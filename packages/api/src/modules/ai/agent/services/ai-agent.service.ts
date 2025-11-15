@@ -627,6 +627,9 @@ export class AiAgentService extends BaseService<Agent> {
 
         if (!agent) {
             throw HttpErrorFactory.notFound("智能体不存在或未发布");
+        } else {
+            // 增加访问计数
+            await this.incrementUserCount(agent.id);
         }
 
         return agent as Agent;

@@ -92,8 +92,6 @@ export class AiAgentConsoleController {
     })
     @BuildFileUrl(["**.avatar"])
     async detail(@Param("id") id: string) {
-        // 增加访问计数
-        await this.AiAgentService.incrementUserCount(id);
         return this.AiAgentService.getAgentDetail(id);
     }
 
