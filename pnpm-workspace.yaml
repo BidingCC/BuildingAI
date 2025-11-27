@@ -2,14 +2,20 @@ packages:
   - packages/*
   - extensions/*
   - packages/web/*
+  - packages/mobile/*
   - packages/@buildingai/*
   - packages/web/@buildingai/*
+  - packages/mobile/@buildingai/*
 
 catalog:
   axios: ^1.13.2
   callsites: ^4.2.0
+  chokidar: ^4.0.3
   cli-table3: 0.6.5
   dotenv: ^17.2.3
+  fast-glob: ^3.3.3
+  fs-extra: ^11.2.0
+  '@types/fs-extra': ^11.0.4
 
 catalogs:
   api:
@@ -48,10 +54,15 @@ catalogs:
     prettier-plugin-tailwindcss: ^0.6.14
     typescript: 5.9.2
     typescript-eslint: ^8.46.3
-    vite: ^7.1.6
+    vite: ^5.4.21
     vite-plugin-eslint2: ^5.0.4
     vue-eslint-parser: ^10.2.0
     vue-tsc: ^2.2.12
+  mobile:
+    '@dcloudio/types': ^3.4.16
+    '@mini-types/alipay': ^3.0.14
+    '@uni-helper/uni-types': 1.0.0-alpha.6
+    miniprogram-api-typings: ^4.1.0
   web:
     '@internationalized/date': ^3.10.0
     '@nuxt/devtools': ^2.7.0

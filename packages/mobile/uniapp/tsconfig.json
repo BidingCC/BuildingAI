@@ -1,0 +1,29 @@
+{
+    "extends": "@vue/tsconfig/tsconfig.json",
+    "compilerOptions": {
+        "lib": [
+            "ESNext",
+            "DOM",
+            "DOM.Iterable"
+        ],
+        "baseUrl": ".",
+        "paths": {
+            "@/*": [
+                "./src/*"
+            ]
+        },
+        "types": [
+            "@dcloudio/types",
+            "@mini-types/alipay",
+            "miniprogram-api-typings",
+            "@uni-helper/uni-types",
+            "@uni-helper/vite-plugin-uni-pages"
+        ],
+        "sourceMap": true
+    },
+    "vueCompilerOptions": {
+        "plugins": [
+            "@uni-helper/uni-types/volar-plugin"
+        ]
+    }
+}

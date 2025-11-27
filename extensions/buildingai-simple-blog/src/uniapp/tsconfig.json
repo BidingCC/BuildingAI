@@ -1,0 +1,17 @@
+{
+    "extends": "../../../../packages/mobile/uniapp/tsconfig.json",
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "@/*": [
+                "../../../../../packages/mobile/uniapp/src/*"
+            ]
+        },
+        "types": [
+            "@dcloudio/types",
+            "@mini-types/alipay",
+            "miniprogram-api-typings",
+            "@uni-helper/uni-types"
+        ]
+    }
+}
