@@ -87,7 +87,7 @@ defineExpose({
 <template>
     <view class="blog-list-page">
         <view class="header">
-            <text class="title">博客列表</text>
+            <text class="title text-primary text-2xl font-bold">博客列表1211123123 </text>
         </view>
 
         <!-- 文章列表 -->
@@ -120,85 +120,3 @@ defineExpose({
         </view>
     </view>
 </template>
-
-<style scoped>
-.blog-list-page {
-    min-height: 100vh;
-    background-color: #f5f5f5;
-}
-
-.header {
-    padding: 32rpx;
-    background-color: #ffffff;
-}
-
-.title {
-    font-size: 48rpx;
-    font-weight: bold;
-    color: #333333;
-}
-
-.article-list {
-    padding: 24rpx;
-}
-
-.article-item {
-    margin-bottom: 24rpx;
-    padding: 32rpx;
-    background-color: #ffffff;
-    border-radius: 16rpx;
-    box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
-}
-
-.article-content {
-    display: flex;
-    flex-direction: column;
-    gap: 16rpx;
-}
-
-.article-title {
-    font-size: 36rpx;
-    font-weight: 600;
-    color: #333333;
-}
-
-.article-summary {
-    font-size: 28rpx;
-    color: #666666;
-    line-height: 1.5;
-}
-
-.article-meta {
-    display: flex;
-    align-items: center;
-    gap: 24rpx;
-    margin-top: 8rpx;
-}
-
-.article-category {
-    font-size: 24rpx;
-    color: #1890ff;
-    padding: 4rpx 16rpx;
-    background-color: #e6f7ff;
-    border-radius: 8rpx;
-}
-
-.article-date {
-    font-size: 24rpx;
-    color: #999999;
-}
-
-.empty-state,
-.loading-state {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 120rpx 0;
-}
-
-.empty-text,
-.loading-text {
-    font-size: 28rpx;
-    color: #999999;
-}
-</style>

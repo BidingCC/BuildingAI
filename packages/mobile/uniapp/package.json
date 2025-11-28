@@ -29,8 +29,9 @@
         "@dcloudio/uni-mp-weixin": "3.0.0-4070520250711001",
         "@dcloudio/uni-mp-xhs": "3.0.0-4070520250711001",
         "@dcloudio/uni-quickapp-webview": "3.0.0-4070520250711001",
-        "@vueuse/core": "^13.5.0",
-        "@vueuse/shared": "^14.0.0",
+        "@uni-helper/uni-use": "^0.19.17",
+        "@vueuse/core": "^12.8.2",
+        "@vueuse/shared": "^12.8.2",
         "vue": "3.4.21",
         "vue-i18n": "^9.14.5",
         "vue-router": "4.5.1"
@@ -38,8 +39,8 @@
     "devDependencies": {
         "@buildingai/eslint-config": "workspace:*",
         "@buildingai/types": "workspace:*",
-        "@buildingai/vite-plugins": "workspace:*",
         "@buildingai/typescript-config": "workspace:*",
+        "@buildingai/vite-plugins": "workspace:*",
         "@dcloudio/types": "^3.4.16",
         "@dcloudio/uni-automator": "3.0.0-4070520250711001",
         "@dcloudio/uni-cli-shared": "3.0.0-4070520250711001",

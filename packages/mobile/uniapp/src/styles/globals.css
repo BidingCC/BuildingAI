@@ -1,0 +1,12 @@
+.shadow-default {
+    box-shadow: 0 0 6px 0 rgba(145 158 171 / 0.2);
+    /* box-shadow:
+        0 0 4px 0 rgba(145 158 171 / 0.2),
+        0 0 24px -4px rgba(145 158 171 / 0.12); */
+}
+
+.shadow-primary {
+    box-shadow:
+        0 0px 6px -1px var(--primary-50),
+        0 0px 5px -1px var(--primary-500);
+}

@@ -1,0 +1,137 @@
+:root,
+page {
+    --background: rgb(255 255 255);
+    --foreground: rgb(10 10 10);
+
+    --scrollbar-color: #ecececb6;
+    --scrollbar-color-hover: #e3e3e3;
+
+    --sidebar: rgb(250 250 250);
+    --sidebar-foreground: rgb(10 10 10);
+
+    --secondary: rgb(245 245 245);
+    --secondary-foreground: rgb(23 23 23);
+
+    --muted: rgb(245 245 245);
+    --muted-foreground: rgb(115 115 115);
+
+    --accent: rgb(245 245 245);
+    --accent-foreground: rgb(23 23 23);
+
+    --border: rgb(229 231 235);
+    --border-muted: rgb(229 231 235);
+    --border-accent: rgb(229 231 235);
+    --border-inverted: rgb(20 20 20);
+
+    --ring: rgb(161 161 161);
+    --ring-offset: rgb(245 245 245);
+
+    --primary: rgb(97 95 255);
+    --primary-50: rgb(238 242 255);
+    --primary-100: rgb(224 231 255);
+    --primary-200: rgb(198 210 255);
+    --primary-300: rgb(163 179 255);
+    --primary-400: orgb(124 134 255);
+    --primary-500: rgb(97 95 255);
+    --primary-600: rgb(79 57 246);
+    --primary-700: rgb(67 45 215);
+    --primary-800: rgb(55 42 172);
+    --primary-900: rgb(49 44 133);
+    --primary-950: rgb(30 26 77);
+
+    --success: rgb(0 201 81);
+    --success-50: rgb(240 253 244);
+    --success-100: rgb(220 252 231);
+    --success-200: rgb(185 248 207);
+    --success-300: rgb(123 241 168);
+    --success-400: rgb(5 223 114);
+    --success-500: rgb(0 201 81);
+    --success-600: rgb(0 166 62);
+    --success-700: rgb(0 130 54);
+    --success-800: rgb(1 102 48);
+    --success-900: rgb(13 84 43);
+    --success-950: rgb(3 46 21);
+
+    --info: rgb(43 127 255);
+    --info-50: rgb(239 246 255);
+    --info-100: rgb(219 234 254);
+    --info-200: rgb(190 219 255);
+    --info-300: rgb(142 197 255);
+    --info-400: rgb(81 162 255);
+    --info-500: rgb(43 127 255);
+    --info-600: rgb(21 93 252);
+    --info-700: rgb(20 71 230);
+    --info-800: rgb(25 60 184);
+    --info-900: rgb(28 57 142);
+    --info-950: rgb(22 37 86);
+
+    --warning: rgb(240 177 0);
+    --warning-50: rgb(254 252 232);
+    --warning-100: rgb(254 249 194);
+    --warning-200: rgb(255 240 133);
+    --warning-300: rgb(255 223 33);
+    --warning-400: rgb(253 199 0);
+    --warning-500: rgb(240 177 0);
+    --warning-600: rgb(208 135 0);
+    --warning-700: rgb(166 95 0);
+    --warning-800: rgb(137 75 0);
+    --warning-900: rgb(115 62 10);
+    --warning-950: rgb(67 32 4);
+
+    --error: rgb(251 44 54);
+    --error-50: rgb(254 242 242);
+    --error-100: rgb(255 226 226);
+    --error-200: rgb(255 201 201);
+    --error-300: rgb(255 162 162);
+    --error-400: rgb(255 100 103);
+    --error-500: rgb(251 44 54);
+    --error-600: rgb(231 0 11);
+    --error-700: rgb(193 0 7);
+    --error-800: rgb(159 7 18);
+    --error-900: rgb(130 24 26);
+    --error-950: rgb(70 8 9);
+
+    --neutral: rgb(115 115 115);
+    --neutral-50: rgb(250 250 250);
+    --neutral-100: rgb(245 245 245);
+    --neutral-200: rgb(229 229 229);
+    --neutral-300: rgb(212 212 212);
+    --neutral-400: rgb(161 161 161);
+    --neutral-500: rgb(115 115 115);
+    --neutral-600: rgb(82 82 82);
+    --neutral-700: rgb(64 64 64);
+    --neutral-800: rgb(38 38 38);
+    --neutral-900: rgb(23 23 23);
+    --neutral-950: rgb(10 10 10);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root,
+    page {
+        --background: rgb(10 10 10);
+        --foreground: rgb(250 250 250);
+
+        --scrollbar-color: rgb(66 66 66);
+        --scrollbar-color-hover: #676767;
+
+        --sidebar: rgb(23 23 23);
+        --sidebar-foreground: rgb(250 250 250);
+
+        --secondary: rgb(38 38 38);
+        --secondary-foreground: rgb(250 250 250);
+
+        --muted: rgb(38 38 38);
+        --muted-foreground: rgb(161 161 161);
+
+        --accent: rgb(64 64 64);
+        --accent-foreground: rgb(250 250 250);
+
+        --border: rgb(38 38 38);
+        --border-muted: rgb(64 64 64);
+        --border-accent: rgb(64 64 64);
+        --border-inverted: rgb(255 255 255);
+
+        --ring: rgb(115 115 115);
+        --ring-offset: rgb(38 38 38);
+    }
+}

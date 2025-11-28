@@ -6,7 +6,7 @@ export default defineExtension({
         {
             path: "pages/list/index",
             style: {
-                navigationBarTitleText: "博客列表",
+                navigationBarTitleText: "123121231233",
                 navigationBarBackgroundColor: "#ffffff",
                 navigationBarTextStyle: "black",
                 enablePullDownRefresh: true,
@@ -16,7 +16,15 @@ export default defineExtension({
         {
             path: "pages/detail/index",
             style: {
-                navigationBarTitleText: "博客详情",
+                navigationBarTitleText: "博客详情 2312321322",
+                navigationBarBackgroundColor: "#ffffff",
+                navigationBarTextStyle: "black",
+            },
+        },
+        {
+            path: "pages/cate",
+            style: {
+                navigationBarTitleText: "博客栏目",
                 navigationBarBackgroundColor: "#ffffff",
                 navigationBarTextStyle: "black",
             },

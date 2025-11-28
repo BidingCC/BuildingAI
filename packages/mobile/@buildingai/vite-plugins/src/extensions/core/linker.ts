@@ -14,11 +14,17 @@ export class ExtensionLinker {
         for (const ext of extensions) {
             const linkPath = path.join(this.targetDir, "src", ext.config.root);
             try {
-                if (await pathExists(linkPath)) await unlink(linkPath);
+                if (await pathExists(linkPath)) {
+                    console.log(`[extensions] Removing existing: ${linkPath}`);
+                    await unlink(linkPath);
+                }
+                console.log(`[extensions] Creating symlink: ${linkPath} -> ${ext.root}`);
                 await symlink(ext.root, linkPath, "dir");
-            } catch {
+                console.log(`[extensions] ✓ Linked: ${ext.config.name || ext.config.root}`);
+            } catch (error) {
                 console.error(
-                    `[extensions] Failed to link extension ${ext.config.name}: ${linkPath}`,
+                    `[extensions] ✗ Failed to link ${ext.config.name || ext.config.root}:`,
+                    error,
                 );
             }
         }
@@ -28,10 +34,14 @@ export class ExtensionLinker {
         for (const ext of extensions) {
             const linkPath = path.join(this.targetDir, "src", ext.config.root);
             try {
-                if (await pathExists(linkPath)) await unlink(linkPath);
-            } catch {
+                if (await pathExists(linkPath)) {
+                    await unlink(linkPath);
+                    console.log(`[extensions] ✓ Unlinked: ${ext.config.name || ext.config.root}`);
+                }
+            } catch (error) {
                 console.error(
-                    `[extensions] Failed to unlink extension ${ext.config.name}: ${linkPath}`,
+                    `[extensions] ✗ Failed to unlink ${ext.config.name || ext.config.root}:`,
+                    error,
                 );
             }
         }

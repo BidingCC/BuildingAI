@@ -1,5 +1,6 @@
 import { uniappExtensions } from "@buildingai/vite-plugins";
 import Uni from "@uni-helper/plugin-uni";
+import { uniuseAutoImports } from "@uni-helper/uni-use";
 import UniHelperComponents from "@uni-helper/vite-plugin-uni-components";
 import UniHelperLayouts from "@uni-helper/vite-plugin-uni-layouts";
 import UniHelperManifest from "@uni-helper/vite-plugin-uni-manifest";
@@ -35,13 +36,12 @@ export default defineConfig({
         UniPolyfill(),
         // https://github.com/antfu/unplugin-auto-import
         AutoImport({
-            imports: ["vue", "@vueuse/core", "uni-app"],
+            imports: ["vue", "@vueuse/core", "uni-app", uniuseAutoImports()],
             dts: "src/auto-imports.d.ts",
             dirs: ["src/composables", "src/stores", "src/utils"],
             vueTemplate: true,
         }),
         // https://github.com/antfu/unocss
-        // see unocss.config.ts for config
         UnoCSS(),
     ],
 });

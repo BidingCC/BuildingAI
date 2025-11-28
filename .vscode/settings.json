@@ -91,6 +91,8 @@
         "toutiao",
         "Unhead",
         "uniapp",
+        "uniuse",
+        "unocss",
         "unplugin",
         "vaul",
         "vite",
@@ -134,4 +136,18 @@
     "i18n-ally.enabledFrameworks": [
         "vue"
     ],
+    "uni-highlight.platform": {
+        "MP-WEIXIN": {
+            "color": "#41b883",
+            "label": "微信小程序"
+        },
+        "MP-ALIPAY": {
+            "color": "#db4437",
+            "label": "支付宝小程序"
+        },
+        "H5": {
+            "color": "#007AFF",
+            "label": "H5"
+        },
+    }
 }

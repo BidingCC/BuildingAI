@@ -5,7 +5,10 @@
 
 type _LocationUrl =
   "/pages/index" |
-  "/pages/hi";
+  "/pages/hi" |
+  "/simple-blog/pages/list/index" |
+  "/simple-blog/pages/detail/index" |
+  "/simple-blog/pages/cate";
 
 interface NavigateToOptions {
   url: _LocationUrl;

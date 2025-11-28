@@ -11,10 +11,13 @@ export function uniappExtensions(options: PluginOptions = {}) {
 export async function loadExtensionSubPackages(
     extensionsDir = "../../../extensions",
     options: PluginOptions = {},
-) {
+): Promise<Array<{ root: string; pages: any[] }>> {
     const resolvedDir = path.resolve(process.cwd(), extensionsDir);
     const extensions = await new ExtensionRegistry(resolvedDir, options).discover();
-    return extensions.map((ext) => ({ root: ext.config.root, pages: ext.config.pages }));
+    return extensions.map((ext) => ({
+        root: ext.config.root,
+        pages: ext.config.pages,
+    }));
 }
 
 export type * from "./types.js";

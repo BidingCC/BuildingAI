@@ -1,10 +1,10 @@
 {
-    "extends": "../../../../packages/mobile/uniapp/tsconfig.json",
+    "extends": "../../tsconfig.json",
     "compilerOptions": {
         "baseUrl": ".",
         "paths": {
             "@/*": [
-                "../../../../../packages/mobile/uniapp/src/*"
+                "../*"
             ]
         },
         "types": [

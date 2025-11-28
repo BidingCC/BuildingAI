@@ -67,7 +67,7 @@ onMounted(() => {
         <!-- 文章内容 -->
         <view v-if="article && !loading" class="article-detail">
             <view class="article-header">
-                <text class="article-title">{{ article.title }}</text>
+                <text class="article-title">{{ article.title }}1我</text>
                 <view class="article-meta">
                     <text class="article-category">{{ article.category }}</text>
                     <text class="article-date">{{ article.date }}</text>
