@@ -21,6 +21,10 @@
         ],
         "sourceMap": true
     },
+    // "include": [
+    //     "src/types/async-import.d.ts",
+    //     "src/types/async-component.d.ts"
+    // ],
     "vueCompilerOptions": {
         "plugins": [
             "@uni-helper/uni-types/volar-plugin"

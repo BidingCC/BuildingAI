@@ -7,7 +7,7 @@ import { defineConfig } from "@uni-helper/unh";
 export default defineConfig({
     platform: {
         // 默认平台
-        default: "mp-weixin",
+        default: "h5",
         // 平台别名
         alias: {
             h5: ["w", "h"],

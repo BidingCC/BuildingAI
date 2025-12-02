@@ -17,6 +17,8 @@ export default defineConfig({
             // },
         }),
     ],
+    // transformerDirectives 启用指令功能：主要用于支持 @apply、@screen 和 theme() 等 CSS 指令
+    // transformerVariantGroup 启用变体功能
     transformers: [transformerDirectives(), transformerVariantGroup()],
     theme: {
         colors: {

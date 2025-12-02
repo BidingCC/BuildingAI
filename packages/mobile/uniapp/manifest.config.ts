@@ -1,7 +1,7 @@
 import { defineManifestConfig } from "@uni-helper/vite-plugin-uni-manifest";
 
 export default defineManifestConfig({
-    name: "vitesse-uni-app",
+    name: "BuildingAI",
     appid: "",
     description: "",
     versionName: "1.0.0",
@@ -55,6 +55,9 @@ export default defineManifestConfig({
         appid: "",
         setting: {
             urlCheck: false,
+        },
+        optimization: {
+            subPackages: true,
         },
         usingComponents: true,
         darkmode: true,

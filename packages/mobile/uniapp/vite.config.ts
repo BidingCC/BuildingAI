@@ -1,47 +1,97 @@
+// 扩展插件加载器（必须在 UniHelperPages 之前）
 import { uniappExtensions } from "@buildingai/vite-plugins";
+/** @see https://uni-helper.js.org/plugin-uni */
 import Uni from "@uni-helper/plugin-uni";
+/** @see https://github.com/antfu/unplugin-auto-import */
 import { uniuseAutoImports } from "@uni-helper/uni-use";
+/** @see https://uni-helper.js.org/vite-plugin-uni-components */
 import UniHelperComponents from "@uni-helper/vite-plugin-uni-components";
+/** @see https://uni-helper.js.org/vite-plugin-uni-layouts */
 import UniHelperLayouts from "@uni-helper/vite-plugin-uni-layouts";
+/** @see https://uni-helper.js.org/vite-plugin-uni-manifest */
 import UniHelperManifest from "@uni-helper/vite-plugin-uni-manifest";
+/** @see https://uni-helper.js.org/vite-plugin-uni-pages */
 import UniHelperPages from "@uni-helper/vite-plugin-uni-pages";
+/** @see https://github.com/uni-ku/bundle-optimizer */
+import Optimization from "@uni-ku/bundle-optimizer";
+/** @see https://unocss.dev/integrations/vite */
 import UnoCSS from "unocss/vite";
+/** @see https://github.com/antfu/unplugin-auto-import */
 import AutoImport from "unplugin-auto-import/vite";
+/** @see https://github.com/vitejs/vite */
 import { defineConfig } from "vite";
+/** @see https://github.com/dcloudio/vite-plugin-uni-polyfill */
 import UniPolyfill from "vite-plugin-uni-polyfill";
 
-// https://vitejs.dev/config/
+/** @see https://vitejs.dev/config/ */
 export default defineConfig({
     plugins: [
-        // 扩展插件加载器（必须在 UniHelperPages 之前）
         uniappExtensions({
             extensionsDir: "../../../extensions",
             enableHmr: true,
         }),
-        // https://uni-helper.js.org/vite-plugin-uni-manifest
         UniHelperManifest(),
-        // https://uni-helper.js.org/vite-plugin-uni-pages
         UniHelperPages({
-            dts: "src/uni-pages.d.ts",
+            dts: "src/types/uni-pages.d.ts",
         }),
-        // https://uni-helper.js.org/vite-plugin-uni-layouts
         UniHelperLayouts(),
-        // https://uni-helper.js.org/vite-plugin-uni-components
         UniHelperComponents({
-            dts: "src/components.d.ts",
+            dts: "src/types/components.d.ts",
             directoryAsNamespace: true,
         }),
-        // https://uni-helper.js.org/plugin-uni
+        Optimization({
+            enable: {
+                optimization: true,
+                "async-import": true,
+                "async-component": true,
+            },
+            dts: {
+                enable: true,
+                base: "src/types",
+            },
+            logger: false,
+        }),
         Uni(),
         UniPolyfill(),
-        // https://github.com/antfu/unplugin-auto-import
         AutoImport({
-            imports: ["vue", "@vueuse/core", "uni-app", uniuseAutoImports()],
-            dts: "src/auto-imports.d.ts",
-            dirs: ["src/composables", "src/stores", "src/utils"],
+            imports: [
+                "vue",
+                {
+                    "@vueuse/core": [
+                        // 排除与 @uni-helper/uni-use 重复的函数
+                        // 这些函数在 uni-app 环境中应使用 @uni-helper/uni-use 的版本
+                        "!tryOnScopeDispose",
+                        "!useNetwork",
+                        "!useOnline",
+                        "!usePreferredDark",
+                        "!useStorage",
+                        "!useStorageAsync",
+                    ],
+                },
+                "uni-app",
+                {
+                    pinia: ["storeToRefs"],
+                },
+                uniuseAutoImports(),
+            ],
+            dts: "src/types/auto-imports.d.ts",
+            dirs: ["src/hooks", "src/stores", "src/utils"],
             vueTemplate: true,
         }),
-        // https://github.com/antfu/unocss
+        /** @see https://github.com/antfu/unocss */
         UnoCSS(),
     ],
+    server: {
+        host: "0.0.0.0",
+        hmr: true,
+        port: 4092,
+    },
+    build: {
+        target: "es6",
+        /** @see https://cn.vitejs.dev/config/build-options.html#build-csstarget */
+        cssTarget: "chrome61",
+    },
+    optimizeDeps: {
+        exclude: ["vue-demi"],
+    },
 });
