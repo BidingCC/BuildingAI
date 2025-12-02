@@ -14,21 +14,28 @@ export default defineUniPages({
         navigationStyle: "custom",
     },
     tabBar: {
-        backgroundColor: "@tabBgColor",
+        blurEffect: "extralight",
+        // backgroundColor: "@tabBgColor",
         borderStyle: "@tabBorderStyle",
         color: "@tabFontColor",
         selectedColor: "@tabSelectedColor",
         list: [
             {
-                pagePath: "/pages/chat/index",
+                pagePath: "pages/chat/index",
+                iconPath: "static/icons/tabbar/home.png",
+                selectedIconPath: "static/icons/tabbar/home-active.png",
                 text: "对话",
             },
             {
-                pagePath: "/pages/apps/index",
+                pagePath: "pages/apps/index",
+                iconPath: "static/icons/tabbar/apps.png",
+                selectedIconPath: "static/icons/tabbar/apps-active.png",
                 text: "应用",
             },
             {
-                pagePath: "/pages/profile/index",
+                pagePath: "pages/user/index",
+                iconPath: "static/icons/tabbar/user.png",
+                selectedIconPath: "static/icons/tabbar/user-active.png",
                 text: "我的",
             },
         ],

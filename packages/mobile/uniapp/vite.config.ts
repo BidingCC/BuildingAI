@@ -33,6 +33,7 @@ export default defineConfig({
         UniHelperManifest(),
         UniHelperPages({
             dts: "src/types/uni-pages.d.ts",
+            homePage: "pages/chat/index",
         }),
         UniHelperLayouts(),
         UniHelperComponents({
