@@ -25,7 +25,7 @@ TailwindCSS +
 - bd-time-picker: 时间选择器 - 用于时间选择场景，定制化的开发
 - bd-uploader: 上传组件 - 上传各种文件场景的封装 7.项目的 http 请求封装在 @building/http 模块里面(项目中使用无需引入)，项目的 hooks/use-request 会被 @building/nuxt 的 modules 自动引入，然后项目中 只需要 使用 useXXXGet,
   useXXXPost, useXXXPut, useXXXDelete,
-  useXXXPatch 等就能直接使用 。8.项目的请求 api 被独立的放在了一个包之中，是 @building/service 模块，里面使用独立文件去定义每个模块的请求接口，比如 common.ts 里面拥有全局的一些请求功能， 在使用的时候 引入 @building/service/common， 比如 apiGetSiteConfig 直接 在 script 中使用即可。， !!!!![注意]：@building/service 仅限于给主程序使用 ，如果在插件(extensions)里面的web项目中使用的话，请在自己的 app/service 中定义api的接口。而不是在 @building/service 模块中定义。9.项目的 i18n 配置在 @building/i18n-config 模块中，里面定义了 i18n 的语言包获取，以及公共的 i18n 语言包，可用于 主程序或插件，只需要在项目中 app/i18n中定义一个文件夹，里面 index.ts 引入 generateAppMessagesForLocale 然后 export
+  useXXXPatch 等就能直接使用 。8.项目的请求 api 被独立的放在了一个包之中，是 @building/service 模块，里面使用独立文件去定义每个模块的请求接口，比如 common.ts 里面拥有全局的一些请求功能， 在使用的时候 引入 @building/service/common， 比如 apiGetSiteConfig 直接 在 script 中使用即可。， !!!!![注意]：@building/service 仅限于给主程序使用 ，如果在插件(extensions)里面的web项目中使用的话，请在自己的 web/service 中定义api的接口。而不是在 @building/service 模块中定义。9.项目的 i18n 配置在 @building/i18n-config 模块中，里面定义了 i18n 的语言包获取，以及公共的 i18n 语言包，可用于 主程序或插件，只需要在项目中 app/i18n中定义一个文件夹，里面 index.ts 引入 generateAppMessagesForLocale 然后 export
   default
   defineI18nLocale 导出即可使用这个插件包，语言包的定义文件夹名称约为 zh/jp/en等，注意不要使用 common.json 因为这个文件是公共的，不允许重复定义， 使用国际化方式的时候如果在 template 中可以 使用 $t('xxx'), 如果在 script 中使用 const
   { t } =
