@@ -1,4 +1,4 @@
-import { symlink, unlink } from "node:fs/promises";
+import { mkdir, symlink, unlink } from "node:fs/promises";
 import * as path from "node:path";
 
 import fsExtra from "fs-extra";
@@ -11,8 +11,15 @@ export class ExtensionLinker {
     constructor(private readonly targetDir: string) {}
 
     async link(extensions: Extension[]): Promise<void> {
+        const extensionsDir = path.join(this.targetDir, "src", "extensions");
+        try {
+            await mkdir(extensionsDir, { recursive: true });
+        } catch {
+            // ignore if already exists
+        }
+
         for (const ext of extensions) {
-            const linkPath = path.join(this.targetDir, "src", ext.config.root);
+            const linkPath = path.join(extensionsDir, ext.config.root);
             try {
                 if (await pathExists(linkPath)) {
                     console.log(`[extensions] Removing existing: ${linkPath}`);
@@ -32,7 +39,7 @@ export class ExtensionLinker {
 
     async unlink(extensions: Extension[]): Promise<void> {
         for (const ext of extensions) {
-            const linkPath = path.join(this.targetDir, "src", ext.config.root);
+            const linkPath = path.join(this.targetDir, "src", "extensions", ext.config.root);
             try {
                 if (await pathExists(linkPath)) {
                     await unlink(linkPath);

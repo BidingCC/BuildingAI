@@ -1,0 +1,17 @@
+html,
+body,
+:root,
+page {
+    background-color: var(--background-soft);
+}
+
+.uni-tabbar {
+    padding: 12rpx 0 !important;
+    border-radius: 12rpx 12rpx 0 0 !important;
+}
+
+.uni-tabbar-border {
+    background-color: transparent !important;
+    height: 0 !important;
+    border: none !important;
+}

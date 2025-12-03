@@ -1,0 +1,24 @@
+import { getPageTitle, tabBarList } from "virtual:pages-meta";
+import { useI18n } from "vue-i18n";
+
+export function updateTabBarTitles() {
+    const { t } = useI18n();
+
+    tabBarList.forEach((item: { pagePath: string; index: number }) => {
+        try {
+            const pageTitle = getPageTitle(item.pagePath);
+            if (pageTitle) {
+                uni.setTabBarItem({
+                    index: item.index,
+                    text: t(pageTitle),
+                });
+            }
+        } catch {
+            // ignore
+        }
+    });
+}
+
+export function setTabBarTitle() {
+    // TODO: set tab bar
+}

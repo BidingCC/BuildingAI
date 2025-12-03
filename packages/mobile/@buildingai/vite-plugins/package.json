@@ -15,6 +15,11 @@
 			"require": "./dist/index.js",
 			"import": "./dist/index.js",
 			"types": "./dist/index.d.ts"
+		},
+		"./middleware": {
+			"require": "./dist/middleware-runtime.js",
+			"import": "./dist/middleware-runtime.js",
+			"types": "./dist/middleware-runtime.d.ts"
 		}
 	},
 	"scripts": {
@@ -37,11 +42,12 @@
 	"devDependencies": {
 		"@buildingai/typescript-config": "workspace:*",
 		"@buildingai/eslint-config": "workspace:*",
-		"@types/fs-extra": "catalog:",
-		"vite": "^5.2.8"
+		"@dcloudio/types": "^3.4.16",
+		"@types/fs-extra": "catalog:"
 	},
 	"peerDependencies": {
-		"vite": "^5.0.0"
+		"vite": "^5.0.0",
+		"vue": "^3.0.0"
 	}
 }
 

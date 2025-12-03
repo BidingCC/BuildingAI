@@ -15,7 +15,7 @@ export async function loadExtensionSubPackages(
     const resolvedDir = path.resolve(process.cwd(), extensionsDir);
     const extensions = await new ExtensionRegistry(resolvedDir, options).discover();
     return extensions.map((ext) => ({
-        root: ext.config.root,
+        root: `extensions/${ext.config.root}`,
         pages: ext.config.pages,
     }));
 }

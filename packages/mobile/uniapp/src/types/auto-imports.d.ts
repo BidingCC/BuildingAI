@@ -12,6 +12,7 @@ declare global {
   const !usePreferredDark: typeof import('@vueuse/core')['!usePreferredDark']
   const !useStorage: typeof import('@vueuse/core')['!useStorage']
   const !useStorageAsync: typeof import('@vueuse/core')['!useStorageAsync']
+  const !useToast: typeof import('@uni-helper/uni-use')['!useToast']
   const EffectScope: typeof import('vue')['EffectScope']
   const asyncComputed: typeof import('@vueuse/core')['asyncComputed']
   const autoResetRef: typeof import('@vueuse/core')['autoResetRef']
@@ -47,12 +48,26 @@ declare global {
   const ignorableWatch: typeof import('@vueuse/core')['ignorableWatch']
   const inject: typeof import('vue')['inject']
   const injectLocal: typeof import('@vueuse/core')['injectLocal']
+  const isApp: typeof import('../utils/env')['isApp']
+  const isAppAndroid: typeof import('../utils/env')['isAppAndroid']
+  const isAppHarmony: typeof import('../utils/env')['isAppHarmony']
+  const isAppIOS: typeof import('../utils/env')['isAppIOS']
+  const isAppPlus: typeof import('../utils/env')['isAppPlus']
   const isDark: typeof import('../hooks/use-dark')['isDark']
   const isDefined: typeof import('@vueuse/core')['isDefined']
+  const isDevMode: typeof import('../utils/env')['isDevMode']
+  const isH5: typeof import('../utils/env')['isH5']
+  const isMiniProgram: typeof import('../utils/env')['isMiniProgram']
+  const isMp: typeof import('../utils/env')['isMp']
+  const isMpAlipay: typeof import('../utils/env')['isMpAlipay']
+  const isMpWeixin: typeof import('../utils/env')['isMpWeixin']
+  const isProdMode: typeof import('../utils/env')['isProdMode']
   const isProxy: typeof import('vue')['isProxy']
   const isReactive: typeof import('vue')['isReactive']
   const isReadonly: typeof import('vue')['isReadonly']
   const isRef: typeof import('vue')['isRef']
+  const isWeb: typeof import('../utils/env')['isWeb']
+  const isWechatOa: typeof import('../utils/env')['isWechatOa']
   const makeDestructurable: typeof import('@vueuse/core')['makeDestructurable']
   const markRaw: typeof import('vue')['markRaw']
   const nextTick: typeof import('vue')['nextTick']
@@ -118,6 +133,7 @@ declare global {
   const resolveComponent: typeof import('vue')['resolveComponent']
   const resolveRef: typeof import('@vueuse/core')['resolveRef']
   const resolveUnref: typeof import('@vueuse/core')['resolveUnref']
+  const setTabBarTitle: typeof import('../utils/tabbar')['setTabBarTitle']
   const shallowReactive: typeof import('vue')['shallowReactive']
   const shallowReadonly: typeof import('vue')['shallowReadonly']
   const shallowRef: typeof import('vue')['shallowRef']
@@ -150,6 +166,7 @@ declare global {
   const unref: typeof import('vue')['unref']
   const unrefElement: typeof import('@vueuse/core')['unrefElement']
   const until: typeof import('@vueuse/core')['until']
+  const updateTabBarTitles: typeof import('../utils/tabbar')['updateTabBarTitles']
   const useActionSheet: typeof import('@uni-helper/uni-use')['useActionSheet']
   const useActiveElement: typeof import('@vueuse/core')['useActiveElement']
   const useAnimate: typeof import('@vueuse/core')['useAnimate']
@@ -181,6 +198,7 @@ declare global {
   const useCloned: typeof import('@vueuse/core')['useCloned']
   const useColorMode: typeof import('@vueuse/core')['useColorMode']
   const useConfirmDialog: typeof import('@vueuse/core')['useConfirmDialog']
+  const useCookie: typeof import('../hooks/use-cookie')['useCookie']
   const useCountdown: typeof import('@vueuse/core')['useCountdown']
   const useCounter: typeof import('@vueuse/core')['useCounter']
   const useCssModule: typeof import('vue')['useCssModule']
@@ -222,6 +240,7 @@ declare global {
   const useGamepad: typeof import('@vueuse/core')['useGamepad']
   const useGeolocation: typeof import('@vueuse/core')['useGeolocation']
   const useGlobalData: typeof import('@uni-helper/uni-use')['useGlobalData']
+  const useI18n: typeof import('vue-i18n')['useI18n']
   const useId: typeof import('vue')['useId']
   const useIdle: typeof import('@vueuse/core')['useIdle']
   const useImage: typeof import('@vueuse/core')['useImage']
@@ -234,6 +253,7 @@ declare global {
   const useLastChanged: typeof import('@vueuse/core')['useLastChanged']
   const useLoading: typeof import('@uni-helper/uni-use')['useLoading']
   const useLocalStorage: typeof import('@vueuse/core')['useLocalStorage']
+  const useLocale: typeof import('../hooks/use-locale')['useLocale']
   const useMagicKeys: typeof import('@vueuse/core')['useMagicKeys']
   const useManualRefHistory: typeof import('@vueuse/core')['useManualRefHistory']
   const useMediaControls: typeof import('@vueuse/core')['useMediaControls']
@@ -322,7 +342,7 @@ declare global {
   const useTitle: typeof import('@vueuse/core')['useTitle']
   const useToNumber: typeof import('@vueuse/core')['useToNumber']
   const useToString: typeof import('@vueuse/core')['useToString']
-  const useToast: typeof import('@uni-helper/uni-use')['useToast']
+  const useToast: typeof import('../hooks/use-toast')['useToast']
   const useToggle: typeof import('@vueuse/core')['useToggle']
   const useTransition: typeof import('@vueuse/core')['useTransition']
   const useUploadFile: typeof import('@uni-helper/uni-use')['useUploadFile']
@@ -388,11 +408,25 @@ declare module 'vue' {
     readonly guessSerializerType: UnwrapRef<typeof import('@uni-helper/uni-use')['guessSerializerType']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
     readonly inject: UnwrapRef<typeof import('vue')['inject']>
+    readonly isApp: UnwrapRef<typeof import('../utils/env')['isApp']>
+    readonly isAppAndroid: UnwrapRef<typeof import('../utils/env')['isAppAndroid']>
+    readonly isAppHarmony: UnwrapRef<typeof import('../utils/env')['isAppHarmony']>
+    readonly isAppIOS: UnwrapRef<typeof import('../utils/env')['isAppIOS']>
+    readonly isAppPlus: UnwrapRef<typeof import('../utils/env')['isAppPlus']>
     readonly isDark: UnwrapRef<typeof import('../hooks/use-dark')['isDark']>
+    readonly isDevMode: UnwrapRef<typeof import('../utils/env')['isDevMode']>
+    readonly isH5: UnwrapRef<typeof import('../utils/env')['isH5']>
+    readonly isMiniProgram: UnwrapRef<typeof import('../utils/env')['isMiniProgram']>
+    readonly isMp: UnwrapRef<typeof import('../utils/env')['isMp']>
+    readonly isMpAlipay: UnwrapRef<typeof import('../utils/env')['isMpAlipay']>
+    readonly isMpWeixin: UnwrapRef<typeof import('../utils/env')['isMpWeixin']>
+    readonly isProdMode: UnwrapRef<typeof import('../utils/env')['isProdMode']>
     readonly isProxy: UnwrapRef<typeof import('vue')['isProxy']>
     readonly isReactive: UnwrapRef<typeof import('vue')['isReactive']>
     readonly isReadonly: UnwrapRef<typeof import('vue')['isReadonly']>
     readonly isRef: UnwrapRef<typeof import('vue')['isRef']>
+    readonly isWeb: UnwrapRef<typeof import('../utils/env')['isWeb']>
+    readonly isWechatOa: UnwrapRef<typeof import('../utils/env')['isWechatOa']>
     readonly markRaw: UnwrapRef<typeof import('vue')['markRaw']>
     readonly nextTick: UnwrapRef<typeof import('vue')['nextTick']>
     readonly onActivated: UnwrapRef<typeof import('vue')['onActivated']>
@@ -438,6 +472,7 @@ declare module 'vue' {
     readonly readonly: UnwrapRef<typeof import('vue')['readonly']>
     readonly ref: UnwrapRef<typeof import('vue')['ref']>
     readonly resolveComponent: UnwrapRef<typeof import('vue')['resolveComponent']>
+    readonly setTabBarTitle: UnwrapRef<typeof import('../utils/tabbar')['setTabBarTitle']>
     readonly shallowReactive: UnwrapRef<typeof import('vue')['shallowReactive']>
     readonly shallowReadonly: UnwrapRef<typeof import('vue')['shallowReadonly']>
     readonly shallowRef: UnwrapRef<typeof import('vue')['shallowRef']>
@@ -458,16 +493,20 @@ declare module 'vue' {
     readonly tryOnUnload: UnwrapRef<typeof import('@uni-helper/uni-use')['tryOnUnload']>
     readonly tryParseJson: UnwrapRef<typeof import('@uni-helper/uni-use')['tryParseJson']>
     readonly unref: UnwrapRef<typeof import('vue')['unref']>
+    readonly updateTabBarTitles: UnwrapRef<typeof import('../utils/tabbar')['updateTabBarTitles']>
     readonly useActionSheet: UnwrapRef<typeof import('@uni-helper/uni-use')['useActionSheet']>
     readonly useAttrs: UnwrapRef<typeof import('vue')['useAttrs']>
     readonly useClipboardData: UnwrapRef<typeof import('@uni-helper/uni-use')['useClipboardData']>
+    readonly useCookie: UnwrapRef<typeof import('../hooks/use-cookie')['useCookie']>
     readonly useCssModule: UnwrapRef<typeof import('vue')['useCssModule']>
     readonly useCssVars: UnwrapRef<typeof import('vue')['useCssVars']>
     readonly useDownloadFile: UnwrapRef<typeof import('@uni-helper/uni-use')['useDownloadFile']>
     readonly useGlobalData: UnwrapRef<typeof import('@uni-helper/uni-use')['useGlobalData']>
+    readonly useI18n: UnwrapRef<typeof import('vue-i18n')['useI18n']>
     readonly useId: UnwrapRef<typeof import('vue')['useId']>
     readonly useInterceptor: UnwrapRef<typeof import('@uni-helper/uni-use')['useInterceptor']>
     readonly useLoading: UnwrapRef<typeof import('@uni-helper/uni-use')['useLoading']>
+    readonly useLocale: UnwrapRef<typeof import('../hooks/use-locale')['useLocale']>
     readonly useModal: UnwrapRef<typeof import('@uni-helper/uni-use')['useModal']>
     readonly useModel: UnwrapRef<typeof import('vue')['useModel']>
     readonly useNetwork: UnwrapRef<typeof import('@uni-helper/uni-use')['useNetwork']>
@@ -493,7 +532,7 @@ declare module 'vue' {
     readonly useStorageAsync: UnwrapRef<typeof import('@uni-helper/uni-use')['useStorageAsync']>
     readonly useStorageSync: UnwrapRef<typeof import('@uni-helper/uni-use')['useStorageSync']>
     readonly useTemplateRef: UnwrapRef<typeof import('vue')['useTemplateRef']>
-    readonly useToast: UnwrapRef<typeof import('@uni-helper/uni-use')['useToast']>
+    readonly useToast: UnwrapRef<typeof import('../hooks/use-toast')['useToast']>
     readonly useUploadFile: UnwrapRef<typeof import('@uni-helper/uni-use')['useUploadFile']>
     readonly useVisible: UnwrapRef<typeof import('@uni-helper/uni-use')['useVisible']>
     readonly watch: UnwrapRef<typeof import('vue')['watch']>

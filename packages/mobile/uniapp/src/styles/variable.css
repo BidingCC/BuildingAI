@@ -1,6 +1,7 @@
 :root,
 page {
     --background: rgb(255 255 255);
+    --background-soft: rgb(242 243 248);
     --foreground: rgb(10 10 10);
 
     --scrollbar-color: #ecececb6;
@@ -109,6 +110,7 @@ page {
     :root,
     page {
         --background: rgb(10 10 10);
+        --background-soft: rgb(24 24 24);
         --foreground: rgb(250 250 250);
 
         --scrollbar-color: rgb(66 66 66);

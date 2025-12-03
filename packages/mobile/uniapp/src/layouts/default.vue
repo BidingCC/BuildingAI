@@ -1,12 +1,21 @@
 <script setup lang="ts">
+import { getCurrentPageTitle } from "virtual:pages-meta";
+import { useI18n } from "vue-i18n";
+
 import { isDark } from "../hooks/use-dark";
+import { updateTabBarTitles } from "../utils/tabbar";
+
+const title = computed(() => getCurrentPageTitle());
+const { t } = useI18n();
+
+updateTabBarTitles();
 </script>
 
 <template>
-    <view class="app" :class="{ dark: isDark }">
-        <view class="px-10 py-20 text-center">
-            <slot />
-            <view class="mx-auto mt-5 text-center text-sm opacity-25"> [Default Layout] </view>
-        </view>
+    <view class="app flex h-full flex-col" :class="{ dark: isDark }">
+        <slot name="header">
+            <bd-navbar :title="t(title)" :show-back="true" :show-home="true" />
+        </slot>
+        <slot />
     </view>
 </template>

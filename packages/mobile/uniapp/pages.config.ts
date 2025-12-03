@@ -2,20 +2,20 @@ import { loadExtensionSubPackages } from "@buildingai/vite-plugins";
 import { defineUniPages } from "@uni-helper/vite-plugin-uni-pages";
 
 export default defineUniPages({
+    middleware: ["global"],
     pages: [],
     globalStyle: {
         backgroundColor: "@bgColor",
         backgroundColorBottom: "@bgColorBottom",
         backgroundColorTop: "@bgColorTop",
         backgroundTextStyle: "@bgTxtStyle",
-        navigationBarBackgroundColor: "#000000",
+        navigationBarBackgroundColor: "@navBgColor",
         navigationBarTextStyle: "@navTxtStyle",
-        navigationBarTitleText: "Vitesse-Uni",
+        navigationBarTitleText: "BuildingAI",
         navigationStyle: "custom",
     },
     tabBar: {
-        blurEffect: "extralight",
-        // backgroundColor: "@tabBgColor",
+        backgroundColor: "@tabBgColor",
         borderStyle: "@tabBorderStyle",
         color: "@tabFontColor",
         selectedColor: "@tabSelectedColor",
@@ -24,19 +24,19 @@ export default defineUniPages({
                 pagePath: "pages/chat/index",
                 iconPath: "static/icons/tabbar/home.png",
                 selectedIconPath: "static/icons/tabbar/home-active.png",
-                text: "对话",
+                text: "‎",
             },
             {
                 pagePath: "pages/apps/index",
                 iconPath: "static/icons/tabbar/apps.png",
                 selectedIconPath: "static/icons/tabbar/apps-active.png",
-                text: "应用",
+                text: "‎",
             },
             {
                 pagePath: "pages/user/index",
                 iconPath: "static/icons/tabbar/user.png",
                 selectedIconPath: "static/icons/tabbar/user-active.png",
-                text: "我的",
+                text: "‎",
             },
         ],
     },

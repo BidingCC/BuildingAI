@@ -1,0 +1,16 @@
+{
+    "title": "博客",
+    "list": "博客列表",
+    "detail": "博客详情",
+    "category": "博客栏目",
+    "welcome": "欢迎使用 BuildingAI",
+    "welcomeDesc": "BuildingAI 是一个强大的扩展系统",
+    "howToCreate": "如何创建扩展",
+    "howToCreateDesc": "学习如何为 BuildingAI 创建自定义扩展",
+    "tutorial": "教程",
+    "development": "开发",
+    "empty": "暂无文章",
+    "loading": "加载中...",
+    "loadFailed": "加载失败"
+}
+

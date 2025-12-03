@@ -11,14 +11,12 @@ export default defineConfig({
                 display: "inline-block",
                 "vertical-align": "middle",
             },
-            // HBuilderX 必须针对要使用的 Collections 做异步导入
+            // HBuilderX must perform asynchronous imports for the Collections to be used
             // collections: {
             //   carbon: () => import('@iconify-json/carbon/icons.json').then(i => i.default),
             // },
         }),
     ],
-    // transformerDirectives 启用指令功能：主要用于支持 @apply、@screen 和 theme() 等 CSS 指令
-    // transformerVariantGroup 启用变体功能
     transformers: [transformerDirectives(), transformerVariantGroup()],
     theme: {
         colors: {

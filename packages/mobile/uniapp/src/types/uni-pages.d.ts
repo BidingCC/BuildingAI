@@ -12,7 +12,10 @@ type _LocationUrl =
   "/pages/register/index" |
   "/pages/user/index" |
   "/pages/user/settings" |
-  "/pages/webview/index";
+  "/pages/webview/index" |
+  "/extensions/simple-blog/pages/list/index" |
+  "/extensions/simple-blog/pages/detail/index" |
+  "/extensions/simple-blog/pages/cate";
 
 interface NavigateToOptions {
   url: _LocationUrl;

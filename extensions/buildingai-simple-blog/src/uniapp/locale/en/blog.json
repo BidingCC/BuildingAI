@@ -1,0 +1,16 @@
+{
+    "title": "Blog",
+    "list": "Blog List",
+    "detail": "Blog Detail",
+    "category": "Blog Category",
+    "welcome": "Welcome to BuildingAI",
+    "welcomeDesc": "BuildingAI is a powerful extension system",
+    "howToCreate": "How to Create Extensions",
+    "howToCreateDesc": "Learn how to create custom extensions for BuildingAI",
+    "tutorial": "Tutorial",
+    "development": "Development",
+    "empty": "No articles yet",
+    "loading": "Loading...",
+    "loadFailed": "Load failed"
+}
+

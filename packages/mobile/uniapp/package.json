@@ -33,7 +33,7 @@
         "@vueuse/core": "^12.8.2",
         "@vueuse/shared": "^12.8.2",
         "vue": "3.4.21",
-        "vue-i18n": "^9.14.5",
+        "vue-i18n": "catalog:web",
         "vue-router": "4.5.1"
     },
     "devDependencies": {
@@ -64,6 +64,7 @@
         "@unocss/eslint-config": "^66.0.0",
         "@vue/runtime-core": "3.4.21",
         "@vue/tsconfig": "^0.7.0",
+        "glob": "^11.0.3",
         "miniprogram-api-typings": "^4.1.0",
         "typescript": "~5.8.3",
         "unocss": "66.0.0",

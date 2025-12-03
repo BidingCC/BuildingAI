@@ -148,6 +148,7 @@
         "yup": "catalog:web"
     },
     "devDependencies": {
+        "@buildingai/vite-plugins": "workspace:*",
         "@dcloudio/types": "catalog:mobile",
         "@mini-types/alipay": "catalog:mobile",
         "@nestjs/cli": "catalog:api",

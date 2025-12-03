@@ -52,8 +52,13 @@ export default defineManifestConfig({
     quickapp: {},
     /* 小程序特有相关 */
     "mp-weixin": {
-        appid: "",
+        appid: "wx01304ade94842d78",
         setting: {
+            bigPackageSizeSupport: true,
+            minified: true,
+            es6: true,
+            postcss: false,
+            useApiHook: true,
             urlCheck: false,
         },
         optimization: {

@@ -1,5 +1,6 @@
 // 扩展插件加载器（必须在 UniHelperPages 之前）
-import { uniappExtensions } from "@buildingai/vite-plugins";
+/** @see https://github.com/vitejs/vite */
+import { uniappExtensions, uniMiddleware, uniPagesMeta } from "@buildingai/vite-plugins";
 /** @see https://uni-helper.js.org/plugin-uni */
 import Uni from "@uni-helper/plugin-uni";
 /** @see https://github.com/antfu/unplugin-auto-import */
@@ -18,7 +19,6 @@ import Optimization from "@uni-ku/bundle-optimizer";
 import UnoCSS from "unocss/vite";
 /** @see https://github.com/antfu/unplugin-auto-import */
 import AutoImport from "unplugin-auto-import/vite";
-/** @see https://github.com/vitejs/vite */
 import { defineConfig } from "vite";
 /** @see https://github.com/dcloudio/vite-plugin-uni-polyfill */
 import UniPolyfill from "vite-plugin-uni-polyfill";
@@ -29,6 +29,13 @@ export default defineConfig({
         uniappExtensions({
             extensionsDir: "../../../extensions",
             enableHmr: true,
+        }),
+        uniMiddleware({
+            middlewareDir: "src/middleware",
+            pagesJsonPath: "src/pages.json",
+        }),
+        uniPagesMeta({
+            pagesJsonPath: "src/pages.json",
         }),
         UniHelperManifest(),
         UniHelperPages({
@@ -57,6 +64,7 @@ export default defineConfig({
         AutoImport({
             imports: [
                 "vue",
+                "vue-i18n",
                 {
                     "@vueuse/core": [
                         // 排除与 @uni-helper/uni-use 重复的函数
@@ -75,6 +83,7 @@ export default defineConfig({
                 },
                 uniuseAutoImports(),
             ],
+            ignore: ["useToast"],
             dts: "src/types/auto-imports.d.ts",
             dirs: ["src/hooks", "src/stores", "src/utils"],
             vueTemplate: true,
