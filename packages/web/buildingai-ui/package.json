@@ -7,6 +7,7 @@
     "scripts": {
         "prebuild:ssr": "pnpm run lint && pnpm run typecheck",
         "postinstall": "NUXT_BUILD_SSR=true NUXT_BUILD_ENV=development nuxt prepare --dotenv ../../../.env",
+        "build": "cross-env NODE_OPTIONS=--max-old-space-size=8192 NUXT_BUILD_SSR=false NUXT_BUILD_ENV=production nuxt generate --dotenv ../../../.env && cross-env NUXT_BUILD_SSR=false node ../../../scripts/release.mjs",
         "build:ssr": "cross-env NODE_OPTIONS=--max-old-space-size=8192 NUXT_BUILD_SSR=true NUXT_BUILD_ENV=production nuxt build --dotenv ../../../.env && cross-env NUXT_BUILD_SSR=true node ../../../scripts/release.mjs",
         "generate": "cross-env NODE_OPTIONS=--max-old-space-size=8192 NUXT_BUILD_SSR=false NUXT_BUILD_ENV=production nuxt generate --dotenv ../../../.env && cross-env NUXT_BUILD_SSR=false node ../../../scripts/release.mjs",
         "dev": "NUXT_BUILD_SSR=false NUXT_BUILD_ENV=development nuxt dev --no-clear --dotenv ../../../.env",
