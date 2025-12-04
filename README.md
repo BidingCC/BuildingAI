@@ -47,6 +47,20 @@ Wait for images to be pulled and the project to build. Depending on your device 
 
 After the project has fully started, open your browser and visit [http://localhost:4090/install](http://localhost:4090/install) to complete the initial setup wizard.
 
+### Deploy to Vercel
+
+Deploy BuildingAI to Vercel with your own AI API keys (Claude, ChatGPT, DeepSeek, Gemini):
+
+```bash
+# Quick setup with interactive script
+node scripts/setup-ai-providers.mjs
+
+# Deploy to Vercel
+vercel
+```
+
+📖 **See detailed instructions**: [VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md)
+
 For other deployment methods, see our [Deployment Guide](https://www.buildingai.cc/docs/introduction/install).
 
 ## Key Features

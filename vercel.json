@@ -1,0 +1,28 @@
+{
+  "version": 2,
+  "name": "buildingai",
+  "buildCommand": "pnpm run build:web",
+  "outputDirectory": "packages/web/buildingai-ui/.output/public",
+  "framework": "nuxtjs",
+  "installCommand": "pnpm install",
+  "builds": [
+    {
+      "src": "packages/web/buildingai-ui/nuxt.config.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/packages/web/buildingai-ui/$1"
+    }
+  ],
+  "env": {
+    "NODE_VERSION": "22"
+  },
+  "regions": ["iad1"]
+}

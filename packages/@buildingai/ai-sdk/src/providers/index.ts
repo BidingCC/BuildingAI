@@ -1,3 +1,4 @@
+export { anthropic, AnthropicAdapter } from "./anthropic";
 export { custom, CustomAdapter } from "./custom";
 export { deepseek, DeepSeekAdapter } from "./deepseek";
 export { google, GoogleAdapter } from "./google";
