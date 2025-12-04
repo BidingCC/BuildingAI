@@ -5,7 +5,6 @@
   "outputDirectory": "packages/web/buildingai-ui/.output/public",
   "framework": "nuxtjs",
   "installCommand": "pnpm install --filter=!./extensions/** --filter=!./templates/**",
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD ./packages/web ./packages/@buildingai",
   "builds": [
     {
       "src": "packages/web/buildingai-ui/package.json",
