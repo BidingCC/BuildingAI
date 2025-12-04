@@ -1,17 +1,14 @@
 {
   "version": 2,
   "name": "buildingai",
-  "buildCommand": "cd packages/web/buildingai-ui && pnpm run generate",
+  "buildCommand": "pnpm run build:web",
   "outputDirectory": "packages/web/buildingai-ui/.output/public",
   "framework": "nuxtjs",
   "installCommand": "pnpm install --filter=!./extensions/** --filter=!./templates/**",
   "builds": [
     {
-      "src": "packages/web/buildingai-ui/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": ".output/public"
-      }
+      "src": "package.json",
+      "use": "@vercel/static-build"
     }
   ],
   "routes": [
