@@ -54,12 +54,14 @@ Bạn cần đăng ký và lấy API keys từ các providers mà bạn muốn s
 
 #### 3.2. Cấu hình Build Settings
 
-Vercel sẽ tự động detect Nuxt.js. Kiểm tra các settings sau:
+Vercel sẽ tự động detect Nuxt.js. Cấu hình đã được tối ưu trong `vercel.json`:
 
 - **Framework Preset**: Nuxt.js
-- **Build Command**: `pnpm run build:web`
+- **Build Command**: `cd packages/web/buildingai-ui && pnpm run generate`
 - **Output Directory**: `packages/web/buildingai-ui/.output/public`
-- **Install Command**: `pnpm install`
+- **Install Command**: `pnpm install --filter=!./extensions/** --filter=!./templates/**`
+
+> **Lưu ý**: Build command đã được tối ưu để chỉ build web package, bỏ qua extensions để tránh lỗi dependencies.
 
 #### 3.3. Cấu hình Environment Variables
 

@@ -1,0 +1,32 @@
+# Ignore extensions during Vercel build
+extensions/**
+templates/**
+
+# Ignore local development files
+.env
+.env.local
+.env.*.local
+
+# Ignore logs
+logs/
+*.log
+
+# Ignore development artifacts
+.turbo/
+node_modules/
+
+# Ignore Docker files
+docker/
+docker-compose.yml
+Dockerfile
+
+# Ignore PM2 files
+ecosystem.config.js
+
+# Ignore test files
+**/*.test.ts
+**/*.spec.ts
+**/__tests__/**
+
+# Ignore storage
+storage/**
