@@ -38,7 +38,7 @@
     "scripts": {
         "build": "cross-env NODE_OPTIONS=--max-old-space-size=5120 turbo run build",
         "build:web": "cd packages/web/buildingai-ui && pnpm run generate",
-        "build:vercel": "cross-env NODE_OPTIONS=--max-old-space-size=8192 turbo run build --filter=@buildingai/buildingai-ui...",
+        "build:vercel": "cross-env NODE_OPTIONS=--max-old-space-size=8192 turbo run build --filter=...@buildingai/buildingai-ui",
         "dev": "turbo run dev",
         "start": "pnpm i && cd packages/cli && pnpm run start",
         "predeploy": "pnpm i && cd packages/cli && pnpm run predeploy",
