@@ -1,7 +1,7 @@
 {
   "version": 2,
   "name": "buildingai",
-  "buildCommand": "pnpm run build:web",
+  "buildCommand": "pnpm -w run build:web",
   "outputDirectory": "packages/web/buildingai-ui/.output/public",
   "framework": "nuxtjs",
   "installCommand": "pnpm install --filter=!./extensions/** --filter=!./templates/**",
