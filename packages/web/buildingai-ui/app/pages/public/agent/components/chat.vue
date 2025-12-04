@@ -16,13 +16,13 @@ import { nextTick, onMounted, onUnmounted, watch } from "vue";
 import PublicAgentChatsList from "./chats-list.vue";
 
 const AgentAnnotationModal = defineAsyncComponent(
-    () => import("../../../console/ai/agent/components/logs/annotation-modal.vue"),
+    () => import("~/pages/console/ai/agent/components/logs/annotation-modal.vue"),
 );
 const ChatsContextModal = defineAsyncComponent(
     () => import("~/components/ask-assistant-chat/chats-context-modal.vue"),
 );
 const VariableInput = defineAsyncComponent(
-    () => import("../../../console/ai/agent/components/configuration/variable-input.vue"),
+    () => import("~/pages/console/ai/agent/components/configuration/variable-input.vue"),
 );
 
 const props = defineProps<{
