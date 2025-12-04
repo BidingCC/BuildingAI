@@ -1,9 +1,6 @@
 import { getPageTitle, tabBarList } from "virtual:pages-meta";
-import { useI18n } from "vue-i18n";
 
-export function updateTabBarTitles() {
-    const { t } = useI18n();
-
+export function updateTabBarTitles(t: (key: string) => string) {
     tabBarList.forEach((item: { pagePath: string; index: number }) => {
         try {
             const pageTitle = getPageTitle(item.pagePath);

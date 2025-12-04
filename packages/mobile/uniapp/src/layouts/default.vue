@@ -8,7 +8,7 @@ import { updateTabBarTitles } from "../utils/tabbar";
 const title = computed(() => getCurrentPageTitle());
 const { t } = useI18n();
 
-updateTabBarTitles();
+updateTabBarTitles(t);
 </script>
 
 <template>

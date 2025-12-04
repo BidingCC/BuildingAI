@@ -23,6 +23,7 @@ const showLocalePicker = () => {
         itemList: locales.map((l) => l.label),
         success: (res) => {
             setLocale(locales[res.tapIndex].value);
+            updateTabBarTitles(t);
         },
     });
 };
