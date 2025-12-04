@@ -98,3 +98,4 @@ This project **only collects anonymized usage statistics with your consent**. Fo
 ## License
 
 [Apache License 2.0](./LICENSE)
+
