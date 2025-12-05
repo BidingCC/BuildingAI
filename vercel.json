@@ -1,0 +1,14 @@
+{
+    "$schema": "https://openapi.vercel.sh/vercel.json",
+    "version": 2,
+    "framework": "nuxt",
+    "installCommand": "pnpm install",
+    "buildCommand": "pnpm --filter @buildingai/buildingai-ui generate:vercel",
+    "outputDirectory": "packages/web/buildingai-ui/.output/public",
+    "rewrites": [
+        {
+            "source": "/(.*)",
+            "destination": "/index.html"
+        }
+    ]
+}
