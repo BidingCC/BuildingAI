@@ -8,7 +8,7 @@ templates/**
 .env.*.local
 
 # Ignore logs
-logs/
+/logs/
 *.log
 
 # Ignore development artifacts
