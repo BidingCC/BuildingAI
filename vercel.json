@@ -1,6 +1,6 @@
 {
-  "buildCommand": "cd packages/web/buildingai-ui && cross-env NODE_OPTIONS=--max-old-space-size=8192 NUXT_BUILD_SSR=false NUXT_BUILD_ENV=production nuxt generate",
-  "outputDirectory": "packages/web/buildingai-ui/.output/public",
-  "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "pnpm --filter @buildingai/buildingai-ui run generate",
+  "outputDirectory": "public/web",
+  "installCommand": "pnpm install",
   "framework": null
 }
