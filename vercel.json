@@ -2,7 +2,7 @@
   "version": 2,
   "name": "buildingai",
   "buildCommand": "pnpm -w run build:vercel",
-  "outputDirectory": "packages/web/buildingai-ui/.output/public",
+  "outputDirectory": "public/web",
   "framework": "nuxtjs",
   "installCommand": "pnpm install --filter=!./extensions/** --filter=!./templates/**",
   "builds": [
