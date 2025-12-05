@@ -1,5 +1,5 @@
 {
-  "buildCommand": "pnpm --filter @buildingai/buildingai-ui^... build && pnpm run build:vercel",
+  "buildCommand": "pnpm --filter @buildingai/buildingai-ui^... build && cd packages/web/buildingai-ui && pnpm exec cross-env NODE_OPTIONS=--max-old-space-size=8192 NUXT_BUILD_SSR=false NUXT_BUILD_ENV=production nuxt generate && pnpm exec cross-env NUXT_BUILD_SSR=false node ../../../scripts/release.mjs",
   "outputDirectory": "public/web",
   "installCommand": "pnpm install",
   "framework": null
