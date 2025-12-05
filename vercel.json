@@ -1,5 +1,5 @@
 {
-  "buildCommand": "bash ./build-vercel.sh",
+  "buildCommand": "cd packages/web/buildingai-ui && NODE_OPTIONS=--max-old-space-size=8192 NUXT_BUILD_SSR=false NUXT_BUILD_ENV=production pnpm nuxt generate --dotenv ../../../.env",
   "outputDirectory": "packages/web/buildingai-ui/.output/public",
   "installCommand": "pnpm install",
   "framework": null,
