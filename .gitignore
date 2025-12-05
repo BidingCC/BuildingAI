@@ -46,6 +46,8 @@ packages/**/dist
 _temp_get_languages.*
 build.tsbuildinfo
 
+# IDE
+.idea
 
 # Debug
 npm-debug.log*
