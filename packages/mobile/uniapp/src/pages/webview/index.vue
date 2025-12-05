@@ -1,7 +1,7 @@
 <script setup lang="ts">
-defineProps<{
-    url: string;
-}>();
+import { useQuery } from "@uni-helper/uni-use";
+
+const { value: url } = useQuery("url");
 </script>
 
 <template>
