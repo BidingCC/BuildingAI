@@ -1,0 +1,12 @@
+{
+  "buildCommand": "sh build-vercel.sh",
+  "outputDirectory": "packages/web/buildingai-ui/.output/public",
+  "installCommand": "pnpm install",
+  "framework": null,
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
