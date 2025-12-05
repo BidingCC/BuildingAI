@@ -1,6 +1,6 @@
 {
-  "buildCommand": "pnpm run build:web",
+  "buildCommand": "cd packages/web/buildingai-ui && pnpm run generate",
   "outputDirectory": "public/web",
-  "installCommand": "pnpm install",
+  "installCommand": "pnpm install --frozen-lockfile",
   "framework": null
 }
