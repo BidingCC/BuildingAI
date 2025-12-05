@@ -1,5 +1,5 @@
 {
-  "buildCommand": "sh build-vercel.sh",
+  "buildCommand": "bash ./build-vercel.sh",
   "outputDirectory": "packages/web/buildingai-ui/.output/public",
   "installCommand": "pnpm install",
   "framework": null,
