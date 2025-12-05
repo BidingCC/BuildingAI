@@ -1,5 +1,5 @@
 {
-  "buildCommand": "./build-vercel.sh",
+  "buildCommand": "sh build-vercel.sh",
   "outputDirectory": "public/web",
   "installCommand": "pnpm install",
   "framework": null
