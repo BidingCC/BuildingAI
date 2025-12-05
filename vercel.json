@@ -1,5 +1,5 @@
 {
-  "buildCommand": "pnpm --filter @buildingai/buildingai-ui^... build && pnpm --filter @buildingai/buildingai-ui run generate",
+  "buildCommand": "pnpm --filter @buildingai/buildingai-ui^... build && pnpm run build:vercel",
   "outputDirectory": "public/web",
   "installCommand": "pnpm install",
   "framework": null
