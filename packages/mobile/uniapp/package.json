@@ -32,9 +32,9 @@
         "@uni-helper/uni-use": "^0.19.17",
         "@vueuse/core": "^12.8.2",
         "@vueuse/shared": "^12.8.2",
-        "vue": "3.4.21",
+        "vue": "catalog:web",
         "vue-i18n": "catalog:web",
-        "vue-router": "4.5.1"
+        "vue-router": "catalog:web"
     },
     "devDependencies": {
         "@buildingai/eslint-config": "workspace:*",
@@ -49,7 +49,6 @@
         "@dcloudio/vite-plugin-uni": "3.0.0-4070520250711001",
         "@iconify-json/carbon": "^1.2.11",
         "@mini-types/alipay": "^3.0.14",
-        "@types/node": "^24.1.0",
         "@uni-helper/eslint-config": "^0.4.0",
         "@uni-helper/plugin-uni": "^0.1.0",
         "@uni-helper/unh": "^0.2.3",
@@ -62,15 +61,15 @@
         "@uni-helper/vite-plugin-uni-pages": "^0.3.19",
         "@uni-ku/bundle-optimizer": "^1.3.16",
         "@unocss/eslint-config": "^66.0.0",
-        "@vue/runtime-core": "3.4.21",
-        "@vue/tsconfig": "^0.7.0",
+        "@vue/runtime-core": "catalog:web",
+        "@vue/tsconfig": "catalog:web",
         "glob": "^11.0.3",
         "miniprogram-api-typings": "^4.1.0",
-        "typescript": "~5.8.3",
+        "typescript": "catalog:dev",
         "unocss": "66.0.0",
         "unplugin-auto-import": "^19.3.0",
         "vite": "^5.2.8",
         "vite-plugin-uni-polyfill": "^0.1.0",
-        "vue-tsc": "^3.0.4"
+        "vue-tsc": "catalog:dev"
     }
 }

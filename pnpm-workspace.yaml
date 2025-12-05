@@ -54,7 +54,7 @@ catalogs:
     prettier-plugin-tailwindcss: ^0.6.14
     typescript: 5.9.2
     typescript-eslint: ^8.46.3
-    vite: ^5.4.21
+    vite: ^7.2.6
     vite-plugin-eslint2: ^5.0.4
     vue-eslint-parser: ^10.2.0
     vue-tsc: ^2.2.12
@@ -107,6 +107,8 @@ catalogs:
     tailwindcss-animate: ^1.0.7
     tiptap-markdown: ^0.8.10
     vue: ^3.5.24
+    '@vue/runtime-core': ^3.5.24
+    '@vue/tsconfig': ^0.8.0
     vue-dompurify-html: ^5.3.0
     vue-i18n: ^11.1.12
     vue-renderer-markdown: 0.0.61-beta.7

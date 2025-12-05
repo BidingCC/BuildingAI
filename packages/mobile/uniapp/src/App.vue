@@ -1,17 +1,9 @@
 <script setup lang="ts">
 onLaunch((options) => {
-    uni.setTabBarItem({
-        index: 0,
-        text: "Chat",
-    });
     console.log("App Launch", options);
 });
 onShow(() => {
     console.log("App Show");
-    uni.setTabBarItem({
-        index: 0,
-        text: "Chat",
-    });
 });
 onHide(() => {
     console.log("App Hide");

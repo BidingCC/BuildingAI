@@ -161,6 +161,7 @@
         "@types/multer": "^1.4.13",
         "@types/node": "catalog:dev",
         "@uni-helper/uni-types": "catalog:mobile",
+        "@intlify/core-base": "11.2.1",
         "body-parser": "2.2.0",
         "clsx": "catalog:web",
         "cross-env": "^10.1.0",
@@ -193,8 +194,8 @@
             "glob": "^11.0.3",
             "source-map": "^0.7.4",
             "superagent": "^10.2.3",
-            "unconfig": "7.3.2",
-            "@intlify/shared": "11.2.1"
+            "@intlify/shared": "11.2.1",
+            "unconfig": "7.3.2"
         },
         "peerDependencyRules": {
             "ignoreMissing": [
@@ -206,6 +207,14 @@
                 "nuxt": "4",
                 "storybook": "9",
                 "magicast": "0.5.1"
+            }
+        },
+        "packageExtensions": {
+            "@dcloudio/uni-cli-shared@*": {
+                "dependencies": {
+                    "vue-i18n": "9.1.9",
+                    "@intlify/core-base": "9.1.9"
+                }
             }
         }
     },
