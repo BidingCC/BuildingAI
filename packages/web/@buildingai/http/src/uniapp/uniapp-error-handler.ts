@@ -1,13 +1,20 @@
+/**
+ * @fileoverview UniApp Error Handler
+ * @description UniApp platform error handler using uni.showToast
+ *
+ * @author BuildingAI Teams
+ */
+
 import { BusinessCode } from "@buildingai/constants/shared/business-code.constant";
-import { useUserStore } from "@buildingai/stores/user";
 import type { ResponseSchema } from "@buildingai/types";
-import type { Composer } from "vue-i18n";
+
+import type { ErrorHandler } from "../common/types";
 
 /**
- * Error handler
- * Responsible for handling HTTP status code errors and business error codes
+ * UniApp error handler
+ * Uses uni.showToast for error display in UniApp environment
  */
-export class ErrorHandler {
+export class UniAppErrorHandler implements ErrorHandler {
     /** Global custom business status code handler */
     private customCodeHandler: ((status: number, response: ResponseSchema) => void) | null = null;
 
@@ -20,53 +27,73 @@ export class ErrorHandler {
     }
 
     /**
+     * Show error message using uni.showToast
+     * @param message Error message
+     * @param _title Optional error title (not used in UniApp)
+     */
+    showError(message: string, _title?: string): void {
+        try {
+            // @ts-expect-error - uni is a global object in UniApp environment
+            uni.showToast({
+                title: message,
+                icon: "none",
+                duration: 2000,
+            });
+        } catch (_e) {
+            // Fallback to console if uni.showToast is not available
+            console.error("[UniAppErrorHandler]", message);
+        }
+    }
+
+    /**
+     * Handle login redirect using uni.reLaunch
+     */
+    handleLogin(): void {
+        try {
+            // @ts-expect-error - uni is a global object in UniApp environment
+            uni.removeStorageSync("USER_TOKEN");
+            // @ts-expect-error - uni is a global object in UniApp environment
+            uni.reLaunch({ url: "/pages/login/index" });
+        } catch (_e) {
+            // Ignore navigation errors
+        }
+    }
+
+    /**
      * Handle HTTP status code errors
      * @param status HTTP status code
      * @param responseData Response data
      */
-    handleHttpError(status: number, responseData: ResponseSchema): void {
+    private handleHttpError(status: number, responseData: ResponseSchema): void {
         const response = responseData as ResponseSchema;
         const errorMessage = response?.message || "Unknown error";
         const errorPath = response?.path ? ` (${response.path})` : "";
 
-        const { $i18n } = useNuxtApp();
-        const t = ($i18n as Composer).t;
-
         switch (status) {
             case 400:
-                useMessage().error(`Bad Request: ${errorMessage}`, {
-                    title: t("common.request.400"),
-                });
+                this.showError(`Bad Request: ${errorMessage}`);
                 throw new Error(`Bad Request: ${errorMessage}${errorPath}`);
 
             case 401:
                 // Unauthorized 401
-                useMessage().error(`Unauthorized: ${errorMessage}`, {
-                    title: t("common.request.401"),
-                });
-                useUserStore().toLogin();
+                this.showError(`Unauthorized: ${errorMessage}`);
+                this.handleLogin();
                 throw new Error(`Unauthorized: ${errorMessage}`);
 
             case 403:
-                useMessage().error(`Forbidden: ${errorMessage}`, {
-                    title: t("common.request.403"),
-                });
+                this.showError(`Forbidden: ${errorMessage}`);
                 throw new Error(`Forbidden: ${errorMessage}${errorPath}`);
 
             case 404:
-                useMessage().error(`Not Found: ${errorMessage}${errorPath}`, {
-                    title: t("common.request.404"),
-                });
+                this.showError(`Not Found: ${errorMessage}${errorPath}`);
                 throw new Error(`Not Found: ${status}: ${errorMessage}${errorPath}`);
 
             case 500:
-                useMessage().error(`Internal Server Error: ${errorMessage}${errorPath}`, {
-                    title: t("common.request.500"),
-                });
+                this.showError(`Internal Server Error: ${errorMessage}${errorPath}`);
                 throw new Error(`Internal Server Error: ${errorMessage}${errorPath}`);
 
             default:
-                useMessage().error(errorMessage + errorPath);
+                this.showError(errorMessage + errorPath);
                 throw new Error(`HTTP Error ${status}: ${errorMessage}${errorPath}`);
         }
     }
@@ -76,7 +103,7 @@ export class ErrorHandler {
      * @param code Business status code
      * @param response Response data
      */
-    handleBusinessError(code: number, response: ResponseSchema): void {
+    private handleBusinessError(code: number, response: ResponseSchema): void {
         // Success status code handling
         if (code === BusinessCode.SUCCESS) {
             return; // Business status code is normal, no need to handle
@@ -93,6 +120,9 @@ export class ErrorHandler {
                 errorMessage = `Business Error: ${key} (${code})`;
             }
         });
+
+        // Show error message
+        this.showError(`${errorMessage}${errorPath}`);
 
         // Throw business error
         throw new Error(`${errorMessage}${errorPath}`);
@@ -119,3 +149,5 @@ export class ErrorHandler {
         !skipBusinessCheck && this.handleBusinessError(response.code, response);
     }
 }
+
+

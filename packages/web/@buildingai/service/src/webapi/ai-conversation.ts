@@ -342,7 +342,7 @@ export function apiGetAiModelsByCapability(capability: string): Promise<AiModel[
 export function apiGetAiConversationList(
     params: Pagination,
 ): Promise<PaginationResult<AiConversation>> {
-    return useWebGet("/ai-conversations", params, { requireAuth: true });
+    return useWebGet("/ai-conversations", params, { requireAuth: false });
 }
 
 /**

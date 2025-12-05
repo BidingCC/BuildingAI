@@ -13,7 +13,7 @@ export default defineNuxtModule({
 
         const httpSrcPath = resolve(
             nuxt.options.rootDir,
-            "node_modules/@buildingai/http/src/hooks",
+            "node_modules/@buildingai/http/src/web-hooks",
         );
         addImportsDir(httpSrcPath);
     },

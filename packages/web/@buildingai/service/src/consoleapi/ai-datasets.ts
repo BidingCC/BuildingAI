@@ -663,7 +663,7 @@ export function apiCreateEmptyDataset(data: {
  * @returns Promise with paginated dataset list result
  */
 export function apiGetDatasetList(params: QueryDatasetParams): Promise<PaginationResult<Dataset>> {
-    return useConsoleGet("/ai-datasets", params, { requireAuth: true });
+    return useConsoleGet("/ai-datasets", params, { requireAuth: false });
 }
 
 /**
@@ -729,7 +729,7 @@ export function apiRetrievalTest(
     id: string,
     data: { query: string; retrievalConfig?: RetrievalConfig },
 ): Promise<{ chunks: DatasetChunk[]; totalTime: number }> {
-    return useConsolePost(`/ai-datasets/${id}/retrieval-test`, data, { requireAuth: true });
+    return useConsolePost(`/ai-datasets/${id}/retrieval-test`, data, { requireAuth: false });
 }
 
 /**
@@ -763,7 +763,7 @@ export function apiCreateDocument(data: CreateDocumentParams): Promise<CreateDoc
 export function apiGetDocumentList(
     params: QueryDocumentParams,
 ): Promise<PaginationResult<DatasetDocument[]>> {
-    return useConsoleGet("/ai-datasets-documents", params, { requireAuth: true });
+    return useConsoleGet("/ai-datasets-documents", params, { requireAuth: false });
 }
 
 /**
@@ -773,7 +773,7 @@ export function apiGetDocumentList(
  * @returns Promise with document list
  */
 export function apiGetAllDocumentList(datasetsId: string): Promise<DatasetDocument[]> {
-    return useConsoleGet("/ai-datasets-documents/all", { datasetsId }, { requireAuth: true });
+    return useConsoleGet("/ai-datasets-documents/all", { datasetsId }, { requireAuth: false });
 }
 
 /**
@@ -807,7 +807,7 @@ export function apiRenameDocument(
     id: string,
     data: { fileName: string; datasetId: string },
 ): Promise<DatasetDocument> {
-    return useConsolePatch(`/ai-datasets-documents/${id}/rename`, data, { requireAuth: true });
+    return useConsolePatch(`/ai-datasets-documents/${id}/rename`, data, { requireAuth: false });
 }
 
 /**
@@ -858,7 +858,7 @@ export function apiCreateSegment(data: CreateSegmentParams): Promise<DatasetSegm
 export function apiGetSegmentList(
     params: QuerySegmentParams,
 ): Promise<PaginationResult<DatasetSegment[]>> {
-    return useConsoleGet("/ai-datasets-segments", params, { requireAuth: true });
+    return useConsoleGet("/ai-datasets-segments", params, { requireAuth: false });
 }
 
 /**
@@ -973,7 +973,7 @@ export function apiRemoveTeamMember(data: RemoveTeamMemberParams): Promise<{ mes
 export function apiGetTeamMembers(
     params: QueryTeamMemberParams,
 ): Promise<PaginationResult<TeamMember[]>> {
-    return useConsoleGet("/ai-datasets-team-members", params, { requireAuth: true });
+    return useConsoleGet("/ai-datasets-team-members", params, { requireAuth: false });
 }
 
 /**

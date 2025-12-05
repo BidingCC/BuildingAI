@@ -5,8 +5,8 @@ import type {
     UploadOptions,
 } from "@buildingai/types";
 
-import { InterceptorManager } from "../core/interceptor-manager";
-import { ErrorHandler } from "../handlers/error-handler";
+import { InterceptorManager } from "../common/interceptor-manager";
+import type { ErrorHandler } from "../common/types";
 
 /**
  * File upload handler
@@ -98,7 +98,7 @@ export class FileUpload {
                                     timestamp: Date.now(),
                                 };
                             }
-                            this.errorHandler.handleHttpError(xhr.status, responseData);
+                            this.errorHandler.handle(xhr.status, responseData, false);
                         } catch (error) {
                             reject(error instanceof Error ? error : new Error(String(error)));
                         }

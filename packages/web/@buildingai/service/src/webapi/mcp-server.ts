@@ -180,7 +180,7 @@ export interface JsonImportMcpServerResponse {
  * @returns Promise with MCP server list
  */
 export function apiGetMcpServerList(params?: McpServerQueryParams): Promise<McpServerResponse> {
-    return useWebGet("/ai-mcp-servers", params, { requireAuth: true });
+    return useWebGet("/ai-mcp-servers", params, { requireAuth: false });
 }
 
 /**
@@ -189,7 +189,7 @@ export function apiGetMcpServerList(params?: McpServerQueryParams): Promise<McpS
  * @returns Promise with all MCP server list
  */
 export function apiGetAllMcpServerList(): Promise<McpServerInfo[] | SystemMcpServerInfo[]> {
-    return useWebGet("/ai-mcp-servers/all", {}, { requireAuth: true });
+    return useWebGet("/ai-mcp-servers/all", {}, { requireAuth: false });
 }
 
 /**

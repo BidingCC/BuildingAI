@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Response Handler
+ * @description Platform-agnostic response handling
+ *
+ * @author BuildingAI Teams
+ */
+
 import type { ResponseSchema } from "@buildingai/types";
 
 /**
@@ -12,3 +19,5 @@ export function handleResponse<T>(
 ): T | ResponseSchema<T> {
     return returnFullResponse ? responseData : (responseData.data as T);
 }
+
+

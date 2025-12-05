@@ -757,7 +757,7 @@ export function apiCreateAgent(data: UpdateAgentConfigParams): Promise<Agent> {
  * @returns Promise with paginated agent list result
  */
 export function apiGetAgentList(params: QueryAgentParams): Promise<PaginationResult<Agent>> {
-    return useConsoleGet("/ai-agent", params, { requireAuth: true });
+    return useConsoleGet("/ai-agent", params, { requireAuth: false });
 }
 
 /**
@@ -847,7 +847,7 @@ export function apiAgentChat(
 export function apiGetAgentChatRecordList(
     params: QueryAgentChatRecordParams,
 ): Promise<PaginationResult<AgentChatRecord[]>> {
-    return useConsoleGet("/ai-agent-chat-record", params, { requireAuth: true });
+    return useConsoleGet("/ai-agent-chat-record", params, { requireAuth: false });
 }
 
 /**
@@ -872,7 +872,7 @@ export function apiGetAgentChatsMessages(
     params: { page?: number; pageSize?: number },
 ): Promise<PaginationResult<AgentChatMessage[]>> {
     return useConsoleGet(`/ai-agent-chat-message/conversation/${conversationId}`, params, {
-        requireAuth: true,
+        requireAuth: false,
     });
 }
 
