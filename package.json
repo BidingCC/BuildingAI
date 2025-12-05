@@ -38,6 +38,7 @@
     "scripts": {
         "build": "cross-env NODE_OPTIONS=--max-old-space-size=5120 turbo run build",
         "build:web": "cd packages/web/buildingai-ui && pnpm run generate",
+        "build:vercel": "cd packages/web/buildingai-ui && pnpm exec cross-env NODE_OPTIONS=--max-old-space-size=8192 NUXT_BUILD_SSR=false NUXT_BUILD_ENV=production nuxt generate && pnpm exec cross-env NUXT_BUILD_SSR=false node ../../../scripts/release.mjs",
         "dev": "turbo run dev",
         "start": "pnpm i && cd packages/cli && pnpm run start",
         "predeploy": "pnpm i && cd packages/cli && pnpm run predeploy",
