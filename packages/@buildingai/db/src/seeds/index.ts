@@ -11,3 +11,4 @@ export { PageSeeder } from "./seeders/page.seeder";
 export { PayConfigSeeder } from "./seeders/payconfig.seeder";
 export { RechargeCenterSeeder } from "./seeders/recharge-center.seeder";
 export { SecretTemplateSeeder } from "./seeders/secret-template.seeder";
+export { StorageConfigSeeder } from "./seeders/storage-config.seeder";

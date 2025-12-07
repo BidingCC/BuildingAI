@@ -15,6 +15,7 @@ import {
     RechargeCenterSeeder,
     SecretTemplateSeeder,
     SeedRunner,
+    StorageConfigSeeder,
 } from "@buildingai/db/seeds";
 import { DataSource, Repository } from "@buildingai/db/typeorm";
 import { DictService } from "@buildingai/dict";
@@ -130,6 +131,7 @@ export class DatabaseInitService implements OnModuleInit {
             new MembershipPlansSeeder(), // Membership plans
             new RechargeCenterSeeder(), // Recharge center configuration
             new AgentSquareSeeder(), // Agent square configuration
+            new StorageConfigSeeder(), // OSS storage
         ]);
     }
 
