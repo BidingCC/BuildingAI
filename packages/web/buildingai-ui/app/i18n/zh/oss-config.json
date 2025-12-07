@@ -1,0 +1,56 @@
+{
+    "alter": {
+        "title": "温馨提示：",
+        "content": "1. 使用对象存储，需要将public目录下的资源文件保留原来目录路径传输到对象存储空间。\r\n2. 请勿随意切换存储方式，可能导致图片无法查看。\r\n3. 需要在对象存储后台设置域名跨域，否则图片生成场景无法使用，例海报合成等。 \r\n4. 需将对象存储的图片域名添加到微信小程序官方后台request合法域名和downloadFile合法域名。"
+    },
+    "table": {
+        "storageType": "存储方式",
+        "storageLocation": "存储位置",
+        "status": "状态",
+        "action": "操作",
+        "setting": "设置",
+        "enabled": "开启",
+        "disabled": "关闭"
+    },
+    "form": {
+        "storageType": {
+            "label": "存储方式",
+            "desc": "切换阿里云OSS后，素材库需要重新上传至阿里云 OSS"
+        },
+        "status": "状态",
+        "spaceName": {
+            "label": "储存空间名称",
+            "placeholder": "请输入存储空间名称 (Bucket)"
+        },
+        "accessKey": {
+            "placeholder": "请输入 ACCESS_KEY(AK)"
+        },
+        "secretKey": {
+            "placeholder": "请输入 SECRET_KEY(SK)"
+        },
+        "spaceDomain": {
+            "label": "空间域名",
+            "placeholder": "请输入空间域名 (Domain)"
+        },
+        "endpoint": {
+            "placeholder": "请输入 endpoint"
+        },
+        "arn": {
+            "placeholder": "请输入 role_arn"
+        }
+    },
+    "storage": {
+        "local": "本地存储"
+    },
+    "location": {
+        "local": "存储在本地服务器",
+        "qiniu": "存储在七牛云，请前往七牛云开通存储服务",
+        "aliyun": "存储在阿里云，请前往阿里云开通存储服务",
+        "tencent": "存储在腾讯云，请前往腾讯云开通存储服务"
+    },
+    "aliCloud": {
+        "paramDesc": "阿里云文件直传参数"
+    },
+    "confirm": "确认",
+    "cancel": "取消"
+}

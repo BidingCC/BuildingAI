@@ -34,7 +34,7 @@ const columns: TableColumn<OssConfig>[] = [
             switch (row.original.storageType) {
                 case "local":
                     return h(LocalConfig);
-                case "ali-cloud":
+                case "aliyun":
                     return h(AliCloudConfig);
             }
 
@@ -46,13 +46,13 @@ const ossConfigList: OssConfig[] = [
     {
         id: "1",
         storageType: "local",
-        storageLocation: "stored in a location on OSS",
+        storageLocation: t("oss-config.location.local"),
         isActive: true,
     },
     {
         id: "2",
-        storageType: "ali-cloud",
-        storageLocation: "stored in a location on OSS",
+        storageType: "aliyun",
+        storageLocation: t("oss-config.location.aliyun"),
         isActive: false,
     },
 ];
