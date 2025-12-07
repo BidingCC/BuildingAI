@@ -1,45 +1,59 @@
 <script setup lang="ts">
 import type { TableColumn } from "@nuxt/ui";
+import { h } from "vue";
+
+import AliCloudConfig from "./components/ali-cloud-config.vue";
+import LocalConfig from "./components/local-config.vue";
 
 const { t } = useI18n();
 
 interface OssConfig {
     id: string;
-    storeWay: string;
-    storeLocation: string;
-    enabled: boolean;
+    storageType: string;
+    storageLocation: string;
+    isActive: boolean;
 }
 
 const columns: TableColumn<OssConfig>[] = [
     {
-        accessorKey: "storeWay",
-        header: t("oss-config.table.storeWay"),
+        accessorKey: "storageType",
+        header: t("oss-config.table.storageType"),
     },
     {
-        accessorKey: "storeLocation",
-        header: t("oss-config.table.storeLocation"),
+        accessorKey: "storageLocation",
+        header: t("oss-config.table.storageLocation"),
     },
     {
-        accessorKey: "enabled",
+        accessorKey: "isActive",
         header: t("oss-config.table.status"),
     },
     {
         accessorKey: "action",
         header: t("oss-config.table.action"),
+        cell: ({ row }) => {
+            switch (row.original.storageType) {
+                case "local":
+                    return h(LocalConfig);
+                case "ali-cloud":
+                    return h(AliCloudConfig);
+            }
+
+            return null;
+        },
     },
 ];
 const ossConfigList: OssConfig[] = [
     {
         id: "1",
-        storeWay: "ABC",
-        storeLocation: "stored in a location on OSS",
-        enabled: true,
+        storageType: "local",
+        storageLocation: "stored in a location on OSS",
+        isActive: true,
     },
     {
         id: "2",
-        storeWay: "DEF",
-        storeLocation: "stored in a location on OSS",
-        enabled: false,
+        storageType: "ali-cloud",
+        storageLocation: "stored in a location on OSS",
+        isActive: false,
     },
 ];
 </script>
@@ -64,21 +78,17 @@ const ossConfigList: OssConfig[] = [
                 tr: '[&:has(>td[colspan])]:hidden',
             }"
         >
-            <template #enabled-cell="{ row }">
+            <template #isActive-cell="{ row }">
                 <UBadge
-                    :variant="row.original.enabled ? 'solid' : 'outline'"
-                    :color="row.original.enabled ? 'primary' : 'neutral'"
-                    >{{
-                        row.original.enabled
+                    :variant="row.original.isActive ? 'solid' : 'outline'"
+                    :color="row.original.isActive ? 'primary' : 'neutral'"
+                >
+                    {{
+                        row.original.isActive
                             ? $t("oss-config.table.enabled")
                             : $t("oss-config.table.disabled")
-                    }}</UBadge
-                >
-            </template>
-            <template #action-cell>
-                <UButton class="cursor-pointer" variant="ghost">{{
-                    $t("oss-config.table.setting")
-                }}</UButton>
+                    }}
+                </UBadge>
             </template>
         </UTable>
     </div>
