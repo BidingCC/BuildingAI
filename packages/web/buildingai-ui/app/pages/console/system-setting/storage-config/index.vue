@@ -1,4 +1,9 @@
 <script setup lang="ts">
+import {
+    apiGetStorageConfigList,
+    type StorageConfigTableData,
+    StorageType,
+} from "@buildingai/service/consoleapi/storage-config";
 import type { TableColumn } from "@nuxt/ui";
 import { h } from "vue";
 
@@ -7,55 +12,46 @@ import LocalConfig from "./components/local-config.vue";
 
 const { t } = useI18n();
 
-interface OssConfig {
-    id: string;
-    storageType: string;
-    storageLocation: string;
-    isActive: boolean;
-}
-
-const columns: TableColumn<OssConfig>[] = [
+const columns: TableColumn<StorageConfigTableData>[] = [
     {
         accessorKey: "storageType",
-        header: t("oss-config.table.storageType"),
+        header: t("storage-config.table.storageType"),
+        cell: ({ row }) => {
+            return t(`storage-config.storage.${row.original.name}`);
+        },
     },
     {
         accessorKey: "storageLocation",
-        header: t("oss-config.table.storageLocation"),
+        header: t("storage-config.table.storageLocation"),
+        cell: ({ row }) => {
+            return t(`storage-config.location.${row.original.name}`);
+        },
     },
     {
         accessorKey: "isActive",
-        header: t("oss-config.table.status"),
+        header: t("storage-config.table.status"),
     },
     {
         accessorKey: "action",
-        header: t("oss-config.table.action"),
+        header: t("storage-config.table.action"),
         cell: ({ row }) => {
             switch (row.original.storageType) {
-                case "local":
+                case StorageType.LOCAL:
                     return h(LocalConfig);
-                case "aliyun":
+                case StorageType.ALIYUN_OSS:
                     return h(AliCloudConfig);
+                default:
+                    return t("storage-config.notSupport");
             }
-
-            return null;
         },
     },
 ];
-const ossConfigList: OssConfig[] = [
-    {
-        id: "1",
-        storageType: "local",
-        storageLocation: t("oss-config.location.local"),
-        isActive: true,
-    },
-    {
-        id: "2",
-        storageType: "aliyun",
-        storageLocation: t("oss-config.location.aliyun"),
-        isActive: false,
-    },
-];
+
+const ossConfigList = shallowRef<StorageConfigTableData[]>([]);
+const requestStorageConfigs = async () => {
+    ossConfigList.value = await apiGetStorageConfigList();
+};
+onMounted(requestStorageConfigs);
 </script>
 <template>
     <div>
@@ -63,8 +59,8 @@ const ossConfigList: OssConfig[] = [
             color="primary"
             variant="subtle"
             class="mb-4 whitespace-pre-line"
-            :title="$t('oss-config.alter.title')"
-            :description="$t('oss-config.alter.content')"
+            :title="$t('storage-config.alter.title')"
+            :description="$t('storage-config.alter.content')"
         ></UAlert>
         <UTable
             :columns="columns"
@@ -85,8 +81,8 @@ const ossConfigList: OssConfig[] = [
                 >
                     {{
                         row.original.isActive
-                            ? $t("oss-config.table.enabled")
-                            : $t("oss-config.table.disabled")
+                            ? $t("storage-config.table.enabled")
+                            : $t("storage-config.table.disabled")
                     }}
                 </UBadge>
             </template>

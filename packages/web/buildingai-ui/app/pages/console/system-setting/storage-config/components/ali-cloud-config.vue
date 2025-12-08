@@ -7,10 +7,10 @@ const form = useTemplateRef("form");
 const schema = object({
     storageType: string().required(),
     isActive: boolean().required(),
-    spaceName: string().required(t("oss-config.form.spaceName.placeholder")),
-    accessKey: string().required(t("oss-config.form.accessKey.placeholder")),
-    secretKey: string().required(t("oss-config.form.secretKey.placeholder")),
-    spaceDomain: string().required(t("oss-config.form.spaceDomain.placeholder")),
+    spaceName: string().required(t("storage-config.form.spaceName.placeholder")),
+    accessKey: string().required(t("storage-config.form.accessKey.placeholder")),
+    secretKey: string().required(t("storage-config.form.secretKey.placeholder")),
+    spaceDomain: string().required(t("storage-config.form.spaceDomain.placeholder")),
     endpoint: string().optional(),
     arn: string().optional(),
 });
@@ -34,8 +34,8 @@ async function handleSubmit(event: FormSubmitEvent<Schema>) {
 </script>
 
 <template>
-    <UModal :title="$t('oss-config.storage.local')" :ui="{ footer: 'justify-end' }">
-        <UButton variant="ghost">{{ $t("oss-config.table.setting") }}</UButton>
+    <UModal :title="$t('storage-config.storage.local')" :ui="{ footer: 'justify-end' }">
+        <UButton variant="ghost">{{ $t("storage-config.table.setting") }}</UButton>
 
         <template #body>
             <UForm
@@ -47,25 +47,25 @@ async function handleSubmit(event: FormSubmitEvent<Schema>) {
             >
                 <UFormField
                     name="storageType"
-                    :label="$t('oss-config.form.storageType.label')"
+                    :label="$t('storage-config.form.storageType.label')"
                     :ui="{ description: 'py-2' }"
-                    :description="$t('oss-config.form.storageType.desc')"
+                    :description="$t('storage-config.form.storageType.desc')"
                 >
                     <URadioGroup
                         v-model="state.storageType"
-                        :items="[{ label: $t('oss-config.storage.local'), value: 'local' }]"
+                        :items="[{ label: $t('storage-config.storage.local'), value: 'local' }]"
                     />
                 </UFormField>
 
                 <UFormField
                     required
-                    :label="$t('oss-config.form.spaceName.label')"
+                    :label="$t('storage-config.form.spaceName.label')"
                     name="spaceName"
                 >
                     <UInput
                         class="w-full"
                         v-model="state.spaceName"
-                        :placeholder="$t('oss-config.form.spaceName.placeholder')"
+                        :placeholder="$t('storage-config.form.spaceName.placeholder')"
                     />
                 </UFormField>
 
@@ -73,7 +73,7 @@ async function handleSubmit(event: FormSubmitEvent<Schema>) {
                     <UInput
                         class="w-full"
                         v-model="state.accessKey"
-                        :placeholder="$t('oss-config.form.accessKey.placeholder')"
+                        :placeholder="$t('storage-config.form.accessKey.placeholder')"
                     />
                 </UFormField>
 
@@ -81,19 +81,19 @@ async function handleSubmit(event: FormSubmitEvent<Schema>) {
                     <UInput
                         class="w-full"
                         v-model="state.secretKey"
-                        :placeholder="$t('oss-config.form.secretKey.placeholder')"
+                        :placeholder="$t('storage-config.form.secretKey.placeholder')"
                     />
                 </UFormField>
 
                 <UFormField
                     required
-                    :label="$t('oss-config.form.spaceDomain.label')"
+                    :label="$t('storage-config.form.spaceDomain.label')"
                     name="spaceDomain"
                 >
                     <UInput
                         class="w-full"
                         v-model="state.spaceDomain"
-                        :placeholder="$t('oss-config.form.spaceDomain.placeholder')"
+                        :placeholder="$t('storage-config.form.spaceDomain.placeholder')"
                     />
                 </UFormField>
 
@@ -101,12 +101,12 @@ async function handleSubmit(event: FormSubmitEvent<Schema>) {
                     label="ENDPOINT"
                     name="endpoint"
                     :ui="{ description: 'text-xs' }"
-                    :description="$t('oss-config.aliCloud.paramDesc')"
+                    :description="$t('storage-config.aliCloud.paramDesc')"
                 >
                     <UInput
                         class="w-full"
                         v-model="state.endpoint"
-                        :placeholder="$t('oss-config.form.endpoint.placeholder')"
+                        :placeholder="$t('storage-config.form.endpoint.placeholder')"
                     />
                 </UFormField>
 
@@ -114,16 +114,16 @@ async function handleSubmit(event: FormSubmitEvent<Schema>) {
                     label="ARN"
                     name="arn"
                     :ui="{ description: 'text-xs' }"
-                    :description="$t('oss-config.aliCloud.paramDesc')"
+                    :description="$t('storage-config.aliCloud.paramDesc')"
                 >
                     <UInput
                         class="w-full"
                         v-model="state.arn"
-                        :placeholder="$t('oss-config.form.arn.placeholder')"
+                        :placeholder="$t('storage-config.form.arn.placeholder')"
                     />
                 </UFormField>
 
-                <UFormField :label="$t('oss-config.form.status')" name="isActive">
+                <UFormField :label="$t('storage-config.form.status')" name="isActive">
                     <USwitch v-model="state.isActive" />
                 </UFormField>
             </UForm>
@@ -131,10 +131,10 @@ async function handleSubmit(event: FormSubmitEvent<Schema>) {
 
         <template #footer="{ close }">
             <UButton color="neutral" variant="outline" @click="close">{{
-                $t("oss-config.cancel")
+                $t("storage-config.cancel")
             }}</UButton>
             <UButton color="primary" @click="() => form?.submit()">{{
-                $t("oss-config.confirm")
+                $t("storage-config.confirm")
             }}</UButton>
         </template>
         <template #description></template>

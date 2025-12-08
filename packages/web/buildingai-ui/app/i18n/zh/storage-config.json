@@ -40,17 +40,21 @@
         }
     },
     "storage": {
-        "local": "本地存储"
+        "local": "本地存储",
+        "qiniu-kodo": "七牛云存储",
+        "aliyun-oss": "阿里云 OSS",
+        "tencent-cos": "腾讯云 COS"
     },
     "location": {
         "local": "存储在本地服务器",
-        "qiniu": "存储在七牛云，请前往七牛云开通存储服务",
-        "aliyun": "存储在阿里云，请前往阿里云开通存储服务",
-        "tencent": "存储在腾讯云，请前往腾讯云开通存储服务"
+        "qiniu-kodo": "存储在七牛云，请前往七牛云开通存储服务",
+        "aliyun-oss": "存储在阿里云，请前往阿里云开通存储服务",
+        "tencent-cos": "存储在腾讯云，请前往腾讯云开通存储服务"
     },
     "aliCloud": {
         "paramDesc": "阿里云文件直传参数"
     },
     "confirm": "确认",
-    "cancel": "取消"
+    "cancel": "取消",
+    "notSupport": "暂不支持"
 }
