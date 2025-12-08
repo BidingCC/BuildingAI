@@ -41,7 +41,7 @@ const columns: TableColumn<StorageConfigTableData>[] = [
                 case StorageType.ALIYUN_OSS:
                     return h(AliCloudConfig);
                 default:
-                    return t("storage-config.notSupport");
+                    return t("storage-config.noSupport");
             }
         },
     },
