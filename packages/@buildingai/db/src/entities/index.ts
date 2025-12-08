@@ -39,6 +39,7 @@ export {
     SecretTemplateType,
     type TemplateField,
 } from "./secret-template.entity";
+export { StorageConfig } from "./storage-config.entity";
 export { Tag } from "./tag.entity";
 export { User } from "./user.entity";
 export { UserSubscription } from "./user-subscription.entity";

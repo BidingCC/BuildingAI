@@ -7,6 +7,7 @@ import { AccountLog, MembershipLevels, UserSubscription } from "@buildingai/db/e
 import { Permission } from "@buildingai/db/entities";
 import { Role } from "@buildingai/db/entities";
 import { UserToken } from "@buildingai/db/entities";
+import { StorageConfig } from "@buildingai/db/entities";
 import { RolePermissionService } from "@common/modules/auth/services/role-permission.service";
 import { PayModule } from "@common/modules/pay/pay.module";
 import { AuthModule } from "@modules/auth/auth.module";
@@ -14,9 +15,11 @@ import { UserService } from "@modules/user/services/user.service";
 import { forwardRef, Module } from "@nestjs/common";
 
 import { PayconfigConsoleController } from "./controllers/console/payconfig.controller";
+import { StorageController } from "./controllers/console/storage.controller";
 import { SystemConsoleController } from "./controllers/console/system.controller";
 import { WebsiteConsoleController } from "./controllers/console/website.controller";
 import { PayconfigService } from "./services/payconfig.service";
+import { StorageService } from "./services/storage.service";
 import { SystemService } from "./services/system.service";
 import { WebsiteService } from "./services/website.service";
 
@@ -36,10 +39,16 @@ import { WebsiteService } from "./services/website.service";
             Payconfig,
             UserSubscription,
             MembershipLevels,
+            StorageConfig,
         ]),
         forwardRef(() => PayModule),
     ],
-    controllers: [WebsiteConsoleController, SystemConsoleController, PayconfigConsoleController],
+    controllers: [
+        WebsiteConsoleController,
+        SystemConsoleController,
+        PayconfigConsoleController,
+        StorageController,
+    ],
     providers: [
         WebsiteService,
         RolePermissionService,
@@ -47,7 +56,8 @@ import { WebsiteService } from "./services/website.service";
         CacheService,
         PayconfigService,
         UserService,
+        StorageService,
     ],
-    exports: [WebsiteService, SystemService, PayconfigService],
+    exports: [WebsiteService, SystemService, PayconfigService, StorageService],
 })
 export class SystemModule {}
