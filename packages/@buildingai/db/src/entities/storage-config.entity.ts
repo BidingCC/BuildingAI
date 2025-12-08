@@ -1,8 +1,4 @@
 import {
-    BooleanNumber,
-    type BooleanNumberType,
-} from "@buildingai/constants/shared/status-codes.constant";
-import {
     type StorageConfigData,
     StorageType,
     type StorageTypeType,
@@ -20,8 +16,8 @@ export class StorageConfig extends BaseEntity {
     @Column({ type: "enum", enum: StorageType, comment: "存储类型" })
     storageType: StorageTypeType;
 
-    @Column({ type: "enum", enum: BooleanNumber, default: BooleanNumber.NO, comment: "是否激活" })
-    isActive: BooleanNumberType;
+    @Column({ type: "boolean", default: false, comment: "是否激活" })
+    isActive: boolean;
 
     @Column({ type: "jsonb", nullable: true, comment: "存储配置内容" })
     config: StorageConfigData;

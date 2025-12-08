@@ -1,4 +1,3 @@
-import { BooleanNumber } from "@buildingai/constants";
 import { StorageType } from "@buildingai/constants/shared/storage-config.constant";
 
 import { StorageConfig } from "../../entities/storage-config.entity";
@@ -26,25 +25,25 @@ export class StorageConfigSeeder extends BaseSeeder {
                 {
                     name: "local",
                     storageType: StorageType.LOCAL,
-                    isActive: BooleanNumber.YES,
+                    isActive: true,
                     config: null,
                 },
                 {
                     name: "aliyun-oss",
                     storageType: StorageType.ALIYUN_OSS,
-                    isActive: BooleanNumber.NO,
+                    isActive: false,
                     config: null,
                 },
                 {
                     name: "tencent-cos",
                     storageType: StorageType.TENCENT_COS,
-                    isActive: BooleanNumber.NO,
+                    isActive: false,
                     config: null,
                 },
                 {
                     name: "qiniu-kodo",
                     storageType: StorageType.QINIU_KODO,
-                    isActive: BooleanNumber.NO,
+                    isActive: false,
                     config: null,
                 },
             ]);

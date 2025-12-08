@@ -1,7 +1,6 @@
-import { BooleanNumber, type BooleanNumberType } from "@buildingai/constants";
 import type { StorageConfigData } from "@buildingai/constants/shared/storage-config.constant";
 import {
-    IsEnum,
+    IsBoolean,
     IsFQDN,
     IsNotEmpty,
     IsObject,
@@ -46,8 +45,8 @@ export class UpdateStorageConfigDto {
     name?: string;
 
     @IsOptional()
-    @IsEnum(BooleanNumber)
-    isActive?: BooleanNumberType;
+    @IsBoolean()
+    isActive?: boolean;
 
     @IsOptional()
     @IsObject()
