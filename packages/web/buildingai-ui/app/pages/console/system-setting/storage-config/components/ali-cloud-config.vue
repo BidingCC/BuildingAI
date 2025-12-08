@@ -1,11 +1,19 @@
 <script setup lang="ts">
+import { type StorageConfig, StorageType } from "@buildingai/service/consoleapi/storage-config";
 import type { FormSubmitEvent } from "@nuxt/ui";
-import { boolean, type InferType, object, string } from "yup";
+import { boolean, type InferType, number, object, string } from "yup";
+
+const props = defineProps({
+    config: {
+        type: Object as PropType<StorageConfig>,
+        required: true,
+    },
+});
 
 const { t } = useI18n();
 const form = useTemplateRef("form");
 const schema = object({
-    storageType: string().required(),
+    storageType: number().required(),
     isActive: boolean().required(),
     spaceName: string().required(t("storage-config.form.spaceName.placeholder")),
     accessKey: string().required(t("storage-config.form.accessKey.placeholder")),
@@ -16,8 +24,8 @@ const schema = object({
 });
 type Schema = InferType<typeof schema>;
 const state = reactive({
-    storageType: "local",
-    isActive: true,
+    storageType: StorageType.ALIYUN_OSS,
+    isActive: props.config.isActive,
     spaceName: "",
     accessKey: "",
     secretKey: "",
@@ -53,7 +61,12 @@ async function handleSubmit(event: FormSubmitEvent<Schema>) {
                 >
                     <URadioGroup
                         v-model="state.storageType"
-                        :items="[{ label: $t('storage-config.storage.local'), value: 'local' }]"
+                        :items="[
+                            {
+                                label: $t('storage-config.storage.aliyun-oss'),
+                                value: StorageType.ALIYUN_OSS,
+                            },
+                        ]"
                     />
                 </UFormField>
 

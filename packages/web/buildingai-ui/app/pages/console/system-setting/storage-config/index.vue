@@ -39,7 +39,7 @@ const columns: TableColumn<StorageConfigTableData>[] = [
                 case StorageType.LOCAL:
                     return h(LocalConfig);
                 case StorageType.ALIYUN_OSS:
-                    return h(AliCloudConfig);
+                    return h(AliCloudConfig, { config: { ...row.original } });
                 default:
                     return t("storage-config.noSupport");
             }

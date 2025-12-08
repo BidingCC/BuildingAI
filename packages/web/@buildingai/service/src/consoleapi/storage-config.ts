@@ -1,19 +1,19 @@
-export const StorageType = {
-    LOCAL: 1,
-    ALIYUN_OSS: 2,
-    TENCENT_COS: 3,
-    QINIU_KODO: 4,
-} as const;
+import type {
+    StorageConfigData,
+    StorageTypeType,
+} from "@buildingai/constants/shared/storage-config.constant";
+import { StorageType } from "@buildingai/constants/shared/storage-config.constant";
+export { StorageType, type StorageTypeType };
 
-export type StorageTypeType = (typeof StorageType)[keyof typeof StorageType];
-
-export interface StorageConfigTableData {
+export interface StorageConfig {
     id: string;
     name: string;
+    isActive: boolean;
     storageType: StorageTypeType;
-    isActive: number;
-    config: any;
+    config: StorageConfigData;
 }
+
+export type StorageConfigTableData = StorageConfig;
 
 export function apiGetStorageConfigList(): Promise<StorageConfigTableData[]> {
     return useConsoleGet("/system-storage-config");
