@@ -5,14 +5,16 @@
     "type": "module",
     "license": "MIT",
     "scripts": {
-        "dev": "unh dev",
-        "build": "unh build",
+        "dev": "cross-env BUILD_ENV=development unh dev",
+        "build": "cross-env BUILD_ENV=production unh build",
         "about": "unh info",
         "type-check": "vue-tsc --noEmit",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix"
     },
     "dependencies": {
+        "@buildingai/constants": "workspace:*",
+        "@buildingai/service": "workspace:*",
         "@dcloudio/uni-app": "3.0.0-4070520250711001",
         "@dcloudio/uni-app-harmony": "3.0.0-4070520250711001",
         "@dcloudio/uni-app-plus": "3.0.0-4070520250711001",
@@ -32,7 +34,8 @@
         "@uni-helper/uni-use": "^0.19.17",
         "@vueuse/core": "^12.8.2",
         "@vueuse/shared": "^12.8.2",
-        "vue": "catalog:web",
+        "pinia": "^2.0.36",
+        "vue": "^3.4.21",
         "vue-i18n": "catalog:web",
         "vue-router": "catalog:web"
     },
@@ -68,7 +71,7 @@
         "typescript": "catalog:dev",
         "unocss": "66.0.0",
         "unplugin-auto-import": "^19.3.0",
-        "vite": "^5.2.8",
+        "vite": "6.3.4",
         "vite-plugin-uni-polyfill": "^0.1.0",
         "vue-tsc": "catalog:dev"
     }

@@ -43,11 +43,8 @@
 		"@buildingai/typescript-config": "workspace:*",
 		"@buildingai/eslint-config": "workspace:*",
 		"@dcloudio/types": "^3.4.16",
-		"@types/fs-extra": "catalog:"
-	},
-	"peerDependencies": {
-		"vite": "^5.0.0",
-		"vue": "^3.0.0"
+		"@types/fs-extra": "catalog:",
+        "vite": "6.3.4"
 	}
 }
 

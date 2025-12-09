@@ -1,5 +1,6 @@
 // 扩展插件加载器（必须在 UniHelperPages 之前）
 /** @see https://github.com/vitejs/vite */
+
 import { uniappExtensions, uniMiddleware, uniPagesMeta } from "@buildingai/vite-plugins";
 /** @see https://uni-helper.js.org/plugin-uni */
 import Uni from "@uni-helper/plugin-uni";
@@ -15,13 +16,25 @@ import UniHelperManifest from "@uni-helper/vite-plugin-uni-manifest";
 import UniHelperPages from "@uni-helper/vite-plugin-uni-pages";
 /** @see https://github.com/uni-ku/bundle-optimizer */
 import Optimization from "@uni-ku/bundle-optimizer";
+import dotenv from "dotenv";
+import { resolve } from "path";
 /** @see https://unocss.dev/integrations/vite */
 import UnoCSS from "unocss/vite";
 /** @see https://github.com/antfu/unplugin-auto-import */
 import AutoImport from "unplugin-auto-import/vite";
+import { fileURLToPath } from "url";
+/** @see https://vitejs.dev/config/ */
 import { defineConfig } from "vite";
 /** @see https://github.com/dcloudio/vite-plugin-uni-polyfill */
 import UniPolyfill from "vite-plugin-uni-polyfill";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = resolve(__filename, "..");
+
+dotenv.config({
+    path: resolve(__dirname, "../../../.env"),
+    quiet: true,
+});
 
 /** @see https://vitejs.dev/config/ */
 export default defineConfig({
@@ -85,7 +98,7 @@ export default defineConfig({
             ],
             ignore: ["useToast"],
             dts: "src/types/auto-imports.d.ts",
-            dirs: ["src/hooks", "src/stores", "src/utils"],
+            dirs: ["src/stores", "src/utils", "src/hooks"],
             vueTemplate: true,
         }),
         /** @see https://github.com/antfu/unocss */

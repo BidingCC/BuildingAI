@@ -7,6 +7,9 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    BdActionSheet: typeof import('./../components/bd-action-sheet.vue')['default']
+    BdModal: typeof import('./../components/bd-modal.vue')['default']
     BdNavbar: typeof import('./../components/bd-navbar.vue')['default']
+    BdPicker: typeof import('./../components/bd-picker.vue')['default']
   }
 }

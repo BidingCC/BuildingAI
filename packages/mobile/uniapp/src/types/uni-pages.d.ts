@@ -8,6 +8,7 @@ type _LocationUrl =
   "/pages/about_us/index" |
   "/pages/agreement/index" |
   "/pages/apps/index" |
+  "/pages/demo/index" |
   "/pages/login/index" |
   "/pages/register/index" |
   "/pages/user/index" |
