@@ -2,6 +2,13 @@
 import type { FormSubmitEvent } from "@nuxt/ui";
 import { boolean, object, string } from "yup";
 
+const props = defineProps({
+    isActive: {
+        type: Boolean,
+        required: true,
+    },
+});
+
 const form = useTemplateRef("form");
 const schema = object({
     storageType: string().required(),
@@ -9,7 +16,7 @@ const schema = object({
 });
 const state = reactive({
     storageType: "local",
-    isActive: true,
+    isActive: props.isActive,
 });
 
 const toast = useToast();
@@ -38,7 +45,7 @@ function onSubmit(event: FormSubmitEvent<typeof state>) {
                 </UFormField>
 
                 <UFormField :label="$t('storage-config.form.status')" name="isActive">
-                    <USwitch v-model="state.isActive" />
+                    <USwitch v-model="state.isActive" :disabled="state.isActive" />
                 </UFormField>
             </UForm>
         </template>

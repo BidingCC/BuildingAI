@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
     apiGetStorageConfigList,
+    type StorageConfig,
     type StorageConfigTableData,
     StorageType,
 } from "@buildingai/service/consoleapi/storage-config";
@@ -37,9 +38,11 @@ const columns: TableColumn<StorageConfigTableData>[] = [
         cell: ({ row }) => {
             switch (row.original.storageType) {
                 case StorageType.LOCAL:
-                    return h(LocalConfig);
-                case StorageType.ALIYUN_OSS:
-                    return h(AliCloudConfig, { config: { ...row.original } });
+                    return h(LocalConfig, { isActive: row.original.isActive });
+                case StorageType.ALIYUN_OSS: {
+                    const data = row.original as StorageConfig<typeof StorageType.ALIYUN_OSS>;
+                    return h(AliCloudConfig, { data });
+                }
                 default:
                     return t("storage-config.noSupport");
             }

@@ -27,6 +27,13 @@ export interface TencentCosConfig extends CloudStorageConfig {
 
 export interface QiniuKodoConfig extends CloudStorageConfig {}
 
+export interface StorageConfigMap {
+    [StorageType.LOCAL]: LocalStorageConfig;
+    [StorageType.ALIYUN_OSS]: AliyunOssConfig;
+    [StorageType.TENCENT_COS]: TencentCosConfig;
+    [StorageType.QINIU_KODO]: QiniuKodoConfig;
+}
+
 export type StorageConfigData =
     | LocalStorageConfig
     | AliyunOssConfig
