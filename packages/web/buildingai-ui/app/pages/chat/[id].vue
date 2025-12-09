@@ -2,7 +2,7 @@
 import type { AiMessage, FilesList } from "@buildingai/service/models/message";
 import type { AiModel, ChatConfig, QuickMenu } from "@buildingai/service/webapi/ai-conversation";
 import {
-    apiChatStream,
+    apiAgentChatStream,
     apiGetAiConversation,
     apiGetAiConversationDetail,
     apiGetChatConfig,
@@ -74,7 +74,7 @@ const initialMessages = messagesData.value.items.map((item: AiMessage) => {
 
 const { messages, input, files, handleSubmit, reload, stop, status, error } = useChat({
     id: currentConversationId.value,
-    api: apiChatStream,
+    api: apiAgentChatStream,
     initialMessages: initialMessages,
     body: {
         get modelId() {

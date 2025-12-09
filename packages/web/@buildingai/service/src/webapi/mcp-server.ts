@@ -7,6 +7,12 @@
  */
 
 import type {
+    CheckMcpServerConnectResponse,
+    JsonImportMcpServerResponse,
+    McpServerInfo,
+    McpServerQueryParams,
+} from "../consoleapi/mcp-server";
+import type {
     BaseCreateRequest,
     BaseEntity,
     BaseUpdateRequest,
@@ -23,43 +29,6 @@ import type {
 export enum McpServerType {
     USER = "user",
     SYSTEM = "system",
-}
-
-/**
- * MCP server query parameters interface
- * @description Interface for MCP server query parameters
- */
-export interface McpServerQueryParams {
-    name?: string;
-    isDisabled?: boolean;
-    type?: McpServerType;
-}
-
-/**
- * MCP server information interface
- * @description Interface for MCP server information with all server properties
- */
-export interface McpServerInfo extends BaseEntity {
-    mcpServerId: string;
-    name: string;
-    description: string;
-    icon: string;
-    type: "user" | "system";
-    timeout: number;
-    providerName: string;
-    url: string;
-    sortOrder: number;
-    isDisabled: boolean;
-    creatorId: string;
-    proproviderIcon?: string;
-    isShow?: boolean;
-    isAssociated?: boolean;
-    connectError: string;
-    connectable: boolean;
-    alias?: string;
-    tools?: ToolsItem[];
-    communicationType?: string;
-    customHeaders?: Record<string, string> | string;
 }
 
 /**
@@ -114,17 +83,6 @@ export interface SystemMcpServerCreateParams extends Pagination {
 }
 
 /**
- * Tool information interface
- * @description Interface for tool statistics information
- */
-export interface ToolInfo {
-    created: number;
-    deleted: number;
-    total: number;
-    updated: number;
-}
-
-/**
  * Tools item type definition
  * @description Type definition for MCP server tools
  */
@@ -136,18 +94,6 @@ export interface ToolsItem extends BaseEntity {
 }
 
 /**
- * MCP server connection check response interface
- * @description Interface for MCP server connection check response
- */
-export interface CheckMcpServerConnectResponse {
-    connectable: boolean;
-    error?: string;
-    message: string;
-    success: boolean;
-    toolsInfo?: ToolInfo[];
-}
-
-/**
  * Association interface
  * @description Interface for MCP server association information
  */
@@ -156,19 +102,6 @@ export interface Association {
     id: string;
     name: string;
     status: string;
-}
-
-/**
- * JSON import MCP server response interface
- * @description Interface for JSON import MCP server response
- */
-export interface JsonImportMcpServerResponse {
-    results: Association[];
-    message: string;
-    success: boolean;
-    created: number;
-    updated: number;
-    total: number;
 }
 
 // ==================== MCP Server Query Related APIs ====================

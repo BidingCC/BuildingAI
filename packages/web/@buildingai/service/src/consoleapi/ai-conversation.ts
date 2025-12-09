@@ -111,7 +111,7 @@ export function apiToggleConversationPin(id: string, isPinned: boolean): Promise
  * @description Get current chat page configuration information (suggestion options and welcome information)
  * @returns Promise with chat configuration information
  */
-export function apiGetChatConfig(): Promise<ChatConfig> {
+export function apiGetConsoleChatConfig(): Promise<ChatConfig> {
     return useConsoleGet("/ai-conversations/config");
 }
 

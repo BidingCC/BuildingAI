@@ -3,7 +3,7 @@ import type { TagTypeType } from "@buildingai/constants";
 import {
     apiCreateTag,
     apiDeleteTag,
-    apiGetTagList,
+    apiGetConsoleTagList,
     apiUpdateTag,
     type TagFormData,
 } from "@buildingai/service/consoleapi/tag";
@@ -20,7 +20,7 @@ const tags = shallowRef<TagFormData[]>([]);
 const newTagName = shallowRef("");
 const editingTag = shallowRef(-1);
 const getTags = async () => {
-    const res = await apiGetTagList({
+    const res = await apiGetConsoleTagList({
         type: props.type,
     });
     tags.value = res;

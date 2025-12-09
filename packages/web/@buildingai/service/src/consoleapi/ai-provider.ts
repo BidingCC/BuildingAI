@@ -142,7 +142,7 @@ export type UpdateAiProviderRequest = Partial<CreateAiProviderRequest>;
  * Base query parameters interface
  * @description Common query parameters for all entities (without pagination)
  */
-export interface BaseQueryParams {
+export interface BaseAiProviderQueryParams {
     /** Keyword search filter */
     keyword?: string;
     /** Active status filter */
@@ -153,13 +153,13 @@ export interface BaseQueryParams {
  * AI provider query parameters interface
  * @description Parameters for querying AI providers with filters (no pagination)
  */
-export type AiProviderQueryParams = BaseQueryParams;
+export type AiProviderQueryParams = BaseAiProviderQueryParams;
 
 /**
  * AI model query request parameters interface
  * @description Parameters for querying AI models with filters
  */
-export interface AiModelQueryRequest extends BaseQueryParams {
+export interface AiModelQueryRequest extends BaseAiProviderQueryParams {
     /** Provider ID filter */
     providerId?: string;
     /** Default model filter */
@@ -271,7 +271,7 @@ export type UpdateAiModelRequest = Partial<CreateAiModelRequest> & {
  * Model type interface
  * @description Interface for model type information
  */
-export interface ModelType {
+export interface AiModelType {
     /** Model type value */
     value: string;
     /** Model type label */
@@ -388,6 +388,6 @@ export function apiToggleAiProviderActive(id: string, isActive: boolean): Promis
  * @description Get list of model types supported by AI providers
  * @returns Promise with model type list
  */
-export function apiGetAiProviderModelTypes(): Promise<ModelType[]> {
+export function apiGetAiProviderModelTypes(): Promise<AiModelType[]> {
     return useConsoleGet("/ai-models/type/list");
 }

@@ -78,7 +78,7 @@ export interface ReferenceSource {
  * User information interface
  * @description Standard user information structure
  */
-export interface UserInfo {
+export interface AgentUserInfo {
     /** Username */
     username: string;
     /** User nickname */
@@ -390,7 +390,7 @@ export interface AgentChatRecord extends BaseEntity {
     /** Associated agent information */
     agent?: Agent;
     /** Associated user information */
-    user?: UserInfo;
+    user?: AgentUserInfo;
 }
 
 /**
@@ -579,7 +579,7 @@ export interface AgentAnnotation extends BaseEntity {
     /** Creator user ID */
     createdBy: string;
     /** Reviewer information */
-    reviewer?: UserInfo;
+    reviewer?: AgentUserInfo;
 }
 
 /**
@@ -1085,12 +1085,4 @@ export function apiConsoleSetAgentDecorate(
     data: AgentDecorateConfig,
 ): Promise<AgentDecorateConfig> {
     return useConsolePost("/agent-decorate", data);
-}
-
-/**
- * Get agent decorate config (web)
- * @description 前台公开获取运营位配置
- */
-export function apiGetAgentDecorate(): Promise<AgentDecorateConfig> {
-    return useWebGet("/agent-decorate");
 }

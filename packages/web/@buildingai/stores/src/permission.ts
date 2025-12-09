@@ -7,7 +7,7 @@
  */
 
 import type { MenuFormData } from "@buildingai/service/consoleapi/menu";
-import { apiGetUserInfo } from "@buildingai/service/consoleapi/user";
+import { apiGetConsoleUserInfo } from "@buildingai/service/consoleapi/user";
 import { createPinia, defineStore } from "pinia";
 
 import { useUserStore } from "./user";
@@ -35,7 +35,7 @@ export const permissionStore = defineStore("permission", () => {
      * @description Fetch user permissions, menus, and user info from API
      */
     const { lockFn: loadPermissions } = useLockFn(async () => {
-        const result = await apiGetUserInfo();
+        const result = await apiGetConsoleUserInfo();
         menus.value = result.menus || [];
         permissions.value = result.permissions || [];
         userStore.userInfo = result.user ? result.user : null;

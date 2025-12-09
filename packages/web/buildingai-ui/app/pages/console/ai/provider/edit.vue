@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type {
+    AiModelType,
     AiProviderInfo,
     CreateAiProviderRequest,
-    ModelType,
 } from "@buildingai/service/consoleapi/ai-provider";
 import {
     apiCreateAiProvider,
@@ -27,7 +27,7 @@ const route = useRoute();
 const router = useRouter();
 
 const modelTypes = shallowRef<string[]>([]);
-const allModelTypes = shallowRef<ModelType[]>([]);
+const allModelTypes = shallowRef<AiModelType[]>([]);
 
 const detail = ref<AiProviderInfo | null>(null);
 

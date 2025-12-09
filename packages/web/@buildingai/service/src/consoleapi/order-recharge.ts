@@ -82,14 +82,14 @@ export interface OrderListItem {
     /** Total power amount */
     totalPower?: number;
     /** User information */
-    user?: User;
+    user?: OrderRechargeUser;
 }
 
 /**
  * User information interface
  * @description Interface for user basic information
  */
-export interface User {
+export interface OrderRechargeUser {
     /** User avatar */
     avatar: string;
     /** Username */
@@ -151,7 +151,7 @@ export interface OrderDetailData {
     /** Total recharge power amount */
     totalPower: number;
     /** User information */
-    user: User;
+    user: OrderRechargeUser;
 }
 
 // ==================== Order and Recharge Related APIs ====================

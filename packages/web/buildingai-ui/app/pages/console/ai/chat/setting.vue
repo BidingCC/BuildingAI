@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { UpdateChatConfigDto } from "@buildingai/service/consoleapi/ai-conversation";
 import {
-    apiGetChatConfig,
+    apiGetConsoleChatConfig,
     apiUpdateChatConfig,
 } from "@buildingai/service/consoleapi/ai-conversation";
 import type { ChatConfig } from "@buildingai/service/webapi/ai-conversation";
@@ -28,7 +28,7 @@ const formData = reactive<ChatConfig>({
 
 const { lockFn: getChatConfig, isLock: detailLoading } = useLockFn(async () => {
     try {
-        const response = await apiGetChatConfig();
+        const response = await apiGetConsoleChatConfig();
         // 合并响应数据到表单
         Object.assign(formData, response);
     } catch (error) {

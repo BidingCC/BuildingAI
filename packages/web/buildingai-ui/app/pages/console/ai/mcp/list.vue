@@ -2,11 +2,11 @@
 import type { AiProviderInfo } from "@buildingai/service/consoleapi/ai-provider";
 import type { McpServerDetail } from "@buildingai/service/consoleapi/mcp-server";
 import {
-    apiBatchDeleteMcpServers,
-    apiDeleteMcpServer,
-    apiGetMcpServerList,
-    apiSetQuickMenu,
-    apiUpdateMcpServer,
+    apiConsoleBatchDeleteMcpServers,
+    apiConsoleDeleteMcpServer,
+    apiConsoleGetMcpServerList,
+    apiConsoleSetQuickMenu,
+    apiConsoleUpdateMcpServer,
 } from "@buildingai/service/consoleapi/mcp-server";
 
 const McpServerCard = defineAsyncComponent(() => import("./components/mcp-server-card.vue"));
@@ -25,7 +25,7 @@ const searchForm = shallowReactive({
 const updateIds = shallowRef<string[]>([]);
 
 const { paging, getLists } = usePaging({
-    fetchFun: apiGetMcpServerList,
+    fetchFun: apiConsoleGetMcpServerList,
     params: searchForm,
 });
 
@@ -62,10 +62,10 @@ const handleDelete = async (id: string | string[]) => {
         });
 
         if (Array.isArray(id)) {
-            await apiBatchDeleteMcpServers(id);
+            await apiConsoleBatchDeleteMcpServers(id);
             toast.success(t("ai-mcp.backend.deleteSuccess"));
         } else {
-            await apiDeleteMcpServer(id);
+            await apiConsoleDeleteMcpServer(id);
             toast.success(t("ai-mcp.backend.deleteSuccess"));
         }
 
@@ -132,7 +132,7 @@ const handleImportMcpServer = () => {
 
 const handleSetQuickMenu = async (mcpServer: McpServerDetail) => {
     try {
-        await apiSetQuickMenu(mcpServer.id);
+        await apiConsoleSetQuickMenu(mcpServer.id);
         getLists();
         toast.success(t("ai-mcp.backend.quickMenuSuccess"));
     } catch (error) {
@@ -146,7 +146,7 @@ const handleEditProvider = (provider: McpServerDetail) => {
 
 const handleToggleProviderActive = async (providerId: string, isDisabled: boolean) => {
     try {
-        await apiUpdateMcpServer(providerId, { isDisabled });
+        await apiConsoleUpdateMcpServer(providerId, { isDisabled });
         toast.success(isDisabled ? "MCP已禁用" : "MCP已启用");
 
         getLists();

@@ -46,7 +46,7 @@ export interface LoginSettings {
  * @description Get current login settings information
  * @returns Promise with login settings information
  */
-export const apiGetLoginSettings = (): Promise<LoginSettings> => {
+export const apiGetConsoleLoginSettings = (): Promise<LoginSettings> => {
     return useConsoleGet("/users/login-settings");
 };
 

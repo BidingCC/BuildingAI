@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { McpServerDetail } from "@buildingai/service/consoleapi/mcp-server";
 import {
-    apiCheckMcpServerConnect,
-    apiGetMcpServerDetail,
+    apiConsoleCheckMcpServerConnect,
+    apiConsoleGetMcpServerDetail,
 } from "@buildingai/service/consoleapi/mcp-server";
 
 const emits = defineEmits<{
@@ -59,7 +59,9 @@ const reconnecting = shallowRef(false);
 
 const { lockFn: fetchDetail, isLock: detailLoading } = useLockFn(async () => {
     try {
-        const data: McpServerDetail = await apiGetMcpServerDetail(mcpServerId.value as string);
+        const data: McpServerDetail = await apiConsoleGetMcpServerDetail(
+            mcpServerId.value as string,
+        );
         Object.keys(formData).forEach((key) => {
             const typedKey = key as keyof typeof formData;
             const value = data[typedKey as keyof McpServerDetail];
@@ -82,7 +84,7 @@ const { lockFn: fetchDetail, isLock: detailLoading } = useLockFn(async () => {
 
 const { lockFn: handleReconnect, isLock: reconnectLoading } = useLockFn(async () => {
     try {
-        const res = await apiCheckMcpServerConnect(formData.id);
+        const res = await apiConsoleCheckMcpServerConnect(formData.id);
         if (res.connectable) {
             toast.success(res.message);
             fetchDetail();

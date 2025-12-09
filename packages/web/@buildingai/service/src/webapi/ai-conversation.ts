@@ -411,7 +411,7 @@ export function apiGetAiConversation(
  * @param _mcpServers MCP servers (unused parameter)
  * @returns Promise with stream controller
  */
-export function apiChatStream(
+export function apiAgentChatStream(
     messages: AiMessage[] | any,
     config?: Partial<ChatStreamConfig>,
     _mcpServers?: string[],

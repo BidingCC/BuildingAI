@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { McpServerDetail } from "@buildingai/service/consoleapi/mcp-server";
-import { apiCheckMcpServerConnect } from "@buildingai/service/consoleapi/mcp-server";
+import { apiConsoleCheckMcpServerConnect } from "@buildingai/service/consoleapi/mcp-server";
 
 const props = withDefaults(
     defineProps<{
@@ -28,7 +28,7 @@ const connectable = shallowRef<boolean | "">("");
 const connectableError = shallowRef<string | undefined>("");
 
 const handleCheckConnect = async () => {
-    const res = await apiCheckMcpServerConnect(props.mcpServer.id);
+    const res = await apiConsoleCheckMcpServerConnect(props.mcpServer.id);
     connectable.value = res.connectable;
     connectableError.value = res.error;
 };

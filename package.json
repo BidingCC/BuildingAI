@@ -215,6 +215,56 @@
                     "vue-i18n": "9.1.9",
                     "@intlify/core-base": "9.1.9"
                 }
+            },
+            "@dcloudio/vite-plugin-uni@*": {
+                "dependencies": {
+                    "vite": "6.3.4"
+                }
+            },
+            "@uni-helper/plugin-uni@*": {
+                "dependencies": {
+                    "vite": "6.3.4"
+                }
+            },
+            "@uni-helper/vite-plugin-uni-components@*": {
+                "dependencies": {
+                    "vite": "6.3.4"
+                }
+            },
+            "@uni-helper/vite-plugin-uni-layouts@*": {
+                "dependencies": {
+                    "vite": "6.3.4"
+                }
+            },
+            "@uni-helper/vite-plugin-uni-manifest@*": {
+                "dependencies": {
+                    "vite": "6.3.4"
+                }
+            },
+            "@uni-helper/vite-plugin-uni-pages@*": {
+                "dependencies": {
+                    "vite": "6.3.4"
+                }
+            },
+            "@uni-ku/bundle-optimizer@*": {
+                "dependencies": {
+                    "vite": "6.3.4"
+                }
+            },
+            "vite-plugin-uni-polyfill@*": {
+                "dependencies": {
+                    "vite": "6.3.4"
+                }
+            },
+            "@buildingai/vite-plugins@*": {
+                "dependencies": {
+                    "vite": "6.3.4"
+                }
+            },
+            "unplugin-auto-import@*": {
+                "dependencies": {
+                    "vite": "6.3.4"
+                }
             }
         }
     },

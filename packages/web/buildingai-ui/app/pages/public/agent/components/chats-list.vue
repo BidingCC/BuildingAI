@@ -2,7 +2,7 @@
 import type { Agent } from "@buildingai/service/consoleapi/ai-agent";
 import type { PaginationResult } from "@buildingai/service/models/globals";
 import {
-    apiDeleteConversation,
+    apiDeleteAgentConversation,
     apiGetConversations,
     apiUpdateConversation,
 } from "@buildingai/service/webapi/ai-agent-publish";
@@ -192,7 +192,7 @@ const deleteConversation = async (conversation: AiConversation) => {
     if (!props.accessToken) return;
 
     try {
-        await apiDeleteConversation(props.publishToken, props.accessToken, conversation.id);
+        await apiDeleteAgentConversation(props.publishToken, props.accessToken, conversation.id);
         await refreshNuxtData(
             `public-agent-conversations-${props.publishToken}-${props.accessToken}`,
         );
