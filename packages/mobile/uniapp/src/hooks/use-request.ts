@@ -1,11 +1,22 @@
 import type { RequestOptions } from "@buildingai/types";
 
+import i18n from "@/i18n";
 import { useUserStore } from "@/stores/user";
 
 interface ApiResponse<T = unknown> {
     code: number;
     data: T;
     message?: string;
+}
+
+interface UploadResponse {
+    id?: string;
+    url: string;
+    originalName?: string;
+    size?: number;
+    type?: string;
+    extension?: string;
+    [key: string]: unknown;
 }
 
 const getBaseUrl = (): string => {
@@ -21,6 +32,35 @@ const getBaseUrl = (): string => {
 
 const WEB_PREFIX = import.meta.env.VITE_APP_WEB_API_PREFIX || "/api";
 const CONSOLE_PREFIX = import.meta.env.VITE_APP_CONSOLE_API_PREFIX || "/consoleapi";
+
+const handleHttpError = (status: number, errorMessage: string, errorPath = ""): Error => {
+    switch (status) {
+        case 400:
+            useToast().error(`${i18n.global.t("common.request.400")}: ${errorMessage}`);
+            return new Error(`${i18n.global.t("common.request.400")}: ${errorMessage}${errorPath}`);
+
+        case 401:
+            useToast().error(`${i18n.global.t("common.request.401")}: ${errorMessage}`);
+            useUserStore().toLogin();
+            return new Error(`${i18n.global.t("common.request.401")}: ${errorMessage}`);
+
+        case 403:
+            useToast().error(`${i18n.global.t("common.request.403")}: ${errorMessage}`);
+            return new Error(`${i18n.global.t("common.request.403")}: ${errorMessage}${errorPath}`);
+
+        case 404:
+            useToast().error(`${i18n.global.t("common.request.404")}: ${errorMessage}${errorPath}`);
+            return new Error(`${i18n.global.t("common.request.404")}: ${errorMessage}${errorPath}`);
+
+        case 500:
+            useToast().error(`${i18n.global.t("common.request.500")}: ${errorMessage}${errorPath}`);
+            return new Error(`${i18n.global.t("common.request.500")}: ${errorMessage}${errorPath}`);
+
+        default:
+            useToast().error(errorMessage + errorPath);
+            return new Error(`HTTP Error ${status}: ${errorMessage}${errorPath}`);
+    }
+};
 
 async function request<T = unknown>(
     method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH",
@@ -63,29 +103,31 @@ async function request<T = unknown>(
         uni.request({
             ...requestParams,
             success: (res) => {
-                if (!options?.skipBusinessCheck) {
-                    const response = res.data as ApiResponse<T>;
-                    if (response.code > 300 && response.code < 200) {
-                        const error = new Error(response.message || "请求失败");
-                        if (options?.onError) {
-                            options.onError(error);
+                if (res.statusCode >= 200 && res.statusCode < 300) {
+                    if (!options?.skipBusinessCheck) {
+                        const response = res.data as ApiResponse<T>;
+                        if (options?.returnFullResponse) {
+                            resolve(res.data as T);
+                        } else {
+                            resolve(response.data);
                         }
-                        reject(error);
-                        return;
-                    }
-
-                    if (options?.returnFullResponse) {
-                        resolve(res.data as T);
                     } else {
-                        resolve(response.data);
+                        resolve(res.data as T);
                     }
                 } else {
-                    resolve(res.data as T);
+                    const errorMessage =
+                        (res.data as ApiResponse<T>)?.message ||
+                        i18n.global.t("common.requestFailed");
+                    const error = handleHttpError(res.statusCode, errorMessage, url);
+                    if (options?.onError) {
+                        options.onError(error);
+                    }
+                    reject(error);
                 }
             },
             fail: (err) => {
                 console.log("error", err);
-                const error = new Error(err.errMsg || "请求失败");
+                const error = new Error(err.errMsg || i18n.global.t("common.requestFailed"));
                 if (options?.onError) {
                     options.onError(error);
                 }
@@ -197,5 +239,202 @@ export const useConsolePatch = <T = unknown>(
     return request<T>("PATCH", url, CONSOLE_PREFIX, undefined, data, {
         requireAuth: true,
         ...options,
+    });
+};
+
+/**
+ * @example
+ * ```typescript
+ * const uploadTask = useUpload({
+ *   data: { file: fileObject, extensionId: 'xxx' },
+ *   success: (res) => {
+ *     console.log('Upload success:', res);
+ *   },
+ *   fail: (errMsg) => {
+ *     console.error('Upload failed:', errMsg);
+ *   }
+ * });
+ *
+ * uploadTask.onProgressUpdate((res) => {
+ *   console.log('Progress:', res.progress);
+ *   console.log('Total bytes:', res.totalBytesExpectedToSend);
+ *   console.log('Sent bytes:', res.totalBytesSent);
+ * });
+ * ```
+ */
+export const useUpload = <T = UploadResponse>(opts: {
+    data: { file: File | string; extensionId?: string; [key: string]: unknown };
+    success: (res: T) => void;
+    fail: (errMsg: string) => void;
+    complete?: () => void;
+}): UniApp.UploadTask => {
+    const { data, success, fail, complete } = opts;
+    const { file, ...formData } = data;
+
+    let fileInfo: { filePath?: string; file?: File };
+    if (typeof file === "string") {
+        fileInfo = { filePath: file };
+    } else {
+        fileInfo = { file };
+    }
+
+    const userStore = useUserStore();
+    const baseUrl = getBaseUrl();
+    const fullUrl = `${baseUrl}${WEB_PREFIX}/upload/files`;
+
+    return uni.uploadFile({
+        header: {
+            Authorization: userStore.token ? `Bearer ${userStore.token}` : "",
+        },
+        url: fullUrl,
+        name: "file",
+        timeout: 30000,
+        ...fileInfo,
+        formData,
+        success: (res) => {
+            if (res.statusCode >= 200 && res.statusCode < 300) {
+                try {
+                    const result = JSON.parse(res.data) as ApiResponse<T>;
+                    success(result.data);
+                    userStore.refreshToken();
+                } catch (error) {
+                    console.error("Parse upload response error:", error);
+                    const errorMsg = i18n.global.t("common.parseResponseFailed");
+                    useToast().error(errorMsg);
+                    fail(errorMsg);
+                }
+            } else {
+                try {
+                    const result = JSON.parse(res.data) as ApiResponse<T>;
+                    const errorMessage = result.message || i18n.global.t("common.uploadFailed");
+                    const error = handleHttpError(res.statusCode, errorMessage);
+                    fail(error.message);
+                } catch (_parseError) {
+                    const error = handleHttpError(
+                        res.statusCode,
+                        i18n.global.t("common.uploadFailed"),
+                    );
+                    fail(error.message);
+                }
+            }
+        },
+        fail: (err) => {
+            console.error("Upload error:", err);
+            const errorMsg = err.errMsg || i18n.global.t("common.uploadFailed");
+            useToast().error(errorMsg);
+            fail(errorMsg);
+        },
+        complete: () => {
+            complete?.();
+        },
+    });
+};
+
+/**
+ * @example
+ * ```typescript
+ * useDownloadFile({
+ *   type: 'image',
+ *   fileUrl: 'https://example.com/image.jpg',
+ *   success: (res) => {
+ *     console.log('Download success:', res);
+ *   },
+ *   fail: (errMsg) => {
+ *     console.error('Download failed:', errMsg);
+ *   }
+ * });
+ * ```
+ */
+export const useDownloadFile = (opts: {
+    type: "image" | "video";
+    fileUrl: string;
+    success: (res: unknown) => void;
+    fail: (errMsg: string) => void;
+    complete?: () => void;
+}): void => {
+    const { type, fileUrl, success, fail, complete } = opts;
+
+    if (fileUrl === "") {
+        const errorMsg = i18n.global.t("common.filePathEmpty");
+        useToast().error(errorMsg);
+        fail(errorMsg);
+        return;
+    }
+
+    uni.downloadFile({
+        url: fileUrl,
+        timeout: 30000,
+        success: (res) => {
+            if (res.statusCode >= 200 && res.statusCode < 300) {
+                const handler: Record<string, () => void> = {
+                    image: () => {
+                        uni.saveImageToPhotosAlbum({
+                            filePath: res.tempFilePath,
+                            success: (saveRes) => {
+                                useToast().success(i18n.global.t("common.savedToAlbum"));
+                                success(saveRes);
+                            },
+                            fail: (saveErr) => {
+                                if (
+                                    saveErr.errMsg ===
+                                    "saveImageToPhotosAlbum:fail invalid file type"
+                                ) {
+                                    useToast().error(i18n.global.t("common.downloadFormatError"));
+                                } else {
+                                    useToast().error(i18n.global.t("common.savePhotoFailed"));
+                                }
+                                fail(
+                                    `${i18n.global.t("common.savePhotoFailed")}: ${saveErr.errMsg}`,
+                                );
+                            },
+                        });
+                    },
+                    video: () => {
+                        uni.saveVideoToPhotosAlbum({
+                            filePath: res.tempFilePath,
+                            success: (saveRes) => {
+                                useToast().success(i18n.global.t("common.savedToAlbum"));
+                                success(saveRes);
+                            },
+                            fail: (saveErr) => {
+                                if (
+                                    saveErr.errMsg ===
+                                    "saveImageToPhotosAlbum:fail invalid file type"
+                                ) {
+                                    useToast().error(i18n.global.t("common.downloadFormatError"));
+                                } else {
+                                    useToast().error(i18n.global.t("common.saveVideoFailed"));
+                                }
+                                fail(
+                                    `${i18n.global.t("common.saveVideoFailed")}: ${saveErr.errMsg}`,
+                                );
+                            },
+                        });
+                    },
+                };
+
+                const downloadHandler = handler[type];
+                if (downloadHandler) {
+                    downloadHandler();
+                } else {
+                    fail(i18n.global.t("common.unsupportedFileType"));
+                }
+            } else {
+                const error = handleHttpError(
+                    res.statusCode,
+                    i18n.global.t("common.downloadFailed"),
+                );
+                fail(error.message);
+            }
+        },
+        fail: (err) => {
+            console.error("Download error:", err);
+            const errorMsg = typeof err !== "string" ? JSON.stringify(err) : err;
+            useToast().error(i18n.global.t("common.downloadFailed"));
+            fail(errorMsg);
+        },
+        complete: () => {
+            complete?.();
+        },
     });
 };
