@@ -22,7 +22,7 @@ const showLocalePicker = () => {
     uni.showActionSheet({
         itemList: locales.map((l) => l.label),
         success: (res) => {
-            setLocale(locales[res.tapIndex].value);
+            setLocale(locales[res.tapIndex ?? 0]?.value ?? "en");
             updateTabBarTitles(t);
         },
     });

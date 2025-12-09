@@ -1,12 +1,334 @@
-.button {
-    text-align: center;
-    line-height: 1;
-    font-size: 14px;
-    font-weight: 500;
-    padding: 10px 20px;
-    border-radius: 5px;
-    border: 1px solid var(--border);
-    background-color: var(--background);
-    color: var(--foreground);
-    cursor: pointer;
+:root,
+page {
+    --ui-form: 41 41 41;
+    --ui-form-muted: 62 62 62;
+    --ui-form-bold: 33 33 34;
+
+    --ui-form-height: 108rpx;
+    --ui-form-height-mini: 88rpx;
+    --ui-font: 1rem;
+    --ui-font-mini: 0.875rem;
+
+    --ui-padding: 1rem;
+    --ui-radius: 28rpx;
+    --ui-border-animation: border 0.1s ease;
+    --ui-font-base: 1rem;
+    --ui-font-mini: 0.875rem;
+    --ui-clear-icon-color: #c0c4cc;
+    --ui-safe-area-bottom: env(safe-area-inset-bottom);
+    --ui-safe-area-tabbar: calc(env(safe-area-inset-bottom) + 50px);
+    --button-default: #383838;
 }
+
+/* Button Styles */
+button {
+    border-radius: 36rpx !important;
+    height: var(--ui-form-height);
+    line-height: var(--ui-form-height) !important;
+    box-sizing: border-box;
+    font-size: var(--ui-font) !important;
+    white-space: nowrap;
+    word-break: keep-all;
+    overflow: hidden;
+    width: 100%;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    border: none;
+}
+
+uni-button::after,
+button::after {
+    border: none !important;
+}
+
+button[size="mini"] {
+    height: 80rpx;
+    line-height: 80rpx !important;
+    font-size: var(--ui-font-mini) !important;
+}
+
+button[rounded-full=""],
+button.rounded-full {
+    border-radius: 9999px !important;
+}
+
+/* 默认按钮 */
+button,
+button[type="default"] {
+    color: var(--foreground) !important;
+    background: linear-gradient(98deg, var(--neutral-200) 0%, var(--neutral-300) 100%);
+}
+
+.dark button,
+.dark button[type="default"] {
+    color: var(--foreground) !important;
+    background: linear-gradient(98deg, var(--neutral-700) 0%, var(--neutral-800) 100%);
+}
+
+button:not([disabled]):not([loading]):active,
+button[type="default"]:not([disabled]):not([loading]):active {
+    background: linear-gradient(98deg, var(--neutral-300) 0%, var(--neutral-400) 100%);
+}
+
+.dark button:not([disabled]):not([loading]):active,
+.dark button[type="default"]:not([disabled]):not([loading]):active {
+    background: linear-gradient(98deg, var(--neutral-800) 0%, var(--neutral-900) 100%);
+}
+
+button[disabled][type="default"],
+button[disabled]:not([type]) {
+    color: var(--neutral-400) !important;
+    background: linear-gradient(98deg, var(--neutral-200) 0%, var(--neutral-300) 100%);
+}
+
+/* 彩色按钮通用样式 - 正常状态 */
+button[type="primary"] {
+    background: linear-gradient(98deg, var(--primary-500) 0%, var(--primary-700) 100%);
+    color: #fff !important;
+}
+
+button[type="success"] {
+    background: linear-gradient(98deg, var(--success-500) 0%, var(--success-600) 100%);
+    color: #fff !important;
+}
+
+button[type="info"] {
+    background: linear-gradient(98deg, var(--info-500) 0%, var(--info-600) 100%);
+    color: #fff !important;
+}
+
+button[type="warn"] {
+    background: linear-gradient(98deg, var(--warning-500) 0%, var(--warning-600) 100%);
+    color: #fff !important;
+}
+
+button[type="error"] {
+    background: linear-gradient(98deg, var(--error-500) 0%, var(--error-600) 100%);
+    color: #fff !important;
+}
+
+/* 彩色按钮通用样式 - 激活状态 */
+button[type="primary"]:not([disabled]):not([loading]):active {
+    background: linear-gradient(98deg, var(--primary-600) 0%, var(--primary-800) 100%);
+}
+
+button[type="success"]:not([disabled]):not([loading]):active {
+    background: linear-gradient(98deg, var(--success-600) 0%, var(--success-700) 100%);
+}
+
+button[type="info"]:not([disabled]):not([loading]):active {
+    background: linear-gradient(98deg, var(--info-600) 0%, var(--info-700) 100%);
+}
+
+button[type="warn"]:not([disabled]):not([loading]):active {
+    background: linear-gradient(98deg, var(--warning-600) 0%, var(--warning-700) 100%);
+}
+
+button[type="error"]:not([disabled]):not([loading]):active {
+    background: linear-gradient(98deg, var(--error-600) 0%, var(--error-700) 100%);
+}
+
+/* 彩色按钮通用样式 - 禁用状态 */
+button[disabled][type="primary"],
+button[disabled][type="success"],
+button[disabled][type="info"],
+button[disabled][type="warn"],
+button[disabled][type="error"] {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+button[disabled][type="primary"] {
+    background: linear-gradient(98deg, var(--primary-400) 0%, var(--primary-600) 100%);
+}
+
+button[disabled][type="success"] {
+    background: linear-gradient(98deg, var(--success-400) 0%, var(--success-500) 100%);
+}
+
+button[disabled][type="info"] {
+    background: linear-gradient(98deg, var(--info-400) 0%, var(--info-500) 100%);
+}
+
+button[disabled][type="warn"] {
+    background: linear-gradient(98deg, var(--warning-400) 0%, var(--warning-500) 100%);
+}
+
+button[disabled][type="error"] {
+    background: linear-gradient(98deg, var(--error-400) 0%, var(--error-500) 100%);
+}
+
+/* Plain 按钮通用样式 */
+button[plain],
+button[type="default"][plain] {
+    background: transparent !important;
+    border: 1px solid var(--neutral-400);
+}
+
+.dark button[plain],
+.dark button[type="default"][plain] {
+    border: 1px solid var(--neutral-600);
+}
+
+button[plain]:not([disabled]):not([loading]):active,
+button[type="default"][plain]:not([disabled]):not([loading]):active {
+    background: linear-gradient(
+        98deg,
+        rgba(56, 56, 56, 0.4) 0%,
+        rgba(56, 56, 56, 0.4) 100%
+    ) !important;
+}
+
+button[type="primary"][plain],
+button[type="success"][plain],
+button[type="info"][plain],
+button[type="warn"][plain],
+button[type="error"][plain] {
+    background: transparent !important;
+}
+
+button[type="primary"][plain] {
+    color: var(--primary-600) !important;
+    border: 1px solid var(--primary-600) !important;
+}
+
+button[type="success"][plain] {
+    color: var(--success-600) !important;
+    border: 1px solid var(--success-600) !important;
+}
+
+button[type="info"][plain] {
+    color: var(--info-600) !important;
+    border: 1px solid var(--info-600) !important;
+}
+
+button[type="warn"][plain] {
+    color: var(--warning-600) !important;
+    border: 1px solid var(--warning-600) !important;
+}
+
+button[type="error"][plain] {
+    color: var(--error-600) !important;
+    border: 1px solid var(--error-600) !important;
+}
+
+button[type="primary"][plain]:not([disabled]):not([loading]):active,
+button[type="success"][plain]:not([disabled]):not([loading]):active,
+button[type="info"][plain]:not([disabled]):not([loading]):active,
+button[type="warn"][plain]:not([disabled]):not([loading]):active,
+button[type="error"][plain]:not([disabled]):not([loading]):active {
+    background: var(--neutral-200) !important;
+    opacity: 0.8;
+}
+.dark button[type="primary"][plain]:not([disabled]):not([loading]):active,
+.dark button[type="success"][plain]:not([disabled]):not([loading]):active,
+.dark button[type="info"][plain]:not([disabled]):not([loading]):active,
+.dark button[type="warn"][plain]:not([disabled]):not([loading]):active,
+.dark button[type="error"][plain]:not([disabled]):not([loading]):active {
+    background: var(--neutral-800) !important;
+}
+/* Button Styles */
+
+/* Picker Styles */
+.uni-picker-container .uni-picker-custom {
+    background-color: var(--background);
+    border-radius: 1.25rem 1.25rem 0 0;
+}
+.uni-picker-container .uni-mask,
+.uni-picker-container .uni-picker-mask {
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+}
+
+uni-app .uni-picker-container .uni-picker-header {
+    height: 100rpx;
+    line-height: 100rpx;
+}
+uni-app .uni-picker-container .uni-picker-header::after {
+    border: 0;
+}
+uni-app .uni-picker-container .uni-picker-header .uni-picker-action-cancel {
+    color: var(--foreground);
+}
+uni-app .uni-picker-container .uni-picker-header .uni-picker-action-confirm {
+    color: var(--primary);
+}
+uni-app .uni-picker-container .uni-picker-header .uni-picker-action-cancel,
+uni-app .uni-picker-container .uni-picker-header .uni-picker-action-confirm {
+    line-height: 100rpx;
+    padding: 0 32rpx;
+}
+/* Picker Styles */
+
+/* Modal Styles */
+uni-modal .uni-mask {
+    background: rgba(0, 0, 0, 0.5) !important;
+    backdrop-filter: blur(8px) !important;
+}
+uni-modal .uni-modal {
+    background-color: var(--background);
+    border-radius: 1rem;
+    /* 确保居中定位 */
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+uni-modal .uni-modal .uni-modal__hd {
+    padding: 1.3em 1.6em 0em;
+}
+uni-modal .uni-modal .uni-modal__bd {
+    padding: 1.6rem 1.6em 1.6rem;
+}
+uni-modal .uni-modal .uni-modal__ft {
+    padding: 1rem;
+    gap: 1rem;
+}
+uni-modal .uni-modal .uni-modal__btn::after,
+uni-modal .uni-modal .uni-modal__ft::after {
+    border: 0;
+}
+uni-modal .uni-modal .uni-modal__btn {
+    border-radius: 36rpx !important;
+    height: 80rpx;
+    line-height: 80rpx;
+    font-size: var(--ui-font-mini);
+}
+uni-modal .uni-modal .uni-modal__btn_default {
+    color: var(--foreground) !important;
+    background: linear-gradient(98deg, var(--neutral-200) 0%, var(--neutral-300) 100%);
+}
+uni-modal .uni-modal .uni-modal__btn_primary {
+    color: var(--background) !important;
+    background: linear-gradient(98deg, var(--primary-500) 0%, var(--primary-700) 100%);
+}
+
+/* Transition Styles - 将 fade 动画改为 zoom 动画 */
+.uni-fade-enter-active .uni-modal,
+.uni-fade-leave-active .uni-modal {
+    transition:
+        transform 0.3s ease,
+        opacity 0.3s ease;
+}
+
+.uni-fade-enter-from .uni-modal {
+    transform: translate(-50%, -50%) scale(0.8) !important;
+    opacity: 0;
+}
+
+.uni-fade-enter-to .uni-modal {
+    transform: translate(-50%, -50%) scale(1) !important;
+    opacity: 1;
+}
+
+.uni-fade-leave-from .uni-modal {
+    transform: translate(-50%, -50%) scale(1) !important;
+    opacity: 1;
+}
+
+.uni-fade-leave-to .uni-modal {
+    transform: translate(-50%, -50%) scale(0.8) !important;
+    opacity: 0;
+}
+/* Modal Styles */
