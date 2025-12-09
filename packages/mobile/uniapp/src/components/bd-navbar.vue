@@ -8,6 +8,7 @@ interface Props {
     fixed?: boolean;
     placeholder?: boolean;
     border?: boolean;
+    filter?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -19,6 +20,7 @@ const props = withDefaults(defineProps<Props>(), {
     fixed: true,
     placeholder: true,
     border: false,
+    filter: "",
 });
 
 const emit = defineEmits<{
@@ -30,10 +32,16 @@ const statusBarHeight = ref(0);
 const navBarHeight = ref(44);
 const menuButtonInfo = ref({ width: 0, height: 0, top: 0, right: 0 });
 
-const navbarStyle = computed(() => ({
-    backgroundColor: props.bgColor,
-    paddingTop: `${statusBarHeight.value}px`,
-}));
+const navbarStyle = computed(() => {
+    const style: Record<string, string> = {
+        background: props.bgColor,
+        paddingTop: `${statusBarHeight.value}px`,
+    };
+    if (props.filter) {
+        style.backdropFilter = props.filter;
+    }
+    return style;
+});
 
 const navbarContentStyle = computed(() => ({
     height: `${navBarHeight.value}px`,
@@ -42,7 +50,7 @@ const navbarContentStyle = computed(() => ({
 const capsuleStyle = computed(() => ({
     height: `${menuButtonInfo.value.height || 32}px`,
     borderColor: props.textColor === "#ffffff" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.15)",
-    backgroundColor: props.textColor === "#ffffff" ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.05)",
+    background: props.textColor === "#ffffff" ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.05)",
 }));
 
 const titleStyle = computed(() => ({
@@ -146,7 +154,7 @@ function handleHome() {
                         <view
                             v-if="showBack && canGoBack && showHome"
                             class="bd-navbar__capsule-divider"
-                            :style="{ backgroundColor: capsuleStyle.borderColor }"
+                            :style="{ background: capsuleStyle.borderColor }"
                         />
                         <view v-if="showHome" class="bd-navbar__capsule-btn" @tap="handleHome">
                             <text

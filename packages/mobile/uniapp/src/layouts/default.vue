@@ -14,7 +14,7 @@ updateTabBarTitles(t);
 <template>
     <view class="app flex h-full flex-col" :class="{ dark: isDark }">
         <slot name="header">
-            <bd-navbar :title="t(title)" :show-back="true" :show-home="true" />
+            <bd-navbar :title="t(title)" :show-back="true" :show-home="true" filter="blur(4px)" />
         </slot>
         <slot />
     </view>
