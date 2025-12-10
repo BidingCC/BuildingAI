@@ -1,4 +1,11 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+definePage({
+    style: {
+        navigationBarTitle: "pages.register",
+        auth: false,
+    },
+});
+</script>
 
 <template>
     <div>

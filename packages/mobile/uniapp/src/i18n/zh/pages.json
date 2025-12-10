@@ -1,5 +1,7 @@
 {
     "apps": "应用",
     "chat": "对话",
-    "user": "用户"
+    "user": "用户",
+    "login": "登录",
+    "register": "注册"
 }

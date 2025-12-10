@@ -1,7 +1,154 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { LoginMethod } from "@buildingai/service/consoleapi/login-settings";
+import type { LoginResponse, SystemLoginAccountParams } from "@buildingai/service/webapi/user";
+
+import BdModal from "@/components/bd-modal.vue";
+import Agreement from "@/components/login/agreement.vue";
+import LoginAccount from "@/components/login/login-account.vue";
+import LoginWeixin from "@/components/login/login-weixin.vue";
+import WebsiteInfo from "@/components/login/website-info.vue";
+import { apiAuthLogin } from "@/service/user";
+import { isH5, isWechatOa } from "@/utils/env";
+
+definePage({
+    style: {
+        navigationBarTitle: "pages.login",
+        auth: false,
+    },
+});
+
+const appStore = useAppStore();
+const toast = useToast();
+const userStore = useUserStore();
+
+const modalRef = ref<InstanceType<typeof BdModal> | null>(null);
+// 默认登录方式(处理不同平台登录方式的差异)
+const defaultLoginMethod = computed(() => {
+    if (
+        isH5 &&
+        isWechatOa &&
+        loginSettings.value?.allowedLoginMethods.includes(LoginMethod.WEIXIN)
+    ) {
+        return LoginMethod.WEIXIN;
+    }
+    return LoginMethod.ACCOUNT;
+});
+// 当前登录方式
+const currentLoginMethod = shallowRef(defaultLoginMethod.value);
+// 是否同意隐私协议及用户协议
+const checked = shallowRef<boolean>(false);
+// 微信小程序获取手机号
+const wxMpPhoneNumber = shallowRef<GetPhoneNumberEvent["detail"]>();
+// 账号登录参数
+const accountLoginParams = shallowRef<SystemLoginAccountParams>();
+
+const loginSettings = computed(() => appStore.loginSettings);
+
+const handleLoginPreset = async (
+    e: GetPhoneNumberEvent["detail"] | SystemLoginAccountParams | undefined,
+) => {
+    // 小程序获取手机号
+    if (e && "iv" in e && "encryptedData" in e) {
+        wxMpPhoneNumber.value = e;
+    }
+
+    // 账号登录信息
+    if (e && "username" in e && "password" in e) {
+        accountLoginParams.value = e;
+    }
+
+    if (!checked.value) {
+        modalRef.value?.open();
+        return;
+    } else {
+        handleLogin();
+    }
+};
+
+const handleAccountLogin = async () => {
+    try {
+        const data = unref(accountLoginParams);
+        loginResult(await apiAuthLogin(data));
+    } catch (error) {
+        console.log("AccountLogin error", error);
+    }
+    //
+};
+
+const handleLogin = async () => {
+    const method = unref(currentLoginMethod);
+    toast.loading("登录中");
+    if (!checked.value) checked.value = true;
+    if (method === LoginMethod.WEIXIN) {
+        // const { code } = await uni.login({ provider: "weixin" });
+        // console.log("code", code);
+        // // 调用微信登录接口
+        // // wxMpPhoneNumber 手机号获取加密的相关，这边需要看看接口怎么设计的
+    }
+    if (method === LoginMethod.ACCOUNT) {
+        handleAccountLogin();
+    }
+};
+
+const loginResult = (res: LoginResponse) => {
+    toast.clear();
+    userStore.login(res.token);
+};
+</script>
 
 <template>
-    <div>
-        <view class="dark:text-primary text-center text-2xl font-bold text-black">login</view>
-    </div>
+    <view class="flex h-[calc(100vh-112px)] flex-col items-center justify-center px-8">
+        <!-- 网站信息 -->
+        <WebsiteInfo class="mb-4" />
+        <!-- 微信登录 -->
+        <template v-if="(!isH5 || isWechatOa) && currentLoginMethod === LoginMethod.WEIXIN">
+            <LoginWeixin class="mt-14 w-full" @getPhoneNumber="handleLoginPreset" />
+        </template>
+        <!-- 账号登录 -->
+        <template v-else-if="currentLoginMethod === LoginMethod.ACCOUNT">
+            <LoginAccount class="mt-14 w-full" @login="handleLoginPreset" />
+        </template>
+        <!-- 隐私协议及用户协议 -->
+        <Agreement v-if="loginSettings?.showPolicyAgreement" class="mt-4" v-model="checked" />
+        <!-- 其他登录方式 -->
+        <BdSeparator
+            v-if="
+                (currentLoginMethod === LoginMethod.ACCOUNT && !isH5 && isWechatOa) ||
+                currentLoginMethod === LoginMethod.WEIXIN
+            "
+            text="其他登录方式"
+            margin="30px 0"
+        />
+        <view flex="~ col gap-2" w="full">
+            <button
+                v-if="currentLoginMethod === LoginMethod.ACCOUNT && !isH5 && isWechatOa"
+                size="mini"
+                type="default"
+                plain
+                @click="currentLoginMethod = LoginMethod.WEIXIN"
+            >
+                <view i-tabler-brand-wechat />
+                继续使用微信登录
+            </button>
+            <button
+                v-if="currentLoginMethod === LoginMethod.WEIXIN"
+                size="mini"
+                type="default"
+                plain
+                @click="currentLoginMethod = LoginMethod.ACCOUNT"
+            >
+                <view i-tabler-lock />
+                继续使用账号登录
+            </button>
+        </view>
+        <!-- 隐私协议及用户协议模态框 -->
+        <BdModal ref="modalRef" title="服务协议及隐私保护" @confirm="handleLogin">
+            <view class="px-2 py-4">
+                <text>确认即表示你已阅读并同意BuildingAI的</text>
+                <text class="text-primary">用户协议</text>
+                <text>和</text>
+                <text class="text-primary">隐私政策</text>
+            </view>
+        </BdModal>
+    </view>
 </template>

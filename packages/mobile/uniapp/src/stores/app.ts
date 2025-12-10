@@ -6,12 +6,11 @@
  * @author BuildingAI Teams
  */
 
+import type { LoginSettings } from "@buildingai/service/consoleapi/login-settings";
+import type { SiteConfig } from "@buildingai/service/consoleapi/website";
 import { defineStore } from "pinia";
 
-import type { SystemInfo } from "@/service";
-import type { LoginSettings, SiteConfig } from "@/service";
-import { apiGetSystemInfo } from "@/service";
-import { apiGetLoginSettings, apiGetSiteConfig } from "@/service";
+import { apiGetLoginSettings, apiGetSiteConfig } from "@/service/common";
 
 /**
  * Application store
@@ -25,7 +24,6 @@ const appStore = defineStore("app", () => {
         defaultLoginWay: 1,
     });
     const loginSettings = ref<LoginSettings | null>(null);
-    const systemInfo = ref<SystemInfo | null>(null);
 
     /**
      * Get site configuration
@@ -58,55 +56,6 @@ const appStore = defineStore("app", () => {
     };
 
     /**
-     * Get system information
-     * @description Fetch and cache system information from API
-     * @returns Promise with system information or null if failed
-     */
-    const getSystemInfo = async () => {
-        try {
-            systemInfo.value = await apiGetSystemInfo();
-            return systemInfo.value;
-        } catch (error) {
-            console.error("Failed to get system information:", error);
-            return null;
-        }
-    };
-
-    /**
-     * Check system initialization and return redirect path if needed
-     * @description Check if system is initialized and handle route redirection logic
-     * @param path Current route path
-     * @returns Redirect path if needed, null otherwise. Throws error if system info fetch fails.
-     */
-    const checkSystemInitialization = async (path: string): Promise<string | null> => {
-        // Normalize path by removing trailing slash for comparison
-        const normalizedPath = path.replace(/\/$/, "") || "/";
-        const isInstallPage = normalizedPath === "/install";
-
-        // If system info is not loaded, fetch it first
-        if (!systemInfo.value) {
-            const info = await getSystemInfo();
-            if (!info) {
-                // If API call fails, it might be because system is not initialized or network issue
-                // Return a special value to indicate error, let middleware handle it
-                throw new Error("Failed to get system information");
-            }
-        }
-
-        // If system is already initialized and user is trying to access install page, redirect to home
-        if (systemInfo.value?.isInitialized && isInstallPage) {
-            return "/";
-        }
-
-        // If system is not initialized and user is not on install page, redirect to install page
-        if (!systemInfo.value?.isInitialized && !isInstallPage) {
-            return "/install";
-        }
-
-        return null;
-    };
-
-    /**
      * Get image URL
      * @description Process image URL conversion, supports relative path to absolute path conversion
      * @param imageUrl Original image URL
@@ -135,13 +84,10 @@ const appStore = defineStore("app", () => {
         siteConfig,
         loginWay,
         loginSettings,
-        systemInfo,
 
         getConfig,
         getImageUrl,
         getLoginSettings,
-        getSystemInfo,
-        checkSystemInitialization,
     };
 });
 /**

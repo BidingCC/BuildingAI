@@ -6,11 +6,13 @@
  * @author BuildingAI Teams
  */
 
-import { ROUTES, STORAGE_KEYS } from "@buildingai/constants/web";
+import { STORAGE_KEYS } from "@buildingai/constants/web";
 import type { UserInfo } from "@buildingai/service/webapi/user";
-import { apiGetCurrentUserInfo } from "@buildingai/service/webapi/user";
+import { useQuery } from "@uni-helper/uni-use";
 import { defineStore } from "pinia";
 import { computed, shallowRef } from "vue";
+
+import { apiGetCurrentUserInfo } from "@/service/user";
 
 /**
  * User authentication store
@@ -48,7 +50,7 @@ const userStore = defineStore("auth", () => {
     const login = async (newToken: string) => {
         // const route = useRoute();
         if (!newToken) {
-            // useMessage().error("Login error, please try again");
+            useToast().error("Login error, please try again");
             return;
         }
         setToken(newToken);
@@ -56,28 +58,21 @@ const userStore = defineStore("auth", () => {
         await nextTick();
         getUser();
 
-        // const params = route.query as Record<string, string>;
-        // const redirectUrl = params.redirect;
+        const { value: redirect } = useQuery("redirect");
 
-        // if (!redirectUrl || redirectUrl === ROUTES.HOME || redirectUrl === ROUTES.LOGIN) {
-        // return reloadNuxtApp({
-        //     ttl: 100,
-        //     path: ROUTES.HOME,
-        // });
-        // }
+        console.log("redirect", redirect);
 
-        // Parse redirect URL, support URLs with query parameters
-        // const redirectParts = redirectUrl.split("?");
-        // const redirectPath = redirectParts[0];
+        if (
+            !redirect.value ||
+            redirect.value === "/pages/index/index" ||
+            redirect.value === "/pages/login/index"
+        ) {
+            return uni.reLaunch({
+                url: "/pages/index/index",
+            });
+        }
 
-        // if (route.path === redirectPath) {
-        //     return reloadNuxtApp({
-        //         ttl: 100,
-        //         path: redirectUrl,
-        //     });
-        // } else {
-        //     return navigateTo(redirectUrl, { replace: true });
-        // }
+        uni.navigateBack();
     };
 
     /**

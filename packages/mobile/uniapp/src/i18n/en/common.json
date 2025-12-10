@@ -57,6 +57,23 @@
     "clearCache": "Clear Cache",
     "update": "Update",
     "checkUpdate": "Check Update",
-    "latestVersion": "Already Latest Version"
+    "latestVersion": "Already Latest Version",
+    "request": {
+        "400": "Bad Request 400",
+        "401": "Unauthorized 401",
+        "403": "Forbidden 403",
+        "404": "Not Found 404",
+        "500": "Internal Server Error 500"
+    },
+    "requestFailed": "Request failed",
+    "parseResponseFailed": "Failed to parse response",
+    "uploadFailed": "Upload failed",
+    "downloadFailed": "Download failed",
+    "filePathEmpty": "File path is empty",
+    "savedToAlbum": "Saved to album",
+    "downloadFormatError": "Download format error",
+    "savePhotoFailed": "Failed to save photo",
+    "saveVideoFailed": "Failed to save video",
+    "unsupportedFileType": "Unsupported file type"
 }
 

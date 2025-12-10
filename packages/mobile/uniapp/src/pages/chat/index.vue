@@ -6,8 +6,9 @@ const { t, currentLocale, currentLocaleLabel, locales, setLocale } = useLocale()
 definePage({
     style: {
         navigationBarTitle: "pages.chat",
+        auth: false,
     },
-    middleware: ["auth"],
+    // middleware: ["auth"],
 });
 
 const router = useRouter();

@@ -57,5 +57,22 @@
     "clearCache": "清除缓存",
     "update": "更新",
     "checkUpdate": "检查更新",
-    "latestVersion": "已是最新版本"
+    "latestVersion": "已是最新版本",
+    "request": {
+        "400": "错误请求400",
+        "401": "未授权401",
+        "403": "禁止访问403",
+        "404": "未找到404",
+        "500": "服务器错误500"
+    },
+    "requestFailed": "请求失败",
+    "parseResponseFailed": "解析响应失败",
+    "uploadFailed": "上传失败",
+    "downloadFailed": "下载失败",
+    "filePathEmpty": "文件路径为空",
+    "savedToAlbum": "已保存到相册",
+    "downloadFormatError": "下载格式错误",
+    "savePhotoFailed": "保存照片失败",
+    "saveVideoFailed": "保存视频失败",
+    "unsupportedFileType": "不支持的文件类型"
 }

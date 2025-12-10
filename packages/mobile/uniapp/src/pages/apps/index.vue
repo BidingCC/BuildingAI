@@ -15,6 +15,7 @@ const toast = useToast();
 definePage({
     style: {
         navigationBarTitle: "pages.apps",
+        auth: false,
     },
 });
 

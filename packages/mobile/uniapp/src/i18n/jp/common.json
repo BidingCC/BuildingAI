@@ -57,5 +57,22 @@
     "clearCache": "キャッシュクリア",
     "update": "更新",
     "checkUpdate": "アップデート確認",
-    "latestVersion": "最新バージョンです"
+    "latestVersion": "最新バージョンです",
+    "request": {
+        "400": "エラーリクエスト400",
+        "401": "認証失敗401",
+        "403": "アクセス禁止403",
+        "404": "見つかりません404",
+        "500": "サーバーエラー500"
+    },
+    "requestFailed": "リクエスト失敗",
+    "parseResponseFailed": "レスポンス解析失敗",
+    "uploadFailed": "アップロード失敗",
+    "downloadFailed": "ダウンロード失敗",
+    "filePathEmpty": "ファイルパスが空です",
+    "savedToAlbum": "アルバムに保存しました",
+    "downloadFormatError": "ダウンロード形式エラー",
+    "savePhotoFailed": "写真の保存に失敗しました",
+    "saveVideoFailed": "動画の保存に失敗しました",
+    "unsupportedFileType": "サポートされていないファイルタイプ"
 }

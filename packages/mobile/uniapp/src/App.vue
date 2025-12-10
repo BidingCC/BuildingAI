@@ -1,11 +1,17 @@
 <script setup lang="ts">
-onLaunch((options) => {
-    console.log("App Launch", options);
+const appStore = useAppStore();
+
+onLaunch(async () => {
+    console.log("App Launch");
+    await appStore.getConfig();
+    await appStore.getLoginSettings();
 });
-onShow(() => {
+
+onShow(async () => {
     console.log("App Show");
 });
-onHide(() => {
+
+onHide(async () => {
     console.log("App Hide");
 });
 </script>
