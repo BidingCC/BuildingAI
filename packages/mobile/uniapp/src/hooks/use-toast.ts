@@ -36,10 +36,15 @@ export function useToast(message?: string, options?: Omit<UniApp.ShowToastOption
         _toast(msg, "loading", opts);
     };
 
+    const clear = () => {
+        uni.hideToast();
+    };
+
     return {
         success,
         error,
         exception,
         loading,
+        clear,
     };
 }
