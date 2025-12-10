@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import type { UniPopupInstance } from "@uni-helper/uni-ui-types";
+import type {
+    UniCountdownInstance,
+    UniFormsInstance,
+    UniPopupInstance,
+} from "@uni-helper/uni-ui-types";
 
 definePage({
     style: {
