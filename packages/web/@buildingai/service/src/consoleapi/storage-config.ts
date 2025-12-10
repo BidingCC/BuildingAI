@@ -1,16 +1,16 @@
 import type {
-    StorageConfigData,
+    StorageConfigMap,
     StorageTypeType,
 } from "@buildingai/constants/shared/storage-config.constant";
 import { StorageType } from "@buildingai/constants/shared/storage-config.constant";
-export { StorageType, type StorageTypeType };
+export { StorageType };
 
-export interface StorageConfig {
+export interface StorageConfig<T extends StorageTypeType = StorageTypeType> {
     id: string;
     name: string;
     isActive: boolean;
     storageType: StorageTypeType;
-    config: StorageConfigData;
+    config: StorageConfigMap[T];
 }
 
 export type StorageConfigTableData = StorageConfig;
