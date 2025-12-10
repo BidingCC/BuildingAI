@@ -1,0 +1,107 @@
+{
+  "id": "uni-easyinput",
+  "displayName": "uni-easyinput 增强输入框",
+  "version": "1.1.22",
+  "description": "Easyinput 组件是对原生input组件的增强",
+  "keywords": [
+    "uni-ui",
+    "uniui",
+    "input",
+    "uni-easyinput",
+    "输入框"
+],
+  "repository": "https://github.com/dcloudio/uni-ui",
+  "engines": {
+    "HBuilderX": "",
+    "uni-app": "^4.07",
+    "uni-app-x": ""
+  },
+  "directories": {
+    "example": "../../temps/example_temps"
+  },
+  "dcloudext": {
+    "sale": {
+      "regular": {
+        "price": "0.00"
+      },
+      "sourcecode": {
+        "price": "0.00"
+      }
+    },
+    "contact": {
+      "qq": ""
+    },
+    "declaration": {
+      "ads": "无",
+      "data": "无",
+      "permissions": "无"
+    },
+    "npmurl": "https://www.npmjs.com/package/@dcloudio/uni-ui",
+    "type": "component-vue",
+    "darkmode": "x",
+    "i18n": "x",
+    "widescreen": "x"
+  },
+  "uni_modules": {
+    "dependencies": [
+      "uni-scss",
+      "uni-icons"
+    ],
+    "encrypt": [],
+    "platforms": {
+      "cloud": {
+        "tcb": "x",
+        "aliyun": "x",
+        "alipay": "x"
+      },
+      "client": {
+        "uni-app": {
+          "vue": {
+            "vue2": "√",
+            "vue3": "√"
+          },
+          "web": {
+            "safari": "√",
+            "chrome": "√"
+          },
+          "app": {
+            "vue": "√",
+            "nvue": "-",
+            "android": "√",
+            "ios": "√",
+            "harmony": "√"
+          },
+          "mp": {
+            "weixin": "√",
+            "alipay": "√",
+            "toutiao": "√",
+            "baidu": "√",
+            "kuaishou": "√",
+            "jd": "√",
+            "harmony": "√",
+            "qq": "√",
+            "lark": "-"
+          },
+          "quickapp": {
+            "huawei": "-",
+            "union": "-"
+          }
+        },
+        "uni-app-x": {
+          "web": {
+            "safari": "-",
+            "chrome": "-"
+          },
+          "app": {
+            "android": "-",
+            "ios": "-",
+            "harmony": "-"
+          },
+          "mp": {
+            "weixin": "-"
+          }
+        }
+      }
+    }
+  }
+}

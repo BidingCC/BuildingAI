@@ -174,7 +174,6 @@ function handleHome() {
         </view>
     </view>
 </template>
-
 <style scoped>
 .bd-navbar-wrapper {
     position: relative;

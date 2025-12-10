@@ -93,6 +93,7 @@ function change() {
 
 function confirm() {
     confirmCallback.value?.();
+    emit("confirm");
     close();
 }
 

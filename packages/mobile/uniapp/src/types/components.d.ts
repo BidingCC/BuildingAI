@@ -8,8 +8,14 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     BdActionSheet: typeof import('./../components/bd-action-sheet.vue')['default']
+    BdCheckbox: typeof import('./../components/bd-checkbox.vue')['default']
     BdModal: typeof import('./../components/bd-modal.vue')['default']
     BdNavbar: typeof import('./../components/bd-navbar.vue')['default']
     BdPicker: typeof import('./../components/bd-picker.vue')['default']
+    BdSeparator: typeof import('./../components/bd-separator.vue')['default']
+    LoginAgreement: typeof import('./../components/login/agreement.vue')['default']
+    LoginLoginAccount: typeof import('./../components/login/login-account.vue')['default']
+    LoginLoginWeixin: typeof import('./../components/login/login-weixin.vue')['default']
+    LoginWebsiteInfo: typeof import('./../components/login/website-info.vue')['default']
   }
 }

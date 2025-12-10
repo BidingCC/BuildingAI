@@ -340,6 +340,7 @@ declare global {
   const getSecretTemplateDetail: typeof import('../../../../web/@buildingai/service/src/consoleapi/secret-template')['getSecretTemplateDetail']
   const getSecretTemplateList: typeof import('../../../../web/@buildingai/service/src/consoleapi/secret-template')['getSecretTemplateList']
   const getSecretTemplateListAll: typeof import('../../../../web/@buildingai/service/src/consoleapi/secret-template')['getSecretTemplateListAll']
+  const getTerminal: typeof import('../utils/env')['getTerminal']
   const guessSerializerType: typeof import('@uni-helper/uni-use')['guessSerializerType']
   const h: typeof import('vue')['h']
   const importSecretTemplate: typeof import('../../../../web/@buildingai/service/src/consoleapi/secret-template')['importSecretTemplate']
@@ -449,7 +450,7 @@ declare global {
   const useCookie: typeof import('../hooks/use-cookie')['useCookie']
   const useCssModule: typeof import('vue')['useCssModule']
   const useCssVars: typeof import('vue')['useCssVars']
-  const useDownloadFile: typeof import('@uni-helper/uni-use')['useDownloadFile']
+  const useDownloadFile: typeof import('../hooks/use-request')['useDownloadFile']
   const useGlobalData: typeof import('@uni-helper/uni-use')['useGlobalData']
   const useI18n: typeof import('vue-i18n')['useI18n']
   const useId: typeof import('vue')['useId']
@@ -498,6 +499,7 @@ declare global {
   const useStorageSync: typeof import('@uni-helper/uni-use')['useStorageSync']
   const useTemplateRef: typeof import('vue')['useTemplateRef']
   const useToast: typeof import('../hooks/use-toast')['useToast']
+  const useUpload: typeof import('../hooks/use-request')['useUpload']
   const useUploadFile: typeof import('@uni-helper/uni-use')['useUploadFile']
   const useUserStore: typeof import('../stores/user')['useUserStore']
   const useVisible: typeof import('@uni-helper/uni-use')['useVisible']
@@ -541,6 +543,7 @@ declare module 'vue' {
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
+    readonly getTerminal: UnwrapRef<typeof import('../utils/env')['getTerminal']>
     readonly guessSerializerType: UnwrapRef<typeof import('@uni-helper/uni-use')['guessSerializerType']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
     readonly inject: UnwrapRef<typeof import('vue')['inject']>
@@ -642,7 +645,7 @@ declare module 'vue' {
     readonly useCookie: UnwrapRef<typeof import('../hooks/use-cookie')['useCookie']>
     readonly useCssModule: UnwrapRef<typeof import('vue')['useCssModule']>
     readonly useCssVars: UnwrapRef<typeof import('vue')['useCssVars']>
-    readonly useDownloadFile: UnwrapRef<typeof import('@uni-helper/uni-use')['useDownloadFile']>
+    readonly useDownloadFile: UnwrapRef<typeof import('../hooks/use-request')['useDownloadFile']>
     readonly useGlobalData: UnwrapRef<typeof import('@uni-helper/uni-use')['useGlobalData']>
     readonly useI18n: UnwrapRef<typeof import('vue-i18n')['useI18n']>
     readonly useId: UnwrapRef<typeof import('vue')['useId']>
@@ -676,6 +679,7 @@ declare module 'vue' {
     readonly useStorageSync: UnwrapRef<typeof import('@uni-helper/uni-use')['useStorageSync']>
     readonly useTemplateRef: UnwrapRef<typeof import('vue')['useTemplateRef']>
     readonly useToast: UnwrapRef<typeof import('../hooks/use-toast')['useToast']>
+    readonly useUpload: UnwrapRef<typeof import('../hooks/use-request')['useUpload']>
     readonly useUploadFile: UnwrapRef<typeof import('@uni-helper/uni-use')['useUploadFile']>
     readonly useUserStore: UnwrapRef<typeof import('../stores/user')['useUserStore']>
     readonly useVisible: UnwrapRef<typeof import('@uni-helper/uni-use')['useVisible']>

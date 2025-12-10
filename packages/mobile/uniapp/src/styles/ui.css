@@ -4,13 +4,13 @@ page {
     --ui-form-muted: 62 62 62;
     --ui-form-bold: 33 33 34;
 
-    --ui-form-height: 108rpx;
+    --ui-form-height: 88rpx;
     --ui-form-height-mini: 88rpx;
     --ui-font: 1rem;
     --ui-font-mini: 0.875rem;
 
     --ui-padding: 1rem;
-    --ui-radius: 28rpx;
+    --ui-radius: 20rpx;
     --ui-border-animation: border 0.1s ease;
     --ui-font-base: 1rem;
     --ui-font-mini: 0.875rem;
@@ -22,7 +22,7 @@ page {
 
 /* Button Styles */
 button {
-    border-radius: 36rpx !important;
+    border-radius: 0.5rem !important;
     height: var(--ui-form-height);
     line-height: var(--ui-form-height) !important;
     box-sizing: border-box;
@@ -162,21 +162,22 @@ button[disabled][type="error"] {
 /* Plain 按钮通用样式 */
 button[plain],
 button[type="default"][plain] {
+    color: var(--neutral-700) !important;
     background: transparent !important;
-    border: 1px solid var(--neutral-400);
+    border: 1px solid var(--neutral-300) !important;
 }
 
 .dark button[plain],
 .dark button[type="default"][plain] {
-    border: 1px solid var(--neutral-600);
+    border: 1px solid var(--neutral-600) !important;
 }
 
 button[plain]:not([disabled]):not([loading]):active,
 button[type="default"][plain]:not([disabled]):not([loading]):active {
     background: linear-gradient(
         98deg,
-        rgba(56, 56, 56, 0.4) 0%,
-        rgba(56, 56, 56, 0.4) 100%
+        rgba(56, 56, 56, 0.1) 0%,
+        rgba(56, 56, 56, 0.1) 100%
     ) !important;
 }
 
@@ -231,6 +232,7 @@ button[type="error"][plain]:not([disabled]):not([loading]):active {
 /* Button Styles */
 
 /* Picker Styles */
+/* #ifdef H5 */
 .uni-picker-container .uni-picker-custom {
     background-color: var(--background);
     border-radius: 1.25rem 1.25rem 0 0;
@@ -265,6 +267,7 @@ uni-app .uni-picker-container .uni-picker-header .uni-picker-action-confirm {
 uni-modal .uni-mask {
     background: rgba(0, 0, 0, 0.5) !important;
     backdrop-filter: blur(8px) !important;
+    transition: opacity 0.3s ease;
 }
 uni-modal .uni-modal {
     background-color: var(--background);
@@ -304,7 +307,6 @@ uni-modal .uni-modal .uni-modal__btn_primary {
     background: linear-gradient(98deg, var(--primary-500) 0%, var(--primary-700) 100%);
 }
 
-/* Transition Styles - 将 fade 动画改为 zoom 动画 */
 .uni-fade-enter-active .uni-modal,
 .uni-fade-leave-active .uni-modal {
     transition:
@@ -331,4 +333,5 @@ uni-modal .uni-modal .uni-modal__btn_primary {
     transform: translate(-50%, -50%) scale(0.8) !important;
     opacity: 0;
 }
+/* #endif */
 /* Modal Styles */

@@ -10,6 +10,7 @@ export {
     isMpWeixin,
     isWeb,
 } from "@uni-helper/uni-env";
+import { UserTerminal } from "@buildingai/constants";
 
 export const isMiniProgram = (() => {
     // #ifdef H5
@@ -33,6 +34,19 @@ export const isWechatOa = (() => {
     return false;
     // #endif
 })();
+
+export const getTerminal = () => {
+    // #ifdef H5
+    return UserTerminal.H5;
+    // #endif
+    // #ifdef MP
+    return UserTerminal.MP;
+
+    // #endif
+    // #ifdef APP-PLUS
+    return UserTerminal.APP;
+    // #endif
+};
 
 export function isDevMode(): boolean {
     return import.meta.env.DEV;
