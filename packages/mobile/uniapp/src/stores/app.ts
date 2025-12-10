@@ -6,8 +6,7 @@
  * @author BuildingAI Teams
  */
 
-import type { LoginSettings } from "@buildingai/service/consoleapi/login-settings";
-import type { SiteConfig } from "@buildingai/service/consoleapi/website";
+import type { LoginSettings, SiteConfig } from "@buildingai/service/common";
 import { defineStore } from "pinia";
 
 import { apiGetLoginSettings, apiGetSiteConfig } from "@/service/common";

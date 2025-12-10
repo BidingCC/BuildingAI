@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { LoginSettings } from "@buildingai/service/consoleapi/login-settings";
-import type { SiteConfig } from "@buildingai/service/consoleapi/website";
+import type { WebsiteConfig } from "@buildingai/service/consoleapi/website";
 
 import {
     AnalyseActionType,
@@ -20,7 +20,7 @@ definePage({
 });
 
 // 响应式数据
-const siteConfig = ref<SiteConfig | null>(null);
+const siteConfig = ref<WebsiteConfig | null>(null);
 const loginSettings = ref<LoginSettings | null>(null);
 const loading = ref(false);
 const error = ref<string | null>(null);

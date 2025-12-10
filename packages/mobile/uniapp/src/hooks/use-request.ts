@@ -86,7 +86,14 @@ async function request<T = unknown>(
     };
 
     const token: string | null = useUserStore().token;
-    if (token && options?.requireAuth !== false) {
+
+    console.log("token", token, useUserStore().temporaryToken, options?.requireAuth);
+    // Check user authentication
+    if (options?.requireAuth === false && !token && !useUserStore().temporaryToken) {
+        throw new Error("User not logged in, please login first and try again");
+    }
+    // && options?.requireAuth !== false
+    if (token) {
         requestParams.header = {
             ...requestParams.header,
             Authorization: `Bearer ${token}`,

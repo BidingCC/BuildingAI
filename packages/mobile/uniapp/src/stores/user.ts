@@ -8,8 +8,9 @@
 
 import { STORAGE_KEYS } from "@buildingai/constants/web";
 import type { UserInfo } from "@buildingai/service/webapi/user";
-import { useQuery } from "@uni-helper/uni-use";
 import { defineStore } from "pinia";
+import { getCurrentPageMeta } from "virtual:pages-meta";
+import { pages } from "virtual:uni-pages";
 import { computed, shallowRef } from "vue";
 
 import { apiGetCurrentUserInfo } from "@/service/user";
@@ -25,9 +26,13 @@ const userStore = defineStore("auth", () => {
     const LOGIN_TIME_STAMP = Number(useCookie(STORAGE_KEYS.LOGIN_TIME_STAMP).value || 0);
 
     /** Temporary token */
-    const temporaryToken = shallowRef<string | null>(STORAGE_KEYS.USER_TEMPORARY_TOKEN);
+    const temporaryToken = shallowRef<string | null>(
+        useCookie<string>(STORAGE_KEYS.USER_TEMPORARY_TOKEN).value || null,
+    );
     /** Authentication token */
-    const token = shallowRef<string | null>(STORAGE_KEYS.USER_TOKEN);
+    const token = shallowRef<string | null>(
+        useCookie<string | null>(STORAGE_KEYS.USER_TOKEN).value || null,
+    );
     /** User information */
     const userInfo = shallowRef<UserInfo | null>(null);
     /** Login expiration notice flag */
@@ -47,7 +52,7 @@ const userStore = defineStore("auth", () => {
      * @description Handle user login with token and redirect logic
      * @param newToken Authentication token
      */
-    const login = async (newToken: string) => {
+    const login = async (newToken: string, redirect: string) => {
         // const route = useRoute();
         if (!newToken) {
             useToast().error("Login error, please try again");
@@ -58,21 +63,31 @@ const userStore = defineStore("auth", () => {
         await nextTick();
         getUser();
 
-        const { value: redirect } = useQuery("redirect");
-
-        console.log("redirect", redirect);
-
-        if (
-            !redirect.value ||
-            redirect.value === "/pages/index/index" ||
-            redirect.value === "/pages/login/index"
-        ) {
+        if (redirect === `/${pages[0]?.path || "/"}` || redirect === "/pages/login/index") {
             return uni.reLaunch({
-                url: "/pages/index/index",
+                url: `/${pages[0]?.path || "/"}`,
             });
+        } else {
+            const currentPages = usePages();
+            if (currentPages.value.length > 1) {
+                const prevPage = currentPages.value[currentPages.value.length - 2];
+                await uni.navigateBack();
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-expect-error
+                const { onLoad, options } = prevPage;
+                // 刷新上一个页面
+                // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+                onLoad && onLoad(options);
+            } else if (redirect) {
+                try {
+                    uni.redirectTo({ url: redirect });
+                } finally {
+                    uni.switchTab({ url: redirect });
+                }
+            } else {
+                uni.reLaunch({ url: `/${pages[0]?.path || "/"}` });
+            }
         }
-
-        uni.navigateBack();
     };
 
     /**
@@ -120,12 +135,12 @@ const userStore = defineStore("auth", () => {
      * @description Redirect to login page with current route as redirect parameter
      * @param route Current route object
      */
-    const toLogin = async (route = useRoute()) => {
-        // if (route.path === ROUTES.LOGIN) {
-        //     return;
-        // }
-        // clearToken();
-        // useRouter().push(`${ROUTES.LOGIN}?redirect=${route?.fullPath}`);
+    const toLogin = async () => {
+        clearToken();
+        const route = getCurrentPageMeta();
+        return uni.redirectTo({
+            url: "/pages/login/index?redirect=" + route?.path,
+        });
     };
 
     /**

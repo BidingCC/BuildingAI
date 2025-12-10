@@ -1,10 +1,12 @@
 <script setup lang="ts">
 const appStore = useAppStore();
+const userStore = useUserStore();
 
 onLaunch(async () => {
     console.log("App Launch");
     await appStore.getConfig();
     await appStore.getLoginSettings();
+    await userStore.getUser();
 });
 
 onShow(async () => {

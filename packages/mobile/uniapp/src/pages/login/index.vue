@@ -8,7 +8,7 @@ import LoginAccount from "@/components/login/login-account.vue";
 import LoginWeixin from "@/components/login/login-weixin.vue";
 import WebsiteInfo from "@/components/login/website-info.vue";
 import { apiAuthLogin } from "@/service/user";
-import { isH5, isWechatOa } from "@/utils/env";
+import { isApp, isH5, isMp, isWechatOa } from "@/utils/env";
 
 definePage({
     style: {
@@ -17,22 +17,24 @@ definePage({
     },
 });
 
+const { value: redirect } = useQuery("redirect");
 const appStore = useAppStore();
 const toast = useToast();
 const userStore = useUserStore();
 
 const modalRef = ref<InstanceType<typeof BdModal> | null>(null);
+const loginSettings = computed(() => appStore.loginSettings);
 // 默认登录方式(处理不同平台登录方式的差异)
 const defaultLoginMethod = computed(() => {
     if (
-        isH5 &&
-        isWechatOa &&
+        (isMp || isApp || isWechatOa) &&
         loginSettings.value?.allowedLoginMethods.includes(LoginMethod.WEIXIN)
     ) {
         return LoginMethod.WEIXIN;
     }
     return LoginMethod.ACCOUNT;
 });
+
 // 当前登录方式
 const currentLoginMethod = shallowRef(defaultLoginMethod.value);
 // 是否同意隐私协议及用户协议
@@ -41,8 +43,6 @@ const checked = shallowRef<boolean>(false);
 const wxMpPhoneNumber = shallowRef<GetPhoneNumberEvent["detail"]>();
 // 账号登录参数
 const accountLoginParams = shallowRef<SystemLoginAccountParams>();
-
-const loginSettings = computed(() => appStore.loginSettings);
 
 const handleLoginPreset = async (
     e: GetPhoneNumberEvent["detail"] | SystemLoginAccountParams | undefined,
@@ -92,8 +92,12 @@ const handleLogin = async () => {
 
 const loginResult = (res: LoginResponse) => {
     toast.clear();
-    userStore.login(res.token);
+    userStore.login(res.token, redirect.value);
 };
+
+watch(defaultLoginMethod, (newVal) => {
+    currentLoginMethod.value = newVal;
+});
 </script>
 
 <template>
@@ -109,19 +113,20 @@ const loginResult = (res: LoginResponse) => {
             <LoginAccount class="mt-14 w-full" @login="handleLoginPreset" />
         </template>
         <!-- 隐私协议及用户协议 -->
-        <Agreement v-if="loginSettings?.showPolicyAgreement" class="mt-4" v-model="checked" />
+        <Agreement v-if="loginSettings?.showPolicyAgreement" class="mt-6" v-model="checked" />
         <!-- 其他登录方式 -->
         <BdSeparator
             v-if="
-                (currentLoginMethod === LoginMethod.ACCOUNT && !isH5 && isWechatOa) ||
+                (currentLoginMethod === LoginMethod.ACCOUNT && (!isH5 || isWechatOa)) ||
                 currentLoginMethod === LoginMethod.WEIXIN
             "
             text="其他登录方式"
             margin="30px 0"
+            w="full"
         />
         <view flex="~ col gap-2" w="full">
             <button
-                v-if="currentLoginMethod === LoginMethod.ACCOUNT && !isH5 && isWechatOa"
+                v-if="currentLoginMethod === LoginMethod.ACCOUNT && (!isH5 || isWechatOa)"
                 size="mini"
                 type="default"
                 plain
