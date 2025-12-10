@@ -52,6 +52,7 @@
         "defu",
         "dmermaid",
         "dompurify",
+        "easyinput",
         "echarts",
         "esbuild",
         "fancyapps",
@@ -96,6 +97,7 @@
         "uniuse",
         "unocss",
         "unplugin",
+        "unref",
         "vaul",
         "vite",
         "vuedraggable",
@@ -121,6 +123,8 @@
         "packages/web/buildingai-ui/app/i18n",
         "packages/web/@buildingai/i18n-config/src/i18n",
         "extensions/*/src/web/i18n",
+        "extensions/*/src/uniapp/i18n",
+        "packages/mobile/uniapp/src/i18n",
     ],
     "i18n-ally.enabledParsers": [
         "json"
