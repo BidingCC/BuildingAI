@@ -134,7 +134,7 @@ async function handleSubmit(event: FormSubmitEvent<Schema>) {
                 </UFormField>
 
                 <UFormField :label="$t('storage-config.form.status')" name="isActive">
-                    <USwitch v-model="state.isActive" :disabled="state.isActive" />
+                    <USwitch v-model="state.isActive" :disabled="data.isActive" />
                 </UFormField>
             </UForm>
         </template>

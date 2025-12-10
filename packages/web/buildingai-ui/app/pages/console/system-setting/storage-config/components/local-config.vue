@@ -45,7 +45,7 @@ function onSubmit(event: FormSubmitEvent<typeof state>) {
                 </UFormField>
 
                 <UFormField :label="$t('storage-config.form.status')" name="isActive">
-                    <USwitch v-model="state.isActive" :disabled="state.isActive" />
+                    <USwitch v-model="state.isActive" :disabled="props.isActive" />
                 </UFormField>
             </UForm>
         </template>
