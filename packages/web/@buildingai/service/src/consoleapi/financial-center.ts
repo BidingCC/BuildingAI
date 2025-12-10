@@ -59,7 +59,7 @@ export interface Recharge {
  * User overview interface
  * @description Interface for user statistics and consumption data
  */
-export interface FinancialCenterUser {
+export interface User {
     /** Total chat count */
     totalChatNum: number;
     /** Total remaining computing power */

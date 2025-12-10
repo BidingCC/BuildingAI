@@ -6,7 +6,6 @@
  * @author BuildingAI Teams
  */
 
-import type { RechargeRule } from "../consoleapi/package-management";
 import type { BaseEntity } from "../models/globals";
 
 // ==================== Type Definitions ====================
@@ -25,7 +24,7 @@ export interface RechargeCenterInfo {
     /** Recharge switch status */
     rechargeStatus: boolean;
     /** User information */
-    user: RechargeCenterUserInfo;
+    user: User;
 }
 
 /**
@@ -42,10 +41,25 @@ export interface PayWayList {
 }
 
 /**
+ * Recharge rule interface
+ * @description Interface for recharge rule configuration
+ */
+export interface RechargeRule extends BaseEntity {
+    /** Gift power amount */
+    givePower: number;
+    /** Rule label */
+    label: string;
+    /** Recharge power amount */
+    power: number;
+    /** Selling price */
+    sellPrice: string;
+}
+
+/**
  * User information interface
  * @description Interface for user basic information
  */
-export interface RechargeCenterUserInfo extends BaseEntity {
+export interface User extends BaseEntity {
     /** User avatar */
     avatar: string;
     /** User power */

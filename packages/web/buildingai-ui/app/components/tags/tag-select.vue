@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { TagTypeType } from "@buildingai/constants";
-import { apiGetConsoleTagList, type TagFormData } from "@buildingai/service/consoleapi/tag";
+import { apiGetTagList, type TagFormData } from "@buildingai/service/consoleapi/tag";
 
 const ManagePopup = defineAsyncComponent(() => import("./manage-popup.vue"));
 
@@ -30,7 +30,7 @@ const inputValue = shallowRef("");
 const isOpen = shallowRef(false);
 
 const getTags = async () => {
-    const res = await apiGetConsoleTagList({
+    const res = await apiGetTagList({
         type: props.type,
     });
     tags.value = res;

@@ -70,7 +70,7 @@ export function apiGetAvailableModels(): Promise<AiModelInfo[]> {
  * @returns Promise with default model information
  */
 export function apiGetDefaultModel(): Promise<AiModelInfo> {
-    return useConsoleGet("/ai-models/default/current", { requireAuth: false });
+    return useConsoleGet("/ai-models/default/current", { requireAuth: true });
 }
 
 // ==================== AI Model Management Related APIs ====================

@@ -9,13 +9,27 @@
 import type {
     Agent,
     CreateAgentAnnotationParams,
-    PublishConfig,
     UpdateAgentAnnotationParams,
 } from "../consoleapi/ai-agent";
 import type { PaginationResult } from "../models/globals";
 import type { AiMessage } from "../models/message";
 
 // ==================== Type Definitions ====================
+
+/**
+ * Publish configuration interface
+ * @description Configuration settings for agent publishing
+ */
+export interface PublishConfig {
+    /** Allowed origins for CORS */
+    allowOrigins?: string[];
+    /** Rate limit per minute */
+    rateLimitPerMinute?: number;
+    /** Whether to show branding */
+    showBranding?: boolean;
+    /** Whether to allow downloading conversation history */
+    allowDownloadHistory?: boolean;
+}
 
 /**
  * Publish agent request parameters interface
@@ -245,7 +259,7 @@ export function apiGetMessagesByApiKey(
  * @param conversationId Conversation ID
  * @returns Promise with deletion result
  */
-export function apiDeleteAgentConversation(
+export function apiDeleteConversation(
     publishToken: string,
     accessToken: string,
     conversationId: string,

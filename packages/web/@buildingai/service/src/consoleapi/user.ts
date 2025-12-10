@@ -66,7 +66,7 @@ export function apiGetUserDetail(id: string): Promise<UserInfo> {
  * @description Get complete information of current logged-in user, including basic info, menu permissions and permission list
  * @returns Promise with user information data
  */
-export function apiGetConsoleUserInfo(): Promise<ConsoleUserInfo> {
+export function apiGetUserInfo(): Promise<ConsoleUserInfo> {
     return useConsoleGet<ConsoleUserInfo>("/users/info");
 }
 

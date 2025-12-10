@@ -1,14 +1,6 @@
 /**
- * @fileoverview Parameter Processor
- * @description Platform-agnostic parameter processing
- *
- * @author BuildingAI Teams
- */
-
-/**
  * Parameter processor
  * Responsible for processing and transforming request parameters
- * Platform-agnostic implementation
  */
 export class ParamsProcessor {
     /** Custom parameter processing function */
@@ -32,5 +24,3 @@ export class ParamsProcessor {
         return this.processor(params);
     }
 }
-
-

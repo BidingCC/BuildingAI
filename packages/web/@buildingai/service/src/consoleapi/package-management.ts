@@ -6,8 +6,6 @@
  * @author BuildingAI Teams
  */
 
-import type { BaseEntity } from "../models/globals";
-
 // ==================== Type Definitions ====================
 
 /**
@@ -27,9 +25,11 @@ export interface RechargeConfigData {
  * Recharge rule interface
  * @description Interface for individual recharge rule configuration
  */
-export interface RechargeRule extends BaseEntity {
+export interface RechargeRule {
     /** Gift power amount */
     givePower: number;
+    /** Rule ID */
+    id?: string;
     /** Rule label */
     label: string;
     /** Recharge power amount */

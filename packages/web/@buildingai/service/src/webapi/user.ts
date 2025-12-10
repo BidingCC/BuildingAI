@@ -138,9 +138,8 @@ export interface UserCreateRequest extends BaseUserInfo {
  * User update request interface
  * @description Interface for updating existing users
  */
-export interface UserUpdateRequest extends Partial<
-    Omit<UserCreateRequest, "username" | "password">
-> {
+export interface UserUpdateRequest
+    extends Partial<Omit<UserCreateRequest, "username" | "password">> {
     /** User ID (required for updates) */
     id: string;
 }
@@ -233,7 +232,7 @@ export interface SystemRegisrerAccountParams {
  * @returns Promise with current user information
  */
 export function apiGetCurrentUserInfo(): Promise<UserInfo> {
-    return useWebGet("/user/info", {}, { requireAuth: false });
+    return useWebGet("/user/info", {}, { requireAuth: true });
 }
 
 /**
@@ -250,7 +249,7 @@ export function apiSearchUsers(params?: {
     /** Return count limit */
     limit?: number;
 }): Promise<UserInfo[]> {
-    return useWebGet("/user/search", params, { requireAuth: false });
+    return useWebGet("/user/search", params, { requireAuth: true });
 }
 
 /**

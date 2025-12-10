@@ -1,10 +1,3 @@
-/**
- * @fileoverview Interceptor Manager
- * @description Platform-agnostic interceptor management
- *
- * @author BuildingAI Teams
- */
-
 import type {
     ExtendedFetchOptions,
     Interceptor,
@@ -14,7 +7,6 @@ import type {
 /**
  * Interceptor manager
  * Responsible for managing and executing various interceptors
- * Platform-agnostic implementation
  */
 export class InterceptorManager implements IInterceptorManager {
     /** Request interceptor list */
@@ -143,5 +135,3 @@ export class InterceptorManager implements IInterceptorManager {
         throw error; // Continue throwing error
     }
 }
-
-

@@ -132,7 +132,11 @@ export interface McpServerQueryParams {
  * @description Interface for detailed MCP server information
  */
 export interface McpServerDetail
-    extends BaseEntity, BaseMcpServerConfig, McpServerStatus, McpServerConnection, McpServerUI {
+    extends BaseEntity,
+        BaseMcpServerConfig,
+        McpServerStatus,
+        McpServerConnection,
+        McpServerUI {
     /** User information */
     user: UserInfo;
     /** Available tools */
@@ -157,7 +161,9 @@ export interface McpServerTool extends BaseEntity {
  * @description Interface for creating MCP server request
  */
 export interface CreateMcpServerRequest
-    extends Partial<BaseMcpServerConfig>, Partial<McpServerConnection>, Partial<McpServerUI> {
+    extends Partial<BaseMcpServerConfig>,
+        Partial<McpServerConnection>,
+        Partial<McpServerUI> {
     /** JSON import string */
     jsonImport?: string;
     /** Available tools */
@@ -244,9 +250,7 @@ export type UpdateMcpServerRequest = Partial<CreateMcpServerRequest>;
  * @param params Query parameters
  * @returns Promise with MCP server list
  */
-export function apiConsoleGetMcpServerList(
-    params?: McpServerQueryParams,
-): Promise<McpServerInfo[]> {
+export function apiGetMcpServerList(params?: McpServerQueryParams): Promise<McpServerInfo[]> {
     return useConsoleGet("/ai-mcp-servers", params);
 }
 
@@ -256,7 +260,7 @@ export function apiConsoleGetMcpServerList(
  * @param id MCP server ID
  * @returns Promise with MCP server detail information
  */
-export function apiConsoleGetMcpServerDetail(id: string): Promise<McpServerDetail> {
+export function apiGetMcpServerDetail(id: string): Promise<McpServerDetail> {
     return useConsoleGet(`/ai-mcp-servers/${id}`);
 }
 
@@ -268,7 +272,7 @@ export function apiConsoleGetMcpServerDetail(id: string): Promise<McpServerDetai
  * @param data MCP server creation data
  * @returns Promise with created MCP server information
  */
-export function apiConsoleCreateMcpServer(
+export function apiCreateMcpServer(
     data:
         | CreateMcpServerRequest
         | (Omit<CreateMcpServerRequest, "args"> & { args?: Record<string, unknown> }),
@@ -282,7 +286,7 @@ export function apiConsoleCreateMcpServer(
  * @param id MCP server ID
  * @returns Promise with deletion result
  */
-export function apiConsoleDeleteMcpServer(id: string): Promise<void> {
+export function apiDeleteMcpServer(id: string): Promise<void> {
     return useConsoleDelete(`/ai-mcp-servers/${id}`);
 }
 
@@ -292,7 +296,7 @@ export function apiConsoleDeleteMcpServer(id: string): Promise<void> {
  * @param ids Array of MCP server IDs
  * @returns Promise with deletion result
  */
-export function apiConsoleBatchDeleteMcpServers(ids: string[]): Promise<void> {
+export function apiBatchDeleteMcpServers(ids: string[]): Promise<void> {
     return useConsolePost("/ai-mcp-servers/batch-delete", { ids });
 }
 
@@ -303,7 +307,7 @@ export function apiConsoleBatchDeleteMcpServers(ids: string[]): Promise<void> {
  * @param data Update data
  * @returns Promise with updated MCP server information
  */
-export function apiConsoleUpdateMcpServer(
+export function apiUpdateMcpServer(
     id: string,
     data:
         | UpdateMcpServerRequest
@@ -318,9 +322,7 @@ export function apiConsoleUpdateMcpServer(
  * @param jsonString JSON string containing server configurations
  * @returns Promise with import results
  */
-export function apiConsoleJsonImportMcpServers(
-    jsonString: string,
-): Promise<JsonImportMcpServerResponse> {
+export function apiJsonImportMcpServers(jsonString: string): Promise<JsonImportMcpServerResponse> {
     return useConsolePost("/ai-mcp-servers/import-json-string", { jsonString });
 }
 
@@ -330,9 +332,7 @@ export function apiConsoleJsonImportMcpServers(
  * @param id MCP server ID
  * @returns Promise with connectivity check results
  */
-export function apiConsoleCheckMcpServerConnect(
-    id: string,
-): Promise<CheckMcpServerConnectResponse> {
+export function apiCheckMcpServerConnect(id: string): Promise<CheckMcpServerConnectResponse> {
     return useConsolePost(`/ai-mcp-servers/${id}/check-connection`);
 }
 
@@ -342,7 +342,7 @@ export function apiConsoleCheckMcpServerConnect(
  * @param id MCP server ID
  * @returns Promise with operation result
  */
-export function apiConsoleSetQuickMenu(id: string): Promise<void> {
+export function apiSetQuickMenu(id: string): Promise<void> {
     return useConsolePost(`/ai-mcp-servers/quick-menu/${id}`);
 }
 
@@ -352,6 +352,6 @@ export function apiConsoleSetQuickMenu(id: string): Promise<void> {
  * @param mcpServerIds Array of MCP server IDs
  * @returns Promise with batch check results
  */
-export function apiConsoleBatchCheckMcpServerConnect(mcpServerIds: string[]): Promise<void> {
+export function apiBatchCheckMcpServerConnect(mcpServerIds: string[]): Promise<void> {
     return useConsolePost("/ai-mcp-servers/batch-check-connection", { mcpServerIds });
 }

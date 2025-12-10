@@ -8,7 +8,23 @@
 
 import type { DashboardData } from "@buildingai/types";
 
-import type { ConsoleUserInfo } from "./user";
+import type { UserInfo } from "../webapi/user";
+import type { MenuFormData } from "./menu";
+
+// ==================== Type Definitions ====================
+
+/**
+ * Console user information response interface
+ * @description Interface for console user information response with permissions and menus
+ */
+export interface ConsoleUserInfo {
+    /** User menu permissions */
+    menus?: MenuFormData[];
+    /** User permission list */
+    permissions?: string[];
+    /** User basic information */
+    user?: UserInfo;
+}
 
 // ==================== Dashboard Related APIs ====================
 

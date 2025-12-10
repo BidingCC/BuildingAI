@@ -13,7 +13,7 @@ import type { BaseEntity } from "../models/globals";
  * API response interface for delete operations
  * @description Standard response structure for delete operations
  */
-export interface TagDeleteResponse {
+export interface DeleteResponse {
     /** Response message */
     message: string;
     /** Operation success status */
@@ -64,7 +64,7 @@ export type TagUpdateRequest = Partial<TagCreateRequest>;
  * @param params Query parameters
  * @returns Promise with tag list result
  */
-export function apiGetConsoleTagList(params?: TagQueryRequest): Promise<TagFormData[]> {
+export function apiGetTagList(params?: TagQueryRequest): Promise<TagFormData[]> {
     return useConsoleGet("/tag", params);
 }
 
@@ -107,7 +107,7 @@ export function apiUpdateTag(id: string, data: TagUpdateRequest): Promise<TagFor
  * @param id Tag ID
  * @returns Promise with deletion result
  */
-export function apiDeleteTag(id: string): Promise<TagDeleteResponse> {
+export function apiDeleteTag(id: string): Promise<DeleteResponse> {
     return useConsoleDelete(`/tag/${id}`);
 }
 
@@ -118,6 +118,6 @@ export function apiDeleteTag(id: string): Promise<TagDeleteResponse> {
  * @param params.ids Array of tag IDs
  * @returns Promise with batch deletion result
  */
-export function apiBatchDeleteTag(params: { ids: string[] }): Promise<TagDeleteResponse> {
+export function apiBatchDeleteTag(params: { ids: string[] }): Promise<DeleteResponse> {
     return useConsolePost("/tag/batch-delete", params);
 }

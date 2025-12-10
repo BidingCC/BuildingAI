@@ -78,7 +78,7 @@ export interface ReferenceSource {
  * User information interface
  * @description Standard user information structure
  */
-export interface AgentUserInfo {
+export interface UserInfo {
     /** Username */
     username: string;
     /** User nickname */
@@ -390,7 +390,7 @@ export interface AgentChatRecord extends BaseEntity {
     /** Associated agent information */
     agent?: Agent;
     /** Associated user information */
-    user?: AgentUserInfo;
+    user?: UserInfo;
 }
 
 /**
@@ -579,7 +579,7 @@ export interface AgentAnnotation extends BaseEntity {
     /** Creator user ID */
     createdBy: string;
     /** Reviewer information */
-    reviewer?: AgentUserInfo;
+    reviewer?: UserInfo;
 }
 
 /**
@@ -757,7 +757,7 @@ export function apiCreateAgent(data: UpdateAgentConfigParams): Promise<Agent> {
  * @returns Promise with paginated agent list result
  */
 export function apiGetAgentList(params: QueryAgentParams): Promise<PaginationResult<Agent>> {
-    return useConsoleGet("/ai-agent", params, { requireAuth: false });
+    return useConsoleGet("/ai-agent", params, { requireAuth: true });
 }
 
 /**
@@ -847,7 +847,7 @@ export function apiAgentChat(
 export function apiGetAgentChatRecordList(
     params: QueryAgentChatRecordParams,
 ): Promise<PaginationResult<AgentChatRecord[]>> {
-    return useConsoleGet("/ai-agent-chat-record", params, { requireAuth: false });
+    return useConsoleGet("/ai-agent-chat-record", params, { requireAuth: true });
 }
 
 /**
@@ -872,7 +872,7 @@ export function apiGetAgentChatsMessages(
     params: { page?: number; pageSize?: number },
 ): Promise<PaginationResult<AgentChatMessage[]>> {
     return useConsoleGet(`/ai-agent-chat-message/conversation/${conversationId}`, params, {
-        requireAuth: false,
+        requireAuth: true,
     });
 }
 
@@ -1085,4 +1085,12 @@ export function apiConsoleSetAgentDecorate(
     data: AgentDecorateConfig,
 ): Promise<AgentDecorateConfig> {
     return useConsolePost("/agent-decorate", data);
+}
+
+/**
+ * Get agent decorate config (web)
+ * @description 前台公开获取运营位配置
+ */
+export function apiGetAgentDecorate(): Promise<AgentDecorateConfig> {
+    return useWebGet("/agent-decorate");
 }

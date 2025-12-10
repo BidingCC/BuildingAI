@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { LoginSettings } from "@buildingai/service/consoleapi/login-settings";
 import {
-    apiGetConsoleLoginSettings,
+    apiGetLoginSettings,
     apiUpdateLoginSettings,
 } from "@buildingai/service/consoleapi/login-settings";
 import { array, boolean, number, object } from "yup";
@@ -135,7 +135,7 @@ const resetForm = () => {
  */
 const getLoginSettings = async () => {
     try {
-        const data = await apiGetConsoleLoginSettings();
+        const data = await apiGetLoginSettings();
 
         // 保存原始数据用于重置
         originalFormData.value = { ...data };

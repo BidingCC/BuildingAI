@@ -5,7 +5,6 @@
  * @author BuildingAI Teams
  */
 
-import type { TagQueryRequest } from "../consoleapi/tag";
 import type { BaseEntity } from "../models/globals";
 
 // ==================== Type Definitions ====================
@@ -21,6 +20,17 @@ export interface Tag extends BaseEntity {
     type: string;
     /** Binding count */
     bindingCount: number;
+}
+
+/**
+ * Tag query request parameters interface
+ * @description Interface for tag query request parameters
+ */
+export interface TagQueryRequest {
+    /** Tag name filter */
+    name?: string;
+    /** Tag type filter */
+    type?: string;
 }
 
 // ==================== Tag Query Related APIs ====================

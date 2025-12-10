@@ -16,7 +16,7 @@ import type { BaseEntity, BaseQueryParams, PaginationResult } from "../models/gl
  */
 export interface PowerDetailData extends PaginationResult<PowerDetailItem> {
     /** User information */
-    userInfo: PowerDetailUserInfo;
+    userInfo: UserInfo;
 }
 
 /**
@@ -52,7 +52,7 @@ export interface PowerDetailItem extends BaseEntity {
  * User information interface
  * @description Interface for user power information
  */
-export interface PowerDetailUserInfo {
+export interface UserInfo {
     /** Remaining power (gift power is fixed at 0) */
     power: number;
 }

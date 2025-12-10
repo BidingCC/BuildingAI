@@ -10,7 +10,7 @@ import type {
     ChatStreamConfig,
 } from "@buildingai/types/http/types";
 
-import { InterceptorManager } from "../common/interceptor-manager";
+import { InterceptorManager } from "../core/interceptor-manager";
 
 function uuid() {
     return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {

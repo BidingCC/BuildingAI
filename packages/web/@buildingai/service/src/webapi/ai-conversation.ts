@@ -342,7 +342,7 @@ export function apiGetAiModelsByCapability(capability: string): Promise<AiModel[
 export function apiGetAiConversationList(
     params: Pagination,
 ): Promise<PaginationResult<AiConversation>> {
-    return useWebGet("/ai-conversations", params, { requireAuth: false });
+    return useWebGet("/ai-conversations", params, { requireAuth: true });
 }
 
 /**
@@ -411,7 +411,7 @@ export function apiGetAiConversation(
  * @param _mcpServers MCP servers (unused parameter)
  * @returns Promise with stream controller
  */
-export function apiAgentChatStream(
+export function apiChatStream(
     messages: AiMessage[] | any,
     config?: Partial<ChatStreamConfig>,
     _mcpServers?: string[],

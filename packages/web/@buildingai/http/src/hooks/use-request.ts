@@ -1,59 +1,42 @@
-/**
- * @fileoverview UniApp Request Hooks
- * @description UniApp platform request hooks, completely separated from Web
- *
- * @author BuildingAI Teams
- */
+/// <reference types="vite/client" />
 
-import type { ChatStreamConfig, HttpMethod, RequestOptions, ResponseSchema } from "@buildingai/types";
+import { useUserStore } from "@buildingai/stores/user";
 
-import { HttpClientBase } from "../common/http-client-base";
-import type { HttpClientConfig } from "../common/types";
-import { UniAppChatStream } from "../uniapp/uniapp-chat-stream";
-import { UniAppErrorHandler } from "../uniapp/uniapp-error-handler";
-import { UniAppFileUpload } from "../uniapp/uniapp-file-upload";
-import { UniAppRequestStrategy } from "../uniapp/uniapp-request-strategy";
+import {
+    type ChatStreamConfig,
+    createHttpClient,
+    type HttpMethod,
+    type RequestOptions,
+    type ResponseSchema,
+} from "../index";
 
 // ==================== API Configuration Constants ====================
 
 /**
- * Get API base URL from storage (UniApp only)
+ * API configuration constants
+ * @description These values are read from environment variables at build time by Vite
  */
-function getBaseApiUrl(): string {
-    try {
-        // @ts-expect-error - uni is a global object in UniApp environment
-        return uni.getStorageSync("BASE_API_URL") || "";
-    } catch (_e) {
-        return "";
-    }
-}
+const BASE_API =
+    process.env.NODE_ENV === "development"
+        ? import.meta.env.VITE_DEVELOP_APP_BASE_URL || ""
+        : import.meta.env.VITE_PRODUCTION_APP_BASE_URL || "";
 
-/**
- * Get API prefix from storage (UniApp only)
- */
-function getApiPrefix(envKey: string, defaultValue: string): string {
-    try {
-        // @ts-expect-error - uni is a global object in UniApp environment
-        return uni.getStorageSync(envKey) || defaultValue;
-    } catch (_e) {
-        return defaultValue;
-    }
-}
-
-const BASE_API = getBaseApiUrl();
-const WEB_API_PREFIX = getApiPrefix("VITE_APP_WEB_API_PREFIX", "/api/web");
-const CONSOLE_API_PREFIX = getApiPrefix("VITE_APP_CONSOLE_API_PREFIX", "/api/console");
+const WEB_API_PREFIX = import.meta.env.VITE_APP_WEB_API_PREFIX || "/api/web";
+const CONSOLE_API_PREFIX = import.meta.env.VITE_APP_CONSOLE_API_PREFIX || "/api/console";
 
 // ==================== Type Definitions ====================
 
 /**
  * Request factory options interface
+ * @description Configuration options for creating different types of request instances (Console, Web, Plugin)
  */
 export interface RequestFactoryOptions {
     /** API prefix path */
     apiPrefix: string;
     /** Whether to enable status logging */
     enableStatusLog?: boolean;
+    /** Whether to enable runtime configuration */
+    enableRuntimeConfig?: boolean;
     /** Whether to filter empty parameters (undefined, null) */
     filterEmptyParams?: boolean;
     /** Whether user authentication is required */
@@ -64,28 +47,16 @@ export interface RequestFactoryOptions {
     customErrorHandler?: (error: unknown) => void;
 }
 
-// ==================== Helper Functions ====================
-
-/**
- * Get user token from storage (UniApp only)
- */
-function getUserToken(): string {
-    try {
-        // @ts-expect-error - uni is a global object in UniApp environment
-        return uni.getStorageSync("USER_TOKEN") || "";
-    } catch (_e) {
-        return "";
-    }
-}
-
 // ==================== Core Factory Function ====================
 
 /**
- * Create request factory for UniApp platform
+ * Universal request factory function
+ * @description Creates HTTP request instances with different characteristics based on configuration options
+ *
  * @param options Configuration options
  * @returns Object containing various HTTP request methods
  */
-function createUniAppRequestFactory(options: RequestFactoryOptions) {
+function createRequestFactory(options: RequestFactoryOptions) {
     const {
         apiPrefix,
         enableStatusLog = false,
@@ -95,60 +66,34 @@ function createUniAppRequestFactory(options: RequestFactoryOptions) {
         customErrorHandler,
     } = options;
 
-    // Create UniApp-specific strategy and error handler
-    const strategy = new UniAppRequestStrategy();
-    const errorHandler = new UniAppErrorHandler();
+    // Create HTTP client instance with basic configuration
+    const http = createHttpClient({
+        dedupe: true, // Enable request deduplication
+        ignoreResponseError: true, // Ignore response errors, handled by interceptors
+        timeout: 30000, // 30 second timeout
+    });
 
-    // Create HTTP client configuration
-    const clientConfig: HttpClientConfig = {
-        baseURL: `${BASE_API}${apiPrefix}`,
-        timeout: 30000,
-        dedupe: true,
-        ignoreResponseError: true,
-        strategy,
-        errorHandler,
-    };
-
-    // Create HTTP client instance
-    const http = new HttpClientBase(strategy, errorHandler, clientConfig);
-
-    // Create ChatStream and FileUpload instances for UniApp
-    const chatStream = new UniAppChatStream(() => clientConfig.baseURL || "", http.getInterceptors());
-    const fileUpload = new UniAppFileUpload(
-        () => clientConfig.baseURL || "",
-        http.getInterceptors(),
-        errorHandler,
-    );
+    // Set API base URL
+    http.setBaseURL(`${BASE_API}${apiPrefix}`);
 
     // Configure status code handling logic
-    errorHandler.setCustomCodeHandler((status: number, response: ResponseSchema) => {
-        if (enableStatusLog) {
-            console.log(`[UniHttp ${status}]`, response);
-        }
-
-        // Handle common business status codes
-        if (status === 401) {
-            // Token expired or unauthorized
-            try {
-                // @ts-expect-error - uni is a global object in UniApp environment
-                uni.removeStorageSync("USER_TOKEN");
-                // @ts-expect-error - uni is a global object in UniApp environment
-                uni.reLaunch({ url: "/pages/login/index" });
-            } catch (_e) {
-                // Ignore navigation errors
-            }
+    http.setStatusHandler((status: number, response: ResponseSchema) => {
+        if (enableStatusLog && import.meta.client) {
+            console.log(`[HTTP ${status}]`, response);
         }
     });
 
-    // Request interceptor - Handle authentication headers
-    http.getInterceptors().request(async (config) => {
+    // Request interceptor - Handle authentication headers and runtime configuration
+    http.interceptors.request(async (config) => {
+        const userStore = useUserStore();
+
         // Initialize request headers
         if (!config.headers) {
             config.headers = {};
         }
 
-        // Get authentication token
-        const Authorization = getUserToken();
+        // Check if authentication is required, block request if user is not logged in when auth is required
+        const Authorization = userStore.token || userStore.temporaryToken;
 
         // Add authentication token
         const headers = config.headers as Record<string, string>;
@@ -159,22 +104,22 @@ function createUniAppRequestFactory(options: RequestFactoryOptions) {
         return config;
     });
 
-    // Response interceptor
-    http.getInterceptors().response(<T>(response: T) => {
+    // Response interceptor - Handle response data format
+    http.interceptors.response(<T>(response: T) => {
         return response;
     });
 
-    // Error interceptor
-    http.getInterceptors().error((error: unknown) => {
+    // Error interceptor - Unified error handling
+    http.interceptors.error((error: unknown) => {
         const typedError = error as Error;
 
         if (customErrorHandler) {
             customErrorHandler(error);
         } else {
-            console.error("[UniApp Request Failed]", typedError.message, error);
+            console.error("[Request Failed]", typedError.message, error);
         }
 
-        throw error;
+        throw error; // Continue throwing error for upper layer handling
     });
 
     // Parameter processor configuration
@@ -202,43 +147,62 @@ function createUniAppRequestFactory(options: RequestFactoryOptions) {
 
     /**
      * GET request
+     * @param url Request path
+     * @param params Query parameters
+     * @param options Request configuration options
+     * @returns Promise<T>
      */
-    const get = <T>(url: string, params?: Record<string, any>, opts?: RequestOptions) =>
-        http.get<T>(url, { params, requireAuth, ...opts });
+    const get = <T>(url: string, params?: Record<string, any>, options?: RequestOptions) =>
+        http.get<T>(url, { params, requireAuth, ...options });
 
     /**
      * POST request
+     * @param url Request path
+     * @param data Request body data
+     * @param options Request configuration options
+     * @returns Promise<T>
      */
-    const post = <T>(url: string, data?: Record<string, any>, opts?: RequestOptions) =>
-        http.post<T>(url, { data, requireAuth, ...opts });
+    const post = <T>(url: string, data?: Record<string, any>, options?: RequestOptions) =>
+        http.post<T>(url, { data, requireAuth, ...options });
 
     /**
      * PUT request
+     * @param url Request path
+     * @param data Request body data
+     * @param options Request configuration options
+     * @returns Promise<T>
      */
-    const put = <T>(url: string, data?: Record<string, any>, opts?: RequestOptions) =>
-        http.put<T>(url, { data, requireAuth, ...opts });
+    const put = <T>(url: string, data?: Record<string, any>, options?: RequestOptions) =>
+        http.put<T>(url, { data, requireAuth, ...options });
 
     /**
      * DELETE request
+     * @param url Request path
+     * @param data Request body data
+     * @param options Request configuration options
+     * @returns Promise<T>
      */
-    const del = <T>(url: string, data?: Record<string, any>, opts?: RequestOptions) =>
-        http.delete<T>(url, { data, requireAuth, ...opts });
+    const del = <T>(url: string, data?: Record<string, any>, options?: RequestOptions) =>
+        http.delete<T>(url, { data, requireAuth, ...options });
 
     /**
      * PATCH request
+     * @param url Request path
+     * @param data Request body data
+     * @param options Request configuration options
+     * @returns Promise<T>
      */
-    const patch = <T>(url: string, data?: Record<string, any>, opts?: RequestOptions) =>
-        http.patch<T>(url, { data, requireAuth, ...opts });
+    const patch = <T>(url: string, data?: Record<string, any>, options?: RequestOptions) =>
+        http.patch<T>(url, { data, requireAuth, ...options });
 
     /**
-     * Cancel specific request
+     * Generic request method
+     * @param url Request path
+     * @param options Request configuration options (including HTTP method)
+     * @returns Promise<T>
      */
-    const cancel = (url: string, method: HttpMethod = "GET") => http.cancel(url, method);
-
-    /**
-     * Cancel all active requests
-     */
-    const cancelAll = () => http.cancelAll();
+    const request = <T>(url: string, options: RequestOptions & { method: HttpMethod }) =>
+        http.request<T>(options.method, url, { requireAuth, ...options });
 
     /**
      * Stream request
@@ -246,18 +210,18 @@ function createUniAppRequestFactory(options: RequestFactoryOptions) {
      * @param config Stream configuration
      * @returns Promise<Stream controller with control methods>
      */
-    const stream = (url: string, config: ChatStreamConfig) => chatStream.create(url, config);
+    const stream = (url: string, config: ChatStreamConfig) => http.chatStream(url, config);
 
     /**
      * File upload method
      * @param url Upload endpoint path
-     * @param data Form data or file path
+     * @param data Form data, can include files and other fields
      * @param opts Upload options configuration
      * @returns Promise<T>
      */
     const upload = <T = any>(
         url: string,
-        data?: Record<string, any> | string,
+        data?: Record<string, any>,
         opts?: {
             /** Upload progress callback function */
             onProgress?: (percent: number) => void;
@@ -269,31 +233,41 @@ function createUniAppRequestFactory(options: RequestFactoryOptions) {
             returnFullResponse?: boolean;
         },
     ): Promise<T> => {
-        // For UniApp, data should be a file path string or object with path
-        const filePath = typeof data === "string" ? data : (data as any)?.file || (data as any)?.path || "";
+        // Build FormData object
+        const formData = new FormData();
+        if (data) {
+            Object.entries(data).forEach(([key, value]) => {
+                // Handle file arrays
+                if (Array.isArray(value) && value[0] instanceof File) {
+                    value.forEach((file: File) => {
+                        formData.append(key, file);
+                    });
+                } else {
+                    formData.append(key, value);
+                }
+            });
+        }
 
-        const controller = fileUpload.upload<T>(url, {
-            file: filePath,
-            fieldName: "file",
-            formData: typeof data === "object" && data !== null ? data : {},
-            onProgress: opts?.onProgress,
-            headers: opts?.headers,
-            skipBusinessCheck: opts?.skipBusinessCheck,
-            returnFullResponse: opts?.returnFullResponse,
+        // Send upload request
+        const controller = http.upload<T>(url, {
+            file: formData,
+            ...opts,
         });
 
         return controller.promise;
     };
 
     /**
-     * Generic request method
-     * @param method HTTP method
+     * Cancel specific request
      * @param url Request path
-     * @param options Request configuration options
-     * @returns Promise<T>
+     * @param method HTTP method, defaults to GET
      */
-    const request = <T>(method: HttpMethod, url: string, options?: RequestOptions) =>
-        http.request<T>(method, url, { requireAuth, ...options });
+    const cancel = (url: string, method: HttpMethod = "GET") => http.cancel(url, method);
+
+    /**
+     * Cancel all active requests
+     */
+    const cancelAll = () => http.cancelAll();
 
     // Return all request methods
     return {
@@ -314,13 +288,21 @@ function createUniAppRequestFactory(options: RequestFactoryOptions) {
 
 /**
  * Create Console API request instance for backend management
+ * @description Features:
+ * - Uses CONSOLE_API_PREFIX prefix
+ * - Status logging disabled
+ * - Runtime configuration not required
+ * - Empty parameter filtering enabled
+ *
+ * @returns Console API request method collection
  */
 function createConsoleApiRequest() {
-    const requestFactory = createUniAppRequestFactory({
+    const requestFactory = createRequestFactory({
         apiPrefix: CONSOLE_API_PREFIX,
         enableStatusLog: false,
+        enableRuntimeConfig: false,
         filterEmptyParams: true,
-        requireAuth: true,
+        requireAuth: true, // Console API requires authentication
         customErrorHandler: (error: unknown) => {
             const typedError = error as Error;
             console.error("[Console API Request Failed]", typedError.message, error);
@@ -344,13 +326,22 @@ function createConsoleApiRequest() {
 
 /**
  * Create Web API request instance for frontend
+ * @description Features:
+ * - Uses WEB_API_PREFIX prefix
+ * - Status logging enabled
+ * - Runtime configuration required
+ * - Empty parameter filtering disabled
+ * - File upload supported
+ *
+ * @returns Web API request method collection
  */
 function createWebApiRequest() {
-    const requestFactory = createUniAppRequestFactory({
+    const requestFactory = createRequestFactory({
         apiPrefix: WEB_API_PREFIX,
         enableStatusLog: true,
+        enableRuntimeConfig: true,
         filterEmptyParams: false,
-        requireAuth: false,
+        requireAuth: false, // Web API does not require authentication by default, can be adjusted as needed
         customErrorHandler: (error: unknown) => {
             const typedError = error as Error;
             console.error("[Web API Request Failed]", typedError.message);
@@ -364,8 +355,8 @@ function createWebApiRequest() {
         useWebDelete: requestFactory.delete,
         useWebPatch: requestFactory.patch,
         useWebRequest: requestFactory.request,
-        useWebUpload: requestFactory.upload,
         useWebStream: requestFactory.stream,
+        useWebUpload: requestFactory.upload,
         cancelWebRequest: requestFactory.cancel,
         cancelWebAllRequests: requestFactory.cancelAll,
     };
@@ -377,35 +368,38 @@ function createWebApiRequest() {
  * Create plugin request instance lazy factory function
  * @description Creates a lazy-initialized request factory for plugin API calls
  *
- * @param apiType API type prefix (console or web)
+ * @param apiType API type (console or web)
  * @returns Lazy-initialized request instance factory
  */
 function createPluginApiRequest(apiType: string = WEB_API_PREFIX) {
     // Lazy-initialized instance
-    let requestFactory: ReturnType<typeof createUniAppRequestFactory> | null = null;
+    let requestFactory: ReturnType<typeof createRequestFactory> | null = null;
 
     const getRequestFactory = () => {
-        // Get plugin key from storage (UniApp only)
+        // Get plugin key from location.pathname
         let finalPluginKey: string = "unknown";
 
         try {
-            // @ts-expect-error - uni is a global object in UniApp environment
-            const pluginKey = uni.getStorageSync("CURRENT_PLUGIN_KEY");
-            if (pluginKey) {
-                finalPluginKey = pluginKey;
+            if (typeof window !== "undefined" && window.location) {
+                const pathname = window.location.pathname;
+                // Match pattern: /extensions/{pluginKey}/
+                const match = pathname.match(/\/extensions\/([^/]+)/);
+                if (match && match[1]) {
+                    finalPluginKey = match[1];
+                }
             }
         } catch (error) {
-            console.warn("[Plugin API] Failed to get plugin key:", error);
+            console.warn("[Plugin API] Failed to extract plugin key from pathname:", error);
         }
 
         // Build plugin API prefix: /{pluginKey}/{apiType}
         const pluginApiPrefix = `/${finalPluginKey}${apiType}`;
 
-        requestFactory = createUniAppRequestFactory({
+        requestFactory = createRequestFactory({
             apiPrefix: pluginApiPrefix,
-            enableStatusLog: apiType === WEB_API_PREFIX,
-            filterEmptyParams: apiType === CONSOLE_API_PREFIX,
-            requireAuth: apiType === CONSOLE_API_PREFIX,
+            enableStatusLog: apiType === "web",
+            enableRuntimeConfig: apiType === "web",
+            filterEmptyParams: apiType === "console",
             customErrorHandler: (error: unknown) => {
                 const typedError = error as Error;
                 console.error(
@@ -430,10 +424,10 @@ function createPluginApiRequest(apiType: string = WEB_API_PREFIX) {
             getRequestFactory().delete<T>(url, data, options),
         patch: <T>(url: string, data?: Record<string, any>, options?: RequestOptions) =>
             getRequestFactory().patch<T>(url, data, options),
-        request: <T>(method: HttpMethod, url: string, options?: RequestOptions) =>
-            getRequestFactory().request<T>(method, url, options),
+        request: <T>(url: string, options: RequestOptions & { method: HttpMethod }) =>
+            getRequestFactory().request<T>(url, options),
         stream: (url: string, config: ChatStreamConfig) => getRequestFactory().stream(url, config),
-        upload: <T>(url: string, data?: Record<string, any> | string, opts?: RequestOptions) =>
+        upload: <T>(url: string, data?: Record<string, any>, opts?: RequestOptions) =>
             getRequestFactory().upload<T>(url, data, opts),
         cancel: (url: string, method?: HttpMethod) => getRequestFactory().cancel(url, method),
         cancelAll: () => getRequestFactory().cancelAll(),
@@ -442,6 +436,7 @@ function createPluginApiRequest(apiType: string = WEB_API_PREFIX) {
 
 /**
  * Create plugin Console API request method collection
+ * @description Creates request methods for plugin backend management functionality
  */
 function createPluginConsoleApiRequest() {
     const requestFactory = createPluginApiRequest(CONSOLE_API_PREFIX);
@@ -461,6 +456,7 @@ function createPluginConsoleApiRequest() {
 
 /**
  * Create plugin Web API request method collection
+ * @description Creates request methods for plugin frontend display functionality
  */
 function createPluginWebApiRequest() {
     const requestFactory = createPluginApiRequest(WEB_API_PREFIX);
@@ -472,8 +468,8 @@ function createPluginWebApiRequest() {
         usePluginWebDelete: requestFactory.delete,
         usePluginWebPatch: requestFactory.patch,
         usePluginWebRequest: requestFactory.request,
-        usePluginWebUpload: requestFactory.upload,
         usePluginWebStream: requestFactory.stream,
+        usePluginWebUpload: requestFactory.upload,
         cancelPluginWebRequest: requestFactory.cancel,
         cancelPluginWebAllRequests: requestFactory.cancelAll,
     };
@@ -481,6 +477,10 @@ function createPluginWebApiRequest() {
 
 // ==================== Export Console API Request Methods ====================
 
+/**
+ * Export backend management Console API request methods
+ * @description Used for data operations in the backend management system
+ */
 export const {
     useConsoleGet,
     useConsolePost,
@@ -495,6 +495,10 @@ export const {
 
 // ==================== Export Web API Request Methods ====================
 
+/**
+ * Export frontend Web API request methods
+ * @description Used for data operations in the frontend user interface
+ */
 export const {
     useWebGet,
     useWebPost,
@@ -502,14 +506,18 @@ export const {
     useWebDelete,
     useWebPatch,
     useWebRequest,
-    useWebUpload,
     useWebStream,
+    useWebUpload,
     cancelWebRequest,
     cancelWebAllRequests,
 } = createWebApiRequest();
 
 // ==================== Export Plugin API Request Methods ====================
 
+/**
+ * Export plugin Console API request methods
+ * @description Used for plugin backend management functionality
+ */
 export const {
     usePluginConsoleGet,
     usePluginConsolePost,
@@ -522,6 +530,10 @@ export const {
     cancelPluginConsoleAllRequests,
 } = createPluginConsoleApiRequest();
 
+/**
+ * Export plugin Web API request methods
+ * @description Used for plugin frontend display functionality
+ */
 export const {
     usePluginWebGet,
     usePluginWebPost,
@@ -529,19 +541,22 @@ export const {
     usePluginWebDelete,
     usePluginWebPatch,
     usePluginWebRequest,
-    usePluginWebUpload,
     usePluginWebStream,
+    usePluginWebUpload,
     cancelPluginWebRequest,
     cancelPluginWebAllRequests,
 } = createPluginWebApiRequest();
 
 // ==================== Export Factory Functions ====================
 
+/**
+ * Export factory functions for scenarios requiring custom configuration
+ */
 export {
     createConsoleApiRequest,
     createPluginApiRequest,
     createPluginConsoleApiRequest,
     createPluginWebApiRequest,
-    createUniAppRequestFactory,
+    createRequestFactory,
     createWebApiRequest,
 };

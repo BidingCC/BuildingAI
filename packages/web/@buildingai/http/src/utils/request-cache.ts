@@ -1,14 +1,6 @@
 /**
- * @fileoverview Request Cache
- * @description Platform-agnostic request cache management
- *
- * @author BuildingAI Teams
- */
-
-/**
  * Request cache manager
  * Responsible for request deduplication and cancellation control
- * Platform-agnostic implementation
  */
 export class RequestCache {
     /** Request cache mapping */
@@ -143,4 +135,3 @@ export class RequestCache {
         this.deleteAbortController(method, url, data);
     }
 }
-

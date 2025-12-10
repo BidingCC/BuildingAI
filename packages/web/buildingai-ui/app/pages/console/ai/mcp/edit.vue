@@ -4,10 +4,10 @@ import type {
     McpServerDetail,
 } from "@buildingai/service/consoleapi/mcp-server";
 import {
-    apiConsoleCreateMcpServer,
-    apiConsoleGetMcpServerDetail,
-    apiConsoleJsonImportMcpServers,
-    apiConsoleUpdateMcpServer,
+    apiCreateMcpServer,
+    apiGetMcpServerDetail,
+    apiJsonImportMcpServers,
+    apiUpdateMcpServer,
 } from "@buildingai/service/consoleapi/mcp-server";
 import { object, string } from "yup";
 
@@ -174,9 +174,7 @@ const jsonImportSchema = object({
 
 const { lockFn: fetchDetail, isLock: detailLoading } = useLockFn(async () => {
     try {
-        const data: McpServerDetail = await apiConsoleGetMcpServerDetail(
-            mcpServerId.value as string,
-        );
+        const data: McpServerDetail = await apiGetMcpServerDetail(mcpServerId.value as string);
         Object.keys(formData).forEach((key) => {
             const typedKey = key as keyof typeof formData;
             const value = data[typedKey as keyof McpServerDetail];
@@ -251,12 +249,12 @@ const { lockFn: submitForm, isLock } = useLockFn(async () => {
     try {
         let id = "";
         if (mcpServerId.value) {
-            const res = await apiConsoleUpdateMcpServer(mcpServerId.value, newFormData);
+            const res = await apiUpdateMcpServer(mcpServerId.value, newFormData);
             id = res.id;
             emits("change-update", [id]);
             toast.success(t("ai-mcp.backend.updateSuccess"));
         } else {
-            const res = await apiConsoleCreateMcpServer(newFormData);
+            const res = await apiCreateMcpServer(newFormData);
             id = res.id;
             emits("change-update", [id]);
             toast.success(t("ai-mcp.backend.createSuccess"));
@@ -270,7 +268,7 @@ const { lockFn: submitForm, isLock } = useLockFn(async () => {
 // JSON导入提交表单
 const { lockFn: jsonSubmitForm, isLock: _jsonIsLock } = useLockFn(async () => {
     try {
-        const res = await apiConsoleJsonImportMcpServers(jsonFormData.jsonImport || "");
+        const res = await apiJsonImportMcpServers(jsonFormData.jsonImport || "");
         toast.success(
             `${t("ai-mcp.backend.jsonImportTotal")} ${res.total} ${t("ai-mcp.backend.jsonImportUnit")}，
             ${t("console-common.create")} ${res.created} ${t("ai-mcp.backend.jsonImportUnit")}，
