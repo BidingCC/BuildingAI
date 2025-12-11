@@ -41,7 +41,11 @@ async function handleSubmit() {
 </script>
 
 <template>
-    <UModal :title="$t('storage-config.storage.local')" :ui="{ footer: 'justify-end' }">
+    <UModal
+        :title="$t('storage-config.storage.local')"
+        :ui="{ footer: 'justify-end' }"
+        :dismissible="false"
+    >
         <UButton variant="ghost">{{ $t("storage-config.table.setting") }}</UButton>
 
         <template #body>

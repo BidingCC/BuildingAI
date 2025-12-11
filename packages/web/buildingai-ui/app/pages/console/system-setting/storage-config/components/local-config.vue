@@ -1,10 +1,14 @@
 <script setup lang="ts">
-import type { FormSubmitEvent } from "@nuxt/ui";
+import {
+    apiUpdateStorageConfig,
+    type StorageConfig,
+    StorageType,
+} from "@buildingai/service/consoleapi/storage-config";
 import { boolean, object, string } from "yup";
 
 const props = defineProps({
-    isActive: {
-        type: Boolean,
+    data: {
+        type: Object as PropType<StorageConfig<typeof StorageType.LOCAL>>,
         required: true,
     },
 });
@@ -15,14 +19,15 @@ const schema = object({
     isActive: boolean().required(),
 });
 const state = reactive({
-    storageType: "local",
-    isActive: props.isActive,
+    ...props.data,
+    config: null,
 });
 
 const toast = useToast();
-function onSubmit(event: FormSubmitEvent<typeof state>) {
+async function onSubmit() {
     toast.add({ title: "Success", description: "The form has been submitted.", color: "success" });
-    console.log(event.data);
+    await apiUpdateStorageConfig(state);
+    console.log("emit update");
 }
 </script>
 
@@ -45,7 +50,7 @@ function onSubmit(event: FormSubmitEvent<typeof state>) {
                 </UFormField>
 
                 <UFormField :label="$t('storage-config.form.status')" name="isActive">
-                    <USwitch v-model="state.isActive" :disabled="props.isActive" />
+                    <USwitch v-model="state.isActive" :disabled="props.data.isActive" />
                 </UFormField>
             </UForm>
         </template>

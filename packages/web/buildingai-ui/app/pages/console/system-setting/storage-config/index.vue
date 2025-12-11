@@ -37,8 +37,10 @@ const columns: TableColumn<StorageConfigTableData>[] = [
         header: t("storage-config.table.action"),
         cell: ({ row }) => {
             switch (row.original.storageType) {
-                case StorageType.LOCAL:
-                    return h(LocalConfig, { isActive: row.original.isActive });
+                case StorageType.LOCAL: {
+                    const data = row.original as StorageConfig<typeof StorageType.LOCAL>;
+                    return h(LocalConfig, { data });
+                }
                 case StorageType.ALIYUN_OSS: {
                     const data = row.original as StorageConfig<typeof StorageType.ALIYUN_OSS>;
                     return h(AliCloudConfig, { data });
