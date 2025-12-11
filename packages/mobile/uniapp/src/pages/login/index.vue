@@ -19,7 +19,6 @@ definePage({
 
 const { value: redirect } = useQuery("redirect");
 const appStore = useAppStore();
-const toast = useToast();
 const userStore = useUserStore();
 
 const modalRef = ref<InstanceType<typeof BdModal> | null>(null);
@@ -77,7 +76,7 @@ const handleAccountLogin = async () => {
 
 const handleLogin = async () => {
     const method = unref(currentLoginMethod);
-    toast.loading("登录中");
+    useToast().loading("登录中");
     if (!checked.value) checked.value = true;
     if (method === LoginMethod.WEIXIN) {
         // const { code } = await uni.login({ provider: "weixin" });
@@ -91,7 +90,7 @@ const handleLogin = async () => {
 };
 
 const loginResult = (res: LoginResponse) => {
-    toast.clear();
+    useToast().clear();
     userStore.login(res.token, redirect.value);
 };
 

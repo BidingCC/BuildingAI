@@ -10,7 +10,6 @@ import {
 } from "@/service/common";
 
 const { t } = useI18n();
-const toast = useToast();
 
 definePage({
     style: {
@@ -32,11 +31,10 @@ const fetchSiteConfig = async () => {
         error.value = null;
         const config = await apiGetSiteConfig();
         siteConfig.value = config;
-        toast.success("获取网站配置成功");
+        useToast().success("获取网站配置成功");
     } catch (err: unknown) {
         const errorMessage = err instanceof Error ? err.message : "获取网站配置失败";
         error.value = errorMessage;
-        toast.error(errorMessage);
         console.error("获取网站配置失败:", err);
     } finally {
         loading.value = false;
@@ -50,11 +48,10 @@ const fetchLoginSettings = async () => {
         error.value = null;
         const settings = await apiGetLoginSettings();
         loginSettings.value = settings;
-        toast.success("获取登录设置成功");
+        useToast().success("获取登录设置成功");
     } catch (err: unknown) {
         const errorMessage = err instanceof Error ? err.message : "获取登录设置失败";
         error.value = errorMessage;
-        toast.error(errorMessage);
         console.error("获取登录设置失败:", err);
     } finally {
         loading.value = false;
@@ -73,12 +70,11 @@ const recordAnalyse = async () => {
                 timestamp: new Date().toISOString(),
             },
         });
-        toast.success("记录行为分析成功");
+        useToast().success("记录行为分析成功");
         console.log("行为分析记录结果:", result);
     } catch (err: unknown) {
         const errorMessage = err instanceof Error ? err.message : "记录行为分析失败";
         error.value = errorMessage;
-        toast.error(errorMessage);
         console.error("记录行为分析失败:", err);
     } finally {
         loading.value = false;
