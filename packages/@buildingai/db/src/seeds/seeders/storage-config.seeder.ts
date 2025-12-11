@@ -1,6 +1,6 @@
 import { StorageType } from "@buildingai/constants/shared/storage-config.constant";
 
-import { StorageConfig } from "../../entities/storage-config.entity";
+import { StorageConfig } from "../../entities";
 import { DataSource } from "../../typeorm";
 import { BaseSeeder } from "./base.seeder";
 
@@ -23,25 +23,21 @@ export class StorageConfigSeeder extends BaseSeeder {
 
             await repository.save([
                 {
-                    name: "local",
                     storageType: StorageType.LOCAL,
                     isActive: true,
                     config: null,
                 },
                 {
-                    name: "aliyun-oss",
                     storageType: StorageType.ALIYUN_OSS,
                     isActive: false,
                     config: null,
                 },
                 {
-                    name: "tencent-cos",
                     storageType: StorageType.TENCENT_COS,
                     isActive: false,
                     config: null,
                 },
                 {
-                    name: "qiniu-kodo",
                     storageType: StorageType.QINIU_KODO,
                     isActive: false,
                     config: null,

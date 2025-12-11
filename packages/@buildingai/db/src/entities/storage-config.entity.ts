@@ -10,9 +10,6 @@ import { BaseEntity } from "./base";
 
 @AppEntity({ name: "storage_config", comment: "存储配置" })
 export class StorageConfig extends BaseEntity {
-    @Column({ comment: "存储方式名称" })
-    name: string;
-
     @Column({ type: "enum", enum: StorageType, comment: "存储类型" })
     storageType: StorageTypeType;
 

@@ -17,7 +17,6 @@ export class StorageService {
             .createQueryBuilder("storage-config")
             .select([
                 "storage-config.id",
-                "storage-config.name",
                 "storage-config.isActive",
                 "storage-config.storageType",
                 "storage-config.config",

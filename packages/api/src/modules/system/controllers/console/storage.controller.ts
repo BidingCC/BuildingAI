@@ -2,7 +2,7 @@ import { BaseController } from "@buildingai/base";
 import { UUIDValidationPipe } from "@buildingai/pipe/param-validate.pipe";
 import { ConsoleController } from "@common/decorators";
 import { UpdateStorageConfigDto } from "@modules/system/dto/update-storage-config.dto";
-import { Body, Get, Inject, Param, Put } from "@nestjs/common";
+import { Body, Get, Inject, Param, Patch } from "@nestjs/common";
 
 import { StorageService } from "../../services/storage.service";
 
@@ -10,6 +10,7 @@ import { StorageService } from "../../services/storage.service";
     {
         path: "system-storage-config",
         skipAuth: true,
+        skipPermissionCheck: true,
     },
     "存储配置",
 )
@@ -22,11 +23,11 @@ export class StorageController extends BaseController {
         return this.storageService.getAllConfigs();
     }
 
-    @Put(":id")
+    @Patch(":id")
     async updateStorageConfig(
         @Param("id", UUIDValidationPipe) id: string,
-        @Body() dto: UpdateStorageConfigDto,
+        @Body() body: UpdateStorageConfigDto,
     ) {
-        await this.storageService.updateConfig(id, dto);
+        await this.storageService.updateConfig(id, body);
     }
 }

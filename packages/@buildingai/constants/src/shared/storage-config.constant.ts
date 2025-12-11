@@ -1,8 +1,8 @@
 export const StorageType = {
-    LOCAL: 1,
-    ALIYUN_OSS: 2,
-    TENCENT_COS: 3,
-    QINIU_KODO: 4,
+    LOCAL: "local",
+    ALIYUN_OSS: "aliyun-oss",
+    TENCENT_COS: "tencent-cos",
+    QINIU_KODO: "qiniu-kodo",
 } as const;
 
 export type StorageTypeType = (typeof StorageType)[keyof typeof StorageType];
