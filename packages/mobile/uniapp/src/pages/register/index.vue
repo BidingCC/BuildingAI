@@ -7,6 +7,8 @@ import Agreement from "@/components/login/agreement.vue";
 import WebsiteInfo from "@/components/login/website-info.vue";
 import { apiAuthRegister } from "@/service/user";
 
+const { t } = useI18n();
+
 definePage({
     style: {
         navigationBarTitle: "pages.register",
@@ -31,30 +33,30 @@ const formData = reactive<SystemRegisrerAccountParams & { confirmPassword: strin
     terminal: getTerminal().toString(),
 });
 
-const customRules = {
+const customRules = computed(() => ({
     username: {
         rules: [
-            { required: true, errorMessage: "请输入账号" },
-            { minLength: 3, errorMessage: "账号长度不得低于3个字符" },
+            { required: true, errorMessage: t("login.validation.accountRequired") },
+            { minLength: 3, errorMessage: t("login.validation.accountMinLength") },
         ],
     },
     password: {
         rules: [
-            { required: true, errorMessage: "请输入密码" },
-            { minLength: 6, errorMessage: "密码长度不能少于6个字符" },
-            { maxLength: 25, errorMessage: "密码长度不能超过25个字符" },
+            { required: true, errorMessage: t("login.validation.passwordRequired") },
+            { minLength: 6, errorMessage: t("login.validation.passwordMinLength") },
+            { maxLength: 25, errorMessage: t("login.validation.passwordMaxLength") },
         ],
     },
     confirmPassword: {
         rules: [
-            { required: true, errorMessage: "请确认密码" },
+            { required: true, errorMessage: t("login.validation.confirmPasswordRequired") },
             {
                 validateFunction: (rule: object, value: string, _data: object) => {
                     // 返回 Promise 对象
                     return new Promise<void>((resolve, reject) => {
                         if (value !== formData.password) {
                             // 不通过返回 reject
-                            reject(new Error("两次输入的密码不一致"));
+                            reject(new Error(t("login.validation.passwordMismatch")));
                         } else {
                             // 通过返回 resolve
                             resolve();
@@ -64,7 +66,7 @@ const customRules = {
             },
         ],
     },
-};
+}));
 
 const handleLoginPreset = async () => {
     if (!checked.value && loginSettings.value?.showPolicyAgreement) {
@@ -88,7 +90,7 @@ const handleRegister = async () => {
         return;
     }
 
-    useToast().loading("注册中");
+    useToast().loading(t("login.registering"));
 
     const data = unref(formData);
     const res = await apiAuthRegister(data);
@@ -113,54 +115,64 @@ const handleAgreement = (type: "service" | "privacy") => {
             <uni-forms ref="customFormRefs" :rules="customRules" :modelValue="formData">
                 <uni-forms-item label="" :labelWidth="0" name="username">
                     <view class="text-accent-foreground text-sm">
-                        账号
+                        {{ t("login.form.account") }}
                         <text text="error">*</text>
                     </view>
                     <uni-easyinput
                         v-model="formData.username"
                         :customStyles="{ height: '88rpx' }"
-                        placeholder="请输入账号"
+                        :placeholder="t('login.form.accountPlaceholder')"
                     />
                 </uni-forms-item>
                 <uni-forms-item label="" :labelWidth="0" name="password">
                     <view class="text-accent-foreground text-sm">
-                        密码
+                        {{ t("login.form.password") }}
                         <text text="error">*</text>
                     </view>
                     <uni-easyinput
                         v-model="formData.password"
                         type="password"
-                        placeholder="请输入密码"
+                        :placeholder="t('login.form.passwordPlaceholder')"
                         :customStyles="{ height: '88rpx' }"
                     />
                 </uni-forms-item>
                 <uni-forms-item label="" :labelWidth="0" name="confirmPassword">
                     <view class="text-accent-foreground text-sm">
-                        确认密码
+                        {{ t("login.form.confirmPassword") }}
                         <text text="error">*</text>
                     </view>
                     <uni-easyinput
                         v-model="formData.confirmPassword"
                         type="password"
-                        placeholder="请确认密码"
+                        :placeholder="t('login.form.confirmPasswordPlaceholder')"
                         :customStyles="{ height: '88rpx' }"
                     />
                 </uni-forms-item>
             </uni-forms>
 
             <view class="mt-8">
-                <button size="mini" type="primary" @click="handleLoginPreset()">立即注册</button>
+                <button size="mini" type="primary" @click="handleLoginPreset()">
+                    {{ t("login.form.registerNow") }}
+                </button>
             </view>
         </view>
         <!-- 隐私协议及用户协议 -->
         <Agreement v-if="loginSettings?.showPolicyAgreement" class="mt-6" v-model="checked" />
         <!-- 隐私协议及用户协议模态框 -->
-        <BdModal ref="modalRef" title="服务协议及隐私保护" @confirm="handleRegister">
+        <BdModal
+            ref="modalRef"
+            :title="t('login.serviceAgreementAndPrivacy')"
+            @confirm="handleRegister"
+        >
             <view class="px-2 py-4">
-                <text>确认即表示你已阅读并同意BuildingAI的</text>
-                <text class="text-primary" @click="handleAgreement('service')">用户协议</text>
-                <text>和</text>
-                <text class="text-primary" @click="handleAgreement('privacy')">隐私政策</text>
+                <text>{{ t("login.agreementConfirmText") }}</text>
+                <text class="text-primary" @click="handleAgreement('service')">
+                    {{ t("login.userAgreement") }}
+                </text>
+                <text>{{ t("login.and") }}</text>
+                <text class="text-primary" @click="handleAgreement('privacy')">
+                    {{ t("login.privacyPolicy") }}
+                </text>
             </view>
         </BdModal>
     </view>

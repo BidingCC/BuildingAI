@@ -1,0 +1,38 @@
+{
+    "loading": "登录中",
+    "registering": "注册中",
+    "otherLoginMethods": "其他登录方式",
+    "continueWithWechat": "继续使用微信登录",
+    "continueWithAccount": "继续使用账号登录",
+    "serviceAgreementAndPrivacy": "服务协议及隐私保护",
+    "agreementConfirmText": "确认即表示你已阅读并同意BuildingAI的",
+    "userAgreement": "用户协议",
+    "privacyPolicy": "隐私政策",
+    "and": "和",
+    "quickLogin": "一键快捷登录",
+    "form": {
+        "account": "账号",
+        "password": "密码",
+        "confirmPassword": "确认密码",
+        "accountPlaceholder": "请输入账号",
+        "passwordPlaceholder": "请输入密码",
+        "confirmPasswordPlaceholder": "请确认密码",
+        "registerAccount": "注册账号",
+        "loginNow": "立即登录",
+        "registerNow": "立即注册"
+    },
+    "validation": {
+        "accountRequired": "请输入账号",
+        "accountMinLength": "账号长度不得低于3个字符",
+        "passwordRequired": "请输入密码",
+        "passwordMinLength": "密码长度不能少于6个字符",
+        "passwordMaxLength": "密码长度不能超过25个字符",
+        "confirmPasswordRequired": "请确认密码",
+        "passwordMismatch": "两次输入的密码不一致"
+    },
+    "agreement": {
+        "readAndAgree": "已阅读并同意",
+        "userAgreementBrackets": "《用户协议》",
+        "privacyPolicyBrackets": "《隐私政策》"
+    }
+}

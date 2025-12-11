@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useVModel } from "@vueuse/core";
 
+const { t } = useI18n();
+
 const props = defineProps<{
     modelValue: boolean;
 }>();
@@ -23,13 +25,13 @@ const handleAgreement = (type: "service" | "privacy") => {
         <BdCheckbox v-model="checked" :value="true">
             <template #label>
                 <view class="flex items-center" text-xs text-muted-foreground>
-                    <text ml-1>已阅读并同意</text>
+                    <text ml-1>{{ t("login.agreement.readAndAgree") }}</text>
                     <text class="text-primary" @click="handleAgreement('service')">
-                        《用户协议》
+                        {{ t("login.agreement.userAgreementBrackets") }}
                     </text>
-                    <text>和</text>
+                    <text>{{ t("login.and") }}</text>
                     <text class="text-primary" @click="handleAgreement('privacy')">
-                        《隐私政策》
+                        {{ t("login.agreement.privacyPolicyBrackets") }}
                     </text>
                 </view>
             </template>

@@ -10,6 +10,8 @@ import WebsiteInfo from "@/components/login/website-info.vue";
 import { apiAuthLogin } from "@/service/user";
 import { isApp, isH5, isMp, isWechatOa } from "@/utils/env";
 
+const { t } = useI18n();
+
 definePage({
     style: {
         navigationBarTitle: "pages.login",
@@ -76,7 +78,7 @@ const handleAccountLogin = async () => {
 
 const handleLogin = async () => {
     const method = unref(currentLoginMethod);
-    useToast().loading("登录中");
+    useToast().loading(t("login.loading"));
     if (!checked.value) checked.value = true;
     if (method === LoginMethod.WEIXIN) {
         // const { code } = await uni.login({ provider: "weixin" });
@@ -125,7 +127,7 @@ const handleAgreement = (type: "service" | "privacy") => {
                 (currentLoginMethod === LoginMethod.ACCOUNT && (!isH5 || isWechatOa)) ||
                 currentLoginMethod === LoginMethod.WEIXIN
             "
-            text="其他登录方式"
+            :text="t('login.otherLoginMethods')"
             margin="30px 0"
             w="full"
         />
@@ -138,7 +140,7 @@ const handleAgreement = (type: "service" | "privacy") => {
                 @click="currentLoginMethod = LoginMethod.WEIXIN"
             >
                 <view i-tabler-brand-wechat />
-                继续使用微信登录
+                {{ t("login.continueWithWechat") }}
             </button>
             <button
                 v-if="currentLoginMethod === LoginMethod.WEIXIN"
@@ -148,16 +150,24 @@ const handleAgreement = (type: "service" | "privacy") => {
                 @click="currentLoginMethod = LoginMethod.ACCOUNT"
             >
                 <view i-tabler-lock />
-                继续使用账号登录
+                {{ t("login.continueWithAccount") }}
             </button>
         </view>
         <!-- 隐私协议及用户协议模态框 -->
-        <BdModal ref="modalRef" title="服务协议及隐私保护" @confirm="handleLogin">
+        <BdModal
+            ref="modalRef"
+            :title="t('login.serviceAgreementAndPrivacy')"
+            @confirm="handleLogin"
+        >
             <view class="px-2 py-4">
-                <text>确认即表示你已阅读并同意BuildingAI的</text>
-                <text class="text-primary" @click="handleAgreement('service')">用户协议</text>
-                <text>和</text>
-                <text class="text-primary" @click="handleAgreement('privacy')">隐私政策</text>
+                <text>{{ t("login.agreementConfirmText") }}</text>
+                <text class="text-primary" @click="handleAgreement('service')">
+                    {{ t("login.userAgreement") }}
+                </text>
+                <text>{{ t("login.and") }}</text>
+                <text class="text-primary" @click="handleAgreement('privacy')">
+                    {{ t("login.privacyPolicy") }}
+                </text>
             </view>
         </BdModal>
     </view>

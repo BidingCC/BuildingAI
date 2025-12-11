@@ -1,4 +1,6 @@
 <script setup lang="ts">
+const { t } = useI18n();
+
 const emits = defineEmits<{
     (e: "getPhoneNumber", value: GetPhoneNumberEvent["detail"]): void;
 }>();
@@ -10,7 +12,7 @@ const getPhoneNumber = (e: GetPhoneNumberEvent) => {
 
 <template>
     <button type="primary" open-type="getPhoneNumber" @getphonenumber="getPhoneNumber">
-        一键快捷登录
+        {{ t("login.quickLogin") }}
     </button>
 </template>
 
