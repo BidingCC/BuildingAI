@@ -56,7 +56,7 @@ const handleLoginPreset = async (
         accountLoginParams.value = e;
     }
 
-    if (!checked.value) {
+    if (!checked.value && loginSettings.value?.showPolicyAgreement) {
         modalRef.value?.open();
         return;
     } else {
@@ -156,3 +156,22 @@ watch(defaultLoginMethod, (newVal) => {
         </BdModal>
     </view>
 </template>
+
+<style>
+page {
+    background-image:
+        url("@/static/images/background.png"),
+        linear-gradient(
+            to bottom,
+            var(--primary-300) 0%,
+            var(--primary-200) 10%,
+            var(--primary-50) 25%,
+            var(--background-soft) 30%,
+            var(--background-soft) 100%
+        );
+    background-size: 100%, cover;
+    background-position: top, top;
+    background-repeat: no-repeat, no-repeat;
+    z-index: 0;
+}
+</style>

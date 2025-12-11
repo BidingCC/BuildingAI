@@ -138,8 +138,9 @@ export interface UserCreateRequest extends BaseUserInfo {
  * User update request interface
  * @description Interface for updating existing users
  */
-export interface UserUpdateRequest
-    extends Partial<Omit<UserCreateRequest, "username" | "password">> {
+export interface UserUpdateRequest extends Partial<
+    Omit<UserCreateRequest, "username" | "password">
+> {
     /** User ID (required for updates) */
     id: string;
 }

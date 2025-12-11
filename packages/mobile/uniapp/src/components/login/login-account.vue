@@ -44,6 +44,10 @@ const submit = async () => {
     <view w="full">
         <uni-forms ref="customFormRefs" :rules="customRules" :modelValue="formData">
             <uni-forms-item label="" :labelWidth="0" name="username">
+                <view class="text-accent-foreground text-sm">
+                    账号
+                    <text text="error">*</text>
+                </view>
                 <uni-easyinput
                     v-model="formData.username"
                     :customStyles="{ height: '88rpx' }"
@@ -51,6 +55,10 @@ const submit = async () => {
                 />
             </uni-forms-item>
             <uni-forms-item label="" :labelWidth="0" name="password">
+                <view class="text-accent-foreground text-sm">
+                    密码
+                    <text text="error">*</text>
+                </view>
                 <uni-easyinput
                     v-model="formData.password"
                     type="password"
