@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import type { StorageConfig } from "@buildingai/service/consoleapi/storage-config";
+import {
+    apiUpdateStorageConfig,
+    type StorageConfig,
+} from "@buildingai/service/consoleapi/storage-config";
 import { StorageType } from "@buildingai/service/consoleapi/storage-config";
-import type { FormSubmitEvent } from "@nuxt/ui";
-import { boolean, type InferType, number, object, string } from "yup";
+import { boolean, object, string } from "yup";
 
 const props = defineProps({
     data: {
@@ -14,7 +16,7 @@ const props = defineProps({
 const { t } = useI18n();
 const form = useTemplateRef("form");
 const schema = object({
-    storageType: number().required(),
+    storageType: string().required(),
     isActive: boolean().required(),
     config: object({
         bucket: string().required(t("storage-config.form.spaceName.placeholder")),
@@ -25,16 +27,16 @@ const schema = object({
         arn: string().optional(),
     }),
 });
-type Schema = InferType<typeof schema>;
 const state = reactive<StorageConfig<typeof StorageType.ALIYUN_OSS>>({
     ...props.data,
     config: { ...props.data.config },
 });
 
 const toast = useToast();
-async function handleSubmit(event: FormSubmitEvent<Schema>) {
+async function handleSubmit() {
     toast.add({ title: "Success", description: "The form has been submitted.", color: "success" });
-    console.log(event.data);
+    await apiUpdateStorageConfig(state);
+    console.log("emit update");
 }
 </script>
 
@@ -48,7 +50,7 @@ async function handleSubmit(event: FormSubmitEvent<Schema>) {
                 :schema="schema"
                 :state="state"
                 class="space-y-6"
-                @submit="(event) => handleSubmit(event)"
+                @submit="handleSubmit"
             >
                 <UFormField
                     name="storageType"

@@ -18,14 +18,14 @@ const columns: TableColumn<StorageConfigTableData>[] = [
         accessorKey: "storageType",
         header: t("storage-config.table.storageType"),
         cell: ({ row }) => {
-            return t(`storage-config.storage.${row.original.name}`);
+            return t(`storage-config.storage.${row.original.storageType}`);
         },
     },
     {
         accessorKey: "storageLocation",
         header: t("storage-config.table.storageLocation"),
         cell: ({ row }) => {
-            return t(`storage-config.location.${row.original.name}`);
+            return t(`storage-config.location.${row.original.storageType}`);
         },
     },
     {
