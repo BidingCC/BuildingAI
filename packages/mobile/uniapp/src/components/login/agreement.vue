@@ -10,6 +10,12 @@ const emits = defineEmits<{
 }>();
 
 const checked = useVModel(props, "modelValue", emits);
+
+const handleAgreement = (type: "service" | "privacy") => {
+    useRouter().navigate({
+        url: `/pages/agreement/index?url=${type}`,
+    });
+};
 </script>
 
 <template>
@@ -18,9 +24,13 @@ const checked = useVModel(props, "modelValue", emits);
             <template #label>
                 <view class="flex items-center" text-xs text-muted-foreground>
                     <text ml-1>已阅读并同意</text>
-                    <text class="text-primary">《用户协议》</text>
+                    <text class="text-primary" @click="handleAgreement('service')">
+                        《用户协议》
+                    </text>
                     <text>和</text>
-                    <text class="text-primary">《隐私政策》</text>
+                    <text class="text-primary" @click="handleAgreement('privacy')">
+                        《隐私政策》
+                    </text>
                 </view>
             </template>
         </BdCheckbox>

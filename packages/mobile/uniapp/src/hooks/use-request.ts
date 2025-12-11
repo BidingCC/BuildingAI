@@ -19,7 +19,7 @@ interface UploadResponse {
     [key: string]: unknown;
 }
 
-const getBaseUrl = (): string => {
+export const getBaseUrl = (): string => {
     console.log(
         import.meta.env.VITE_DEVELOP_APP_BASE_URL,
         import.meta.env.VITE_PRODUCTION_APP_BASE_URL,

@@ -6,8 +6,9 @@
  * @author BuildingAI Teams
  */
 
+import type { SiteConfig } from "@buildingai/service/common";
 import type { LoginSettings } from "@buildingai/service/consoleapi/login-settings";
-import type { SiteConfig, WebsiteConfig } from "@buildingai/service/consoleapi/website";
+import type { WebsiteConfig } from "@buildingai/service/consoleapi/website";
 
 // ==================== File Upload Type Definitions ====================
 

@@ -90,13 +90,19 @@ const handleLogin = async () => {
 };
 
 const loginResult = (res: LoginResponse) => {
-    useToast().clear();
+    uni.hideToast();
     userStore.login(res.token, redirect.value);
 };
 
 watch(defaultLoginMethod, (newVal) => {
     currentLoginMethod.value = newVal;
 });
+
+const handleAgreement = (type: "service" | "privacy") => {
+    useRouter().navigate({
+        url: `/pages/agreement/index?url=${type}`,
+    });
+};
 </script>
 
 <template>
@@ -149,9 +155,9 @@ watch(defaultLoginMethod, (newVal) => {
         <BdModal ref="modalRef" title="服务协议及隐私保护" @confirm="handleLogin">
             <view class="px-2 py-4">
                 <text>确认即表示你已阅读并同意BuildingAI的</text>
-                <text class="text-primary">用户协议</text>
+                <text class="text-primary" @click="handleAgreement('service')">用户协议</text>
                 <text>和</text>
-                <text class="text-primary">隐私政策</text>
+                <text class="text-primary" @click="handleAgreement('privacy')">隐私政策</text>
             </view>
         </BdModal>
     </view>

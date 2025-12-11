@@ -50,7 +50,7 @@ const submit = async () => {
                 </view>
                 <uni-easyinput
                     v-model="formData.username"
-                    :customStyles="{ height: '88rpx' }"
+                    :customStyles="{ height: '86rpx' }"
                     placeholder="请输入账号"
                 />
             </uni-forms-item>
@@ -63,7 +63,7 @@ const submit = async () => {
                     v-model="formData.password"
                     type="password"
                     placeholder="请输入密码"
-                    :customStyles="{ height: '88rpx' }"
+                    :customStyles="{ height: '86rpx' }"
                 />
             </uni-forms-item>
         </uni-forms>

@@ -330,6 +330,7 @@ declare global {
   const deleteSecrets: typeof import('../../../../web/@buildingai/service/src/consoleapi/secret-list')['deleteSecrets']
   const effectScope: typeof import('vue')['effectScope']
   const getAccountBalanceList: typeof import('../../../../web/@buildingai/service/src/consoleapi/account-balance')['getAccountBalanceList']
+  const getBaseUrl: typeof import('../hooks/use-request')['getBaseUrl']
   const getCurrentInstance: typeof import('vue')['getCurrentInstance']
   const getCurrentScope: typeof import('vue')['getCurrentScope']
   const getSecretConfigsByTemplate: typeof import('../../../../web/@buildingai/service/src/consoleapi/secret-list')['getSecretConfigsByTemplate']
@@ -541,6 +542,7 @@ declare module 'vue' {
     readonly defineAsyncComponent: UnwrapRef<typeof import('vue')['defineAsyncComponent']>
     readonly defineComponent: UnwrapRef<typeof import('vue')['defineComponent']>
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
+    readonly getBaseUrl: UnwrapRef<typeof import('../hooks/use-request')['getBaseUrl']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
     readonly getTerminal: UnwrapRef<typeof import('../utils/env')['getTerminal']>
