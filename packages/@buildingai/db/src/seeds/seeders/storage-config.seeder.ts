@@ -26,21 +26,25 @@ export class StorageConfigSeeder extends BaseSeeder {
                     storageType: StorageType.LOCAL,
                     isActive: true,
                     config: null,
+                    sort: 0,
                 },
                 {
                     storageType: StorageType.ALIYUN_OSS,
                     isActive: false,
                     config: null,
+                    sort: 1,
                 },
                 {
                     storageType: StorageType.TENCENT_COS,
                     isActive: false,
                     config: null,
+                    sort: 2,
                 },
                 {
                     storageType: StorageType.QINIU_KODO,
                     isActive: false,
                     config: null,
+                    sort: 3,
                 },
             ]);
 

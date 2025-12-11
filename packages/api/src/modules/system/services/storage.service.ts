@@ -21,6 +21,7 @@ export class StorageService {
                 "storage-config.storageType",
                 "storage-config.config",
             ])
+            .orderBy("sort", "ASC")
             .getMany();
     }
 

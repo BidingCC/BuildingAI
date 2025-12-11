@@ -16,6 +16,9 @@ export class StorageConfig extends BaseEntity {
     @Column({ type: "boolean", default: false, comment: "是否激活" })
     isActive: boolean;
 
+    @Column({ default: 0, comment: "排序" })
+    sort: number;
+
     @Column({ type: "jsonb", nullable: true, comment: "存储配置内容" })
     config: StorageConfigData;
 }
