@@ -22,9 +22,9 @@ const { lockFn: getWxMpConfig } = useLockFn(async () => {
 });
 
 const schema = object({
-    name: string().required("小程序名称不能为空"),
-    appId: string().required("AppId不能为空"),
-    appSecret: string().required("AppSecret不能为空"),
+    name: string().required(t("channel.wechatMP.validation.name.required")),
+    appId: string().required(t("channel.wechatMP.validation.appId.required")),
+    appSecret: string().required(t("channel.wechatMP.validation.appSecret.required")),
 });
 const { lockFn: handleSubmit, isLock } = useLockFn(async () => {
     try {
@@ -62,41 +62,52 @@ onMounted(() => getWxMpConfig());
     <UForm :schema="schema" :state="state" class="space-y-6" @submit="handleSubmit" ref="formRef">
         <div class="information-container mx-auto mt-4">
             <div class="mb-4 flex flex-col justify-center">
-                <h2 class="text-xl font-semibold">基本信息</h2>
+                <h2 class="text-xl font-semibold">
+                    {{ t("channel.wechatMP.sections.basicInfo.title") }}
+                </h2>
                 <p class="text-muted-foreground mt-1 text-sm">
-                    填写小程序基本信息，用于小程序的识别和展示
+                    {{ t("channel.wechatMP.sections.basicInfo.description") }}
                 </p>
             </div>
         </div>
-        <UFormField label="小程序名称" class="mb-6" name="name" required>
+        <UFormField
+            :label="t('channel.wechatMP.form.name.label')"
+            class="mb-6"
+            name="name"
+            required
+        >
             <UInput
                 v-model="state.name"
-                placeholder="请输入小程序名称"
-                size="lg"
-                :ui="{ root: 'w-full sm:w-xs' }"
-            >
-            </UInput>
-        </UFormField>
-        <UFormField label="原始ID" class="mb-6" name="originalId">
-            <UInput
-                v-model="state.originalId"
-                placeholder="请输入原始ID"
+                :placeholder="t('channel.wechatMP.form.name.placeholder')"
                 size="lg"
                 :ui="{ root: 'w-full sm:w-xs' }"
             >
             </UInput>
         </UFormField>
         <UFormField
-            label="小程序码"
+            :label="t('channel.wechatMP.form.originalId.label')"
+            class="mb-6"
+            name="originalId"
+        >
+            <UInput
+                v-model="state.originalId"
+                :placeholder="t('channel.wechatMP.form.originalId.placeholder')"
+                size="lg"
+                :ui="{ root: 'w-full sm:w-xs' }"
+            >
+            </UInput>
+        </UFormField>
+        <UFormField
+            :label="t('channel.wechatMP.form.qrCode.label')"
             class="mb-6"
             name="qrCode"
-            description="建议尺寸：400*400像素，支持jpg，jpeg，png格式"
+            :description="t('channel.wechatMP.form.qrCode.description')"
         >
             <div class="flex items-start gap-4">
                 <BdUploader
                     v-model="state.qrCode"
                     class="h-24 w-24"
-                    text="上传小程序码"
+                    :text="t('channel.wechatMP.form.qrCode.uploadText')"
                     icon="i-lucide-upload"
                     accept=".jpg,.png,.jpeg"
                     :maxCount="1"
@@ -106,34 +117,50 @@ onMounted(() => getWxMpConfig());
         </UFormField>
         <div class="information-container mx-auto mt-4">
             <div class="mb-4 flex flex-col justify-center">
-                <h2 class="text-xl font-semibold">开发者配置</h2>
+                <h2 class="text-xl font-semibold">
+                    {{ t("channel.wechatMP.sections.developerConfig.title") }}
+                </h2>
                 <p class="text-muted-foreground mt-1 text-sm">
-                    填写小程序开发者配置，用于小程序的开发和维护
+                    {{ t("channel.wechatMP.sections.developerConfig.description") }}
                 </p>
             </div>
         </div>
-        <UFormField label="AppId" class="mb-6" name="appId" required>
+        <UFormField
+            :label="t('channel.wechatMP.form.appId.label')"
+            class="mb-6"
+            name="appId"
+            required
+        >
             <UInput
                 v-model="state.appId"
-                placeholder="请输入AppId"
+                :placeholder="t('channel.wechatMP.form.appId.placeholder')"
                 size="lg"
                 :ui="{ root: 'w-full sm:w-xs' }"
             >
             </UInput>
         </UFormField>
-        <UFormField label="AppSecret" class="mb-6" name="appSecret" required>
+        <UFormField
+            :label="t('channel.wechatMP.form.appSecret.label')"
+            class="mb-6"
+            name="appSecret"
+            required
+        >
             <UInput
                 v-model="state.appSecret"
-                placeholder="请输入AppSecret"
+                :placeholder="t('channel.wechatMP.form.appSecret.placeholder')"
                 size="lg"
                 :ui="{ root: 'w-full sm:w-xs' }"
             >
             </UInput>
         </UFormField>
-        <UFormField label="上传密钥" class="mb-6" name="uploadKey">
+        <UFormField
+            :label="t('channel.wechatMP.form.uploadKey.label')"
+            class="mb-6"
+            name="uploadKey"
+        >
             <UTextarea
                 v-model="state.uploadKey"
-                placeholder="请输入上传密钥"
+                :placeholder="t('channel.wechatMP.form.uploadKey.placeholder')"
                 size="lg"
                 :ui="{ root: 'w-full sm:w-xs' }"
             >
@@ -141,7 +168,7 @@ onMounted(() => getWxMpConfig());
         </UFormField>
         <div class="flex space-x-3 pt-4">
             <UButton type="submit" color="primary" :loading="isLock" :disabled="isLock">
-                {{ isLock ? "保存中..." : "保存更改" }}
+                {{ isLock ? t("channel.wechatMP.actions.saving") : t("console-common.save") }}
             </UButton>
             <UButton
                 type="reset"
@@ -151,7 +178,7 @@ onMounted(() => getWxMpConfig());
                 :disabled="isLock"
                 @click="resetForm"
             >
-                {{ isLock ? "重置中..." : "重置配置" }}
+                {{ isLock ? t("channel.wechatMP.actions.resetting") : t("console-common.reset") }}
             </UButton>
         </div>
     </UForm>

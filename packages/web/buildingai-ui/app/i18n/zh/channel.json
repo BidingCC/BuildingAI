@@ -97,5 +97,68 @@
             "copyJsApiDomainSuccess": "JS接口安全域名已复制到剪贴板",
             "copyWebAuthDomainSuccess": "网页授权域名已复制到剪贴板"
         }
+    },
+    "wechatMP": {
+        "tabs": {
+            "info": "小程序配置",
+            "version": "版本管理"
+        },
+        "sections": {
+            "basicInfo": {
+                "title": "基本信息",
+                "description": "填写小程序基本信息，用于小程序的识别和展示"
+            },
+            "developerConfig": {
+                "title": "开发者配置",
+                "description": "填写小程序开发者配置，用于小程序的开发和维护"
+            }
+        },
+        "form": {
+            "name": {
+                "label": "小程序名称",
+                "placeholder": "请输入小程序名称",
+                "required": "小程序名称不能为空"
+            },
+            "originalId": {
+                "label": "原始ID",
+                "placeholder": "请输入原始ID"
+            },
+            "qrCode": {
+                "label": "小程序码",
+                "description": "建议尺寸：400*400像素，支持jpg，jpeg，png格式",
+                "uploadText": "上传小程序码"
+            },
+            "appId": {
+                "label": "AppId",
+                "placeholder": "请输入AppId",
+                "required": "AppId不能为空"
+            },
+            "appSecret": {
+                "label": "AppSecret",
+                "placeholder": "请输入AppSecret",
+                "required": "AppSecret不能为空"
+            },
+            "uploadKey": {
+                "label": "上传密钥",
+                "placeholder": "请输入上传密钥"
+            }
+        },
+        "actions": {
+            "saving": "保存中...",
+            "resetting": "重置中...",
+            "save": "保存",
+            "reset": "重置"
+        },
+        "validation": {
+            "name": {
+                "required": "小程序名称不能为空"
+            },
+            "appId": {
+                "required": "AppId不能为空"
+            },
+            "appSecret": {
+                "required": "AppSecret不能为空"
+            }
+        }
     }
 }

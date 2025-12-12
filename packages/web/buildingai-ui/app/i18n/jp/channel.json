@@ -97,5 +97,68 @@
             "copyJsApiDomainSuccess": "JSインターフェース安全ドメインをクリップボードにコピーしました",
             "copyWebAuthDomainSuccess": "Web認証ドメインをクリップボードにコピーしました"
         }
+    },
+    "wechatMP": {
+        "tabs": {
+            "info": "ウィジェット設定",
+            "version": "バージョン管理"
+        },
+        "sections": {
+            "basicInfo": {
+                "title": "基本情報",
+                "description": "ウィジェットの識別と表示のための基本情報を入力"
+            },
+            "developerConfig": {
+                "title": "開発者設定",
+                "description": "ウィジェットの開発とメンテナンスのための開発者設定を入力"
+            }
+        },
+        "form": {
+            "name": {
+                "label": "ウィジェット名",
+                "placeholder": "ウィジェット名を入力",
+                "required": "ウィジェット名は必須です"
+            },
+            "originalId": {
+                "label": "オリジナルID",
+                "placeholder": "オリジナルIDを入力"
+            },
+            "qrCode": {
+                "label": "QRコード",
+                "description": "推奨サイズ：400*400ピクセル、jpg、jpeg、png形式をサポート",
+                "uploadText": "QRコードをアップロード"
+            },
+            "appId": {
+                "label": "AppId",
+                "placeholder": "AppIdを入力",
+                "required": "AppIdは必須です"
+            },
+            "appSecret": {
+                "label": "AppSecret",
+                "placeholder": "AppSecretを入力",
+                "required": "AppSecretは必須です"
+            },
+            "uploadKey": {
+                "label": "アップロードキー",
+                "placeholder": "アップロードキーを入力"
+            }
+        },
+        "actions": {
+            "saving": "保存中です...",
+            "resetting": "リセット中です...",
+            "save": "保存",
+            "reset": "リセット"
+        },
+        "validation": {
+            "name": {
+                "required": "ウィジェット名は必須です"
+            },
+            "appId": {
+                "required": "AppIdは必須です"
+            },
+            "appSecret": {
+                "required": "AppSecretは必須です"
+            }
+        }
     }
 }

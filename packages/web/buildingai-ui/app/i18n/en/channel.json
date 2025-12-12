@@ -97,5 +97,68 @@
             "copyJsApiDomainSuccess": "JS API domain copied",
             "copyWebAuthDomainSuccess": "Web auth domain copied"
         }
+    },
+    "wechatMP": {
+        "tabs": {
+            "info": "Mini Program Config",
+            "version": "Version Management"
+        },
+        "sections": {
+            "basicInfo": {
+                "title": "Basic Info",
+                "description": "Fill in basic information for mini program identification and display"
+            },
+            "developerConfig": {
+                "title": "Developer Config",
+                "description": "Fill in developer configuration for mini program development and maintenance"
+            }
+        },
+        "form": {
+            "name": {
+                "label": "Mini Program Name",
+                "placeholder": "Enter mini program name",
+                "required": "Mini program name required"
+            },
+            "originalId": {
+                "label": "Original ID",
+                "placeholder": "Enter original ID"
+            },
+            "qrCode": {
+                "label": "QR Code",
+                "description": "Recommended size: 400*400 pixels, supports jpg, jpeg, png formats",
+                "uploadText": "Upload QR Code"
+            },
+            "appId": {
+                "label": "AppId",
+                "placeholder": "Enter AppId",
+                "required": "AppId required"
+            },
+            "appSecret": {
+                "label": "AppSecret",
+                "placeholder": "Enter AppSecret",
+                "required": "AppSecret required"
+            },
+            "uploadKey": {
+                "label": "Upload Key",
+                "placeholder": "Enter upload key"
+            }
+        },
+        "actions": {
+            "saving": "Saving...",
+            "resetting": "Resetting...",
+            "save": "Save",
+            "reset": "Reset"
+        },
+        "validation": {
+            "name": {
+                "required": "Mini program name required"
+            },
+            "appId": {
+                "required": "AppId required"
+            },
+            "appSecret": {
+                "required": "AppSecret required"
+            }
+        }
     }
 }
