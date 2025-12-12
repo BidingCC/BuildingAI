@@ -8,6 +8,8 @@
     "agreementConfirmText": "确认即表示你已阅读并同意BuildingAI的",
     "userAgreement": "用户协议",
     "privacyPolicy": "隐私政策",
+    "paymentAgreement": "支付协议",
+    "logout": "退出登录",
     "and": "和",
     "quickLogin": "一键快捷登录",
     "form": {

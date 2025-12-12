@@ -12,6 +12,7 @@ type _LocationUrl =
   "/pages/login/index" |
   "/pages/register/index" |
   "/pages/user/index" |
+  "/pages/user/profile" |
   "/pages/user/settings" |
   "/pages/webview/index" |
   "/extensions/simple-blog/pages/list/index" |

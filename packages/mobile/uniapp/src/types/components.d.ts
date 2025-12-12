@@ -17,5 +17,6 @@ declare module 'vue' {
     LoginLoginAccount: typeof import('./../components/login/login-account.vue')['default']
     LoginLoginWeixin: typeof import('./../components/login/login-weixin.vue')['default']
     LoginWebsiteInfo: typeof import('./../components/login/website-info.vue')['default']
+    UserUserProfile: typeof import('./../components/user/user-profile.vue')['default']
   }
 }

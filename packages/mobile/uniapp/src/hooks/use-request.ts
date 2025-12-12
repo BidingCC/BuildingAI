@@ -20,10 +20,6 @@ interface UploadResponse {
 }
 
 export const getBaseUrl = (): string => {
-    console.log(
-        import.meta.env.VITE_DEVELOP_APP_BASE_URL,
-        import.meta.env.VITE_PRODUCTION_APP_BASE_URL,
-    );
     if (import.meta.env.DEV) {
         return import.meta.env.VITE_DEVELOP_APP_BASE_URL || "";
     }
@@ -72,7 +68,6 @@ async function request<T = unknown>(
 ): Promise<T> {
     const baseUrl = getBaseUrl();
 
-    console.log(baseUrl, prefix, url);
     const fullUrl = `${baseUrl}${prefix}${url}`;
 
     const requestParams: UniApp.RequestOptions = {
@@ -87,7 +82,6 @@ async function request<T = unknown>(
 
     const token: string | null = useUserStore().token;
 
-    console.log("token", token, useUserStore().temporaryToken, options?.requireAuth);
     // Check user authentication
     if (options?.requireAuth === false && !token && !useUserStore().temporaryToken) {
         throw new Error("User not logged in, please login first and try again");

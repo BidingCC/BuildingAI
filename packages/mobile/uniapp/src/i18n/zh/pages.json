@@ -3,5 +3,7 @@
     "chat": "对话",
     "user": "用户",
     "login": "登录",
-    "register": "注册"
+    "register": "注册",
+    "profile": "个人信息",
+    "settings": "通用设置"
 }
