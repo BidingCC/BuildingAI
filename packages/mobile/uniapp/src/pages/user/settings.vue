@@ -81,209 +81,222 @@ function showLocalePicker() {
 </script>
 
 <template>
-    <template #header> </template>
-    <view class="settings-page-container" :style="pageTransform">
-        <bd-navbar
-            :title="t('pages.settings')"
-            :fixed="true"
-            :show-back="true"
-            :show-home="true"
-            :filter="isPopupOpen ? 'none' : 'blur(4px)'"
-        />
-        <view class="p-4">
-            <view
-                class="bg-background mb-6 flex items-center justify-between rounded-lg py-3 pr-2 pl-4"
-                @click="userProfileRefs?.open()"
-            >
-                <view class="flex items-center gap-3">
-                    <image :src="userStore.userInfo?.avatar" class="size-11 rounded-full" />
-                    <view class="flex flex-col gap-1">
-                        <view class="text-foreground text-sm font-medium">
-                            {{ userStore.userInfo?.nickname }}
-                        </view>
-                        <view class="text-muted-foreground truncate text-xs">
-                            {{ userStore.userInfo?.email || userStore.userInfo?.phone || "admin" }}
+    <view>
+        <view class="settings-page-container" :style="pageTransform">
+            <bd-navbar
+                :title="t('pages.settings')"
+                :fixed="true"
+                :show-back="true"
+                :show-home="true"
+                :filter="isPopupOpen ? 'none' : 'blur(4px)'"
+            />
+            <view class="p-4">
+                <view
+                    class="bg-background mb-6 flex items-center justify-between rounded-lg py-3 pr-2 pl-4"
+                    @click="userProfileRefs?.open()"
+                >
+                    <view class="flex items-center gap-3">
+                        <image :src="userStore.userInfo?.avatar" class="size-11 rounded-full" />
+                        <view class="flex flex-col gap-1">
+                            <view class="text-foreground text-sm font-medium">
+                                {{ userStore.userInfo?.nickname }}
+                            </view>
+                            <view class="text-muted-foreground truncate text-xs">
+                                {{
+                                    userStore.userInfo?.email ||
+                                    userStore.userInfo?.phone ||
+                                    "admin"
+                                }}
+                            </view>
                         </view>
                     </view>
+                    <view i-carbon-chevron-right class="text-muted-foreground ml-1" />
                 </view>
-                <view i-carbon-chevron-right class="text-muted-foreground ml-1" />
-            </view>
 
-            <view class="text-muted-foreground mb-2 ml-4 text-xs"> 账户 </view>
-            <view class="bg-background mb-6 rounded-lg">
-                <view class="flex items-center justify-between pl-2" @click="showLocalePicker">
-                    <view i-lucide-user-round w="10" text="muted-foreground" />
-                    <view
-                        w="full"
-                        flex="~ justify-between items-center"
-                        class="border-b-solid border-muted border-b py-3 pr-2"
-                    >
-                        <view class="text-foreground text-sm">{{ t("common.account") }}</view>
-                        <view class="text-muted-foreground flex items-center">
-                            <text text-sm mr="1">{{ userStore.userInfo?.username }}</text>
+                <view class="text-muted-foreground mb-2 ml-4 text-xs"> 账户 </view>
+                <view class="bg-background mb-6 rounded-lg">
+                    <view class="flex items-center justify-between pl-2" @click="showLocalePicker">
+                        <view i-lucide-user-round w="10" text="muted-foreground" />
+                        <view
+                            w="full"
+                            flex="~ justify-between items-center"
+                            class="border-b-solid border-muted border-b py-3 pr-2"
+                        >
+                            <view class="text-foreground text-sm">{{ t("common.account") }}</view>
+                            <view class="text-muted-foreground flex items-center">
+                                <text text-sm mr="1">{{ userStore.userInfo?.username }}</text>
+                            </view>
                         </view>
                     </view>
-                </view>
-                <view class="flex items-center justify-between pl-2">
-                    <view i-lucide-smartphone w="10" text="muted-foreground" />
-                    <view
-                        w="full"
-                        flex="~ justify-between items-center"
-                        class="border-b-solid border-muted border-b py-3 pr-2"
-                    >
-                        <view class="text-foreground text-sm">{{ t("common.phone") }}</view>
-                        <view class="text-muted-foreground flex items-center">
-                            <text text-sm :class="{ 'mr-1': userStore.userInfo?.phone }">
-                                {{ userStore.userInfo?.phone || t("common.notBind") }}
-                            </text>
-                            <text
-                                v-if="!userStore.userInfo?.phone"
-                                class="i-carbon-chevron-right mt-px"
-                            />
+                    <view class="flex items-center justify-between pl-2">
+                        <view i-lucide-smartphone w="10" text="muted-foreground" />
+                        <view
+                            w="full"
+                            flex="~ justify-between items-center"
+                            class="border-b-solid border-muted border-b py-3 pr-2"
+                        >
+                            <view class="text-foreground text-sm">{{ t("common.phone") }}</view>
+                            <view class="text-muted-foreground flex items-center">
+                                <text text-sm :class="{ 'mr-1': userStore.userInfo?.phone }">
+                                    {{ userStore.userInfo?.phone || t("common.notBind") }}
+                                </text>
+                                <text
+                                    v-if="!userStore.userInfo?.phone"
+                                    class="i-carbon-chevron-right mt-px"
+                                />
+                            </view>
                         </view>
                     </view>
-                </view>
-                <view class="flex items-center justify-between pl-2">
-                    <view i-tabler-brand-wechat w="10" text="muted-foreground" />
-                    <view
-                        w="full"
-                        flex="~ justify-between items-center"
-                        class="border-b-solid border-muted border-b py-3 pr-2"
-                    >
-                        <view class="text-foreground text-sm">{{ t("common.wechatBind") }}</view>
-                        <view class="text-muted-foreground flex items-center">
-                            <text text-sm :class="{ 'mr-1': userStore.userInfo?.phone }">
-                                {{ userStore.userInfo?.phone || t("common.notBind") }}
-                            </text>
-                            <text
-                                v-if="!userStore.userInfo?.phone"
-                                class="i-carbon-chevron-right mt-px"
-                            />
+                    <view class="flex items-center justify-between pl-2">
+                        <view i-tabler-brand-wechat w="10" text="muted-foreground" />
+                        <view
+                            w="full"
+                            flex="~ justify-between items-center"
+                            class="border-b-solid border-muted border-b py-3 pr-2"
+                        >
+                            <view class="text-foreground text-sm">{{
+                                t("common.wechatBind")
+                            }}</view>
+                            <view class="text-muted-foreground flex items-center">
+                                <text text-sm :class="{ 'mr-1': userStore.userInfo?.phone }">
+                                    {{ userStore.userInfo?.phone || t("common.notBind") }}
+                                </text>
+                                <text
+                                    v-if="!userStore.userInfo?.phone"
+                                    class="i-carbon-chevron-right mt-px"
+                                />
+                            </view>
                         </view>
                     </view>
-                </view>
-                <view class="flex items-center justify-between pl-2">
-                    <view i-tabler-mail w="10" text="muted-foreground" />
-                    <view w="full" flex="~ justify-between items-center" class="py-3 pr-2">
-                        <view class="text-foreground text-sm">{{ t("common.emailBind") }}</view>
-                        <view class="text-muted-foreground flex items-center">
-                            <text text-sm :class="{ 'mr-1': userStore.userInfo?.phone }">
-                                {{ userStore.userInfo?.phone || t("common.notBind") }}
-                            </text>
-                            <text
-                                v-if="!userStore.userInfo?.phone"
-                                class="i-carbon-chevron-right mt-px"
-                            />
-                        </view>
-                    </view>
-                </view>
-            </view>
-
-            <view class="text-muted-foreground mb-2 ml-4 text-xs"> 通用 </view>
-            <view class="bg-background mb-6 rounded-lg">
-                <view class="flex items-center justify-between pl-2" @click="showLocalePicker">
-                    <view i-lucide-languages w="10" text="muted-foreground" />
-                    <view
-                        w="full"
-                        flex="~ justify-between items-center"
-                        class="border-b-solid border-muted border-b py-3 pr-2"
-                    >
-                        <view class="text-foreground text-sm">{{ t("common.language") }}</view>
-                        <view class="text-muted-foreground flex items-center">
-                            <text text-sm>{{ currentLocaleLabel }}</text>
-                            <text class="i-carbon-chevron-right mt-px" />
-                        </view>
-                    </view>
-                </view>
-                <view class="flex items-center justify-between pl-2">
-                    <view i-lucide-shirt w="10" text="muted-foreground" />
-                    <view
-                        w="full"
-                        flex="~ justify-between items-center"
-                        class="border-b-solid border-muted border-b py-3 pr-2"
-                    >
-                        <view class="text-foreground text-sm">{{ t("common.theme") }}</view>
-                        <view class="text-muted-foreground flex items-center">
-                            <text text-sm mr="1">{{ t("common.systemMode") }}</text>
-                        </view>
-                    </view>
-                </view>
-                <view class="flex items-center justify-between pl-2">
-                    <view v-if="shake" i-lucide-vibrate w="10" text="muted-foreground xl" />
-                    <view v-else i-lucide-vibrate-off w="10" text="muted-foreground xl" />
-                    <view w="full" flex="~ justify-between items-center" class="py-3 pr-2">
-                        <view class="text-foreground text-sm">{{
-                            t("common.hapticFeedback")
-                        }}</view>
-                        <view class="text-muted-foreground flex items-center">
-                            <view text-sm mr="-2">
-                                <switch
-                                    :checked="shake"
-                                    color="var(--primary)"
-                                    style="transform: scale(0.7)"
+                    <view class="flex items-center justify-between pl-2">
+                        <view i-tabler-mail w="10" text="muted-foreground" />
+                        <view w="full" flex="~ justify-between items-center" class="py-3 pr-2">
+                            <view class="text-foreground text-sm">{{ t("common.emailBind") }}</view>
+                            <view class="text-muted-foreground flex items-center">
+                                <text text-sm :class="{ 'mr-1': userStore.userInfo?.phone }">
+                                    {{ userStore.userInfo?.phone || t("common.notBind") }}
+                                </text>
+                                <text
+                                    v-if="!userStore.userInfo?.phone"
+                                    class="i-carbon-chevron-right mt-px"
                                 />
                             </view>
                         </view>
                     </view>
                 </view>
-            </view>
 
-            <view class="text-muted-foreground mb-2 ml-4 text-xs"> {{ t("common.about") }} </view>
-            <view class="bg-background mb-6 rounded-lg">
-                <view
-                    class="flex items-center justify-between pl-2"
-                    @click="router.navigate({ url: '/pages/agreement/index?url=service' })"
-                >
-                    <view i-lucide-clipboard-pen-line w="10" text="muted-foreground" />
+                <view class="text-muted-foreground mb-2 ml-4 text-xs"> 通用 </view>
+                <view class="bg-background mb-6 rounded-lg">
+                    <view class="flex items-center justify-between pl-2" @click="showLocalePicker">
+                        <view i-lucide-languages w="10" text="muted-foreground" />
+                        <view
+                            w="full"
+                            flex="~ justify-between items-center"
+                            class="border-b-solid border-muted border-b py-3 pr-2"
+                        >
+                            <view class="text-foreground text-sm">{{ t("common.language") }}</view>
+                            <view class="text-muted-foreground flex items-center">
+                                <text text-sm>{{ currentLocaleLabel }}</text>
+                                <text class="i-carbon-chevron-right mt-px" />
+                            </view>
+                        </view>
+                    </view>
+                    <view class="flex items-center justify-between pl-2">
+                        <view i-lucide-shirt w="10" text="muted-foreground" />
+                        <view
+                            w="full"
+                            flex="~ justify-between items-center"
+                            class="border-b-solid border-muted border-b py-3 pr-2"
+                        >
+                            <view class="text-foreground text-sm">{{ t("common.theme") }}</view>
+                            <view class="text-muted-foreground flex items-center">
+                                <text text-sm mr="1">{{ t("common.systemMode") }}</text>
+                            </view>
+                        </view>
+                    </view>
+                    <view class="flex items-center justify-between pl-2">
+                        <view v-if="shake" i-lucide-vibrate w="10" text="muted-foreground xl" />
+                        <view v-else i-lucide-vibrate-off w="10" text="muted-foreground xl" />
+                        <view w="full" flex="~ justify-between items-center" class="py-3 pr-2">
+                            <view class="text-foreground text-sm">{{
+                                t("common.hapticFeedback")
+                            }}</view>
+                            <view class="text-muted-foreground flex items-center">
+                                <view text-sm mr="-2">
+                                    <switch
+                                        :checked="shake"
+                                        color="var(--primary)"
+                                        style="transform: scale(0.7)"
+                                    />
+                                </view>
+                            </view>
+                        </view>
+                    </view>
+                </view>
+
+                <view class="text-muted-foreground mb-2 ml-4 text-xs">
+                    {{ t("common.about") }}
+                </view>
+                <view class="bg-background mb-6 rounded-lg">
                     <view
-                        w="full"
-                        flex="~ justify-between items-center"
-                        class="border-b-solid border-muted border-b py-3 pr-2"
+                        class="flex items-center justify-between pl-2"
+                        @click="router.navigate({ url: '/pages/agreement/index?url=service' })"
                     >
-                        <view class="text-foreground text-sm">{{ t("login.userAgreement") }}</view>
-                        <view class="text-muted-foreground flex items-center">
-                            <text class="i-carbon-chevron-right mt-px" />
+                        <view i-lucide-clipboard-pen-line w="10" text="muted-foreground" />
+                        <view
+                            w="full"
+                            flex="~ justify-between items-center"
+                            class="border-b-solid border-muted border-b py-3 pr-2"
+                        >
+                            <view class="text-foreground text-sm">{{
+                                t("login.userAgreement")
+                            }}</view>
+                            <view class="text-muted-foreground flex items-center">
+                                <text class="i-carbon-chevron-right mt-px" />
+                            </view>
+                        </view>
+                    </view>
+                    <view
+                        class="flex items-center justify-between pl-2"
+                        @click="router.navigate({ url: '/pages/agreement/index?url=privacy' })"
+                    >
+                        <view i-lucide-file-lock-2 w="10" text="muted-foreground" />
+                        <view w="full" flex="~ justify-between items-center" class="py-3 pr-2">
+                            <view class="text-foreground text-sm">{{
+                                t("login.privacyPolicy")
+                            }}</view>
+                            <view class="text-muted-foreground flex items-center">
+                                <text class="i-carbon-chevron-right mt-px" />
+                            </view>
                         </view>
                     </view>
                 </view>
-                <view
-                    class="flex items-center justify-between pl-2"
-                    @click="router.navigate({ url: '/pages/agreement/index?url=privacy' })"
-                >
-                    <view i-lucide-file-lock-2 w="10" text="muted-foreground" />
-                    <view w="full" flex="~ justify-between items-center" class="py-3 pr-2">
-                        <view class="text-foreground text-sm">{{ t("login.privacyPolicy") }}</view>
-                        <view class="text-muted-foreground flex items-center">
-                            <text class="i-carbon-chevron-right mt-px" />
+
+                <view class="bg-background rounded-lg">
+                    <view
+                        class="text-error flex items-center justify-between pl-2"
+                        @click="userStore.logout()"
+                    >
+                        <view i-lucide-log-out w="10" />
+                        <view w="full" flex="~ justify-between items-center" class="py-3">
+                            <view class="text-sm">{{ t("login.logout") }}</view>
                         </view>
                     </view>
                 </view>
-            </view>
 
-            <view class="bg-background rounded-lg">
-                <view
-                    class="text-error flex items-center justify-between pl-2"
-                    @click="userStore.logout()"
-                >
-                    <view i-lucide-log-out w="10" />
-                    <view w="full" flex="~ justify-between items-center" class="py-3">
-                        <view class="text-sm">{{ t("login.logout") }}</view>
-                    </view>
-                </view>
-            </view>
-
-            <view class="text-muted-foreground mt-10 flex items-center justify-center text-xs">
-                <text mr="2">{{ t("common.version") }}</text>
-                <text>25.2.0 (Build: 20260101)</text>
-            </view></view
-        >
+                <view class="text-muted-foreground mt-10 flex items-center justify-center text-xs">
+                    <text mr="2">{{ t("common.version") }}</text>
+                    <text>25.2.0 (Build: 20260101)</text>
+                </view></view
+            >
+        </view>
+        <UserProfile
+            ref="userProfileRefs"
+            @slide-progress="handleSlideProgress"
+            @open="handlePopupOpen"
+            @close="handlePopupClose"
+        />
     </view>
-    <UserProfile
-        ref="userProfileRefs"
-        @slide-progress="handleSlideProgress"
-        @open="handlePopupOpen"
-        @close="handlePopupClose"
-    />
 </template>
 
 <style>

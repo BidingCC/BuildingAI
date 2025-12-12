@@ -1,4 +1,4 @@
-<!-- #ifdef APP-VUE || MP-WEIXIN || MP-QQ || H5 -->
+<!-- #ifdef APP-PLUS || MP-WEIXIN || MP-QQ || H5 -->
 <script src="./use-touch.wxs" module="wxs" lang="wxs"></script>
 <!-- #endif -->
 <script setup lang="ts">
@@ -14,30 +14,44 @@ const {
     wxsPropsType,
     isFullScreen,
     popupHeight,
-    onClickClose,
     onFullScreen,
-    onOverlayClose,
-    updateSlideProgress
+    onOverlayClose
 } = usePopup(props, emits)
-
-const handleSlideProgress = (progress: number) => {
-    updateSlideProgress(progress);
-};
 
 
 // 将方法暴露给wxs调用
-defineExpose({ onClickClose, handleSlideProgress, getCurrentInstance })
+defineExpose({ getCurrentInstance })
+</script>
+
+<!-- 因为 setup 语法的 方法无法被 wxs 调用，所以需要使用 script 标签来定义方法 垃圾啊-->
+<script lang="ts">
+export default {
+    emits: ['slide-progress', 'update:modelValue'],
+    methods: {
+        handleSlideProgress(progress: number) {
+            this.$emit('slide-progress', progress);
+        },
+        handleClose() {
+            this.$emit('update:modelValue', false);
+        }
+    }
+}
 </script>
 
 <template>
     <view
+        <!-- #ifdef APP-PLUS -->
+        v-show="visiblePopup"
+        <!-- #endif -->
+        <!-- #ifndef APP-PLUS -->
         v-if="visiblePopup"
+        <!-- #endif -->
         class="half-popup"
         :style="{
             '--zIndex': props.zIndex,
             '--color': props.color
         }"
-        @close="onClickClose"
+        @close="handleClose"
         @tap.stop="onOverlayClose"
         @touchmove.stop.prevent
     >
@@ -56,7 +70,7 @@ defineExpose({ onClickClose, handleSlideProgress, getCurrentInstance })
             :catchtouchmove="wxs.handleTouchmove"
             <!-- #endif -->
             <!-- #ifndef MP-WEIXIN -->
-            @onClickClose="onClickClose"
+            @handleClose="handleClose"
             @touchmove.passive="wxs.handleTouchmove"
             <!-- #endif -->
             @touchend="wxs.handleTouchend"
@@ -77,7 +91,7 @@ defineExpose({ onClickClose, handleSlideProgress, getCurrentInstance })
             <view
                 v-if="props.closeBtn"
                 class="half-popup-btn half-popup-close-btn"
-                @tap.stop="onClickClose"
+                @tap.stop="handleClose"
             >
                 <text class="__close-icon" />
             </view>
@@ -85,6 +99,6 @@ defineExpose({ onClickClose, handleSlideProgress, getCurrentInstance })
     </view>
 </template>
 
-<style lang="scss">
-@import 'half-popup.scss';
+<style>
+@import 'half-popup.css';
 </style>

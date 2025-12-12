@@ -43,14 +43,6 @@ export const usePopup = (props: HalfPopupProps, emits: HalfPopupEmits) => {
     const popupHeight: Ref<string> = ref(convertHeightToPx(props.height));
 
     /**
-     * @description 更新滑动进度，用于通知外部组件
-     * @param progress 滑动进度，0-1之间
-     */
-    const updateSlideProgress = (progress: number) => {
-        emits("slide-progress", progress);
-    };
-
-    /**
      * @description 更新弹窗状态
      * @param value
      */
@@ -120,13 +112,6 @@ export const usePopup = (props: HalfPopupProps, emits: HalfPopupEmits) => {
     };
 
     /**
-     * @description 点击关闭按钮
-     */
-    const onClickClose = () => {
-        updateModelValue(false);
-    };
-
-    /**
      * @description 点击遮罩关闭弹窗
      */
     const onOverlayClose = () => {
@@ -143,8 +128,6 @@ export const usePopup = (props: HalfPopupProps, emits: HalfPopupEmits) => {
         popupHeight,
 
         onFullScreen,
-        onClickClose,
         onOverlayClose,
-        updateSlideProgress,
     };
 };

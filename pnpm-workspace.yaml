@@ -40,7 +40,7 @@ catalogs:
     bullmq: ^5.63.0
     class-transformer: ^0.5.1
     class-validator: ^0.14.2
-    cron: 4.3.3
+    cron: 4.3.5
     express: ^5.1.0
     typeorm: 0.3.27
     typeorm-naming-strategies: ^4.1.0

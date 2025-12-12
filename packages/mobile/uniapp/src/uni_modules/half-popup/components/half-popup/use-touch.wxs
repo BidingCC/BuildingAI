@@ -93,13 +93,13 @@ function handleTouchend(e, ownerInstance) {
         // 通知外部调用关闭
         // 小程序端：使用callMethod
         if (ownerInstance && ownerInstance.callMethod) {
-            ownerInstance.callMethod('onClickClose');
+            ownerInstance.callMethod('handleClose');
         }
         
         // H5端：通过ownerInstance['$vm']['$'].exposed访问
         if (ownerInstance && ownerInstance['$vm'] && ownerInstance['$vm']['$'] && ownerInstance['$vm']['$'].exposed) {
-            if (ownerInstance['$vm']['$'].exposed.onClickClose) {
-                ownerInstance['$vm']['$'].exposed.onClickClose();
+            if (ownerInstance['$vm']['$'].exposed.handleClose) {
+                ownerInstance['$vm']['$'].exposed.handleClose();
             }
         }
     } else {
@@ -126,7 +126,7 @@ function applyTransformation(transform, currentInstance, animate, transition) {
 // 获取当前实例的函数
 function getInstance(ownerInstance) {
     // if (!currentInstance) {
-        // ownerInstance.callMethod('onClickClose');
+        // ownerInstance.callMethod('handleClose');
         // currentInstance = ownerInstance.getState().currentInstance;
     // }
     return ownerInstance.getState().currentInstance

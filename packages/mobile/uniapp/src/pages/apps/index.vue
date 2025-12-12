@@ -10,6 +10,7 @@ import {
 } from "@/service/common";
 
 const { t } = useI18n();
+const router = useRouter();
 
 definePage({
     style: {
@@ -80,6 +81,12 @@ const recordAnalyse = async () => {
         loading.value = false;
     }
 };
+
+const handleGoToSettings = () => {
+    uni.navigateTo({
+        url: "/pages/user/settings",
+    });
+};
 </script>
 
 <template>
@@ -120,6 +127,14 @@ const recordAnalyse = async () => {
                 @click="recordAnalyse"
             >
                 {{ loading ? "加载中..." : "记录行为分析" }}
+            </button>
+
+            <button
+                class="w-full rounded-lg bg-blue-500 px-4 py-2 text-white disabled:opacity-50"
+                :disabled="loading"
+                @click="handleGoToSettings"
+            >
+                {{ loading ? "加载中..." : "去个人设置1" }}
             </button>
         </view>
 
