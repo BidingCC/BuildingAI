@@ -94,6 +94,7 @@
         "agreement": "ポリシー契約",
         "channelManagement": "チャネル管理",
         "wechatOaConfig": "公式アカウント設定",
+        "wechatMpConfig": "ウィジェット管理です",
         "loginConfig": "ログイン設定"
     },
     "plugin": "アプリ管理",

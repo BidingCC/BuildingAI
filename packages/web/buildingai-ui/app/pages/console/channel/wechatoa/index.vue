@@ -9,7 +9,6 @@ const message = useMessage();
 const { copy } = useClipboard();
 
 const activeTab = shallowRef("0");
-const formRef = shallowRef();
 const state = ref<WxOaConfig>({
     appId: "",
     appSecret: "",
@@ -323,7 +322,6 @@ onMounted(getWxOaConfig);
                     <UButton
                         type="submit"
                         color="primary"
-                        size="xl"
                         :loading="isLock || isLockSubmit"
                         :disabled="isLock || isLockSubmit"
                     >
@@ -333,7 +331,6 @@ onMounted(getWxOaConfig);
                     </UButton>
                     <UButton
                         type="reset"
-                        size="xl"
                         :loading="isLock || isLockSubmit"
                         :disabled="isLock || isLockSubmit"
                         color="neutral"

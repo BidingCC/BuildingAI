@@ -94,6 +94,7 @@
         "agreement": "政策协议",
         "channelManagement": "渠道管理",
         "wechatOaConfig": "公众号配置",
+        "wechatMpConfig": "小程序管理",
         "loginConfig": "登录设置"
     },
     "plugin": "应用管理",

@@ -94,6 +94,7 @@
         "agreement": "Agreements",
         "channelManagement": "Channels",
         "wechatOaConfig": "WeChat OA Config",
+        "wechatMpConfig": "WeChat MP Config",
         "loginConfig": "Login Settings"
     },
     "plugin": "App Management",

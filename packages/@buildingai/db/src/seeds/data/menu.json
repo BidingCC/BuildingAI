@@ -1076,6 +1076,34 @@
                                 "pluginPackName": null
                             }
                         ]
+                    },
+                    {
+                        "name": "console-menu.systemSettings.wechatMpConfig",
+                        "code": "channel-wechat-mp",
+                        "path": "wechat-mp",
+                        "icon": "",
+                        "component": "/console/channel/wechatmp/index",
+                        "permissionCode": "wxmpconfig:get-config",
+                        "sort": 0,
+                        "isHidden": 0,
+                        "type": 2,
+                        "sourceType": 1,
+                        "pluginPackName": null,
+                        "children": [
+                            {
+                                "name": "console-common.update",
+                                "code": null,
+                                "path": "",
+                                "icon": "",
+                                "component": "",
+                                "permissionCode": "wxmpconfig:update-config",
+                                "sort": 0,
+                                "isHidden": 0,
+                                "type": 3,
+                                "sourceType": 1,
+                                "pluginPackName": null
+                            }
+                        ]
                     }
                 ]
             },
