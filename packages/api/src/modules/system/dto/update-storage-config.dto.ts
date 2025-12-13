@@ -6,10 +6,10 @@ import { plainToInstance } from "class-transformer";
 import {
     IsBoolean,
     IsEnum,
-    IsFQDN,
     IsNotEmpty,
     IsOptional,
     IsString,
+    IsUrl,
     Validate,
     validateSync,
     ValidationArguments,
@@ -111,7 +111,7 @@ class BaseCloudConfigDto {
 
     @IsNotEmpty()
     @IsString()
-    @IsFQDN({}, { message: "Domain is invalid" })
+    @IsUrl({ protocols: ["https"], require_protocol: true })
     domain: string;
 }
 
