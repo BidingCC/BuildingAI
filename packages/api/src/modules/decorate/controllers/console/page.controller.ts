@@ -1,15 +1,17 @@
+import { DictService } from "@buildingai/dict";
 import { ConsoleController } from "@common/decorators/controller.decorator";
 import { Permissions } from "@common/decorators/permissions.decorator";
 import { LayoutConfigDto } from "@modules/decorate/dto/layout.dto";
 import { PageService } from "@modules/decorate/services/page.service";
 import { PluginLinksService } from "@modules/decorate/services/plugin-links.service";
-import { Body, Get, Param, Post } from "@nestjs/common";
+import { Body, Get, Param, Post, Query } from "@nestjs/common";
 
 @ConsoleController("decorate-page", "布局配置")
 export class PageConsoleController {
     constructor(
         private readonly pageService: PageService,
         private readonly pluginLinksService: PluginLinksService,
+        private readonly dictService: DictService,
     ) {}
 
     /**
@@ -110,5 +112,50 @@ export class PageConsoleController {
                 timestamp: new Date().toISOString(),
             };
         }
+    }
+
+    /**
+     * 获取 pages 配置
+     * @param type 配置类型，固定为 '自定义'
+     * @returns Pages 配置数据
+     */
+    @Get("pages")
+    @Permissions({
+        code: "get-pages-config",
+        name: "获取 Pages 配置",
+        description: "根据类型获取 Pages 配置",
+    })
+    async getPagesConfig(@Query("type") type: string = "自定义") {
+        const key = `pages_${type}`;
+        const group = "decorate";
+
+        const config = await this.dictService.get<any>(key, {}, group);
+        return config;
+    }
+
+    /**
+     * 设置 pages 配置
+     * @param type 配置类型，固定为 '自定义'
+     * @param data 配置数据，由前端传递
+     * @returns 保存结果
+     */
+    @Post("pages")
+    @Permissions({
+        code: "set-pages-config",
+        name: "设置 Pages 配置",
+        description: "根据类型设置 Pages 配置",
+    })
+    async setPagesConfig(@Query("type") type: string = "自定义", @Body() data: any) {
+        const key = `pages_${type}`;
+        const group = "decorate";
+
+        await this.dictService.set(key, data, {
+            group,
+            description: `Pages 配置 - ${type}`,
+        });
+
+        // 返回更新后的配置
+        const config = await this.dictService.get<any>(key, {}, group);
+        return config;
     }
 }

@@ -87,6 +87,21 @@ export interface PluginLinksResponse {
     error?: string;
 }
 
+/**
+ * Pages configuration interface
+ * @description Interface for pages configuration data
+ */
+export interface PagesConfig {
+    /** Configuration data, structure defined by frontend */
+    [key: string]: any;
+}
+
+/**
+ * Pages configuration response interface
+ * @description Interface for pages configuration API response
+ */
+export interface PagesConfigResponse extends PagesConfig {}
+
 // ==================== Layout Configuration Related APIs ====================
 
 /**
@@ -204,4 +219,30 @@ export function apiBatchDeleteMicropage(params: { ids: string[] }): Promise<{
  */
 export function apiGetPluginLinks(): Promise<PluginLinksResponse> {
     return useConsoleGet("/decorate-page/plugin-links");
+}
+
+// ==================== Pages Configuration Related APIs ====================
+
+/**
+ * Get pages configuration
+ * @description Retrieves pages configuration based on type
+ * @param type Configuration type, defaults to '自定义'
+ * @returns Promise with pages configuration
+ */
+export function apiGetPagesConfig(type: string = "自定义"): Promise<PagesConfigResponse> {
+    return useConsoleGet("/decorate-page/pages", { type });
+}
+
+/**
+ * Set pages configuration
+ * @description Saves pages configuration data
+ * @param type Configuration type, defaults to '自定义'
+ * @param data Configuration data to save
+ * @returns Promise with save result
+ */
+export function apiSetPagesConfig(
+    type: string = "自定义",
+    data: PagesConfig,
+): Promise<PagesConfigResponse> {
+    return useConsolePost(`/decorate-page/pages?type=${type}`, data);
 }
