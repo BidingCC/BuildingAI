@@ -174,6 +174,7 @@ const handleAgreement = (type: "service" | "privacy") => {
 </template>
 
 <style scoped>
+/* #ifdef H5 */
 page {
     background-image:
         url("@/static/images/background.png"),
@@ -190,4 +191,26 @@ page {
     background-repeat: no-repeat, no-repeat;
     z-index: 0;
 }
+/* #endif */
+</style>
+
+<style>
+/* #ifndef H5 */
+page {
+    background-image:
+        url("@/static/images/background.png"),
+        linear-gradient(
+            to bottom,
+            var(--primary-300) 0%,
+            var(--primary-200) 10%,
+            var(--primary-50) 25%,
+            var(--background-soft) 30%,
+            var(--background-soft) 100%
+        );
+    background-size: 100%, cover;
+    background-position: top, top;
+    background-repeat: no-repeat, no-repeat;
+    z-index: 0;
+}
+/* #endif */
 </style>

@@ -15,6 +15,7 @@ declare global {
   const ACTION: typeof import('../../../../web/@buildingai/service/src/consoleapi/account-balance')['ACTION']
   const AnalyseActionType: typeof import('../../../../web/@buildingai/service/src/common')['AnalyseActionType']
   const EffectScope: typeof import('vue')['EffectScope']
+  const LinkTypeEnum: typeof import('../utils/navigate')['LinkTypeEnum']
   const LoginMethod: typeof import('../../../../web/@buildingai/service/src/consoleapi/login-settings')['LoginMethod']
   const McpServerType: typeof import('../../../../web/@buildingai/service/src/webapi/mcp-server')['McpServerType']
   const PayConfigPayType: typeof import('../../../../web/@buildingai/service/src/consoleapi/payconfig')['PayConfigPayType']
@@ -353,6 +354,7 @@ declare global {
   const isAppPlus: typeof import('../utils/env')['isAppPlus']
   const isDark: typeof import('../hooks/use-dark')['isDark']
   const isDevMode: typeof import('../utils/env')['isDevMode']
+  const isEmpty: typeof import('../utils/navigate')['isEmpty']
   const isH5: typeof import('../utils/env')['isH5']
   const isMiniProgram: typeof import('../utils/env')['isMiniProgram']
   const isMp: typeof import('../utils/env')['isMp']
@@ -366,7 +368,10 @@ declare global {
   const isWeb: typeof import('../utils/env')['isWeb']
   const isWechatOa: typeof import('../utils/env')['isWechatOa']
   const markRaw: typeof import('vue')['markRaw']
+  const navigateTo: typeof import('../utils/navigate')['navigateTo']
+  const navigateToMiniProgram: typeof import('../utils/navigate')['navigateToMiniProgram']
   const nextTick: typeof import('vue')['nextTick']
+  const objectToQuery: typeof import('../utils/navigate')['objectToQuery']
   const onActivated: typeof import('vue')['onActivated']
   const onAddToFavorites: typeof import('@dcloudio/uni-app')['onAddToFavorites']
   const onBackPress: typeof import('@dcloudio/uni-app')['onBackPress']
@@ -405,6 +410,7 @@ declare global {
   const onUnmounted: typeof import('vue')['onUnmounted']
   const onUpdated: typeof import('vue')['onUpdated']
   const onWatcherCleanup: typeof import('vue')['onWatcherCleanup']
+  const parseQuery: typeof import('../utils/navigate')['parseQuery']
   const provide: typeof import('vue')['provide']
   const reactive: typeof import('vue')['reactive']
   const readonly: typeof import('vue')['readonly']
@@ -522,6 +528,9 @@ declare global {
   // @ts-ignore
   export type { Component, Slot, Slots, ComponentPublicInstance, ComputedRef, DirectiveBinding, ExtractDefaultPropTypes, ExtractPropTypes, ExtractPublicPropTypes, InjectionKey, PropType, Ref, MaybeRef, MaybeRefOrGetter, VNode, WritableComputedRef } from 'vue'
   import('vue')
+  // @ts-ignore
+  export type { LinkTypeEnum, Link } from '../utils/navigate'
+  import('../utils/navigate')
 }
 
 // for vue template auto import
@@ -536,6 +545,7 @@ declare module 'vue' {
     readonly !useStorage: UnwrapRef<typeof import('@vueuse/core')['!useStorage']>
     readonly !useStorageAsync: UnwrapRef<typeof import('@vueuse/core')['!useStorageAsync']>
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
+    readonly LinkTypeEnum: UnwrapRef<typeof import('../utils/navigate')['LinkTypeEnum']>
     readonly computed: UnwrapRef<typeof import('vue')['computed']>
     readonly createApp: UnwrapRef<typeof import('vue')['createApp']>
     readonly customRef: UnwrapRef<typeof import('vue')['customRef']>
@@ -556,6 +566,7 @@ declare module 'vue' {
     readonly isAppPlus: UnwrapRef<typeof import('../utils/env')['isAppPlus']>
     readonly isDark: UnwrapRef<typeof import('../hooks/use-dark')['isDark']>
     readonly isDevMode: UnwrapRef<typeof import('../utils/env')['isDevMode']>
+    readonly isEmpty: UnwrapRef<typeof import('../utils/navigate')['isEmpty']>
     readonly isH5: UnwrapRef<typeof import('../utils/env')['isH5']>
     readonly isMiniProgram: UnwrapRef<typeof import('../utils/env')['isMiniProgram']>
     readonly isMp: UnwrapRef<typeof import('../utils/env')['isMp']>
@@ -569,7 +580,10 @@ declare module 'vue' {
     readonly isWeb: UnwrapRef<typeof import('../utils/env')['isWeb']>
     readonly isWechatOa: UnwrapRef<typeof import('../utils/env')['isWechatOa']>
     readonly markRaw: UnwrapRef<typeof import('vue')['markRaw']>
+    readonly navigateTo: UnwrapRef<typeof import('../utils/navigate')['navigateTo']>
+    readonly navigateToMiniProgram: UnwrapRef<typeof import('../utils/navigate')['navigateToMiniProgram']>
     readonly nextTick: UnwrapRef<typeof import('vue')['nextTick']>
+    readonly objectToQuery: UnwrapRef<typeof import('../utils/navigate')['objectToQuery']>
     readonly onActivated: UnwrapRef<typeof import('vue')['onActivated']>
     readonly onAddToFavorites: UnwrapRef<typeof import('@dcloudio/uni-app')['onAddToFavorites']>
     readonly onBackPress: UnwrapRef<typeof import('@dcloudio/uni-app')['onBackPress']>
@@ -608,6 +622,7 @@ declare module 'vue' {
     readonly onUnmounted: UnwrapRef<typeof import('vue')['onUnmounted']>
     readonly onUpdated: UnwrapRef<typeof import('vue')['onUpdated']>
     readonly onWatcherCleanup: UnwrapRef<typeof import('vue')['onWatcherCleanup']>
+    readonly parseQuery: UnwrapRef<typeof import('../utils/navigate')['parseQuery']>
     readonly provide: UnwrapRef<typeof import('vue')['provide']>
     readonly reactive: UnwrapRef<typeof import('vue')['reactive']>
     readonly readonly: UnwrapRef<typeof import('vue')['readonly']>

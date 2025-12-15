@@ -9,6 +9,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     BdActionSheet: typeof import('./../components/bd-action-sheet.vue')['default']
     BdCheckbox: typeof import('./../components/bd-checkbox.vue')['default']
+    BdImage: typeof import('./../components/bd-image.vue')['default']
     BdModal: typeof import('./../components/bd-modal.vue')['default']
     BdNavbar: typeof import('./../components/bd-navbar.vue')['default']
     BdPicker: typeof import('./../components/bd-picker.vue')['default']
@@ -18,5 +19,8 @@ declare module 'vue' {
     LoginLoginWeixin: typeof import('./../components/login/login-weixin.vue')['default']
     LoginWebsiteInfo: typeof import('./../components/login/website-info.vue')['default']
     UserUserProfile: typeof import('./../components/user/user-profile.vue')['default']
+    WidgetUserBannerUserBanner: typeof import('./../components/widget/user-banner/user-banner.vue')['default']
+    WidgetUserServiceUserService: typeof import('./../components/widget/user-service/user-service.vue')['default']
+    WidgetUserVersionUserVersion: typeof import('./../components/widget/user-version/user-version.vue')['default']
   }
 }

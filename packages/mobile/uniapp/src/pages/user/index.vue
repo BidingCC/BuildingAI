@@ -1,4 +1,10 @@
 <script setup lang="ts">
+import UserBanner from "@/components/widget/user-banner/user-banner.vue";
+import UserService from "@/components/widget/user-service/user-service.vue";
+import UserVersion from "@/components/widget/user-version/user-version.vue";
+import type { PagesConfig } from "@/service/decorate";
+import { apiGetPagesConfig } from "@/service/decorate";
+
 definePage({
     style: {
         navigationBarTitle: "pages.user",
@@ -6,16 +12,41 @@ definePage({
     },
 });
 
-const { t } = useI18n();
 const userStore = useUserStore();
 
 const userInfo = computed(() => userStore.userInfo);
+
+const pagesConfig = ref<PagesConfig | null>(null);
 
 const toSettings = () => {
     uni.navigateTo({
         url: "/pages/user/settings",
     });
 };
+
+const fetchPagesConfig = async () => {
+    try {
+        const config = await apiGetPagesConfig("user");
+        if (config) {
+            // 处理 user-service 数据，将 title 映射为 name
+            if (config["user-service"]?.data) {
+                config["user-service"].data = config["user-service"].data.map(
+                    (item: Record<string, unknown>) => ({
+                        ...item,
+                        name: item.title || item.name || "",
+                    }),
+                );
+            }
+            pagesConfig.value = config;
+        }
+    } catch (error) {
+        console.error("获取页面配置失败:", error);
+    }
+};
+
+onMounted(() => {
+    fetchPagesConfig();
+});
 </script>
 
 <template>
@@ -46,7 +77,7 @@ const toSettings = () => {
                     </view>
                 </view>
             </view> -->
-            <view class="bg-background mb-4 rounded-lg p-4">
+            <view class="bg-background rounded-lg p-4">
                 <view class="mb-2 flex items-center justify-between">
                     <view class="text-foreground text-sm font-medium"> 积分余额 </view>
 
@@ -66,52 +97,18 @@ const toSettings = () => {
             </view>
         </view>
 
-        <view class="bg-background flex flex-col gap-1 rounded-lg px-4 py-2">
-            <view flex="~ items-center" justify="between" gap="2" py="2">
-                <view flex="~ items-center" gap="2">
-                    <image src="@/static/images/user-share.png" class="size-6" />
-                    <view>分享有礼</view>
-                </view>
-                <view i-carbon-chevron-right class="text-muted-foreground ml-1" />
-            </view>
-            <view flex="~ items-center" justify="between" gap="2" py="2">
-                <view flex="~ items-center" gap="2">
-                    <image src="@/static/images/user-recharge.png" class="size-6" />
-                    <view>充值套餐</view>
-                </view>
-                <view i-carbon-chevron-right class="text-muted-foreground ml-1" />
-            </view>
-            <view flex="~ items-center" justify="between" gap="2" py="2">
-                <view flex="~ items-center" gap="2">
-                    <image src="@/static/images/user-member.png" class="size-6" />
-                    <view>会员中心</view>
-                </view>
-                <view i-carbon-chevron-right class="text-muted-foreground ml-1" />
-            </view>
-            <view flex="~ items-center" justify="between" gap="2" py="2">
-                <view flex="~ items-center" gap="2">
-                    <image src="@/static/images/user-account.png" class="size-6" />
-                    <view>账户明细</view>
-                </view>
-                <view i-carbon-chevron-right class="text-muted-foreground ml-1" />
-            </view>
-            <view flex="~ items-center" justify="between" gap="2" py="2">
-                <view flex="~ items-center" gap="2">
-                    <image src="@/static/images/user-about.png" class="size-6" />
-                    <view>关于我们</view>
-                </view>
-                <view i-carbon-chevron-right class="text-muted-foreground ml-1" />
-            </view>
-        </view>
+        <!-- User Service -->
+        <UserService v-if="pagesConfig?.['user-service']" :content="pagesConfig['user-service']" />
 
-        <view class="text-muted-foreground mt-10 flex items-center justify-center text-xs">
-            <text mr="2">{{ t("common.version") }}</text>
-            <text>25.2.0 (Build: 20260101)</text>
-        </view>
+        <!-- User Banner -->
+        <UserBanner v-if="pagesConfig?.['user-banner']" :content="pagesConfig['user-banner']" />
+
+        <UserVersion />
     </view>
 </template>
 
 <style scoped>
+/* #ifdef H5 */
 page {
     background-image:
         url("@/static/images/background.png"),
@@ -128,4 +125,26 @@ page {
     background-repeat: no-repeat, no-repeat;
     z-index: 0;
 }
+/* #endif */
+</style>
+
+<style>
+/* #ifndef H5 */
+page {
+    background-image:
+        url("@/static/images/background.png"),
+        linear-gradient(
+            to bottom,
+            var(--primary-300) 0%,
+            var(--primary-200) 10%,
+            var(--primary-50) 25%,
+            var(--background-soft) 30%,
+            var(--background-soft) 100%
+        );
+    background-size: 100%, cover;
+    background-position: top, top;
+    background-repeat: no-repeat, no-repeat;
+    z-index: 0;
+}
+/* #endif */
 </style>

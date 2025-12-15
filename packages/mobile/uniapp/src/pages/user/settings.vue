@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import UserProfile from "@/components/user/user-profile.vue";
+import UserVersion from "@/components/widget/user-version/user-version.vue";
 
 const { t, currentLocaleLabel, locales, setLocale } = useLocale();
 
@@ -285,10 +286,7 @@ function showLocalePicker() {
                     </view>
                 </view>
 
-                <view class="text-muted-foreground mt-10 flex items-center justify-center text-xs">
-                    <text mr="2">{{ t("common.version") }}</text>
-                    <text>25.2.0 (Build: 20260101)</text>
-                </view>
+                <UserVersion />
             </view>
         </view>
         <UserProfile
