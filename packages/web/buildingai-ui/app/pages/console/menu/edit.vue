@@ -32,7 +32,6 @@ const formData = shallowReactive<MenuCreateRequest>({
     isHidden: 0,
     component: "",
     sourceType: props.sourceType || 1,
-    pluginPackName: "",
 });
 
 const menuSchema = object({

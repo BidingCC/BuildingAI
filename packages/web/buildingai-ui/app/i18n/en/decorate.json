@@ -44,5 +44,11 @@
             "menuNumber": "Menu {number}"
         }
     },
+    "mobile": {
+        "tabs": {
+            "tabbar": "Tabbar Settings",
+            "settings": "User Interface Settings"
+        }
+    },
     "openDecorateSettings": "Decorate Settings"
 }

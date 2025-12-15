@@ -44,5 +44,11 @@
             "menuNumber": "菜单 {number}"
         }
     },
+    "mobile": {
+        "tabs": {
+            "tabbar": "Tabbar 设置",
+            "settings": "用户界面设置"
+        }
+    },
     "openDecorateSettings": "设置装修位"
 }
