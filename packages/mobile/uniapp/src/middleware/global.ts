@@ -9,7 +9,9 @@ export default defineMiddleware((to, from) => {
     console.log("[global]", to, "from:", from);
 
     const requireAuth = getCurrentPageMeta()?.style?.auth !== false;
-    if (requireAuth && !userStore.isLogin) {
+    const currentRoute = getCurrentPageMeta()?.path;
+
+    if (requireAuth && !userStore.isLogin && currentRoute !== to.route) {
         return {
             url: "/pages/login/index?redirect=" + to.route,
             method: "navigateTo",

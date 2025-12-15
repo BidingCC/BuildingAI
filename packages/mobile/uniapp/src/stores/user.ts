@@ -78,7 +78,7 @@ const userStore = defineStore("auth", () => {
                 // 刷新上一个页面
                 // eslint-disable-next-line @typescript-eslint/no-unused-expressions
                 onLoad && onLoad(options);
-            } else if (redirect) {
+            } else if (redirect !== undefined && redirect !== null) {
                 try {
                     uni.redirectTo({ url: redirect });
                 } finally {
