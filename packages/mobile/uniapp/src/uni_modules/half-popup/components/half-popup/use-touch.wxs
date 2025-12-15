@@ -91,16 +91,8 @@ function handleTouchend(e, ownerInstance) {
         initialTouchPositionY = -1;
         animationDuration = -1;
         // 通知外部调用关闭
-        // 小程序端：使用callMethod
         if (ownerInstance && ownerInstance.callMethod) {
             ownerInstance.callMethod('handleClose');
-        }
-        
-        // H5端：通过ownerInstance['$vm']['$'].exposed访问
-        if (ownerInstance && ownerInstance['$vm'] && ownerInstance['$vm']['$'] && ownerInstance['$vm']['$'].exposed) {
-            if (ownerInstance['$vm']['$'].exposed.handleClose) {
-                ownerInstance['$vm']['$'].exposed.handleClose();
-            }
         }
     } else {
         // 如果没有超过，则复原窗口
@@ -139,15 +131,8 @@ function extractTouchFromEvent(e) {
 
 // 通知滑动进度
 function notifySlideProgress(progress, ownerInstance, currentInstance) {
-    // 小程序端：使用callMethod
     if (ownerInstance && ownerInstance.callMethod) {
         ownerInstance.callMethod('handleSlideProgress', progress);
-    }
-    
-    // H5端：ownerInstance['$vm']只有props和wxs，handleSlideProgress需要通过ownerInstance本身访问
-    // ownerInstance可能就是组件实例，或者handleSlideProgress在ownerInstance的其他属性上
-    if (ownerInstance && ownerInstance['$vm'] && ownerInstance['$vm']['$'] && ownerInstance['$vm']['$'].exposed) {
-        ownerInstance['$vm']['$'].exposed.handleSlideProgress(progress);
     }
 }
 

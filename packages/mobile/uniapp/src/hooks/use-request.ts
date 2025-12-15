@@ -281,7 +281,7 @@ export const useUpload = <T = UploadResponse>(opts: {
 
     const userStore = useUserStore();
     const baseUrl = getBaseUrl();
-    const fullUrl = `${baseUrl}${WEB_PREFIX}/upload/files`;
+    const fullUrl = `${baseUrl}${WEB_PREFIX}/upload/file`;
 
     return uni.uploadFile({
         header: {

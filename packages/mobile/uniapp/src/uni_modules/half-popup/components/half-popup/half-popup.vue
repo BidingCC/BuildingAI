@@ -18,7 +18,6 @@ const {
     onOverlayClose
 } = usePopup(props, emits)
 
-
 // 将方法暴露给wxs调用
 defineExpose({ getCurrentInstance })
 </script>
@@ -27,9 +26,15 @@ defineExpose({ getCurrentInstance })
 <script lang="ts">
 export default {
     emits: ['slide-progress', 'update:modelValue'],
+    data() {
+        return {
+            slideProgress: 0
+        };
+    },
     methods: {
         handleSlideProgress(progress: number) {
             this.$emit('slide-progress', progress);
+            this.slideProgress = progress;
         },
         handleClose() {
             this.$emit('update:modelValue', false);
@@ -49,7 +54,9 @@ export default {
         class="half-popup"
         :style="{
             '--zIndex': props.zIndex,
-            '--color': props.color
+            '--color': props.color,
+            '--bg-color': props.bgColor,
+            'background-color': `rgba(0, 0, 0, ${slideProgress / 6})`
         }"
         @close="handleClose"
         @tap.stop="onOverlayClose"

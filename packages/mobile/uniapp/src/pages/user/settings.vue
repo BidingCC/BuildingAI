@@ -45,7 +45,7 @@ const pageTransform = computed(() => {
 
     const scale = 0.92;
     const maxBorderRadius = 24; // 最大圆角值（px）
-    const maxTranslateY = 30; // 最大向下移动距离（px）
+    const maxTranslateY = 40; // 最大向下移动距离（px）
 
     // 直接使用进度值，不使用缓动函数，确保实时跟随
     // 进度为1时scale为0.92（缩小），进度为0时scale为1（正常）
@@ -88,6 +88,7 @@ function showLocalePicker() {
                 :fixed="true"
                 :show-back="true"
                 :show-home="true"
+                :style="{ opacity: isPopupOpen ? 0 : 1 }"
                 :filter="isPopupOpen ? 'none' : 'blur(4px)'"
             />
             <view class="p-4">

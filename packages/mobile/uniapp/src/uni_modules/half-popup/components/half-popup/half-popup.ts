@@ -48,6 +48,11 @@ export const halfPopupProps = {
      * @type { Boolean }
      */
     color: makeStringProp(""),
+    /**
+     * @description 背景颜色
+     * @type { String }
+     */
+    bgColor: makeStringProp(""),
 };
 
 export const halfPopupEmits = {

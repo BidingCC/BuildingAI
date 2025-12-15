@@ -92,11 +92,13 @@ export function apiUploadFile(
     options?: { onProgress?: (percent: number) => void },
 ): Promise<FileUploadResponse> {
     const extensionId = getExtensionId(params.extensionId);
-    return useWebUpload<FileUploadResponse>(
-        `/upload/file`,
-        { ...params, ...(extensionId && { extensionId }) },
-        options,
-    );
+    return new Promise<FileUploadResponse>((resolve, reject) => {
+        useUpload<FileUploadResponse>({
+            data: { ...params, ...(extensionId && { extensionId }) },
+            success: (res) => resolve(res),
+            fail: (errMsg) => reject(new Error(errMsg)),
+        });
+    });
 }
 
 /**
@@ -114,11 +116,13 @@ export function apiUploadFiles(
     options?: { onProgress?: (percent: number) => void },
 ): Promise<FileUploadResponse[]> {
     const extensionId = getExtensionId(params.extensionId);
-    return useWebUpload<FileUploadResponse[]>(
-        `/upload/files`,
-        { ...params, ...(extensionId && { extensionId }) },
-        options,
-    );
+    return new Promise<FileUploadResponse[]>((resolve, reject) => {
+        useUpload<FileUploadResponse[]>({
+            data: { file: params.files, ...(extensionId && { extensionId }) },
+            success: (res) => resolve(res),
+            fail: (errMsg) => reject(new Error(errMsg)),
+        });
+    });
 }
 
 /**
@@ -135,7 +139,13 @@ export function apiUploadInitFile(
     params: { file: File; description?: string },
     options?: { onProgress?: (percent: number) => void },
 ): Promise<FileUploadResponse> {
-    return useWebUpload<FileUploadResponse>(`/upload/init-file`, params, options);
+    return new Promise<FileUploadResponse>((resolve, reject) => {
+        useUpload<FileUploadResponse>({
+            data: params,
+            success: (res) => resolve(res),
+            fail: (errMsg) => reject(new Error(errMsg)),
+        });
+    });
 }
 
 /**
