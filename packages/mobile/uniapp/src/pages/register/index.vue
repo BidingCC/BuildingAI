@@ -178,7 +178,7 @@ const handleAgreement = (type: "service" | "privacy") => {
     </view>
 </template>
 
-<style>
+<style scoped>
 page {
     background-image:
         url("@/static/images/background.png"),

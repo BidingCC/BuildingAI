@@ -38,7 +38,9 @@
     "forgotPassword": "忘记密码",
     "rememberMe": "记住我",
     "loginSuccess": "登录成功",
+    "logout": "退出登录",
     "logoutSuccess": "退出成功",
+    "logoutConfirm": "确定要退出登录吗？",
     "registerSuccess": "注册成功",
     "networkError": "网络错误，请稍后重试",
     "serverError": "服务器错误",
@@ -77,5 +79,11 @@
     "downloadFormatError": "下载格式错误",
     "savePhotoFailed": "保存照片失败",
     "saveVideoFailed": "保存视频失败",
-    "unsupportedFileType": "不支持的文件类型"
+    "unsupportedFileType": "不支持的文件类型",
+    "power": "能量值",
+    "accountStatus": "账户状态",
+    "normal": "正常",
+    "disabled": "禁用",
+    "accountInfo": "账户信息",
+    "userNo": "用户编号"
 }
