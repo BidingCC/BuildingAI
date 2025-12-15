@@ -1,8 +1,9 @@
 <script lang="ts" setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
 import { type LinkItem, LinkType, type RouteMeta } from "../layout.d";
+import { mobilePages } from "../mobile-pages";
 
 const { t } = useI18n();
 
@@ -12,11 +13,14 @@ interface Props {
     searchQuery?: string;
     /** 当前选中的链接 */
     selected?: LinkItem | null;
+    /** Mode: mobile or web */
+    mode?: "mobile" | "web";
 }
 
 const props = withDefaults(defineProps<Props>(), {
     searchQuery: "",
     selected: null,
+    mode: "web",
 });
 
 // 组件事件
@@ -42,6 +46,27 @@ const filteredPages = computed(() => {
  * 加载系统页面
  */
 const getSystemPages = async () => {
+    // 如果是移动端模式，使用 mobile-pages.ts 中的页面列表
+    if (props.mode === "mobile") {
+        const pages: LinkItem[] = mobilePages.map((page) => ({
+            type: LinkType.SYSTEM,
+            name: page.name,
+            path: page.path,
+            query: {},
+        }));
+
+        // 按名称排序
+        pages.sort((a: LinkItem, b: LinkItem) => {
+            const nameA = a.name || "";
+            const nameB = b.name || "";
+            return nameA.localeCompare(nameB);
+        });
+
+        systemPages.value = pages;
+        return;
+    }
+
+    // Web 模式：从路由中获取系统页面
     const routes = useRouter().getRoutes();
 
     const pages: LinkItem[] = [];
@@ -89,6 +114,14 @@ const isSelected = (page: LinkItem) => {
 
 // 组件挂载时加载数据
 onMounted(() => getSystemPages());
+
+// 监听 mode 变化，重新加载页面列表
+watch(
+    () => props.mode,
+    () => {
+        getSystemPages();
+    },
+);
 </script>
 
 <template>

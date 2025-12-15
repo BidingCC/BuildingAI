@@ -26,11 +26,13 @@ const props = withDefaults(
             root: string;
             trailing: string;
         }>;
+        mode?: "mobile" | "web";
     }>(),
     {
         placeholder: "",
         clearable: true,
         size: "md",
+        mode: "web",
     },
 );
 
@@ -142,6 +144,7 @@ watch(
 
             <LinkPickerContent
                 :selected="selectedLink"
+                :mode="mode"
                 @select="handleLinkSelect"
                 @close="handleModalClose"
             />

@@ -26,9 +26,12 @@ const props = withDefaults(
     defineProps<{
         /** Currently selected link */
         selected?: LinkItem | null;
+        /** Mode: mobile or web */
+        mode?: "mobile" | "web";
     }>(),
     {
         selected: null,
+        mode: "web",
     },
 );
 
@@ -66,6 +69,15 @@ const componentProps = computed(() => {
         return {
             ...baseProps,
             selected: props.selected?.path || null,
+        };
+    }
+
+    // 系统页面组件需要传递 mode
+    if (activeTab.value === LinkType.SYSTEM) {
+        return {
+            ...baseProps,
+            searchQuery: searchQuery.value,
+            mode: props.mode,
         };
     }
 

@@ -195,6 +195,7 @@ onMounted(() => getConfig());
                                 v-model="item.link"
                                 placeholder="选择链接"
                                 size="md"
+                                mode="mobile"
                                 :ui="{ root: 'w-full' }"
                             />
                         </UFormField>
@@ -317,6 +318,7 @@ onMounted(() => getConfig());
                                 v-model="item.link"
                                 placeholder="选择链接"
                                 size="md"
+                                mode="mobile"
                                 :ui="{ root: 'w-full' }"
                             />
                         </UFormField>
