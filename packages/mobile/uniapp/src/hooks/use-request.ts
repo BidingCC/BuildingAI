@@ -29,7 +29,12 @@ export const getBaseUrl = (): string => {
 const WEB_PREFIX = import.meta.env.VITE_APP_WEB_API_PREFIX || "/api";
 const CONSOLE_PREFIX = import.meta.env.VITE_APP_CONSOLE_API_PREFIX || "/consoleapi";
 
-const handleHttpError = (status: number, errorMessage: string, errorPath = ""): Error => {
+const handleHttpError = (
+    status: number,
+    errorMessage: string,
+    errorPath = "",
+    options?: RequestOptions,
+): Error => {
     switch (status) {
         case 400:
             useToast().error(`${i18n.global.t("common.request.400")}: ${errorMessage}`);
@@ -37,7 +42,9 @@ const handleHttpError = (status: number, errorMessage: string, errorPath = ""): 
 
         case 401:
             useToast().error(`${i18n.global.t("common.request.401")}: ${errorMessage}`);
-            useUserStore().toLogin();
+            if (options?.requireAuth) {
+                useUserStore().toLogin();
+            }
             return new Error(`${i18n.global.t("common.request.401")}: ${errorMessage}`);
 
         case 403:
@@ -119,7 +126,7 @@ async function request<T = unknown>(
                     const errorMessage =
                         (res.data as ApiResponse<T>)?.message ||
                         i18n.global.t("common.requestFailed");
-                    const error = handleHttpError(res.statusCode, errorMessage, url);
+                    const error = handleHttpError(res.statusCode, errorMessage, url, options);
                     if (options?.onError) {
                         options.onError(error);
                     }
