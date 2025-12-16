@@ -7,11 +7,13 @@ definePage({
     style: {
         navigationBarTitle: "pages.chat",
         auth: false,
+        hiddenHeader: true,
     },
     // middleware: ["auth"],
 });
 
 const router = useRouter();
+const showDrawer = shallowRef(false);
 
 const handleClick = () => {
     router.navigate({
@@ -31,28 +33,40 @@ const showLocalePicker = () => {
 </script>
 
 <template>
-    <view class="p-4">
-        <view class="dark:text-primary text-center text-2xl font-bold text-black">
-            {{ t("pages.chat") }}
-        </view>
+    <swipe-drawer ref="drawer" v-model="showDrawer" drawerBgColor="var(--background)">
+        <template #drawer>
+            <view class="menu bg-background w-full">侧边栏内容</view>
+        </template>
 
-        <view class="mt-8">
-            <view
-                class="flex items-center justify-between rounded-lg bg-gray-100 p-4 dark:bg-gray-800"
-                @click="showLocalePicker"
-            >
-                <view class="dark:text-white">{{ t("common.language") || "Language" }}</view>
-                <view class="flex items-center text-gray-500">
-                    <text>{{ currentLocaleLabel }}</text>
-                    <text class="i-carbon-chevron-right ml-1" />
+        <template #content>
+            <view class="home">
+                <view class="p-4">
+                    <view class="dark:text-primary text-center text-2xl font-bold text-black">
+                        {{ t("pages.chat") }}
+                    </view>
+
+                    <view class="mt-8">
+                        <view
+                            class="flex items-center justify-between rounded-lg bg-gray-100 p-4 dark:bg-gray-800"
+                            @click="showLocalePicker"
+                        >
+                            <view class="dark:text-white">{{
+                                t("common.language") || "Language"
+                            }}</view>
+                            <view class="flex items-center text-gray-500">
+                                <text>{{ currentLocaleLabel }}</text>
+                                <text class="i-carbon-chevron-right ml-1" />
+                            </view>
+                        </view>
+                    </view>
+
+                    <view class="mt-4 text-sm text-gray-500">Current: {{ currentLocale }}</view>
+
+                    <view class="mt-8" @click="handleClick">
+                        <view class="text-center text-gray-400">Click to navigate</view>
+                    </view>
                 </view>
             </view>
-        </view>
-
-        <view class="mt-4 text-sm text-gray-500">Current: {{ currentLocale }}</view>
-
-        <view class="mt-8" @click="handleClick">
-            <view class="text-center text-gray-400">Click to navigate</view>
-        </view>
-    </view>
+        </template>
+    </swipe-drawer>
 </template>

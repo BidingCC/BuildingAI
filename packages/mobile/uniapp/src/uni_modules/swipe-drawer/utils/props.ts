@@ -1,6 +1,5 @@
 /**
- * prop type helpers
- * help us to write less code and reduce bundle size
+ * @description swipe-drawer 模块通用 prop 类型辅助方法
  */
 import type { PropType } from "vue";
 
@@ -37,3 +36,5 @@ export const makeStringProp = <T>(defaultVal: T) => ({
     type: String as unknown as PropType<T>,
     default: defaultVal,
 });
+
+

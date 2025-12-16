@@ -12,6 +12,7 @@ definePage({
     },
 });
 
+const { t } = useI18n();
 const userStore = useUserStore();
 
 const userInfo = computed(() => userStore.userInfo);
@@ -51,6 +52,12 @@ onMounted(() => {
 
 <template>
     <view class="flex h-[calc(100vh-112px)] flex-col px-4">
+        <BdNavbar
+            :title="t('pages.user')"
+            :show-back="false"
+            :show-home="false"
+            filter="blur(4px)"
+        />
         <view flex="~ items-center" gap="3" py="8" px="2" @click="toSettings">
             <image v-if="userStore.isLogin" :src="userInfo?.avatar" class="size-14 rounded-full" />
             <image v-else src="@/static/images/default-avatar.png" class="size-14 rounded-full" />

@@ -7,3 +7,9 @@ interface GetPhoneNumberEvent {
         iv?: string;
     };
 }
+
+declare global {
+    interface Window {
+        wxs: any;
+    }
+}

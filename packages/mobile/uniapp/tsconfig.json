@@ -26,6 +26,9 @@
     //     "src/types/async-import.d.ts",
     //     "src/types/async-component.d.ts"
     // ],
+    "exclude": [
+        "src/uni_modules/**/*"
+    ],
     "vueCompilerOptions": {
         "plugins": [
             "@uni-helper/uni-types/volar-plugin"

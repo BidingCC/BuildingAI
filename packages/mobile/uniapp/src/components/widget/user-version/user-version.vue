@@ -1,3 +1,7 @@
+<script setup lang="ts">
+const { t } = useI18n();
+</script>
+
 <template>
     <view class="text-muted-foreground mt-10 flex items-center justify-center text-xs">
         <text mr="2">{{ t("common.version") }}</text>
