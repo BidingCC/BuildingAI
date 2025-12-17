@@ -6,9 +6,9 @@ import { UserToken } from "@buildingai/db/entities/user-token.entity";
 import { AuthService } from "@common/modules/auth/services/auth.service";
 import { RolePermissionService } from "@common/modules/auth/services/role-permission.service";
 import { UserTokenService } from "@common/modules/auth/services/user-token.service";
-import { WechatOaService } from "@common/modules/wechat/services/wechatoa.service";
+import { WechatModule } from "@common/modules/wechat/wechat.module";
 import { ChannelModule } from "@modules/channel/channel.module";
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { DiscoveryModule } from "@nestjs/core";
 import { JwtModule } from "@nestjs/jwt";
@@ -25,6 +25,7 @@ import { AuthWebController } from "./controller/web/auth.controller";
     imports: [
         TypeOrmModule.forFeature([User, Role, Permission, UserToken]),
         ChannelModule,
+        forwardRef(() => WechatModule),
         DiscoveryModule,
         JwtModule.registerAsync({
             imports: [ConfigModule],
@@ -38,7 +39,7 @@ import { AuthWebController } from "./controller/web/auth.controller";
         }),
     ],
     controllers: [AuthWebController],
-    providers: [AuthService, RolePermissionService, UserTokenService, WechatOaService],
+    providers: [AuthService, RolePermissionService, UserTokenService],
     exports: [AuthService, JwtModule, RolePermissionService, UserTokenService],
 })
 export class AuthModule {}

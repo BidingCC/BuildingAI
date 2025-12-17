@@ -4,7 +4,9 @@ import { Dict } from "@buildingai/db/entities/dict.entity";
 import { Repository } from "@buildingai/db/typeorm";
 import { DictCacheService } from "@buildingai/dict";
 import { DictService } from "@buildingai/dict";
+import { WECHAT_EVENTS } from "@common/modules/wechat/constants/wechat.constant";
 import { Injectable } from "@nestjs/common";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 
 import { UpdateWxMpConfigDto } from "../dto/updatemp.dto";
 import { WxMpConfig } from "../interface/wexmpconfig";
@@ -15,6 +17,7 @@ export class WxMpConfigService extends BaseService<Dict> {
         private readonly dictService: DictService,
         @InjectRepository(Dict) repository: Repository<Dict>,
         private readonly dictCacheService: DictCacheService,
+        private readonly eventEmitter: EventEmitter2,
     ) {
         super(repository);
     }
@@ -41,6 +44,7 @@ export class WxMpConfigService extends BaseService<Dict> {
      */
     async updateConfig(config: UpdateWxMpConfigDto) {
         await this.setGroupConfig("wxmpconfig", config);
+        this.eventEmitter.emit(WECHAT_EVENTS.MP_CONFIG_REFRESH);
         return { success: true };
     }
 

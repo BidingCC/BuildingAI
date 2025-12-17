@@ -15,7 +15,7 @@ import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
 import crypto from "crypto";
 import { v4 as uuidv4 } from "uuid";
 
-import { WECHAT_EVENTS, WECHAT_SCENE_PREFIX } from "../constants/wechatoa.constant";
+import { WECHAT_EVENTS, WECHAT_SCENE_PREFIX } from "../constants/wechat.constant";
 
 /**
  * 微信公众号服务
@@ -97,7 +97,7 @@ export class WechatOaService {
      * @returns access_token字符串
      * @throws 当配置不存在或API调用失败时抛出错误
      */
-    async getgetAccessTokenByRedis() {
+    async getAccessTokenByRedis() {
         const { appId } = await this.wxoaconfigService.getConfig();
         // 构建缓存键
         const cacheKey = `${this.CACHE_PREFIX}:${appId}`;
@@ -131,7 +131,7 @@ export class WechatOaService {
     }> {
         try {
             // 获取有效的access_token
-            const accessToken = await this.getgetAccessTokenByRedis();
+            const accessToken = await this.getAccessTokenByRedis();
 
             // 生成一个随机UUID作为场景值
             const sceneStr = uuidv4();
@@ -363,7 +363,7 @@ export class WechatOaService {
     private async sendTemplateMessage(openid: string, content: string) {
         try {
             // 获取有效的access_token
-            const access_token = await this.getgetAccessTokenByRedis();
+            const access_token = await this.getAccessTokenByRedis();
 
             // 调用微信客户端发送模板消息
             return this.wechatOaClient.sendTemplateMessage(
@@ -419,6 +419,6 @@ export class WechatOaService {
     @OnEvent(WECHAT_EVENTS.REFRESH, { async: true })
     async handleAccessTokenRefresh() {
         this.logger.log("access_token 刷新");
-        await this.getgetAccessTokenByRedis();
+        await this.getAccessTokenByRedis();
     }
 }

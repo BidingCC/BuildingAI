@@ -10,7 +10,9 @@ import { WebController } from "@common/decorators";
 import { ChangePasswordDto } from "@common/modules/auth/dto/change-password.dto";
 import { LoginDto } from "@common/modules/auth/dto/login.dto";
 import { RegisterDto } from "@common/modules/auth/dto/register.dto";
+import { WxMpLoginDto } from "@common/modules/auth/dto/wxmp-login.dto";
 import { AuthService } from "@common/modules/auth/services/auth.service";
+import { WechatMpService } from "@common/modules/wechat/services/wechatmp.service";
 import { WechatOaService } from "@common/modules/wechat/services/wechatoa.service";
 import { Body, Get, Headers, Param, Post, Query, Req, Res } from "@nestjs/common";
 import type { Request, Response } from "express";
@@ -24,6 +26,7 @@ export class AuthWebController extends BaseController {
     constructor(
         private authService: AuthService,
         private wechatOaService: WechatOaService,
+        private wechatMpService: WechatMpService,
     ) {
         super();
     }
@@ -74,6 +77,31 @@ export class AuthWebController extends BaseController {
         return this.authService.login(
             loginDto.username,
             loginDto.password,
+            terminalType,
+            ipAddress,
+            userAgent,
+        );
+    }
+
+    /**
+     * 微信小程序登录
+     *
+     * @param wxMpLoginDto 微信小程序登录信息，包含 code
+     * @param userAgent 用户代理
+     * @param ipAddress IP地址
+     * @returns 登录结果，包含令牌和用户信息
+     */
+    @Public()
+    @Post("wxlogin")
+    @BuildFileUrl(["**.avatar"])
+    async wxMpLogin(
+        @Body() wxMpLoginDto: WxMpLoginDto,
+        @Headers("user-agent") userAgent?: string,
+        @Headers("x-real-ip") ipAddress?: string,
+    ) {
+        const terminalType = UserTerminal.MP;
+        return this.wechatMpService.loginOrRegister(
+            wxMpLoginDto.code,
             terminalType,
             ipAddress,
             userAgent,

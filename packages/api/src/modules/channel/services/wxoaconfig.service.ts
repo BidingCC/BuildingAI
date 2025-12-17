@@ -4,7 +4,7 @@ import { Dict } from "@buildingai/db/entities/dict.entity";
 import { Repository } from "@buildingai/db/typeorm";
 import { DictCacheService } from "@buildingai/dict";
 import { DictService } from "@buildingai/dict";
-import { WECHAT_EVENTS } from "@common/modules/wechat/constants/wechatoa.constant";
+import { WECHAT_EVENTS } from "@common/modules/wechat/constants/wechat.constant";
 import { UpdateWxOaConfigDto } from "@modules/channel/dto/updatewx.dto";
 import {
     MessageEncryptType,

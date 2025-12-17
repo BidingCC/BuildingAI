@@ -106,6 +106,19 @@ export function apiAuthLogin(params?: SystemLoginAccountParams): Promise<LoginRe
 }
 
 /**
+ * WeChat Mini Program login
+ * @description Login with WeChat Mini Program using code obtained from wx.login()
+ * @param params Login parameters
+ * @param params.code Login code obtained from wx.login() API
+ * @returns Promise with login result, including user information, token, and isNewUser flag
+ */
+export function apiAuthWxMpLogin(params: {
+    code: string;
+}): Promise<LoginResponse & { isNewUser: boolean }> {
+    return useWebPost("/auth/wxlogin", params);
+}
+
+/**
  * Account registration
  * @description Register new account
  * @param params Registration parameters
