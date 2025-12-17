@@ -88,6 +88,7 @@ export default defineConfig({
                         "!usePreferredDark",
                         "!useStorage",
                         "!useStorageAsync",
+                        "!useDownloadFile",
                     ],
                 },
                 "uni-app",

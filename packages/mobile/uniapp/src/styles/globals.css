@@ -10,3 +10,10 @@
         0 0px 6px -1px var(--primary-50),
         0 0px 5px -1px var(--primary-500);
 }
+
+view,
+textarea,
+input,
+text {
+    box-sizing: border-box;
+}

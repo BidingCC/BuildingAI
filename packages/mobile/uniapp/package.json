@@ -38,7 +38,8 @@
         "std-env": "^3.10.0",
         "vue": "^3.4.21",
         "vue-i18n": "catalog:web",
-        "vue-router": "catalog:web"
+        "vue-router": "catalog:web",
+        "z-paging": "^2.8.8"
     },
     "devDependencies": {
         "@buildingai/eslint-config": "workspace:*",
