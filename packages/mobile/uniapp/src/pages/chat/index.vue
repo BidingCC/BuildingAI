@@ -133,6 +133,7 @@ const confirmDelete = async () => {
     </swipe-drawer>
 
     <bd-modal
+        :zIndex="99999"
         ref="modalRef"
         title="编辑标题"
         :show-cancel="true"
@@ -150,6 +151,7 @@ const confirmDelete = async () => {
     </bd-modal>
 
     <bd-modal
+        :zIndex="99999"
         ref="deleteModalRef"
         title="删除聊天记录"
         content="删除后，聊天记录不可恢复"
