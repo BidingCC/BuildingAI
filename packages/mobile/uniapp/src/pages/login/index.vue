@@ -6,8 +6,9 @@ import BdModal from "@/components/bd-modal.vue";
 import Agreement from "@/components/login/agreement.vue";
 import LoginAccount from "@/components/login/login-account.vue";
 import LoginWeixin from "@/components/login/login-weixin.vue";
+import NewUser from "@/components/login/new-user.vue";
 import WebsiteInfo from "@/components/login/website-info.vue";
-import { apiAuthLogin } from "@/service/user";
+import { apiAuthLogin, apiAuthWxMpLogin } from "@/service/user";
 import { isApp, isH5, isMp, isWechatOa } from "@/utils/env";
 
 const { t } = useI18n();
@@ -24,6 +25,7 @@ const appStore = useAppStore();
 const userStore = useUserStore();
 
 const modalRef = ref<InstanceType<typeof BdModal> | null>(null);
+const newUserModalRef = ref<InstanceType<typeof NewUser> | null>(null);
 const loginSettings = computed(() => appStore.loginSettings);
 // 默认登录方式(处理不同平台登录方式的差异)
 const defaultLoginMethod = computed(() => {
@@ -81,19 +83,24 @@ const handleLogin = async () => {
     useToast().loading(t("login.loading"));
     if (!checked.value) checked.value = true;
     if (method === LoginMethod.WEIXIN) {
-        // const { code } = await uni.login({ provider: "weixin" });
-        // console.log("code", code);
-        // // 调用微信登录接口
-        // // wxMpPhoneNumber 手机号获取加密的相关，这边需要看看接口怎么设计的
+        const { code } = await uni.login({ provider: "weixin" });
+        // 调用微信登录接口
+        const res = await apiAuthWxMpLogin({ code });
+        loginResult(res, res.isNewUser);
     }
     if (method === LoginMethod.ACCOUNT) {
         handleAccountLogin();
     }
 };
 
-const loginResult = (res: LoginResponse) => {
+const loginResult = async (res: LoginResponse, isNewUser: boolean = false) => {
     uni.hideToast();
-    userStore.login(res.token, redirect.value);
+    await userStore.login(res.token);
+    if (isNewUser) {
+        newUserModalRef.value?.open();
+    } else {
+        userStore.handleRedirect(redirect.value);
+    }
 };
 
 watch(defaultLoginMethod, (newVal) => {
@@ -104,6 +111,10 @@ const handleAgreement = (type: "service" | "privacy") => {
     useRouter().navigate({
         url: `/pages/agreement/index?url=${type}`,
     });
+};
+
+const handleNewUserClose = () => {
+    userStore.handleRedirect(redirect.value);
 };
 </script>
 
@@ -170,6 +181,8 @@ const handleAgreement = (type: "service" | "privacy") => {
                 </text>
             </view>
         </BdModal>
+        <!-- 新用户引导弹窗 -->
+        <NewUser ref="newUserModalRef" @close="handleNewUserClose" />
     </view>
 </template>
 

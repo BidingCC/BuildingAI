@@ -51,8 +51,9 @@ const userStore = defineStore("auth", () => {
      * User login
      * @description Handle user login with token and redirect logic
      * @param newToken Authentication token
+     * @param isNewUser New user status
      */
-    const login = async (newToken: string, redirect: string) => {
+    const login = async (newToken: string) => {
         // const route = useRoute();
         if (!newToken) {
             useToast().error("Login error, please try again");
@@ -62,7 +63,13 @@ const userStore = defineStore("auth", () => {
         setLoginTimeStamp();
         await nextTick();
         getUser();
-
+    };
+    /**
+     * Handle redirect
+     * @description Handle redirect to the specified page
+     * @param redirect Redirect page
+     */
+    const handleRedirect = async (redirect: string) => {
         if (redirect === `/${pages[0]?.path || "/"}` || redirect === "/pages/login/index") {
             return uni.reLaunch({
                 url: `/${pages[0]?.path || "/"}`,
@@ -237,6 +244,7 @@ const userStore = defineStore("auth", () => {
         logout,
         toLogin,
         getUser,
+        handleRedirect,
         setTemporaryToken,
         refreshToken,
     };
