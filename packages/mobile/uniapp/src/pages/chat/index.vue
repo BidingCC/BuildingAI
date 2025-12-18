@@ -3,7 +3,6 @@ import ChatsChats from "@/async-components/ask-assistant-chat/chats-chats.vue?as
 import ChatsPrompt from "@/async-components/ask-assistant-chat/chats-prompt/chats-prompt.vue?async";
 import BdModal from "@/async-components/bd-modal.vue?async";
 import BdNavbar from "@/async-components/bd-navbar.vue?async";
-import Test from "@/async-components/test.vue?async";
 import {
     type AiConversation,
     apiDeleteAiConversation,
@@ -124,7 +123,6 @@ const confirmDelete = async () => {
                 </BdNavbar>
                 <view class="h-full" @click="showDrawer = true">
                     <!-- 主要内容区域 -->
-                    <Test />
                 </view>
             </view>
         </template>
