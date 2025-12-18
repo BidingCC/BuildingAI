@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import UserProfile from "@/components/user/user-profile.vue";
-import UserVersion from "@/components/widget/user-version/user-version.vue";
+import BdNavbar from "@/async-components/bd-navbar.vue?async";
+import UserProfile from "@/async-components/user/user-profile.vue?async";
+import UserVersion from "@/async-components/widget/user-version/user-version.vue?async";
 
 const { t, currentLocaleLabel, locales, setLocale } = useLocale();
 

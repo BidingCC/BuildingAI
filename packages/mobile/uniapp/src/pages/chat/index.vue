@@ -1,9 +1,14 @@
 <script setup lang="ts">
-import { useRouter } from "@uni-helper/uni-use";
-
-import ChatsPrompt from "@/components/ask-assistant-chat/chats-prompt/chats-prompt.vue";
-
-const { t, currentLocale, currentLocaleLabel, locales, setLocale } = useLocale();
+import ChatsChats from "@/async-components/ask-assistant-chat/chats-chats.vue?async";
+import ChatsPrompt from "@/async-components/ask-assistant-chat/chats-prompt/chats-prompt.vue?async";
+import BdModal from "@/async-components/bd-modal.vue?async";
+import BdNavbar from "@/async-components/bd-navbar.vue?async";
+import Test from "@/async-components/test.vue?async";
+import {
+    type AiConversation,
+    apiDeleteAiConversation,
+    apiUpdateAiConversation,
+} from "@/service/ai-conversation";
 
 definePage({
     style: {
@@ -14,23 +19,55 @@ definePage({
     // middleware: ["auth"],
 });
 
-const router = useRouter();
 const showDrawer = shallowRef(false);
 const inputValue = shallowRef("");
-const handleClick = () => {
-    router.navigate({
-        url: "/pages/about_us/index",
-    });
+const isEditMode = shallowRef(false);
+const chatsChatsRef = ref<InstanceType<typeof ChatsChats>>();
+const modalRef = ref<InstanceType<typeof BdModal>>();
+const deleteModalRef = ref<InstanceType<typeof BdModal>>();
+const editTitle = shallowRef("");
+const currentEditItem = shallowRef<AiConversation | null>(null);
+
+const handleEdit = (item: AiConversation) => {
+    currentEditItem.value = item;
+    editTitle.value = item.title;
+    modalRef.value?.open();
 };
 
-const showLocalePicker = () => {
-    uni.showActionSheet({
-        itemList: locales.map((l) => l.label),
-        success: (res) => {
-            setLocale(locales[res.tapIndex ?? 0]?.value ?? "en");
-            updateTabBarTitles(t);
-        },
-    });
+const handleDelete = (item: AiConversation) => {
+    currentEditItem.value = item;
+    deleteModalRef.value?.open();
+};
+
+const confirmEdit = async () => {
+    if (!currentEditItem.value || !editTitle.value.trim()) {
+        useToast().error("标题不能为空");
+        return;
+    }
+
+    try {
+        await apiUpdateAiConversation(currentEditItem.value.id, {
+            title: editTitle.value.trim(),
+        });
+        chatsChatsRef.value?.refresh();
+    } catch (error) {
+        console.error(error);
+        useToast().error("修改失败");
+    }
+};
+
+const confirmDelete = async () => {
+    if (!currentEditItem.value) {
+        return;
+    }
+
+    try {
+        await apiDeleteAiConversation(currentEditItem.value.id);
+        chatsChatsRef.value?.refresh();
+    } catch (error) {
+        console.error(error);
+        useToast().error("删除失败");
+    }
 };
 </script>
 
@@ -43,17 +80,31 @@ const showLocalePicker = () => {
                         <text class="text-md font-medium">历史记录</text>
                     </template>
                     <template #right>
-                        <text class="text-primary text-md p-2"> 编辑 </text>
+                        <text
+                            v-if="!isEditMode"
+                            class="text-primary text-md cursor-pointer p-1"
+                            @click="isEditMode = true"
+                        >
+                            编辑
+                        </text>
+                        <text
+                            v-else
+                            class="text-primary text-md cursor-pointer p-1"
+                            @click="isEditMode = false"
+                        >
+                            完成
+                        </text>
                     </template>
                 </BdNavbar>
 
-                <scroll-view class="h-full" scroll-y>
-                    <view class="space-y-2 p-4">
-                        <view v-for="item in 60" :key="item" class="px-4 py-2">
-                            {{ item }}
-                        </view>
-                    </view>
-                </scroll-view>
+                <view class="h-full">
+                    <ChatsChats
+                        ref="chatsChatsRef"
+                        :is-edit-mode="isEditMode"
+                        @edit="handleEdit"
+                        @delete="handleDelete"
+                    />
+                </view>
             </view>
         </template>
 
@@ -73,6 +124,7 @@ const showLocalePicker = () => {
                 </BdNavbar>
                 <view class="h-full" @click="showDrawer = true">
                     <!-- 主要内容区域 -->
+                    <Test />
                 </view>
             </view>
         </template>
@@ -81,4 +133,28 @@ const showLocalePicker = () => {
             <ChatsPrompt v-model="inputValue" />
         </template>
     </swipe-drawer>
+
+    <bd-modal
+        ref="modalRef"
+        title="编辑标题"
+        :show-cancel="true"
+        :show-confirm="true"
+        @confirm="confirmEdit"
+    >
+        <view w="full" py="3">
+            <uni-easyinput
+                v-model="editTitle"
+                placeholder="请输入标题"
+                :trim="true"
+                :maxlength="100"
+            />
+        </view>
+    </bd-modal>
+
+    <bd-modal
+        ref="deleteModalRef"
+        title="删除聊天记录"
+        content="删除后，聊天记录不可恢复"
+        @confirm="confirmDelete"
+    />
 </template>

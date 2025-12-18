@@ -5,6 +5,10 @@ import type {
     UniPopupInstance,
 } from "@uni-helper/uni-ui-types";
 
+import BdActionSheet from "@/async-components/bd-action-sheet.vue?async";
+import BdModal from "@/async-components/bd-modal.vue?async";
+import BdPicker from "@/async-components/bd-picker.vue?async";
+
 definePage({
     style: {
         navigationBarTitle: "pages.demo",

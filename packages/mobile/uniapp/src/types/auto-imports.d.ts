@@ -505,6 +505,7 @@ declare global {
   const useStorage: typeof import('@uni-helper/uni-use')['useStorage']
   const useStorageAsync: typeof import('@uni-helper/uni-use')['useStorageAsync']
   const useStorageSync: typeof import('@uni-helper/uni-use')['useStorageSync']
+  const useStream: typeof import('../hooks/use-request')['useStream']
   const useTemplateRef: typeof import('vue')['useTemplateRef']
   const useToast: typeof import('../hooks/use-toast')['useToast']
   const useUpload: typeof import('../hooks/use-request')['useUpload']
@@ -540,6 +541,7 @@ declare module 'vue' {
   interface GlobalComponents {}
   interface ComponentCustomProperties {
     readonly !tryOnScopeDispose: UnwrapRef<typeof import('@vueuse/core')['!tryOnScopeDispose']>
+    readonly !useDownloadFile: UnwrapRef<typeof import('@vueuse/core')['!useDownloadFile']>
     readonly !useNetwork: UnwrapRef<typeof import('@vueuse/core')['!useNetwork']>
     readonly !useOnline: UnwrapRef<typeof import('@vueuse/core')['!useOnline']>
     readonly !usePreferredDark: UnwrapRef<typeof import('@vueuse/core')['!usePreferredDark']>
@@ -695,6 +697,7 @@ declare module 'vue' {
     readonly useStorage: UnwrapRef<typeof import('@uni-helper/uni-use')['useStorage']>
     readonly useStorageAsync: UnwrapRef<typeof import('@uni-helper/uni-use')['useStorageAsync']>
     readonly useStorageSync: UnwrapRef<typeof import('@uni-helper/uni-use')['useStorageSync']>
+    readonly useStream: UnwrapRef<typeof import('../hooks/use-request')['useStream']>
     readonly useTemplateRef: UnwrapRef<typeof import('vue')['useTemplateRef']>
     readonly useToast: UnwrapRef<typeof import('../hooks/use-toast')['useToast']>
     readonly useUpload: UnwrapRef<typeof import('../hooks/use-request')['useUpload']>

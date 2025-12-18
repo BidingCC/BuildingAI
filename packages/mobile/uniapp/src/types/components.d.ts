@@ -7,17 +7,6 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
-    AskAssistantChatChatsBubble: typeof import('./../components/ask-assistant-chat/chats-bubble.vue')['default']
-    AskAssistantChatChatsChats: typeof import('./../components/ask-assistant-chat/chats-chats.vue')['default']
-    AskAssistantChatChatsMessages: typeof import('./../components/ask-assistant-chat/chats-messages.vue')['default']
-    AskAssistantChatChatsPromptChatsPrompt: typeof import('./../components/ask-assistant-chat/chats-prompt/chats-prompt.vue')['default']
-    BdActionSheet: typeof import('./../components/bd-action-sheet.vue')['default']
-    BdCheckbox: typeof import('./../components/bd-checkbox.vue')['default']
-    BdImage: typeof import('./../components/bd-image.vue')['default']
-    BdModal: typeof import('./../components/bd-modal.vue')['default']
-    BdNavbar: typeof import('./../components/bd-navbar.vue')['default']
-    BdPicker: typeof import('./../components/bd-picker.vue')['default']
-    BdSeparator: typeof import('./../components/bd-separator.vue')['default']
     LoginAgreement: typeof import('./../components/login/agreement.vue')['default']
     LoginLoginAccount: typeof import('./../components/login/login-account.vue')['default']
     LoginLoginWeixin: typeof import('./../components/login/login-weixin.vue')['default']

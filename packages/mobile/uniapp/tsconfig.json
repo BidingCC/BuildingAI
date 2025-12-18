@@ -18,7 +18,8 @@
             "miniprogram-api-typings",
             "@uni-helper/uni-types",
             "@uni-helper/uni-ui-types",
-            "@uni-helper/vite-plugin-uni-pages"
+            "@uni-helper/vite-plugin-uni-pages",
+            "z-paging/types"
         ],
         "sourceMap": true
     },

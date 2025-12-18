@@ -129,7 +129,7 @@ defineExpose({
                         {{ title || props.title }}
                     </slot>
                 </view>
-                <view text="center sm ">
+                <view text="center sm" w="full">
                     <view v-if="content || props.content" class="p-4">
                         {{ content || props.content }}
                     </view>
