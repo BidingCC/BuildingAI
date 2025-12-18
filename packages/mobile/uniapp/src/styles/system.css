@@ -2,6 +2,9 @@ html,
 body,
 :root,
 page {
+    min-height: 100%;
+    height: 100%;
+    --tab-bar-height: 63.22px;
     background-color: var(--background-soft);
 }
 

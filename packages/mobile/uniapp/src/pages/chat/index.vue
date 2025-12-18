@@ -16,7 +16,7 @@ definePage({
 
 const router = useRouter();
 const showDrawer = shallowRef(false);
-
+const inputValue = shallowRef("");
 const handleClick = () => {
     router.navigate({
         url: "/pages/about_us/index",
@@ -35,7 +35,7 @@ const showLocalePicker = () => {
 </script>
 
 <template>
-    <swipe-drawer ref="drawer" v-model="showDrawer" drawerBgColor="var(--background)">
+    <swipe-drawer ref="drawer" v-model="showDrawer" drawerBgColor="var(--background)" h="full">
         <template #drawer>
             <view class="bg-background flex h-full min-h-0 w-full flex-col">
                 <BdNavbar title="" :show-back="true" :show-home="true" filter="blur(4px)">
@@ -71,14 +71,14 @@ const showLocalePicker = () => {
                         </view>
                     </template>
                 </BdNavbar>
-                <view class="h-full">
+                <view class="h-full" @click="showDrawer = true">
                     <!-- 主要内容区域 -->
                 </view>
             </view>
         </template>
 
         <template #footer>
-            <ChatsPrompt />
+            <ChatsPrompt v-model="inputValue" />
         </template>
     </swipe-drawer>
 </template>
