@@ -7,6 +7,10 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    AskAssistantChatChatsBubble: typeof import('./../components/ask-assistant-chat/chats-bubble.vue')['default']
+    AskAssistantChatChatsChats: typeof import('./../components/ask-assistant-chat/chats-chats.vue')['default']
+    AskAssistantChatChatsMessages: typeof import('./../components/ask-assistant-chat/chats-messages.vue')['default']
+    AskAssistantChatChatsPromptChatsPrompt: typeof import('./../components/ask-assistant-chat/chats-prompt/chats-prompt.vue')['default']
     BdActionSheet: typeof import('./../components/bd-action-sheet.vue')['default']
     BdCheckbox: typeof import('./../components/bd-checkbox.vue')['default']
     BdImage: typeof import('./../components/bd-image.vue')['default']

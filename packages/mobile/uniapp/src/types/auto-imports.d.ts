@@ -7,6 +7,7 @@
 export {}
 declare global {
   const !tryOnScopeDispose: typeof import('@vueuse/core')['!tryOnScopeDispose']
+  const !useDownloadFile: typeof import('@vueuse/core')['!useDownloadFile']
   const !useNetwork: typeof import('@vueuse/core')['!useNetwork']
   const !useOnline: typeof import('@vueuse/core')['!useOnline']
   const !usePreferredDark: typeof import('@vueuse/core')['!usePreferredDark']
@@ -539,6 +540,7 @@ declare module 'vue' {
   interface GlobalComponents {}
   interface ComponentCustomProperties {
     readonly !tryOnScopeDispose: UnwrapRef<typeof import('@vueuse/core')['!tryOnScopeDispose']>
+    readonly !useDownloadFile: UnwrapRef<typeof import('@vueuse/core')['!useDownloadFile']>
     readonly !useNetwork: UnwrapRef<typeof import('@vueuse/core')['!useNetwork']>
     readonly !useOnline: UnwrapRef<typeof import('@vueuse/core')['!useOnline']>
     readonly !usePreferredDark: UnwrapRef<typeof import('@vueuse/core')['!usePreferredDark']>

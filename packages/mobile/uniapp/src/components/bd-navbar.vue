@@ -135,34 +135,36 @@ function handleHome() {
         >
             <view class="bd-navbar__content" :style="navbarContentStyle">
                 <view class="bd-navbar__left">
-                    <view
-                        v-if="showCapsule"
-                        class="bd-navbar__capsule"
-                        :class="{ 'bd-navbar__capsule--single': isSingleBtn }"
-                        :style="capsuleStyle"
-                    >
+                    <slot name="left">
                         <view
-                            v-if="showBack && canGoBack"
-                            class="bd-navbar__capsule-btn"
-                            @tap="handleBack"
+                            v-if="showCapsule"
+                            class="bd-navbar__capsule"
+                            :class="{ 'bd-navbar__capsule--single': isSingleBtn }"
+                            :style="capsuleStyle"
                         >
-                            <text
-                                class="bd-navbar__icon i-lucide-chevron-left"
-                                :style="{ color: iconColor }"
+                            <view
+                                v-if="showBack && canGoBack"
+                                class="bd-navbar__capsule-btn"
+                                @tap="handleBack"
+                            >
+                                <text
+                                    class="bd-navbar__icon i-lucide-chevron-left"
+                                    :style="{ color: iconColor }"
+                                />
+                            </view>
+                            <view
+                                v-if="showBack && canGoBack && showHome"
+                                class="bd-navbar__capsule-divider"
+                                :style="{ background: capsuleStyle.borderColor }"
                             />
+                            <view v-if="showHome" class="bd-navbar__capsule-btn" @tap="handleHome">
+                                <text
+                                    class="bd-navbar__icon i-lucide-house"
+                                    :style="{ color: iconColor }"
+                                />
+                            </view>
                         </view>
-                        <view
-                            v-if="showBack && canGoBack && showHome"
-                            class="bd-navbar__capsule-divider"
-                            :style="{ background: capsuleStyle.borderColor }"
-                        />
-                        <view v-if="showHome" class="bd-navbar__capsule-btn" @tap="handleHome">
-                            <text
-                                class="bd-navbar__icon i-lucide-house"
-                                :style="{ color: iconColor }"
-                            />
-                        </view>
-                    </view>
+                    </slot>
                 </view>
                 <view class="bd-navbar__center">
                     <text class="bd-navbar__title" :style="titleStyle">{{ title }}</text>

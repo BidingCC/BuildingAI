@@ -4,6 +4,12 @@ import { defineUniPages } from "@uni-helper/vite-plugin-uni-pages";
 export default defineUniPages({
     middleware: ["global"],
     pages: [],
+    easycom: {
+        custom: {
+            "^(?!z-paging-refresh|z-paging-load-more)z-paging(.*)":
+                "z-paging/components/z-paging$1/z-paging$1.vue",
+        },
+    },
     globalStyle: {
         backgroundColor: "@bgColor",
         backgroundColorBottom: "@bgColorBottom",

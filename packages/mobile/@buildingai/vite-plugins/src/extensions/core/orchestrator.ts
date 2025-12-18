@@ -179,8 +179,13 @@ export class ExtensionOrchestrator {
             },
 
             transform: (code, id) => {
-                if (!this.shouldTransform(id)) return code;
-                return this.transformI18nCode(code, extensionNamespaces);
+                if (!this.shouldTransform(id)) return null;
+                const transformedCode = this.transformI18nCode(code, extensionNamespaces);
+                // 明确返回 null map，告诉 Vite 不需要 sourcemap，避免警告
+                return {
+                    code: transformedCode,
+                    map: null,
+                };
             },
 
             generateBundle: async (_, bundle) => {

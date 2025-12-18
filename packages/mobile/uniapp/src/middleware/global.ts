@@ -11,6 +11,14 @@ export default defineMiddleware((to, from) => {
     const requireAuth = getCurrentPageMeta()?.style?.auth !== false;
     const currentRoute = getCurrentPageMeta()?.path;
 
+    console.log(
+        "requireAuth",
+        requireAuth,
+        "userStore.isLogin",
+        userStore.isLogin,
+        "currentRoute",
+        currentRoute,
+    );
     if (requireAuth && !userStore.isLogin && currentRoute !== "pages/login/index") {
         return {
             url: "/pages/login/index?redirect=" + to.route,

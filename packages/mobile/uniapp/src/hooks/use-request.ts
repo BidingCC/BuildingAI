@@ -45,6 +45,7 @@ const handleHttpError = (
             if (options?.requireAuth) {
                 useUserStore().toLogin();
             }
+            useUserStore().clearToken();
             return new Error(`${i18n.global.t("common.request.401")}: ${errorMessage}`);
 
         case 403:

@@ -2,6 +2,7 @@
 // 参考 half-popup 的纵向实现，改为横向滑动
 
 var initialTouchPositionX = -1;
+var initialTouchPositionY = -1;
 var lastTouchPositionX = -1;
 var touchStartTimestamp = 0;
 var animationDuration = 200;
@@ -67,6 +68,7 @@ function handleTouchstart(e, ownerInstance) {
     
     var touch = extractTouchFromEvent(e);
     var startX = touch.clientX;
+    var startY = touch.clientY;
 
     // 抽屉关闭时，检查是否在边缘触发区域
     if (!isOpen && edgeWidth > 0 && startX > edgeWidth) {
@@ -74,6 +76,7 @@ function handleTouchstart(e, ownerInstance) {
     }
 
     initialTouchPositionX = startX;
+    initialTouchPositionY = startY;
     lastTouchPositionX = startX;
     touchStartTimestamp = e.timeStamp || Date.now();
 
@@ -90,7 +93,7 @@ function handleTouchstart(e, ownerInstance) {
 // 处理touchmove事件的函数
 function handleTouchmove(e, ownerInstance) {
     // 如果还没有开始触摸，不处理
-    if (initialTouchPositionX < 0) {
+    if (initialTouchPositionX < 0 || initialTouchPositionY < 0) {
         return;
     }
     
@@ -104,9 +107,30 @@ function handleTouchmove(e, ownerInstance) {
         return;
     }
     
-    var currentInstance = state.currentInstance;
     var touch = extractTouchFromEvent(e);
-    var deltaX = touch.clientX - initialTouchPositionX;
+    var currentX = touch.clientX;
+    var currentY = touch.clientY;
+    
+    // 计算滑动距离（绝对值）
+    var deltaX = currentX - initialTouchPositionX;
+    var deltaY = currentY - initialTouchPositionY;
+    var deltaXAbs = Math.abs(deltaX);
+    var deltaYAbs = Math.abs(deltaY);
+    
+    // 判断是否为斜滑或竖向滑动：
+    // 只有当横向明显大于纵向时（横向 > 纵向 * 2.0），才认为是横向滑动
+    // 但如果已经开始了横向滑动（deltaXAbs >= 15px），继续处理，避免卡在中间状态
+    // 否则（横向 <= 纵向 * 2.0 且横向 < 15px），认为是斜滑或竖向滑动，不处理
+    if (deltaXAbs <= deltaYAbs * 2.0 && deltaXAbs < 15) {
+        // 还没有开始横向滑动，且是斜滑或竖向滑动，重置状态，不处理
+        if (deltaYAbs > 8) {
+            initialTouchPositionX = -1;
+            initialTouchPositionY = -1;
+            return;
+        }
+    }
+    
+    var currentInstance = state.currentInstance;
 
     // 计算目标偏移量
     var targetOffset;
@@ -128,7 +152,7 @@ function handleTouchmove(e, ownerInstance) {
     // 立即通知进度变化，确保实时跟随
     notifySlideProgress(progress, ownerInstance, currentInstance);
 
-    lastTouchPositionX = touch.clientX;
+    lastTouchPositionX = currentX;
 }
 
 // 处理touchend事件的函数
@@ -136,12 +160,14 @@ function handleTouchend(e, ownerInstance) {
     // 检查 ownerInstance 是否有效
     if (!ownerInstance || !ownerInstance.getState) {
         initialTouchPositionX = -1;
+        initialTouchPositionY = -1;
         return;
     }
     
     var state = ownerInstance.getState();
     if (!state || !state.currentInstance) {
         initialTouchPositionX = -1;
+        initialTouchPositionY = -1;
         return;
     }
     
@@ -149,12 +175,47 @@ function handleTouchend(e, ownerInstance) {
     var currentInstance = state.currentInstance;
     var touch = extractTouchFromEvent(e);
     var endX = touch.clientX;
-    var distance = endX - initialTouchPositionX;
-    var absDistance = Math.abs(distance);
+    var endY = touch.clientY;
+    
+    // 计算滑动距离（绝对值）
+    var deltaX = endX - initialTouchPositionX;
+    var deltaY = endY - initialTouchPositionY;
+    var deltaXAbs = Math.abs(deltaX);
+    var deltaYAbs = Math.abs(deltaY);
+    
+    // 判断是否为斜滑或竖向滑动：
+    // 只有当横向明显大于纵向时（横向 > 纵向 * 2.0），才认为是横向滑动
+    // 否则（横向 <= 纵向 * 2.0），认为是斜滑或竖向滑动
+    var isHorizontalSwipe = deltaXAbs > deltaYAbs * 2.0;
+    
+    if (!isHorizontalSwipe) {
+        // 不是横向滑动（斜滑或竖向滑动）
+        // 但如果抽屉已经移动了（deltaXAbs > 0），需要回弹到原始状态，避免卡在中间
+        if (deltaXAbs > 0) {
+            // 回弹到原始状态（打开或关闭）
+            if (isOpen) {
+                // 如果原来是打开状态，回弹到打开状态
+                applyTransformation('translate3d(0,0,0)', currentInstance, true, 'all ' + animationDuration + 'ms ease-out');
+                notifySlideProgress(1, ownerInstance, currentInstance);
+            } else {
+                // 如果原来是关闭状态，回弹到关闭状态
+                applyTransformation('translate3d(' + -drawerWidth + 'px,0,0)', currentInstance, true, 'all ' + animationDuration + 'ms ease-out');
+                notifySlideProgress(0, ownerInstance, currentInstance);
+            }
+        }
+        // 重置状态
+        initialTouchPositionX = -1;
+        initialTouchPositionY = -1;
+        return;
+    }
+    
+    var distance = deltaX;
+    var absDistance = deltaXAbs;
 
     // 如果移动距离很小（< 10px），认为是点击，不处理手势逻辑
     if (absDistance < 10) {
         initialTouchPositionX = -1;
+        initialTouchPositionY = -1;
         return;
     }
 
@@ -189,6 +250,7 @@ function handleTouchend(e, ownerInstance) {
 
     // 重置状态
     initialTouchPositionX = -1;
+    initialTouchPositionY = -1;
 }
 
 // 应用变形函数

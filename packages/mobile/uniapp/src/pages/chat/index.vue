@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useRouter } from "@uni-helper/uni-use";
 
+import ChatsPrompt from "@/components/ask-assistant-chat/chats-prompt/chats-prompt.vue";
+
 const { t, currentLocale, currentLocaleLabel, locales, setLocale } = useLocale();
 
 definePage({
@@ -35,38 +37,48 @@ const showLocalePicker = () => {
 <template>
     <swipe-drawer ref="drawer" v-model="showDrawer" drawerBgColor="var(--background)">
         <template #drawer>
-            <view class="menu bg-background w-full">侧边栏内容</view>
+            <view class="bg-background flex h-full min-h-0 w-full flex-col">
+                <BdNavbar title="" :show-back="true" :show-home="true" filter="blur(4px)">
+                    <template #left>
+                        <text class="text-md font-medium">历史记录</text>
+                    </template>
+                    <template #right>
+                        <text class="text-primary text-md p-2"> 编辑 </text>
+                    </template>
+                </BdNavbar>
+
+                <scroll-view class="h-full" scroll-y>
+                    <view class="space-y-2 p-4">
+                        <view v-for="item in 60" :key="item" class="px-4 py-2">
+                            {{ item }}
+                        </view>
+                    </view>
+                </scroll-view>
+            </view>
         </template>
 
         <template #content>
-            <view class="home">
-                <view class="p-4">
-                    <view class="dark:text-primary text-center text-2xl font-bold text-black">
-                        {{ t("pages.chat") }}
-                    </view>
-
-                    <view class="mt-8">
-                        <view
-                            class="flex items-center justify-between rounded-lg bg-gray-100 p-4 dark:bg-gray-800"
-                            @click="showLocalePicker"
-                        >
-                            <view class="dark:text-white">{{
-                                t("common.language") || "Language"
-                            }}</view>
-                            <view class="flex items-center text-gray-500">
-                                <text>{{ currentLocaleLabel }}</text>
-                                <text class="i-carbon-chevron-right ml-1" />
+            <view class="flex h-full min-h-0 flex-col">
+                <BdNavbar title="BuildingAI" :show-back="true" :show-home="true" filter="blur(4px)">
+                    <template #left>
+                        <view class="flex items-center gap-1">
+                            <view class="p-2" @click="showDrawer = true">
+                                <text class="i-tabler-align-left text-lg" />
+                            </view>
+                            <view class="p-2">
+                                <text class="i-tabler-message-circle-plus text-lg" />
                             </view>
                         </view>
-                    </view>
-
-                    <view class="mt-4 text-sm text-gray-500">Current: {{ currentLocale }}</view>
-
-                    <view class="mt-8" @click="handleClick">
-                        <view class="text-center text-gray-400">Click to navigate</view>
-                    </view>
+                    </template>
+                </BdNavbar>
+                <view class="h-full">
+                    <!-- 主要内容区域 -->
                 </view>
             </view>
+        </template>
+
+        <template #footer>
+            <ChatsPrompt />
         </template>
     </swipe-drawer>
 </template>

@@ -106,19 +106,28 @@ export default {
                 filter: `blur(${Math.max(0, (props.blurMax || 0) * (slideProgress === 0.01 ? 1 : slideProgress))}px)`,
                 transition: (slideProgress === 0 || slideProgress === 1 || slideProgress === 0.01 || isClosing) ? 'transform 0.2s ease-out, filter 0.25s ease-out' : 'none',
             }"
-            @touchstart.passive="wxs.handleTouchstart"
-            <!-- #ifdef MP-WEIXIN -->
-            :catchtouchmove="wxs.handleTouchmove"
-            <!-- #endif -->
-            <!-- #ifndef MP-WEIXIN -->
-            @touchmove.passive="wxs.handleTouchmove"
-            <!-- #endif -->
-            @touchend="wxs.handleTouchend"
-            @touchcancel="wxs.handleTouchend"
         >
-            <slot name="content">
-                <slot />
-            </slot>
+            <!-- 主要内容区域：可以滑动 -->
+            <view
+                class="swipe-drawer__content-body"
+                @touchstart.passive="wxs.handleTouchstart"
+                <!-- #ifdef MP-WEIXIN -->
+                :catchtouchmove="wxs.handleTouchmove"
+                <!-- #endif -->
+                <!-- #ifndef MP-WEIXIN -->
+                @touchmove.passive="wxs.handleTouchmove"
+                <!-- #endif -->
+                @touchend="wxs.handleTouchend"
+                @touchcancel="wxs.handleTouchend"
+            >
+                <slot name="content">
+                    <slot />
+                </slot>
+            </view>
+            <!-- 底部区域：不参与滑动检测 -->
+            <view class="swipe-drawer__content-footer">
+                <slot name="footer" />
+            </view>
         </view>
 
         <!-- 侧边抽屉面板 -->

@@ -22,10 +22,9 @@
         ],
         "sourceMap": true
     },
-    // "include": [
-    //     "src/types/async-import.d.ts",
-    //     "src/types/async-component.d.ts"
-    // ],
+    "include": [
+        "src/**/*"
+    ],
     "exclude": [
         "src/uni_modules/**/*"
     ],
