@@ -1,8 +1,0 @@
-{
-    "extends": "@buildingai/typescript-config/base.json",
-    "compilerOptions": {
-        "module": "es2022",
-        "moduleResolution": "bundler",
-        "allowArbitraryExtensions": true
-    }
-}

@@ -2,11 +2,11 @@
 
 **💡Tips：构建产物路径**
 
-| 平台 | 构建产物路径 |
-| --- | --- |
-| Windows | [项目根目录]/packages/desktop/src-tauri/target/release/bundle/msi/xxx.msi |
+| 平台    | 构建产物路径                                                               |
+| ------- | -------------------------------------------------------------------------- |
+| Windows | [项目根目录]/packages/desktop/src-tauri/target/release/bundle/msi/xxx.msi  |
 | Windows | [项目根目录]/packages/desktop/src-tauri/target/release/bundle/nsis/xxx.exe |
-| macOS | [项目根目录]/packages/desktop/src-tauri/target/release/bundle/dmg/ |
+| macOS   | [项目根目录]/packages/desktop/src-tauri/target/release/bundle/dmg/         |
 
 > macOS安装如果提示包已损坏，则在终端中输入`sudo xattr -r -d com.apple.quarantine [安装包路径]`，然后输入密码回车即可重新打开。
 
@@ -52,6 +52,7 @@ icns-generator --input icon.png
 </Files>
 
 复制下面几个文件然后粘贴至 `[项目根目录]/packages/desktop/src-tauri/icons` 目录下替换掉默认图标
+
 - `icon.ico`
 - `icon.icns` Windows不需要
 - `icon_32x32.png`
@@ -78,10 +79,10 @@ pnpm build:desktop
     "app": {
         "windows": [
             {
-                "title": "BuildingAI"
-            }
-        ]
-    }
+                "title": "BuildingAI",
+            },
+        ],
+    },
 }
 ```
 
@@ -161,16 +162,16 @@ pnpm build:desktop
 - **`identifier`**：应用唯一标识（类似 bundle id），如 `buildingai.desktop`。
 - **`build.devUrl`**：开发模式加载的地址（通常是本地 dev server）。
 - **`build.frontendDist`**：
-  - 设置为远程 URL 时，桌面应用会直接打开线上网站；
-  - 设置为本地目录时，会把静态资源打包到应用中。
+    - 设置为远程 URL 时，桌面应用会直接打开线上网站；
+    - 设置为本地目录时，会把静态资源打包到应用中。
 - **`build.beforeDevCommand`**：启动开发调试前执行的命令（例如前端预处理）。
 - **`build.beforeBuildCommand`**：构建桌面安装包前执行的命令。
 - **`app.windows`**：窗口配置列表：
-  - `title`：窗口标题。
-  - `width` / `height`：初始窗口宽高。
-  - `minWidth` / `minHeight`：窗口最小尺寸限制。
-  - `devtools`：开发环境是否允许打开 DevTools。
-  - `center`：启动时是否居中显示窗口。
+    - `title`：窗口标题。
+    - `width` / `height`：初始窗口宽高。
+    - `minWidth` / `minHeight`：窗口最小尺寸限制。
+    - `devtools`：开发环境是否允许打开 DevTools。
+    - `center`：启动时是否居中显示窗口。
 - **`app.security.csp`**：Content Security Policy，`null` 表示使用 Tauri 默认策略。
 - **`bundle.active`**：是否启用打包（生成安装包）。
 - **`bundle.targets`**：打包目标平台（例如 `all` 表示所有支持的平台）。

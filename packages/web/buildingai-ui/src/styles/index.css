@@ -1,0 +1,9 @@
+@import "@buildingai/ui/styles/index.css";
+
+body {
+    @apply min-h-screen;
+}
+
+#root {
+    @apply min-h-screen;
+}

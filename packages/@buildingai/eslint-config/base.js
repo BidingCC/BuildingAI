@@ -5,6 +5,7 @@ import tseslint from "typescript-eslint";
 import onlyWarn from "eslint-plugin-only-warn";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
 import eslintPluginPrettier from "eslint-plugin-prettier";
+import { globalIgnores } from "eslint/config";
 
 /**
  * A shared ESLint configuration for the repository.
@@ -13,12 +14,13 @@ import eslintPluginPrettier from "eslint-plugin-prettier";
  * */
 export const config = [
     js.configs.recommended,
+    ...tseslint.configs.recommended,
     {
         ...eslintConfigPrettier,
-        files: ["**/*.{js,mjs,cjs,ts,d.ts,vue}"],
+        files: ["**/*.{js,jsx,mjs,cjs,ts,tsx,d.ts,vue}"],
     },
     {
-        files: ["**/*.{js,mjs,cjs,ts,d.ts,vue}"],
+        files: ["**/*.{js,jsx,mjs,cjs,ts,tsx,d.ts,vue}"],
         plugins: {
             prettier: eslintPluginPrettier,
         },
@@ -26,7 +28,6 @@ export const config = [
             "prettier/prettier": "error",
         },
     },
-    ...tseslint.configs.recommended,
     {
         plugins: {
             turbo: turboPlugin,
@@ -41,7 +42,7 @@ export const config = [
         },
     },
     {
-        files: ["**/*.{ts,vue,js,mjs,cjs,d.ts}"],
+        files: ["**/*.{js,jsx,mjs,cjs,ts,tsx,d.ts,vue}"],
         plugins: {
             "simple-import-sort": simpleImportSort,
         },
@@ -51,10 +52,17 @@ export const config = [
         },
     },
     {
-        ignores: ["dist/**", "node_modules/**", "build/**", ".output/**", ".turbo/**"],
+        ignores: [
+            "dist/**",
+            "node_modules/**",
+            "build/**",
+            ".output/**",
+            ".turbo/**",
+            "packages/eslint-config",
+        ],
     },
     {
-        files: ["**/*.{js,mjs,cjs,ts,d.ts,vue}"],
+        files: ["**/*.{js,jsx,mjs,cjs,ts,tsx,d.ts,vue}"],
         rules: {
             "@typescript-eslint/interface-name-prefix": "off",
             "@typescript-eslint/explicit-function-return-type": "off",
@@ -72,4 +80,5 @@ export const config = [
             ],
         },
     },
+    globalIgnores(["dist", "templates/**"]),
 ];

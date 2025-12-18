@@ -13,6 +13,12 @@ insert_final_newline = false
 quote_type = double
 
 
+[packages/web/**]
+indent_style = space
+indent_size = 2
+tab_width = 2
+
+
 [package.json]
 indent_style = space
 indent_size = 4

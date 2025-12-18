@@ -2,13 +2,15 @@
 
 **💡Tips: Build artifact paths**
 
-| Platform | Build artifact path |
-| --- | --- |
-| Windows | [Project Root]/packages/desktop/src-tauri/target/release/bundle/msi/xxx.msi |
-| Windows | [Project Root]/packages/desktop/src-tauri/target/release/bundle/nsis/xxx.exe |
-| macOS | [Project Root]/packages/desktop/src-tauri/target/release/bundle/dmg/xxx.dmg |
+| Platform | Build artifact path                                                          |
+| -------- | ---------------------------------------------------------------------------- |
+| Windows  | [Project Root]/packages/desktop/src-tauri/target/release/bundle/msi/xxx.msi  |
+| Windows  | [Project Root]/packages/desktop/src-tauri/target/release/bundle/nsis/xxx.exe |
+| macOS    | [Project Root]/packages/desktop/src-tauri/target/release/bundle/dmg/xxx.dmg  |
 
-> If macOS says the app package is damaged, run `sudo xattr -r -d com.apple.quarantine [package-path]` in Terminal, then enter your password and press Enter to open it again.
+> If macOS says the app package is damaged, run
+> `sudo xattr -r -d com.apple.quarantine [package-path]` in Terminal, then enter your password and
+> press Enter to open it again.
 
 ## Update icons
 
@@ -31,7 +33,8 @@ cd icons
 icns-generator --input icon.png
 ```
 
-After running the commands above, an `output` folder will be generated. The directory structure looks like this:
+After running the commands above, an `output` folder will be generated. The directory structure
+looks like this:
 
 <Files>
   <Folder name="icons" defaultOpen>
@@ -52,7 +55,8 @@ After running the commands above, an `output` folder will be generated. The dire
   </Folder>
 </Files>
 
-Copy the files below into `[Project Root]/packages/desktop/src-tauri/icons` to replace the default icons:
+Copy the files below into `[Project Root]/packages/desktop/src-tauri/icons` to replace the default
+icons:
 
 - `icon.ico`
 - `icon.icns` (not required on Windows)
@@ -80,10 +84,10 @@ If you want to modify the desktop app window title (and product name):
     "app": {
         "windows": [
             {
-                "title": "BuildingAI"
-            }
-        ]
-    }
+                "title": "BuildingAI",
+            },
+        ],
+    },
 }
 ```
 
@@ -165,17 +169,17 @@ The desktop app is configured through `src-tauri/tauri.conf.json`. The main fiel
 - **`version`**: Application version string.
 - **`identifier`**: Unique application identifier (similar to bundle id), e.g. `buildingai.desktop`.
 - **`build.devUrl`**: URL loaded in development mode (typically the local dev server).
-- **`build.frontendDist`**: 
-  - Remote URL when you want to open an already deployed website.
-  - Local directory path when you want to bundle static assets into the app.
+- **`build.frontendDist`**:
+    - Remote URL when you want to open an already deployed website.
+    - Local directory path when you want to bundle static assets into the app.
 - **`build.beforeDevCommand`**: Command run before starting the dev server (e.g. prepare frontend).
 - **`build.beforeBuildCommand`**: Command run before building the desktop bundle.
 - **`app.windows`**: List of window definitions:
-  - `title`: Window title.
-  - `width` / `height`: Initial window size.
-  - `minWidth` / `minHeight`: Minimum resize constraints.
-  - `devtools`: Whether devtools are enabled in dev builds.
-  - `center`: Whether to center the window on startup.
+    - `title`: Window title.
+    - `width` / `height`: Initial window size.
+    - `minWidth` / `minHeight`: Minimum resize constraints.
+    - `devtools`: Whether devtools are enabled in dev builds.
+    - `center`: Whether to center the window on startup.
 - **`app.security.csp`**: Content Security Policy; `null` means use Tauri defaults.
 - **`bundle.active`**: Whether bundling (creating installers) is enabled.
 - **`bundle.targets`**: Bundle targets (e.g. `all` to build for all supported platforms).

@@ -1,8 +1,0 @@
-{
-    "extends": [
-        "./.nuxt/tsconfig.json"
-    ],
-    "compilerOptions": {
-        "tsBuildInfoFile": "./.temp/tsconfig.web.tsbuildinfo",
-    }
-}

@@ -195,21 +195,15 @@
     "pnpm": {
         "overrides": {
             "cron": "catalog:api",
-            "vite": "catalog:dev",
-            "@nuxt/kit": "catalog:web",
+            "vite": "npm:rolldown-vite@7.2.5",
             "buildingai": "link:packages/cli",
             "glob": "^11.0.3",
             "source-map": "^0.7.4",
-            "superagent": "^10.2.3"
+            "superagent": "^10.2.3",
+            "zod": "^4.2.1"
         },
         "peerDependencyRules": {
-            "ignoreMissing": [
-                "@storybook-vue/nuxt>nuxt",
-                "@storybook-vue/nuxt>storybook",
-                "@vite-pwa/nuxt>vite-plugin-pwa>vite"
-            ],
             "allowedVersions": {
-                "nuxt": "4",
                 "storybook": "9",
                 "magicast": "0.5.1"
             }
