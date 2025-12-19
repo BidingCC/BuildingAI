@@ -1,9 +1,8 @@
-import * as React from "react";
-import { DayPicker, getDefaultClassNames, type DayButton } from "react-day-picker";
-
-import { cn } from "@buildingai/ui/lib/utils";
 import { Button, buttonVariants } from "@buildingai/ui/components/ui/button";
-import { ChevronLeftIcon, ChevronRightIcon, ChevronDownIcon } from "lucide-react";
+import { cn } from "@buildingai/ui/lib/utils";
+import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import * as React from "react";
+import { type DayButton, DayPicker, getDefaultClassNames } from "react-day-picker";
 
 function Calendar({
   className,

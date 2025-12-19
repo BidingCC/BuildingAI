@@ -1,5 +1,4 @@
-import { Moon, Sun } from "lucide-react";
-
+import { useTheme } from "@buildingai/ui/components/theme-provider";
 import { Button } from "@buildingai/ui/components/ui/button";
 import {
   DropdownMenu,
@@ -7,7 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@buildingai/ui/components/ui/dropdown-menu";
-import { useTheme } from "@buildingai/ui/components/theme-provider";
+import { Moon, Sun } from "lucide-react";
 
 export function ModeToggle() {
   const { setTheme } = useTheme();

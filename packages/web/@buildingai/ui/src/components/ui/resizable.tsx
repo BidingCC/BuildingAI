@@ -1,7 +1,6 @@
+import { cn } from "@buildingai/ui/lib/utils";
 import * as React from "react";
 import * as ResizablePrimitive from "react-resizable-panels";
-
-import { cn } from "@buildingai/ui/lib/utils";
 
 function ResizablePanelGroup({
   className,
@@ -41,4 +40,4 @@ function ResizableHandle({
   );
 }
 
-export { ResizablePanelGroup, ResizablePanel, ResizableHandle };
+export { ResizableHandle, ResizablePanel, ResizablePanelGroup };

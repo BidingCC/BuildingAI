@@ -5,6 +5,7 @@
     "type": "module",
     "scripts": {
         "lint": "eslint .",
+        "lint:fix": "eslint . --fix",
         "update:components": "pnpm dlx shadcn@latest add -a -o"
     },
     "exports": {

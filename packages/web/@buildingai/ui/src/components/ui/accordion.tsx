@@ -1,8 +1,7 @@
-import * as React from "react";
-import { Accordion as AccordionPrimitive } from "radix-ui";
-
 import { cn } from "@buildingai/ui/lib/utils";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
+import { Accordion as AccordionPrimitive } from "radix-ui";
+import * as React from "react";
 
 function Accordion({ className, ...props }: React.ComponentProps<typeof AccordionPrimitive.Root>) {
   return (
@@ -79,4 +78,4 @@ function AccordionContent({
   );
 }
 
-export { Accordion, AccordionItem, AccordionTrigger, AccordionContent };
+export { Accordion, AccordionContent, AccordionItem, AccordionTrigger };
