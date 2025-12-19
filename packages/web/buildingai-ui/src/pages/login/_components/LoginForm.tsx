@@ -18,6 +18,7 @@ import { Input } from "@buildingai/ui/components/ui/input";
 import { Label } from "@buildingai/ui/components/ui/label";
 import { cn } from "@buildingai/ui/lib/utils";
 import { ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
   return (
@@ -104,9 +105,11 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
               </Field>
 
               <Field>
-                <Button type="submit">
-                  Next <ArrowRight />
-                </Button>
+                <Link to="/console" className="block">
+                  <Button type="submit" className="w-full">
+                    Next <ArrowRight />
+                  </Button>
+                </Link>
                 <FieldDescription className="text-center">
                   Don&apos;t have an account? <a href="#">Sign up</a>
                 </FieldDescription>

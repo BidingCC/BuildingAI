@@ -6,7 +6,7 @@
 
 @source "../components";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:is(.dark, .dark *));
 
 @layer base {
   * {
