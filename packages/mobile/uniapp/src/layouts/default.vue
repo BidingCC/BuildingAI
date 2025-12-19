@@ -2,6 +2,8 @@
 import { getCurrentPageMeta } from "virtual:pages-meta";
 import { useI18n } from "vue-i18n";
 
+import BdNavbar from "@/async-components/bd-navbar.vue?async";
+
 import { isDark } from "../hooks/use-dark";
 import { updateTabBarTitles } from "../utils/tabbar";
 

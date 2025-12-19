@@ -48,5 +48,11 @@ export default defineUniPages({
         ],
     },
     // 动态加载扩展分包
-    subPackages: await loadExtensionSubPackages("../../../extensions"),
+    subPackages: [
+        {
+            root: "async-components/",
+            pages: [{ path: "index" }],
+        },
+        ...(await loadExtensionSubPackages("../../../extensions")),
+    ],
 });

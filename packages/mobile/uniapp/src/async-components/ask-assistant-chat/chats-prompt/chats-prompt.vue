@@ -39,18 +39,13 @@ const keyboardIsShow = shallowRef(false);
 const tabbarHeight = shallowRef(0);
 
 onMounted(() => {
-    // 通过系统信息获取 tabbar 高度
     const systemInfo = uni.getSystemInfoSync();
-    // tabbar 高度 = 底部安全区域 + 固定高度（通常为 48px 或 50px）
     const safeAreaBottom = systemInfo.safeAreaInsets?.bottom || 0;
-    // 小程序中 tabbar 固定高度通常是 48px，加上安全区域
-    tabbarHeight.value = safeAreaBottom + 42;
-    console.log("tabbarHeight", tabbarHeight.value, "safeAreaBottom", safeAreaBottom);
+    tabbarHeight.value = safeAreaBottom + 40;
 });
 
 const chatActionBarStyle = computed(() => {
     if (keyboardIsShow.value && keyboardHeight.value > 0) {
-        // 减去 tabbar 的高度
         const adjustedHeight = Math.max(0, keyboardHeight.value - tabbarHeight.value);
         return {
             paddingBottom: `${adjustedHeight}px`,
@@ -61,7 +56,6 @@ const chatActionBarStyle = computed(() => {
 
 function handleKeyboardHeightChange(e: { detail: { height: number } }) {
     const height = e.detail.height || 0;
-    console.log("height", height, "tabbarHeight", tabbarHeight.value);
     keyboardHeight.value = height;
     keyboardIsShow.value = height > 0;
 }

@@ -1,4 +1,11 @@
-import type { RequestOptions } from "@buildingai/types";
+import type {
+    ChatMessage as HttpChatMessage,
+    ChatStreamChunk,
+    ChatStreamConfig,
+    McpCallChunk,
+    McpCallType,
+    RequestOptions,
+} from "@buildingai/types";
 
 import i18n from "@/i18n";
 import { useUserStore } from "@/stores/user";
@@ -29,6 +36,18 @@ export const getBaseUrl = (): string => {
 const WEB_PREFIX = import.meta.env.VITE_APP_WEB_API_PREFIX || "/api";
 const CONSOLE_PREFIX = import.meta.env.VITE_APP_CONSOLE_API_PREFIX || "/consoleapi";
 
+/**
+ * Generate UUID
+ * @returns UUID string
+ */
+function uuid(): string {
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+        const r = (Math.random() * 16) | 0;
+        const v = c === "x" ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+    });
+}
+
 const handleHttpError = (
     status: number,
     errorMessage: string,
@@ -41,9 +60,11 @@ const handleHttpError = (
             return new Error(`${i18n.global.t("common.request.400")}: ${errorMessage}${errorPath}`);
 
         case 401:
-            useToast().error(`${i18n.global.t("common.request.401")}: ${errorMessage}`);
             if (options?.requireAuth) {
                 useUserStore().toLogin();
+            }
+            if (options?.requireAuth !== false) {
+                useToast().error(`${i18n.global.t("common.request.401")}: ${errorMessage}`);
             }
             useUserStore().clearToken();
             return new Error(`${i18n.global.t("common.request.401")}: ${errorMessage}`);
@@ -447,3 +468,265 @@ export const useDownloadFile = (opts: {
         },
     });
 };
+
+/**
+ * Create stream request for chat
+ * @description Creates a streaming chat request using fetch API (H5 only)
+ * @param url Chat API endpoint URL (relative to WEB_PREFIX)
+ * @param config Chat stream configuration
+ * @returns Promise with stream controller containing abort method
+ * @example
+ * ```typescript
+ * const controller = await useStream("/ai-chat/stream", {
+ *   messages: [{ role: "user", content: "Hello" }],
+ *   onUpdate: (chunk) => {
+ *     console.log("Received chunk:", chunk);
+ *   },
+ *   onFinish: (message) => {
+ *     console.log("Stream finished:", message);
+ *   },
+ *   onError: (error) => {
+ *     console.error("Stream error:", error);
+ *   }
+ * });
+ *
+ * // Abort the stream
+ * controller.abort();
+ * ```
+ */
+export const useStream = (
+    url: string,
+    config: ChatStreamConfig,
+): Promise<{ abort: () => void }> => {
+    // #ifndef H5
+    throw new Error("useStream is only available in H5 platform");
+    // #endif
+
+    // #ifdef H5
+    const {
+        messages,
+        body = {},
+        onResponse,
+        onToolCall,
+        onUpdate,
+        onFinish,
+        onError,
+        generateId = () => uuid(),
+        headers = {},
+        ...restOptions
+    } = config;
+
+    // Build request body
+    const requestBody = {
+        messages,
+        ...body,
+    };
+
+    // Build full URL
+    const baseUrl = getBaseUrl();
+    const fullUrl = `${baseUrl}${WEB_PREFIX}${url}`;
+
+    // Get token
+    const token: string | null = useUserStore().token;
+    const requestHeaders: Record<string, string> = {
+        "Content-Type": "application/json",
+        ...headers,
+    };
+
+    if (token) {
+        requestHeaders.Authorization = `Bearer ${token}`;
+    }
+
+    // Create abort controller
+    const abortController = new AbortController();
+    let isAborted = false;
+
+    // Create controller object (return immediately)
+    const controller = {
+        abort: () => {
+            isAborted = true;
+            abortController.abort();
+        },
+    };
+
+    // Async process stream, don't block controller return
+    (async () => {
+        try {
+            // Initiate request
+            const response = await fetch(fullUrl, {
+                method: "POST",
+                body: JSON.stringify(requestBody),
+                headers: requestHeaders,
+                signal: abortController.signal,
+                ...restOptions,
+            });
+
+            // Call response callback
+            if (onResponse) {
+                try {
+                    await onResponse(response);
+                } catch (err) {
+                    throw err;
+                }
+            }
+
+            // Check response status
+            if (!response.ok) {
+                const errorText = await response.text();
+                const error = new Error(errorText || "Failed to fetch the chat response.");
+                onError?.(error);
+                throw error;
+            }
+
+            if (!response.body) {
+                const error = new Error("The response body is empty.");
+                onError?.(error);
+                throw error;
+            }
+
+            // Process streaming response
+            await processStream({
+                stream: response.body,
+                onUpdate,
+                onFinish,
+                onError,
+                onToolCall,
+                generateId,
+                abortController,
+            });
+        } catch (error) {
+            if (!isAborted) {
+                onError?.(error as Error);
+            }
+        }
+    })();
+
+    // Return controller immediately
+    return Promise.resolve(controller);
+    // #endif
+};
+
+/**
+ * Process chat stream response
+ * @description Processes the ReadableStream from fetch response
+ */
+// #ifdef H5
+async function processStream({
+    stream,
+    onUpdate,
+    onToolCall,
+    onFinish,
+    onError,
+    generateId,
+    abortController,
+}: {
+    stream: ReadableStream;
+    onUpdate?: (chunk: ChatStreamChunk) => void;
+    onToolCall?: (chunk: McpCallChunk<unknown>) => void;
+    onFinish?: (message: HttpChatMessage) => void;
+    onError?: (error: Error) => void;
+    generateId: () => string;
+    abortController: AbortController;
+}): Promise<void> {
+    const reader = stream.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let contentBuffer = "";
+    const currentMessage: HttpChatMessage = {
+        id: generateId(),
+        role: "assistant",
+        content: "",
+    } as HttpChatMessage;
+
+    try {
+        while (true) {
+            const { done, value } = await reader.read();
+
+            if (done) break;
+            if (abortController.signal.aborted) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split("\n");
+            buffer = lines.pop() || "";
+
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (!trimmed) continue;
+
+                if (trimmed === "data: [DONE]" || trimmed === "[DONE]") {
+                    onFinish?.(currentMessage);
+                    return;
+                }
+
+                if (trimmed.startsWith("data:")) {
+                    const jsonStr = trimmed.slice(5).trim();
+                    if (!jsonStr) continue;
+                    try {
+                        const parsed = JSON.parse(jsonStr);
+                        if (parsed.type === "error") {
+                            throw new Error(parsed.data.message);
+                        } else if (parsed.type.startsWith("mcp_tool_")) {
+                            const type: McpCallType = parsed.type.replace(/^mcp_tool_/, "");
+                            if (type === "error") {
+                                throw new Error(parsed.data.message);
+                            } else {
+                                onToolCall?.({
+                                    type,
+                                    data: parsed.data,
+                                });
+                            }
+                        } else if (parsed.type === "chunk" && parsed.data) {
+                            contentBuffer += parsed.data;
+                            currentMessage.content = contentBuffer;
+                            onUpdate?.({
+                                type: "content",
+                                message: { ...currentMessage },
+                                delta: parsed.data,
+                            } as ChatStreamChunk);
+                        } else if (parsed.type === "reasoning" && parsed.data) {
+                            // Handle deep thinking data
+                            onUpdate?.({
+                                type: "metadata",
+                                message: { ...currentMessage },
+                                metadata: {
+                                    type: "reasoning",
+                                    data: parsed.data,
+                                },
+                            } as ChatStreamChunk);
+                        } else if (
+                            parsed.type === "context" ||
+                            parsed.type === "references" ||
+                            parsed.type === "suggestions" ||
+                            parsed.type === "conversation_id" ||
+                            parsed.type === "annotations"
+                        ) {
+                            // Handle other types of messages
+                            onUpdate?.({
+                                type: "metadata",
+                                message: { ...currentMessage },
+                                metadata: {
+                                    type: parsed.type,
+                                    data: parsed.data,
+                                },
+                            } as ChatStreamChunk);
+                        }
+                    } catch (e) {
+                        // Parse failure can be ignored or warned
+                        throw e;
+                    }
+                }
+            }
+        }
+
+        // If we reach here without calling onFinish, the stream ended normally
+        if (!abortController.signal.aborted) {
+            onFinish?.(currentMessage);
+        }
+    } catch (error) {
+        onError?.(error as Error);
+        throw error;
+    } finally {
+        reader.releaseLock();
+    }
+}
+// #endif

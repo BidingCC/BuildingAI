@@ -1,6 +1,3 @@
-// swipe-drawer 横向手势 wxs 实现
-// 参考 half-popup 的纵向实现，改为横向滑动
-
 var initialTouchPositionX = -1;
 var initialTouchPositionY = -1;
 var lastTouchPositionX = -1;
@@ -12,7 +9,6 @@ var drawerWidth = 260;
 var isOpen = false;
 var edgeWidth = 0;
 
-// 用于监控属性变化的函数
 function observePropChanges(newVal, oldVal, ownerInstance, currentInstance) {
     if (!ownerInstance || !ownerInstance.getState) {
         return;
@@ -35,28 +31,21 @@ function observePropChanges(newVal, oldVal, ownerInstance, currentInstance) {
             }
         }
 
-        // 使用 'all' 确保小程序下动画流畅，参考 half-popup 的实现
         var transition = 'all ' + animationDuration + 'ms ease-out';
         var transform = isOpen
             ? 'translate3d(0,0,0)'
             : 'translate3d(' + -drawerWidth + 'px,0,0)';
         applyTransformation(transform, currentInstance, true, transition);
         
-        // 通知滑动进度
         if (isOpen) {
-            // 打开时立即通知
             notifySlideProgress(1, ownerInstance, currentInstance);
         } else {
-            // 关闭时，直接通知 0（只有在从打开状态变为关闭状态时，才需要 0.01 来保持可见性）
-            // 如果初始状态就是关闭的，直接通知 0
             notifySlideProgress(0, ownerInstance, currentInstance);
         }
     }
 }
 
-// 处理touchstart事件的函数
 function handleTouchstart(e, ownerInstance) {
-    // 检查 ownerInstance 是否有效
     if (!ownerInstance || !ownerInstance.getState) {
         return;
     }
@@ -70,7 +59,6 @@ function handleTouchstart(e, ownerInstance) {
     var startX = touch.clientX;
     var startY = touch.clientY;
 
-    // 抽屉关闭时，检查是否在边缘触发区域
     if (!isOpen && edgeWidth > 0 && startX > edgeWidth) {
         return;
     }
@@ -80,24 +68,19 @@ function handleTouchstart(e, ownerInstance) {
     lastTouchPositionX = startX;
     touchStartTimestamp = e.timeStamp || Date.now();
 
-    // 确保滑动开始时进度正确
     var currentInstance = state.currentInstance;
     if (currentInstance) {
         notifySlideProgress(isOpen ? 1 : 0, ownerInstance, currentInstance);
     }
     
-    // 标记触摸开始，用于区分点击和滑动
     state.touchStarted = true;
 }
 
-// 处理touchmove事件的函数
 function handleTouchmove(e, ownerInstance) {
-    // 如果还没有开始触摸，不处理
     if (initialTouchPositionX < 0 || initialTouchPositionY < 0) {
         return;
     }
     
-    // 检查 ownerInstance 是否有效
     if (!ownerInstance || !ownerInstance.getState) {
         return;
     }
@@ -111,18 +94,12 @@ function handleTouchmove(e, ownerInstance) {
     var currentX = touch.clientX;
     var currentY = touch.clientY;
     
-    // 计算滑动距离（绝对值）
     var deltaX = currentX - initialTouchPositionX;
     var deltaY = currentY - initialTouchPositionY;
     var deltaXAbs = Math.abs(deltaX);
     var deltaYAbs = Math.abs(deltaY);
     
-    // 判断是否为斜滑或竖向滑动：
-    // 只有当横向明显大于纵向时（横向 > 纵向 * 2.0），才认为是横向滑动
-    // 但如果已经开始了横向滑动（deltaXAbs >= 15px），继续处理，避免卡在中间状态
-    // 否则（横向 <= 纵向 * 2.0 且横向 < 15px），认为是斜滑或竖向滑动，不处理
     if (deltaXAbs <= deltaYAbs * 2.0 && deltaXAbs < 15) {
-        // 还没有开始横向滑动，且是斜滑或竖向滑动，重置状态，不处理
         if (deltaYAbs > 8) {
             initialTouchPositionX = -1;
             initialTouchPositionY = -1;
@@ -132,32 +109,24 @@ function handleTouchmove(e, ownerInstance) {
     
     var currentInstance = state.currentInstance;
 
-    // 计算目标偏移量
     var targetOffset;
     if (isOpen) {
-        // 已打开状态：只能往左推（deltaX < 0），限制在 [-drawerWidth, 0]
         targetOffset = Math.min(0, Math.max(-drawerWidth, deltaX));
     } else {
-        // 已关闭状态：只能往右拉（deltaX > 0），限制在 [-drawerWidth, 0]
         targetOffset = Math.min(0, Math.max(-drawerWidth, -drawerWidth + deltaX));
     }
 
-    // 应用 transform
     applyTransformation('translate3d(' + targetOffset + 'px,0,0)', currentInstance, false, '');
 
-    // 计算滑动进度：-drawerWidth -> 0 映射到 0 -> 1
     var progress = 1 + targetOffset / drawerWidth;
     progress = Math.max(0, Math.min(1, progress));
 
-    // 立即通知进度变化，确保实时跟随
     notifySlideProgress(progress, ownerInstance, currentInstance);
 
     lastTouchPositionX = currentX;
 }
 
-// 处理touchend事件的函数
 function handleTouchend(e, ownerInstance) {
-    // 检查 ownerInstance 是否有效
     if (!ownerInstance || !ownerInstance.getState) {
         initialTouchPositionX = -1;
         initialTouchPositionY = -1;
@@ -177,33 +146,23 @@ function handleTouchend(e, ownerInstance) {
     var endX = touch.clientX;
     var endY = touch.clientY;
     
-    // 计算滑动距离（绝对值）
     var deltaX = endX - initialTouchPositionX;
     var deltaY = endY - initialTouchPositionY;
     var deltaXAbs = Math.abs(deltaX);
     var deltaYAbs = Math.abs(deltaY);
     
-    // 判断是否为斜滑或竖向滑动：
-    // 只有当横向明显大于纵向时（横向 > 纵向 * 2.0），才认为是横向滑动
-    // 否则（横向 <= 纵向 * 2.0），认为是斜滑或竖向滑动
     var isHorizontalSwipe = deltaXAbs > deltaYAbs * 2.0;
     
     if (!isHorizontalSwipe) {
-        // 不是横向滑动（斜滑或竖向滑动）
-        // 但如果抽屉已经移动了（deltaXAbs > 0），需要回弹到原始状态，避免卡在中间
         if (deltaXAbs > 0) {
-            // 回弹到原始状态（打开或关闭）
             if (isOpen) {
-                // 如果原来是打开状态，回弹到打开状态
                 applyTransformation('translate3d(0,0,0)', currentInstance, true, 'all ' + animationDuration + 'ms ease-out');
                 notifySlideProgress(1, ownerInstance, currentInstance);
             } else {
-                // 如果原来是关闭状态，回弹到关闭状态
                 applyTransformation('translate3d(' + -drawerWidth + 'px,0,0)', currentInstance, true, 'all ' + animationDuration + 'ms ease-out');
                 notifySlideProgress(0, ownerInstance, currentInstance);
             }
         }
-        // 重置状态
         initialTouchPositionX = -1;
         initialTouchPositionY = -1;
         return;
@@ -212,48 +171,42 @@ function handleTouchend(e, ownerInstance) {
     var distance = deltaX;
     var absDistance = deltaXAbs;
 
-    // 如果移动距离很小（< 10px），认为是点击，不处理手势逻辑
     if (absDistance < 10) {
         initialTouchPositionX = -1;
         initialTouchPositionY = -1;
         return;
     }
 
-    // 计算滑动速度
     var timeDelta = Math.max(1, endTime - touchStartTimestamp);
     var velocity = (endX - lastTouchPositionX) / timeDelta;
 
     var shouldOpen;
     if (isOpen) {
-        // 已打开状态：往左推超过一半 or 速度快则关闭
         shouldOpen = !(distance < -criticalDistance || velocity < -criticalVelocity);
     } else {
-        // 已关闭状态：往右拉超过一半 or 速度快则打开
         shouldOpen = distance > criticalDistance || velocity > criticalVelocity;
     }
 
     if (shouldOpen) {
-        // 打开抽屉：使用 'all' 确保小程序下动画流畅
         applyTransformation('translate3d(0,0,0)', currentInstance, true, 'all ' + animationDuration + 'ms ease-out');
         isOpen = true;
         notifySlideProgress(1, ownerInstance, currentInstance);
+        if (ownerInstance && ownerInstance.callMethod) {
+            ownerInstance.callMethod('handleOpen');
+        }
     } else {
-        // 关闭抽屉：使用 'all' 确保小程序下动画流畅
         applyTransformation('translate3d(' + -drawerWidth + 'px,0,0)', currentInstance, true, 'all ' + animationDuration + 'ms ease-out');
         isOpen = false;
         notifySlideProgress(0, ownerInstance, currentInstance);
-        // 通知外部调用关闭
         if (ownerInstance && ownerInstance.callMethod) {
             ownerInstance.callMethod('handleClose');
         }
     }
 
-    // 重置状态
     initialTouchPositionX = -1;
     initialTouchPositionY = -1;
 }
 
-// 应用变形函数
 function applyTransformation(transform, currentInstance, animate, transition) {
     if (!currentInstance) {
         return;
@@ -264,7 +217,6 @@ function applyTransformation(transform, currentInstance, animate, transition) {
         }
         var stl = transform !== 'translate3d(0,0,0)' ? { transform: transform } : { transform: 'none' };
         if (animate) {
-            // 使用 'all' 作为默认值，确保小程序下动画流畅
             stl.transition = transition || 'all .2s linear';
         } else {
             stl.transition = 'none';
@@ -273,7 +225,6 @@ function applyTransformation(transform, currentInstance, animate, transition) {
     });
 }
 
-// 获取当前实例的函数
 function getInstance(ownerInstance) {
     if (!ownerInstance || !ownerInstance.getState) {
         return null;
@@ -285,12 +236,10 @@ function getInstance(ownerInstance) {
     return state.currentInstance;
 }
 
-// 提取触摸事件中的触摸对象
 function extractTouchFromEvent(e) {
     return e.changedTouches ? e.changedTouches[0] : e.touches[0];
 }
 
-// 通知滑动进度
 function notifySlideProgress(progress, ownerInstance, currentInstance) {
     if (ownerInstance && ownerInstance.callMethod) {
         var numProgress = typeof progress === 'number' ? progress : parseFloat(progress) || 0;

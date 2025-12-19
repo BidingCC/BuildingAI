@@ -118,4 +118,9 @@ export default defineConfig({
     optimizeDeps: {
         exclude: ["vue-demi"],
     },
+    resolve: {
+        alias: {
+            "@": fileURLToPath(new URL("./src", import.meta.url)),
+        },
+    },
 });

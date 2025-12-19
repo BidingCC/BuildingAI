@@ -13,6 +13,7 @@ type _UniPopupType =
 
 const props = withDefaults(
     defineProps<{
+        zIndex?: number;
         title?: string;
         content?: string;
         confirmText?: string;
@@ -25,6 +26,7 @@ const props = withDefaults(
         type?: _UniPopupType;
     }>(),
     {
+        zIndex: 999,
         title: "提示",
         content: "",
         confirmText: "确认",
@@ -110,7 +112,7 @@ defineExpose({
         type="dialog"
         border-radius="1rem"
         background-color="var(--background)"
-        style="z-index: 999"
+        :style="{ zIndex: props.zIndex }"
         :is-mask-click="isMaskClick"
         @mask-click="emit('close')"
         @change="change"
@@ -129,7 +131,7 @@ defineExpose({
                         {{ title || props.title }}
                     </slot>
                 </view>
-                <view text="center sm ">
+                <view text="center sm" w="full">
                     <view v-if="content || props.content" class="p-4">
                         {{ content || props.content }}
                     </view>

@@ -6,3 +6,91 @@ declare module '*?async' {
   const component: any
   export = component
 }
+declare module '@/async/components/a.vue?async' {
+  const component: typeof import('@/async/components/a.vue')
+  export = component
+}
+declare module '@/async-components/test.vue?async' {
+  const component: typeof import('@/async-components/test.vue')
+  export = component
+}
+declare module '../../async-components/test.vue?async' {
+  const component: typeof import('../../async-components/test.vue')
+  export = component
+}
+declare module '@/async-components/bd-navbar.vue?async' {
+  const component: typeof import('@/async-components/bd-navbar.vue')
+  export = component
+}
+declare module '@/async-components/bd-action-sheet.vue?async' {
+  const component: typeof import('@/async-components/bd-action-sheet.vue')
+  export = component
+}
+declare module '@/async-components/bd-modal.vue?async' {
+  const component: typeof import('@/async-components/bd-modal.vue')
+  export = component
+}
+declare module '@/async-components/bd-picker.vue?async' {
+  const component: typeof import('@/async-components/bd-picker.vue')
+  export = component
+}
+declare module '@/async-components/ask-assistant-chat/chats-chats.vue?async' {
+  const component: typeof import('@/async-components/ask-assistant-chat/chats-chats.vue')
+  export = component
+}
+declare module '@/async-components/ask-assistant-chat/chats-prompt/chats-prompt.vue?async' {
+  const component: typeof import('@/async-components/ask-assistant-chat/chats-prompt/chats-prompt.vue')
+  export = component
+}
+declare module '@/async-components/bd-image.vue?async' {
+  const component: typeof import('@/async-components/bd-image.vue')
+  export = component
+}
+declare module '@/async-components/login/agreement.vue?async' {
+  const component: typeof import('@/async-components/login/agreement.vue')
+  export = component
+}
+declare module '@/async-components/login/login-account.vue?async' {
+  const component: typeof import('@/async-components/login/login-account.vue')
+  export = component
+}
+declare module '@/async-components/login/login-weixin.vue?async' {
+  const component: typeof import('@/async-components/login/login-weixin.vue')
+  export = component
+}
+declare module '@/async-components/login/new-user.vue?async' {
+  const component: typeof import('@/async-components/login/new-user.vue')
+  export = component
+}
+declare module '@/async-components/login/website-info.vue?async' {
+  const component: typeof import('@/async-components/login/website-info.vue')
+  export = component
+}
+declare module '@/async-components/user/user-profile.vue?async' {
+  const component: typeof import('@/async-components/user/user-profile.vue')
+  export = component
+}
+declare module '@/async-components/widget/user-version/user-version.vue?async' {
+  const component: typeof import('@/async-components/widget/user-version/user-version.vue')
+  export = component
+}
+declare module '@/async-components/widget/user-banner/user-banner.vue?async' {
+  const component: typeof import('@/async-components/widget/user-banner/user-banner.vue')
+  export = component
+}
+declare module '@/async-components/widget/user-service/user-service.vue?async' {
+  const component: typeof import('@/async-components/widget/user-service/user-service.vue')
+  export = component
+}
+declare module '@/async-components/widget/user-version/user-phone.vue?async' {
+  const component: typeof import('@/async-components/widget/user-version/user-phone.vue')
+  export = component
+}
+declare module '@/async-components/widget/user-phone/user-version.vue?async' {
+  const component: typeof import('@/async-components/widget/user-phone/user-version.vue')
+  export = component
+}
+declare module '@/async-components/user/user-phone.vue?async' {
+  const component: typeof import('@/async-components/user/user-phone.vue')
+  export = component
+}
