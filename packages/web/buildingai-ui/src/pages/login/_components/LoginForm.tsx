@@ -83,13 +83,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
               </FieldSeparator>
               <Field>
                 <FieldLabel htmlFor="email">Email / UserName</FieldLabel>
-                <Input
-                  id="email"
-                  type="email"
-                  //   className="bg-secondary text-secondary-foreground hover:bg-secondary/80 border-none"
-                  placeholder="m@example.com"
-                  required
-                />
+                <Input id="email" type="email" placeholder="m@example.com" required />
               </Field>
               {/* <Field>
                 <div className="flex items-center">
@@ -102,10 +96,10 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
               </Field> */}
               <Field>
                 <FieldDescription className="">
-                  <div className="flex items-center gap-3">
+                  <span className="flex items-center gap-3">
                     <Checkbox id="terms" />
                     <Label htmlFor="terms">Terms of Service and Privacy Policy.</Label>
-                  </div>
+                  </span>
                 </FieldDescription>
               </Field>
 

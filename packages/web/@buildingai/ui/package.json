@@ -42,7 +42,7 @@
         "next-themes": "^0.4.6",
         "radix-ui": "^1.4.3",
         "react": "^19.2.0",
-        "react-day-picker": "^9.12.0",
+        "react-day-picker": "^9.13.0",
         "react-dom": "^19.2.0",
         "react-hook-form": "^7.68.0",
         "react-resizable-panels": "^3.0.6",
@@ -56,8 +56,9 @@
         "zod": "^4.2.1"
     },
     "devDependencies": {
-        "@eslint/js": "^9.39.1",
+        "@buildingai/eslint-config": "workspace:*",
         "@buildingai/typescript-config": "workspace:*",
+        "@eslint/js": "^9.39.1",
         "@types/node": "^24.10.1",
         "@types/react": "^19.2.5",
         "@types/react-dom": "^19.2.3",

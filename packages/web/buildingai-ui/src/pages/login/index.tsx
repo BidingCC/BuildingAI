@@ -1,3 +1,5 @@
+import { ModeToggle } from "@buildingai/ui/components/mode-toggle";
+import { ThemeToggle } from "@buildingai/ui/components/theme-toggle";
 import { GalleryVerticalEnd } from "lucide-react";
 
 import { LoginForm } from "./_components/LoginForm";
@@ -13,6 +15,8 @@ const LoginPage = () => {
           BuildingAI
         </a>
         <LoginForm />
+        <ModeToggle />
+        <ThemeToggle />
       </div>
     </div>
   );

@@ -1,8 +1,8 @@
-import { cva, type VariantProps } from "class-variance-authority"
-import { Slot } from "radix-ui"
+import { cva, type VariantProps } from "class-variance-authority";
+import { Slot } from "radix-ui";
 
-import { cn } from "@buildingai/ui/lib/utils"
-import { Separator } from "@buildingai/ui/components/ui/separator"
+import { cn } from "@buildingai/ui/lib/utils";
+import { Separator } from "@buildingai/ui/components/ui/separator";
 
 const buttonGroupVariants = cva(
   "has-[>[data-slot=button-group]]:gap-2 has-[select[aria-hidden=true]:last-child]:[&>[data-slot=select-trigger]:last-of-type]:rounded-r-md flex w-fit items-stretch [&>*]:focus-visible:z-10 [&>*]:focus-visible:relative [&>[data-slot=select-trigger]:not([class*='w-'])]:w-fit [&>input]:flex-1",
@@ -18,8 +18,8 @@ const buttonGroupVariants = cva(
     defaultVariants: {
       orientation: "horizontal",
     },
-  }
-)
+  },
+);
 
 function ButtonGroup({
   className,
@@ -34,7 +34,7 @@ function ButtonGroup({
       className={cn(buttonGroupVariants({ orientation }), className)}
       {...props}
     />
-  )
+  );
 }
 
 function ButtonGroupText({
@@ -42,19 +42,19 @@ function ButtonGroupText({
   asChild = false,
   ...props
 }: React.ComponentProps<"div"> & {
-  asChild?: boolean
+  asChild?: boolean;
 }) {
-  const Comp = asChild ? Slot.Root : "div"
+  const Comp = asChild ? Slot.Root : "div";
 
   return (
     <Comp
       className={cn(
-        "bg-muted gap-2 rounded-md border px-2.5 text-sm font-medium shadow-xs [&_svg:not([class*='size-'])]:size-4 flex items-center [&_svg]:pointer-events-none",
-        className
+        "bg-muted flex items-center gap-2 rounded-md border px-2.5 text-sm font-medium shadow-xs [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4",
+        className,
       )}
       {...props}
     />
-  )
+  );
 }
 
 function ButtonGroupSeparator({
@@ -68,16 +68,11 @@ function ButtonGroupSeparator({
       orientation={orientation}
       className={cn(
         "bg-input relative self-stretch data-[orientation=horizontal]:mx-px data-[orientation=horizontal]:w-auto data-[orientation=vertical]:my-px data-[orientation=vertical]:h-auto",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  );
 }
 
-export {
-  ButtonGroup,
-  ButtonGroupSeparator,
-  ButtonGroupText,
-  buttonGroupVariants,
-}
+export { ButtonGroup, ButtonGroupSeparator, ButtonGroupText, buttonGroupVariants };

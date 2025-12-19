@@ -70,6 +70,7 @@ export const config = [
             "@typescript-eslint/no-explicit-any": "off",
             "@typescript-eslint/no-empty-object-type": "off",
             "prefer-const": "off",
+            "react-refresh/only-export-components": "off",
             "@typescript-eslint/no-unused-vars": [
                 "warn",
                 {
