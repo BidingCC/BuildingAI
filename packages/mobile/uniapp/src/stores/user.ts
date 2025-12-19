@@ -87,9 +87,9 @@ const userStore = defineStore("auth", () => {
                 onLoad && onLoad(options);
             } else if (redirect !== undefined && redirect !== null) {
                 try {
-                    uni.redirectTo({ url: redirect });
+                    uni.redirectTo({ url: `/${redirect}` });
                 } finally {
-                    uni.switchTab({ url: redirect });
+                    uni.switchTab({ url: `/${redirect}` });
                 }
             } else {
                 uni.reLaunch({ url: `/${pages[0]?.path || "/"}` });
