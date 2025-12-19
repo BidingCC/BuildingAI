@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import UserPhone from "@/components/user/user-phone.vue";
 import UserProfile from "@/components/user/user-profile.vue";
 import UserVersion from "@/components/widget/user-version/user-version.vue";
-
+import { apiBindWechat } from "@/service/weixin";
 const { t, currentLocaleLabel, locales, setLocale } = useLocale();
 
 definePage({
@@ -15,7 +16,7 @@ const router = useRouter();
 const userStore = useUserStore();
 
 const userProfileRefs = ref<InstanceType<typeof UserProfile>>();
-
+const userPhoneRefs = ref<InstanceType<typeof UserPhone>>();
 const shake = shallowRef(true);
 
 const slideProgress = ref(0);
@@ -75,10 +76,26 @@ function showLocalePicker() {
     uni.showActionSheet({
         itemList: locales.map((l) => l.label),
         success: (res) => {
-            setLocale(locales[res.tapIndex].value);
+            setLocale(locales?.[res.tapIndex]?.value ?? "zh");
         },
     });
 }
+
+const handleBindWechat = async () => {
+    if (userStore.userInfo?.bindWechat) {
+        useToast().error("已绑定微信");
+        return;
+    }
+    const { code } = await uni.login({ provider: "weixin" });
+    try {
+        await apiBindWechat({ code });
+        await userStore.getUser();
+        useToast().success("绑定成功");
+    } catch (error) {
+        console.log("Bind wechat error", error);
+        useToast().error("绑定微信失败");
+    }
+};
 </script>
 
 <template>
@@ -117,7 +134,7 @@ function showLocalePicker() {
 
                 <view class="text-muted-foreground mb-2 ml-4 text-xs"> 账户 </view>
                 <view class="bg-background mb-6 rounded-lg">
-                    <view class="flex items-center justify-between pl-2" @click="showLocalePicker">
+                    <view class="flex items-center justify-between pl-2">
                         <view i-lucide-user-round w="10" text="muted-foreground" />
                         <view
                             w="full"
@@ -136,6 +153,7 @@ function showLocalePicker() {
                             w="full"
                             flex="~ justify-between items-center"
                             class="border-b-solid border-muted border-b py-3 pr-2"
+                            @click="userPhoneRefs?.open()"
                         >
                             <view class="text-foreground text-sm">{{ t("common.phone") }}</view>
                             <view class="text-muted-foreground flex items-center">
@@ -155,16 +173,21 @@ function showLocalePicker() {
                             w="full"
                             flex="~ justify-between items-center"
                             class="border-b-solid border-muted border-b py-3 pr-2"
+                            @click="handleBindWechat"
                         >
                             <view class="text-foreground text-sm">{{
                                 t("common.wechatBind")
                             }}</view>
                             <view class="text-muted-foreground flex items-center">
                                 <text text-sm :class="{ 'mr-1': userStore.userInfo?.phone }">
-                                    {{ userStore.userInfo?.phone || t("common.notBind") }}
+                                    {{
+                                        userStore.userInfo?.bindWechat
+                                            ? t("common.bind")
+                                            : t("common.notBind")
+                                    }}
                                 </text>
                                 <text
-                                    v-if="!userStore.userInfo?.phone"
+                                    v-if="!userStore.userInfo?.bindWechat"
                                     class="i-carbon-chevron-right mt-px"
                                 />
                             </view>
@@ -291,6 +314,12 @@ function showLocalePicker() {
         </view>
         <UserProfile
             ref="userProfileRefs"
+            @slide-progress="handleSlideProgress"
+            @open="handlePopupOpen"
+            @close="handlePopupClose"
+        />
+        <UserPhone
+            ref="userPhoneRefs"
             @slide-progress="handleSlideProgress"
             @open="handlePopupOpen"
             @close="handlePopupClose"

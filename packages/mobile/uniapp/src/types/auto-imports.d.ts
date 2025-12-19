@@ -540,6 +540,7 @@ declare module 'vue' {
   interface GlobalComponents {}
   interface ComponentCustomProperties {
     readonly !tryOnScopeDispose: UnwrapRef<typeof import('@vueuse/core')['!tryOnScopeDispose']>
+    readonly !useDownloadFile: UnwrapRef<typeof import('@vueuse/core')['!useDownloadFile']>
     readonly !useNetwork: UnwrapRef<typeof import('@vueuse/core')['!useNetwork']>
     readonly !useOnline: UnwrapRef<typeof import('@vueuse/core')['!useOnline']>
     readonly !usePreferredDark: UnwrapRef<typeof import('@vueuse/core')['!usePreferredDark']>

@@ -68,6 +68,8 @@ export interface UserInfo extends BaseEntity {
     realName?: string;
     /** Total recharge amount */
     totalRechargeAmount?: number;
+    /** Whether is bind wechat */
+    bindWechat: boolean;
 }
 
 /**
@@ -122,7 +124,14 @@ export type UserTableData = UserInfo;
  */
 export type BaseUserInfo = Omit<
     UserInfo,
-    "id" | "createdAt" | "updatedAt" | "deletedAt" | "role" | "lastLoginAt" | "isRoot"
+    | "id"
+    | "createdAt"
+    | "updatedAt"
+    | "deletedAt"
+    | "role"
+    | "lastLoginAt"
+    | "isRoot"
+    | "bindWechat"
 >;
 
 /**

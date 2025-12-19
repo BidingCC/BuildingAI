@@ -23,6 +23,7 @@ declare module 'vue' {
     LoginLoginWeixin: typeof import('./../components/login/login-weixin.vue')['default']
     LoginNewUser: typeof import('./../components/login/new-user.vue')['default']
     LoginWebsiteInfo: typeof import('./../components/login/website-info.vue')['default']
+    UserUserPhone: typeof import('./../components/user/user-phone.vue')['default']
     UserUserProfile: typeof import('./../components/user/user-profile.vue')['default']
     WidgetUserBannerUserBanner: typeof import('./../components/widget/user-banner/user-banner.vue')['default']
     WidgetUserServiceUserService: typeof import('./../components/widget/user-service/user-service.vue')['default']
