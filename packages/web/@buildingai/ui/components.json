@@ -1,24 +1,24 @@
 {
-    "$schema": "https://ui.shadcn.com/schema.json",
-    "style": "radix-lyra",
-    "rsc": false,
-    "tsx": true,
-    "tailwind": {
-        "config": "",
-        "css": "src/styles/index.css",
-        "baseColor": "neutral",
-        "cssVariables": true,
-        "prefix": ""
-    },
-    "iconLibrary": "lucide",
-    "aliases": {
-        "components": "@buildingai/ui/components",
-        "utils": "@buildingai/ui/lib/utils",
-        "ui": "@buildingai/ui/components/ui",
-        "lib": "@buildingai/ui/lib",
-        "hooks": "@buildingai/ui/hooks"
-    },
-    "menuColor": "default",
-    "menuAccent": "subtle",
-    "registries": {}
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "radix-vega",
+  "rsc": false,
+  "tsx": true,
+  "tailwind": {
+    "config": "",
+    "css": "src/styles/index.css",
+    "baseColor": "neutral",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "iconLibrary": "lucide",
+  "aliases": {
+    "components": "@buildingai/ui/components",
+    "utils": "@buildingai/ui/lib/utils",
+    "ui": "@buildingai/ui/components/ui",
+    "lib": "@buildingai/ui/lib",
+    "hooks": "@buildingai/ui/hooks"
+  },
+  "menuColor": "default",
+  "menuAccent": "subtle",
+  "registries": {}
 }
