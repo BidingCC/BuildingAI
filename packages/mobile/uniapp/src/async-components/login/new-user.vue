@@ -114,16 +114,16 @@ defineExpose({
 <template>
     <uni-popup ref="popupRef" type="bottom" :safe-area="false" z-index="99" :is-mask-click="false">
         <view class="bg-background rounded-t-5 safe-area-bottom overflow-hidden px-4 py-6">
-            <view class="flex items-center gap-2">
-                <image :src="websiteInfo?.logo || Logo" size="96rpx" />
+            <view class="flex gap-2">
+                <image :src="websiteInfo?.logo || Logo" size="108rpx" class="flex-shrink-0" />
                 <view class="flex flex-col justify-around">
-                    <text class="text-muted-foreground text-sm">欢迎使用👋</text>
                     <text class="font-bold">{{ websiteInfo?.name }}</text>
+                    <view class="text-muted-foreground text-xs">
+                        建议使用您的微信头像和昵称，以便获得更好的体验
+                    </view>
                 </view>
             </view>
-            <view class="text-muted-foreground mt-4 text-sm">
-                建议使用您的微信头像和昵称，以便获得更好的体验
-            </view>
+
             <view flex="~ col" gap="2" class="mt-8">
                 <uni-forms ref="customFormRefs" :rules="customRules" :modelValue="formData">
                     <uni-forms-item label="头像" required name="name">
@@ -132,23 +132,23 @@ defineExpose({
                                 pos-relative
                                 hover-class="none"
                                 open-type="chooseAvatar"
-                                class="!ml-0 size-12 rounded-full !px-0"
+                                class="rounded-4 !ml-0 size-12 !px-0"
                                 style="background: var(--background) !important"
                                 @chooseavatar="onChooseAvatar"
                             >
                                 <image
                                     v-if="formData.avatar"
                                     :src="formData.avatar"
-                                    class="size-12 rounded-full"
+                                    class="rounded-4 size-12"
                                     mode="aspectFill"
                                 />
                                 <view
                                     v-else
-                                    class="box-border size-12 rounded-full border border-dashed border-gray-300"
+                                    class="rounded-4 box-border size-12 border border-solid border-gray-300"
                                 >
                                     <view
                                         class="absolute top-1/2 left-1/2 mb-px flex size-4 -translate-x-1/2 -translate-y-1/2 items-center justify-center text-gray-500"
-                                        i-lucide-plus
+                                        i-lucide-camera
                                     />
                                 </view>
                             </button>

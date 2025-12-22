@@ -71,6 +71,7 @@ const handleLoginPreset = async (
 const handleAccountLogin = async () => {
     try {
         const data = unref(accountLoginParams);
+
         loginResult(await apiAuthLogin(data));
     } catch (error) {
         console.log("AccountLogin error", error);
