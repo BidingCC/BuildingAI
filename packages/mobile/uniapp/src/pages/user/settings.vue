@@ -2,6 +2,7 @@
 import BdNavbar from "@/async-components/bd-navbar.vue?async";
 import UserProfile from "@/async-components/user/user-profile.vue?async";
 import UserVersion from "@/async-components/widget/user-version/user-version.vue?async";
+import { useHalfPopupInteraction } from "@/hooks/use-half-popup-interaction";
 
 const { t, currentLocaleLabel, locales, setLocale } = useLocale();
 
@@ -19,58 +20,15 @@ const userProfileRefs = ref<InstanceType<typeof UserProfile>>();
 
 const shake = shallowRef(true);
 
-const slideProgress = ref(0);
-const isPopupOpen = ref(false);
-
-const handleSlideProgress = (progress: number) => {
-    slideProgress.value = progress;
-};
-
-const handlePopupOpen = () => {
-    isPopupOpen.value = true;
-    slideProgress.value = 1;
-};
-
-const handlePopupClose = () => {
-    isPopupOpen.value = false;
-    slideProgress.value = 0;
-};
-
-// 计算页面transform样式
-const pageTransform = computed(() => {
-    if (!isPopupOpen.value && slideProgress.value === 0) {
-        return {
-            transform: "none",
-            transition: "transform 0.2s ease-out",
-        };
-    }
-
-    const scale = 0.92;
-    const maxBorderRadius = 24; // 最大圆角值（px）
-    const maxTranslateY = 40; // 最大向下移动距离（px）
-
-    // 直接使用进度值，不使用缓动函数，确保实时跟随
-    // 进度为1时scale为0.92（缩小），进度为0时scale为1（正常）
-    const finalScale = 1 - (1 - scale) * slideProgress.value;
-    // 圆角根据进度动态变化，进度为1时圆角最大
-    const borderRadius = maxBorderRadius * slideProgress.value;
-    // 向下移动距离，进度为1时移动最大
-    const translateY = maxTranslateY * slideProgress.value;
-
-    // 只要进度不在边界值（0或1），就禁用transition实现实时跟随
-    // 使用更小的阈值，确保从一开始滑动就能实时跟随
-    const isSliding = slideProgress.value > 0.001 && slideProgress.value < 0.999;
-
-    return {
-        transform: `scale(${finalScale}) translateY(${translateY}px)`,
-        transformOrigin: "center center",
-        borderRadius: `${borderRadius}px`,
-        overflow: "hidden",
-        transition: isSliding
-            ? "none"
-            : "transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-radius 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-    };
-});
+// Use half-popup interaction hook
+const {
+    slideProgress,
+    isPopupOpen,
+    handleSlideProgress,
+    handlePopupOpen,
+    handlePopupClose,
+    pageTransform,
+} = useHalfPopupInteraction();
 
 function showLocalePicker() {
     uni.showActionSheet({

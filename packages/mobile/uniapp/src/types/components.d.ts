@@ -7,14 +7,6 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
-    LoginAgreement: typeof import('./../components/login/agreement.vue')['default']
-    LoginLoginAccount: typeof import('./../components/login/login-account.vue')['default']
-    LoginLoginWeixin: typeof import('./../components/login/login-weixin.vue')['default']
-    LoginNewUser: typeof import('./../components/login/new-user.vue')['default']
-    LoginWebsiteInfo: typeof import('./../components/login/website-info.vue')['default']
-    UserUserProfile: typeof import('./../components/user/user-profile.vue')['default']
-    WidgetUserBannerUserBanner: typeof import('./../components/widget/user-banner/user-banner.vue')['default']
-    WidgetUserServiceUserService: typeof import('./../components/widget/user-service/user-service.vue')['default']
-    WidgetUserVersionUserVersion: typeof import('./../components/widget/user-version/user-version.vue')['default']
+    UaMarkdownUaMarkdown: typeof import('./../components/ua-markdown/ua-markdown.vue')['default']
   }
 }

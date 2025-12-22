@@ -82,3 +82,87 @@ declare module '@/async-components/widget/user-service/user-service.vue?async' {
   const component: typeof import('@/async-components/widget/user-service/user-service.vue')
   export = component
 }
+declare module '@/async-components/bd-markdown/index.vue?async' {
+  const component: typeof import('@/async-components/bd-markdown/index.vue')
+  export = component
+}
+declare module '@/async-components/bd-markdown/components/mermaid-block.vue?async' {
+  const component: typeof import('@/async-components/bd-markdown/components/mermaid-block.vue')
+  export = component
+}
+declare module '@/async-components/ask-assistant-chat/chats-messages.vue?async' {
+  const component: typeof import('@/async-components/ask-assistant-chat/chats-messages.vue')
+  export = component
+}
+declare module '@/async-components/model-select/model-select.vue?async' {
+  const component: typeof import('@/async-components/model-select/model-select.vue')
+  export = component
+}
+declare module '@/async-components/ua-markdown/ua-markdown.vue?async' {
+  const component: typeof import('@/async-components/ua-markdown/ua-markdown.vue')
+  export = component
+}
+declare module '@/async-components/bd-checkbox.vue?async' {
+  const component: typeof import('@/async-components/bd-checkbox.vue')
+  export = component
+}
+declare module '@/async-components/bd-separator.vue?async' {
+  const component: typeof import('@/async-components/bd-separator.vue')
+  export = component
+}
+declare module '@/async-components/uni_modules/uni-badge/components/uni-badge/uni-badge.vue?async' {
+  const component: typeof import('@/async-components/uni_modules/uni-badge/components/uni-badge/uni-badge.vue')
+  export = component
+}
+declare module '@/async-components/uni_modules/uni-count-down/components/uni-count-down/uni-count-down.vue?async' {
+  const component: typeof import('@/async-components/uni_modules/uni-count-down/components/uni-count-down/uni-count-down.vue')
+  export = component
+}
+declare module '@/async-components/uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput.vue?async' {
+  const component: typeof import('@/async-components/uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput.vue')
+  export = component
+}
+declare module '@/async-components/uni_modules/uni-forms/components/uni-forms/uni-forms.vue?async' {
+  const component: typeof import('@/async-components/uni_modules/uni-forms/components/uni-forms/uni-forms.vue')
+  export = component
+}
+declare module '@/async-components/uni_modules/uni-forms-item/components/uni-forms-item/uni-forms-item.vue?async' {
+  const component: typeof import('@/async-components/uni_modules/uni-forms-item/components/uni-forms-item/uni-forms-item.vue')
+  export = component
+}
+declare module '@/async-components/uni_modules/uni-picker/components/uni-picker/uni-picker.vue?async' {
+  const component: typeof import('@/async-components/uni_modules/uni-picker/components/uni-picker/uni-picker.vue')
+  export = component
+}
+declare module '@/async-components/uni_modules/uni-popup/components/uni-popup/uni-popup.vue?async' {
+  const component: typeof import('@/async-components/uni_modules/uni-popup/components/uni-popup/uni-popup.vue')
+  export = component
+}
+declare module '@/async-components/uni_modules/stream-client/components/stream-client/stream-client.vue?async' {
+  const component: typeof import('@/async-components/uni_modules/stream-client/components/stream-client/stream-client.vue')
+  export = component
+}
+declare module '@/async-components/uni_modules/uni-swipe-drawer/components/uni-swipe-drawer/uni-swipe-drawer.vue?async' {
+  const component: typeof import('@/async-components/uni_modules/uni-swipe-drawer/components/uni-swipe-drawer/uni-swipe-drawer.vue')
+  export = component
+}
+declare module '@/async-components/uni_modules/half-popup/components/half-popup/half-popup.vue?async' {
+  const component: typeof import('@/async-components/uni_modules/half-popup/components/half-popup/half-popup.vue')
+  export = component
+}
+declare module '@/async-components/uni_modules/uni-count-down/components/uni-countdown/uni-countdown.vue?async' {
+  const component: typeof import('@/async-components/uni_modules/uni-count-down/components/uni-countdown/uni-countdown.vue')
+  export = component
+}
+declare module '@/async-components/uni_modules/uni-countdown/components/uni-countdown/uni-countdown.vue?async' {
+  const component: typeof import('@/async-components/uni_modules/uni-countdown/components/uni-countdown/uni-countdown.vue')
+  export = component
+}
+declare module '@/async-components/uni_modules/uni-forms/components/uni-forms-item/uni-forms-item.vue?async' {
+  const component: typeof import('@/async-components/uni_modules/uni-forms/components/uni-forms-item/uni-forms-item.vue')
+  export = component
+}
+declare module '@/async-components/uni_modules/swipe-drawer/components/swipe-drawer/swipe-drawer.vue?async' {
+  const component: typeof import('@/async-components/uni_modules/swipe-drawer/components/swipe-drawer/swipe-drawer.vue')
+  export = component
+}

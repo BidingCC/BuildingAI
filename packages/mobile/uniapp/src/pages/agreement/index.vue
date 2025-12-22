@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import BdNavbar from "@/async-components/bd-navbar.vue?async";
 import { apiGetAgreementConfig } from "@/service/common";
 
 const { value: type } = useQuery("url");
@@ -47,7 +48,7 @@ onMounted(() => {
 
 <template>
     <template #header>
-        <bd-navbar :title="title" :show-back="true" :show-home="true" filter="blur(4px)" />
+        <BdNavbar :title="title" :show-back="true" :show-home="true" filter="blur(4px)" />
     </template>
     <view v-if="content" class="p-4 text-sm">
         <rich-text :nodes="content"></rich-text>

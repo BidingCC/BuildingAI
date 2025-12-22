@@ -3,6 +3,7 @@ import { LoginMethod } from "@buildingai/service/consoleapi/login-settings";
 import type { LoginResponse, SystemLoginAccountParams } from "@buildingai/service/webapi/user";
 
 import BdModal from "@/async-components/bd-modal.vue?async";
+import BdSeparator from "@/async-components/bd-separator.vue?async";
 import Agreement from "@/async-components/login/agreement.vue?async";
 import LoginAccount from "@/async-components/login/login-account.vue?async";
 import LoginWeixin from "@/async-components/login/login-weixin.vue?async";

@@ -18,9 +18,12 @@ onHide(async () => {
 });
 </script>
 
-<style>
+<style lang="scss">
 @import "./styles/globals.css";
 @import "./styles/system.css";
 @import "./styles/ui.css";
 @import "./styles/variable.css";
+// #ifdef H5
+@import "./styles/markdown.css";
+// #endif
 </style>
