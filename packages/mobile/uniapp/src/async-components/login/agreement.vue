@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useVModel } from "@vueuse/core";
 
+import BdCheckbox from "@/async-components/bd-checkbox.vue?async";
+
 const { t } = useI18n();
 
 const props = defineProps<{

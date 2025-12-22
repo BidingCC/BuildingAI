@@ -2,6 +2,8 @@
 import type { BaseEvent } from "@uni-helper/uni-types";
 import type { UniPopupInstance } from "@uni-helper/uni-ui-types";
 
+import UniPopup from "@/async-components/uni_modules/uni-popup/components/uni-popup/uni-popup.vue?async";
+
 const props = withDefaults(
     defineProps<{
         range: any[][];

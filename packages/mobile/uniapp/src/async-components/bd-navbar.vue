@@ -294,6 +294,7 @@ function handleHome() {
 }
 
 .bd-navbar__title {
+    max-width: 160px;
     font-size: 17px;
     font-weight: 500;
     white-space: nowrap;

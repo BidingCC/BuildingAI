@@ -1,0 +1,52 @@
+.swipe-drawer {
+    height: 100%;
+    z-index: var(--zIndex);
+    overflow: hidden;
+}
+
+.swipe-drawer__content {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    z-index: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.swipe-drawer__content-body {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+}
+
+.swipe-drawer__content-footer {
+    flex-shrink: 0;
+    position: relative;
+    z-index: 10;
+}
+
+.swipe-drawer__panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 70%;
+    z-index: 2;
+    background-color: var(--drawer-bg-color);
+    transform: translateX(-100%);
+    will-change: transform;
+    transition: opacity 0.2s ease-out;
+}
+
+.swipe-drawer__mask {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    background: rgba(0, 0, 0, 0);
+    transition:
+        background 0.2s ease-out,
+        opacity 0.2s ease-out;
+}

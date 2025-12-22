@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import HalfPopup from "@/async-components/uni_modules/half-popup/components/half-popup/half-popup.vue?async";
 import { useUpload } from "@/hooks/use-request";
 import { apiUpdateUserField } from "@/service/user";
 
@@ -145,7 +146,7 @@ defineExpose({
 </script>
 
 <template>
-    <half-popup
+    <HalfPopup
         v-model="show"
         :z-index="99999"
         height="90vh"
@@ -202,5 +203,5 @@ defineExpose({
                 />
             </view>
         </view>
-    </half-popup>
+    </HalfPopup>
 </template>

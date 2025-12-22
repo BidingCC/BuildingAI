@@ -1,0 +1,145 @@
+// 设置初始变量
+var initialTouchPositionY = -1;
+var lastTouchPositionY = -1;
+var touchStartTimestamp = 0;
+var animationDuration = -1; // 动画完成时间，拿的是props传入的
+var criticalVelocity = 0.8; // 一个临界滑动速度，如果超过这个值则表示需要关闭窗口
+var criticalDistance = 350; // 一个临界滑动距离，如果超过这个值则表示需要关闭窗口
+var popupHeight = 980; // 弹窗高度，用于计算滑动进度
+
+// 用于监控属性变化的函数
+function observePropChanges(newVal, oldVal, ownerInstance, currentInstance) {
+    var state = ownerInstance.getState() || {};
+    state.currentInstance = currentInstance;
+
+    if (newVal) {
+        var data = JSON.parse(newVal);
+        animationDuration = data.duration;
+        if (data.height) {
+            // 处理高度单位，转换为px
+            // 注意：vh和rpx单位已经在Vue组件中转换为px，这里只需要处理px单位
+            // 使用字符串拼接代替String()构造函数，避免在微信小程序wxs中报错
+            var heightStr = '' + data.height;
+            if (heightStr.indexOf('px') !== -1) {
+                // 直接提取px值
+                popupHeight = parseFloat(heightStr) || 980;
+            } else {
+                // 纯数字，假设是px
+                popupHeight = parseFloat(heightStr) || 980;
+            }
+        }
+        var transition = 'all ' + animationDuration + 'ms ease-in-out';
+        var isOpen = data.modelValue;
+        applyTransformation(isOpen ? 'translate3d(0,0px,0)' : 'translate3d(0,100%,0)', currentInstance, true, transition);
+        // 通知滑动进度
+        notifySlideProgress(isOpen ? 1 : 0, ownerInstance, currentInstance);
+    }
+}
+
+// 处理touchstart事件的函数
+function handleTouchstart(e, ownerInstance) {
+    var touch = extractTouchFromEvent(e);
+    initialTouchPositionY = touch.clientY;
+    lastTouchPositionY = initialTouchPositionY;
+    touchStartTimestamp = e.timeStamp || Date.now();
+    
+    // 确保滑动开始时进度为1（弹窗完全打开状态）
+    var currentInstance = getInstance(ownerInstance);
+    notifySlideProgress(1, ownerInstance, currentInstance);
+}
+
+// 处理touchmove事件的函数
+function handleTouchmove(e, ownerInstance) {
+    var currentInstance = getInstance(ownerInstance);
+    var touch = extractTouchFromEvent(e);
+    var distance = touch.clientY - initialTouchPositionY;
+
+    distance = Math.max(distance, 0); // 防止负数距离
+    applyTransformation('translate3d(0,' + distance + 'px, 0)', currentInstance, false, '');
+    
+    // 计算滑动进度并通知
+    // 确保popupHeight有效，避免除零错误
+    var validHeight = popupHeight > 0 ? popupHeight : 980;
+    var progress = Math.max(0, Math.min(1, 1 - (distance / validHeight)));
+    
+    // 立即通知进度变化，确保实时跟随
+    notifySlideProgress(progress, ownerInstance, currentInstance);
+}
+
+// 处理touchend事件的函数
+function handleTouchend(e, ownerInstance) {
+    var endTime = e.timeStamp || Date.now();
+    var currentInstance = getInstance(ownerInstance);
+    var touch = extractTouchFromEvent(e);
+    var endY = touch.clientY;
+    var distance = endY - initialTouchPositionY;
+
+    // 计算滑动速度
+    var velocity = (endY - lastTouchPositionY) / (endTime - touchStartTimestamp);
+    var shouldClose = distance > criticalDistance / 2 || velocity > criticalVelocity;
+
+    if (shouldClose) {
+        var viewStyle = currentInstance.getComputedStyle(['transform'])
+
+        // 这里的作用是防止在内部有元素有滚动条时滑动导致关掉弹窗
+        if (viewStyle.transform === 'none') {
+            return
+        }
+        // 滑动超过一半屏幕高度或速度较快，则关闭窗口
+        applyTransformation('translate3d(0,100%,0)', currentInstance, true, 'all ' + animationDuration + 'ms ease-in-out');
+        // 重置状态
+        initialTouchPositionY = -1;
+        animationDuration = -1;
+        // 通知外部调用关闭
+        if (ownerInstance && ownerInstance.callMethod) {
+            ownerInstance.callMethod('handleClose');
+        }
+    } else {
+        // 如果没有超过，则复原窗口
+        applyTransformation('translate3d(0,0px,0)', currentInstance, true, 'all ' + animationDuration + 'ms ease-in-out');
+        // 通知滑动进度恢复为1
+        notifySlideProgress(1, ownerInstance, currentInstance);
+    }
+}
+
+// 应用变形函数
+function applyTransformation(transform, currentInstance, animate, transition) {
+    currentInstance.requestAnimationFrame(function() {
+        var stl = transform !== 'translate3d(0,0px,0)' ? { transform: transform } : { transform: 'none' };
+        if (animate) {
+            stl.transition = transition || 'transform .1s linear';
+        } else {
+            stl.transition = 'none'
+        }
+        currentInstance.setStyle(stl)
+    });
+}
+
+// 获取当前实例的函数
+function getInstance(ownerInstance) {
+    // if (!currentInstance) {
+        // ownerInstance.callMethod('handleClose');
+        // currentInstance = ownerInstance.getState().currentInstance;
+    // }
+    return ownerInstance.getState().currentInstance
+}
+
+// 提取触摸事件中的触摸对象
+function extractTouchFromEvent(e) {
+    return e.changedTouches ? e.changedTouches[0] : e.touches[0];
+}
+
+// 通知滑动进度
+function notifySlideProgress(progress, ownerInstance, currentInstance) {
+    if (ownerInstance && ownerInstance.callMethod) {
+        ownerInstance.callMethod('handleSlideProgress', progress);
+    }
+}
+
+module.exports = {
+    handleTouchstart: handleTouchstart,
+    handleTouchmove: handleTouchmove,
+    handleTouchend: handleTouchend,
+    observePropChanges: observePropChanges,
+    notifySlideProgress: notifySlideProgress
+}; 

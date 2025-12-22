@@ -66,18 +66,12 @@ function handleKeyboardHide() {
 }
 
 function handleKeydown(event: KeyboardEvent) {
-    if (event.isComposing) {
-        return;
-    }
+    event.preventDefault();
 
-    if (event.key === "Enter" && !event.shiftKey) {
-        event.preventDefault();
-
-        if (props.isLoading) {
-            emits("stop");
-        } else {
-            emits("submit", inputValue.value);
-        }
+    if (props.isLoading) {
+        emits("stop");
+    } else {
+        emits("submit", inputValue.value);
     }
 }
 
@@ -116,15 +110,18 @@ function handleSubmit() {
                 :show-confirm-bar="false"
                 @keyboardheightchange="handleKeyboardHeightChange"
                 @blur="handleKeyboardHide"
+                @keydown.enter="handleKeydown"
             />
         </view>
         <view class="action-bar" flex="~ items-center justify-between" px="1">
             <view flex="~ items-center gap-2">
-                <view class="p-1.5">
-                    <text i-lucide-settings-2 />
-                </view>
+                <slot name="action-left">
+                    <view class="p-1.5">
+                        <text i-lucide-settings-2 />
+                    </view>
+                </slot>
             </view>
-            <view flex="~ items-center gap-2">
+            <view flex="~ items-center gap-2" @click="handleSubmit">
                 <view flex="~ items-center justify-center" class="bg-primary rounded-full p-2">
                     <text i-lucide-arrow-up text="white" />
                 </view>
