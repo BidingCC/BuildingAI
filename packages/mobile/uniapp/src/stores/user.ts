@@ -135,6 +135,7 @@ const userStore = defineStore("auth", () => {
         //     path: `${ROUTES.HOME}?redirect=${route?.fullPath}`,
         //     replace: true,
         // });
+        toLogin();
     };
 
     /**

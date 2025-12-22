@@ -166,3 +166,15 @@ declare module '@/async-components/uni_modules/swipe-drawer/components/swipe-dra
   const component: typeof import('@/async-components/uni_modules/swipe-drawer/components/swipe-drawer/swipe-drawer.vue')
   export = component
 }
+declare module '@/async-components/widget/user-version/user-phone.vue?async' {
+  const component: typeof import('@/async-components/widget/user-version/user-phone.vue')
+  export = component
+}
+declare module '@/async-components/widget/user-phone/user-version.vue?async' {
+  const component: typeof import('@/async-components/widget/user-phone/user-version.vue')
+  export = component
+}
+declare module '@/async-components/user/user-phone.vue?async' {
+  const component: typeof import('@/async-components/user/user-phone.vue')
+  export = component
+}

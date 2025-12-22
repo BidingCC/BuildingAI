@@ -96,7 +96,8 @@ const handleRegister = async () => {
     const res = await apiAuthRegister(data);
     useToast().clear();
     await uni.navigateBack({ delta: 1 });
-    userStore.login(res.token, redirect.value);
+    userStore.login(res.token);
+    userStore.handleRedirect(redirect.value);
 };
 
 const handleAgreement = (type: "service" | "privacy") => {

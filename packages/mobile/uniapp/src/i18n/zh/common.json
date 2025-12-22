@@ -32,6 +32,7 @@
     "phone": "手机号",
     "wechatBind": "微信绑定",
     "emailBind": "邮箱绑定",
+    "bind": "已绑定",
     "notBind": "未绑定",
     "verifyCode": "验证码",
     "getVerifyCode": "获取验证码",

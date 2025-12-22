@@ -1,7 +1,6 @@
 import { LOGIN_TYPE, UserTerminal, type UserTerminalType } from "@buildingai/constants";
 import { DictService } from "@buildingai/dict";
 import { HttpErrorFactory } from "@buildingai/errors";
-import { isEnabled } from "@buildingai/utils";
 import { WechatMpJscode2sessionResponse } from "@buildingai/wechat-sdk/interfaces/mp";
 import { AuthService } from "@common/modules/auth/services/auth.service";
 import { LoginSettingsConfig } from "@modules/user/dto/login-settings.dto";
@@ -146,5 +145,35 @@ export class WechatMpService {
             allowMultipleLogin: false,
             showPolicyAgreement: true,
         };
+    }
+
+    /**
+     * 绑定微信
+     * @param code 微信小程序登录凭证 code
+     * @param userId 用户ID
+     * @returns
+     */
+    async bindWechat(code: string, userId: string) {
+        const { openid } = await this.jscode2session(code);
+        if (!openid) {
+            throw HttpErrorFactory.internal("获取 openid 失败");
+        }
+        const user = await this.authService.findOne({ where: { id: userId } });
+        if (!user) {
+            throw HttpErrorFactory.badRequest("用户不存在");
+        }
+        if (user.openid) {
+            throw HttpErrorFactory.badRequest("用户已绑定微信");
+        }
+        // 检查该 openid 是否已被其他用户使用
+        const existingUser = await this.authService.findOne({
+            where: { openid },
+        });
+        if (existingUser && existingUser.id !== userId) {
+            throw HttpErrorFactory.badRequest("该微信账号已被其他用户绑定");
+        }
+        // 更新用户的 openid
+        await this.authService.updateById(userId, { openid });
+        return { message: "success" };
     }
 }

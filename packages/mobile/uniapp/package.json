@@ -32,10 +32,24 @@
         "@dcloudio/uni-mp-xhs": "3.0.0-4080720251210001",
         "@dcloudio/uni-quickapp-webview": "3.0.0-4080720251210001",
         "@uni-helper/uni-use": "^0.19.17",
+        "@vscode/markdown-it-katex": "^1.1.2",
         "@vueuse/core": "^12.8.2",
         "@vueuse/shared": "^12.8.2",
+        "highlight.js": "^11.11.1",
+        "katex": "^0.16.21",
+        "markdown-it-container": "^3.0.0",
+        "markdown-it-emoji": "^3.0.0",
+        "markdown-it-ins": "^3.0.1",
+        "markdown-it-mark": "^3.0.1",
+        "markdown-it-sub": "^1.0.0",
+        "markdown-it-sup": "^1.0.0",
+        "markstream-vue": "catalog:web",
+        "mdurl": "^1.0.1",
         "pinia": "^2.0.36",
         "std-env": "^3.10.0",
+        "stream-markdown-parser": "^0.0.44",
+        "ts-dedent": "^2.2.0",
+        "uc.micro": "^1.0.6",
         "vue": "^3.4.21",
         "vue-i18n": "catalog:web",
         "vue-router": "catalog:web",
@@ -54,6 +68,7 @@
         "@dcloudio/vite-plugin-uni": "3.0.0-4080720251210001",
         "@iconify-json/carbon": "^1.2.11",
         "@mini-types/alipay": "^3.0.14",
+        "@types/markdown-it": "^14.1.2",
         "@uni-helper/eslint-config": "^0.4.0",
         "@uni-helper/plugin-uni": "^0.1.0",
         "@uni-helper/unh": "^0.2.3",
@@ -77,8 +92,5 @@
         "vite": "6.3.4",
         "vite-plugin-uni-polyfill": "^0.1.0",
         "vue-tsc": "catalog:dev"
-    },
-    "pnpm": {
-        "packageManager": "isolated"
     }
 }

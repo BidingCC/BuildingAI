@@ -287,4 +287,14 @@ export class AuthWebController extends BaseController {
     async getWechatQrcodeStatus(@Param("scene_str") scene_str: string) {
         return this.wechatOaService.getQrCodeStatus(scene_str);
     }
+
+    /**
+     * 绑定微信
+     * @param bindWechatDto 绑定微信信息，包含 code
+     * @returns
+     */
+    @Post("bind-wechat")
+    async bindWechat(@Body() bindWechatDto: WxMpLoginDto, @Playground() user: UserPlayground) {
+        return this.wechatMpService.bindWechat(bindWechatDto.code, user.id);
+    }
 }

@@ -7,6 +7,5 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
-    UaMarkdownUaMarkdown: typeof import('./../components/ua-markdown/ua-markdown.vue')['default']
   }
 }
