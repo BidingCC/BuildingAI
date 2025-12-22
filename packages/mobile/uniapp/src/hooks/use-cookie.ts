@@ -1,4 +1,4 @@
-import { ref, type UnwrapRef, watch } from "vue";
+import { ref, watch } from "vue";
 
 interface UseCookieOptions<T> {
     default?: T | (() => T);
@@ -75,10 +75,10 @@ export function useCookie<T = unknown>(key: string, options: UseCookieOptions<T>
 
     watch(
         data,
-        (val: UnwrapRef<T>) => {
+        (val) => {
             if (val === null) {
                 uni.removeStorageSync(key);
-                data.value = getDefault() as UnwrapRef<T>;
+                data.value = getDefault() as typeof data.value;
             } else {
                 write(val as T);
             }
