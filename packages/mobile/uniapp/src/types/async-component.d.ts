@@ -178,3 +178,7 @@ declare module '@/components/user/user-phone.vue?async' {
   const component: typeof import('@/components/user/user-phone.vue')
   export = component
 }
+declare module '@/async-components/ua-markdown/ua-markdown.vue?async' {
+  const component: typeof import('@/async-components/ua-markdown/ua-markdown.vue')
+  export = component
+}

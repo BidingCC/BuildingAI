@@ -10,20 +10,18 @@ definePage({
 import type { AiMessage } from "@buildingai/service/models/message";
 import type { MessageContentPart } from "@buildingai/types";
 
-import ChatsChats from "@/components/ask-assistant-chat/chats-chats.vue?async";
-import ChatsMessages from "@/components/ask-assistant-chat/chats-messages.vue?async";
-import ChatsPrompt from "@/components/ask-assistant-chat/chats-prompt/chats-prompt.vue?async";
 // #ifdef H5
-import BdMarkdown from "@/components/bd-markdown/index.vue?async";
+import BdMarkdown from "@/async-components/bd-markdown/index.vue?async";
 // #endif
-import BdModal from "@/components/bd-modal.vue?async";
-import BdNavbar from "@/components/bd-navbar.vue?async";
-import ModelSelect from "@/components/model-select/model-select.vue?async";
 // #ifndef H5
-import UaMarkdown from "@/components/ua-markdown/ua-markdown.vue?async";
+import UaMarkdown from "@/async-components/ua-markdown/ua-markdown.vue?async";
 // #endif
-import StreamClient from "@/components/uni_modules/stream-client/components/stream-client/stream-client.vue?async";
-import SwipeDrawer from "@/components/uni_modules/swipe-drawer/components/swipe-drawer/swipe-drawer.vue?async";
+import ChatsChats from "@/components/ask-assistant-chat/chats-chats.vue";
+import ChatsMessages from "@/components/ask-assistant-chat/chats-messages.vue";
+import ChatsPrompt from "@/components/ask-assistant-chat/chats-prompt/chats-prompt.vue";
+import BdModal from "@/components/bd-modal.vue";
+import BdNavbar from "@/components/bd-navbar.vue";
+import ModelSelect from "@/components/model-select/model-select.vue";
 import { generateUuid, useChat } from "@/hooks/use-chat";
 import { useHalfPopupInteraction } from "@/hooks/use-half-popup-interaction";
 import type { AiModel } from "@/service/ai-conversation";
@@ -392,7 +390,7 @@ const navbarTitle = computed(() => {
 </script>
 
 <template>
-    <SwipeDrawer ref="drawer" v-model="showDrawer" drawerBgColor="var(--background)" h="full">
+    <swipe-drawer ref="drawer" v-model="showDrawer" drawerBgColor="var(--background)" h="full">
         <template #drawer>
             <view class="bg-background flex h-full min-h-0 w-full flex-col">
                 <BdNavbar title="" :show-back="true" :show-home="true" filter="blur(4px)">
@@ -567,9 +565,9 @@ const navbarTitle = computed(() => {
                 </template>
             </ChatsPrompt>
         </template>
-    </SwipeDrawer>
+    </swipe-drawer>
 
-    <bd-modal
+    <BdModal
         :zIndex="99999"
         ref="modalRef"
         title="编辑标题"
@@ -585,9 +583,9 @@ const navbarTitle = computed(() => {
                 :maxlength="100"
             />
         </view>
-    </bd-modal>
+    </BdModal>
 
-    <bd-modal
+    <BdModal
         :zIndex="99999"
         ref="deleteModalRef"
         title="删除聊天记录"
@@ -607,7 +605,7 @@ const navbarTitle = computed(() => {
     />
 
     <!-- 流式客户端组件 -->
-    <StreamClient
+    <stream-client
         ref="streamClientRef"
         :timeout="streamTimeout"
         :heartbeat-timeout="streamHeartbeatTimeout"

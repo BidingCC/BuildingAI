@@ -5,14 +5,9 @@ import type {
     UniPopupInstance,
 } from "@uni-helper/uni-ui-types";
 
-import BdActionSheet from "@/components/bd-action-sheet.vue?async";
-import BdModal from "@/components/bd-modal.vue?async";
-import BdPicker from "@/components/bd-picker.vue?async";
-import UniBadge from "@/components/uni_modules/uni-badge/components/uni-badge/uni-badge.vue?async";
-import UniCountdown from "@/components/uni_modules/uni-countdown/components/uni-countdown/uni-countdown.vue?async";
-import UniEasyinput from "@/components/uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput.vue?async";
-import UniForms from "@/components/uni_modules/uni-forms/components/uni-forms/uni-forms.vue?async";
-import UniFormsItem from "@/components/uni_modules/uni-forms/components/uni-forms-item/uni-forms-item.vue?async";
+import BdActionSheet from "@/components/bd-action-sheet.vue";
+import BdModal from "@/components/bd-modal.vue";
+import BdPicker from "@/components/bd-picker.vue";
 
 definePage({
     style: {
@@ -47,7 +42,7 @@ const range3 = [
     [7, 8, 9],
 ];
 
-const formData = reactive<UniFormsInstance>({
+const formData = reactive({
     name: "",
     age: "",
     hobby: [],

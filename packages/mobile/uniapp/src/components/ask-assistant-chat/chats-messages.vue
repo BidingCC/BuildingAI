@@ -3,10 +3,10 @@ import type { AiMessage } from "@buildingai/service/models/message";
 import { computed } from "vue";
 
 // #ifdef H5
-import BdMarkdown from "@/components/bd-markdown/index.vue?async";
+import BdMarkdown from "@/async-components/bd-markdown/index.vue?async";
 // #endif
 // #ifndef H5
-import UaMarkdown from "@/components/ua-markdown/ua-markdown.vue?async";
+import UaMarkdown from "@/async-components/ua-markdown/ua-markdown.vue?async";
 
 // #endif
 import ChatsBubble from "./chats-bubble.vue";
