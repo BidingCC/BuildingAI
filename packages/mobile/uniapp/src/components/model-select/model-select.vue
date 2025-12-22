@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ModelType } from "@buildingai/service/models/globals";
 
-import HalfPopup from "@/async-components/uni_modules/half-popup/components/half-popup/half-popup.vue?async";
+import HalfPopup from "@/components/uni_modules/half-popup/components/half-popup/half-popup.vue?async";
 import type { AiModel, AiProvider } from "@/service/ai-conversation";
 import { apiGetAiModel, apiGetAiProviders, apiGetDefaultAiModel } from "@/service/ai-conversation";
 

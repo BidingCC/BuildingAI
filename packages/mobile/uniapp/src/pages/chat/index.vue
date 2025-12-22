@@ -10,20 +10,20 @@ definePage({
 import type { AiMessage } from "@buildingai/service/models/message";
 import type { MessageContentPart } from "@buildingai/types";
 
-import ChatsChats from "@/async-components/ask-assistant-chat/chats-chats.vue?async";
-import ChatsMessages from "@/async-components/ask-assistant-chat/chats-messages.vue?async";
-import ChatsPrompt from "@/async-components/ask-assistant-chat/chats-prompt/chats-prompt.vue?async";
+import ChatsChats from "@/components/ask-assistant-chat/chats-chats.vue?async";
+import ChatsMessages from "@/components/ask-assistant-chat/chats-messages.vue?async";
+import ChatsPrompt from "@/components/ask-assistant-chat/chats-prompt/chats-prompt.vue?async";
 // #ifdef H5
-import BdMarkdown from "@/async-components/bd-markdown/index.vue?async";
+import BdMarkdown from "@/components/bd-markdown/index.vue?async";
 // #endif
-import BdModal from "@/async-components/bd-modal.vue?async";
-import BdNavbar from "@/async-components/bd-navbar.vue?async";
-import ModelSelect from "@/async-components/model-select/model-select.vue?async";
+import BdModal from "@/components/bd-modal.vue?async";
+import BdNavbar from "@/components/bd-navbar.vue?async";
+import ModelSelect from "@/components/model-select/model-select.vue?async";
 // #ifndef H5
-import UaMarkdown from "@/async-components/ua-markdown/ua-markdown.vue?async";
+import UaMarkdown from "@/components/ua-markdown/ua-markdown.vue?async";
 // #endif
-import StreamClient from "@/async-components/uni_modules/stream-client/components/stream-client/stream-client.vue?async";
-import SwipeDrawer from "@/async-components/uni_modules/swipe-drawer/components/swipe-drawer/swipe-drawer.vue?async";
+import StreamClient from "@/components/uni_modules/stream-client/components/stream-client/stream-client.vue?async";
+import SwipeDrawer from "@/components/uni_modules/swipe-drawer/components/swipe-drawer/swipe-drawer.vue?async";
 import { generateUuid, useChat } from "@/hooks/use-chat";
 import { useHalfPopupInteraction } from "@/hooks/use-half-popup-interaction";
 import type { AiModel } from "@/service/ai-conversation";

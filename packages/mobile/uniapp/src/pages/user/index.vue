@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import BdNavbar from "@/async-components/bd-navbar.vue?async";
-import UserBanner from "@/async-components/widget/user-banner/user-banner.vue?async";
-import UserService from "@/async-components/widget/user-service/user-service.vue?async";
-import UserVersion from "@/async-components/widget/user-version/user-version.vue?async";
+import BdNavbar from "@/components/bd-navbar.vue?async";
+import UserBanner from "@/components/widget/user-banner/user-banner.vue?async";
+import UserService from "@/components/widget/user-service/user-service.vue?async";
+import UserVersion from "@/components/widget/user-version/user-version.vue?async";
 import type { PagesConfig } from "@/service/decorate";
 import { apiGetPagesConfig } from "@/service/decorate";
 

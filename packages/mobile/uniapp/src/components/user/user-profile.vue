@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import HalfPopup from "@/async-components/uni_modules/half-popup/components/half-popup/half-popup.vue?async";
+import HalfPopup from "@/components/uni_modules/half-popup/components/half-popup/half-popup.vue?async";
 import { useUpload } from "@/hooks/use-request";
 import { apiUpdateUserField } from "@/service/user";
 

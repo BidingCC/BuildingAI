@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import BdImage from "@/async-components/bd-image.vue?async";
+import BdImage from "@/components/bd-image.vue?async";
 import type { Link } from "@/utils/navigate";
 import { navigateTo } from "@/utils/navigate";
 

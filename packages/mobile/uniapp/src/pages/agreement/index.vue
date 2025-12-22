@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import BdNavbar from "@/async-components/bd-navbar.vue?async";
+import BdNavbar from "@/components/bd-navbar.vue?async";
 import { apiGetAgreementConfig } from "@/service/common";
 
 const { value: type } = useQuery("url");

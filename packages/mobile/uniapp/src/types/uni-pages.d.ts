@@ -15,7 +15,7 @@ type _LocationUrl =
   "/pages/user/profile" |
   "/pages/user/settings" |
   "/pages/webview/index" |
-  "/async-components/index" |
+  "/components/index" |
   "/extensions/simple-blog/pages/list/index" |
   "/extensions/simple-blog/pages/detail/index" |
   "/extensions/simple-blog/pages/cate";
