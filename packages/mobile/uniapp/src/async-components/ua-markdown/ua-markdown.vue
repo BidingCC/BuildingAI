@@ -6,7 +6,7 @@ import "./lib/katex/katex.css";
 import mdKatex from "@vscode/markdown-it-katex";
 import hljs from "highlight.js/lib/common";
 
-import MpHtml from "../uni_modules/mp-html/mp-html.vue";
+import MpHtml from "../mp-html/mp-html.vue";
 import { tagStyle } from "./css/tag-style";
 import { customLinkPlugin } from "./customLink";
 import { docQuotePlugin } from "./docLInk";

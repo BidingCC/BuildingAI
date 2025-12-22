@@ -50,7 +50,7 @@ export default defineUniPages({
     // 动态加载扩展分包
     subPackages: [
         {
-            root: "components/",
+            root: "async-components/",
             pages: [{ path: "index" }],
         },
         ...(await loadExtensionSubPackages("../../../extensions")),

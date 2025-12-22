@@ -594,11 +594,11 @@ export default {
     </view>
 </template>
 <style lang="scss">
-@import "@/components/ua-markdown/css/markdown-style.css";
+@import "../../ua-markdown/css/markdown-style.css";
 // @import "@/components/ua-markdown/lib/highlight/atom-one-dark.css";
 // @import "@/components/ua-markdown/lib/highlight/atom-one-light.css";
-@import "@/components/ua-markdown/lib/highlight/github-dark.min.css";
-@import "@/components/ua-markdown/lib/highlight/snazzy.css";
+@import "../../ua-markdown/lib/highlight/github-dark.min.css";
+@import "../../ua-markdown/lib/highlight/snazzy.css";
 
 /* #ifdef APP-PLUS */
 ._video {
