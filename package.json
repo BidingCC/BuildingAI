@@ -142,7 +142,7 @@
         "vite": "catalog:dev",
         "vue": "catalog:web",
         "vue-dompurify-html": "catalog:web",
-        "vue-renderer-markdown": "catalog:web",
+        "markstream-vue": "catalog:web",
         "vue-router": "catalog:web",
         "vuedraggable": "catalog:web",
         "yup": "catalog:web"

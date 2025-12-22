@@ -2,7 +2,7 @@
 import type { ComputedRef } from "vue";
 import { computed, defineAsyncComponent, inject, ref, watch } from "vue";
 import type { Composer } from "vue-i18n";
-import { PreCodeNode } from "vue-renderer-markdown";
+import { PreCodeNode } from "markstream-vue";
 
 import { useShikiCdn } from "../composables/use-shiki-cdn";
 import { getLanguageIcon } from "../utils/language-icon";

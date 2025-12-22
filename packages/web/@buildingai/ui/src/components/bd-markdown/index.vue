@@ -1,7 +1,7 @@
 <!--
  * BdMarkdown component
  * A highly customizable Markdown rendering component, supporting tables, pictures, flowcharts, sequence diagrams, state diagrams, UML diagrams, mathematical formulas, etc.
- * Extends the vue-renderer-markdown component, supports custom components and themes.
+ * Extends the markstream-vue component, supports custom components and themes.
  * Usage: <BdMarkdown :content="content" />
  * @author BuildingAI Team
 -->
@@ -10,7 +10,7 @@
 import "katex/dist/katex.min.css";
 
 import { computed, provide } from "vue";
-import MarkdownRender, { setCustomComponents } from "vue-renderer-markdown";
+import MarkdownRender, { setCustomComponents } from "markstream-vue";
 
 import CodeBlock from "./components/code-block.vue";
 import MermaidBlock from "./components/mermaid-block.vue";
