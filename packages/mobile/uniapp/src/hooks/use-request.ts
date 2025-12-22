@@ -9,6 +9,7 @@ import type {
 
 import i18n from "@/i18n";
 import { useUserStore } from "@/stores/user";
+import { objectToQuery } from "@/utils/navigate";
 
 interface ApiResponse<T = unknown> {
     code: number;
@@ -124,7 +125,14 @@ async function request<T = unknown>(
     }
 
     if (method === "GET") {
-        requestParams.data = params;
+        if (params && Object.keys(params).length > 0) {
+            const queryString = objectToQuery(params);
+            if (queryString) {
+                requestParams.url = `${fullUrl}${fullUrl.includes("?") ? "&" : "?"}${queryString}`;
+            }
+            // GET 请求不需要 data 参数，参数已经在 URL 中
+            requestParams.data = undefined;
+        }
     } else {
         requestParams.data = data;
     }
@@ -570,8 +578,8 @@ export const useStream = (
                 }
             }
 
-            // Check response status
-            if (!response.ok) {
+            // Check response status (201 Created is also a success status)
+            if (!response.ok && response.status !== 201) {
                 const errorText = await response.text();
                 const error = new Error(errorText || "Failed to fetch the chat response.");
                 onError?.(error);
@@ -596,7 +604,16 @@ export const useStream = (
             });
         } catch (error) {
             if (!isAborted) {
-                onError?.(error as Error);
+                const err =
+                    error instanceof Error ? error : new Error(String(error) || "Unknown error");
+                // Check if it's a network error that we can handle gracefully
+                if (
+                    err.message.includes("ERR_INCOMPLETE_CHUNKED_ENCODING") ||
+                    err.message.includes("network error")
+                ) {
+                    console.warn("Network error during stream, may be recoverable:", err.message);
+                }
+                onError?.(err);
             }
         }
     })();
@@ -637,6 +654,9 @@ async function processStream({
         role: "assistant",
         content: "",
     } as HttpChatMessage;
+
+    // Export currentMessage for use in error handling
+    (processStream as any).currentMessage = currentMessage;
 
     try {
         while (true) {

@@ -86,5 +86,14 @@
     "normal": "正常",
     "disabled": "禁用",
     "accountInfo": "账户信息",
-    "userNo": "用户编号"
+    "userNo": "用户编号",
+    "message": {
+        "copySuccess": "复制成功",
+        "downloadSuccess": "下载成功"
+    },
+    "expand": "展开",
+    "collapse": "收起",
+    "preview": "预览",
+    "source": "源码",
+    "typing": "对方正在输入..."
 }

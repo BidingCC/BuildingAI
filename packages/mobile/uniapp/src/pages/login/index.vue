@@ -2,12 +2,13 @@
 import { LoginMethod } from "@buildingai/service/consoleapi/login-settings";
 import type { LoginResponse, SystemLoginAccountParams } from "@buildingai/service/webapi/user";
 
-import BdModal from "@/async-components/bd-modal.vue?async";
-import Agreement from "@/async-components/login/agreement.vue?async";
-import LoginAccount from "@/async-components/login/login-account.vue?async";
-import LoginWeixin from "@/async-components/login/login-weixin.vue?async";
-import NewUser from "@/async-components/login/new-user.vue?async";
-import WebsiteInfo from "@/async-components/login/website-info.vue?async";
+import BdModal from "@/components/bd-modal.vue?async";
+import BdSeparator from "@/components/bd-separator.vue?async";
+import Agreement from "@/components/login/agreement.vue?async";
+import LoginAccount from "@/components/login/login-account.vue?async";
+import LoginWeixin from "@/components/login/login-weixin.vue?async";
+import NewUser from "@/components/login/new-user.vue?async";
+import WebsiteInfo from "@/components/login/website-info.vue?async";
 import { apiAuthLogin, apiAuthWxMpLogin } from "@/service/user";
 import { isApp, isH5, isMp, isWechatOa } from "@/utils/env";
 

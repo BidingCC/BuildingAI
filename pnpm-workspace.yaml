@@ -111,7 +111,7 @@ catalogs:
     '@vue/tsconfig': ^0.8.0
     vue-dompurify-html: ^5.3.0
     vue-i18n: ^11.1.12
-    vue-renderer-markdown: 0.0.61-beta.7
+    markstream-vue: 0.0.3-beta.7
     vue-router: ^4.6.3
     vuedraggable: ^4.1.0
     yup: ^1.7.1

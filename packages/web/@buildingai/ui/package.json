@@ -48,6 +48,6 @@
         "tiptap-markdown": "catalog:web",
         "vue": "catalog:web",
         "vue-i18n": "catalog:web",
-        "vue-renderer-markdown": "catalog:web"
+        "markstream-vue": "catalog:web"
     }
 }

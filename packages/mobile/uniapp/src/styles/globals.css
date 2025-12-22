@@ -14,6 +14,10 @@
 view,
 textarea,
 input,
+div,
+p,
+span,
+pre,
 text {
     box-sizing: border-box;
 }

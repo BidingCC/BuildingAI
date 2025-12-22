@@ -1,0 +1,18 @@
+{
+    "id": "ua-markdown",
+    "name": "uniapp markdown语法渲染及代码高亮",
+    "displayName": "uniapp markdown语法渲染及代码高亮",
+    "version": "1.2.4",
+    "description": "基于uniapp+vue3自定义解析markdown语法/高亮，适用于h5+小程序+App端。",
+    "keywords": [
+        "ua-markdown",
+        "uni-markdown",
+        "markdown"
+    ],
+    "dcloudext": {
+        "category": [
+            "前端组件",
+            "通用组件"
+        ]
+    }
+}

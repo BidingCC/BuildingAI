@@ -2,9 +2,9 @@
 import type { SystemRegisrerAccountParams } from "@buildingai/service/webapi/user";
 import type { UniForms } from "@uni-helper/uni-types";
 
-import BdModal from "@/async-components/bd-modal.vue?async";
-import Agreement from "@/async-components/login/agreement.vue?async";
-import WebsiteInfo from "@/async-components/login/website-info.vue?async";
+import BdModal from "@/components/bd-modal.vue?async";
+import Agreement from "@/components/login/agreement.vue?async";
+import WebsiteInfo from "@/components/login/website-info.vue?async";
 import { apiAuthRegister } from "@/service/user";
 
 const { t } = useI18n();

@@ -117,6 +117,18 @@ export default defineConfig({
     },
     optimizeDeps: {
         exclude: ["vue-demi"],
+        include: [
+            "markstream-vue",
+            "stream-markdown-parser",
+            "markdown-it-emoji",
+            "markdown-it-ins",
+            "markdown-it-mark",
+            "markdown-it-sub",
+            "markdown-it-sup",
+            "markdown-it-container",
+            "mdurl",
+            "uc.micro",
+        ],
     },
     resolve: {
         alias: {
