@@ -182,3 +182,7 @@ declare module '@/async-components/ua-markdown/ua-markdown.vue?async' {
   const component: typeof import('@/async-components/ua-markdown/ua-markdown.vue')
   export = component
 }
+declare module '@/async-components/bd-markdown/index.vue?async' {
+  const component: typeof import('@/async-components/bd-markdown/index.vue')
+  export = component
+}

@@ -1,18 +1,86 @@
 <script setup lang="ts">
-import type { LoginSettings } from "@buildingai/service/consoleapi/login-settings";
-import type { WebsiteConfig } from "@buildingai/service/consoleapi/website";
+import type { Agent } from "@buildingai/service/consoleapi/ai-agent";
+import type { QueryPublicAgentParams } from "@buildingai/service/webapi/ai-agent";
 
-import BdNavbar from "@/async-components/bd-navbar.vue?async";
-import {
-    AnalyseActionType,
-    apiGetLoginSettings,
-    apiGetSiteConfig,
-    apiRecordAnalyse,
-} from "@/service/common";
-import Logo from "@/static/logo.png";
+import BdActionSheet from "@/components/bd-action-sheet.vue?async";
+import BdNavbar from "@/components/bd-navbar.vue?async";
+import { useDebounce } from "@/hooks/use-debounce";
+import { apiGetPublicAgents } from "@/service/agent";
 
 const { t } = useI18n();
-const router = useRouter();
+
+const agentLists = shallowRef<Agent[]>([]);
+const pagingRef = shallowRef<ZPagingRef>();
+
+// 搜索关键词
+const searchKeyword = shallowRef("");
+
+// 排序方式
+const sortBy = shallowRef<"latest" | "popular">("latest");
+const sortOptions = [
+    { label: "最新发布", value: "latest" as const },
+    { label: "最受欢迎", value: "popular" as const },
+];
+
+// 动作面板引用
+const sortActionSheetRef = shallowRef<InstanceType<typeof BdActionSheet>>();
+
+// 查询列表
+const queryList = (pageNo: number, pageSize: number) => {
+    const params: QueryPublicAgentParams = {
+        page: pageNo,
+        pageSize: pageSize,
+        keyword: "",
+        sortBy: sortBy.value,
+    };
+
+    // 如果有搜索关键词，添加到参数中
+    if (searchKeyword.value.trim()) {
+        params.keyword = searchKeyword.value.trim();
+    }
+
+    apiGetPublicAgents(params)
+        .then((res) => {
+            pagingRef.value?.complete(res.items);
+        })
+        .catch((error) => {
+            console.error("Failed to load agents:", error);
+            pagingRef.value?.complete(false);
+        });
+};
+
+// 使用防抖 Hook 处理搜索
+const { debouncedFn: debouncedSearch } = useDebounce(() => {
+    pagingRef.value?.reload();
+}, 500);
+
+// 搜索处理
+const handleSearch = (value: string) => {
+    searchKeyword.value = value;
+    debouncedSearch();
+};
+
+// 清除搜索
+const handleClearSearch = () => {
+    searchKeyword.value = "";
+    pagingRef.value?.reload();
+};
+
+// 打开排序选择面板
+const handleOpenSortMenu = () => {
+    sortActionSheetRef.value?.open();
+};
+
+// 切换排序方式
+const handleSortChange = (value: "latest" | "popular") => {
+    sortBy.value = value;
+    pagingRef.value?.reload();
+};
+
+// 获取当前排序选项的标签
+const currentSortLabel = computed(() => {
+    return sortOptions.find((opt) => opt.value === sortBy.value)?.label || "最新发布";
+});
 
 definePage({
     style: {
@@ -23,31 +91,84 @@ definePage({
 </script>
 
 <template>
-    <view class="flex h-[calc(100vh-112px)] flex-col px-4">
-        <BdNavbar
-            :title="t('pages.apps')"
-            :show-back="false"
-            :show-home="false"
-            filter="blur(4px)"
-        />
-        <view bg="muted" p="2" rounded="lg" flex gap="2" items-center my="2">
-            <view i-lucide-search></view>
-            <input type="text" placeholder="请输入智能体名称" font-size="sm" />
+    <BdNavbar :title="t('pages.apps')" :show-back="false" :show-home="false" filter="blur(4px)">
+        <!-- <template #left>
+            <view bg="white" py="2" px="4" rounded="5" flex gap="1" items-center z="0">
+                <view i-lucide-search size="4"></view>
+                <view text="sm muted-foreground">搜索智能体</view>
+            </view>
+        </template> -->
+    </BdNavbar>
+    <view class="flex h-[calc(100vh-112px)] flex-col overflow-hidden px-4">
+        <view bg="white" py="2" px="4" rounded="5" flex gap="1" items-center z="0">
+            <view i-lucide-search size="4"></view>
+            <input
+                :value="searchKeyword"
+                type="text"
+                placeholder="搜索智能体"
+                font-size="sm"
+                @input="(e) => handleSearch((e.target as HTMLInputElement).value)"
+            />
+            <view
+                v-if="searchKeyword"
+                i-lucide-x
+                size="3"
+                class="cursor-pointer"
+                text="muted-foreground"
+                @click="handleClearSearch"
+            ></view>
         </view>
-        <view flex justify-end gap="2" font-size="sm" text="muted-foreground">
-            <view text="primary" flex items-center gap="1">
-                最新发布
+        <view flex justify-end gap="2" font-size="sm" text="muted-foreground" my="2">
+            <view
+                text="primary"
+                flex
+                items-center
+                gap="1"
+                class="cursor-pointer"
+                @click="handleOpenSortMenu"
+            >
+                {{ currentSortLabel }}
                 <view i-lucide-chevron-down size="3"></view>
             </view>
         </view>
-        <view>
-            <view border="~ rounded-lg" p="3" bg="background" shadow="sm" my="2">
-                <view flex items-center gap="2">
-                    <image :src="Logo" size="10" />
-                    <view>代码解释器</view>
-                    <image :src="Logo" size="4" ml="auto" />
 
-                    <!-- <view text="xs">编辑于2025-12-22</view> -->
+        <!-- 排序选择动作面板 -->
+        <bd-action-sheet
+            ref="sortActionSheetRef"
+            :actions="[
+                {
+                    title: '最新发布',
+                    type: sortBy === 'latest' ? 'primary' : 'default',
+                    click: () => handleSortChange('latest'),
+                },
+                {
+                    title: '最受欢迎',
+                    type: sortBy === 'popular' ? 'primary' : 'default',
+                    click: () => handleSortChange('popular'),
+                },
+            ]"
+        />
+        <z-paging
+            ref="pagingRef"
+            v-model="agentLists"
+            @query="queryList"
+            :show-scrollbar="false"
+            :fixed="false"
+            class="flex-1"
+        >
+            <view
+                border="~ rounded-lg"
+                p="3"
+                bg="background"
+                shadow="sm"
+                mb="2"
+                v-for="item in agentLists"
+                :key="item.id"
+            >
+                <view flex items-center gap="2">
+                    <image :src="item.avatar" size="10" rounded="md" />
+                    <view>{{ item.name }}</view>
+                    <image :src="item.provider?.iconUrl" size="4" ml="auto" rounded="md" />
                 </view>
                 <view
                     text="sm muted-foreground"
@@ -57,17 +178,18 @@ definePage({
                     border-t-gray-200
                     pt="3"
                 >
-                    代码解释器是一个用于解释代码的工具，它可以帮助你理解代码的含义，并提供代码的解释和优化建议
+                    {{ item.description }}
                 </view>
                 <view flex justify-between items-center text="xs muted-foreground" mt="2">
                     <view flex items-center gap="1">
-                        <view i-lucide-message-square-text size="3"></view>11
-                        <view i-lucide-users size="3"></view>11
+                        <view i-lucide-message-square-text size="3"></view
+                        >{{ item.conversationCount }} <view i-lucide-users size="3"></view
+                        >{{ item.userCount }}
                     </view>
                     <view mt="2">编辑于2025-12-22</view>
                 </view>
             </view>
-        </view>
+        </z-paging>
     </view>
 </template>
 <style>
