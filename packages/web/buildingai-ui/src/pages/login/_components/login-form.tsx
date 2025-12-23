@@ -25,13 +25,15 @@ import { Link } from "react-router-dom";
 import SvgIcons from "../../../components/svg-icons";
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
+  const { setUserInfo, setToken } = useAuthStore((state) => state.authActions);
   const loginHandler = async () => {
     const { token, user } = await postLogin({
       username: "admin1",
       password: "BuildingAI&123456",
       terminal: 1,
     });
-    useAuthStore.setState({ auth: { token, userInfo: user } });
+    setUserInfo(user);
+    setToken(token);
   };
   return (
     <div className={cn("flex flex-col gap-4", className)} {...props}>

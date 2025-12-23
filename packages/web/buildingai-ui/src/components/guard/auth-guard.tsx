@@ -2,8 +2,8 @@ import { useAuthStore } from "@buildingai/stores";
 import { Navigate, Outlet } from "react-router-dom";
 
 const AuthGuard = () => {
-  const { authActions } = useAuthStore();
-  if (authActions.isLogin()) {
+  const { isLogin } = useAuthStore((state) => state.authActions);
+  if (isLogin()) {
     return <Outlet />;
   }
 

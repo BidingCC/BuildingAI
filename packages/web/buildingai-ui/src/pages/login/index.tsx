@@ -5,9 +5,9 @@ import { Navigate } from "react-router-dom";
 import { LoginForm } from "./_components/login-form";
 
 const LoginPage = () => {
-  const { authActions } = useAuthStore();
+  const { isLogin } = useAuthStore((state) => state.authActions);
 
-  if (authActions.isLogin()) {
+  if (isLogin()) {
     return <Navigate to="/" replace />;
   }
   return (
