@@ -12,7 +12,6 @@ type _LocationUrl =
   "/pages/login/index" |
   "/pages/register/index" |
   "/pages/user/index" |
-  "/pages/user/profile" |
   "/pages/user/settings" |
   "/pages/webview/index" |
   "/async-components/index" |

@@ -207,6 +207,10 @@ const {
 const handleSubmitMessage = async (content: string) => {
     if ((!content.trim() && !files.value.length) || status.value === "loading") return;
 
+    if (!userStore.isLogin) {
+        return userStore.toLogin();
+    }
+
     // 添加用户消息到列表（用于显示）
     const userMessage: AiMessage = {
         id: generateUuid(),
