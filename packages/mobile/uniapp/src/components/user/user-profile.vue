@@ -145,7 +145,7 @@ defineExpose({
 </script>
 
 <template>
-    <HalfPopup
+    <half-popup
         v-model="show"
         :z-index="99999"
         height="90vh"
@@ -202,5 +202,5 @@ defineExpose({
                 />
             </view>
         </view>
-    </HalfPopup>
+    </half-popup>
 </template>

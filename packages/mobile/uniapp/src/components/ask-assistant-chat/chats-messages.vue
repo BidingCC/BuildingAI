@@ -10,29 +10,19 @@ import UaMarkdown from "@/async-components/ua-markdown/ua-markdown.vue?async";
 
 // #endif
 import ChatsBubble from "./chats-bubble.vue";
+import ReferenceKnowledge from "./reference/reference-knowledge.vue";
+import ReferenceMcpToolCall from "./reference/reference-mcp-tool-call.vue";
+import ReferenceReasoning from "./reference/reference-reasoning.vue";
 
-/**
- * Assistant configuration interface
- * @description Configuration for assistant message actions
- */
 interface AssistantConfig {
-    /** Action buttons for assistant messages */
     actions?: Array<{
-        /** Action label */
         label: string;
-        /** Action icon */
         icon: string;
-        /** Whether to show the action */
         show?: boolean;
-        /** Click handler */
         onClick?: (message: AiMessage, index: number) => void;
     }>;
 }
 
-/**
- * Component props interface
- * @description Props for the chats messages component
- */
 const props = withDefaults(
     defineProps<{
         /** List of messages to display */
@@ -54,31 +44,16 @@ const props = withDefaults(
     },
 );
 
-/**
- * Component emits interface
- * @description Events emitted by the component
- */
 defineEmits<{
-    /** File preview event */
     (e: "file-preview", file: { name: string; url: string }): void;
 }>();
 
 const { t } = useI18n();
 const { userInfo } = useUserStore();
 
-/**
- * Get message avatar URL
- * @param message - Message object
- * @returns Avatar URL string
- */
 const getMessageAvatar = (message: AiMessage) =>
     message.role === "user" ? userInfo?.avatar || "" : message.avatar || "";
 
-/**
- * Get message sender name
- * @param message - Message object
- * @returns Sender name string
- */
 const getMessageName = (message: AiMessage) => {
     const nameMap: Record<string, string> = {
         user: t("common.chat.messages.me") || "我",
@@ -87,11 +62,6 @@ const getMessageName = (message: AiMessage) => {
     return nameMap[message.role] || t("common.chat.messages.unknown") || "未知";
 };
 
-/**
- * Get text content from message
- * @param content - Message content (string or array)
- * @returns Text content string
- */
 const getMessageTextContent = (content: AiMessage["content"]): string => {
     if (typeof content === "string") return content;
     if (Array.isArray(content)) {
@@ -100,12 +70,6 @@ const getMessageTextContent = (content: AiMessage["content"]): string => {
     return "";
 };
 
-/**
- * Get error message from error object or message
- * @param error - Error object
- * @param message - Message object
- * @returns Error message string
- */
 const getErrorMessage = (error: Error | undefined, message: AiMessage): string => {
     if (!error)
         return (
@@ -127,11 +91,10 @@ const getErrorMessage = (error: Error | undefined, message: AiMessage): string =
     return JSON.stringify(error);
 };
 
-/**
- * All messages computed property
- * @description Returns all messages as a computed array
- */
 const allMessages = computed(() => [...props.messages]);
+
+const shouldReasoningDefaultOpen = (message: AiMessage) =>
+    !!(message.metadata?.reasoning && !message.metadata.reasoning.endTime);
 </script>
 
 <template>
@@ -197,6 +160,34 @@ const allMessages = computed(() => [...props.messages]);
                     <text class="i-lucide-alert-circle text-lg" />
                     <text>{{ getErrorMessage(error, message) }}</text>
                 </view>
+
+                <!-- Reasoning display -->
+                <ReferenceReasoning
+                    v-if="message.role === 'assistant' && message.metadata?.reasoning?.content"
+                    :reasoning="message.metadata.reasoning"
+                    :message-id="message.id"
+                    :is-thinking="!message.metadata.reasoning.endTime"
+                    :default-open="shouldReasoningDefaultOpen(message)"
+                    :key="`reasoning-${message.id}-${JSON.stringify(message.metadata.reasoning)}`"
+                />
+
+                <!-- Knowledge reference display -->
+                <ReferenceKnowledge
+                    v-if="
+                        message.metadata?.references &&
+                        message.metadata.references.length > 0 &&
+                        message.role === 'assistant'
+                    "
+                    :references="message.metadata.references"
+                />
+
+                <!-- MCP tool call display -->
+                <ReferenceMcpToolCall
+                    v-if="message.role === 'assistant' && message.mcpToolCalls?.length"
+                    :tool-calls="message.mcpToolCalls"
+                    :message-id="message.id"
+                    :key="`tool-${message.id}-${message.mcpToolCalls.map((item) => item.output)}`"
+                />
 
                 <!-- Message bubble -->
                 <ChatsBubble

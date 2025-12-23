@@ -95,5 +95,47 @@
     "collapse": "收起",
     "preview": "预览",
     "source": "源码",
-    "typing": "对方正在输入..."
+    "typing": "对方正在输入...",
+    "chat": {
+        "messages": {
+            "me": "我",
+            "assistant": "助手",
+            "unknown": "未知",
+            "sendFailed": "发送失败",
+            "thinking": "思考中..."
+        },
+        "reasoning": {
+            "thinking": "思考中",
+            "completed": "思考完成",
+            "duration": "耗时"
+        },
+        "knowledgeCall": {
+            "start": "开始",
+            "from": "从",
+            "call": "调用",
+            "finished": "完成"
+        },
+        "toolCall": {
+            "start": "开始",
+            "calling": "调用中",
+            "from": "从",
+            "call": "调用",
+            "finished": "完成",
+            "duration": "耗时",
+            "startCall": "开始调用",
+            "finishedCall": "调用完成"
+        }
+    },
+    "datasets": {
+        "retrieval": {
+            "vector": "向量检索",
+            "fullText": "全文检索",
+            "hybrid": "混合检索"
+        }
+    },
+    "reference": {
+        "request": "请求",
+        "response": "响应",
+        "callDetails": "调用详情"
+    }
 }

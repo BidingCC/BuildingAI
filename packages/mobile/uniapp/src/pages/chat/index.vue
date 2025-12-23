@@ -71,7 +71,6 @@ const queryList = async (pageNo: number, pageSize: number) => {
     const conversationId = internalConversationId.value || currentConversationId.value;
     if (!conversationId) {
         pagingRef.value?.complete([]);
-        setMessages([]);
         return;
     }
 
@@ -80,7 +79,7 @@ const queryList = async (pageNo: number, pageSize: number) => {
             page: pageNo,
             pageSize,
         });
-        const messages = data.items.map((item: AiMessage) => ({
+        const list = data.items.map((item: AiMessage) => ({
             id: item.id || generateUuid(),
             role: item.role,
             metadata: item.metadata,
@@ -90,17 +89,10 @@ const queryList = async (pageNo: number, pageSize: number) => {
             createdAt: item.createdAt,
         }));
         // 聊天记录模式需要倒序，最新的在底部
-        pagingRef.value?.complete(messages);
-        // 同步消息到 useChat，用于继续对话时传递历史记录
-        // 注意：z-paging 的聊天记录模式是倒序的，但 useChat 需要正序（从旧到新）
-        if (pageNo === 1 && messages.length > 0) {
-            const reversedMessages = [...messages].reverse();
-            setMessages(reversedMessages);
-        }
+        pagingRef.value?.complete(list);
     } catch (error) {
         console.error("Failed to load messages:", error);
         pagingRef.value?.complete(false);
-        setMessages([]);
     }
 };
 
@@ -163,6 +155,20 @@ const {
         useToast().error(message);
     },
     onUpdate(chunk) {
+        // 处理 conversation_id 更新
+        if (chunk.type === "conversation_id" && chunk.data) {
+            const newConversationId =
+                typeof chunk.data === "string" ? chunk.data : (chunk.data as { id?: string })?.id;
+            if (
+                newConversationId &&
+                !internalConversationId.value &&
+                !currentConversationId.value
+            ) {
+                internalConversationId.value = newConversationId;
+            }
+            return;
+        }
+
         if (chunk.type === "content" && chunk.message) {
             const messageId = chunk.message.id;
             // 查找 dataList 中是否已存在该消息
@@ -184,9 +190,10 @@ const {
         }
     },
     onFinish(message: AiMessage) {
-        const lastMessage = dataList.value[dataList.value.length - 1];
+        // dataList 是倒序的，最新的消息在数组开头（index 0）
+        const lastMessage = dataList.value[0];
         if (lastMessage && lastMessage.id === message.id) {
-            dataList.value[dataList.value.length - 1] = {
+            dataList.value[0] = {
                 ...lastMessage,
                 ...message,
                 status: "completed",
@@ -201,13 +208,17 @@ const {
 });
 
 /**
- * 提交消息（包装 handleSubmit 以支持 pagingRef）
+ * 提交消息
  * @param content 消息内容
  */
 const handleSubmitMessage = async (content: string) => {
     if ((!content.trim() && !files.value.length) || status.value === "loading") return;
 
-    // 添加用户消息到列表（用于显示）
+    if (!userStore.isLogin) {
+        return userStore.toLogin();
+    }
+
+    // 添加用户消息到 dataList 显示
     const userMessage: AiMessage = {
         id: generateUuid(),
         role: "user",
@@ -221,10 +232,9 @@ const handleSubmitMessage = async (content: string) => {
         status: "completed",
         mcpToolCalls: [],
     };
-
     pagingRef.value?.addChatRecordData(userMessage);
 
-    // 调用 useChat 的 handleSubmit
+    // 调用 useChat 的 handleSubmit 发送消息
     await handleSubmit(content);
 };
 
@@ -349,29 +359,7 @@ watch(
     },
 );
 
-// 监听消息变化，同步到 dataList（主要用于初始化和完成时的同步）
-watch(
-    () => messages.value,
-    (newMessages) => {
-        // 只处理新增或更新的 assistant 消息
-        newMessages.forEach((msg) => {
-            if (msg.role === "assistant") {
-                const existingIndex = dataList.value.findIndex((m) => m.id === msg.id);
-                if (existingIndex >= 0) {
-                    // 更新已存在的消息
-                    dataList.value[existingIndex] = {
-                        ...dataList.value[existingIndex],
-                        ...msg,
-                    };
-                } else {
-                    // 新消息，添加到列表
-                    pagingRef.value?.addChatRecordData(msg);
-                }
-            }
-        });
-    },
-    { deep: true },
-);
+// TODO: 实现消息监听和同步逻辑
 
 const containerStyle = computed(() => ({
     ...pageTransform.value,
@@ -454,10 +442,10 @@ const navbarTitle = computed(() => {
                 <z-paging
                     ref="pagingRef"
                     v-model="dataList"
-                    hide-empty-view
-                    :auto="false"
                     :auto-clean-list-when-reload="false"
                     :show-chat-loading-when-reload="true"
+                    :auto-hide-keyboard-when-chat="false"
+                    :auto-adjust-position-when-chat="false"
                     use-chat-record-mode
                     :bottom-bg-color="'var(--background-soft)'"
                     :fixed="false"
@@ -465,10 +453,10 @@ const navbarTitle = computed(() => {
                     class="h-full"
                     @query="queryList"
                 >
-                    <template :class="{ 'h-full': dataList.length === 0 }" #top>
+                    <template #empty>
                         <view
                             v-if="dataList.length === 0 && chatConfig?.welcomeInfo"
-                            class="flex h-full flex-col justify-center gap-0 px-6 py-8"
+                            class="flex h-full w-screen flex-col justify-center gap-0 px-6 py-8"
                         >
                             <view class="mb-4 flex flex-col gap-2">
                                 <text class="text-foreground text-md font-semibold">
@@ -503,7 +491,7 @@ const navbarTitle = computed(() => {
                         </view>
                     </template>
 
-                    <view class="pb-10">
+                    <view class="pb-10" v-if="dataList.length > 0">
                         <template v-for="(message, index) in dataList" :key="message.id || index">
                             <view style="transform: scaleY(-1); padding-bottom: 16px">
                                 <ChatsMessages

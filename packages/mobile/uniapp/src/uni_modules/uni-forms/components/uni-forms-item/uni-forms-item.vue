@@ -80,6 +80,10 @@ export default {
             type: [String, Boolean],
             default: "",
         },
+        customClass: {
+            type: String,
+            default: "",
+        },
         // 1.4.0 弃用，统一使用 form 的校验时机
         // validateTrigger: {
         // 	type: String,
@@ -429,6 +433,7 @@ export default {
             'is-direction-' + localLabelPos,
             border ? 'uni-forms-item--border' : '',
             border && isFirstBorder ? 'is-first-border' : '',
+            customClass,
         ]"
     >
         <slot name="label">

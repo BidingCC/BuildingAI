@@ -74,5 +74,47 @@
     "downloadFormatError": "ダウンロード形式エラー",
     "savePhotoFailed": "写真の保存に失敗しました",
     "saveVideoFailed": "動画の保存に失敗しました",
-    "unsupportedFileType": "サポートされていないファイルタイプ"
+    "unsupportedFileType": "サポートされていないファイルタイプ",
+    "chat": {
+        "messages": {
+            "me": "私",
+            "assistant": "アシスタント",
+            "unknown": "不明",
+            "sendFailed": "送信失敗",
+            "thinking": "考え中..."
+        },
+        "reasoning": {
+            "thinking": "考え中",
+            "completed": "完了",
+            "duration": "所要時間"
+        },
+        "knowledgeCall": {
+            "start": "開始",
+            "from": "から",
+            "call": "呼び出し",
+            "finished": "完了"
+        },
+        "toolCall": {
+            "start": "開始",
+            "calling": "呼び出し中",
+            "from": "から",
+            "call": "呼び出し",
+            "finished": "完了",
+            "duration": "所要時間",
+            "startCall": "呼び出し開始",
+            "finishedCall": "呼び出し完了"
+        }
+    },
+    "datasets": {
+        "retrieval": {
+            "vector": "ベクトル検索",
+            "fullText": "全文検索",
+            "hybrid": "ハイブリッド検索"
+        }
+    },
+    "reference": {
+        "request": "リクエスト",
+        "response": "レスポンス",
+        "callDetails": "呼び出し詳細"
+    }
 }

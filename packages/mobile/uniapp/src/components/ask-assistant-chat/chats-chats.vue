@@ -18,6 +18,7 @@ const emit = defineEmits<{
     select: [item: AiConversation];
 }>();
 
+const userStore = useUserStore();
 const pagingRefs = ref<ZPagingRef>();
 const dataList = ref<AiConversation[]>([]);
 
@@ -73,6 +74,13 @@ defineExpose({
             v-model="dataList"
             @query="queryList"
         >
+            <template #empty>
+                <view class="flex h-full flex-col items-center justify-center">
+                    <text class="text-foreground text-sm">
+                        {{ userStore.isLogin ? "暂无历史记录" : "请先登录" }}
+                    </text>
+                </view>
+            </template>
             <view class="flex flex-col gap-2 p-2">
                 <template v-for="(item, index) in dataList" :key="index">
                     <view

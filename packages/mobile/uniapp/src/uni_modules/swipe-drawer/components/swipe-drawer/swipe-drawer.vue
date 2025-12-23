@@ -94,10 +94,10 @@ export default {
                 class="swipe-drawer__content-body"
                 @touchstart.passive="wxs.handleTouchstart"
                 <!-- #ifdef MP-WEIXIN -->
-                :catchtouchmove="wxs.handleTouchmove"
+                @touchmove.capture="wxs.handleTouchmove"
                 <!-- #endif -->
                 <!-- #ifndef MP-WEIXIN -->
-                @touchmove.passive="wxs.handleTouchmove"
+                @touchmove.capture="wxs.handleTouchmove"
                 <!-- #endif -->
                 @touchend="wxs.handleTouchend"
                 @touchcancel="wxs.handleTouchend"
