@@ -21,6 +21,7 @@ declare global {
   const defineAsyncComponent: typeof import('vue')['defineAsyncComponent']
   const defineComponent: typeof import('vue')['defineComponent']
   const effectScope: typeof import('vue')['effectScope']
+  const formatDuration: typeof import('../utils/helper')['formatDuration']
   const generateUuid: typeof import('../hooks/use-chat')['generateUuid']
   const getBaseUrl: typeof import('../hooks/use-request')['getBaseUrl']
   const getCurrentInstance: typeof import('vue')['getCurrentInstance']
@@ -220,6 +221,7 @@ declare module 'vue' {
     readonly defineAsyncComponent: UnwrapRef<typeof import('vue')['defineAsyncComponent']>
     readonly defineComponent: UnwrapRef<typeof import('vue')['defineComponent']>
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
+    readonly formatDuration: UnwrapRef<typeof import('../utils/helper')['formatDuration']>
     readonly generateUuid: UnwrapRef<typeof import('../hooks/use-chat')['generateUuid']>
     readonly getBaseUrl: UnwrapRef<typeof import('../hooks/use-request')['getBaseUrl']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>

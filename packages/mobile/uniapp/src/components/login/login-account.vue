@@ -45,7 +45,7 @@ const submit = async () => {
 <template>
     <view w="full">
         <uni-forms ref="customFormRefs" :rules="customRules" :modelValue="formData">
-            <uni-forms-item label="" :labelWidth="0" name="username">
+            <uni-forms-item label="" :labelWidth="0" name="username" customClass="mb-3!">
                 <view class="text-accent-foreground text-sm">
                     {{ t("login.form.account") }}
                     <text text="error">*</text>
@@ -56,7 +56,7 @@ const submit = async () => {
                     :placeholder="t('login.form.accountPlaceholder')"
                 />
             </uni-forms-item>
-            <uni-forms-item label="" :labelWidth="0" name="password">
+            <uni-forms-item label="" :labelWidth="0" name="password" customClass="mb-0!">
                 <view class="text-accent-foreground text-sm">
                     {{ t("login.form.password") }}
                     <text text="error">*</text>

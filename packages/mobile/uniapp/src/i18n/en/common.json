@@ -74,6 +74,48 @@
     "downloadFormatError": "Download format error",
     "savePhotoFailed": "Failed to save photo",
     "saveVideoFailed": "Failed to save video",
-    "unsupportedFileType": "Unsupported file type"
+    "unsupportedFileType": "Unsupported file type",
+    "chat": {
+        "messages": {
+            "me": "Me",
+            "assistant": "Assistant",
+            "unknown": "Unknown",
+            "sendFailed": "Send failed",
+            "thinking": "Thinking..."
+        },
+        "reasoning": {
+            "thinking": "Thinking",
+            "completed": "Completed",
+            "duration": "Duration"
+        },
+        "knowledgeCall": {
+            "start": "Start",
+            "from": "from",
+            "call": "call",
+            "finished": "finished"
+        },
+        "toolCall": {
+            "start": "Start",
+            "calling": "Calling",
+            "from": "from",
+            "call": "call",
+            "finished": "finished",
+            "duration": "Duration",
+            "startCall": "Start call",
+            "finishedCall": "Call finished"
+        }
+    },
+    "datasets": {
+        "retrieval": {
+            "vector": "Vector retrieval",
+            "fullText": "Full text retrieval",
+            "hybrid": "Hybrid retrieval"
+        }
+    },
+    "reference": {
+        "request": "Request",
+        "response": "Response",
+        "callDetails": "Call details"
+    }
 }
 

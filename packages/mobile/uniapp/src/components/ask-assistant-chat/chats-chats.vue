@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { userInfo } from "os";
-
 import { type AiConversation, apiGetAiConversationList } from "@/service/ai-conversation";
 
 const props = withDefaults(
