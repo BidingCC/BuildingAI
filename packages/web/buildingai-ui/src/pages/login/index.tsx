@@ -1,8 +1,15 @@
+import { useAuthStore } from "@buildingai/stores";
 import { GalleryVerticalEnd } from "lucide-react";
+import { Navigate } from "react-router-dom";
 
-import { LoginForm } from "./_components/LoginForm";
+import { LoginForm } from "./_components/login-form";
 
 const LoginPage = () => {
+  const { authActions } = useAuthStore();
+
+  if (authActions.isLogin()) {
+    return <Navigate to="/" replace />;
+  }
   return (
     <div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
       <div className="flex w-full max-w-sm flex-col gap-6">

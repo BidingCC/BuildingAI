@@ -265,7 +265,7 @@ export class AuthService extends BaseService<User> {
             lastLoginAt: new Date(),
         });
 
-        const { password: _pwd, ...userInfo } = user;
+        const { password: _pwd, openid: _openid, deletedAt: _deletedAt, ...userInfo } = user;
 
         return {
             token: tokenResult.token,

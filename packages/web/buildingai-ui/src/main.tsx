@@ -5,15 +5,30 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
 
-import AuthGuard from "./components/AuthGuard";
-import { routes } from "./router";
+import { createRoutes, generateRoutes, type MenuRoute } from "./router";
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <ThemeProvider>
-      <AuthGuard>
-        <RouterProvider router={routes} />
-      </AuthGuard>
-    </ThemeProvider>
-  </StrictMode>,
-);
+/**
+ * Fetch menu routes from API and bootstrap the application.
+ */
+async function bootstrap() {
+  // TODO: Replace with actual API call
+  const menuRoutes: MenuRoute[] = await Promise.resolve([
+    {
+      path: "dashboard",
+      component: "/console/dashboard/index.tsx",
+    },
+  ]);
+
+  const dynamicRoutes = generateRoutes(menuRoutes);
+  const router = createRoutes(dynamicRoutes);
+
+  createRoot(document.getElementById("root")!).render(
+    <StrictMode>
+      <ThemeProvider>
+        <RouterProvider router={router} />
+      </ThemeProvider>
+    </StrictMode>,
+  );
+}
+
+bootstrap();

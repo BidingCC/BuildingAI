@@ -60,7 +60,7 @@ export class McpServerHttp {
         try {
             const response = await this.client.listTools();
 
-            this.tools = response.tools.map((tool) => ({
+            this.tools = response.tools.map((tool: any) => ({
                 name: tool.name,
                 description: tool.description || "",
                 inputSchema: tool.inputSchema,

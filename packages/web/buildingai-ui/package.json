@@ -11,8 +11,13 @@
         "preview": "vite preview"
     },
     "dependencies": {
-        "@hookform/resolvers": "^5.2.2",
         "@buildingai/ui": "workspace:*",
+        "@buildingai/http": "workspace:*",
+        "@buildingai/constants": "workspace:*",
+        "@buildingai/web-types": "workspace:*",
+        "@buildingai/services": "workspace:*",
+        "@buildingai/stores": "workspace:*",
+        "@hookform/resolvers": "^5.2.2",
         "date-fns": "^4.1.0",
         "lucide-react": "^0.561.0",
         "react": "^19.2.0",

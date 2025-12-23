@@ -3,6 +3,7 @@
     "ui": "tui",
     "concurrency": "20",
     "globalEnv": [
+        "DEV",
         "NODE_ENV",
         "APP_NAME",
         "SERVER_PORT",

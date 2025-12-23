@@ -42,10 +42,10 @@ export function NavMain({
             {item.items?.length ? (
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
-                  <SidebarMenuButton tooltip={item.title} className="group">
+                  <SidebarMenuButton tooltip={item.title}>
                     <item.icon />
                     <span>{item.title}</span>
-                    <SidebarMenuAction asChild className="group-data-[state=open]:rotate-90">
+                    <SidebarMenuAction asChild className="[[data-state=open]_>_&]:rotate-90">
                       <div>
                         <ChevronRight />
                         <span className="sr-only">Toggle</span>
