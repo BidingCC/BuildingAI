@@ -454,10 +454,10 @@ const navbarTitle = computed(() => {
                 <z-paging
                     ref="pagingRef"
                     v-model="dataList"
-                    hide-empty-view
-                    :auto="false"
                     :auto-clean-list-when-reload="false"
                     :show-chat-loading-when-reload="true"
+                    :auto-hide-keyboard-when-chat="false"
+                    :auto-adjust-position-when-chat="false"
                     use-chat-record-mode
                     :bottom-bg-color="'var(--background-soft)'"
                     :fixed="false"
@@ -465,10 +465,10 @@ const navbarTitle = computed(() => {
                     class="h-full"
                     @query="queryList"
                 >
-                    <template :class="{ 'h-full': dataList.length === 0 }" #top>
+                    <template #empty>
                         <view
                             v-if="dataList.length === 0 && chatConfig?.welcomeInfo"
-                            class="flex h-full flex-col justify-center gap-0 px-6 py-8"
+                            class="flex h-full w-screen flex-col justify-center gap-0 px-6 py-8"
                         >
                             <view class="mb-4 flex flex-col gap-2">
                                 <text class="text-foreground text-md font-semibold">
@@ -503,7 +503,7 @@ const navbarTitle = computed(() => {
                         </view>
                     </template>
 
-                    <view class="pb-10">
+                    <view class="pb-10" v-if="dataList.length > 0">
                         <template v-for="(message, index) in dataList" :key="message.id || index">
                             <view style="transform: scaleY(-1); padding-bottom: 16px">
                                 <ChatsMessages

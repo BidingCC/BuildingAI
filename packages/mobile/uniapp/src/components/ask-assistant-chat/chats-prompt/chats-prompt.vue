@@ -96,17 +96,15 @@ function handleSubmit() {
     >
         <view p="2">
             <textarea
+                :adjust-position="false"
                 v-model="inputValue"
                 placeholder="给 小助手 发送消息"
                 focus
                 auto-height
-                class="textarea-input"
-                w="full"
+                :cursor-spacing="-1"
+                class="textarea-input w-full"
                 confirm-type="send"
                 :maxlength="-1"
-                :adjust-position="false"
-                disable-default-padding
-                adjust-keyboard-to="bottom"
                 :show-confirm-bar="false"
                 @keyboardheightchange="handleKeyboardHeightChange"
                 @blur="handleKeyboardHide"
@@ -136,6 +134,7 @@ function handleSubmit() {
         0 0 8px 0 rgba(145 158 171 / 0.2),
         0 0 24px -4px rgba(145 158 171 / 0.12);
     user-select: none;
+    transition: padding-bottom 0.3s;
 }
 
 .textarea-input {
