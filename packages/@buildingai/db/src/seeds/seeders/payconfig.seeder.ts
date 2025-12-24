@@ -43,7 +43,20 @@ export class PayConfigSeeder extends BaseSeeder {
                     payVersion: PayVersion.V3,
                     merchantType: Merchant.ORDINARY,
                 },
+                {
+                    name: "Alipay",
+                    payType: PayConfigPayType.ALIPAY,
+                    isEnable: BooleanNumber.YES,
+                    isDefault: BooleanNumber.NO,
+                    logo: "/static/images/wxpay.png",
+                    sort: 1,
+                    payVersion: PayVersion.V3,
+                    merchantType: Merchant.ORDINARY,
+                },
             ]);
+
+            const count = await repository.count();
+            this.logInfo(`实际插入后的记录数: ${count}`);
 
             this.logSuccess("Payment configuration initialized successfully");
         } catch (error) {
