@@ -85,9 +85,6 @@ defineExpose({
                 <template v-for="(item, index) in dataList" :key="index">
                     <view
                         class="flex w-full items-center gap-2 rounded-lg pr-2 transition-colors"
-                        :class="{
-                            'cursor-pointer': !props.isEditMode,
-                        }"
                         @click="handleSelect(item)"
                     >
                         <view

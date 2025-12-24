@@ -154,5 +154,14 @@
         "request": "请求",
         "response": "响应",
         "callDetails": "调用详情"
-    }
+    },
+    "unit": {
+        "general": {
+            "item": "个"
+        }
+    },
+    "ai": {
+        "model": "模型"
+    },
+    "free": "免费"
 }

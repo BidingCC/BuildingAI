@@ -208,7 +208,7 @@ defineExpose({
         height="90vh"
         :close-btn="false"
         :full-screen="false"
-        bg-color="var(--background-soft)"
+        bg-color="var(--background)"
         @close="close"
         @open="emit('open')"
         @slide-progress="emit('slide-progress', $event)"
@@ -226,9 +226,9 @@ defineExpose({
                     placeholder="搜索模型..."
                     :styles="{
                         color: 'var(--foreground)',
-                        backgroundColor: 'transparent',
+                        backgroundColor: 'var(--background-soft)',
                         disableColor: 'var(--border)',
-                        borderColor: 'var(--background)',
+                        borderColor: 'var(--background-soft)',
                     }"
                     type="text"
                 />
@@ -252,13 +252,19 @@ defineExpose({
                     <view
                         v-for="provider in filteredProviders"
                         :key="provider.id"
-                        class="bg-background mb-3 overflow-hidden rounded-lg"
+                        class="bg-background hover:bg-background-soft mb-1 overflow-hidden rounded-lg"
                     >
                         <view
-                            class="flex cursor-pointer items-center justify-between px-2.5 py-2"
+                            class="flex cursor-pointer items-center justify-between py-2 pr-2 pl-2"
                             @click="toggleProvider(provider.id)"
                         >
-                            <view class="flex items-center gap-3">
+                            <view class="flex items-center gap-2">
+                                <text
+                                    :class="[
+                                        'i-lucide-chevron-right text-muted-foreground transition-transform',
+                                        expandedProviders[provider.id] ? 'rotate-90' : '',
+                                    ]"
+                                />
                                 <image
                                     v-if="provider.iconUrl"
                                     :src="provider.iconUrl"
@@ -271,36 +277,29 @@ defineExpose({
                                 >
                                     <text class="i-lucide-brain text-muted-foreground text-sm" />
                                 </view>
-                                <text class="text-foreground text-sm font-medium">
+                                <text class="text-foreground text-sm">
                                     {{ provider.name }}
                                 </text>
                             </view>
-                            <view class="flex items-center gap-1">
-                                <text class="text-muted-foreground text-xs">
-                                    {{ provider.models?.length || 0 }} 个模型
-                                </text>
-                                <text
-                                    :class="[
-                                        'i-lucide-chevron-down text-muted-foreground transition-transform',
-                                        expandedProviders[provider.id] ? 'rotate-180' : '',
-                                    ]"
-                                />
-                            </view>
+
+                            <text
+                                class="text-foreground bg-muted rounded-sm px-2 py-0.5 text-[12px]"
+                            >
+                                {{ provider.models?.length || 0 }}
+                                {{ $t("common.unit.general.item") }}{{ $t("common.ai.model") }}
+                            </text>
                         </view>
 
-                        <view
-                            v-if="expandedProviders[provider.id]"
-                            class="border-muted/30 border-t"
-                        >
+                        <view v-if="expandedProviders[provider.id]" class="pl-6">
                             <view
                                 v-for="(model, index) in provider.models"
                                 :key="model.id"
                                 :class="[
-                                    'active:bg-muted/30 flex cursor-pointer items-center justify-between px-4 py-1 transition-colors',
-                                    selectedModelId === model.id ? 'bg-primary/5' : '',
+                                    'active:bg-muted/30 flex cursor-pointer items-center justify-between px-2 py-2 transition-colors',
                                     index !== (provider.models?.length || 0) - 1
                                         ? 'border-muted/20 border-b'
                                         : '',
+                                    selectedModelId === model.id ? 'bg-primary-50 rounded-lg' : '',
                                 ]"
                                 @click="selectModel(model)"
                             >
@@ -308,7 +307,7 @@ defineExpose({
                                     <text
                                         :class="[
                                             selectedModelId === model.id
-                                                ? 'text-white'
+                                                ? 'text-primary'
                                                 : 'text-muted-foreground',
                                         ]"
                                         class="font-mono text-xs"
@@ -322,16 +321,29 @@ defineExpose({
                                         {{ model.description }}
                                     </text>
                                 </view>
-                                <view
-                                    v-if="selectedModelId === model.id"
-                                    class="ml-3 flex-shrink-0"
+
+                                <text
+                                    v-if="model.billingRule.power === 0"
+                                    class="text-foreground bg-muted rounded-sm px-2 py-0.5 text-[12px]"
                                 >
-                                    <view
-                                        class="bg-primary flex h-5 w-5 items-center justify-center rounded-full"
+                                    {{ $t("common.free") }}
+                                </text>
+                                <text
+                                    v-else
+                                    class="text-inverted flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium"
+                                    :class="
+                                        selectedModelId === model.id
+                                            ? 'bg-primary dark:bg-primary-800'
+                                            : 'bg-primary/10 text-primary'
+                                    "
+                                >
+                                    <text
+                                        >{{ model.billingRule.power
+                                        }}{{ $t("common.unit.points") }}</text
                                     >
-                                        <text class="i-lucide-check text-background text-xs" />
-                                    </view>
-                                </view>
+                                    <text>/</text>
+                                    <text>{{ model.billingRule.tokens }}Tokens</text>
+                                </text>
                             </view>
                         </view>
                     </view>
