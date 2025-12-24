@@ -21,6 +21,7 @@ export default defineConfig({
     theme: {
         colors: {
             background: "var(--background)",
+            "background-soft": "var(--background-soft)",
             foreground: "var(--foreground)",
             scrollbar: "var(--scrollbar-color)",
             "scrollbar-hover": "var(--scrollbar-color-hover)",

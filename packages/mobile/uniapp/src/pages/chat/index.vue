@@ -484,6 +484,10 @@ const navbarTitle = computed(() => {
                 :need-auth="true"
                 :attachment-size-limit="chatConfig?.attachmentSizeLimit"
                 :selected-model="selectedModel"
+                :class="{
+                    'bg-background-soft': messages.length === 0,
+                    'bg-background': messages.length > 0,
+                }"
                 @submit="handleSubmitMessage"
                 @stop="stop"
             >
