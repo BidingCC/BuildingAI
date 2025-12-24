@@ -135,6 +135,7 @@ declare global {
   const useCopy: typeof import('../hooks/use-copy')['useCopy']
   const useCssModule: typeof import('vue')['useCssModule']
   const useCssVars: typeof import('vue')['useCssVars']
+  const useDebounce: typeof import('../hooks/use-debounce')['useDebounce']
   const useDownloadFile: typeof import('../hooks/use-request')['useDownloadFile']
   const useGlobalData: typeof import('@uni-helper/uni-use')['useGlobalData']
   const useHalfPopupInteraction: typeof import('../hooks/use-half-popup-interaction')['useHalfPopupInteraction']
@@ -336,6 +337,7 @@ declare module 'vue' {
     readonly useCopy: UnwrapRef<typeof import('../hooks/use-copy')['useCopy']>
     readonly useCssModule: UnwrapRef<typeof import('vue')['useCssModule']>
     readonly useCssVars: UnwrapRef<typeof import('vue')['useCssVars']>
+    readonly useDebounce: UnwrapRef<typeof import('../hooks/use-debounce')['useDebounce']>
     readonly useDownloadFile: UnwrapRef<typeof import('../hooks/use-request')['useDownloadFile']>
     readonly useGlobalData: UnwrapRef<typeof import('@uni-helper/uni-use')['useGlobalData']>
     readonly useHalfPopupInteraction: UnwrapRef<typeof import('../hooks/use-half-popup-interaction')['useHalfPopupInteraction']>

@@ -1,170 +1,214 @@
 <script setup lang="ts">
-import type { LoginSettings } from "@buildingai/service/consoleapi/login-settings";
-import type { WebsiteConfig } from "@buildingai/service/consoleapi/website";
+import type { Agent } from "@buildingai/service/consoleapi/ai-agent";
+import type { QueryPublicAgentParams } from "@buildingai/service/webapi/ai-agent";
 
-import {
-    AnalyseActionType,
-    apiGetLoginSettings,
-    apiGetSiteConfig,
-    apiRecordAnalyse,
-} from "@/service/common";
+import BdActionSheet from "@/components/bd-action-sheet.vue?async";
+import BdNavbar from "@/components/bd-navbar.vue?async";
+import { useDebounce } from "@/hooks/use-debounce";
+import { apiGetPublicAgents } from "@/service/agent";
 
 const { t } = useI18n();
-const router = useRouter();
+
+const agentLists = shallowRef<Agent[]>([]);
+const pagingRef = shallowRef<ZPagingRef>();
+
+// 搜索关键词
+const searchKeyword = shallowRef("");
+
+// 排序方式
+const sortBy = shallowRef<"latest" | "popular">("latest");
+const sortOptions = [
+    { label: "最新发布", value: "latest" as const },
+    { label: "最受欢迎", value: "popular" as const },
+];
+
+// 动作面板引用
+const sortActionSheetRef = shallowRef<InstanceType<typeof BdActionSheet>>();
+
+// 查询列表
+const queryList = (pageNo: number, pageSize: number) => {
+    const params: QueryPublicAgentParams = {
+        page: pageNo,
+        pageSize: pageSize,
+        keyword: "",
+        sortBy: sortBy.value,
+    };
+
+    // 如果有搜索关键词，添加到参数中
+    if (searchKeyword.value.trim()) {
+        params.keyword = searchKeyword.value.trim();
+    }
+
+    apiGetPublicAgents(params)
+        .then((res) => {
+            pagingRef.value?.complete(res.items);
+        })
+        .catch((error) => {
+            console.error("Failed to load agents:", error);
+            pagingRef.value?.complete(false);
+        });
+};
+
+// 使用防抖 Hook 处理搜索
+const { debouncedFn: debouncedSearch } = useDebounce(() => {
+    pagingRef.value?.reload();
+}, 500);
+
+// 搜索处理
+const handleSearch = (value: string) => {
+    searchKeyword.value = value;
+    debouncedSearch();
+};
+
+// 清除搜索
+const handleClearSearch = () => {
+    searchKeyword.value = "";
+    pagingRef.value?.reload();
+};
+
+// 打开排序选择面板
+const handleOpenSortMenu = () => {
+    sortActionSheetRef.value?.open();
+};
+
+// 切换排序方式
+const handleSortChange = (value: "latest" | "popular") => {
+    sortBy.value = value;
+    pagingRef.value?.reload();
+};
+
+// 获取当前排序选项的标签
+const currentSortLabel = computed(() => {
+    return sortOptions.find((opt) => opt.value === sortBy.value)?.label || "最新发布";
+});
 
 definePage({
     style: {
         navigationBarTitle: "pages.apps",
-        auth: false,
+        hiddenHeader: true,
     },
 });
-
-// 响应式数据
-const siteConfig = ref<WebsiteConfig | null>(null);
-const loginSettings = ref<LoginSettings | null>(null);
-const loading = ref(false);
-const error = ref<string | null>(null);
-
-// 获取网站配置
-const fetchSiteConfig = async () => {
-    try {
-        loading.value = true;
-        error.value = null;
-        const config = await apiGetSiteConfig();
-        siteConfig.value = config;
-        useToast().success("获取网站配置成功");
-    } catch (err: unknown) {
-        const errorMessage = err instanceof Error ? err.message : "获取网站配置失败";
-        error.value = errorMessage;
-        console.error("获取网站配置失败:", err);
-    } finally {
-        loading.value = false;
-    }
-};
-
-// 获取登录设置
-const fetchLoginSettings = async () => {
-    try {
-        loading.value = true;
-        error.value = null;
-        const settings = await apiGetLoginSettings();
-        loginSettings.value = settings;
-        useToast().success("获取登录设置成功");
-    } catch (err: unknown) {
-        const errorMessage = err instanceof Error ? err.message : "获取登录设置失败";
-        error.value = errorMessage;
-        console.error("获取登录设置失败:", err);
-    } finally {
-        loading.value = false;
-    }
-};
-
-// 记录行为分析
-const recordAnalyse = async () => {
-    try {
-        loading.value = true;
-        error.value = null;
-        const result = await apiRecordAnalyse({
-            actionType: AnalyseActionType.PAGE_VISIT,
-            source: "/pages/apps/index",
-            extraData: {
-                timestamp: new Date().toISOString(),
-            },
-        });
-        useToast().success("记录行为分析成功");
-        console.log("行为分析记录结果:", result);
-    } catch (err: unknown) {
-        const errorMessage = err instanceof Error ? err.message : "记录行为分析失败";
-        error.value = errorMessage;
-        console.error("记录行为分析失败:", err);
-    } finally {
-        loading.value = false;
-    }
-};
-
-const handleGoToSettings = () => {
-    uni.navigateTo({
-        url: "/pages/user/settings",
-    });
-};
 </script>
 
 <template>
-    <view class="p-4">
-        <view class="mb-4 text-center text-2xl font-bold dark:text-white">
-            {{ t("pages.apps") }}
+    <BdNavbar :title="t('pages.apps')" :show-back="false" :show-home="false" filter="blur(4px)">
+        <!-- <template #left>
+            <view bg="white" py="2" px="4" rounded="5" flex gap="1" items-center z="0">
+                <view i-lucide-search size="4"></view>
+                <view text="sm muted-foreground">搜索智能体</view>
+            </view>
+        </template> -->
+    </BdNavbar>
+    <view class="flex h-[calc(100vh-112px)] flex-col overflow-hidden px-4">
+        <view bg="white" py="2" px="4" rounded="5" flex gap="1" items-center z="0">
+            <view i-lucide-search size="4"></view>
+            <input
+                :value="searchKeyword"
+                type="text"
+                placeholder="搜索智能体"
+                font-size="sm"
+                @input="(e) => handleSearch((e.target as HTMLInputElement).value)"
+            />
+            <view
+                v-if="searchKeyword"
+                i-lucide-x
+                size="3"
+                class="cursor-pointer"
+                text="muted-foreground"
+                @click="handleClearSearch"
+            ></view>
+        </view>
+        <view flex justify-end gap="2" font-size="sm" text="muted-foreground" my="2">
+            <view
+                text="primary"
+                flex
+                items-center
+                gap="1"
+                class="cursor-pointer"
+                @click="handleOpenSortMenu"
+            >
+                {{ currentSortLabel }}
+                <view i-lucide-chevron-down size="3"></view>
+            </view>
         </view>
 
-        <!-- 错误提示 -->
-        <view
-            v-if="error"
-            class="mb-4 rounded-lg bg-red-100 p-3 text-sm text-red-600 dark:bg-red-900 dark:text-red-300"
+        <!-- 排序选择动作面板 -->
+        <bd-action-sheet
+            ref="sortActionSheetRef"
+            :actions="[
+                {
+                    title: '最新发布',
+                    type: sortBy === 'latest' ? 'primary' : 'default',
+                    click: () => handleSortChange('latest'),
+                },
+                {
+                    title: '最受欢迎',
+                    type: sortBy === 'popular' ? 'primary' : 'default',
+                    click: () => handleSortChange('popular'),
+                },
+            ]"
+        />
+        <z-paging
+            ref="pagingRef"
+            v-model="agentLists"
+            @query="queryList"
+            :show-scrollbar="false"
+            :fixed="false"
+            class="flex-1"
         >
-            {{ error }}
-        </view>
-
-        <!-- 操作按钮 -->
-        <view class="mb-4 space-y-2">
-            <button
-                class="w-full rounded-lg bg-blue-500 px-4 py-2 text-white disabled:opacity-50"
-                :disabled="loading"
-                @click="fetchSiteConfig"
+            <view
+                border="~ rounded-lg"
+                p="3"
+                bg="background"
+                shadow="sm"
+                mb="2"
+                v-for="item in agentLists"
+                :key="item.id"
             >
-                {{ loading ? "加载中..." : "获取网站配置" }}
-            </button>
-
-            <button
-                class="w-full rounded-lg bg-green-500 px-4 py-2 text-white disabled:opacity-50"
-                :disabled="loading"
-                @click="fetchLoginSettings"
-            >
-                {{ loading ? "加载中..." : "获取登录设置" }}
-            </button>
-
-            <button
-                class="w-full rounded-lg bg-purple-500 px-4 py-2 text-white disabled:opacity-50"
-                :disabled="loading"
-                @click="recordAnalyse"
-            >
-                {{ loading ? "加载中..." : "记录行为分析" }}
-            </button>
-
-            <button
-                class="w-full rounded-lg bg-blue-500 px-4 py-2 text-white disabled:opacity-50"
-                :disabled="loading"
-                @click="handleGoToSettings"
-            >
-                {{ loading ? "加载中..." : "去个人设置1" }}
-            </button>
-        </view>
-
-        <!-- 网站配置显示 -->
-        <view v-if="siteConfig" class="mb-4 rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
-            <view class="mb-2 text-lg font-bold dark:text-white">网站配置</view>
-            <view class="space-y-1 text-sm text-gray-600 dark:text-gray-300">
-                <view>网站名称: {{ siteConfig.webinfo?.name }}</view>
-                <view>网站描述: {{ siteConfig.webinfo?.description || "无" }}</view>
-                <view>版本: {{ siteConfig.webinfo?.version || "无" }}</view>
-                <view>版权: {{ siteConfig.copyright?.displayName || "无" }}</view>
-            </view>
-        </view>
-
-        <!-- 登录设置显示 -->
-        <view v-if="loginSettings" class="mb-4 rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
-            <view class="mb-2 text-lg font-bold dark:text-white">登录设置</view>
-            <view class="space-y-1 text-sm text-gray-600 dark:text-gray-300">
+                <view flex items-center gap="2">
+                    <image :src="item.avatar" size="10" rounded="md" />
+                    <view>{{ item.name }}</view>
+                    <image :src="item.provider?.iconUrl" size="4" ml="auto" rounded="md" />
+                </view>
                 <view
-                    >允许的登录方式:
-                    {{ loginSettings.allowedLoginMethods?.join(", ") || "无" }}</view
+                    text="sm muted-foreground"
+                    mt="3"
+                    border-t-solid
+                    border-t-1
+                    border-t-gray-200
+                    pt="3"
                 >
-                <view
-                    >允许的注册方式:
-                    {{ loginSettings.allowedRegisterMethods?.join(", ") || "无" }}</view
-                >
-                <view>默认登录方式: {{ loginSettings.defaultLoginMethod }}</view>
-                <view>允许多设备登录: {{ loginSettings.allowMultipleLogin ? "是" : "否" }}</view>
-                <view>显示政策协议: {{ loginSettings.showPolicyAgreement ? "是" : "否" }}</view>
+                    {{ item.description }}
+                </view>
+                <view flex justify-between items-center text="xs muted-foreground" mt="2">
+                    <view flex items-center gap="1">
+                        <view i-lucide-message-square-text size="3"></view
+                        >{{ item.conversationCount }} <view i-lucide-users size="3"></view
+                        >{{ item.userCount }}
+                    </view>
+                    <view mt="2">编辑于2025-12-22</view>
+                </view>
             </view>
-        </view>
+        </z-paging>
     </view>
 </template>
+<style>
+/* #ifndef H5 */
+page {
+    background-image:
+        url("@/static/images/background.png"),
+        linear-gradient(
+            to bottom,
+            var(--primary-300) 0%,
+            var(--primary-200) 10%,
+            var(--primary-50) 25%,
+            var(--background-soft) 30%,
+            var(--background-soft) 100%
+        );
+    background-size: 100%, cover;
+    background-position: top, top;
+    background-repeat: no-repeat, no-repeat;
+    z-index: 0;
+}
+/* #endif */
+</style>
