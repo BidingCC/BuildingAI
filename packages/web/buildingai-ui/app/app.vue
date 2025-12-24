@@ -3,6 +3,7 @@ import { uiI18nMap } from "@buildingai/i18n-config";
 import { AnalyseActionType, apiRecordAnalyse } from "@buildingai/service/common";
 import * as uiLocale from "@nuxt/ui/locale";
 import colors from "tailwindcss/colors";
+import { Analytics } from "@vercel/analytics/nuxt";
 
 const { locale } = useI18n();
 const appConfig = useAppConfig();
@@ -90,6 +91,8 @@ recordPageVisit(route.path);
         <NuxtLoadingIndicator color="var(--ui-primary)" :height="2" />
         <!-- Route Change Announcer -->
         <NuxtRouteAnnouncer />
+        <!-- Vercel Web Analytics -->
+        <Analytics />
         <!-- Page Layout -->
         <NuxtLayout>
             <NuxtPage />
