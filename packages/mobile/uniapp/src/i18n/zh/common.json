@@ -89,8 +89,16 @@
     "userNo": "用户编号",
     "message": {
         "copySuccess": "复制成功",
-        "downloadSuccess": "下载成功"
+        "downloadSuccess": "下载成功",
+        "uploadSuccess": "上传成功",
+        "uploadFailed": "上传失败",
+        "invalidUrl": "无效的URL",
+        "chooseFileFailed": "选择文件失败",
+        "fileNotFound": "文件未找到",
+        "urlAdded": "URL添加成功",
+        "unsupportedFileType": "不支持的文件类型"
     },
+    "upload": "上传",
     "expand": "展开",
     "collapse": "收起",
     "preview": "预览",
@@ -102,7 +110,13 @@
             "assistant": "助手",
             "unknown": "未知",
             "sendFailed": "发送失败",
-            "thinking": "思考中..."
+            "thinking": "思考中...",
+            "uploadAttachment": "上传附件",
+            "inputUrlPlaceholder": "输入文件URL",
+            "or": "或",
+            "chooseImage": "选择图片",
+            "chooseVideo": "选择视频",
+            "uploadFile": "上传文件"
         },
         "reasoning": {
             "thinking": "思考中",

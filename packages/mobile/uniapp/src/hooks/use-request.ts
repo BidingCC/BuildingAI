@@ -355,6 +355,7 @@ export const useUpload = <T = UploadResponse>(opts: {
                     fail(error.message);
                 }
             }
+            console.log("Upload success:", res);
         },
         fail: (err) => {
             console.error("Upload error:", err);

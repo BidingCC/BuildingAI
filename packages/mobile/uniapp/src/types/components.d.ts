@@ -11,6 +11,8 @@ declare module 'vue' {
     AskAssistantChatChatsChats: typeof import('./../components/ask-assistant-chat/chats-chats.vue')['default']
     AskAssistantChatChatsMessages: typeof import('./../components/ask-assistant-chat/chats-messages.vue')['default']
     AskAssistantChatChatsPromptChatsPrompt: typeof import('./../components/ask-assistant-chat/chats-prompt/chats-prompt.vue')['default']
+    AskAssistantChatChatsPromptPromptFilePreview: typeof import('./../components/ask-assistant-chat/chats-prompt/prompt-file-preview.vue')['default']
+    AskAssistantChatChatsPromptPromptFileUpload: typeof import('./../components/ask-assistant-chat/chats-prompt/prompt-file-upload.vue')['default']
     AskAssistantChatReferenceReferenceKnowledge: typeof import('./../components/ask-assistant-chat/reference/reference-knowledge.vue')['default']
     AskAssistantChatReferenceReferenceMcpToolCall: typeof import('./../components/ask-assistant-chat/reference/reference-mcp-tool-call.vue')['default']
     AskAssistantChatReferenceReferenceReasoning: typeof import('./../components/ask-assistant-chat/reference/reference-reasoning.vue')['default']

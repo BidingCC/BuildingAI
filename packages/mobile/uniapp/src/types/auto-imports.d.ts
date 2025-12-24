@@ -26,6 +26,8 @@ declare global {
   const getBaseUrl: typeof import('../hooks/use-request')['getBaseUrl']
   const getCurrentInstance: typeof import('vue')['getCurrentInstance']
   const getCurrentScope: typeof import('vue')['getCurrentScope']
+  const getFileExtensionFromName: typeof import('../utils/file')['getFileExtensionFromName']
+  const getMediaType: typeof import('../utils/file')['getMediaType']
   const getTerminal: typeof import('../utils/env')['getTerminal']
   const guessSerializerType: typeof import('@uni-helper/uni-use')['guessSerializerType']
   const h: typeof import('vue')['h']
@@ -35,10 +37,12 @@ declare global {
   const isAppHarmony: typeof import('../utils/env')['isAppHarmony']
   const isAppIOS: typeof import('../utils/env')['isAppIOS']
   const isAppPlus: typeof import('../utils/env')['isAppPlus']
+  const isAudioFile: typeof import('../utils/file')['isAudioFile']
   const isDark: typeof import('../hooks/use-dark')['isDark']
   const isDevMode: typeof import('../utils/env')['isDevMode']
   const isEmpty: typeof import('../utils/navigate')['isEmpty']
   const isH5: typeof import('../utils/env')['isH5']
+  const isImageFile: typeof import('../utils/file')['isImageFile']
   const isMiniProgram: typeof import('../utils/env')['isMiniProgram']
   const isMp: typeof import('../utils/env')['isMp']
   const isMpAlipay: typeof import('../utils/env')['isMpAlipay']
@@ -48,6 +52,7 @@ declare global {
   const isReactive: typeof import('vue')['isReactive']
   const isReadonly: typeof import('vue')['isReadonly']
   const isRef: typeof import('vue')['isRef']
+  const isVideoFile: typeof import('../utils/file')['isVideoFile']
   const isWeb: typeof import('../utils/env')['isWeb']
   const isWechatOa: typeof import('../utils/env')['isWechatOa']
   const markRaw: typeof import('vue')['markRaw']
@@ -228,6 +233,8 @@ declare module 'vue' {
     readonly getBaseUrl: UnwrapRef<typeof import('../hooks/use-request')['getBaseUrl']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
+    readonly getFileExtensionFromName: UnwrapRef<typeof import('../utils/file')['getFileExtensionFromName']>
+    readonly getMediaType: UnwrapRef<typeof import('../utils/file')['getMediaType']>
     readonly getTerminal: UnwrapRef<typeof import('../utils/env')['getTerminal']>
     readonly guessSerializerType: UnwrapRef<typeof import('@uni-helper/uni-use')['guessSerializerType']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
@@ -237,10 +244,12 @@ declare module 'vue' {
     readonly isAppHarmony: UnwrapRef<typeof import('../utils/env')['isAppHarmony']>
     readonly isAppIOS: UnwrapRef<typeof import('../utils/env')['isAppIOS']>
     readonly isAppPlus: UnwrapRef<typeof import('../utils/env')['isAppPlus']>
+    readonly isAudioFile: UnwrapRef<typeof import('../utils/file')['isAudioFile']>
     readonly isDark: UnwrapRef<typeof import('../hooks/use-dark')['isDark']>
     readonly isDevMode: UnwrapRef<typeof import('../utils/env')['isDevMode']>
     readonly isEmpty: UnwrapRef<typeof import('../utils/navigate')['isEmpty']>
     readonly isH5: UnwrapRef<typeof import('../utils/env')['isH5']>
+    readonly isImageFile: UnwrapRef<typeof import('../utils/file')['isImageFile']>
     readonly isMiniProgram: UnwrapRef<typeof import('../utils/env')['isMiniProgram']>
     readonly isMp: UnwrapRef<typeof import('../utils/env')['isMp']>
     readonly isMpAlipay: UnwrapRef<typeof import('../utils/env')['isMpAlipay']>
@@ -250,6 +259,7 @@ declare module 'vue' {
     readonly isReactive: UnwrapRef<typeof import('vue')['isReactive']>
     readonly isReadonly: UnwrapRef<typeof import('vue')['isReadonly']>
     readonly isRef: UnwrapRef<typeof import('vue')['isRef']>
+    readonly isVideoFile: UnwrapRef<typeof import('../utils/file')['isVideoFile']>
     readonly isWeb: UnwrapRef<typeof import('../utils/env')['isWeb']>
     readonly isWechatOa: UnwrapRef<typeof import('../utils/env')['isWechatOa']>
     readonly markRaw: UnwrapRef<typeof import('vue')['markRaw']>

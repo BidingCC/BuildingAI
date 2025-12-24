@@ -1,8 +1,4 @@
 export function useToast(message?: string, options?: Omit<UniApp.ShowToastOptions, "title">) {
-    if (typeof message !== "string") {
-        message = String(message);
-    }
-
     const _toast = (
         msg: string,
         icon: "success" | "loading" | "error" | "fail" | "none" | "exception",
@@ -18,7 +14,7 @@ export function useToast(message?: string, options?: Omit<UniApp.ShowToastOption
         });
     };
 
-    if (message) {
+    if (message && typeof message === "string") {
         _toast(message, options?.icon || "none", options);
     }
 

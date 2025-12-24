@@ -70,6 +70,45 @@ const getMessageTextContent = (content: AiMessage["content"]): string => {
     return "";
 };
 
+const getMessageImages = (content: AiMessage["content"]) => {
+    if (!Array.isArray(content)) return [];
+    return content
+        .filter((item) => item.type === "image_url" && item.image_url)
+        .map((item) => ({
+            url: item.image_url?.url || "",
+            detail: item.image_url?.detail,
+        }));
+};
+
+const getMessageVideos = (content: AiMessage["content"]) => {
+    if (!Array.isArray(content)) return [];
+    return content
+        .filter((item) => item.type === "video_url" && item.video_url)
+        .map((item) => ({
+            url: item.video_url?.url || "",
+        }));
+};
+
+const getMessageAudios = (content: AiMessage["content"]) => {
+    if (!Array.isArray(content)) return [];
+    return content
+        .filter((item) => item.type === "input_audio" && item.input_audio)
+        .map((item) => ({
+            url: item.input_audio?.data || "",
+            format: item.input_audio?.format || "mp3",
+        }));
+};
+
+const getMessageFiles = (content: AiMessage["content"]) => {
+    if (!Array.isArray(content)) return [];
+    return content
+        .filter((item) => item.type === "file_url" && item.url && item.name)
+        .map((item) => ({
+            name: item.name || "Unknown file",
+            url: item.url || "",
+        }));
+};
+
 const getErrorMessage = (error: Error | undefined, message: AiMessage): string => {
     if (!error)
         return (
@@ -95,6 +134,19 @@ const allMessages = computed(() => [...props.messages]);
 
 const shouldReasoningDefaultOpen = (message: AiMessage) =>
     !!(message.metadata?.reasoning && !message.metadata.reasoning.endTime);
+
+const handleFileClick = (
+    file: { name: string; url: string; mediaType?: string },
+    message: AiMessage,
+) => {
+    if (file.mediaType === "image") {
+        const imageUrls = getMessageImages(message.content).map((img) => img.url);
+        uni.previewImage({
+            urls: imageUrls,
+            current: file.url,
+        });
+    }
+};
 </script>
 
 <template>
@@ -139,6 +191,115 @@ const shouldReasoningDefaultOpen = (message: AiMessage) =>
                 class="flex min-w-0 flex-1 flex-col gap-0"
                 :class="message.role === 'user' ? 'items-end' : 'items-start'"
             >
+                <!-- File preview for user messages -->
+                <view
+                    v-if="
+                        message.role === 'user' &&
+                        (getMessageFiles(message.content).length > 0 ||
+                            getMessageImages(message.content).length > 0 ||
+                            getMessageVideos(message.content).length > 0 ||
+                            getMessageAudios(message.content).length > 0)
+                    "
+                    class="mb-2 flex flex-wrap justify-end"
+                    style="gap: 8px; max-width: 70%"
+                >
+                    <view
+                        v-for="(file, fIndex) in [
+                            ...getMessageFiles(message.content).map((f) => ({
+                                ...f,
+                                mediaType: 'file' as const,
+                            })),
+                            ...getMessageImages(message.content).map((img) => ({
+                                name: img.url.split('/').pop() || 'image',
+                                url: img.url,
+                                mediaType: 'image' as const,
+                            })),
+                            ...getMessageVideos(message.content).map((video) => ({
+                                name: video.url.split('/').pop() || 'video',
+                                url: video.url,
+                                mediaType: 'video' as const,
+                            })),
+                            ...getMessageAudios(message.content).map((audio) => ({
+                                name: audio.url.split('/').pop() || `audio.${audio.format}`,
+                                url: audio.url,
+                                mediaType: 'audio' as const,
+                            })),
+                        ]"
+                        :key="fIndex"
+                        class="relative"
+                    >
+                        <!-- Image preview -->
+                        <view v-if="file.mediaType === 'image'" class="relative">
+                            <image
+                                :src="file.url"
+                                mode="aspectFill"
+                                class="rounded-lg"
+                                style="width: 50px; height: 50px; min-width: 50px"
+                                @click="handleFileClick(file, message)"
+                            />
+                        </view>
+
+                        <!-- Video preview -->
+                        <view v-else-if="file.mediaType === 'video'" class="relative">
+                            <view
+                                class="relative rounded-lg bg-black"
+                                style="width: 50px; height: 50px"
+                                @click="handleFileClick(file, message)"
+                            >
+                                <video
+                                    :src="file.url"
+                                    class="rounded-lg"
+                                    style="width: 100%; height: 100%"
+                                    :controls="false"
+                                    :show-center-play-btn="true"
+                                />
+                            </view>
+                        </view>
+
+                        <!-- Audio preview -->
+                        <view
+                            v-else-if="file.mediaType === 'audio'"
+                            class="border-border bg-primary-50 relative flex items-center gap-2 rounded-lg border p-2 pr-4"
+                            @click="handleFileClick(file, message)"
+                        >
+                            <view
+                                class="border-border flex items-center justify-center rounded-lg border shadow-md"
+                                style="width: 50px; height: 50px"
+                            >
+                                <text
+                                    class="i-lucide-audio-lines text-foreground"
+                                    style="font-size: 16px"
+                                />
+                            </view>
+                            <view class="text-foreground max-w-[200px] truncate text-sm font-bold">
+                                {{ file.name }}
+                            </view>
+                        </view>
+
+                        <!-- File preview -->
+                        <view
+                            v-else
+                            class="border-border bg-primary-50 relative flex items-center gap-2 rounded-lg border py-2.5 pr-4 pl-2"
+                            @click="handleFileClick(file, message)"
+                        >
+                            <view
+                                class="border-border flex items-center justify-center rounded-lg border shadow-md"
+                                style="width: 32px; height: 32px"
+                            >
+                                <text
+                                    class="i-lucide-file-box text-foreground"
+                                    style="font-size: 16px"
+                                />
+                            </view>
+                            <view
+                                class="text-foreground me-auto max-w-[250px] truncate text-sm font-bold"
+                            >
+                                {{ file.name }}
+                            </view>
+                        </view>
+                    </view>
+                </view>
+
                 <!-- Loading state -->
                 <view
                     v-if="
@@ -193,7 +354,10 @@ const shouldReasoningDefaultOpen = (message: AiMessage) =>
 
                 <!-- Message bubble -->
                 <ChatsBubble
-                    v-if="message.content.length"
+                    v-if="
+                        getMessageTextContent(message.content) ||
+                        (Array.isArray(message.content) && message.content.length > 0)
+                    "
                     :type="message.role === 'user' ? 'user' : 'system'"
                     :class="{
                         'max-w-[70%]': message.role === 'user',

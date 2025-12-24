@@ -75,13 +75,29 @@
     "savePhotoFailed": "Failed to save photo",
     "saveVideoFailed": "Failed to save video",
     "unsupportedFileType": "Unsupported file type",
+    "message": {
+        "uploadSuccess": "Upload success",
+        "uploadFailed": "Upload failed",
+        "invalidUrl": "Invalid URL",
+        "chooseFileFailed": "Failed to choose file",
+        "fileNotFound": "File not found",
+        "urlAdded": "URL added successfully",
+        "unsupportedFileType": "Unsupported file type"
+    },
+    "upload": "Upload",
     "chat": {
         "messages": {
             "me": "Me",
             "assistant": "Assistant",
             "unknown": "Unknown",
             "sendFailed": "Send failed",
-            "thinking": "Thinking..."
+            "thinking": "Thinking...",
+            "uploadAttachment": "Upload Attachment",
+            "inputUrlPlaceholder": "Enter file URL",
+            "or": "OR",
+            "chooseImage": "Choose Image",
+            "chooseVideo": "Choose Video",
+            "uploadFile": "Upload File"
         },
         "reasoning": {
             "thinking": "Thinking",

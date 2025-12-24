@@ -483,6 +483,7 @@ const navbarTitle = computed(() => {
                 :is-loading="isLoading"
                 :need-auth="true"
                 :attachment-size-limit="chatConfig?.attachmentSizeLimit"
+                :selected-model="selectedModel"
                 @submit="handleSubmitMessage"
                 @stop="stop"
             >
