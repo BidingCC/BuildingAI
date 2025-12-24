@@ -65,16 +65,6 @@ function handleKeyboardHide() {
     keyboardHeight.value = 0;
 }
 
-function handleKeydown(event: KeyboardEvent) {
-    event.preventDefault();
-
-    if (props.isLoading) {
-        emits("stop");
-    } else {
-        emits("submit", inputValue.value);
-    }
-}
-
 function handleSubmit() {
     if (props.isLoading) {
         emits("stop");
@@ -108,7 +98,7 @@ function handleSubmit() {
                 :show-confirm-bar="false"
                 @keyboardheightchange="handleKeyboardHeightChange"
                 @blur="handleKeyboardHide"
-                @keydown.enter="handleKeydown"
+                @confirm="handleSubmit"
             />
         </view>
         <view class="action-bar" flex="~ items-center justify-between" px="1">

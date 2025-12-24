@@ -143,6 +143,7 @@ declare global {
   const useInterceptor: typeof import('@uni-helper/uni-use')['useInterceptor']
   const useLoading: typeof import('@uni-helper/uni-use')['useLoading']
   const useLocale: typeof import('../hooks/use-locale')['useLocale']
+  const useLockFn: typeof import('../hooks/use-lock-fn')['useLockFn']
   const useModal: typeof import('@uni-helper/uni-use')['useModal']
   const useModel: typeof import('vue')['useModel']
   const useNetwork: typeof import('@uni-helper/uni-use')['useNetwork']
@@ -343,6 +344,7 @@ declare module 'vue' {
     readonly useInterceptor: UnwrapRef<typeof import('@uni-helper/uni-use')['useInterceptor']>
     readonly useLoading: UnwrapRef<typeof import('@uni-helper/uni-use')['useLoading']>
     readonly useLocale: UnwrapRef<typeof import('../hooks/use-locale')['useLocale']>
+    readonly useLockFn: UnwrapRef<typeof import('../hooks/use-lock-fn')['useLockFn']>
     readonly useModal: UnwrapRef<typeof import('@uni-helper/uni-use')['useModal']>
     readonly useModel: UnwrapRef<typeof import('vue')['useModel']>
     readonly useNetwork: UnwrapRef<typeof import('@uni-helper/uni-use')['useNetwork']>

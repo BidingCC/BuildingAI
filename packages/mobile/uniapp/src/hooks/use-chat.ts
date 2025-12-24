@@ -1,20 +1,9 @@
-/**
- * @fileoverview Chat composable hook for mobile uniapp
- * @description This file contains the useChat composable for managing chat state and streaming
- * @author BuildingAI Teams
- */
-
 import type { McpToolCall } from "@buildingai/service/consoleapi/mcp-server";
 import type { AiMessage, FilesList } from "@buildingai/service/models/message";
-import type { MessageContent, MessageContentPart } from "@buildingai/types";
 
 import { getBaseUrl } from "@/hooks/use-request";
 import { useUserStore } from "@/stores/user";
 
-/**
- * Generate UUID
- * @returns UUID string
- */
 export function generateUuid(): string {
     return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
         const r = (Math.random() * 16) | 0;
@@ -23,20 +12,12 @@ export function generateUuid(): string {
     });
 }
 
-/**
- * Chat configuration interface
- */
 export interface ChatConfig {
-    /** Avatar URL for assistant messages */
     avatar?: string;
     [key: string]: unknown;
 }
 
-/**
- * Stream client instance interface
- */
 export interface StreamClientInstance {
-    /** Start chat stream */
     startChat: (config: {
         url: string;
         method?: string;
@@ -46,13 +27,9 @@ export interface StreamClientInstance {
         heartbeatTimeout?: number;
         maxRetryCount?: number;
     }) => void;
-    /** Stop chat stream */
     stopChat: (...args: unknown[]) => void;
 }
 
-/**
- * Stream message update chunk
- */
 export interface StreamUpdateChunk {
     type: string;
     message?: AiMessage;
@@ -60,9 +37,6 @@ export interface StreamUpdateChunk {
     data?: unknown;
 }
 
-/**
- * Parsed stream message
- */
 interface ParsedStreamMessage {
     type?: string;
     data?: string | { message?: string; id?: string; [key: string]: unknown };
@@ -74,9 +48,6 @@ interface ParsedStreamMessage {
     [key: string]: unknown;
 }
 
-/**
- * HTTP Response interface
- */
 export interface HttpResponse {
     status?: number;
     statusText?: string;
@@ -84,111 +55,48 @@ export interface HttpResponse {
     [key: string]: unknown;
 }
 
-/**
- * UseChat options interface
- */
 export interface UseChatOptions {
-    /** Conversation ID */
     id?: string | (() => string | undefined);
-    /** Initial messages to display */
     initialMessages?: AiMessage[];
-    /** Additional body parameters for API requests */
     body?: Record<string, unknown> | (() => Record<string, unknown>);
-    /** API endpoint URL (relative to base URL, e.g., "/ai-chat/stream") */
     apiUrl?: string;
-    /** Callback when tool is called */
     onToolCall?: (message: McpToolCall) => void;
-    /** Callback when response is received */
     onResponse?: (response: HttpResponse) => void | Promise<void>;
-    /** Callback when stream chunk is received */
     onUpdate?: (chunk: StreamUpdateChunk) => void;
-    /** Callback when error occurs */
     onError?: (error: Error) => void;
-    /** Callback when stream finishes */
     onFinish?: (message: AiMessage) => void;
-    /** Chat configuration */
     chatConfig?: ChatConfig;
-    /** Stream client timeout (ms) */
     timeout?: number;
-    /** Heartbeat timeout (ms) */
     heartbeatTimeout?: number;
-    /** Max retry count */
     maxRetryCount?: number;
-    /** Custom stream URL builder (overrides apiUrl if provided) */
     buildStreamUrl?: () => string;
-    /** Custom headers builder */
     buildHeaders?: () => Record<string, string>;
 }
 
-/**
- * Chat status type
- */
 export type ChatStatus = "idle" | "loading" | "error" | "completed";
 
-/**
- * UseChat return interface
- */
 export interface UseChatReturn {
-    /** Current messages */
     messages: Ref<AiMessage[]>;
-    /** Input value */
     input: Ref<string>;
-    /** Files list */
     files: Ref<FilesList>;
-    /** Current status */
     status: Ref<ChatStatus>;
-    /** Error object if any */
     error: Ref<Error | null>;
-    /** Handle form submission */
     handleSubmit: (event?: Event | string) => Promise<void>;
-    /** Reload last message */
     reload: () => Promise<void>;
-    /** Stop current stream */
     stop: () => void;
-    /** Set messages directly */
     setMessages: (messages: AiMessage[]) => void;
-    /** Append a new message */
     append: (message: AiMessage) => Promise<void>;
-    /** Stream client ref (for template usage) */
     streamClientRef: Ref<StreamClientInstance | null>;
-    /** Handle stream open event */
     handleStreamOpen: () => void;
-    /** Handle stream message event */
     handleStreamMessage: (msg: { data: string; event?: string }) => void;
-    /** Handle stream error event */
     handleStreamError: (err: string | Error) => void;
-    /** Handle stream finish event */
     handleStreamFinish: () => void;
-    /** Handle retry upper limit event */
     handleRetryUpperLimit: () => void;
-    /** Stream client timeout (ms) */
     timeout: number;
-    /** Stream client heartbeat timeout (ms) */
     heartbeatTimeout: number;
-    /** Stream client max retry count */
     maxRetryCount: number;
 }
 
-/**
- * Chat composable hook similar to @ai-sdk/vue useChat
- * @description Manages chat state and streaming for AI conversations
- * @param options - Configuration options for the chat
- * @returns Chat state and control functions
- * @example
- * ```typescript
- * const { messages, input, handleSubmit, status } = useChat({
- *   api: apiChatStream,
- *   initialMessages: [],
- *   body: {
- *     modelId: "model-123",
- *     conversationId: "conv-456",
- *   },
- *   onFinish: (message) => {
- *     console.log("Chat finished:", message);
- *   },
- * });
- * ```
- */
 export function useChat(options: UseChatOptions = {}): UseChatReturn {
     const {
         id,
@@ -215,17 +123,10 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
     const error = ref<Error | null>(null);
     const streamClientRef = ref<StreamClientInstance | null>(null);
     const currentAssistantMessage = ref<AiMessage | null>(null);
-    const messageHistory = ref<AiMessage[]>([]);
     const reactiveChatConfig = computed(() => chatConfig || {});
-
     let updateTimer: ReturnType<typeof setTimeout> | null = null;
     const UPDATE_DEBOUNCE_MS = 50;
 
-    messageHistory.value = [...initialMessages];
-
-    /**
-     * 创建助手消息对象
-     */
     const createAssistantMessage = (): AiMessage => {
         return {
             id: generateUuid(),
@@ -238,31 +139,26 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
         };
     };
 
-    /**
-     * 更新 messages 数组中的消息
-     */
-    const updateMessageInArray = (message: AiMessage) => {
-        const messageIndex = messages.value.findIndex((msg) => msg.id === message.id);
-        if (messageIndex >= 0) {
-            messages.value[messageIndex] = { ...message };
-        }
-    };
-
-    /**
-     * 确保助手消息已创建
-     */
     const ensureAssistantMessage = (): boolean => {
-        if (!currentAssistantMessage.value) {
-            currentAssistantMessage.value = createAssistantMessage();
-            messages.value.push({ ...currentAssistantMessage.value });
-            return true;
+        if (currentAssistantMessage.value) {
+            return false;
         }
-        return false;
+
+        const existingMessage = messages.value.find(
+            (msg) => msg.role === "assistant" && msg.status === "loading",
+        );
+
+        if (existingMessage) {
+            currentAssistantMessage.value = existingMessage;
+            return false;
+        }
+
+        currentAssistantMessage.value = createAssistantMessage();
+        // 适配倒序模式，新消息添加到数组开头
+        messages.value.unshift({ ...currentAssistantMessage.value });
+        return true;
     };
 
-    /**
-     * 批量更新消息（防抖）
-     */
     const debouncedUpdate = (callback: () => void) => {
         if (updateTimer) {
             clearTimeout(updateTimer);
@@ -282,7 +178,6 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
 
     const setMessages = (newMessages: AiMessage[]) => {
         messages.value = [...newMessages];
-        messageHistory.value = [...newMessages];
     };
 
     const getConversationId = (): string | undefined => {
@@ -318,7 +213,20 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
     };
 
     const buildRequestBody = () => {
-        const historyMessages = messageHistory.value.map((msg) => {
+        const messagesToSend = messages.value.filter((msg) => {
+            if (
+                msg.role === "assistant" &&
+                msg.status === "loading" &&
+                (!msg.content || msg.content === "")
+            ) {
+                return false;
+            }
+            return true;
+        });
+
+        const reversedMessages = [...messagesToSend].reverse();
+
+        const historyMessages = reversedMessages.map((msg) => {
             let content = msg.content;
             if (Array.isArray(content)) {
                 content = content.map((item) => {
@@ -345,46 +253,112 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
         return JSON.parse(JSON.stringify(requestBody));
     };
 
-    const append = async (message: AiMessage) => {
-        const messageWithId = {
-            id: generateUuid(),
-            ...message,
-        };
+    const updateAssistantContent = (delta: string, isNewMessage: boolean) => {
+        if (!currentAssistantMessage.value) return;
 
-        messages.value.push(messageWithId);
-        messageHistory.value.push(messageWithId);
+        if (isNewMessage) {
+            currentAssistantMessage.value.content = delta;
+        } else {
+            currentAssistantMessage.value.content += delta;
+            currentAssistantMessage.value.status = "active";
+        }
 
-        if (message.role === "user") {
-            await generateAIResponse();
+        if (isNewMessage) {
+            onUpdate?.({
+                type: "content",
+                message: { ...currentAssistantMessage.value },
+                delta,
+            });
+        } else {
+            debouncedUpdate(() => {
+                if (currentAssistantMessage.value) {
+                    onUpdate?.({
+                        type: "content",
+                        message: { ...currentAssistantMessage.value },
+                        delta,
+                    });
+                }
+            });
         }
     };
 
-    const parseStreamMessage = (msg: { data: string; event?: string }) => {
-        if (!msg.data) {
-            return;
+    const updateAssistantMetadata = (type: string, data: unknown) => {
+        if (!currentAssistantMessage.value) return;
+
+        if (!currentAssistantMessage.value.metadata) {
+            currentAssistantMessage.value.metadata = {};
         }
+
+        switch (type) {
+            case "conversation_id":
+                onUpdate?.({ type: "conversation_id", data });
+                break;
+            case "reasoning":
+                if (!currentAssistantMessage.value.metadata.reasoning) {
+                    currentAssistantMessage.value.metadata.reasoning = {
+                        content: data as string,
+                        startTime: Date.now(),
+                    };
+                } else {
+                    currentAssistantMessage.value.metadata.reasoning.content += data as string;
+                }
+                break;
+            default:
+                currentAssistantMessage.value.metadata[type] = data;
+        }
+
+        onUpdate?.({
+            type: "metadata",
+            message: { ...currentAssistantMessage.value },
+        });
+    };
+
+    const handleToolCall = (toolData: McpToolCall) => {
+        if (!currentAssistantMessage.value) return;
+
+        if (!currentAssistantMessage.value.mcpToolCalls) {
+            currentAssistantMessage.value.mcpToolCalls = [];
+        }
+
+        const index = currentAssistantMessage.value.mcpToolCalls.findIndex(
+            (item) => item.id === toolData.id,
+        );
+
+        if (index >= 0) {
+            currentAssistantMessage.value.mcpToolCalls[index] = toolData;
+        } else {
+            currentAssistantMessage.value.mcpToolCalls.push(toolData);
+        }
+
+        onToolCall?.(toolData);
+    };
+
+    const parseStreamMessage = (msg: { data: string; event?: string }) => {
+        if (!msg.data) return;
 
         const dataLines = msg.data.split("\n").filter((line) => line.trim());
 
         for (const line of dataLines) {
             const trimmedLine = line.trim();
+
+            // 检查是否结束
             if (trimmedLine === "[DONE]" || trimmedLine === "data: [DONE]") {
                 clearUpdateTimer();
                 handleStreamFinish();
                 return;
             }
 
+            // 提取 JSON 字符串
             let jsonStr = trimmedLine;
             if (jsonStr.startsWith("data:")) {
                 jsonStr = jsonStr.slice(5).trim();
             }
-            if (!jsonStr) {
-                continue;
-            }
+            if (!jsonStr) continue;
 
             try {
                 const parsed = JSON.parse(jsonStr) as ParsedStreamMessage;
 
+                // 处理错误
                 if (parsed.type === "error") {
                     const errorData = parsed.data as { message?: string } | undefined;
                     const errorMsg = errorData?.message || "未知错误";
@@ -398,124 +372,47 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
                     return;
                 }
 
+                // 处理工具调用
                 if (parsed.type?.startsWith("mcp_tool_")) {
                     const type = parsed.type.replace(/^mcp_tool_/, "");
                     const toolData = parsed.data as McpToolCall | { message?: string } | undefined;
+
                     if (type === "error") {
                         const errorMsg =
                             (toolData as { message?: string })?.message || "工具调用错误";
                         error.value = new Error(errorMsg);
                         onError?.(new Error(errorMsg));
                     } else if (currentAssistantMessage.value && toolData) {
-                        if (!currentAssistantMessage.value.mcpToolCalls) {
-                            currentAssistantMessage.value.mcpToolCalls = [];
-                        }
-                        const toolCall = toolData as McpToolCall;
-                        const index = currentAssistantMessage.value.mcpToolCalls.findIndex(
-                            (item) => item.id === toolCall.id,
-                        );
-                        if (index >= 0) {
-                            currentAssistantMessage.value.mcpToolCalls[index] = toolCall;
-                        } else {
-                            currentAssistantMessage.value.mcpToolCalls.push(toolCall);
-                        }
-                        onToolCall?.(toolCall);
+                        handleToolCall(toolData as McpToolCall);
                     }
                     return;
                 }
 
+                // 处理内容块
                 if (parsed.type === "chunk" && parsed.data && typeof parsed.data === "string") {
-                    const chunkData = parsed.data;
                     const isNewMessage = ensureAssistantMessage();
-
-                    if (currentAssistantMessage.value) {
-                        if (isNewMessage) {
-                            currentAssistantMessage.value.content = chunkData;
-                        } else {
-                            currentAssistantMessage.value.content += chunkData;
-                            currentAssistantMessage.value.status = "active";
-                        }
-
-                        if (isNewMessage) {
-                            onUpdate?.({
-                                type: "content",
-                                message: { ...currentAssistantMessage.value },
-                                delta: chunkData,
-                            });
-                        } else {
-                            debouncedUpdate(() => {
-                                if (currentAssistantMessage.value) {
-                                    updateMessageInArray(currentAssistantMessage.value);
-                                    onUpdate?.({
-                                        type: "content",
-                                        message: { ...currentAssistantMessage.value },
-                                        delta: chunkData,
-                                    });
-                                }
-                            });
-                        }
-                    }
+                    updateAssistantContent(parsed.data, isNewMessage);
                     return;
                 }
 
+                // 处理元数据
                 if (parsed.type === "metadata" && parsed.metadata) {
                     ensureAssistantMessage();
-                    if (!currentAssistantMessage.value?.metadata) {
-                        if (currentAssistantMessage.value) {
-                            currentAssistantMessage.value.metadata = {};
-                        }
-                    }
-
                     const metadata = parsed.metadata as { type?: string; data?: unknown };
-                    const { type: metaType, data } = metadata;
-                    if (metaType === "conversation_id") {
-                        onUpdate?.({ type: "conversation_id", data });
-                    } else if (
-                        metaType === "reasoning" &&
-                        typeof data === "string" &&
-                        currentAssistantMessage.value?.metadata
-                    ) {
-                        if (!currentAssistantMessage.value.metadata.reasoning) {
-                            currentAssistantMessage.value.metadata.reasoning = {
-                                content: data,
-                                startTime: Date.now(),
-                            };
-                        } else {
-                            currentAssistantMessage.value.metadata.reasoning.content += data;
-                        }
-                    } else if (metaType && currentAssistantMessage.value?.metadata) {
-                        currentAssistantMessage.value.metadata[metaType] = data;
-                    }
-
-                    if (currentAssistantMessage.value) {
-                        updateMessageInArray(currentAssistantMessage.value);
-                        onUpdate?.({
-                            type: "metadata",
-                            message: { ...currentAssistantMessage.value },
-                        });
+                    if (metadata.type && metadata.data !== undefined) {
+                        updateAssistantMetadata(metadata.type, metadata.data);
                     }
                     return;
                 }
 
+                // 处理 reasoning 类型
                 if (parsed.type === "reasoning" && parsed.data && typeof parsed.data === "string") {
                     ensureAssistantMessage();
-                    if (currentAssistantMessage.value) {
-                        if (!currentAssistantMessage.value.metadata) {
-                            currentAssistantMessage.value.metadata = {};
-                        }
-                        if (!currentAssistantMessage.value.metadata.reasoning) {
-                            currentAssistantMessage.value.metadata.reasoning = {
-                                content: parsed.data,
-                                startTime: Date.now(),
-                            };
-                        } else {
-                            currentAssistantMessage.value.metadata.reasoning.content += parsed.data;
-                        }
-                        updateMessageInArray(currentAssistantMessage.value);
-                    }
+                    updateAssistantMetadata("reasoning", parsed.data);
                     return;
                 }
 
+                // 处理其他元数据类型
                 const metadataTypes = [
                     "context",
                     "references",
@@ -528,40 +425,16 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
                     ensureAssistantMessage();
                     if (parsed.type === "conversation_id") {
                         onUpdate?.({ type: "conversation_id", data: parsed.data });
-                    } else if (parsed.type && currentAssistantMessage.value) {
-                        if (!currentAssistantMessage.value.metadata) {
-                            currentAssistantMessage.value.metadata = {};
-                        }
-                        currentAssistantMessage.value.metadata[parsed.type] = parsed.data;
+                    } else if (parsed.data !== undefined) {
+                        updateAssistantMetadata(parsed.type, parsed.data);
                     }
                     return;
                 }
             } catch (_err) {
+                // 如果解析失败，尝试作为纯文本内容处理
                 if (line && line.trim() && !line.startsWith("data:")) {
                     const isNewMessage = ensureAssistantMessage();
-                    if (currentAssistantMessage.value) {
-                        if (isNewMessage) {
-                            currentAssistantMessage.value.content = line;
-                            onUpdate?.({
-                                type: "content",
-                                message: { ...currentAssistantMessage.value },
-                                delta: line,
-                            });
-                        } else {
-                            currentAssistantMessage.value.content += line;
-                            currentAssistantMessage.value.status = "active";
-                            debouncedUpdate(() => {
-                                if (currentAssistantMessage.value) {
-                                    updateMessageInArray(currentAssistantMessage.value);
-                                    onUpdate?.({
-                                        type: "content",
-                                        message: { ...currentAssistantMessage.value },
-                                        delta: line,
-                                    });
-                                }
-                            });
-                        }
-                    }
+                    updateAssistantContent(line, isNewMessage);
                 }
             }
         }
@@ -590,8 +463,7 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
             userStore.logout();
         }
 
-        const errorObj = new Error(errorMsg);
-        onError?.(errorObj);
+        onError?.(new Error(errorMsg));
     };
 
     const handleStreamFinish = () => {
@@ -601,6 +473,7 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
         if (currentAssistantMessage.value) {
             currentAssistantMessage.value.status = "completed";
 
+            // 更新 reasoning 结束时间
             if (
                 currentAssistantMessage.value.metadata?.reasoning?.startTime &&
                 !currentAssistantMessage.value.metadata.reasoning.endTime
@@ -610,9 +483,6 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
                 currentAssistantMessage.value.metadata.reasoning.duration =
                     endTime - currentAssistantMessage.value.metadata.reasoning.startTime;
             }
-
-            updateMessageInArray(currentAssistantMessage.value);
-            messageHistory.value.push({ ...currentAssistantMessage.value });
 
             onUpdate?.({
                 type: "content",
@@ -663,39 +533,8 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
             event.preventDefault();
         }
 
-        const content = typeof event === "string" ? event : input.value.trim();
-
-        if ((!content && !files.value.length) || status.value === "loading") return;
-
-        const userMessageContent: MessageContent =
-            files.value.length > 0
-                ? ([
-                      ...files.value,
-                      ...(content ? [{ type: "text", text: content }] : []),
-                  ] as MessageContentPart[])
-                : content;
-
-        const userMessage: AiMessage = {
-            id: generateUuid(),
-            role: "user",
-            content: userMessageContent,
-            status: "completed",
-            mcpToolCalls: [],
-        };
-
-        messages.value.push(userMessage);
-        messageHistory.value.push({
-            ...userMessage,
-            content: typeof userMessage.content === "string" ? userMessage.content : content || "",
-        });
-
-        input.value = "";
-        files.value = [];
-
-        currentAssistantMessage.value = null;
         status.value = "loading";
         error.value = null;
-
         startStreamRequest();
     };
 
@@ -713,13 +552,7 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
         if (lastUserMessageIndex === undefined) return;
 
         messages.value = messages.value.slice(0, lastUserMessageIndex + 1);
-        messageHistory.value = messages.value.slice(0, lastUserMessageIndex + 1);
-
-        const userMessage = messages.value[lastUserMessageIndex];
-        if (!userMessage) return;
-
-        const content = typeof userMessage.content === "string" ? userMessage.content : "";
-        await handleSubmit(content);
+        await handleSubmit();
     };
 
     const stop = () => {
@@ -732,6 +565,20 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
                 currentAssistantMessage.value.status = "completed";
             }
             currentAssistantMessage.value = null;
+        }
+    };
+
+    const append = async (message: AiMessage) => {
+        const messageWithId = {
+            id: generateUuid(),
+            ...message,
+        };
+
+        // 适配倒序模式
+        messages.value.unshift(messageWithId);
+
+        if (message.role === "user") {
+            await generateAIResponse();
         }
     };
 

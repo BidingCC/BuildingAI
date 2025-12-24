@@ -35,7 +35,6 @@ import {
 } from "@/service/ai-conversation";
 
 const { t } = useI18n();
-const { value: conversationId } = useQuery("id");
 const userStore = useUserStore();
 const appStore = useAppStore();
 
@@ -59,16 +58,14 @@ const {
     pageTransform,
 } = useHalfPopupInteraction();
 
-const currentConversationId = computed(() => conversationId.value as string | undefined);
-const internalConversationId = ref<string | undefined>(currentConversationId.value);
+const currentConversationId = ref<string | undefined>(undefined);
 const currentConversation = shallowRef<AiConversation | null>(null);
 const chatConfig = shallowRef<Awaited<ReturnType<typeof apiGetChatConfig>> | null>(null);
 
 const pagingRef = ref<ZPagingRef>();
-const dataList = ref<AiMessage[]>([]);
 
 const queryList = async (pageNo: number, pageSize: number) => {
-    const conversationId = internalConversationId.value || currentConversationId.value;
+    const conversationId = currentConversationId.value;
     if (!conversationId) {
         pagingRef.value?.complete([]);
         return;
@@ -88,7 +85,6 @@ const queryList = async (pageNo: number, pageSize: number) => {
             mcpToolCalls: item.mcpToolCalls,
             createdAt: item.createdAt,
         }));
-        // 聊天记录模式需要倒序，最新的在底部
         pagingRef.value?.complete(list);
     } catch (error) {
         console.error("Failed to load messages:", error);
@@ -97,7 +93,7 @@ const queryList = async (pageNo: number, pageSize: number) => {
 };
 
 const loadConversationDetail = async (id?: string) => {
-    const conversationId = id || internalConversationId.value || currentConversationId.value;
+    const conversationId = id || currentConversationId.value;
     if (!conversationId) return;
     try {
         currentConversation.value = await apiGetAiConversationDetail(conversationId);
@@ -113,10 +109,6 @@ const loadChatConfig = async () => {
         console.error("Failed to load chat config:", error);
     }
 };
-
-const activeConversationId = computed(() => {
-    return internalConversationId.value || currentConversationId.value;
-});
 
 // 使用 useChat hook
 const {
@@ -139,7 +131,7 @@ const {
     heartbeatTimeout: streamHeartbeatTimeout,
     maxRetryCount: streamMaxRetryCount,
 } = useChat({
-    id: () => activeConversationId.value,
+    id: () => currentConversationId.value,
     apiUrl: "/ai-chat/stream",
     body: () => ({
         modelId: selectedModelId.value,
@@ -159,46 +151,13 @@ const {
         if (chunk.type === "conversation_id" && chunk.data) {
             const newConversationId =
                 typeof chunk.data === "string" ? chunk.data : (chunk.data as { id?: string })?.id;
-            if (
-                newConversationId &&
-                !internalConversationId.value &&
-                !currentConversationId.value
-            ) {
-                internalConversationId.value = newConversationId;
+            if (newConversationId && !currentConversationId.value) {
+                currentConversationId.value = newConversationId;
             }
             return;
         }
-
-        if (chunk.type === "content" && chunk.message) {
-            const messageId = chunk.message.id;
-            // 查找 dataList 中是否已存在该消息
-            const existingIndex = dataList.value.findIndex((m) => m.id === messageId);
-
-            if (existingIndex >= 0) {
-                // 更新已存在的消息（直接更新，触发响应式）
-                dataList.value[existingIndex] = {
-                    ...dataList.value[existingIndex],
-                    ...chunk.message,
-                };
-            } else {
-                // 如果不存在，添加新消息
-                pagingRef.value?.addChatRecordData({
-                    ...chunk.message,
-                    status: chunk.message.status || "loading",
-                });
-            }
-        }
     },
-    onFinish(message: AiMessage) {
-        // dataList 是倒序的，最新的消息在数组开头（index 0）
-        const lastMessage = dataList.value[0];
-        if (lastMessage && lastMessage.id === message.id) {
-            dataList.value[0] = {
-                ...lastMessage,
-                ...message,
-                status: "completed",
-            };
-        }
+    onFinish() {
         userStore.getUser();
         chatsChatsRef.value?.refresh();
         if (currentConversationId.value) {
@@ -207,10 +166,6 @@ const {
     },
 });
 
-/**
- * 提交消息
- * @param content 消息内容
- */
 const handleSubmitMessage = async (content: string) => {
     if ((!content.trim() && !files.value.length) || status.value === "loading") return;
 
@@ -218,7 +173,6 @@ const handleSubmitMessage = async (content: string) => {
         return userStore.toLogin();
     }
 
-    // 添加用户消息到 dataList 显示
     const userMessage: AiMessage = {
         id: generateUuid(),
         role: "user",
@@ -232,11 +186,26 @@ const handleSubmitMessage = async (content: string) => {
         status: "completed",
         mcpToolCalls: [],
     };
-    pagingRef.value?.addChatRecordData(userMessage);
+    // pagingRef.value?.addChatRecordData(userMessage);
+    messages.value.unshift(userMessage);
 
-    // 调用 useChat 的 handleSubmit 发送消息
+    const assistantMessage: AiMessage = {
+        id: generateUuid(),
+        role: "assistant",
+        content: "",
+        status: "loading",
+        mcpToolCalls: [],
+    };
+    messages.value.unshift(assistantMessage);
+    messages.value = [...messages.value];
+    // await pagingRef.value?.addChatRecordData(assistantMessage);
+
     await handleSubmit(content);
 };
+
+watch(messages, (newMessages) => {
+    console.log("messages", newMessages);
+});
 
 const isLoading = computed(() => status.value === "loading");
 
@@ -269,23 +238,20 @@ const handleDelete = (item: AiConversation) => {
 
 const handleNewChat = () => {
     showDrawer.value = false;
-    internalConversationId.value = undefined;
-    dataList.value = [];
+    currentConversationId.value = undefined;
+    messages.value = [];
     setMessages([]);
-    if (!currentConversationId.value) {
-        pagingRef.value?.reload();
-    }
 };
 
 const handleChatSelect = async (item: AiConversation) => {
     showDrawer.value = false;
     const targetId = item.id;
-    if (internalConversationId.value === targetId || currentConversationId.value === targetId) {
+    if (currentConversationId.value === targetId) {
         return;
     }
 
-    internalConversationId.value = targetId;
-    dataList.value = [];
+    currentConversationId.value = targetId;
+    messages.value = [];
     setMessages([]);
     await loadConversationDetail(targetId);
     pagingRef.value?.reload();
@@ -337,33 +303,9 @@ onMounted(async () => {
     }
 });
 
-watch(
-    () => currentConversationId.value,
-    (newId) => {
-        if (newId) {
-            internalConversationId.value = newId;
-            pagingRef.value?.reload();
-        } else {
-            internalConversationId.value = undefined;
-            dataList.value = [];
-        }
-    },
-);
-
-watch(
-    () => internalConversationId.value,
-    (newId) => {
-        if (newId && newId !== currentConversationId.value) {
-            loadConversationDetail(newId);
-        }
-    },
-);
-
-// TODO: 实现消息监听和同步逻辑
-
 const containerStyle = computed(() => ({
     ...pageTransform.value,
-    backgroundColor: dataList.value.length === 0 ? "var(--background-soft)" : "var(--background)",
+    backgroundColor: messages.value.length === 0 ? "var(--background-soft)" : "var(--background)",
 }));
 
 const navbarTitle = computed(() => {
@@ -441,7 +383,7 @@ const navbarTitle = computed(() => {
 
                 <z-paging
                     ref="pagingRef"
-                    v-model="dataList"
+                    v-model="messages"
                     :auto-clean-list-when-reload="false"
                     :show-chat-loading-when-reload="true"
                     :auto-hide-keyboard-when-chat="false"
@@ -455,7 +397,7 @@ const navbarTitle = computed(() => {
                 >
                     <template #empty>
                         <view
-                            v-if="dataList.length === 0 && chatConfig?.welcomeInfo"
+                            v-if="messages.length === 0 && chatConfig?.welcomeInfo"
                             class="flex h-full w-screen flex-col justify-center gap-0 px-6 py-8"
                         >
                             <view class="mb-4 flex flex-col gap-2">
@@ -491,40 +433,41 @@ const navbarTitle = computed(() => {
                         </view>
                     </template>
 
-                    <view class="pb-10" v-if="dataList.length > 0">
-                        <template v-for="(message, index) in dataList" :key="message.id || index">
-                            <view style="transform: scaleY(-1); padding-bottom: 16px">
-                                <ChatsMessages
-                                    :messages="[message]"
-                                    :error="error as unknown as Error"
-                                    :assistant="{
-                                        actions: [
-                                            {
-                                                label: t('ai-chat.frontend.messages.copy'),
-                                                icon: 'i-tabler-copy',
-                                                onClick: () => {},
-                                            },
-                                            {
-                                                label:
-                                                    t('ai-chat.frontend.messages.retry') || '重试',
-                                                icon: 'i-lucide-rotate-cw-square',
-                                                onClick: () => reload(),
-                                            },
-                                        ],
-                                    }"
-                                    :spacing-offset="0"
-                                >
-                                    <template #content="{ message: msg }">
-                                        <!-- #ifdef H5 -->
-                                        <BdMarkdown class="pt-4" :content="msg.content as string" />
-                                        <!-- #endif -->
-                                        <!-- #ifndef H5 -->
-                                        <UaMarkdown class="pt-4" :content="msg.content as string" />
-                                        <!-- #endif -->
-                                    </template>
-                                </ChatsMessages>
-                            </view>
-                        </template>
+                    <view :class="{ 'pb-10': messages.length > 0 }">
+                        <view
+                            v-for="(message, index) in messages"
+                            :key="`${message.id} + ${index} + ''`"
+                            style="transform: scaleY(-1); padding-bottom: 16px"
+                        >
+                            <ChatsMessages
+                                :messages="[message]"
+                                :error="error as unknown as Error"
+                                :assistant="{
+                                    actions: [
+                                        {
+                                            label: t('ai-chat.frontend.messages.copy'),
+                                            icon: 'i-tabler-copy',
+                                            onClick: () => {},
+                                        },
+                                        {
+                                            label: t('ai-chat.frontend.messages.retry') || '重试',
+                                            icon: 'i-lucide-rotate-cw-square',
+                                            onClick: () => reload(),
+                                        },
+                                    ],
+                                }"
+                                :spacing-offset="0"
+                            >
+                                <template #content="{ message: msg }">
+                                    <!-- #ifdef H5 -->
+                                    <BdMarkdown class="pt-4" :content="msg.content as string" />
+                                    <!-- #endif -->
+                                    <!-- #ifndef H5 -->
+                                    <UaMarkdown class="pt-4" :content="msg.content as string" />
+                                    <!-- #endif -->
+                                </template>
+                            </ChatsMessages>
+                        </view>
                     </view>
                 </z-paging>
             </view>

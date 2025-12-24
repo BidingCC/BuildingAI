@@ -146,10 +146,12 @@ const shouldReasoningDefaultOpen = (message: AiMessage) =>
                         !message.mcpToolCalls?.length &&
                         !Object.keys(message.metadata || {}).length
                     "
-                    class="bg-background flex items-center gap-2 rounded-lg px-4 py-2"
+                    class="bg-background flex h-8 items-center gap-2 rounded-lg px-4 py-2"
                 >
-                    <text class="i-lucide-loader-2 animate-spin text-lg" />
-                    <text>{{ t("common.chat.messages.thinking") || "思考中..." }}</text>
+                    <text class="i-lucide-loader-2 animate-spin text-xs" />
+                    <text class="text-xs">
+                        {{ t("common.chat.messages.thinking") || "思考中..." }}
+                    </text>
                 </view>
 
                 <!-- Error state -->
@@ -191,11 +193,11 @@ const shouldReasoningDefaultOpen = (message: AiMessage) =>
 
                 <!-- Message bubble -->
                 <ChatsBubble
-                    v-else
+                    v-if="message.content.length"
                     :type="message.role === 'user' ? 'user' : 'system'"
                     :class="{
                         'max-w-[70%]': message.role === 'user',
-                        'w-full': message.role !== 'user',
+                        'min-h-8 w-full': message.role !== 'user',
                     }"
                 >
                     <!-- User message content -->

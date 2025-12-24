@@ -87,7 +87,6 @@ defineExpose({
                         class="flex w-full items-center gap-2 rounded-lg pr-2 transition-colors"
                         :class="{
                             'cursor-pointer': !props.isEditMode,
-                            'bg-primary/10': props.currentConversationId === item.id,
                         }"
                         @click="handleSelect(item)"
                     >
