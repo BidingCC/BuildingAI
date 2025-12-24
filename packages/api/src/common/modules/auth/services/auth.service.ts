@@ -478,10 +478,7 @@ export class AuthService extends BaseService<User> {
             // 验证旧密码
             const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password);
             if (!isOldPasswordValid) {
-                throw HttpErrorFactory.unauthorized(
-                    "旧密码不正确",
-                    BusinessCode.PASSWORD_INCORRECT,
-                );
+                throw HttpErrorFactory.business("旧密码不正确", BusinessCode.PASSWORD_INCORRECT);
             }
         }
 
