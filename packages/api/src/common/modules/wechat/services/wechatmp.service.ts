@@ -79,7 +79,7 @@ export class WechatMpService {
     ) {
         try {
             // 通过 code 换取 openid 和 session_key
-            const { openid } = await this.jscode2session(jsCode);
+            const { openid, unionid } = await this.jscode2session(jsCode);
 
             if (!openid) {
                 throw HttpErrorFactory.internal("获取 openid 失败");

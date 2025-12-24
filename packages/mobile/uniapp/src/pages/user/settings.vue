@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import BdNavbar from "@/components/bd-navbar.vue?async";
+import UserPassword from "@/components/user/user-password.vue?async";
 import UserPhone from "@/components/user/user-phone.vue?async";
 import UserProfile from "@/components/user/user-profile.vue?async";
 import UserVersion from "@/components/widget/user-version/user-version.vue?async";
@@ -19,6 +20,7 @@ const userStore = useUserStore();
 
 const userProfileRefs = ref<InstanceType<typeof UserProfile>>();
 const userPhoneRefs = ref<InstanceType<typeof UserPhone>>();
+const userPasswordRefs = ref<InstanceType<typeof UserPassword>>();
 const shake = shallowRef(true);
 
 // Use half-popup interaction hook
@@ -54,6 +56,16 @@ const handleBindWechat = async () => {
         console.log("Bind wechat error", error);
         useToast().error("绑定微信失败");
     }
+};
+const showEmailPicker = () => {
+    useToast().error("功能暂未开放");
+};
+const showPhonePicker = () => {
+    // userPhoneRefs.value?.open();
+    useToast().error("功能暂未开放");
+};
+const showPasswordPicker = () => {
+    userPasswordRefs.value?.open();
 };
 </script>
 
@@ -112,7 +124,7 @@ const handleBindWechat = async () => {
                             w="full"
                             flex="~ justify-between items-center"
                             class="border-b-solid border-muted border-b py-3 pr-2"
-                            @click="userPhoneRefs?.open()"
+                            @click="showPhonePicker"
                         >
                             <view class="text-foreground text-sm">{{ t("common.phone") }}</view>
                             <view class="text-muted-foreground flex items-center">
@@ -121,6 +133,30 @@ const handleBindWechat = async () => {
                                 </text>
                                 <text
                                     v-if="!userStore.userInfo?.phone"
+                                    class="i-carbon-chevron-right mt-px"
+                                />
+                            </view>
+                        </view>
+                    </view>
+                    <view class="flex items-center justify-between pl-2">
+                        <view i-lucide-lock w="10" text="muted-foreground" />
+                        <view
+                            w="full"
+                            flex="~ justify-between items-center"
+                            class="border-b-solid border-muted border-b py-3 pr-2"
+                            @click="showPasswordPicker"
+                        >
+                            <view class="text-foreground text-sm">{{ t("common.password") }}</view>
+                            <view class="text-muted-foreground flex items-center">
+                                <text text-sm :class="{ 'mr-1': userStore.userInfo?.hasPassword }">
+                                    {{
+                                        userStore.userInfo?.hasPassword
+                                            ? t("common.setting")
+                                            : t("common.noSetting")
+                                    }}
+                                </text>
+                                <text
+                                    v-if="!userStore.userInfo?.hasPassword"
                                     class="i-carbon-chevron-right mt-px"
                                 />
                             </view>
@@ -152,7 +188,7 @@ const handleBindWechat = async () => {
                             </view>
                         </view>
                     </view>
-                    <view class="flex items-center justify-between pl-2">
+                    <view class="flex items-center justify-between pl-2" @click="showEmailPicker">
                         <view i-tabler-mail w="10" text="muted-foreground" />
                         <view w="full" flex="~ justify-between items-center" class="py-3 pr-2">
                             <view class="text-foreground text-sm">{{ t("common.emailBind") }}</view>
@@ -279,6 +315,12 @@ const handleBindWechat = async () => {
         />
         <UserPhone
             ref="userPhoneRefs"
+            @slide-progress="handleSlideProgress"
+            @open="handlePopupOpen"
+            @close="handlePopupClose"
+        />
+        <UserPassword
+            ref="userPasswordRefs"
             @slide-progress="handleSlideProgress"
             @open="handlePopupOpen"
             @close="handlePopupClose"

@@ -1,4 +1,4 @@
-import { IsDefined, IsNotEmpty, IsString, Matches, MinLength } from "class-validator";
+import { IsDefined, IsNotEmpty, IsOptional, IsString, Matches, MinLength } from "class-validator";
 
 /**
  * 管理员修改密码DTO
@@ -7,8 +7,7 @@ export class ChangePasswordDto {
     /**
      * 旧密码
      */
-    @IsDefined({ message: "旧密码参数必须传递" })
-    @IsNotEmpty({ message: "旧密码不能为空" })
+    @IsOptional()
     @IsString({ message: "旧密码必须是字符串" })
     oldPassword: string;
 

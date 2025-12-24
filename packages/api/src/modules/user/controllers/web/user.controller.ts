@@ -67,7 +67,7 @@ export class UserWebController extends BaseController {
     async getUserInfo(@Playground() user: UserPlayground) {
         // 获取用户信息（排除敏感字段）
         const userInfo = await this.userService.findOneById(user.id, {
-            excludeFields: ["password"],
+            // excludeFields: ["password"],
             relations: ["role"],
         });
 
@@ -80,10 +80,11 @@ export class UserWebController extends BaseController {
 
         // 判断用户是否有权限：有权限就是1，没有权限就是0
         const hasPermissions = user.isRoot === 1 || permissionCodes.length > 0 ? 1 : 0;
-        const { openid, ...restUserInfo } = userInfo;
+        const { openid, password, ...restUserInfo } = userInfo;
         return {
             ...restUserInfo,
             bindWechat: !!openid,
+            hasPassword: !!password,
             permissions: hasPermissions,
         };
     }

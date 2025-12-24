@@ -186,3 +186,7 @@ declare module '@/async-components/bd-markdown/index.vue?async' {
   const component: typeof import('@/async-components/bd-markdown/index.vue')
   export = component
 }
+declare module '@/components/user/user-password.vue?async' {
+  const component: typeof import('@/components/user/user-password.vue')
+  export = component
+}

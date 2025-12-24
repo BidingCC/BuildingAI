@@ -70,6 +70,8 @@ export interface UserInfo extends BaseEntity {
     totalRechargeAmount?: number;
     /** Whether is bind wechat */
     bindWechat: boolean;
+    /** Whether has password */
+    hasPassword: boolean;
 }
 
 /**
@@ -132,6 +134,7 @@ export type BaseUserInfo = Omit<
     | "lastLoginAt"
     | "isRoot"
     | "bindWechat"
+    | "hasPassword"
 >;
 
 /**
