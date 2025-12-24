@@ -200,6 +200,9 @@ const handleSubmitMessage = async (content: string) => {
     messages.value = [...messages.value];
     // await pagingRef.value?.addChatRecordData(assistantMessage);
 
+    input.value = "";
+    files.value = [];
+
     await handleSubmit(content);
 };
 

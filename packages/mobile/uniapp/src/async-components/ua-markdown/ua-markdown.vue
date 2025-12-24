@@ -4,12 +4,12 @@ import "./lib/highlight/snazzy.css";
 import "./lib/katex/katex.css";
 
 import mdKatex from "@vscode/markdown-it-katex";
-import hljs from "highlight.js/lib/common";
 
 import MpHtml from "../mp-html/mp-html.vue";
 import { tagStyle } from "./css/tag-style";
 import { customLinkPlugin } from "./customLink";
 import { docQuotePlugin } from "./docLInk";
+import hljs from "./lib/highlight/uni-highlight.min.js";
 import parseHtml from "./lib/html-parser.js";
 import MarkdownIt from "./lib/markdown-it.min.js";
 
@@ -37,7 +37,7 @@ const markdown = MarkdownIt({
         let preCode = "";
         try {
             preCode = hljs.highlightAuto(str).value;
-        } catch (_err) {
+        } catch (err) {
             preCode = markdown.utils.escapeHtml(str);
         }
         const lines = preCode.split(/\n/).slice(0, -1);
@@ -63,23 +63,22 @@ const markdown = MarkdownIt({
         }
         copyCodeData.push(str);
         let htmlCode = `<div class="markdown-wrap">`;
-
-        htmlCode += `<div class="copy-line" style="text-align: right;font-size: 12px; margin-bottom: -10px;border-radius: 5px 5px 0 0;">`;
-        htmlCode += `${lang}<a class="code-copy-btn" code-data-index="${
-            copyCodeData.length - 1
-        }">复制代码</a>`;
+        // #ifndef MP-WEIXIN
+        htmlCode += `<div style="color: #aaa;text-align: right;font-size: 12px;padding:8px;">`;
+        htmlCode += `${lang}<a class="copy-btn" code-data-index="${copyCodeData.length - 1}" style="margin-left: 8px;">复制代码</a>`;
         htmlCode += `</div>`;
-
-        htmlCode += `<pre class="hljs" style="padding:10px 8px;margin:5px 0;overflow: auto;display: block;border-radius: 5px;"><code>${html}</code></pre>`;
+        // #endif
+        htmlCode += `<pre class="hljs" style="padding:10px 8px 0;margin-bottom:5px;overflow: auto;display: block;border-radius: 5px;"><code>${html}</code></pre>`;
         htmlCode += "</div>";
         return htmlCode;
     },
 });
 // #ifdef H5
-markdown.use(mdKatex);
 // #endif
+markdown.use(mdKatex);
 markdown.use(customLinkPlugin);
 markdown.use(docQuotePlugin);
+
 const parseNodes = (value) => {
     if (!value) return;
     // 解析<br />到\n
@@ -91,13 +90,9 @@ const parseNodes = (value) => {
         if (mdtext[mdtext.length - 1] != "\n") {
             mdtext += "\n";
         }
-        htmlString = markdown.render(preprocessContent(mdtext), {
-            linkList: props.linkList,
-        });
+        htmlString = markdown.render(preprocessContent(mdtext));
     } else {
-        htmlString = markdown.render(preprocessContent(value), {
-            linkList: props.linkList,
-        });
+        htmlString = markdown.render(preprocessContent(value));
     }
     // 解决小程序表格边框型失效问题
     htmlString = htmlString.replace(/<table/g, `<table class="table"`);
@@ -105,6 +100,7 @@ const parseNodes = (value) => {
     htmlString = htmlString.replace(/<th>/g, `<th class="th">`);
     htmlString = htmlString.replace(/<td/g, `<td class="td"`);
     htmlString = htmlString.replace(/<hr>|<hr\/>|<hr \/>/g, `<hr class="hr">`);
+
     // #ifndef APP-NVUE
     return htmlString;
     // #endif
@@ -139,7 +135,7 @@ const preprocessContent = (content) => {
     // #ifdef MP-WEIXIN
     return content;
     // #endif
-    // #ifdef H5
+    // #ifndef MP-WEIXIN
     return content
         .replace(/\\\(/g, "$$") // 将 \( 替换为 $
         .replace(/\\\)/g, "$$") // 将 \) 替换为 $
