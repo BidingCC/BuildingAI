@@ -373,7 +373,7 @@ const navbarTitle = computed(() => {
                             <view class="p-2" @click="showDrawer = true">
                                 <text class="i-tabler-align-left text-lg" />
                             </view>
-                            <view class="p-2" @click="handleNewChat">
+                            <view class="p-2" v-if="currentConversationId" @click="handleNewChat">
                                 <text class="i-tabler-message-circle-plus text-lg" />
                             </view>
                         </view>
@@ -555,9 +555,9 @@ const navbarTitle = computed(() => {
 
 <style scoped>
 .chat-content-container {
+    -webkit-backface-visibility: hidden;
     will-change: transform;
     backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
     transform-style: preserve-3d;
 }
 </style>
