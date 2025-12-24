@@ -89,19 +89,9 @@ const schema = object({
                 <div class="flex flex-col items-center space-y-4" style="padding: 80px 24px 40px">
                     <!-- 上传 -->
                     <div class="flex items-start gap-4">
-                        <!-- <BdUploader
-                            v-model="formData.logo"
-                            class="h-32 w-32"
-                            :text="t('payment-config.form.addLogo')"
-                            icon="i-lucide-camera"
-                            accept=".jpg,.png,.jpeg"
-                            :maxCount="1"
-                            :single="true"
-                            name="logo"
-                        /> -->
                         <UAvatar
                             :src="formData.logo"
-                            alt="微信支付"
+                            alt="Alipay"
                             class="h-32 w-32"
                             :ui="{ root: 'rounded-lg' }"
                         />
@@ -181,31 +171,31 @@ const schema = object({
                         />
                     </UFormField>
                     <!-- 支付接口版本 -->
-                    <UFormField
-                        :label="t('payment-config.form.payVersion')"
-                        :description="t('payment-config.form.payVersionHelp')"
-                        name="payVersion"
-                        required
-                    >
-                        <URadioGroup v-model="formData.payVersion" :items="['V3']" />
-                    </UFormField>
+                    <!--                    <UFormField-->
+                    <!--                        :label="t('payment-config.form.payVersion')"-->
+                    <!--                        :description="t('payment-config.form.payVersionHelp')"-->
+                    <!--                        name="payVersion"-->
+                    <!--                        required-->
+                    <!--                    >-->
+                    <!--                        <URadioGroup v-model="formData.payVersion" :items="['V3']" />-->
+                    <!--                    </UFormField>-->
                     <!-- 商户类型 -->
-                    <UFormField
-                        :label="t('payment-config.form.merchantType')"
-                        :description="t('payment-config.form.merchantTypeHelp')"
-                        name="merchantType"
-                        required
-                    >
-                        <URadioGroup
-                            v-model="formData.merchantType"
-                            :items="[
-                                {
-                                    label: t('payment-config.form.merchantTypeOptions.ordinary'),
-                                    value: 'ordinary',
-                                },
-                            ]"
-                        />
-                    </UFormField>
+                    <!--                    <UFormField-->
+                    <!--                        :label="t('payment-config.form.merchantType')"-->
+                    <!--                        :description="t('payment-config.form.merchantTypeHelp')"-->
+                    <!--                        name="merchantType"-->
+                    <!--                        required-->
+                    <!--                    >-->
+                    <!--                        <URadioGroup-->
+                    <!--                            v-model="formData.merchantType"-->
+                    <!--                            :items="[-->
+                    <!--                                {-->
+                    <!--                                    label: t('payment-config.form.merchantTypeOptions.ordinary'),-->
+                    <!--                                    value: 'ordinary',-->
+                    <!--                                },-->
+                    <!--                            ]"-->
+                    <!--                        />-->
+                    <!--                    </UFormField>-->
                     <!-- 商户号 -->
                     <UFormField
                         :label="t('payment-config.form.mchId')"
@@ -273,7 +263,7 @@ const schema = object({
                             v-model="formData.payAuthDir"
                             variant="subtle"
                             :placeholder="t('payment-config.form.payAuthDirHelp')"
-                         
+
                             :disabled="true"
                             class="w-full"
                         >

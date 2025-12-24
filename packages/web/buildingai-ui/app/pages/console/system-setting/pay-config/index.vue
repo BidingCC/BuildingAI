@@ -1,6 +1,9 @@
 <script lang="ts" setup>
-import type { PayconfigTableData } from "@buildingai/service/consoleapi/payconfig";
-import type { BooleanNumberType } from "@buildingai/service/consoleapi/payconfig";
+import {
+    type BooleanNumberType,
+    type PayconfigTableData,
+    type PayConfigType,
+} from "@buildingai/service/consoleapi/payconfig";
 import {
     apiGetPayconfigList,
     apiUpdatePayconfigStatus,
@@ -69,12 +72,10 @@ const getPayconfigList = async () => {
     }));
 };
 
-const edit = (id: string) => {
+const edit = (id: string, type: PayConfigType) => {
     router.push({
         path: useRoutePath("system-payconfig:update"),
-        query: {
-            id,
-        },
+        query: { id, type },
     });
 };
 
@@ -141,7 +142,7 @@ onMounted(() => getPayconfigList());
                         size="md"
                         variant="ghost"
                         color="primary"
-                        @click="edit(row.original.id)"
+                        @click="edit(row.original.id, row.original.payType)"
                     >
                         {{ $t("console-common.edit") }}
                     </UButton>
