@@ -114,20 +114,12 @@ definePage({
                 v-if="searchKeyword"
                 i-lucide-x
                 size="3"
-                class="cursor-pointer"
                 text="muted-foreground"
                 @click="handleClearSearch"
             ></view>
         </view>
         <view flex justify-end gap="2" font-size="sm" text="muted-foreground" my="2">
-            <view
-                text="primary"
-                flex
-                items-center
-                gap="1"
-                class="cursor-pointer"
-                @click="handleOpenSortMenu"
-            >
+            <view text="primary" flex items-center gap="1" @click="handleOpenSortMenu">
                 {{ currentSortLabel }}
                 <view i-lucide-chevron-down size="3"></view>
             </view>

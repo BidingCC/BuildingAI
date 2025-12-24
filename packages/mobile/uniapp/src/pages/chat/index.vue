@@ -333,16 +333,12 @@ const navbarTitle = computed(() => {
                     <template #right>
                         <text
                             v-if="!isEditMode"
-                            class="text-primary text-md cursor-pointer p-1"
+                            class="text-primary text-md p-1"
                             @click="isEditMode = true"
                         >
                             编辑
                         </text>
-                        <text
-                            v-else
-                            class="text-primary text-md cursor-pointer p-1"
-                            @click="isEditMode = false"
-                        >
+                        <text v-else class="text-primary text-md p-1" @click="isEditMode = false">
                             完成
                         </text>
                     </template>
@@ -493,7 +489,7 @@ const navbarTitle = computed(() => {
             >
                 <template #action-left>
                     <view
-                        class="bg-muted/50 flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2"
+                        class="bg-muted/50 flex items-center gap-2 rounded-lg px-2 py-2"
                         @click="openModelSelect"
                     >
                         <text class="i-lucide-brain text-xs" />

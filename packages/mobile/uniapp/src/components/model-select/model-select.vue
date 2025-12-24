@@ -32,6 +32,7 @@ const providers = shallowRef<AiProvider[]>([]);
 const selectedModelId = shallowRef<string>(props.modelValue || "");
 const expandedProviders = ref<Record<string, boolean>>({});
 
+const { t } = useI18n();
 const modelIdCookie = useCookie<string>("modelId", { default: "" });
 
 const allModels = computed(() => providers.value.flatMap((p) => p.models ?? []));
@@ -255,7 +256,7 @@ defineExpose({
                         class="bg-background hover:bg-background-soft mb-1 overflow-hidden rounded-lg"
                     >
                         <view
-                            class="flex cursor-pointer items-center justify-between py-2 pr-2 pl-2"
+                            class="flex items-center justify-between py-2 pr-2 pl-2"
                             @click="toggleProvider(provider.id)"
                         >
                             <view class="flex items-center gap-2">
@@ -286,7 +287,7 @@ defineExpose({
                                 class="text-foreground bg-muted rounded-sm px-2 py-0.5 text-[12px]"
                             >
                                 {{ provider.models?.length || 0 }}
-                                {{ $t("common.unit.general.item") }}{{ $t("common.ai.model") }}
+                                {{ t("common.unit.general.item") }}{{ t("common.ai.model") }}
                             </text>
                         </view>
 
@@ -295,7 +296,7 @@ defineExpose({
                                 v-for="(model, index) in provider.models"
                                 :key="model.id"
                                 :class="[
-                                    'active:bg-muted/30 flex cursor-pointer items-center justify-between px-2 py-2 transition-colors',
+                                    'active:bg-muted/30 flex items-center justify-between px-2 py-2 transition-colors',
                                     index !== (provider.models?.length || 0) - 1
                                         ? 'border-muted/20 border-b'
                                         : '',
@@ -326,7 +327,7 @@ defineExpose({
                                     v-if="model.billingRule.power === 0"
                                     class="text-foreground bg-muted rounded-sm px-2 py-0.5 text-[12px]"
                                 >
-                                    {{ $t("common.free") }}
+                                    {{ t("common.free") }}
                                 </text>
                                 <text
                                     v-else
@@ -337,10 +338,9 @@ defineExpose({
                                             : 'bg-primary/10 text-primary'
                                     "
                                 >
-                                    <text
-                                        >{{ model.billingRule.power
-                                        }}{{ $t("common.unit.points") }}</text
-                                    >
+                                    <text>
+                                        {{ model.billingRule.power }}{{ t("common.unit.points") }}
+                                    </text>
                                     <text>/</text>
                                     <text>{{ model.billingRule.tokens }}Tokens</text>
                                 </text>

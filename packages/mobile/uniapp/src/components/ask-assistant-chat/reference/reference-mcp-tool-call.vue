@@ -34,7 +34,7 @@ const toggleExpand = (index: number) => {
     >
         <view v-for="(item, index) in toolCalls" :key="index" class="group">
             <view
-                class="flex cursor-pointer flex-row items-center justify-between text-xs select-none"
+                class="flex flex-row items-center justify-between text-xs select-none"
                 @click="toggleExpand(index)"
             >
                 <view class="flex flex-wrap items-center gap-2">
@@ -160,4 +160,3 @@ const toggleExpand = (index: number) => {
     }
 }
 </style>
-

@@ -50,7 +50,7 @@ const toggleExpand = (index: number) => {
     <view v-if="references && references.length > 0" class="bg-muted mb-2 rounded-lg p-2">
         <view v-for="(ref, index) in references" :key="index" class="group">
             <view
-                class="flex w-full cursor-pointer flex-wrap items-center gap-2 text-xs select-none"
+                class="flex w-full flex-wrap items-center gap-2 text-xs select-none"
                 @click="toggleExpand(index)"
             >
                 <text class="i-lucide-hammer text-primary text-base" />

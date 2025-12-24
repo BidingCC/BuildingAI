@@ -99,12 +99,12 @@ defineExpose({
                         <view v-if="props.isEditMode" class="flex flex-none gap-2">
                             <view
                                 i-lucide-pencil
-                                class="text-primary cursor-pointer text-sm"
+                                class="text-primary text-sm"
                                 @click.stop="handleEdit(item)"
                             />
                             <view
                                 i-lucide-trash
-                                class="text-error cursor-pointer text-sm"
+                                class="text-error text-sm"
                                 @click.stop="handleDelete(item)"
                             />
                         </view>

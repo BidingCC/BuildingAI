@@ -810,7 +810,7 @@ onUnmounted(() => {
                 class="bd-markdown-view-toggle flex items-center rounded-md bg-gray-200 p-0.5 dark:bg-gray-700"
             >
                 <view
-                    class="flex flex-1 cursor-pointer items-center justify-center rounded px-2 py-1 text-xs transition-all"
+                    class="flex flex-1 items-center justify-center rounded px-2 py-1 text-xs transition-all"
                     :class="{
                         'bg-white text-gray-900 shadow-sm dark:bg-gray-800 dark:text-gray-100':
                             viewMode === 'preview',
@@ -821,7 +821,7 @@ onUnmounted(() => {
                     <text>{{ t("common.preview") }}</text>
                 </view>
                 <view
-                    class="flex flex-1 cursor-pointer items-center justify-center rounded px-2 py-1 text-xs transition-all"
+                    class="flex flex-1 items-center justify-center rounded px-2 py-1 text-xs transition-all"
                     :class="{
                         'bg-white text-gray-900 shadow-sm dark:bg-gray-800 dark:text-gray-100':
                             viewMode === 'source',

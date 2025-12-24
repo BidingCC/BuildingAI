@@ -49,7 +49,7 @@ const toggleExpand = () => {
 <template>
     <view v-if="reasoning?.content || isThinking" class="bg-muted mb-2 rounded-lg p-2">
         <view
-            class="flex cursor-pointer flex-row items-center gap-2 p-1 text-xs select-none"
+            class="flex flex-row items-center gap-2 p-1 text-xs select-none"
             @click="toggleExpand"
         >
             <text class="i-lucide-atom text-primary text-base" />
