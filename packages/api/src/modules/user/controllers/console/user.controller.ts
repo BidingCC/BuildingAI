@@ -59,7 +59,7 @@ export class UserConsoleController extends BaseController {
     async getUserInfo(@Playground() user: UserPlayground) {
         // 获取用户信息（排除敏感字段）
         const userInfo = await this.userService.findOneById(user.id, {
-            excludeFields: ["password"],
+            // excludeFields: ["password"],
             relations: ["role"],
         });
 
@@ -74,10 +74,11 @@ export class UserConsoleController extends BaseController {
         const menuTree = await this.menuService.getMenuTreeByPermissions(
             userInfo.isRoot ? [] : permissionCodes,
         );
-
+        const { password, ...restUserInfo } = userInfo;
         return {
             user: {
-                ...userInfo,
+                ...restUserInfo,
+                hasPassword: !!password,
                 permissions: userInfo.isRoot || permissionCodes.length > 0 ? 1 : 0,
             },
             permissions: permissionCodes,

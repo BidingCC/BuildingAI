@@ -209,9 +209,9 @@ definePageMeta({
                     <div class="flex items-center gap-2">
                         <UInput
                             :model-value="
-                                userStore.userInfo!.password
+                                userStore.userInfo!.hasPassword
                                     ? t('user.frontend.profile.passwordSet')
-                                    : t('user.frontend.profile.passwordSet')
+                                    : t('user.frontend.profile.passwordNotSet')
                             "
                             variant="soft"
                             color="neutral"

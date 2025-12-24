@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { Agent } from "@buildingai/service/consoleapi/ai-agent";
 import type { QueryPublicAgentParams } from "@buildingai/service/webapi/ai-agent";
+import type { UniPopupInstance } from "@uni-helper/uni-ui-types";
 
-import BdActionSheet from "@/components/bd-action-sheet.vue?async";
 import BdNavbar from "@/components/bd-navbar.vue?async";
 import { useDebounce } from "@/hooks/use-debounce";
 import { apiGetPublicAgents } from "@/service/agent";
@@ -22,8 +22,8 @@ const sortOptions = [
     { label: "最受欢迎", value: "popular" as const },
 ];
 
-// 动作面板引用
-const sortActionSheetRef = shallowRef<InstanceType<typeof BdActionSheet>>();
+// 排序弹窗引用
+const sortPopupRef = ref<UniPopupInstance>();
 
 // 查询列表
 const queryList = (pageNo: number, pageSize: number) => {
@@ -68,12 +68,13 @@ const handleClearSearch = () => {
 
 // 打开排序选择面板
 const handleOpenSortMenu = () => {
-    sortActionSheetRef.value?.open();
+    sortPopupRef.value?.open?.();
 };
 
 // 切换排序方式
 const handleSortChange = (value: "latest" | "popular") => {
     sortBy.value = value;
+    sortPopupRef.value?.close?.();
     pagingRef.value?.reload();
 };
 
@@ -132,22 +133,25 @@ definePage({
             </view>
         </view>
 
-        <!-- 排序选择动作面板 -->
-        <bd-action-sheet
-            ref="sortActionSheetRef"
-            :actions="[
-                {
-                    title: '最新发布',
-                    type: sortBy === 'latest' ? 'primary' : 'default',
-                    click: () => handleSortChange('latest'),
-                },
-                {
-                    title: '最受欢迎',
-                    type: sortBy === 'popular' ? 'primary' : 'default',
-                    click: () => handleSortChange('popular'),
-                },
-            ]"
-        />
+        <!-- 排序选择弹窗 -->
+        <uni-popup ref="sortPopupRef" type="top" :safe-area="false" z-index="999">
+            <view class="bg-background rounded-b-5 overflow-hidden shadow-lg">
+                <view
+                    class="bg-background active:bg-muted flex items-center justify-center border-b border-gray-200 py-4"
+                    :class="sortBy === 'latest' ? 'text-primary-600' : 'text-foreground'"
+                    @click="handleSortChange('latest')"
+                >
+                    <text class="text-base leading-normal">最新发布</text>
+                </view>
+                <view
+                    class="bg-background active:bg-muted flex items-center justify-center py-4"
+                    :class="sortBy === 'popular' ? 'text-primary-600' : 'text-foreground'"
+                    @click="handleSortChange('popular')"
+                >
+                    <text class="text-base leading-normal">最受欢迎</text>
+                </view>
+            </view>
+        </uni-popup>
         <z-paging
             ref="pagingRef"
             v-model="agentLists"

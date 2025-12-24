@@ -27,6 +27,7 @@ declare module 'vue' {
     LoginNewUser: typeof import('./../components/login/new-user.vue')['default']
     LoginWebsiteInfo: typeof import('./../components/login/website-info.vue')['default']
     ModelSelectModelSelect: typeof import('./../components/model-select/model-select.vue')['default']
+    UserUserPassword: typeof import('./../components/user/user-password.vue')['default']
     UserUserPhone: typeof import('./../components/user/user-phone.vue')['default']
     UserUserProfile: typeof import('./../components/user/user-profile.vue')['default']
     WidgetUserBannerUserBanner: typeof import('./../components/widget/user-banner/user-banner.vue')['default']

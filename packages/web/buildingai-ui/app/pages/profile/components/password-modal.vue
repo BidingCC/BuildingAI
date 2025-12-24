@@ -60,7 +60,7 @@ const errors = computed(() => {
     const result: Record<string, string> = {};
 
     // 验证旧密码
-    if (!formData.value.oldPassword.trim()) {
+    if (!formData.value.oldPassword.trim() && userStore.userInfo?.hasPassword) {
         result.oldPassword = t("user.frontend.profile.oldPasswordRequired");
     }
 
@@ -176,6 +176,7 @@ function togglePasswordVisibility(field: keyof typeof showPassword.value) {
                 size="lg"
                 required
                 :error="errors.oldPassword"
+                v-if="userStore.userInfo!.hasPassword"
             >
                 <UInput
                     v-model="formData.oldPassword"

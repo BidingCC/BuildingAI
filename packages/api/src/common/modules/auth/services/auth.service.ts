@@ -474,11 +474,15 @@ export class AuthService extends BaseService<User> {
         if (!user) {
             throw HttpErrorFactory.notFound(`ID为 ${userId} 的用户不存在`);
         }
-
-        // 验证旧密码
-        const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password);
-        if (!isOldPasswordValid) {
-            throw HttpErrorFactory.unauthorized("旧密码不正确", BusinessCode.PASSWORD_INCORRECT);
+        if (user.password) {
+            // 验证旧密码
+            const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password);
+            if (!isOldPasswordValid) {
+                throw HttpErrorFactory.unauthorized(
+                    "旧密码不正确",
+                    BusinessCode.PASSWORD_INCORRECT,
+                );
+            }
         }
 
         // 生成新密码的哈希
