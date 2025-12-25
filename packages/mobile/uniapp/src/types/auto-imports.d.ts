@@ -128,6 +128,7 @@ declare global {
   const updateTabBarTitles: typeof import('../utils/tabbar')['updateTabBarTitles']
   const useActionSheet: typeof import('@uni-helper/uni-use')['useActionSheet']
   const useAppStore: typeof import('../stores/app')['useAppStore']
+  const useAsyncPackage: typeof import('../hooks/use-package')['useAsyncPackage']
   const useAttrs: typeof import('vue')['useAttrs']
   const useChat: typeof import('../hooks/use-chat')['useChat']
   const useClipboardData: typeof import('@uni-helper/uni-use')['useClipboardData']
@@ -335,6 +336,7 @@ declare module 'vue' {
     readonly updateTabBarTitles: UnwrapRef<typeof import('../utils/tabbar')['updateTabBarTitles']>
     readonly useActionSheet: UnwrapRef<typeof import('@uni-helper/uni-use')['useActionSheet']>
     readonly useAppStore: UnwrapRef<typeof import('../stores/app')['useAppStore']>
+    readonly useAsyncPackage: UnwrapRef<typeof import('../hooks/use-package')['useAsyncPackage']>
     readonly useAttrs: UnwrapRef<typeof import('vue')['useAttrs']>
     readonly useChat: UnwrapRef<typeof import('../hooks/use-chat')['useChat']>
     readonly useClipboardData: UnwrapRef<typeof import('@uni-helper/uni-use')['useClipboardData']>

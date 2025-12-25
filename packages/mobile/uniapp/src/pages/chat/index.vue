@@ -13,6 +13,7 @@ import type { MessageContentPart } from "@buildingai/types";
 // #ifdef H5
 import BdMarkdown from "@/async-components/bd-markdown/index.vue?async";
 // #endif
+import BdPopover from "@/async-components/bd-popover/index.vue?async";
 // #ifndef H5
 import UaMarkdown from "@/async-components/ua-markdown/ua-markdown.vue?async";
 // #endif
@@ -57,6 +58,8 @@ const {
     handlePopupClose: handleModelSelectClose,
     pageTransform,
 } = useHalfPopupInteraction();
+
+const { isLoaded } = useAsyncPackage("bd-popover");
 
 const currentConversationId = ref<string | undefined>(undefined);
 const currentConversation = shallowRef<AiConversation | null>(null);
@@ -487,7 +490,7 @@ const navbarTitle = computed(() => {
                 @submit="handleSubmitMessage"
                 @stop="stop"
             >
-                <template #action-left>
+                <template class="flex items-center gap-2" #action-left>
                     <view
                         class="bg-muted/50 flex items-center gap-2 rounded-lg px-2 py-2"
                         @click="openModelSelect"
@@ -497,6 +500,27 @@ const navbarTitle = computed(() => {
                             {{ selectedModel?.name || "选择模型" }}
                         </text>
                     </view>
+
+                    <BdPopover
+                        v-show="isLoaded"
+                        placement="top"
+                        :blurIntensity="4"
+                        :content-style="{
+                            background: 'var(--background-transparent)',
+                        }"
+                    >
+                        <template #content>
+                            <view class="custom-content rounded-lg p-2">
+                                <text>自定义内容</text>
+                                <button size="mini" type="primary">操作按钮</button>
+                            </view>
+                        </template>
+                        <view
+                            class="bg-muted/50 flex items-center gap-2 rounded-lg px-2 py-2 text-xs"
+                        >
+                            MCP
+                        </view>
+                    </BdPopover>
                 </template>
             </ChatsPrompt>
         </template>

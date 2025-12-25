@@ -115,6 +115,7 @@
             "sendFailed": "发送失败",
             "thinking": "思考中...",
             "uploadAttachment": "上传附件",
+            "inputUrl": "在线链接",
             "inputUrlPlaceholder": "输入文件URL",
             "or": "或",
             "chooseImage": "选择图片",

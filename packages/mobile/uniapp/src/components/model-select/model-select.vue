@@ -206,7 +206,7 @@ defineExpose({
     <half-popup
         v-model="show"
         :z-index="999999"
-        height="90vh"
+        height="85vh"
         :close-btn="false"
         :full-screen="false"
         bg-color="var(--background)"
@@ -253,7 +253,7 @@ defineExpose({
                     <view
                         v-for="provider in filteredProviders"
                         :key="provider.id"
-                        class="bg-background hover:bg-background-soft mb-1 overflow-hidden rounded-lg"
+                        class="bg-background mb-1 overflow-hidden rounded-lg"
                     >
                         <view
                             class="flex items-center justify-between py-2 pr-2 pl-2"

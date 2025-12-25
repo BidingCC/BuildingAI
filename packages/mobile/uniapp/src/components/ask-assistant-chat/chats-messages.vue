@@ -396,14 +396,14 @@ const handleFileClick = (
                         <template v-for="action in assistant.actions" :key="action.label">
                             <view
                                 v-if="action.show !== false"
-                                class="p-1"
+                                class="flex p-1"
                                 @click="action.onClick?.(message, index)"
                             >
                                 <view :class="action.icon" class="text-sm" />
                             </view>
                         </template>
                     </view>
-                    <view text="xs muted-foreground" class="mt-1 ml-2 text-[14.5px]">
+                    <view text="xs muted-foreground" class="mt-px ml-2 text-[14.5px]">
                         AI 的回答未必正确无误，请仔细核查
                     </view>
                 </view>

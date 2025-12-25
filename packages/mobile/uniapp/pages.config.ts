@@ -55,4 +55,10 @@ export default defineUniPages({
         },
         ...(await loadExtensionSubPackages("../../../extensions")),
     ],
+    preloadRule: {
+        "async-components/index": {
+            network: "all",
+            packages: ["async-components"],
+        },
+    },
 });

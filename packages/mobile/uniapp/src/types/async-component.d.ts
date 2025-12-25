@@ -190,3 +190,7 @@ declare module '@/components/user/user-password.vue?async' {
   const component: typeof import('@/components/user/user-password.vue')
   export = component
 }
+declare module '@/async-components/bd-popover/index.vue?async' {
+  const component: typeof import('@/async-components/bd-popover/index.vue')
+  export = component
+}

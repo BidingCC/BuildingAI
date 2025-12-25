@@ -93,6 +93,7 @@
             "sendFailed": "Send failed",
             "thinking": "Thinking...",
             "uploadAttachment": "Upload Attachment",
+            "inputUrl": "Online Link",
             "inputUrlPlaceholder": "Enter file URL",
             "or": "OR",
             "chooseImage": "Choose Image",
@@ -134,4 +135,3 @@
         "callDetails": "Call details"
     }
 }
-

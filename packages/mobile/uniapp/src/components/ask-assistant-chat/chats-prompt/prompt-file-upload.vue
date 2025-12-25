@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import BdPopover from "@/async-components/bd-popover/index.vue?async";
 import BdModal from "@/components/bd-modal.vue";
 import type { AiModel } from "@/service/ai-conversation";
 
@@ -16,6 +17,8 @@ const props = defineProps<{
 
 const { t } = useI18n();
 const toast = useToast();
+const { isLoaded } = useAsyncPackage("bd-popover");
+
 const remoteUrls = shallowRef<string>("");
 const modalRef = ref<InstanceType<typeof BdModal>>();
 
@@ -150,6 +153,7 @@ async function chooseFileMP(): Promise<string | null> {
 // #ifdef APP-PLUS
 async function chooseFileApp(): Promise<string | null> {
     return new Promise((resolve) => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore plus is available in App environment
         if (typeof plus === "undefined") {
             console.error("plus.io is not available");
@@ -158,6 +162,7 @@ async function chooseFileApp(): Promise<string | null> {
             return;
         }
 
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore plus.io is available in App environment
         plus.io.chooseFile(
             {
@@ -188,7 +193,6 @@ async function chooseFileApp(): Promise<string | null> {
 async function handleFileSelect(filePath: string | null) {
     if (!filePath) return;
     emits("file-select", filePath);
-    modalRef.value?.close();
 }
 
 const handleChooseImage = async () => {
@@ -209,7 +213,6 @@ const handleChooseImage = async () => {
         if (!tempFilePath) return;
 
         emits("file-select", tempFilePath);
-        modalRef.value?.close();
     } catch (err) {
         console.error("Choose image failed:", err);
         toast.error(t("common.message.chooseFileFailed"));
@@ -231,119 +234,30 @@ const handleChooseVideo = async () => {
         if (!tempFilePath) return;
 
         emits("file-select", tempFilePath);
-        modalRef.value?.close();
     } catch (err) {
         console.error("Choose video failed:", err);
         toast.error(t("common.message.chooseFileFailed"));
     }
 };
 
-// #ifdef MP-WEIXIN
-function showMultimodalActionSheet() {
-    const features = props.selectedModel?.features || [];
-    const supportsVision = features.includes("vision");
-
-    const actionItems: string[] = [];
-    const actions: (() => void)[] = [];
-
-    actionItems.push(t("common.chat.messages.uploadFile"));
-    actions.push(async () => {
-        const filePath = await chooseFileMP();
-        await handleFileSelect(filePath);
-    });
-
-    if (supportsVision) {
-        actionItems.push(t("common.chat.messages.chooseImage"));
-        actions.push(() => {
-            handleChooseImage();
-        });
-    }
-
-    if (supportsVision) {
-        actionItems.push(t("common.chat.messages.chooseVideo"));
-        actions.push(() => {
-            handleChooseVideo();
-        });
-    }
-
-    uni.showActionSheet({
-        itemList: actionItems,
-        success: (res) => {
-            const action = actions[res.tapIndex];
-            if (action) {
-                action();
-            }
-        },
-        fail: () => {},
-    });
-    modalRef.value?.close();
-}
-// #endif
-
 const handleChooseFile = async () => {
     // #ifdef H5
-    const filePath = await chooseFileH5();
-    await handleFileSelect(filePath);
+    const h5FilePath = await chooseFileH5();
+    await handleFileSelect(h5FilePath);
     // #endif
 
     // #ifdef MP-WEIXIN
-    const features = props.selectedModel?.features || [];
-    const isMultimodal = features.includes("vision") || features.includes("audio");
-
-    if (isMultimodal) {
-        showMultimodalActionSheet();
-    } else {
-        const filePath = await chooseFileMP();
-        await handleFileSelect(filePath);
-    }
+    const mpFilePath = await chooseFileMP();
+    await handleFileSelect(mpFilePath);
     // #endif
 
     // #ifdef APP-PLUS
-    const appActionItems: string[] = [];
-    const appActions: (() => void)[] = [];
-
-    appActionItems.push(t("common.chat.messages.uploadFile"));
-    appActions.push(async () => {
-        const filePath = await chooseFileApp();
-        await handleFileSelect(filePath);
-    });
-
-    appActionItems.push(t("common.chat.messages.chooseImage"));
-    appActions.push(() => {
-        handleChooseImage();
-    });
-
-    appActionItems.push(t("common.chat.messages.chooseVideo"));
-    appActions.push(() => {
-        handleChooseVideo();
-    });
-
-    uni.showActionSheet({
-        itemList: appActionItems,
-        success: (res) => {
-            const action = appActions[res.tapIndex];
-            if (action) {
-                action();
-            }
-        },
-        fail: () => {},
-    });
-    modalRef.value?.close();
+    const appFilePath = await chooseFileApp();
+    await handleFileSelect(appFilePath);
     // #endif
 
     // #ifndef H5 || MP-WEIXIN || APP-PLUS
-    uni.showActionSheet({
-        itemList: [t("common.chat.messages.chooseImage"), t("common.chat.messages.chooseVideo")],
-        success: (res) => {
-            if (res.tapIndex === 0) {
-                handleChooseImage();
-            } else if (res.tapIndex === 1) {
-                handleChooseVideo();
-            }
-        },
-        fail: () => {},
-    });
-    modalRef.value?.close();
+    handleChooseImage();
     // #endif
 };
 
@@ -355,19 +269,85 @@ function handleUrlSubmit() {
     remoteUrls.value = "";
     modalRef.value?.close();
 }
+
+function handleOpenUrlModal() {
+    modalRef.value?.open?.({ title: t("common.chat.messages.uploadAttachment") });
+}
+
+const features = computed(() => props.selectedModel?.features || []);
+const supportsVision = computed(() => features.value.includes("vision"));
 </script>
 
 <template>
-    <view>
-        <view
-            class="flex items-center justify-center rounded-full p-2 active:opacity-70"
-            :class="disabled ? 'opacity-50' : ''"
-            @click.stop="
-                !disabled && modalRef?.open?.({ title: t('common.chat.messages.uploadAttachment') })
-            "
+    <view v-show="isLoaded">
+        <BdPopover
+            placement="end-top"
+            :blur-intensity="4"
+            :content-style="{
+                width: '250rpx',
+                background: 'var(--background-transparent)',
+            }"
         >
-            <text class="i-lucide-paperclip text-foreground text-lg" />
-        </view>
+            <template #content>
+                <view class="flex flex-col gap-0 pr-1" style="min-width: 200rpx">
+                    <!-- 在线链接 -->
+                    <view
+                        class="flex items-center gap-2 rounded-lg px-3 py-2.5 active:opacity-80"
+                        :class="disabled ? 'opacity-50' : ''"
+                        @click="!disabled && handleOpenUrlModal()"
+                    >
+                        <text class="i-lucide-link text-foreground text-base" />
+                        <text class="text-foreground text-sm">
+                            {{ t("common.chat.messages.inputUrl") }}
+                        </text>
+                    </view>
+
+                    <!-- 选择文件 -->
+                    <view
+                        class="flex items-center gap-2 rounded-lg px-3 py-2.5 active:opacity-80"
+                        :class="disabled ? 'opacity-50' : ''"
+                        @click="!disabled && handleChooseFile()"
+                    >
+                        <text class="i-lucide-upload text-foreground text-base" />
+                        <text class="text-foreground text-sm">
+                            {{ t("common.chat.messages.uploadFile") }}
+                        </text>
+                    </view>
+
+                    <!-- 选择图片 -->
+                    <view
+                        v-if="supportsVision"
+                        class="flex items-center gap-2 rounded-lg px-3 py-2.5 active:opacity-80"
+                        :class="disabled ? 'opacity-50' : ''"
+                        @click="!disabled && handleChooseImage()"
+                    >
+                        <text class="i-lucide-image text-foreground text-base" />
+                        <text class="text-foreground text-sm">
+                            {{ t("common.chat.messages.chooseImage") }}
+                        </text>
+                    </view>
+
+                    <!-- 选择视频 -->
+                    <view
+                        v-if="supportsVision"
+                        class="flex items-center gap-2 rounded-lg px-3 py-2.5 active:opacity-80"
+                        :class="disabled ? 'opacity-50' : ''"
+                        @click="!disabled && handleChooseVideo()"
+                    >
+                        <text class="i-lucide-video text-foreground text-base" />
+                        <text class="text-foreground text-sm">
+                            {{ t("common.chat.messages.chooseVideo") }}
+                        </text>
+                    </view>
+                </view>
+            </template>
+            <view
+                class="flex items-center justify-center rounded-full p-2 active:opacity-70"
+                :class="disabled ? 'opacity-50' : ''"
+            >
+                <text class="i-lucide-paperclip text-foreground text-lg" />
+            </view>
+        </BdPopover>
 
         <BdModal
             ref="modalRef"
@@ -375,39 +355,22 @@ function handleUrlSubmit() {
             :show-confirm="false"
             :show-cancel="false"
         >
-            <view class="px-4 pb-4">
-                <view class="mb-4">
-                    <view class="flex items-center gap-2">
-                        <uni-easyinput
-                            v-model="remoteUrls"
-                            class="flex-1"
-                            :placeholder="t('common.chat.messages.inputUrlPlaceholder')"
-                            :clearable="true"
-                            :input-border="true"
-                            confirm-type="send"
-                            @confirm="handleUrlSubmit"
-                        />
-                        <view
-                            class="bg-primary rounded-lg px-4 py-2 text-sm text-white active:opacity-80"
-                            @click="handleUrlSubmit"
-                        >
-                            {{ t("common.confirm") }}
-                        </view>
-                    </view>
-                </view>
-
-                <BdSeparator margin="30px 0" :text="t('common.chat.messages.or')" />
-
-                <view class="flex flex-col gap-2">
+            <view class="px-2 pb-4">
+                <view class="flex items-center gap-2">
+                    <uni-easyinput
+                        v-model="remoteUrls"
+                        class="flex-1"
+                        :placeholder="t('common.chat.messages.inputUrlPlaceholder')"
+                        :clearable="true"
+                        :input-border="true"
+                        confirm-type="send"
+                        @confirm="handleUrlSubmit"
+                    />
                     <view
-                        class="bg-muted flex items-center justify-center rounded-lg px-4 py-3 active:opacity-80"
-                        :class="disabled ? 'opacity-50' : ''"
-                        @click="!disabled && handleChooseFile()"
+                        class="bg-primary rounded-lg px-4 py-2 text-sm text-white active:opacity-80"
+                        @click="handleUrlSubmit"
                     >
-                        <text class="i-lucide-upload text-foreground mr-2" />
-                        <text class="text-foreground text-sm">
-                            {{ t("common.chat.messages.uploadFile") }}
-                        </text>
+                        {{ t("common.confirm") }}
                     </view>
                 </view>
             </view>

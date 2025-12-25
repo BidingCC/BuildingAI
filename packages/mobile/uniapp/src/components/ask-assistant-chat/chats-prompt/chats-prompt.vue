@@ -170,7 +170,7 @@ watch(
             </view>
             <view class="action-bar" flex="~ items-center justify-between" px="1">
                 <view flex="~ items-center gap-2">
-                    <slot name="action-left">
+                    <slot flex="~ items-center gap-2" name="action-left">
                         <view class="p-1.5">
                             <text i-lucide-settings-2 />
                         </view>
