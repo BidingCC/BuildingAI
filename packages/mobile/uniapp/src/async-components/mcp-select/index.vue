@@ -48,15 +48,12 @@ const { lockFn: getAllList, isLock: loading } = useLockFn(async () => {
         }
     } catch (e) {
         console.error("Failed to load MCP", e);
-        toast.error(t("common.message.loadFailed") || "加载失败");
     }
 });
 
 const handleSelect = (mcp: McpServerInfo) => {
     if (!mcp.connectable) {
-        toast.error(
-            mcp.connectError || t("common.message.mcpNotConnectable") || "MCP 服务器不可用",
-        );
+        toast.error(mcp.connectError || t("common.message.mcpNotConnectable"));
         return;
     }
 
@@ -66,10 +63,7 @@ const handleSelect = (mcp: McpServerInfo) => {
         currentIds.splice(index, 1);
     } else {
         if (currentIds.length >= 5) {
-            toast.error(
-                t("common.message.mcpMaxLimit") ||
-                    "为了保持性能，最多只能同时激活5个MCP服务器。请在启用新的服务器之前关闭一些服务器。",
-            );
+            toast.error(t("common.message.mcpMaxLimit"));
             return;
         }
         currentIds.push(mcp.id);
