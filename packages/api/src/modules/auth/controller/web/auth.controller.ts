@@ -1,4 +1,5 @@
 import { BaseController } from "@buildingai/base";
+import { BusinessCode } from "@buildingai/constants/shared/business-code.constant";
 import { UserTerminal } from "@buildingai/constants/shared/status-codes.constant";
 import { type UserPlayground } from "@buildingai/db/interfaces/context.interface";
 import { BuildFileUrl } from "@buildingai/decorators/file-url.decorator";
@@ -286,6 +287,66 @@ export class AuthWebController extends BaseController {
     @Get("wechat-qrcode-status/:scene_str")
     async getWechatQrcodeStatus(@Param("scene_str") scene_str: string) {
         return this.wechatOaService.getQrCodeStatus(scene_str);
+    }
+
+    /**
+     * 微信网页授权回调
+     *
+     * 微信在用户点击授权后会携带 code 与 state 回调到此接口。
+     * 后端使用 code 置换 OAuth access_token 并拉取用户信息，
+     * 将用户信息写入 Redis 的 scene 状态中，标记授权完成，
+     * 然后 302 跳转到移动端 H5 的“授权成功”页面。
+     */
+    @Public()
+    @Get("wechat-oauth-callback")
+    async getWechatOAuthCallback(
+        @Query("code") code: string,
+        @Query("state") state: string,
+        @Res() res: Response,
+    ) {
+        if (!code || !state) {
+            throw HttpErrorFactory.business(
+                "缺少必须的 code 或 state 参数",
+                BusinessCode.INVALID_REQUEST,
+            );
+        }
+        await this.wechatOaService.authorizeUserInfo(code, state);
+        // 不做重定向，直接返回一个简洁的移动端友好页
+        const html = `<!doctype html>
+    <html lang="zh-CN">
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+      <title>授权完成</title>
+      <style>
+        body { margin:0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", "Microsoft YaHei", Arial, sans-serif; background: #f8fafc; color: #111827; }
+        .container { min-height: 100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 32px; box-sizing: border-box; }
+        .card { max-width: 520px; background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(15, 23, 42, 0.08); padding: 28px; text-align:center; }
+        .title { font-size: 20px; font-weight: 700; margin: 8px 0 4px; }
+        .desc { font-size: 14px; color:#6b7280; margin: 0 0 16px; }
+        .ok { width: 64px; height: 64px; border-radius: 9999px; background: #10b981; display:flex; align-items:center; justify-content:center; color:#fff; font-size: 36px; margin: 0 auto; }
+        .btn { width: 100%; appearance:none; border:0; padding: 12px 16px; border-radius: 12px; background:#111827; color:#fff; font-size:16px; font-weight:600; }
+        .btn:active { opacity: .9; }
+        .footer { margin-top: 16px; font-size: 12px; color:#9ca3af; }
+      </style>
+      <script>
+        function closeOrBack(){ if (typeof WeixinJSBridge !== 'undefined' && WeixinJSBridge.invoke){ WeixinJSBridge.call('closeWindow'); } else { history.length > 1 ? history.back() : window.close(); } }
+      </script>
+      </head>
+      <body>
+        <div class="container">
+          <div class="card">
+            <div class="ok">✓</div>
+            <h1 class="title">授权完成</h1>
+            <p class="desc">您已完成授权，可返回电脑端，页面会自动登录并跳转首页。</p>
+            <button class="btn" onclick="closeOrBack()">我知道了</button>
+            <div class="footer">FastbuildAI</div>
+          </div>
+        </div>
+      </body>
+      </html>`;
+        res.setHeader("Content-Type", "text/html; charset=utf-8");
+        return res.send(html);
     }
 
     /**

@@ -421,4 +421,125 @@ export class WechatOaService {
         this.logger.log("access_token 刷新");
         await this.getAccessTokenByRedis();
     }
+
+    /**
+     * 处理微信网页授权回调
+     *
+     * 通过 state 传回 scene_str，用以定位当前扫码会话。
+     * 该方法只负责拉取微信用户信息并写入 Redis 标记授权完成；
+     * 实际的注册与登录在 getQrCodeStatus 轮询时完成（当检测到 is_authorized=true）
+     *
+     * @param code 微信回调 code
+     * @param state scene_str 场景值
+     * @returns 跳转的授权成功页 URL
+     */
+    // async authorizeUserInfo(code: string, state: string): Promise<string> {
+    //     const { appId, appSecret, token, encodingAESKey, webAuthDomain } =
+    //         await this.wxoaconfigService.getConfig();
+
+    //     // 初始化客户端（若尚未初始化）
+    //     this.wechatOaClient = new WechatOaClient(token, encodingAESKey, appId, appSecret);
+
+    //     // 通过 code 置换 OAuth access_token 与 openid
+    //     const oauth = await this.wechatOaClient.getOAuthAccessToken(appId, appSecret, code);
+
+    //     // 拉取用户信息（需要 scope=snsapi_userinfo）
+    //     const userInfo = await this.wechatOaClient.getOAuthUserInfo(
+    //         oauth.access_token,
+    //         oauth.openid,
+    //     );
+
+    //     // 合并写回 Redis，标记授权完成，等待 PC 轮询触发最终登录
+    //     console.log("authorizeUserInfo", state);
+
+    //     // 对于绑定账号场景，state 可能是用户ID而不是场景值，需要找到正确的场景key
+    //     let sceneKey = this.SCENE_PREFIX + ":" + state;
+    //     let raw = await this.redisService.get<string>(sceneKey);
+
+    //     // 如果使用state作为场景key找不到记录，可能是绑定账号场景
+    //     if (!raw && (await this.authService.findOne({ where: { id: state } }))) {
+    //         try {
+    //             // 使用executeCommand执行keys命令查找包含该openid的场景记录
+    //             const keys = await this.redisService.executeCommand(
+    //                 "KEYS",
+    //                 this.SCENE_PREFIX + ":*",
+    //             );
+    //             if (keys && Array.isArray(keys)) {
+    //                 for (const key of keys) {
+    //                     const tempRaw = await this.redisService.get<string>(key);
+    //                     if (tempRaw) {
+    //                         const tempScene = JSON.parse(tempRaw);
+    //                         if (tempScene.openid === oauth.openid) {
+    //                             sceneKey = key;
+    //                             raw = tempRaw;
+    //                             break;
+    //                         }
+    //                     }
+    //                 }
+    //             }
+    //         } catch (error) {
+    //             this.logger.warn(`查找Redis场景key时出错: ${error.message}`);
+    //         }
+    //     }
+
+    //     const scene = raw ? JSON.parse(raw) : {};
+
+    //     // 确保正确设置授权状态
+    //     const updatedScene = {
+    //         ...scene,
+    //         openid: oauth.openid,
+    //         is_scan: true,
+    //         is_authorized: true,
+    //         wx_userinfo: userInfo,
+    //     };
+
+    //     await this.redisService.set(sceneKey, JSON.stringify(updatedScene), 300);
+
+    //     // 绑定的目标微信用户
+    //     const existingUser = await this.authService.findOne({ where: { id: state } });
+    //     if (existingUser) {
+    //         // 更新用户的 openid
+    //         await this.authService.update(
+    //             {
+    //                 openid: oauth.openid,
+    //             },
+    //             { where: { id: state } },
+    //         );
+    //         // 返回授权成功页，确保前端能感知到授权状态的变化
+    //         return `${webAuthDomain}/api/auth/wechat-oauth-success?status=success&type=bind`;
+    //     }
+
+    //     // 若为已注册用户，授权完成后跳转首页
+    //     const existed = await this.authService.findOne({ where: { openid: oauth.openid } });
+    //     if (existed) {
+    //         return `${webAuthDomain}/`;
+    //     }
+
+    //     // 未注册用户：在授权后立即完成注册并补齐资料，随后跳转成功页
+    //     try {
+    //         const loginSettings = await this.getLoginSettings();
+    //         if (
+    //             loginSettings.allowedRegisterMethods &&
+    //             loginSettings.allowedRegisterMethods.includes(3)
+    //         ) {
+    //             await this.authService.loginOrRegisterByOpenid(oauth.openid);
+    //             await this.authService.update(
+    //                 {
+    //                     nickname: userInfo.nickname,
+    //                     avatar: userInfo.headimgurl,
+    //                 },
+    //                 { where: { openid: oauth.openid } },
+    //             );
+    //         }
+    //     } catch (e) {
+    //         this.logger.warn(`授权后注册或更新资料失败: ${e.message}`);
+    //     }
+
+    //     // 返回后端内置的授权成功页，避免跳转到站点首页或依赖前端静态资源
+    //     const successUrl = `${webAuthDomain}/api/auth/wechat-oauth-success?status=success`;
+    //     //记录用户为新用户
+    //     await this.redisService.set(oauth.openid, JSON.stringify({ newUser: true }), 5);
+
+    //     return successUrl;
+    // }
 }

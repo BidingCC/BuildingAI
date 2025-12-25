@@ -80,6 +80,7 @@ export class WechatMpService {
         try {
             // 通过 code 换取 openid 和 session_key
             const { openid, unionid } = await this.jscode2session(jsCode);
+            console.log("unionid", unionid);
 
             if (!openid) {
                 throw HttpErrorFactory.internal("获取 openid 失败");

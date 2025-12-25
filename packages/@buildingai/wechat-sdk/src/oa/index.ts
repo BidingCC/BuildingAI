@@ -218,4 +218,101 @@ export class WechatOaClient {
 
         return xml;
     }
+    /**
+     * 通过网页授权 code 获取 OAuth access_token 与 openid
+     *
+     * 文档: https://developers.weixin.qq.com/doc/offiaccount/OA_Web_Apps/Wechat_webpage_authorization.html
+     *
+     * @param appId 公众号 AppID
+     * @param appSecret 公众号 AppSecret
+     * @param code 用户同意授权后回调携带的 code
+     */
+    async getOAuthAccessToken(
+        appId: string,
+        appSecret: string,
+        code: string,
+    ): Promise<{
+        access_token: string;
+        expires_in: number;
+        refresh_token: string;
+        openid: string;
+        scope: string;
+        unionid?: string;
+    }> {
+        const { data } = await axios.get<{
+            access_token: string;
+            expires_in: number;
+            refresh_token: string;
+            openid: string;
+            scope: string;
+            unionid?: string;
+            errcode?: number;
+            errmsg?: string;
+        }>("https://api.weixin.qq.com/sns/oauth2/access_token", {
+            params: {
+                appid: appId,
+                secret: appSecret,
+                code,
+                grant_type: "authorization_code",
+            },
+            timeout: 10000,
+        });
+
+        if (!data.access_token || !data.openid) {
+            throw new Error(`获取OAuth access_token失败: ${data.errmsg || "未知错误"}`);
+        }
+
+        return data;
+    }
+
+    /**
+     * 使用 OAuth access_token 获取用户信息（昵称、头像等）
+     *
+     * 文档: https://developers.weixin.qq.com/doc/offiaccount/OA_Web_Apps/Wechat_webpage_authorization.html#4
+     * 注意: 需要 scope=snsapi_userinfo
+     *
+     * @param access_token OAuth access_token
+     * @param openid 用户的 openid
+     */
+    async getOAuthUserInfo(
+        access_token: string,
+        openid: string,
+    ): Promise<{
+        openid: string;
+        nickname: string;
+        sex?: number;
+        province?: string;
+        city?: string;
+        country?: string;
+        headimgurl?: string;
+        privilege?: string[];
+        unionid?: string;
+    }> {
+        const { data } = await axios.get<{
+            openid: string;
+            nickname: string;
+            sex?: number;
+            province?: string;
+            city?: string;
+            country?: string;
+            headimgurl?: string;
+            privilege?: string[];
+            unionid?: string;
+            errcode?: number;
+            errmsg?: string;
+        }>("https://api.weixin.qq.com/sns/userinfo", {
+            params: {
+                access_token,
+                openid,
+                lang: "zh_CN",
+            },
+            timeout: 10000,
+        });
+
+        if (!data.openid) {
+            throw new Error(`获取用户信息失败: ${data.errmsg || "未知错误"}`);
+        }
+
+        return data;
+    }
 }
