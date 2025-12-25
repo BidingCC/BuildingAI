@@ -29,7 +29,7 @@ const router = useRouter();
         <view class="bg-background rounded-lg px-2">
             <view
                 class="flex items-center justify-between pl-2"
-                @click="router.navigate({ url: '/pages/agreement/index?url=service' })"
+                @click="router.navigate({ url: '/packages/agreement/index?url=service' })"
             >
                 <view
                     w="full"
@@ -44,7 +44,7 @@ const router = useRouter();
             </view>
             <view
                 class="flex items-center justify-between pl-2"
-                @click="router.navigate({ url: '/pages/agreement/index?url=privacy' })"
+                @click="router.navigate({ url: '/packages/agreement/index?url=privacy' })"
             >
                 <view w="full" flex="~ justify-between items-center" class="py-3 pr-2">
                     <view class="text-foreground text-sm">{{ t("login.privacyPolicy") }}</view>

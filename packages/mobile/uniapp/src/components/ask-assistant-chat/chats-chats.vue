@@ -94,7 +94,7 @@ defineExpose({
                                 'text-foreground': props.currentConversationId !== item.id,
                             }"
                         >
-                            {{ item.title }}
+                            {{ item.title || "未命名对话" }}
                         </view>
                         <view v-if="props.isEditMode" class="flex flex-none gap-2">
                             <view
