@@ -20,21 +20,24 @@ import { Input } from "@buildingai/ui/components/ui/input";
 import { Label } from "@buildingai/ui/components/ui/label";
 import { cn } from "@buildingai/ui/lib/utils";
 import { ArrowRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import SvgIcons from "../../../components/svg-icons";
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
-  const { setUserInfo, setToken } = useAuthStore((state) => state.authActions);
+  const { setToken } = useAuthStore((state) => state.authActions);
+  const navigate = useNavigate();
+
   const loginHandler = async () => {
-    const { token, user } = await postLogin({
+    const { token } = await postLogin({
       username: "admin1",
       password: "BuildingAI&123456",
       terminal: 1,
     });
-    setUserInfo(user);
     setToken(token);
+    navigate("/console");
   };
+
   return (
     <div className={cn("flex flex-col gap-4", className)} {...props}>
       <Card>

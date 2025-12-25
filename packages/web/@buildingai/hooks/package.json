@@ -1,0 +1,29 @@
+{
+    "name": "@buildingai/hooks",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
+    "scripts": {
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix"
+    },
+    "exports": {
+        ".": {
+            "import": "./src/index.ts",
+            "require": "./src/index.ts",
+            "types": "./src/index.ts"
+        }
+    },
+    "dependencies": {
+        "@buildingai/constants": "workspace:*",
+        "@buildingai/stores": "workspace:*",
+        "@buildingai/services": "workspace:*",
+        "react": "catalog:web",
+        "@types/react": "catalog:web"
+    },
+    "devDependencies": {
+        "@buildingai/eslint-config": "workspace:*",
+        "@buildingai/typescript-config": "workspace:*",
+        "@buildingai/web-types": "workspace:*"
+    }
+}

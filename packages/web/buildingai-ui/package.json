@@ -1,5 +1,5 @@
 {
-    "name": "salary-keeper",
+    "name": "buildingai-ui",
     "private": true,
     "version": "0.0.0",
     "type": "module",
@@ -13,6 +13,7 @@
     "dependencies": {
         "@buildingai/ui": "workspace:*",
         "@buildingai/http": "workspace:*",
+        "@buildingai/hooks": "workspace:*",
         "@buildingai/constants": "workspace:*",
         "@buildingai/web-types": "workspace:*",
         "@buildingai/services": "workspace:*",
@@ -20,8 +21,8 @@
         "@hookform/resolvers": "^5.2.2",
         "date-fns": "^4.1.0",
         "lucide-react": "^0.561.0",
-        "react": "^19.2.0",
-        "react-dom": "^19.2.0",
+        "react": "catalog:web",
+        "react-dom": "catalog:web",
         "react-hook-form": "^7.68.0",
         "react-router-dom": "^7.10.1",
         "zod": "^4.2.1"
@@ -31,7 +32,7 @@
         "@buildingai/eslint-config": "workspace:*",
         "@tailwindcss/vite": "^4.1.13",
         "@types/node": "^24.10.1",
-        "@types/react": "^19.2.5",
+        "@types/react": "catalog:web",
         "@types/react-dom": "^19.2.3",
         "@vitejs/plugin-react": "^5.1.1",
         "eslint": "^9.39.1",
@@ -41,7 +42,7 @@
         "tailwindcss": "^4.1.13",
         "typescript": "~5.9.3",
         "typescript-eslint": "^8.46.4",
-        "vite": "npm:rolldown-vite@7.2.5",
+        "vite": "npm:rolldown-vite@7.3.0",
         "vite-tsconfig-paths": "^5.1.4"
     }
 }

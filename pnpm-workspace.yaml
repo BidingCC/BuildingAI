@@ -55,16 +55,8 @@ catalogs:
     vue-eslint-parser: ^10.2.0
     vue-tsc: ^2.2.12
   web:
+    '@types/react': ^19.2.7
     '@internationalized/date': ^3.10.0
-    '@nuxt/devtools': ^2.7.0
-    '@nuxt/eslint': ^1.10.0
-    '@nuxt/image': ^1.11.0
-    '@nuxt/kit': ^4.2.0
-    '@nuxt/schema': ^4.1.2
-    '@nuxt/ui': ^3.3.7
-    '@nuxtjs/color-mode': ^3.5.2
-    '@nuxtjs/i18n': ^10.2.0
-    '@pinia/nuxt': ^0.11.3
     '@shikijs/langs': ^3.13.0
     '@shikijs/markdown-it': ^3.12.2
     '@tailwindcss/vite': ^4.1.17
@@ -78,16 +70,14 @@ catalogs:
     '@tiptap/extension-underline': ^2.27.1
     '@tiptap/starter-kit': ^2.27.1
     '@tiptap/vue-3': ^2.27.1
-    '@vite-pwa/nuxt': ^0.10.8
     '@vueuse/core': ^13.9.0
     '@vueuse/motion': ^3.0.3
-    '@vueuse/nuxt': ^12.8.2
+    react: ^19.2.3
+    react-dom: ^19.2.0
     clsx: ^2.1.1
     echarts: ^5.6.0
     mermaid: ^11.12.1
     motion-v: ^1.7.4
-    nuxt: 4.1.2
-    nuxt-svgo: ^4.2.6
     panzoom: ^9.4.3
     pinia: ^3.0.4
     reka-ui: ^2.6.0

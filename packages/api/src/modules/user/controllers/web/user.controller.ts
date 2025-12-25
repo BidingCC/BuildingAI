@@ -25,6 +25,7 @@ import { DictService } from "@buildingai/dict";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { WebController } from "@common/decorators/controller.decorator";
 import { RolePermissionService } from "@common/modules/auth/services/role-permission.service";
+import { MenuService } from "@modules/menu/services/menu.service";
 import { Body, Get, Inject, Patch, Query } from "@nestjs/common";
 
 import { DatasetMemberService } from "../../../ai/datasets/services/datasets-member.service";
@@ -55,6 +56,8 @@ export class UserWebController extends BaseController {
         private readonly rolePermissionService: RolePermissionService,
         private readonly datasetMemberService: DatasetMemberService,
         private readonly dictService: DictService,
+        @Inject(MenuService)
+        private readonly menuService: MenuService,
         @InjectRepository(Agent)
         private readonly agentRepository: Repository<Agent>,
         @InjectRepository(AccountLog)
@@ -90,6 +93,10 @@ export class UserWebController extends BaseController {
         // 获取用户的所有权限码
         const permissionCodes = await this.rolePermissionService.getUserPermissions(user.id);
 
+        const menuTree = await this.menuService.getMenuTreeByPermissions(
+            userInfo.isRoot ? [] : permissionCodes,
+        );
+
         // 判断用户是否有权限：有权限就是1，没有权限就是0
         const hasPermissions = user.isRoot === 1 || permissionCodes.length > 0 ? 1 : 0;
 
@@ -100,6 +107,8 @@ export class UserWebController extends BaseController {
             ...userInfo,
             permissions: hasPermissions,
             membershipLevelId,
+            permissionsCodes: permissionCodes,
+            menus: menuTree,
         };
     }
 

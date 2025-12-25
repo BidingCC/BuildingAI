@@ -18,10 +18,13 @@ import {
   useSidebar,
 } from "@buildingai/ui/components/ui/sidebar";
 import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
   const { userInfo } = useAuthStore((state) => state.auth);
+  const { logout } = useAuthStore((state) => state.authActions);
+  const navigate = useNavigate();
 
   return (
     <SidebarMenu>
@@ -32,13 +35,15 @@ export function NavUser() {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="h-8 w-8 rounded-lg">
+              <Avatar className="h-8 w-8 rounded-lg after:rounded-lg">
                 <AvatarImage
                   className="rounded-lg"
                   src={userInfo?.avatar}
                   alt={userInfo?.nickname}
                 />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarFallback className="rounded-lg">
+                  {userInfo?.nickname?.slice(0, 1)}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{userInfo?.nickname}</span>
@@ -92,7 +97,12 @@ export function NavUser() {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                logout();
+                navigate("/login");
+              }}
+            >
               <LogOut />
               Log out
             </DropdownMenuItem>

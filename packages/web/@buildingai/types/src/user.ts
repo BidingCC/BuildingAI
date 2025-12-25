@@ -15,6 +15,8 @@ export interface UserInfo {
     totalRechargeAmount: number;
     status: BooleanNumberType;
     isRoot: BooleanNumberType;
+    menus: MenuItem[];
+    permissionsCodes: string[];
     role: {
         id: string;
         createdAt: string;
@@ -27,4 +29,22 @@ export interface UserInfo {
     lastLoginAt: string;
     power: number;
     source: UserCreateSourceType;
+}
+
+export interface MenuItem {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    name: string;
+    code: string;
+    path: string;
+    icon: string;
+    component: string;
+    permissionCode: string;
+    parentId: string;
+    sort: number;
+    isHidden: number;
+    type: number;
+    sourceType: number;
+    children: MenuItem[];
 }
