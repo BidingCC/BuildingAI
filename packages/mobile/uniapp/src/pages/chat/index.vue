@@ -13,7 +13,7 @@ import type { MessageContentPart } from "@buildingai/types";
 // #ifdef H5
 import BdMarkdown from "@/async-components/bd-markdown/index.vue?async";
 // #endif
-import BdPopover from "@/async-components/bd-popover/index.vue?async";
+import McpSelect from "@/async-components/mcp-select/index.vue?async";
 // #ifndef H5
 import UaMarkdown from "@/async-components/ua-markdown/ua-markdown.vue?async";
 // #endif
@@ -51,6 +51,8 @@ const modelSelectRef = ref<InstanceType<typeof ModelSelect>>();
 const modelIdCookie = useCookie<string>("modelId", { default: "" });
 const selectedModelId = shallowRef<string>("");
 const selectedModel = shallowRef<AiModel | null>(null);
+const selectedMcpIds = useCookie<string[]>("mcpIds", { default: () => [] });
+const mcpSelectRef = ref<InstanceType<typeof McpSelect>>();
 
 const {
     handleSlideProgress: handleModelSelectSlideProgress,
@@ -59,7 +61,7 @@ const {
     pageTransform,
 } = useHalfPopupInteraction();
 
-const { isLoaded } = useAsyncPackage("bd-popover");
+const { isLoaded: isMcpSelectLoaded } = useAsyncPackage("mcp-select");
 
 const currentConversationId = ref<string | undefined>(undefined);
 const currentConversation = shallowRef<AiConversation | null>(null);
@@ -138,6 +140,7 @@ const {
     apiUrl: "/ai-chat/stream",
     body: () => ({
         modelId: selectedModelId.value,
+        mcpServers: selectedMcpIds.value.length > 0 ? selectedMcpIds.value : undefined,
     }),
     onResponse(response: { status?: number }) {
         if (response?.status === 401) {
@@ -501,26 +504,29 @@ const navbarTitle = computed(() => {
                         </text>
                     </view>
 
-                    <BdPopover
-                        v-show="isLoaded"
+                    <McpSelect
+                        v-show="isMcpSelectLoaded"
+                        ref="mcpSelectRef"
+                        v-model="selectedMcpIds"
                         placement="top"
-                        :blurIntensity="4"
-                        :content-style="{
-                            background: 'var(--background-transparent)',
-                        }"
+                        :disabled="isLoading"
                     >
-                        <template #content>
-                            <view class="custom-content rounded-lg p-2">
-                                <text>自定义内容</text>
-                                <button size="mini" type="primary">操作按钮</button>
-                            </view>
-                        </template>
                         <view
                             class="bg-muted/50 flex items-center gap-2 rounded-lg px-2 py-2 text-xs"
+                            :class="{
+                                'bg-muted': selectedMcpIds.length > 0,
+                            }"
                         >
-                            MCP
+                            <text class="i-lucide-route text-xs" />
+                            <text>MCP</text>
+                            <text
+                                v-if="selectedMcpIds.length > 0"
+                                class="bg-primary flex size-4 items-center justify-center rounded-full text-xs text-white"
+                            >
+                                {{ selectedMcpIds.length }}
+                            </text>
                         </view>
-                    </BdPopover>
+                    </McpSelect>
                 </template>
             </ChatsPrompt>
         </template>

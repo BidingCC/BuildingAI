@@ -99,7 +99,10 @@
         "chooseFileFailed": "选择文件失败",
         "fileNotFound": "文件未找到",
         "urlAdded": "URL添加成功",
-        "unsupportedFileType": "不支持的文件类型"
+        "unsupportedFileType": "不支持的文件类型",
+        "loadFailed": "加载失败",
+        "mcpNotConnectable": "MCP 服务器不可用",
+        "mcpMaxLimit": "为了保持性能，最多只能同时激活5个MCP服务器。请在启用新的服务器之前关闭一些服务器。"
     },
     "upload": "上传",
     "expand": "展开",

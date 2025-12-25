@@ -14,6 +14,7 @@ import type {
     PaginationResult,
 } from "@buildingai/service/models/globals";
 import type { AiMessage } from "@buildingai/service/models/message";
+import type { McpServerInfo } from "@buildingai/service/webapi/mcp-server";
 import type { UserInfo } from "@buildingai/service/webapi/user";
 import type { ChatStreamConfig } from "@buildingai/types";
 
@@ -448,4 +449,13 @@ export function apiGetChatConfig(): Promise<ChatConfig> {
  */
 export function apiGetQuickMenu(): Promise<QuickMenu> {
     return useWebGet("/ai-mcp-servers/quick-menu", {});
+}
+
+/**
+ * Get all MCP server list
+ * @description Retrieves all MCP server list
+ * @returns Promise with all MCP server list
+ */
+export function apiGetAllMcpServerList(): Promise<McpServerInfo[]> {
+    return useWebGet("/ai-mcp-servers/all", {}, { requireAuth: false });
 }
