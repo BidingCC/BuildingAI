@@ -13,11 +13,3 @@ declare module "vite-plugin-uni-polyfill" {
 
     export default uniPolyfill;
 }
-
-
-
-
-
-
-
-

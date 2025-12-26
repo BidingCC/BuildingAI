@@ -3,7 +3,7 @@ declare module "virtual:uni-middleware" {
 
     interface Page extends ComponentPublicInstance {
         $mpType: string;
-        $pages: Record<string, any>;
+        $pages: Record<string, unknown>;
         $vm: Page;
         route: string;
     }
@@ -15,7 +15,7 @@ declare module "virtual:uni-middleware" {
         | {
               url: string;
               method: "navigateTo" | "redirectTo" | "switchTab" | "reLaunch";
-              options?: Record<string, any>;
+              options?: Record<string, unknown>;
           };
 
     type Middleware = (to: Page, from?: Page) => MiddlewareReturn | Promise<MiddlewareReturn>;

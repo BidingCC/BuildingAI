@@ -17,6 +17,7 @@ import type { BdMarkdownProps } from "./types";
 
 withDefaults(defineProps<BdMarkdownProps>(), {
     content: "",
+    customStyle: {},
 });
 
 setCustomComponents({
@@ -26,7 +27,7 @@ setCustomComponents({
 </script>
 
 <template>
-    <view class="bd-markdown">
+    <view class="bd-markdown" :style="customStyle">
         <slot name="before" />
         <MarkdownRender :content="content" :render-code-blocks-as-pre="true" />
         <slot name="after" />

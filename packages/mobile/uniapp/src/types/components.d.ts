@@ -7,6 +7,8 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    AgentChatsAgentChats: typeof import('./../components/agent-chats/agent-chats.vue')['default']
+    AgentFormFieldsAgentFormFields: typeof import('./../components/agent-form-fields/agent-form-fields.vue')['default']
     AskAssistantChatChatsBubble: typeof import('./../components/ask-assistant-chat/chats-bubble.vue')['default']
     AskAssistantChatChatsChats: typeof import('./../components/ask-assistant-chat/chats-chats.vue')['default']
     AskAssistantChatChatsMessages: typeof import('./../components/ask-assistant-chat/chats-messages.vue')['default']
@@ -16,6 +18,7 @@ declare module 'vue' {
     AskAssistantChatReferenceReferenceKnowledge: typeof import('./../components/ask-assistant-chat/reference/reference-knowledge.vue')['default']
     AskAssistantChatReferenceReferenceMcpToolCall: typeof import('./../components/ask-assistant-chat/reference/reference-mcp-tool-call.vue')['default']
     AskAssistantChatReferenceReferenceReasoning: typeof import('./../components/ask-assistant-chat/reference/reference-reasoning.vue')['default']
+    AskAssistantChatUniDataSelectComponentsUniDataSelectUniDataSelect: typeof import('./../components/ask-assistant-chat/uni-data-select/components/uni-data-select/uni-data-select.vue')['default']
     BdActionSheet: typeof import('./../components/bd-action-sheet.vue')['default']
     BdCheckbox: typeof import('./../components/bd-checkbox.vue')['default']
     BdImage: typeof import('./../components/bd-image.vue')['default']

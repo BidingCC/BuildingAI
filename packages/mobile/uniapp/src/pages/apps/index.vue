@@ -83,6 +83,12 @@ const currentSortLabel = computed(() => {
     return sortOptions.find((opt) => opt.value === sortBy.value)?.label || "最新发布";
 });
 
+const handleAgentClick = (item: Agent) => {
+    uni.navigateTo({
+        url: `/packages/agent/explore?id=${item.publishToken}`,
+    });
+};
+
 definePage({
     style: {
         navigationBarTitle: "pages.apps",
@@ -155,6 +161,7 @@ definePage({
                 mb="2"
                 v-for="item in agentLists"
                 :key="item.id"
+                @click="handleAgentClick(item)"
             >
                 <view flex items-center gap="2">
                     <image :src="item.avatar" size="10" rounded="md" />

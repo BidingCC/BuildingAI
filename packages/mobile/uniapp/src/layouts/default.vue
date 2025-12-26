@@ -8,7 +8,7 @@ import BdTabbar from "@/components/bd-tabbar.vue?async";
 import { isDark } from "../hooks/use-dark";
 // import { updateTabBarTitles } from "../utils/tabbar";
 
-const title = computed(() => getCurrentPageMeta()?.style?.navigationBarTitle);
+const title = computed(() => getCurrentPageMeta()?.style?.navigationBarTitle || "");
 const hiddenHeader = computed(() => getCurrentPageMeta()?.style?.hiddenHeader !== true);
 
 const { t } = useI18n();

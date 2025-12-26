@@ -3,13 +3,13 @@ declare module "virtual:pages-meta" {
         navigationBarTitleText?: string;
         navigationBarBackgroundColor?: string;
         navigationBarTextStyle?: string;
-        [key: string]: any;
+        [key: string]: unknown;
     }
 
     interface PageMeta {
         path: string;
         style?: PageStyle;
-        [key: string]: any;
+        [key: string]: unknown;
     }
 
     interface PagesMetaMap {
@@ -19,7 +19,7 @@ declare module "virtual:pages-meta" {
     interface TabBarItem {
         pagePath: string;
         index: number;
-        [key: string]: any;
+        [key: string]: unknown;
     }
 
     export const pagesMeta: PagesMetaMap;
