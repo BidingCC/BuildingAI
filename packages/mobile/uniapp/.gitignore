@@ -26,7 +26,7 @@ src/manifest.json
 
 # types
 src/types/async-component.d.ts
-src/types/auto-imports.d.ts
+src/types/async-import.d.ts
 src/types/auto-imports.d.ts
 src/types/uni-pages.d.ts
 src/types/components.d.ts
