@@ -198,3 +198,7 @@ declare module '@/async-components/mcp-select/index.vue?async' {
   const component: typeof import('@/async-components/mcp-select/index.vue')
   export = component
 }
+declare module '@/components/bd-tabbar.vue?async' {
+  const component: typeof import('@/components/bd-tabbar.vue')
+  export = component
+}

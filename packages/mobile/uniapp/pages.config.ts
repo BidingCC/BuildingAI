@@ -21,6 +21,8 @@ export default defineUniPages({
         navigationStyle: "custom",
     },
     tabBar: {
+        custom: true,
+        customize: true,
         backgroundColor: "@tabBgColor",
         borderStyle: "@tabBorderStyle",
         color: "@tabFontColor",

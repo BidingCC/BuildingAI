@@ -112,7 +112,7 @@ const contentStyle = computed(() => {
     const leftPlacements = ["left", "start-top", "start-bottom"];
 
     return {
-        zIndex: props.zIndex,
+        zIndex: props.zIndex + 1,
         marginTop: bottomPlacements.includes(props.placement) ? `${props.offset}rpx` : "auto",
         marginBottom: topPlacements.includes(props.placement) ? `${props.offset}rpx` : "auto",
         marginLeft: rightPlacements.includes(props.placement) ? `${props.offset}rpx` : "auto",
@@ -145,7 +145,7 @@ defineExpose({
                 'bd-popover__mask--closing': isClosing,
             }"
             :style="{
-                zIndex: zIndex - 1,
+                zIndex: zIndex,
                 backdropFilter: showBlur ? `blur(${blurIntensity}px)` : 'none',
                 WebkitBackdropFilter: showBlur ? `blur(${blurIntensity}px)` : 'none',
             }"

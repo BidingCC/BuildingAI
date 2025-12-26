@@ -345,7 +345,7 @@ const supportsVision = computed(() => features.value.includes("vision"));
                 class="flex items-center justify-center rounded-full p-2 active:opacity-70"
                 :class="disabled ? 'opacity-50' : ''"
             >
-                <text class="i-lucide-paperclip text-foreground text-lg" />
+                <text class="i-lucide-plus text-foreground text-lg" />
             </view>
         </BdPopover>
 

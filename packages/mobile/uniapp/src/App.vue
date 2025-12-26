@@ -3,6 +3,7 @@ const appStore = useAppStore();
 const userStore = useUserStore();
 
 onLaunch(async () => {
+    uni.hideTabBar();
     console.log("App Launch");
     await appStore.getConfig();
     await appStore.getLoginSettings();

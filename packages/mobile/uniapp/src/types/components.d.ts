@@ -23,6 +23,7 @@ declare module 'vue' {
     BdNavbar: typeof import('./../components/bd-navbar.vue')['default']
     BdPicker: typeof import('./../components/bd-picker.vue')['default']
     BdSeparator: typeof import('./../components/bd-separator.vue')['default']
+    BdTabbar: typeof import('./../components/bd-tabbar.vue')['default']
     LoginAgreement: typeof import('./../components/login/agreement.vue')['default']
     LoginLoginAccount: typeof import('./../components/login/login-account.vue')['default']
     LoginLoginWeixin: typeof import('./../components/login/login-weixin.vue')['default']

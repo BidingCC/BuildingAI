@@ -176,7 +176,7 @@ watch(
                         </view>
                     </slot>
                 </view>
-                <view flex="~ items-center gap-2">
+                <view flex="~ items-center gap-1">
                     <PromptFileUpload
                         :disabled="isUploading"
                         :max-size="attachmentSizeLimit"

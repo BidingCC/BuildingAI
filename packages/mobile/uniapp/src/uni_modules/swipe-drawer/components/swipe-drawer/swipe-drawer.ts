@@ -53,7 +53,7 @@ export const swipeDrawerProps = {
      * @description 抽屉组件的层级
      * @default 9999
      */
-    zIndex: makeNumberProp(9999),
+    zIndex: makeNumberProp(998),
     /**
      * @description 抽屉背景色
      * @default '#FFFFFF'
