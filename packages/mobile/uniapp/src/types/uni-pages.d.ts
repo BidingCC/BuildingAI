@@ -10,10 +10,6 @@ type _LocationUrl =
   "/pages/user/index" |
   "/pages/user/settings" |
   "/pages/webview/index" |
-  "/packages/about_us/index" |
-  "/packages/agreement/index" |
-  "/packages/login/index" |
-  "/packages/register/index" |
   "/async-components/index" |
   "/extensions/simple-blog/pages/list/index" |
   "/extensions/simple-blog/pages/detail/index" |

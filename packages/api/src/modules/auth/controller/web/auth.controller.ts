@@ -241,6 +241,7 @@ export class AuthWebController extends BaseController {
         @Res() res: Response,
     ) {
         // 验证微信请求签名，确保请求来自微信官方
+
         await this.wechatOaService.checkSignature(
             signature,
             msg_signature,
@@ -286,7 +287,7 @@ export class AuthWebController extends BaseController {
     @Public()
     @Get("wechat-qrcode-status/:scene_str")
     async getWechatQrcodeStatus(@Param("scene_str") scene_str: string) {
-        // return this.wechatOaService.getQrCodeStatus(scene_str);
+        return this.wechatOaService.getQrCodeStatus(scene_str);
     }
 
     /**
@@ -310,7 +311,7 @@ export class AuthWebController extends BaseController {
                 BusinessCode.INVALID_REQUEST,
             );
         }
-        // await this.wechatOaService.authorizeUserInfo(code, state);
+        await this.wechatOaService.updateQrCodeStatusByCode(code, state);
         // 不做重定向，直接返回一个简洁的移动端友好页
         const html = `<!doctype html>
     <html lang="zh-CN">
@@ -340,7 +341,6 @@ export class AuthWebController extends BaseController {
             <h1 class="title">授权完成</h1>
             <p class="desc">您已完成授权，可返回电脑端，页面会自动登录并跳转首页。</p>
             <button class="btn" onclick="closeOrBack()">我知道了</button>
-            <div class="footer">FastbuildAI</div>
           </div>
         </div>
       </body>

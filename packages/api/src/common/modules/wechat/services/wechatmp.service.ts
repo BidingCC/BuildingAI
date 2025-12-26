@@ -3,6 +3,7 @@ import { User } from "@buildingai/db/entities/user.entity";
 import { FindOptionsWhere } from "@buildingai/db/typeorm";
 import { DictService } from "@buildingai/dict";
 import { HttpErrorFactory } from "@buildingai/errors";
+import { isEnabled } from "@buildingai/utils";
 import { WechatMpJscode2sessionResponse } from "@buildingai/wechat-sdk/interfaces/mp";
 import { AuthService } from "@common/modules/auth/services/auth.service";
 import { LoginSettingsConfig } from "@modules/user/dto/login-settings.dto";
@@ -114,6 +115,9 @@ export class WechatMpService {
 
             // 步骤3: 处理用户已存在的情况（登录流程）
             if (existingUser) {
+                if (!isEnabled(existingUser.status)) {
+                    throw HttpErrorFactory.business("账号已被停用，请联系管理员处理");
+                }
                 // 更新用户的小程序 openid（如果缺失）
                 // 这可以确保用户在不同场景下都能被正确识别
                 if (!existingUser.mpOpenid) {

@@ -1,5 +1,8 @@
 import { RedisService } from "@buildingai/cache";
 import { LOGIN_TYPE } from "@buildingai/constants";
+import { UserTerminal } from "@buildingai/constants/shared/status-codes.constant";
+import { User } from "@buildingai/db/entities/user.entity";
+import { FindOptionsWhere } from "@buildingai/db/typeorm";
 import { DictService } from "@buildingai/dict";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { isEnabled } from "@buildingai/utils";
@@ -141,6 +144,7 @@ export class WechatOaService {
                 this.SCENE_PREFIX + ":" + sceneStr,
                 JSON.stringify({
                     openid: "",
+                    unionid: "",
                     is_scan: false,
                 }),
                 expire_seconds,
@@ -170,7 +174,13 @@ export class WechatOaService {
      */
     async getQrCodeCallback(Event: string, FromUserName: string, EventKey: string) {
         let scene_str = EventKey;
+        // 从Redis获取场景值对应的状态
+        const sceneStr = await this.redisService.get<string>(this.SCENE_PREFIX + ":" + scene_str);
 
+        if (!sceneStr) {
+            // 场景值不存在，说明登录超时，请重新登录
+            throw HttpErrorFactory.internal("登录超时，请重新登录");
+        }
         // 处理取消关注事件
         if (EventKey === "" || Event === WECHAT_SCENE_PREFIX.SCENE_PREFIX_UNSUBSCRIBE) {
             return;
@@ -180,23 +190,13 @@ export class WechatOaService {
         if (Event === WECHAT_SCENE_PREFIX.SCENE_PREFIX_SUBSCRIBE) {
             scene_str = EventKey.split("_")[1];
         }
+        const { appId, webAuthDomain } = await this.wxoaconfigService.getConfig();
 
-        // 从Redis获取场景值对应的状态
-        const sceneStr = await this.redisService.get<string>(this.SCENE_PREFIX + ":" + scene_str);
+        const redirectUri = encodeURIComponent(`${webAuthDomain}/api/auth/wechat-oauth-callback`);
 
-        if (!sceneStr) {
-            // 场景值不存在，说明登录超时，请重新登录
-            throw HttpErrorFactory.internal("登录超时，请重新登录");
-        }
+        const authUrl = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appId}&redirect_uri=${redirectUri}&response_type=code&scope=snsapi_userinfo&state=${scene_str}#wechat_redirect`;
 
-        // 更新场景值状态，标记为已扫描并记录用户openid
-        const playground = JSON.stringify({
-            openid: FromUserName,
-            is_scan: true,
-        });
-
-        // 将场景值和openid关联起来，设置60秒过期时间
-        await this.redisService.set(this.SCENE_PREFIX + ":" + scene_str, playground, 60);
+        await this.sendAuthTemplateMessage(FromUserName, authUrl);
     }
 
     /**
@@ -209,107 +209,156 @@ export class WechatOaService {
      * @returns 包含扫描状态的对象
      * @throws 当场景值不存在时抛出错误
      */
-    // async getQrCodeStatus(scene_str: string) {
-    //     // 从Redis获取场景值对应的状态信息
-    //     const raw = await this.redisService.get<string>(this.SCENE_PREFIX + ":" + scene_str);
-    //     if (!raw) {
-    //         throw HttpErrorFactory.internal("登录超时，请重新登录");
-    //     }
-    //     const scene = JSON.parse(raw);
+    async getQrCodeStatus(scene_str: string) {
+        try {
+            // 从Redis获取场景值对应的状态信息
+            const raw = await this.redisService.get<string>(this.SCENE_PREFIX + ":" + scene_str);
+            if (!raw) {
+                throw HttpErrorFactory.internal("登录超时，请重新登录");
+            }
+            const scene = JSON.parse(raw);
 
-    //     const { appId, webAuthDomain } = await this.wxoaconfigService.getConfig();
+            const { openid, is_scan, unionid, is_processing } = scene;
 
-    //     if (!scene) {
-    //         // 场景值不存在，说明登录超时，请重新登录
-    //         throw HttpErrorFactory.internal("登录超时，请重新登录");
-    //     }
+            // 如果正在处理中，直接返回等待状态，避免并发重复处理
+            if (is_processing) {
+                return { is_scan: false, is_processing: true };
+            }
 
-    //     const { openid, is_scan } = scene;
-    //     // 如果已扫描且openid不为空，则自动登录/注册用户
-    //     if (is_scan && openid !== "") {
-    //         // 检查用户是否已存在
-    //         const existingUser = await this.authService.findOne({ where: { openid } });
+            // 如果还未扫描，直接返回
+            if (!is_scan || !openid) {
+                return { is_scan: false };
+            }
 
-    //         if (existingUser) {
-    //             // 已注册：直接登录
-    //             if (!isEnabled(existingUser.status)) {
-    //                 await this.sendTemplateMessage(openid, "账号已被停用，请联系管理员处理");
-    //                 return { is_scan, error: "账号已被停用，请联系管理员处理" };
-    //             }
+            // 步骤2: 根据是否有 unionid 采用不同的查找策略
+            let existingUser: User | null = null;
 
-    //             const result = await this.authService.loginOrRegisterByOpenid(openid);
-    //             if (result.user.token) {
-    //                 await this.sendTemplateMessage(openid, "登录成功");
-    //             }
-    //             return { ...result, is_scan };
-    //         } else {
-    //             // 未注册：引导授权以获取头像与昵称，注册在授权回调中完成
-    //             const loginSettings = await this.getLoginSettings();
-    //             if (
-    //                 !loginSettings.allowedRegisterMethods ||
-    //                 !loginSettings.allowedRegisterMethods.includes(3)
-    //             ) {
-    //                 await this.sendTemplateMessage(openid, "注册功能已关闭，请联系管理员处理");
-    //                 return { is_scan, error: "注册功能已关闭，请联系管理员处理" };
-    //             }
+            if (unionid) {
+                // 场景A: 有 unionid（已绑定微信开放平台）
+                // 优先使用 unionid 查找用户，因为它是跨平台统一标识
+                const whereCondition: FindOptionsWhere<User> = { unionid };
+                existingUser = await this.authService.findOne({
+                    where: whereCondition,
+                });
+            } else {
+                // 场景B: 没有 unionid（未绑定微信开放平台）
+                // 使用 openid 查找用户（注意：这里 openid 实际是小程序的 openid，应作为 openid 使用）
+                const whereCondition: FindOptionsWhere<User> = { openid };
+                existingUser = await this.authService.findOne({
+                    where: whereCondition,
+                });
+            }
+            // 步骤3: 处理用户已存在的情况（登录流程）
+            if (existingUser) {
+                if (!isEnabled(existingUser.status)) {
+                    await this.sendTemplateMessage(openid, "账号已被停用，请联系管理员处理");
+                    return { is_scan, error: "账号已被停用，请联系管理员处理" };
+                }
+                // 更新用户的公众号 openid（如果缺失）
+                // 这可以确保用户在不同场景下都能被正确识别
+                if (!existingUser.openid) {
+                    await this.authService.updateById(existingUser.id, { openid });
+                }
 
-    //             // 若已完成授权，则此处完成注册并登录
-    //             if (scene.is_authorized) {
-    //                 const result = await this.authService.loginOrRegisterByOpenid(openid);
+                // 如果用户有 unionid 但数据库中没有，则更新（这种情况理论上不应该发生，但为了数据一致性）
+                if (unionid && !existingUser.unionid) {
+                    await this.authService.updateById(existingUser.id, { unionid });
+                }
 
-    //                 // 授权阶段拉到的微信头像/昵称，补齐用户资料
-    //                 const wxUserInfo = scene.wx_userinfo;
-    //                 if (wxUserInfo) {
-    //                     try {
-    //                         await this.authService.update(
-    //                             {
-    //                                 nickname: wxUserInfo.nickname,
-    //                                 avatar: wxUserInfo.headimgurl,
-    //                             },
-    //                             { where: { openid } },
-    //                         );
-    //                     } catch (e) {
-    //                         this.logger.warn(`更新微信用户资料失败: ${e.message}`);
-    //                     }
-    //                 }
+                // 执行登录
+                const result = await this.authService.loginByUser(existingUser);
+                await this.sendTemplateMessage(openid, "登录成功");
 
-    //                 if (result.user.token) {
-    //                     await this.sendTemplateMessage(openid, "注册并登录成功");
-    //                 }
-    //                 return { ...result, is_scan, authorized: true };
-    //             }
+                // 标记为已完成，避免重复处理
+                await this.redisService.set(
+                    this.SCENE_PREFIX + ":" + scene_str,
+                    JSON.stringify({
+                        ...scene,
+                        is_processing: false,
+                        is_completed: true,
+                    }),
+                    60,
+                );
 
-    //             // 未授权：发送授权链接（只发一次），并延长会话有效期，等待用户授权
-    //             if (!scene.is_auth_sent) {
-    //                 const redirectUri = encodeURIComponent(
-    //                     `${webAuthDomain}/api/auth/wechat-oauth-callback`,
-    //                 );
-    //                 // 使用 scene_str 作为 state，以便回调中定位会话
-    //                 const authUrl = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appId}&redirect_uri=${redirectUri}&response_type=code&scope=snsapi_userinfo&state=${scene_str}#wechat_redirect`;
-    //                 await this.sendAuthTemplateMessage(openid, authUrl);
+                return { ...result, is_scan };
+            }
+            // 步骤4: 处理用户不存在的情况（注册流程）
+            // 标记为正在处理，防止并发重复注册
+            await this.redisService.set(
+                this.SCENE_PREFIX + ":" + scene_str,
+                JSON.stringify({
+                    ...scene,
+                    is_processing: true,
+                }),
+                60,
+            );
 
-    //                 await this.redisService.set(
-    //                     this.SCENE_PREFIX + ":" + scene_str,
-    //                     JSON.stringify({ ...scene, is_auth_sent: true }),
-    //                     300,
-    //                 );
-    //             } else {
-    //                 // 已下发授权链接但尚未完成授权：持续刷新会话 TTL，避免用户在授权过程中会话过期
-    //                 await this.redisService.set(
-    //                     this.SCENE_PREFIX + ":" + scene_str,
-    //                     JSON.stringify(scene),
-    //                     300,
-    //                 );
-    //             }
+            // 检查是否允许微信注册
+            await this.checkWechatRegisterAllowed();
+            // 注册新用户
+            // 注意：小程序的 openid 应存储在 mpOpenid 字段中（而不是 openid 字段）
+            // openid 字段用于存储公众号的 openid
+            const result = await this.authService.registerByWechat({ openid }, UserTerminal.PC);
+            // 如果有 unionid，注册后需要更新用户的 unionid
+            // unionid 是微信开放平台的统一标识，用于跨平台用户识别
+            if (unionid) {
+                await this.authService.updateById(result.user.id, { unionid });
+            }
+            // 授权阶段拉到的微信头像/昵称，补齐用户资料
+            const wxUserInfo = scene.wx_userinfo;
+            if (wxUserInfo) {
+                try {
+                    await this.authService.update(
+                        {
+                            nickname: wxUserInfo.nickname,
+                            avatar: wxUserInfo.avatar,
+                        },
+                        { where: { openid } },
+                    );
+                } catch (e) {
+                    this.logger.warn(`更新微信用户资料失败: ${e.message}`);
+                }
+            }
+            await this.sendTemplateMessage(openid, "注册并登录成功");
 
-    //             return { is_scan, need_authorization: true };
-    //         }
-    //     }
+            // 标记为已完成
+            await this.redisService.set(
+                this.SCENE_PREFIX + ":" + scene_str,
+                JSON.stringify({
+                    ...scene,
+                    is_processing: false,
+                    is_completed: true,
+                }),
+                60,
+            );
 
-    //     return {
-    //         is_scan,
-    //     };
-    // }
+            return { ...result, is_scan };
+        } catch (error) {
+            // 如果是业务错误（如注册功能关闭），直接抛出
+            if (error.status && error.status >= 400 && error.status < 500) {
+                throw error;
+            }
+
+            // 其他错误记录日志并包装
+            this.logger.error(`小程序登录失败: ${error.message}`, error.stack);
+            throw HttpErrorFactory.internal(`小程序登录失败: ${error.message}`);
+        }
+    }
+    /**
+     * 检查是否允许微信注册
+     *
+     * @throws 如果注册功能已关闭，抛出禁止访问错误
+     */
+    private async checkWechatRegisterAllowed(): Promise<void> {
+        const loginSettings = await this.getLoginSettings();
+
+        if (
+            !loginSettings.allowedRegisterMethods ||
+            !loginSettings.allowedRegisterMethods.includes(LOGIN_TYPE.WECHAT)
+        ) {
+            throw HttpErrorFactory.forbidden("注册功能已关闭，请联系管理员处理");
+        }
+    }
 
     /**
      * 获取登录设置配置
@@ -334,7 +383,7 @@ export class WechatOaService {
      * @returns 发送结果
      * @throws 当获取access_token失败或发送消息失败时抛出异常
      */
-    private async sendAuthTemplateMessage(openid: string, authUrl: string) {
+    private async sendAuthTemplateMessage(openid: string, authUrl: string, message?: string) {
         try {
             // 获取有效的access_token
             const access_token = await this.getAccessTokenByRedis();
@@ -344,14 +393,14 @@ export class WechatOaService {
                 access_token,
                 openid,
                 MsgType.Text,
-                `🔐 扫码登录确认
+                `🔐 扫码${message || "登录"}确认
     
-    您正在尝试通过微信扫码登录 BuildingAI
+    您正在尝试通过微信扫码${message || "登录"}
     
     📱 登录设备：微信客户端
     ⏰ 登录时间：${new Date().toLocaleString("zh-CN")}
     
-    👉 <a href="${authUrl}">点击确认登录</a>
+    👉 <a href="${authUrl}">点击确认${message || "登录"}</a>
     
     如非本人操作，请忽略此消息。`,
             );
@@ -481,124 +530,37 @@ export class WechatOaService {
         await this.getAccessTokenByRedis();
     }
 
-    /**
-     * 处理微信网页授权回调
-     *
-     * 通过 state 传回 scene_str，用以定位当前扫码会话。
-     * 该方法只负责拉取微信用户信息并写入 Redis 标记授权完成；
-     * 实际的注册与登录在 getQrCodeStatus 轮询时完成（当检测到 is_authorized=true）
-     *
-     * @param code 微信回调 code
-     * @param state scene_str 场景值
-     * @returns 跳转的授权成功页 URL
-     */
-    // async authorizeUserInfo(code: string, state: string): Promise<string> {
-    //     const { appId, appSecret, token, encodingAESKey, webAuthDomain } =
-    //         await this.wxoaconfigService.getConfig();
+    async updateQrCodeStatusByCode(code: string, state: string) {
+        // 从Redis获取场景值对应的状态
+        const sceneStr = await this.redisService.get<string>(this.SCENE_PREFIX + ":" + state);
 
-    //     // 初始化客户端（若尚未初始化）
-    //     this.wechatOaClient = new WechatOaClient(token, encodingAESKey, appId);
+        if (!sceneStr) {
+            // 场景值不存在，说明登录超时，请重新登录
+            throw HttpErrorFactory.internal("登录超时，请重新登录");
+        }
+        const { appId, appSecret, token, encodingAESKey, webAuthDomain } =
+            await this.wxoaconfigService.getConfig();
 
-    //     // 通过 code 置换 OAuth access_token 与 openid
-    //     const oauth = await this.wechatOaClient.getOAuthAccessToken(appId, appSecret, code);
+        // 初始化客户端（若尚未初始化）
+        this.wechatOaClient = new WechatOaClient(token, encodingAESKey, appId);
 
-    //     // 拉取用户信息（需要 scope=snsapi_userinfo）
-    //     const userInfo = await this.wechatOaClient.getOAuthUserInfo(
-    //         oauth.access_token,
-    //         oauth.openid,
-    //     );
+        // 通过 code 置换 OAuth access_token 与 openid
+        const oauth = await this.wechatOaClient.getOAuthAccessToken(appId, appSecret, code);
 
-    //     // 合并写回 Redis，标记授权完成，等待 PC 轮询触发最终登录
-    //     console.log("authorizeUserInfo", state);
+        // // 拉取用户信息（需要 scope=snsapi_userinfo）
+        const userInfo = await this.wechatOaClient.getOAuthUserInfo(
+            oauth.access_token,
+            oauth.openid,
+        );
+        // 更新场景值状态，标记为已扫描并记录用户openid
+        const playground = JSON.stringify({
+            openid: oauth.openid,
+            unionid: oauth.unionid,
+            wx_userinfo: { nickname: userInfo.nickname, avatar: userInfo.headimgurl },
+            is_scan: true,
+        });
 
-    //     // 对于绑定账号场景，state 可能是用户ID而不是场景值，需要找到正确的场景key
-    //     let sceneKey = this.SCENE_PREFIX + ":" + state;
-    //     let raw = await this.redisService.get<string>(sceneKey);
-
-    //     // 如果使用state作为场景key找不到记录，可能是绑定账号场景
-    //     if (!raw && (await this.authService.findOne({ where: { id: state } }))) {
-    //         try {
-    //             // 使用executeCommand执行keys命令查找包含该openid的场景记录
-    //             const keys = await this.redisService.executeCommand(
-    //                 "KEYS",
-    //                 this.SCENE_PREFIX + ":*",
-    //             );
-    //             if (keys && Array.isArray(keys)) {
-    //                 for (const key of keys) {
-    //                     const tempRaw = await this.redisService.get<string>(key);
-    //                     if (tempRaw) {
-    //                         const tempScene = JSON.parse(tempRaw);
-    //                         if (tempScene.openid === oauth.openid) {
-    //                             sceneKey = key;
-    //                             raw = tempRaw;
-    //                             break;
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //         } catch (error) {
-    //             this.logger.warn(`查找Redis场景key时出错: ${error.message}`);
-    //         }
-    //     }
-
-    //     const scene = raw ? JSON.parse(raw) : {};
-
-    //     // 确保正确设置授权状态
-    //     const updatedScene = {
-    //         ...scene,
-    //         openid: oauth.openid,
-    //         is_scan: true,
-    //         is_authorized: true,
-    //         wx_userinfo: userInfo,
-    //     };
-
-    //     await this.redisService.set(sceneKey, JSON.stringify(updatedScene), 300);
-
-    //     // 绑定的目标微信用户
-    //     const existingUser = await this.authService.findOne({ where: { id: state } });
-    //     if (existingUser) {
-    //         // 更新用户的 openid
-    //         await this.authService.update(
-    //             {
-    //                 openid: oauth.openid,
-    //             },
-    //             { where: { id: state } },
-    //         );
-    //         // 返回授权成功页，确保前端能感知到授权状态的变化
-    //         return `${webAuthDomain}/api/auth/wechat-oauth-success?status=success&type=bind`;
-    //     }
-
-    //     // 若为已注册用户，授权完成后跳转首页
-    //     const existed = await this.authService.findOne({ where: { openid: oauth.openid } });
-    //     if (existed) {
-    //         return `${webAuthDomain}/`;
-    //     }
-
-    //     // 未注册用户：在授权后立即完成注册并补齐资料，随后跳转成功页
-    //     try {
-    //         const loginSettings = await this.getLoginSettings();
-    //         if (
-    //             loginSettings.allowedRegisterMethods &&
-    //             loginSettings.allowedRegisterMethods.includes(3)
-    //         ) {
-    //             await this.authService.loginOrRegisterByOpenid(oauth.openid);
-    //             await this.authService.update(
-    //                 {
-    //                     nickname: userInfo.nickname,
-    //                     avatar: userInfo.headimgurl,
-    //                 },
-    //                 { where: { openid: oauth.openid } },
-    //             );
-    //         }
-    //     } catch (e) {
-    //         this.logger.warn(`授权后注册或更新资料失败: ${e.message}`);
-    //     }
-
-    //     // 返回后端内置的授权成功页，避免跳转到站点首页或依赖前端静态资源
-    //     const successUrl = `${webAuthDomain}/api/auth/wechat-oauth-success?status=success`;
-    //     //记录用户为新用户
-    //     await this.redisService.set(oauth.openid, JSON.stringify({ newUser: true }), 5);
-
-    //     return successUrl;
-    // }
+        // 将场景值和openid关联起来，设置60秒过期时间
+        await this.redisService.set(this.SCENE_PREFIX + ":" + state, playground, 60);
+    }
 }
