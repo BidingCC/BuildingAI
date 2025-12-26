@@ -24,9 +24,10 @@ dist
 src/pages.json
 src/manifest.json
 
-# src/types/async-component.d.ts
-# src/types/auto-imports.d.ts
-# src/types/auto-imports.d.ts
-# src/types/uni-pages.d.ts
-# src/types/components.d.ts
-# src/types/vite-plugin-uni-polyfill.d.ts
+# types
+src/types/async-component.d.ts
+src/types/auto-imports.d.ts
+src/types/auto-imports.d.ts
+src/types/uni-pages.d.ts
+src/types/components.d.ts
+src/types/vite-plugin-uni-polyfill.d.ts
