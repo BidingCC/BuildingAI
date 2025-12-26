@@ -1,5 +1,11 @@
 export interface PagesMetaPluginOptions {
     pagesJsonPath?: string;
+    /**
+     * Type definition file path
+     * If specified, the plugin will generate type definitions to this file
+     * @example "src/types/pages-meta.d.ts"
+     */
+    dts?: string;
 }
 
 export interface PageMeta {

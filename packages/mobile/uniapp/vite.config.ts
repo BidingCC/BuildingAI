@@ -1,7 +1,7 @@
 // 扩展插件加载器（必须在 UniHelperPages 之前）
 /** @see https://github.com/vitejs/vite */
 
-import { uniappExtensions, uniMiddleware, uniPagesMeta } from "@buildingai/vite-plugins";
+import { UniExtensions, UniMiddleware, UniPagesMeta } from "@buildingai/vite-plugins";
 /** @see https://uni-helper.js.org/plugin-uni */
 import Uni from "@uni-helper/plugin-uni";
 /** @see https://github.com/antfu/unplugin-auto-import */
@@ -39,16 +39,18 @@ dotenv.config({
 /** @see https://vitejs.dev/config/ */
 export default defineConfig({
     plugins: [
-        uniappExtensions({
+        UniExtensions({
             extensionsDir: "../../../extensions",
             enableHmr: true,
         }),
-        uniMiddleware({
+        UniMiddleware({
             middlewareDir: "src/middleware",
             pagesJsonPath: "src/pages.json",
+            dts: "src/types/uni-middleware.d.ts",
         }),
-        uniPagesMeta({
+        UniPagesMeta({
             pagesJsonPath: "src/pages.json",
+            dts: "src/types/uni-pages-meta.d.ts",
         }),
         UniHelperManifest(),
         UniHelperPages({

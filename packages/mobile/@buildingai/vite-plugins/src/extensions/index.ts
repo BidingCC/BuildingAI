@@ -4,7 +4,7 @@ import { ExtensionOrchestrator } from "./core/orchestrator.js";
 import { ExtensionRegistry } from "./core/registry.js";
 import type { PluginOptions } from "./types.js";
 
-export function uniappExtensions(options: PluginOptions = {}) {
+export function UniExtensions(options: PluginOptions = {}) {
     return new ExtensionOrchestrator(options).createPlugin();
 }
 

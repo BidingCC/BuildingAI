@@ -21,12 +21,7 @@
 			"require": "./dist/middleware-runtime.js",
 			"import": "./dist/middleware-runtime.js",
 			"types": "./dist/middleware-runtime.d.ts"
-		},
-        "./types": {
-            "require": "./types/*.d.ts",
-            "import": "./types/*.d.ts",
-            "types": "./types/*.d.ts"
-        }
+		}
 	},
 	"scripts": {
 		"clean": "rimraf dist .turbo tsconfig.tsbuildinfo",

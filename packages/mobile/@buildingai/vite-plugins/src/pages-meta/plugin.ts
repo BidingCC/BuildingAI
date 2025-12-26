@@ -1,5 +1,5 @@
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { resolve, dirname } from "node:path";
 
 import type { Plugin, ResolvedConfig } from "vite";
 
@@ -15,7 +15,50 @@ function normalizePath(path: string): string {
     return path.replace(/\\/g, "/");
 }
 
-export function uniPagesMeta(options: PagesMetaPluginOptions = {}): Plugin {
+/**
+ * Generate type definition file for pages-meta
+ */
+function generateDtsFile(dtsPath: string, configRoot: string): void {
+    const typeDefinitionContent = `declare module "virtual:pages-meta" {
+    interface PageStyle {
+        navigationBarTitleText?: string;
+        navigationBarBackgroundColor?: string;
+        navigationBarTextStyle?: string;
+        [key: string]: unknown;
+    }
+
+    interface PageMeta {
+        path: string;
+        style?: PageStyle;
+        [key: string]: unknown;
+    }
+
+    interface PagesMetaMap {
+        [path: string]: PageMeta;
+    }
+
+    interface TabBarItem {
+        pagePath: string;
+        index: number;
+        [key: string]: unknown;
+    }
+
+    export const pagesMeta: PagesMetaMap;
+    export const tabBarList: TabBarItem[];
+    export function getPageMeta(path: string): PageMeta | null;
+    export function getPageTitle(path: string): string;
+    export function getCurrentPageMeta(): PageMeta | null;
+    export function getCurrentPageTitle(): string;
+}
+`;
+
+    const fullPath = resolve(configRoot, dtsPath);
+    const dir = dirname(fullPath);
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(fullPath, typeDefinitionContent, "utf-8");
+}
+
+export function UniPagesMeta(options: PagesMetaPluginOptions = {}): Plugin {
     const { pagesJsonPath = "src/pages.json" } = options;
     let config: ResolvedConfig;
 
@@ -88,6 +131,10 @@ export function getCurrentPageTitle() {
 
         configResolved(_config) {
             config = _config;
+            // Generate type definition file if dts option is specified
+            if (options.dts) {
+                generateDtsFile(options.dts, config.root);
+            }
         },
 
         configureServer({ watcher, moduleGraph, ws }) {
