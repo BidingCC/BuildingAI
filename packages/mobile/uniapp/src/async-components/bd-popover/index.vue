@@ -67,12 +67,22 @@ const triggerRef = ref<HTMLElement>();
 const open = () => {
     isClosing.value = false;
     isOpen.value = true;
+    // Emit global event to blur tabbar when popover opens
+    if (props.showBlur) {
+        uni.$emit("popover:open", {
+            blurIntensity: props.blurIntensity,
+        });
+    }
     emit("open");
     emit("change", true);
 };
 
 const close = () => {
     isClosing.value = true;
+    // Emit global event to remove blur from tabbar when popover closes
+    if (props.showBlur) {
+        uni.$emit("popover:close");
+    }
     // Wait for animation to complete before hiding
     setTimeout(() => {
         isOpen.value = false;
@@ -95,6 +105,13 @@ const handleMaskClick = () => {
         close();
     }
 };
+
+// Clean up: remove blur from tabbar when component is unmounted
+onUnmounted(() => {
+    if (props.showBlur && isOpen.value) {
+        uni.$emit("popover:close");
+    }
+});
 
 const placementClass = computed(() => {
     return `bd-popover__content--${props.placement}`;

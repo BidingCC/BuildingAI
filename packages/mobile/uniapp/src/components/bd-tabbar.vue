@@ -52,16 +52,27 @@ const currentIndex = computed(() => {
 const safeAreaBottom = ref(0);
 const tabbarHeight = computed(() => 64 + safeAreaBottom.value);
 
+// 模糊效果状态-（邪修方法，无法解决 stacking context 堆叠问题，所以只能使用这种来模糊背景达到模糊效果）
+const isBlurred = ref(false);
+const blurIntensity = ref(20);
+
 // 样式
 const tabbarStyle = computed(() => ({
     background: "var(--background)",
     height: `${tabbarHeight.value}px`,
     ...(safeAreaBottom.value > 0 && { paddingBottom: `${safeAreaBottom.value}px` }),
+    ...(isBlurred.value && {
+        filter: `blur(${blurIntensity.value}px)`,
+        WebkitFilter: `blur(${blurIntensity.value}px)`,
+        transition: "filter 0.25s ease-out",
+    }),
 }));
 
 // Tab 点击处理
 const handleTabClick = (item: TabItem) => {
     if (item.disabled) return;
+    // 模糊状态下不允许点击跳转
+    if (isBlurred.value) return;
 
     const targetPath = normalizePath(item.pagePath);
     if (currentPagePath.value === targetPath) return;
@@ -88,7 +99,23 @@ const getImagePath = (path: string) => (path && !path.startsWith("/") ? `/${path
 
 onMounted(() => {
     safeAreaBottom.value = uni.getSystemInfoSync().safeAreaInsets?.bottom || 0;
+
+    // Listen to global events to apply blur effect
+    uni.$on("popover:open", (options: { blurIntensity?: number }) => {
+        blurIntensity.value = options?.blurIntensity || 20;
+        isBlurred.value = true;
+    });
+
+    uni.$on("popover:close", () => {
+        isBlurred.value = false;
+    });
 });
+
+// onUnmounted(() => {
+//     // Clean up event listeners
+//     uni.$off("popover:open");
+//     uni.$off("popover:close");
+// });
 </script>
 
 <template>
@@ -102,7 +129,7 @@ onMounted(() => {
                     class="bd-tabbar__item"
                     :class="{
                         'bd-tabbar__item--active': currentIndex === index,
-                        'bd-tabbar__item--disabled': item.disabled,
+                        'bd-tabbar__item--disabled': item.disabled || isBlurred,
                     }"
                     :style="{
                         color:
@@ -142,14 +169,6 @@ onMounted(() => {
             </view>
         </view>
     </view>
-
-    <div>
-        <div class="content">
-            <div class="mask"></div>
-            <div class="content-inner"></div>
-        </div>
-        <div class="tabbar"></div>
-    </div>
 </template>
 
 <style scoped>
