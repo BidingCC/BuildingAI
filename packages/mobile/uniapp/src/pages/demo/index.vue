@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import type {
-    UniCountdownInstance,
-    UniFormsInstance,
-    UniPopupInstance,
-} from "@uni-helper/uni-ui-types";
+import type { UniFormsInstance } from "@uni-helper/uni-ui-types";
 
+import UniBadge from "@/async-components/uni-badge/uni-badge.vue?async";
+import UniCountdown from "@/async-components/uni-countdown/uni-countdown.vue?async";
+import UniDataCheckbox from "@/async-components/uni-data-checkbox/uni-data-checkbox.vue?async";
 import BdActionSheet from "@/components/bd-action-sheet.vue";
 import BdModal from "@/components/bd-modal.vue";
 import BdPicker from "@/components/bd-picker.vue";
@@ -17,13 +16,13 @@ definePage({
 });
 
 // 动作面板实例
-const actionSheetRef = ref<UniPopupInstance>();
+const actionSheetRef = ref<InstanceType<typeof BdActionSheet>>();
 // picker实例
-const pickerRef = ref<UniPopupInstance>();
+const pickerRef = ref<InstanceType<typeof BdPicker>>();
 // modal实例
-const modalRef = ref<UniPopupInstance>();
+const modalRef = ref<InstanceType<typeof BdModal>>();
 // countdown实例
-const countdownRef = ref<UniCountdownInstance>();
+const countdownRef = ref<InstanceType<typeof UniCountdown>>();
 // 表单实例
 const customFormRefs = ref<UniFormsInstance>();
 
