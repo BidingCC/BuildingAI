@@ -29,3 +29,6 @@ declare module "virtual:pages-meta" {
     export function getCurrentPageMeta(): PageMeta | null;
     export function getCurrentPageTitle(): string;
 }
+
+
+

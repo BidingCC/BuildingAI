@@ -8,7 +8,8 @@
 	"module": "./dist/index.js",
 	"types": "./dist/index.d.ts",
 	"files": [
-		"dist/**/*"
+		"dist/**/*",
+		"types/**/*"
 	],
 	"exports": {
 		".": {
@@ -20,7 +21,12 @@
 			"require": "./dist/middleware-runtime.js",
 			"import": "./dist/middleware-runtime.js",
 			"types": "./dist/middleware-runtime.d.ts"
-		}
+		},
+        "./types": {
+            "require": "./types/*.d.ts",
+            "import": "./types/*.d.ts",
+            "types": "./types/*.d.ts"
+        }
 	},
 	"scripts": {
 		"clean": "rimraf dist .turbo tsconfig.tsbuildinfo",
