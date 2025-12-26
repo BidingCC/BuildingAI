@@ -19,13 +19,12 @@
             "@mini-types/alipay",
             "miniprogram-api-typings",
             "@uni-helper/uni-types",
-            "@uni-helper/uni-ui-types",
+            "@uni-helper/uni-ui-types"
         ],
         "sourceMap": true
     },
     "include": [
-        "src/**/*",
-        "@buildingai/vite-plugins/types"
+        "src/**/*"
     ],
     "exclude": [
         "src/uni_modules/**/*"

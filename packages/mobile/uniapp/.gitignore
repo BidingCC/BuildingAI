@@ -25,6 +25,8 @@ src/pages.json
 src/manifest.json
 
 # types
+src/types/uni-middleware.d.ts
+src/types/uni-pages-meta.d.ts
 src/types/async-component.d.ts
 src/types/async-import.d.ts
 src/types/auto-imports.d.ts
