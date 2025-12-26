@@ -209,85 +209,107 @@ export class WechatOaService {
      * @returns 包含扫描状态的对象
      * @throws 当场景值不存在时抛出错误
      */
-    async getQrCodeStatus(scene_str: string) {
-        // 从Redis获取场景值对应的状态信息
-        const sceneStr = await this.redisService.get<string>(this.SCENE_PREFIX + ":" + scene_str);
+    // async getQrCodeStatus(scene_str: string) {
+    //     // 从Redis获取场景值对应的状态信息
+    //     const raw = await this.redisService.get<string>(this.SCENE_PREFIX + ":" + scene_str);
+    //     if (!raw) {
+    //         throw HttpErrorFactory.internal("登录超时，请重新登录");
+    //     }
+    //     const scene = JSON.parse(raw);
 
-        if (!sceneStr) {
-            // 场景值不存在，说明登录超时，请重新登录
-            throw HttpErrorFactory.internal("登录超时，请重新登录");
-        }
+    //     const { appId, webAuthDomain } = await this.wxoaconfigService.getConfig();
 
-        const scene = JSON.parse(sceneStr);
+    //     if (!scene) {
+    //         // 场景值不存在，说明登录超时，请重新登录
+    //         throw HttpErrorFactory.internal("登录超时，请重新登录");
+    //     }
 
-        const { openid, is_scan } = scene;
-        // 如果已扫描且openid不为空，则自动登录/注册用户
-        if (is_scan && openid !== "") {
-            // 检查用户是否已存在
-            const existingUser = await this.authService.findOne({
-                where: { openid },
-            });
+    //     const { openid, is_scan } = scene;
+    //     // 如果已扫描且openid不为空，则自动登录/注册用户
+    //     if (is_scan && openid !== "") {
+    //         // 检查用户是否已存在
+    //         const existingUser = await this.authService.findOne({ where: { openid } });
 
-            if (existingUser) {
-                // 用户已存在，检查用户状态
-                if (!isEnabled(existingUser.status)) {
-                    // 用户状态已停用，发送提示消息
-                    await this.sendTemplateMessage(
-                        openid as string,
-                        "账号已被停用，请联系管理员处理",
-                    );
-                    return {
-                        is_scan,
-                        error: "账号已被停用，请联系管理员处理",
-                    };
-                }
+    //         if (existingUser) {
+    //             // 已注册：直接登录
+    //             if (!isEnabled(existingUser.status)) {
+    //                 await this.sendTemplateMessage(openid, "账号已被停用，请联系管理员处理");
+    //                 return { is_scan, error: "账号已被停用，请联系管理员处理" };
+    //             }
 
-                // 用户状态正常，直接登录
-                const result = await this.authService.loginOrRegisterByOpenid(openid as string);
-                if (result.user.token) {
-                    // 发送登录成功消息
-                    await this.sendTemplateMessage(openid as string, "登录成功");
-                }
-                return {
-                    ...result,
-                    is_scan,
-                };
-            } else {
-                // 用户不存在，检查是否允许微信注册
-                const loginSettings = await this.getLoginSettings();
+    //             const result = await this.authService.loginOrRegisterByOpenid(openid);
+    //             if (result.user.token) {
+    //                 await this.sendTemplateMessage(openid, "登录成功");
+    //             }
+    //             return { ...result, is_scan };
+    //         } else {
+    //             // 未注册：引导授权以获取头像与昵称，注册在授权回调中完成
+    //             const loginSettings = await this.getLoginSettings();
+    //             if (
+    //                 !loginSettings.allowedRegisterMethods ||
+    //                 !loginSettings.allowedRegisterMethods.includes(3)
+    //             ) {
+    //                 await this.sendTemplateMessage(openid, "注册功能已关闭，请联系管理员处理");
+    //                 return { is_scan, error: "注册功能已关闭，请联系管理员处理" };
+    //             }
 
-                if (
-                    !loginSettings.allowedRegisterMethods ||
-                    !loginSettings.allowedRegisterMethods.includes(LOGIN_TYPE.WECHAT)
-                ) {
-                    // 微信注册已关闭，发送提示消息
-                    await this.sendTemplateMessage(
-                        openid as string,
-                        "注册功能已关闭，请联系管理员处理",
-                    );
-                    return {
-                        is_scan,
-                        error: "注册功能已关闭，请联系管理员处理",
-                    };
-                }
+    //             // 若已完成授权，则此处完成注册并登录
+    //             if (scene.is_authorized) {
+    //                 const result = await this.authService.loginOrRegisterByOpenid(openid);
 
-                // 允许微信注册，进行自动注册
-                const result = await this.authService.loginOrRegisterByOpenid(openid as string);
-                if (result.user.token) {
-                    // 发送注册成功消息
-                    await this.sendTemplateMessage(openid as string, "注册并登录成功");
-                }
-                return {
-                    ...result,
-                    is_scan,
-                };
-            }
-        }
+    //                 // 授权阶段拉到的微信头像/昵称，补齐用户资料
+    //                 const wxUserInfo = scene.wx_userinfo;
+    //                 if (wxUserInfo) {
+    //                     try {
+    //                         await this.authService.update(
+    //                             {
+    //                                 nickname: wxUserInfo.nickname,
+    //                                 avatar: wxUserInfo.headimgurl,
+    //                             },
+    //                             { where: { openid } },
+    //                         );
+    //                     } catch (e) {
+    //                         this.logger.warn(`更新微信用户资料失败: ${e.message}`);
+    //                     }
+    //                 }
 
-        return {
-            is_scan,
-        };
-    }
+    //                 if (result.user.token) {
+    //                     await this.sendTemplateMessage(openid, "注册并登录成功");
+    //                 }
+    //                 return { ...result, is_scan, authorized: true };
+    //             }
+
+    //             // 未授权：发送授权链接（只发一次），并延长会话有效期，等待用户授权
+    //             if (!scene.is_auth_sent) {
+    //                 const redirectUri = encodeURIComponent(
+    //                     `${webAuthDomain}/api/auth/wechat-oauth-callback`,
+    //                 );
+    //                 // 使用 scene_str 作为 state，以便回调中定位会话
+    //                 const authUrl = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appId}&redirect_uri=${redirectUri}&response_type=code&scope=snsapi_userinfo&state=${scene_str}#wechat_redirect`;
+    //                 await this.sendAuthTemplateMessage(openid, authUrl);
+
+    //                 await this.redisService.set(
+    //                     this.SCENE_PREFIX + ":" + scene_str,
+    //                     JSON.stringify({ ...scene, is_auth_sent: true }),
+    //                     300,
+    //                 );
+    //             } else {
+    //                 // 已下发授权链接但尚未完成授权：持续刷新会话 TTL，避免用户在授权过程中会话过期
+    //                 await this.redisService.set(
+    //                     this.SCENE_PREFIX + ":" + scene_str,
+    //                     JSON.stringify(scene),
+    //                     300,
+    //                 );
+    //             }
+
+    //             return { is_scan, need_authorization: true };
+    //         }
+    //     }
+
+    //     return {
+    //         is_scan,
+    //     };
+    // }
 
     /**
      * 获取登录设置配置
@@ -300,6 +322,43 @@ export class WechatOaService {
             this.getDefaultLoginSettings(),
             "auth",
         );
+    }
+    /**
+     * 发送确认登录模板消息
+     *
+     * 向指定用户发送包含确认登录超链接的微信公众号模板消息
+     * 用户点击"确认登录"链接即可完成微信授权登录
+     *
+     * @param openid 接收消息的用户openid
+     * @param authUrl 授权登录的URL
+     * @returns 发送结果
+     * @throws 当获取access_token失败或发送消息失败时抛出异常
+     */
+    private async sendAuthTemplateMessage(openid: string, authUrl: string) {
+        try {
+            // 获取有效的access_token
+            const access_token = await this.getAccessTokenByRedis();
+
+            // 发送模板消息
+            return this.wechatOaClient.sendTemplateMessage(
+                access_token,
+                openid,
+                MsgType.Text,
+                `🔐 扫码登录确认
+    
+    您正在尝试通过微信扫码登录 BuildingAI
+    
+    📱 登录设备：微信客户端
+    ⏰ 登录时间：${new Date().toLocaleString("zh-CN")}
+    
+    👉 <a href="${authUrl}">点击确认登录</a>
+    
+    如非本人操作，请忽略此消息。`,
+            );
+        } catch (error) {
+            // 将错误包装为HTTP异常
+            throw HttpErrorFactory.internal(error.message);
+        }
     }
 
     /**
@@ -438,7 +497,7 @@ export class WechatOaService {
     //         await this.wxoaconfigService.getConfig();
 
     //     // 初始化客户端（若尚未初始化）
-    //     this.wechatOaClient = new WechatOaClient(token, encodingAESKey, appId, appSecret);
+    //     this.wechatOaClient = new WechatOaClient(token, encodingAESKey, appId);
 
     //     // 通过 code 置换 OAuth access_token 与 openid
     //     const oauth = await this.wechatOaClient.getOAuthAccessToken(appId, appSecret, code);

@@ -286,7 +286,7 @@ export class AuthWebController extends BaseController {
     @Public()
     @Get("wechat-qrcode-status/:scene_str")
     async getWechatQrcodeStatus(@Param("scene_str") scene_str: string) {
-        return this.wechatOaService.getQrCodeStatus(scene_str);
+        // return this.wechatOaService.getQrCodeStatus(scene_str);
     }
 
     /**
