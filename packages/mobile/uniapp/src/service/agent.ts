@@ -7,7 +7,7 @@
  */
 
 import type { Agent } from "@buildingai/service/consoleapi/ai-agent";
-import type { Pagination, PaginationResult } from "@buildingai/service/models/globals";
+import type { PaginationResult } from "@buildingai/service/models/globals";
 import type { QueryPublicAgentParams } from "@buildingai/service/webapi/ai-agent";
 // ==================== Type Definitions ====================
 

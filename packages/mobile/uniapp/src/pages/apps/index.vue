@@ -45,7 +45,7 @@ const queryList = (pageNo: number, pageSize: number) => {
         })
         .catch((error) => {
             console.error("Failed to load agents:", error);
-            pagingRef.value?.complete(false);
+            pagingRef.value?.complete([]);
         });
 };
 
@@ -86,6 +86,7 @@ const currentSortLabel = computed(() => {
 definePage({
     style: {
         navigationBarTitle: "pages.apps",
+        auth: false,
         hiddenHeader: true,
     },
 });
@@ -93,12 +94,6 @@ definePage({
 
 <template>
     <BdNavbar :title="t('pages.apps')" :show-back="false" :show-home="false" filter="blur(4px)">
-        <!-- <template #left>
-            <view bg="white" py="2" px="4" rounded="5" flex gap="1" items-center z="0">
-                <view i-lucide-search size="4"></view>
-                <view text="sm muted-foreground">搜索智能体</view>
-            </view>
-        </template> -->
     </BdNavbar>
     <view class="flex h-[calc(100vh-112px)] flex-col overflow-hidden px-4">
         <view bg="white" py="2" px="4" rounded="5" flex gap="1" items-center z="0">

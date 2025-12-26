@@ -82,7 +82,10 @@
         "chooseFileFailed": "Failed to choose file",
         "fileNotFound": "File not found",
         "urlAdded": "URL added successfully",
-        "unsupportedFileType": "Unsupported file type"
+        "unsupportedFileType": "Unsupported file type",
+        "loadFailed": "Load failed",
+        "mcpNotConnectable": "MCP server is not available",
+        "mcpMaxLimit": "To maintain performance, a maximum of 5 MCP servers can be activated at the same time. Please close some servers before enabling new ones."
     },
     "upload": "Upload",
     "chat": {

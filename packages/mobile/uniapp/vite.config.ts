@@ -54,6 +54,7 @@ export default defineConfig({
         UniHelperPages({
             dts: "src/types/uni-pages.d.ts",
             homePage: "pages/chat/index",
+            subPackages: ["src/packages"],
         }),
         UniHelperLayouts(),
         UniHelperComponents({

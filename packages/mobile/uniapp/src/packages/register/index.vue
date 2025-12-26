@@ -102,7 +102,7 @@ const handleRegister = async () => {
 
 const handleAgreement = (type: "service" | "privacy") => {
     useRouter().navigate({
-        url: `/pages/agreement/index?url=${type}`,
+        url: `/packages/agreement/index?url=${type}`,
     });
 };
 </script>

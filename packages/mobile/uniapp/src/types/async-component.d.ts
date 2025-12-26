@@ -194,3 +194,7 @@ declare module '@/async-components/bd-popover/index.vue?async' {
   const component: typeof import('@/async-components/bd-popover/index.vue')
   export = component
 }
+declare module '@/async-components/mcp-select/index.vue?async' {
+  const component: typeof import('@/async-components/mcp-select/index.vue')
+  export = component
+}

@@ -256,7 +256,7 @@ const showPasswordPicker = () => {
                 <view class="bg-background mb-6 rounded-lg">
                     <view
                         class="flex items-center justify-between pl-2"
-                        @click="router.navigate({ url: '/pages/agreement/index?url=service' })"
+                        @click="router.navigate({ url: '/packages/agreement/index?url=service' })"
                     >
                         <view i-lucide-clipboard-pen-line w="10" text="muted-foreground" />
                         <view
@@ -274,7 +274,7 @@ const showPasswordPicker = () => {
                     </view>
                     <view
                         class="flex items-center justify-between pl-2"
-                        @click="router.navigate({ url: '/pages/agreement/index?url=privacy' })"
+                        @click="router.navigate({ url: '/packages/agreement/index?url=privacy' })"
                     >
                         <view i-lucide-file-lock-2 w="10" text="muted-foreground" />
                         <view w="full" flex="~ justify-between items-center" class="py-3 pr-2">

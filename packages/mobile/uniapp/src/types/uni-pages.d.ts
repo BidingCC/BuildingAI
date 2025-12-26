@@ -5,15 +5,15 @@
 
 type _LocationUrl =
   "/pages/chat/index" |
-  "/pages/about_us/index" |
-  "/pages/agreement/index" |
   "/pages/apps/index" |
   "/pages/demo/index" |
-  "/pages/login/index" |
-  "/pages/register/index" |
   "/pages/user/index" |
   "/pages/user/settings" |
   "/pages/webview/index" |
+  "/packages/about_us/index" |
+  "/packages/agreement/index" |
+  "/packages/login/index" |
+  "/packages/register/index" |
   "/async-components/index" |
   "/extensions/simple-blog/pages/list/index" |
   "/extensions/simple-blog/pages/detail/index" |

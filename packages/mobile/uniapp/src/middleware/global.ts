@@ -19,14 +19,14 @@ export default defineMiddleware((to, from) => {
         "currentRoute",
         currentRoute,
     );
-    if (requireAuth && !userStore.isLogin && currentRoute !== "pages/login/index") {
+    if (requireAuth && !userStore.isLogin && currentRoute !== "packages/login/index") {
         return {
-            url: "/pages/login/index?redirect=" + to.route,
+            url: "/packages/login/index?redirect=" + to.route,
             method: "navigateTo",
         };
     }
 
-    if (userStore.isLogin && to.route === "pages/login/index") {
+    if (userStore.isLogin && to.route === "packages/login/index") {
         return {
             url: `/${pages[0]?.path || "/"}`,
             method: "reLaunch",

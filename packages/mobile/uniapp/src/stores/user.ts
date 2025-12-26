@@ -70,7 +70,7 @@ const userStore = defineStore("auth", () => {
      * @param redirect Redirect page
      */
     const handleRedirect = async (redirect: string) => {
-        if (redirect === `/${pages[0]?.path || "/"}` || redirect === "/pages/login/index") {
+        if (redirect === `/${pages[0]?.path || "/"}` || redirect === "/packages/login/index") {
             return uni.reLaunch({
                 url: `/${pages[0]?.path || "/"}`,
             });
@@ -147,7 +147,7 @@ const userStore = defineStore("auth", () => {
         clearToken();
         const route = getCurrentPageMeta();
         return uni.redirectTo({
-            url: "/pages/login/index?redirect=" + route?.path,
+            url: "/packages/login/index?redirect=" + route?.path,
         });
     };
 
