@@ -1,11 +1,13 @@
-import { useAuthStore } from "@buildingai/stores";
+import { useAuthStore, useConfigStore } from "@buildingai/stores";
 import { GalleryVerticalEnd } from "lucide-react";
 import { Navigate } from "react-router-dom";
 
+import SvgIcons from "../../components/svg-icons";
 import { LoginForm } from "./_components/login-form";
 
 const LoginPage = () => {
   const { isLogin } = useAuthStore((state) => state.authActions);
+  const { websiteConfig } = useConfigStore((state) => state.config);
 
   if (isLogin()) {
     return <Navigate to="/" replace />;
@@ -14,10 +16,14 @@ const LoginPage = () => {
     <div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
       <div className="flex w-full max-w-sm flex-col gap-6">
         <a href="#" className="flex items-center gap-2 self-center font-medium">
-          <div className="bg-primary text-primary-foreground flex size-9 items-center justify-center rounded-md">
-            <GalleryVerticalEnd className="size-4" />
-          </div>
-          BuildingAI
+          {websiteConfig?.webinfo.logo ? (
+            <div className="flex items-center gap-2">
+              <img className="h-8" src={websiteConfig?.webinfo.logo} alt="logo" />
+              <span className="text-xl font-bold">{websiteConfig?.webinfo.name}</span>
+            </div>
+          ) : (
+            <SvgIcons.buildingaiFull className="h-8" />
+          )}
         </a>
         <LoginForm />
       </div>

@@ -14,3 +14,7 @@ export function postLogin(data: {
         expiresAt: string;
     }>("/auth/login", data);
 }
+
+export function postCheckAccount(data: { account: string }) {
+    return apiHttpClient.post<{ hasAccount: boolean; type: string }>("/auth/check-account", data);
+}

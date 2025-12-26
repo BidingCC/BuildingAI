@@ -26,6 +26,13 @@ export class AuthWebController extends BaseController {
         super();
     }
 
+    @Public()
+    @Post("check-account")
+    @BuildFileUrl(["**.avatar"])
+    async checkAccount(@Body() body: { account: string }) {
+        return this.authService.checkAccount(body.account);
+    }
+
     /**
      * 用户注册
      *

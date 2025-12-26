@@ -760,7 +760,7 @@ export class BaseService<T extends { id: string }> {
         // 构建查询选项并应用锁配置
         const findOptions: FindManyOptions<T> = {
             ...restOptions,
-            where: { ...where },
+            where: Array.isArray(where) ? where : { ...where },
         };
 
         const lockedFindOptions = this.applyLockToFindOptions(findOptions, lock);
