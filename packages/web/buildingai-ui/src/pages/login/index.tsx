@@ -1,5 +1,4 @@
 import { useAuthStore, useConfigStore } from "@buildingai/stores";
-import { GalleryVerticalEnd } from "lucide-react";
 import { Navigate } from "react-router-dom";
 
 import SvgIcons from "../../components/svg-icons";
