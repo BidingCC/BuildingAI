@@ -28,12 +28,6 @@ import { Permission } from "./permission.entity";
  */
 @AppEntity({ name: "user", comment: "用户信息" })
 export class User extends SoftDeleteBaseEntity {
-    /**
-     * 用户openid
-     */
-    @Column({ nullable: true })
-    openid: string;
-
     @Column({ nullable: true })
     userNo: string;
     /**
@@ -164,6 +158,23 @@ export class User extends SoftDeleteBaseEntity {
         enumName: "user_create_source_enum",
     })
     source: UserCreateSourceType;
+    /**
+     * 用户oa_openid
+     */
+    @Column({ nullable: true, unique: true, comment: "用户oa_openid" })
+    openid: string;
+
+    /**
+     * 用户mp_openid
+     */
+    @Column({ nullable: true, unique: true, comment: "用户mp_openid" })
+    mpOpenid: string;
+
+    /**
+     * 用户unionid
+     */
+    @Column({ nullable: true, unique: true, comment: "用户unionid" })
+    unionid: string;
 
     @BeforeInsert()
     @BeforeUpdate()

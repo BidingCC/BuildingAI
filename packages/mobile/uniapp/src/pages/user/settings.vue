@@ -43,10 +43,6 @@ function showLocalePicker() {
 }
 
 const handleBindWechat = async () => {
-    if (userStore.userInfo?.bindWechat) {
-        useToast().error("已绑定微信");
-        return;
-    }
     const { code } = await uni.login({ provider: "weixin" });
     try {
         await apiBindWechat({ code });

@@ -285,25 +285,25 @@ export class AuthService extends BaseService<User> {
      * @param userAgent 用户代理
      * @returns 登录结果
      */
-    async loginOrRegisterByOpenid(
-        openid: string,
-        terminal: UserTerminalType = UserTerminal.PC,
-        ipAddress?: string,
-        userAgent?: string,
-    ) {
-        // 查找是否已有用户绑定此 openid
-        const existingUser = await this.findOne({
-            where: { openid },
-        });
+    // async loginOrRegisterByWechat(
+    //     Conditions: { openid: string } | { unionid: string } | { mpOpenid: string },
+    //     terminal: UserTerminalType = UserTerminal.PC,
+    //     ipAddress?: string,
+    //     userAgent?: string,
+    // ) {
+    //     // 查找是否已有用户绑定此 openid
+    //     const existingUser = await this.findOne({
+    //         where: Conditions,
+    //     });
 
-        if (existingUser) {
-            // 用户已存在，直接登录
-            return this.loginByUser(existingUser, terminal, ipAddress, userAgent);
-        } else {
-            // 用户不存在，自动注册
-            return this.registerByOpenid(openid, terminal, ipAddress, userAgent);
-        }
-    }
+    //     if (existingUser) {
+    //         // 用户已存在，直接登录
+    //         return this.loginByUser(existingUser, terminal, ipAddress, userAgent);
+    //     } else {
+    //         // 用户不存在，自动注册
+    //         // return this.registerByWechat(Conditions, terminal, ipAddress, userAgent);
+    //     }
+    // }
 
     /**
      * 通过 openid 自动注册用户
@@ -314,8 +314,8 @@ export class AuthService extends BaseService<User> {
      * @param userAgent 用户代理
      * @returns 注册结果
      */
-    private async registerByOpenid(
-        openid: string,
+    async registerByWechat(
+        Conditions: { openid: string } | { mpOpenid: string },
         terminal: UserTerminalType = UserTerminal.PC,
         ipAddress?: string,
         userAgent?: string,
@@ -332,7 +332,7 @@ export class AuthService extends BaseService<User> {
         // 创建用户
         const savedUser = await this.create(
             {
-                openid,
+                ...Conditions,
                 username,
                 password: "",
                 nickname: randomNickname,
@@ -390,7 +390,7 @@ export class AuthService extends BaseService<User> {
      * @param userAgent 用户代理
      * @returns 登录结果
      */
-    private async loginByUser(
+    async loginByUser(
         user: User,
         terminal: UserTerminalType = UserTerminal.PC,
         ipAddress?: string,

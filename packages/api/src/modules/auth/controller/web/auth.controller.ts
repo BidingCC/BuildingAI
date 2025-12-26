@@ -310,7 +310,7 @@ export class AuthWebController extends BaseController {
                 BusinessCode.INVALID_REQUEST,
             );
         }
-        await this.wechatOaService.authorizeUserInfo(code, state);
+        // await this.wechatOaService.authorizeUserInfo(code, state);
         // 不做重定向，直接返回一个简洁的移动端友好页
         const html = `<!doctype html>
     <html lang="zh-CN">
