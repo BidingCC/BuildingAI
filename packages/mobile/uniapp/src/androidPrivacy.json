@@ -1,0 +1,40 @@
+{
+    "version": "1",
+    "prompt": "template",
+    "title": "用户协议及隐私政策",
+    "message": "　　为了更好保证您的合法权益，请仔细阅读并同意以下协议。<br/><a href=\"https://demo.buildingai.cc//mobile/packages/agreement/index?type=service\">《用户协议》</a>和<a href=\"https://demo.buildingai.cc//mobile/packages/agreement/index?type=privacy\">《隐私政策》</a>",
+    "buttonAccept": "同意并接受",
+    "buttonRefuse": "暂不同意",
+    "hrefLoader": "system|default",
+    "backToExit": "false",
+    "second": {
+        "title": "确认提示",
+        "message": "　　进入应用前，你需先同意<a href=\"https://demo.buildingai.cc//mobile/packages/agreement/index?type=service\">《用户协议》</a>和<a href=\"https://demo.buildingai.cc//mobile/packages/agreement/index?type=privacy\">《隐私政策》</a>，否则将退出应用。",
+        "buttonAccept": "同意并继续",
+        "buttonRefuse": "退出应用"
+    },
+    "disagreeMode": {
+        "support": false,
+        "loadNativePlugins": false,
+        "visitorEntry": false,
+        "showAlways": false
+    },
+    "styles": {
+        "backgroundColor": "#ffffff",
+        "borderRadius": "5px",
+        "title": {
+            "color": "#000000",
+            "fontWeight": "bolder"
+        },
+        "buttonAccept": {
+            "color": "#000000"
+        },
+        "buttonRefuse": {
+            "color": "#000000",
+            "backgroundColor": "#FFB529"
+        },
+        "buttonVisitor": {
+            "color": "#000000"
+        }
+    }
+}

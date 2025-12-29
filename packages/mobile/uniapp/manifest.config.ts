@@ -46,6 +46,10 @@ export default defineManifestConfig({
             ios: {},
             /* SDK配置 */
             sdkConfigs: {},
+            /* 启动页配置 */
+            splashscreen: {
+                useOriginalMsgbox: true,
+            },
         },
     },
     /* 快应用特有相关 */

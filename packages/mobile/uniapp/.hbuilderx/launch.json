@@ -15,6 +15,10 @@
         {
             "playground" : "standard",
             "type" : "uni-app:app-ios_simulator"
+        },
+        {
+            "playground" : "standard",
+            "type" : "uni-app:app-android"
         }
     ]
 }
