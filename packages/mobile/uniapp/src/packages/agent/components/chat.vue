@@ -159,6 +159,10 @@ const queryList = async (pageNo: number, pageSize: number) => {
     }
 };
 
+const handleGoBack = () => {
+    uni.navigateBack();
+};
+
 const createNewConversation = () => {
     conversationId.value = null;
     messages.value = [];
@@ -464,6 +468,9 @@ onMounted(async () => {
                 >
                     <template #left>
                         <view class="flex items-center gap-1">
+                            <view v-if="billingMode === 'user'" class="p-2" @click="handleGoBack">
+                                <text class="i-tabler-arrow-left text-lg" />
+                            </view>
                             <view class="p-2" @click="showDrawer = true">
                                 <text class="i-tabler-align-left text-lg" />
                             </view>
