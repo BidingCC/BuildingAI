@@ -69,6 +69,7 @@
         "userRecharge": "充值管理"
     },
     "diyCenter": {
+        "mobile": "移动端",
         "title": "DIY 中心",
         "microPage": "微页面",
         "layout": "页面布局",

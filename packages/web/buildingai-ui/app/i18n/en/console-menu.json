@@ -69,6 +69,7 @@
         "userRecharge": "Recharge"
     },
     "diyCenter": {
+        "mobile": "Mobile Settings",
         "title": "DIY Center",
         "microPage": "Micro Pages",
         "layout": "Page Layout",

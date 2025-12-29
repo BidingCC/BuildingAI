@@ -69,6 +69,7 @@
         "userRecharge": "チャージ管理"
     },
     "diyCenter": {
+        "mobile": "移動端設定",
         "title": "DIY センター",
         "microPage": "マイクロページ",
         "layout": "ページレイアウト",
