@@ -650,11 +650,11 @@ onMounted(async () => {
                 v-model:file-list="files"
                 :is-loading="isLoading"
                 :need-auth="false"
+                safe-area-inset-bottom
                 :attachment-size-limit="chatConfig?.attachmentSizeLimit"
                 :class="{
                     'bg-background-soft': messages.length === 0,
                     'bg-background': messages.length > 0,
-                    'safe-area-inset-bottom': true,
                 }"
                 @submit="handleSubmitMessage"
                 @stop="stop"

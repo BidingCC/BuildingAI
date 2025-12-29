@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import LocaleSelect from "@/async-components/locale-select/index.vue?async";
 import BdNavbar from "@/components/bd-navbar.vue?async";
 import UserPassword from "@/components/user/user-password.vue?async";
 import UserPhone from "@/components/user/user-phone.vue?async";
@@ -6,7 +7,7 @@ import UserProfile from "@/components/user/user-profile.vue?async";
 import UserVersion from "@/components/widget/user-version/user-version.vue?async";
 import { useHalfPopupInteraction } from "@/hooks/use-half-popup-interaction";
 import { apiBindWechat } from "@/service/weixin";
-const { t, currentLocaleLabel, locales, setLocale } = useLocale();
+const { t, currentLocaleLabel } = useLocale();
 
 definePage({
     style: {
@@ -24,23 +25,8 @@ const userPhoneRefs = ref<InstanceType<typeof UserPhone>>();
 const userPasswordRefs = ref<InstanceType<typeof UserPassword>>();
 
 // Use half-popup interaction hook
-const {
-    slideProgress,
-    isPopupOpen,
-    handleSlideProgress,
-    handlePopupOpen,
-    handlePopupClose,
-    pageTransform,
-} = useHalfPopupInteraction();
-
-function showLocalePicker() {
-    uni.showActionSheet({
-        itemList: locales.map((l) => l.label),
-        success: (res) => {
-            setLocale(locales?.[res.tapIndex]?.value ?? "zh");
-        },
-    });
-}
+const { isPopupOpen, handleSlideProgress, handlePopupOpen, handlePopupClose, pageTransform } =
+    useHalfPopupInteraction();
 
 const handleBindWechat = async () => {
     const { code } = await uni.login({ provider: "weixin" });
@@ -62,6 +48,16 @@ const showPhonePicker = () => {
 };
 const showPasswordPicker = () => {
     userPasswordRefs.value?.open();
+};
+
+const handleHapticFeedbackChange = (e: { detail: { value: boolean } }) => {
+    const newValue = e.detail.value;
+    appStore.hapticFeedbackEnabled = newValue;
+    if (newValue) {
+        nextTick(() => {
+            appStore.triggerHapticFeedback("light");
+        });
+    }
 };
 </script>
 
@@ -203,7 +199,7 @@ const showPasswordPicker = () => {
 
                 <view class="text-muted-foreground mb-2 ml-4 text-xs"> 通用 </view>
                 <view class="bg-background mb-6 rounded-lg">
-                    <view class="flex items-center justify-between pl-2" @click="showLocalePicker">
+                    <view class="flex items-center justify-between pl-2">
                         <view i-lucide-languages w="10" text="muted-foreground" />
                         <view
                             w="full"
@@ -211,10 +207,14 @@ const showPasswordPicker = () => {
                             class="border-b-solid border-muted border-b py-3 pr-2"
                         >
                             <view class="text-foreground text-sm">{{ t("common.language") }}</view>
-                            <view class="text-muted-foreground flex items-center">
-                                <text text-sm>{{ currentLocaleLabel }}</text>
-                                <text class="i-carbon-chevron-right mt-px" />
-                            </view>
+                            <LocaleSelect>
+                                <view class="text-muted-foreground flex items-center gap-2">
+                                    <text text-sm>{{ currentLocaleLabel }}</text>
+                                    <text
+                                        class="i-carbon-chevron-right text-muted-foreground text-sm"
+                                    />
+                                </view>
+                            </LocaleSelect>
                         </view>
                     </view>
                     <view class="flex items-center justify-between pl-2">
@@ -237,12 +237,7 @@ const showPasswordPicker = () => {
                             w="10"
                             text="muted-foreground xl"
                         />
-                        <view
-                            v-else
-                            i-lucide-vibrate-off
-                            w="10"
-                            text="muted-foreground xl"
-                        />
+                        <view v-else i-lucide-vibrate-off w="10" text="muted-foreground xl" />
                         <view w="full" flex="~ justify-between items-center" class="py-3 pr-2">
                             <view class="text-foreground text-sm">{{
                                 t("common.hapticFeedback")
@@ -253,11 +248,7 @@ const showPasswordPicker = () => {
                                         :checked="appStore.hapticFeedbackEnabled"
                                         color="var(--primary)"
                                         style="transform: scale(0.7)"
-                                        @change="
-                                            (e) => {
-                                                appStore.hapticFeedbackEnabled = e.detail.value;
-                                            }
-                                        "
+                                        @change="handleHapticFeedbackChange"
                                     />
                                 </view>
                             </view>

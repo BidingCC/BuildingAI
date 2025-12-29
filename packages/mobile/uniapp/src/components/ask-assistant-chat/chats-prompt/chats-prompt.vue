@@ -27,6 +27,7 @@ const props = withDefaults(
         needAuth?: boolean;
         attachmentSizeLimit?: number;
         selectedModel?: AiModel | null;
+        safeAreaInsetBottom?: boolean;
     }>(),
     {
         modelValue: "",
@@ -37,6 +38,7 @@ const props = withDefaults(
         needAuth: false,
         attachmentSizeLimit: 10,
         selectedModel: null,
+        safeAreaInsetBottom: false,
     },
 );
 
@@ -147,7 +149,8 @@ watch(
             @retry="handleRetryUpload"
         />
         <view
-            class="chat-action-bar bg-background border-muted safe-area-inset-bottom rounded-t-2xl border border-solid p-2"
+            class="chat-action-bar bg-background border-muted rounded-t-2xl border border-solid p-2"
+            :class="{ 'safe-area-inset-bottom': safeAreaInsetBottom }"
             :style="chatActionBarStyle"
             id="noswipe"
         >
