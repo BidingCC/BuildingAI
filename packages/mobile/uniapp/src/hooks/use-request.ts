@@ -117,9 +117,7 @@ async function request<T = unknown>(
         throw new Error("User not logged in, please login first and try again");
     }
 
-    // Only add user token if requireAuth is not false and headers don't already have Authorization
-    // This allows custom Authorization headers (like accessToken) to be used without being overridden
-    if (options?.requireAuth !== false && token && !requestParams.header.Authorization) {
+    if (token) {
         requestParams.header = {
             ...requestParams.header,
             Authorization: `Bearer ${token}`,

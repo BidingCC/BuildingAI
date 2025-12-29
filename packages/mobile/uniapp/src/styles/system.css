@@ -18,3 +18,7 @@ page {
     height: 0 !important;
     border: none !important;
 }
+
+.safe-area-inset-bottom {
+    padding-bottom: calc(var(--safe-area-inset-bottom));
+}

@@ -47,82 +47,95 @@ const toggleExpand = (index: number) => {
 </script>
 
 <template>
-    <view v-if="references && references.length > 0" class="bg-muted mb-2 rounded-lg p-2">
+    <view
+        v-if="references && references.length > 0"
+        class="bg-muted mb-2 flex flex-col gap-1.5 rounded-lg p-2"
+    >
         <view v-for="(ref, index) in references" :key="index" class="group">
             <view
-                class="flex w-full flex-wrap items-center gap-2 text-xs select-none"
+                class="flex items-center justify-between text-xs select-none"
                 @click="toggleExpand(index)"
             >
-                <text class="i-lucide-hammer text-primary text-base" />
-
-                <view class="flex min-w-0 flex-1 flex-wrap items-center gap-2">
-                    <text class="shrink-0">
-                        {{ t("common.chat.knowledgeCall.start") || "开始" }}
-                        {{ t("common.chat.knowledgeCall.from") || "从" }}
-                    </text>
-
-                    <view
-                        class="bg-primary/15 text-primary max-w-[50vw] truncate rounded px-2 py-1 text-xs"
-                    >
-                        {{ ref.datasetName }}
+                <view class="flex items-stretch gap-2">
+                    <view class="flex">
+                        <text class="i-lucide-hammer text-primary text-base" />
                     </view>
 
-                    <text class="text-md shrink-0">
-                        {{ t("common.chat.knowledgeCall.call") || "调用" }}
-                    </text>
+                    <view class="flex flex-wrap items-center gap-x-2">
+                        <text class="shrink-0">
+                            {{ t("common.chat.knowledgeCall.start") }}
+                            {{ t("common.chat.knowledgeCall.from") }}
+                        </text>
 
-                    <view
-                        v-if="ref.retrievalMode"
-                        class="bg-primary/15 text-primary max-w-[40vw] truncate rounded px-2 py-1 text-xs"
-                    >
-                        {{ retrievalModeMap[ref.retrievalMode as keyof typeof retrievalModeMap] }}
-                    </view>
+                        <view
+                            class="bg-primary-50 text-primary max-w-[50vw] truncate rounded px-2 py-1 text-xs"
+                        >
+                            {{ ref.datasetName }}
+                        </view>
 
-                    <text class="shrink-0">
-                        {{ t("common.chat.knowledgeCall.finished") || "完成" }}
-                    </text>
+                        <text class="text-md shrink-0">
+                            {{ t("common.chat.knowledgeCall.call") }}
+                        </text>
 
-                    <view
-                        v-if="ref.duration"
-                        class="bg-secondary shrink-0 rounded px-2 py-1 text-xs"
-                    >
-                        {{ t("common.chat.toolCall.duration") || "耗时" }}
-                        {{ formatDuration(ref.duration) }}
+                        <view
+                            v-if="ref.retrievalMode"
+                            class="bg-primary-50 text-primary max-w-[40vw] truncate rounded px-2 py-1 text-xs"
+                        >
+                            {{
+                                retrievalModeMap[ref.retrievalMode as keyof typeof retrievalModeMap]
+                            }}
+                        </view>
+
+                        <text class="shrink-0">
+                            {{ t("common.chat.knowledgeCall.finished") }}
+                        </text>
+
+                        <view
+                            v-if="ref.duration"
+                            class="bg-primary-50 text-primary shrink-0 rounded px-2 py-1 text-xs"
+                        >
+                            {{ t("common.chat.toolCall.duration") }}
+                            {{ formatDuration(ref.duration) }}
+                        </view>
                     </view>
                 </view>
-
                 <text
                     :class="
                         expandedIndexes.has(index)
                             ? 'i-lucide-chevron-down'
                             : 'i-lucide-chevron-right'
                     "
-                    class="ml-auto text-base transition-transform duration-200"
+                    class="text-base transition-transform duration-200"
                 />
             </view>
 
-            <view v-if="expandedIndexes.has(index)" class="mt-3 space-y-3">
-                <!-- Request section -->
-                <view class="bg-background rounded p-3">
-                    <text class="text-foreground mb-2 text-xs font-medium">
-                        {{ t("common.reference.request") || "请求" }}
-                    </text>
-                    <text class="text-sm text-gray-800">
-                        {{ ref?.userContent }}
-                    </text>
-                </view>
+            <view v-if="expandedIndexes.has(index) && ref" class="bg-background mt-3 rounded p-3">
+                <text class="text-foreground text-md mb-3 font-medium">
+                    {{ ref.datasetName }} {{ t("common.reference.callDetails") }}
+                </text>
+                <view class="space-y-2">
+                    <!-- Request section -->
+                    <view v-if="ref?.userContent" class="bg-muted rounded p-2">
+                        <text class="text-foreground mb-1 text-xs font-medium">
+                            {{ t("common.reference.request") }}
+                        </text>
+                        <text class="text-muted-foreground text-xs break-all">
+                            {{ ref.userContent }}
+                        </text>
+                    </view>
 
-                <!-- Response section -->
-                <view class="bg-background rounded p-3">
-                    <text class="text-foreground mb-2 text-xs font-medium">
-                        {{ t("common.reference.response") || "响应" }}
-                    </text>
-                    <view class="text-muted-foreground flex flex-col gap-2 text-sm">
-                        <view v-for="(chunk, chunkIndex) in ref?.chunks" :key="chunkIndex">
-                            <text class="text-foreground font-bold">
-                                #chunk-{{ chunkIndex + 1 }}:
-                            </text>
-                            <text>{{ chunk.content }}</text>
+                    <!-- Response section -->
+                    <view v-if="ref?.chunks && ref.chunks.length > 0" class="bg-muted rounded p-2">
+                        <text class="text-foreground mb-1 text-xs font-medium">
+                            {{ t("common.reference.response") }}
+                        </text>
+                        <view class="text-muted-foreground flex flex-col gap-2 text-xs">
+                            <view v-for="(chunk, chunkIndex) in ref.chunks" :key="chunkIndex">
+                                <text class="text-foreground font-bold">
+                                    #chunk-{{ chunkIndex + 1 }}:
+                                </text>
+                                <text class="break-all">{{ chunk.content }}</text>
+                            </view>
                         </view>
                     </view>
                 </view>

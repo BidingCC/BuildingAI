@@ -37,45 +37,42 @@ const toggleExpand = (index: number) => {
                 class="flex flex-row items-center justify-between text-xs select-none"
                 @click="toggleExpand(index)"
             >
-                <view class="flex flex-wrap items-center gap-2">
-                    <text
-                        v-if="!item?.output && !item?.error"
-                        class="i-lucide-loader-2 animate-spin text-base"
-                    />
-                    <view v-else class="flex">
-                        <text class="i-lucide-route text-sm" />
+                <view class="flex items-start gap-2">
+                    <view class="flex">
+                        <text
+                            v-if="!item?.output && !item?.error"
+                            class="i-lucide-loader-2 animate-spin text-base"
+                        />
+                        <text v-else class="i-lucide-route text-sm" />
                     </view>
 
-                    <text>
-                        {{
-                            !item.input && !item.output
-                                ? t("common.chat.toolCall.start") || "开始"
-                                : ""
-                        }}
-                        {{
-                            item.input && !item.output
-                                ? t("common.chat.toolCall.calling") || "调用中"
-                                : ""
-                        }}
-                        {{ t("common.chat.toolCall.from") || "从" }}
-                    </text>
-                    <view class="bg-primary-50 text-primary rounded px-2 py-1 text-xs">
-                        {{ item?.mcpServer?.name }}
-                    </view>
-                    <text class="text-md">{{ t("common.chat.toolCall.call") || "调用" }}</text>
-                    <view class="bg-primary-50 text-primary rounded px-2 py-1 text-xs">
-                        {{ item?.tool?.name }}
-                    </view>
-                    <text>
-                        {{
-                            item.input && item.output
-                                ? t("common.chat.toolCall.finished") || "完成"
-                                : ""
-                        }}
-                    </text>
-                    <view v-if="item.duration" class="bg-secondary rounded px-2 py-1 text-xs">
-                        {{ t("common.chat.toolCall.duration") || "耗时"
-                        }}{{ formatDuration(item.duration) }}
+                    <view class="flex flex-wrap items-center gap-x-2">
+                        <text>
+                            {{ !item.input && !item.output ? t("common.chat.toolCall.start") : "" }}
+                            {{
+                                item.input && !item.output ? t("common.chat.toolCall.calling") : ""
+                            }}
+                            {{ t("common.chat.toolCall.from") || "从" }}
+                        </text>
+                        <view class="bg-primary-50 text-primary rounded px-2 py-1 text-xs">
+                            {{ item?.mcpServer?.name }}
+                        </view>
+                        <text class="text-md">{{ t("common.chat.toolCall.call") }}</text>
+                        <view class="bg-primary-50 text-primary rounded px-2 py-1 text-xs">
+                            {{ item?.tool?.name }}
+                        </view>
+                        <text>
+                            {{
+                                item.input && item.output ? t("common.chat.toolCall.finished") : ""
+                            }}
+                        </text>
+                        <view
+                            v-if="item.duration"
+                            class="bg-primary-50 text-primary rounded px-2 py-1 text-xs"
+                        >
+                            {{ t("common.chat.toolCall.duration")
+                            }}{{ formatDuration(item.duration) }}
+                        </view>
                     </view>
                 </view>
                 <text
@@ -93,13 +90,13 @@ const toggleExpand = (index: number) => {
                 class="bg-background mt-3 rounded p-3"
             >
                 <text class="text-foreground text-md mb-3 font-medium">
-                    {{ item?.tool?.name }} {{ t("common.reference.callDetails") || "调用详情" }}
+                    {{ item?.tool?.name }} {{ t("common.reference.callDetails") }}
                 </text>
                 <view class="space-y-2">
                     <!-- Input section -->
                     <view v-if="item?.input" class="bg-muted rounded p-2">
                         <text class="text-foreground mb-1 text-xs font-medium">
-                            {{ t("common.chat.toolCall.startCall") || "开始调用" }}
+                            {{ t("common.chat.toolCall.startCall") }}
                             {{ item?.tool?.name }}
                         </text>
                         <text class="text-muted-foreground text-xs break-all">
@@ -109,7 +106,7 @@ const toggleExpand = (index: number) => {
                     <!-- Output section -->
                     <view v-if="item?.output" class="bg-muted rounded p-2">
                         <text class="text-foreground mb-1 text-xs font-medium">
-                            {{ t("common.chat.toolCall.finishedCall") || "调用完成" }}
+                            {{ t("common.chat.toolCall.finishedCall") }}
                             {{ item?.tool?.name }}
                         </text>
                         <text class="text-muted-foreground text-xs break-all">

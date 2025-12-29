@@ -33,6 +33,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const toast = useToast();
+const appStore = useAppStore();
 const popoverRef = ref<InstanceType<typeof BdPopover>>();
 const selectedIds = useVModel(props, "modelValue", emit);
 const allMcpList = ref<McpServerInfo[]>([]);
@@ -78,6 +79,8 @@ const handlePopoverOpen = () => {
         popoverRef.value?.close();
         return;
     }
+    // Trigger haptic feedback when popover opens
+    appStore.triggerHapticFeedback("light");
     getAllList();
 };
 

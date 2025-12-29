@@ -22,7 +22,7 @@ const pagesConfig = ref<PagesConfig | null>(null);
 
 const toSettings = () => {
     uni.navigateTo({
-        url: "/pages/user/settings",
+        url: "/packages/user/settings/index",
     });
 };
 

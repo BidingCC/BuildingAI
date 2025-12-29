@@ -17,6 +17,7 @@ const props = defineProps<{
 
 const { t } = useI18n();
 const toast = useToast();
+const appStore = useAppStore();
 const { isLoaded } = useAsyncPackage("bd-popover");
 
 const remoteUrls = shallowRef<string>("");
@@ -287,6 +288,7 @@ const supportsVision = computed(() => features.value.includes("vision"));
                 width: '250rpx',
                 background: 'var(--background-transparent)',
             }"
+            @open="appStore.triggerHapticFeedback('light')"
         >
             <template #content>
                 <view class="flex flex-col gap-0 pr-1" style="min-width: 200rpx">

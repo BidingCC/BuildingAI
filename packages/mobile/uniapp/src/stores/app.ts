@@ -12,6 +12,12 @@ import { defineStore } from "pinia";
 import { apiGetLoginSettings, apiGetSiteConfig } from "@/service/common";
 
 /**
+ * Haptic feedback type
+ * @description Type of haptic feedback to trigger
+ */
+type HapticFeedbackType = "light" | "medium" | "heavy" | "selection";
+
+/**
  * Application store
  * @description Global application state management store
  */
@@ -23,6 +29,14 @@ const appStore = defineStore("app", () => {
         defaultLoginWay: 1,
     });
     const loginSettings = ref<LoginSettings | null>(null);
+
+    /**
+     * Haptic feedback enabled state
+     * @description Whether haptic feedback is enabled, persisted in cookie
+     */
+    const hapticFeedbackEnabled = useCookie<boolean>("hapticFeedbackEnabled", {
+        default: () => true,
+    });
 
     /**
      * Get site configuration
@@ -79,14 +93,37 @@ const appStore = defineStore("app", () => {
         return baseUrl ? `${baseUrl}${imageUrl}` : imageUrl;
     };
 
+    /**
+     * Trigger haptic feedback
+     * @description Trigger haptic feedback vibration if enabled
+     * @param type Type of haptic feedback (default: "light")
+     */
+    const triggerHapticFeedback = (type: HapticFeedbackType = "light") => {
+        if (!hapticFeedbackEnabled.value) {
+            return;
+        }
+
+        try {
+            // Use uni.vibrateShort which supports all platforms
+            uni.vibrateShort({
+                type: type === "selection" ? "light" : (type as "light" | "medium" | "heavy"),
+            });
+        } catch (error) {
+            // Silently fail if haptic feedback is not supported
+            console.debug("Haptic feedback not supported:", error);
+        }
+    };
+
     return {
         siteConfig,
         loginWay,
         loginSettings,
+        hapticFeedbackEnabled,
 
         getConfig,
         getImageUrl,
         getLoginSettings,
+        triggerHapticFeedback,
     };
 });
 /**

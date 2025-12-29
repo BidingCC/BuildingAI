@@ -17,11 +17,11 @@ definePage({
 
 const router = useRouter();
 const userStore = useUserStore();
+const appStore = useAppStore();
 
 const userProfileRefs = ref<InstanceType<typeof UserProfile>>();
 const userPhoneRefs = ref<InstanceType<typeof UserPhone>>();
 const userPasswordRefs = ref<InstanceType<typeof UserPassword>>();
-const shake = shallowRef(true);
 
 // Use half-popup interaction hook
 const {
@@ -231,8 +231,18 @@ const showPasswordPicker = () => {
                         </view>
                     </view>
                     <view class="flex items-center justify-between pl-2">
-                        <view v-if="shake" i-lucide-vibrate w="10" text="muted-foreground xl" />
-                        <view v-else i-lucide-vibrate-off w="10" text="muted-foreground xl" />
+                        <view
+                            v-if="appStore.hapticFeedbackEnabled"
+                            i-lucide-vibrate
+                            w="10"
+                            text="muted-foreground xl"
+                        />
+                        <view
+                            v-else
+                            i-lucide-vibrate-off
+                            w="10"
+                            text="muted-foreground xl"
+                        />
                         <view w="full" flex="~ justify-between items-center" class="py-3 pr-2">
                             <view class="text-foreground text-sm">{{
                                 t("common.hapticFeedback")
@@ -240,9 +250,14 @@ const showPasswordPicker = () => {
                             <view class="text-muted-foreground flex items-center">
                                 <view text-sm mr="-2">
                                     <switch
-                                        :checked="shake"
+                                        :checked="appStore.hapticFeedbackEnabled"
                                         color="var(--primary)"
                                         style="transform: scale(0.7)"
+                                        @change="
+                                            (e) => {
+                                                appStore.hapticFeedbackEnabled = e.detail.value;
+                                            }
+                                        "
                                     />
                                 </view>
                             </view>

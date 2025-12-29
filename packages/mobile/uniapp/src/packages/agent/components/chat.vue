@@ -435,7 +435,7 @@ onMounted(async () => {
                         </view>
                     </template>
                 </BdNavbar>
-                <view class="flex h-full min-h-0 flex-col">
+                <view class="h-full">
                     <AgentChats
                         v-if="publishToken && accessToken"
                         ref="agentChatsRef"
@@ -654,6 +654,7 @@ onMounted(async () => {
                 :class="{
                     'bg-background-soft': messages.length === 0,
                     'bg-background': messages.length > 0,
+                    'safe-area-inset-bottom': true,
                 }"
                 @submit="handleSubmitMessage"
                 @stop="stop"
