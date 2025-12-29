@@ -150,7 +150,6 @@ const {
     onError(err: Error) {
         const message = err?.message || t("ai-chat.frontend.sendFailed") || "发送失败";
         console.error("Chat error:", message);
-        useToast().error(message);
     },
     onUpdate(chunk) {
         // 处理 conversation_id 更新

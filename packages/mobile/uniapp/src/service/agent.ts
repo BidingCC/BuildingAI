@@ -42,7 +42,7 @@ export function apiGetAgentInfo(publishToken: string, accessToken?: string): Pro
         {},
         {
             headers,
-            requireAuth: false,
+            requireAuth: true,
         },
     );
 }
@@ -63,7 +63,7 @@ export function apiGenerateAccessToken(publishToken: string): Promise<{
         `/v1/${publishToken}/generate-access-token`,
         {},
         {
-            requireAuth: false,
+            requireAuth: true,
         },
     );
 }
@@ -85,7 +85,7 @@ export function apiGetConversations(
         headers: {
             Authorization: `Bearer ${accessToken}`,
         },
-        requireAuth: false,
+        requireAuth: true,
     });
 }
 
@@ -108,7 +108,7 @@ export function apiGetMessages(
         headers: {
             Authorization: `Bearer ${accessToken}`,
         },
-        requireAuth: false,
+        requireAuth: true,
     });
 }
 
@@ -131,7 +131,7 @@ export function apiUpdateConversation(
         headers: {
             Authorization: `Bearer ${accessToken}`,
         },
-        requireAuth: false,
+        requireAuth: true,
     });
 }
 
@@ -152,6 +152,6 @@ export function apiDeleteConversation(
         headers: {
             Authorization: `Bearer ${accessToken}`,
         },
-        requireAuth: false,
+        requireAuth: true,
     });
 }

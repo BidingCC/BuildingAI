@@ -116,8 +116,10 @@ async function request<T = unknown>(
     if (options?.requireAuth === false && !token && !useUserStore().temporaryToken) {
         throw new Error("User not logged in, please login first and try again");
     }
-    // && options?.requireAuth !== false
-    if (token) {
+
+    // Only add user token if requireAuth is not false and headers don't already have Authorization
+    // This allows custom Authorization headers (like accessToken) to be used without being overridden
+    if (options?.requireAuth !== false && token && !requestParams.header.Authorization) {
         requestParams.header = {
             ...requestParams.header,
             Authorization: `Bearer ${token}`,

@@ -139,7 +139,9 @@ export default {
 						},
 						onerror: (err) => {
 							console.error('❌ SSE连接错误:', err);
-							this.$ownerInstance.callMethod('error', JSON.stringify(err));
+							// 提取错误信息，优先使用 message，如果是 Error 对象则序列化 message
+							const errorMsg = err?.message || (typeof err === 'string' ? err : JSON.stringify(err));
+							this.$ownerInstance.callMethod('error', errorMsg);
 							return 3000; // 3秒后重试
 						},
 					}, {
@@ -148,7 +150,9 @@ export default {
 						this.$ownerInstance.callMethod('finish');
 					}).catch(err => {
 						console.error('💥 SSE连接异常:', err);
-						this.$ownerInstance.callMethod('error', err);
+						// 提取错误信息，优先使用 message，如果是 Error 对象则序列化 message
+						const errorMsg = err?.message || (typeof err === 'string' ? err : JSON.stringify(err));
+						this.$ownerInstance.callMethod('error', errorMsg);
 					})
 			} catch (e) {
 				console.error('🚨 启动SSE连接时出现异常:', e);

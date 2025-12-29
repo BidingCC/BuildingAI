@@ -279,14 +279,13 @@ const {
         const headers: Record<string, string> = {
             "Content-Type": "application/json",
         };
-        if (props.billingMode === "creator") {
-            // 创建者模式：使用 publishToken
+        if (userStore.token && props.billingMode === "user") {
+            headers.Authorization = `Bearer ${userStore.token}`;
+        } else {
             if (!publishToken.value) {
                 throw new Error("Publish token is required");
             }
             headers.Authorization = `Bearer ${publishToken.value}`;
-        } else {
-            headers.Authorization = `Bearer ${userStore.token}`;
         }
 
         return headers;
@@ -299,7 +298,6 @@ const {
     onError(err: Error) {
         const message = err?.message || t("ai-chat.frontend.sendFailed") || "发送失败";
         console.error("Chat error:", message);
-        useToast().error(message);
     },
     onUpdate(chunk) {
         if (chunk.type === "conversation_id" && chunk.data) {
@@ -323,6 +321,11 @@ const isLoading = computed(() => status.value === "loading");
 
 const handleSubmitMessage = async (content: string) => {
     if ((!content.trim() && !files.value.length) || isLoading.value) return;
+
+    // billingMode === "user" 时需要登录才能发送消息
+    if (props.billingMode === "user" && !userStore.isLogin) {
+        return userStore.toLogin();
+    }
 
     if (!agent.value) {
         useToast().error("智能体信息未加载");

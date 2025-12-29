@@ -318,10 +318,15 @@ const handleFileClick = (
                 <!-- Error state -->
                 <view
                     v-if="message.status === 'failed'"
-                    class="flex items-center gap-2 px-4 text-red-500"
+                    class="flex min-w-0 flex-1 flex-col items-start gap-2 text-red-500"
                 >
-                    <text class="i-lucide-alert-circle text-lg" />
-                    <text>{{ getErrorMessage(error, message) }}</text>
+                    <view class="i-lucide-alert-circle mt-0.5 flex-none text-lg" />
+                    <view class="min-w-0 break-all">
+                        {{
+                            getMessageTextContent(message.content) ||
+                            getErrorMessage(error, message)
+                        }}
+                    </view>
                 </view>
 
                 <!-- Reasoning display -->
@@ -355,8 +360,9 @@ const handleFileClick = (
                 <!-- Message bubble -->
                 <ChatsBubble
                     v-if="
-                        getMessageTextContent(message.content) ||
-                        (Array.isArray(message.content) && message.content.length > 0)
+                        message.status !== 'failed' &&
+                        (getMessageTextContent(message.content) ||
+                            (Array.isArray(message.content) && message.content.length > 0))
                     "
                     :type="message.role === 'user' ? 'user' : 'system'"
                     :class="{

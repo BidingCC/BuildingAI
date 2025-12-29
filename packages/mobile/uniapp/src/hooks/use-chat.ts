@@ -450,13 +450,30 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
     };
 
     const handleStreamError = (err: string | Error) => {
-        const errorMsg = typeof err === "string" ? err : err?.message || "连接错误";
+        const errorMsg = typeof err === "string" ? err : err?.message || "";
         error.value = new Error(errorMsg);
         status.value = "error";
+
+        // 确保有 assistant message，如果没有则创建一个
+        if (!currentAssistantMessage.value) {
+            ensureAssistantMessage();
+        }
 
         if (currentAssistantMessage.value) {
             currentAssistantMessage.value.status = "failed";
             currentAssistantMessage.value.content = errorMsg;
+            // 确保消息被正确更新到 messages 数组中
+            const messageIndex = messages.value.findIndex(
+                (msg) => msg.id === currentAssistantMessage.value?.id,
+            );
+            if (messageIndex >= 0) {
+                // 直接修改 messages 数组中的对应消息对象属性
+                const existingMessage = messages.value[messageIndex];
+                if (existingMessage) {
+                    existingMessage.status = "failed";
+                    existingMessage.content = errorMsg;
+                }
+            }
         }
 
         if (typeof err === "string" && err.includes("401")) {

@@ -36,6 +36,16 @@ export function useCookie<T = unknown>(key: string, options: UseCookieOptions<T>
 
         try {
             const parsed = JSON.parse(raw);
+            // 如果解析出来的是空对象，返回默认值
+            if (
+                parsed &&
+                typeof parsed === "object" &&
+                !Array.isArray(parsed) &&
+                Object.keys(parsed).length === 0
+            ) {
+                uni.removeStorageSync(key);
+                return getDefault();
+            }
             if (
                 parsed &&
                 typeof parsed === "object" &&
@@ -56,7 +66,7 @@ export function useCookie<T = unknown>(key: string, options: UseCookieOptions<T>
     };
 
     const write = (val: T) => {
-        if (val === null) {
+        if (val === null || val === undefined) {
             uni.removeStorageSync(key);
             return;
         }
@@ -76,9 +86,12 @@ export function useCookie<T = unknown>(key: string, options: UseCookieOptions<T>
     watch(
         data,
         (val) => {
-            if (val === null) {
+            if (val === null || val === undefined) {
                 uni.removeStorageSync(key);
-                data.value = getDefault() as typeof data.value;
+                // 如果提供了 default，则设置为 default，否则保持 null/undefined
+                if (options.default !== undefined) {
+                    data.value = getDefault() as typeof data.value;
+                }
             } else {
                 write(val as T);
             }

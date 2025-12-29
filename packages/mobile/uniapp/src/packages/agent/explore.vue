@@ -11,5 +11,5 @@ definePage({
 </script>
 
 <template>
-    <Chat billingMode="user" />
+    <Chat h="full" billingMode="user" />
 </template>

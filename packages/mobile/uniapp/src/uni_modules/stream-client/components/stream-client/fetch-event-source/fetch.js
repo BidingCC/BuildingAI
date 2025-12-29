@@ -121,7 +121,8 @@ export function fetchEventSource(input, _a, extend) {
                     }),
                 );
                 if (response.ok === false) {
-                    throw new Error(`服务器异常`);
+                    const errorText = await response.text();
+                    throw new Error(errorText || `服务器异常`);
                 }
                 // 清除超时定时器
                 window.clearTimeout(timeoutId);

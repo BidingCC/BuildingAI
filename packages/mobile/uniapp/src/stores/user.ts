@@ -122,11 +122,8 @@ const userStore = defineStore("auth", () => {
         //     },
         // });
         // }
-        // clearToken();
-        // userInfo.value = null;
-        // reloadNuxtApp({
-        //     ttl: 100,
-        // });
+        clearToken();
+        userInfo.value = null;
         // localStorage.removeItem("modelId");
         // localStorage.removeItem("mcpIds");
         // const needRedirect = route?.meta.auth !== false;

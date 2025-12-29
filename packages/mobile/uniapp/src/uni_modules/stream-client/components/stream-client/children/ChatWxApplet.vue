@@ -113,13 +113,21 @@ export default {
                 responseType: "arraybuffer",
                 success: (res) => {
                     if (!res) return;
-                    if (res.data instanceof ArrayBuffer) {
-                        this.listener(res);
+                    if (res.statusCode >= 200 && res.statusCode < 300) {
+                        if (res.data instanceof ArrayBuffer) {
+                            this.listener(res);
+                        }
+                    } else {
+                        this.$emit("onInnerError", { message: `HTTP ${res.statusCode}` });
+                        this.isFailed = true;
                     }
                 },
                 fail: (error) => {
+                    console.log("🔄 SSE请求失败", error);
                     if (this.manuallyStopped) return; // 手动停止时不重试不报错
-                    this.$emit("onInnerError", error);
+                    // 和 H5 一样，直接传递错误信息字符串
+                    const errorMsg = error?.errMsg || error?.message || "网络错误";
+                    this.$emit("onInnerError", errorMsg);
                     this.retry({ body, url, headers, method });
                     this.isFailed = true;
                 },
@@ -172,6 +180,7 @@ export default {
                 }, backoffDelay);
             } else {
                 console.error("❌ 达到最大重试次数，停止重试");
+                // 达到最大重试次数，触发错误事件
                 this.$emit("onInnerRetryuUpperlimit");
             }
         },
