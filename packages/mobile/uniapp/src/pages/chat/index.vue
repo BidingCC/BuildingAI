@@ -449,11 +449,6 @@ const navbarTitle = computed(() => {
                                 :assistant="{
                                     actions: [
                                         {
-                                            label: t('ai-chat.frontend.messages.copy'),
-                                            icon: 'i-tabler-copy',
-                                            onClick: () => {},
-                                        },
-                                        {
                                             label: t('ai-chat.frontend.messages.retry') || '重试',
                                             icon: 'i-lucide-rotate-cw-square',
                                             onClick: () => reload(),

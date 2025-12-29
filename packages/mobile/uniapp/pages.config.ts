@@ -1,4 +1,4 @@
-import { loadExtensionSubPackages } from "@buildingai/vite-plugins";
+// import { loadExtensionSubPackages } from "@buildingai/vite-plugins";
 import { defineUniPages } from "@uni-helper/vite-plugin-uni-pages";
 
 export default defineUniPages({
@@ -55,7 +55,7 @@ export default defineUniPages({
             root: "async-components/",
             pages: [{ path: "index" }],
         },
-        ...(await loadExtensionSubPackages("../../../extensions")),
+        // ...(await loadExtensionSubPackages("../../../extensions")),
     ],
     preloadRule: {
         "async-components/index": {

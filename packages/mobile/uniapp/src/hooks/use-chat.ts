@@ -560,6 +560,7 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
 
         status.value = "idle";
         error.value = null;
+        currentAssistantMessage.value = null;
 
         const lastUserMessageIndex = messages.value
             .map((msg, index) => ({ msg, index }))
@@ -568,7 +569,35 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
 
         if (lastUserMessageIndex === undefined) return;
 
+        const lastUserMessage = messages.value[lastUserMessageIndex];
+        if (!lastUserMessage) return;
+
         messages.value = messages.value.slice(0, lastUserMessageIndex + 1);
+
+        const userMessage: AiMessage = {
+            id: generateUuid(),
+            role: "user",
+            content: lastUserMessage.content,
+            status: "completed",
+            mcpToolCalls: [],
+            metadata: lastUserMessage.metadata || {},
+            avatar: lastUserMessage.avatar,
+        };
+        messages.value.unshift(userMessage);
+
+        const assistantMessage: AiMessage = {
+            id: generateUuid(),
+            role: "assistant",
+            content: "",
+            status: "loading",
+            mcpToolCalls: [],
+            metadata: {},
+            avatar: reactiveChatConfig.value.avatar,
+        };
+        messages.value.unshift(assistantMessage);
+        currentAssistantMessage.value = assistantMessage;
+        messages.value = [...messages.value];
+
         await handleSubmit();
     };
 

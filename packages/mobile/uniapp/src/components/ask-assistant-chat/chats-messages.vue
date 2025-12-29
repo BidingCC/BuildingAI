@@ -7,6 +7,7 @@ import BdMarkdown from "@/async-components/bd-markdown/index.vue?async";
 // #endif
 // #ifndef H5
 import UaMarkdown from "@/async-components/ua-markdown/ua-markdown.vue?async";
+import { useCopy } from "@/hooks/use-copy";
 
 // #endif
 import ChatsBubble from "./chats-bubble.vue";
@@ -50,6 +51,9 @@ defineEmits<{
 
 const { t } = useI18n();
 const { userInfo } = useUserStore();
+const { copy } = useCopy();
+
+const copiedMessageId = ref<string | null>(null);
 
 const getMessageAvatar = (message: AiMessage) =>
     message.role === "user" ? userInfo?.avatar || "" : message.avatar || "";
@@ -145,6 +149,21 @@ const handleFileClick = (
             urls: imageUrls,
             current: file.url,
         });
+    }
+};
+
+const handleCopy = async (message: AiMessage) => {
+    const textContent = getMessageTextContent(message.content);
+    if (!textContent || !message.id) return;
+
+    try {
+        await copy(textContent);
+        copiedMessageId.value = message.id;
+        setTimeout(() => {
+            copiedMessageId.value = null;
+        }, 1000);
+    } catch (error) {
+        console.error("Failed to copy message:", error);
     }
 };
 </script>
@@ -393,15 +412,33 @@ const handleFileClick = (
                 <view
                     v-if="
                         message.role === 'assistant' &&
-                        assistant.actions?.length &&
                         !['active', 'loading'].includes(message.status || '')
                     "
                     class="action flex items-center justify-between"
                 >
                     <view class="text-muted-foreground flex items-center gap-1">
+                        <!-- Copy button -->
+                        <view
+                            v-if="getMessageTextContent(message.content)"
+                            class="flex p-1"
+                            @click="handleCopy(message)"
+                        >
+                            <view
+                                :class="
+                                    copiedMessageId === message.id
+                                        ? 'i-lucide-copy-check'
+                                        : 'i-tabler-copy'
+                                "
+                                class="text-sm"
+                            />
+                        </view>
+                        <!-- Other actions -->
                         <template v-for="action in assistant.actions" :key="action.label">
                             <view
-                                v-if="action.show !== false"
+                                v-if="
+                                    action.show !== false &&
+                                    action.label !== t('ai-chat.frontend.messages.copy')
+                                "
                                 class="flex p-1"
                                 @click="action.onClick?.(message, index)"
                             >
@@ -414,11 +451,24 @@ const handleFileClick = (
                     </view>
                 </view>
 
-                <!-- Timestamp for user messages -->
-                <view v-if="message.role === 'user'" class="mt-1 flex items-center gap-2">
+                <!-- Action buttons for user messages -->
+                <view
+                    v-if="message.role === 'user' && getMessageTextContent(message.content)"
+                    class="mt-1 flex items-center gap-2"
+                >
                     <text v-if="message.createdAt" class="text-muted-foreground text-xs">
                         {{ new Date(message.createdAt).toLocaleTimeString() }}
                     </text>
+                    <view class="text-muted-foreground flex p-1" @click="handleCopy(message)">
+                        <view
+                            :class="
+                                copiedMessageId === message.id
+                                    ? 'i-lucide-copy-check'
+                                    : 'i-tabler-copy'
+                            "
+                            class="text-sm"
+                        />
+                    </view>
                 </view>
             </view>
         </view>

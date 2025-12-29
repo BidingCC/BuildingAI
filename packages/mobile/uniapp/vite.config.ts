@@ -39,10 +39,10 @@ dotenv.config({
 /** @see https://vitejs.dev/config/ */
 export default defineConfig({
     plugins: [
-        UniExtensions({
-            extensionsDir: "../../../extensions",
-            enableHmr: true,
-        }),
+        // UniExtensions({
+        //     extensionsDir: "../../../extensions",
+        //     enableHmr: true,
+        // }),
         UniMiddleware({
             middlewareDir: "src/middleware",
             pagesJsonPath: "src/pages.json",
