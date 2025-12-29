@@ -126,15 +126,10 @@ export class Upgrade extends BaseUpgradeScript {
                 return;
             }
 
-            // Check whether the menu already exists
-            const existingMenu = await menuRepository.findOne({
+            // Check whether the main menu already exists
+            let mainMenu = await menuRepository.findOne({
                 where: { code: "channel-wechat-mp" },
             });
-
-            if (existingMenu) {
-                this.log("Menu channel-wechat-mp already exists, skip adding");
-                return;
-            }
 
             // Validate permission codes
             const mainPermissionCode = await this.getValidPermissionCode(
@@ -146,36 +141,54 @@ export class Upgrade extends BaseUpgradeScript {
                 "wxmpconfig:update-config",
             );
 
-            // Create new menu item
-            const newMenu = menuRepository.create({
-                name: "console-menu.systemSettings.wechatMpConfig",
-                code: "channel-wechat-mp",
-                path: "wechat-mp",
-                icon: "",
-                component: "/console/channel/wechatmp/index",
-                permissionCode: mainPermissionCode || undefined,
-                parentId: parentMenu.id,
-                sort: 0,
-                isHidden: 0,
-                type: MenuType.MENU,
-                sourceType: MenuSourceType.SYSTEM,
-                children: [
-                    {
-                        name: "console-common.update",
-                        path: "",
-                        icon: "",
-                        component: "",
-                        permissionCode: updatePermissionCode || undefined,
-                        sort: 0,
-                        isHidden: 0,
-                        type: MenuType.BUTTON,
-                        sourceType: MenuSourceType.SYSTEM,
-                    },
-                ],
+            if (mainMenu) {
+                this.log("Menu channel-wechat-mp already exists, skip adding");
+            } else {
+                // Create main menu item
+                const newMenu = menuRepository.create({
+                    name: "console-menu.systemSettings.wechatMpConfig",
+                    code: "channel-wechat-mp",
+                    path: "wechat-mp",
+                    icon: "",
+                    component: "/console/channel/wechatmp/index",
+                    permissionCode: mainPermissionCode || undefined,
+                    parentId: parentMenu.id,
+                    sort: 0,
+                    isHidden: 0,
+                    type: MenuType.MENU,
+                    sourceType: MenuSourceType.SYSTEM,
+                });
+
+                mainMenu = await menuRepository.save(newMenu);
+                this.log("Menu channel-wechat-mp added successfully");
+            }
+
+            // Check if child menu (button) already exists
+            const existingChildMenu = await menuRepository.findOne({
+                where: { code: "channel-wechat-mp-update" },
             });
 
-            await menuRepository.save(newMenu);
-            this.log("Menu channel-wechat-mp added successfully");
+            if (existingChildMenu) {
+                this.log("Menu channel-wechat-mp-update (button) already exists, skip adding");
+            } else {
+                // Create child menu (button) separately
+                const childMenu = menuRepository.create({
+                    name: "console-common.update",
+                    code: "channel-wechat-mp-update",
+                    path: "",
+                    icon: "",
+                    component: "",
+                    permissionCode: updatePermissionCode || undefined,
+                    parentId: mainMenu.id,
+                    sort: 0,
+                    isHidden: 0,
+                    type: MenuType.BUTTON,
+                    sourceType: MenuSourceType.SYSTEM,
+                });
+
+                await menuRepository.save(childMenu);
+                this.log("Menu channel-wechat-mp-update (button) added successfully");
+            }
         } catch (error) {
             this.error("Upgrade failed", error);
             throw error;
@@ -206,13 +219,13 @@ export class Upgrade extends BaseUpgradeScript {
                 return;
             }
 
-            // Check whether the menu already exists by component path
+            // Check whether the menu already exists by code
             const existingMenu = await menuRepository.findOne({
-                where: { component: "/console/decorate/mobile/index" },
+                where: { code: "diy-center-mobile" },
             });
 
             if (existingMenu) {
-                this.log("Menu /console/decorate/mobile/index already exists, skip adding");
+                this.log("Menu diy-center-mobile already exists, skip adding");
                 return;
             }
 
