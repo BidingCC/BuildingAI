@@ -159,6 +159,79 @@
             "appSecret": {
                 "required": "AppSecret required"
             }
+        },
+        "version": {
+            "upload": {
+                "title": "Upload Version",
+                "form": {
+                    "version": {
+                        "label": "Version Number",
+                        "placeholder": "Enter version number, e.g., 1.0.0"
+                    },
+                    "description": {
+                        "label": "Version Description",
+                        "placeholder": "Enter version description (optional)"
+                    }
+                },
+                "button": "Upload Version"
+            },
+            "preview": {
+                "title": "Preview Version",
+                "form": {
+                    "description": {
+                        "label": "Preview Description",
+                        "placeholder": "Enter preview description (optional)"
+                    }
+                },
+                "button": "Generate Preview QR Code"
+            },
+            "sourcemap": {
+                "title": "SourceMap Download",
+                "description": "Download SourceMap file for the latest uploaded version, used for error tracking and debugging",
+                "button": "Download SourceMap"
+            },
+            "history": {
+                "title": "Version History"
+            },
+            "type": {
+                "upload": "Upload Version",
+                "preview": "Preview Version"
+            },
+            "status": {
+                "success": "Success",
+                "failed": "Failed",
+                "uploading": "Uploading"
+            },
+            "filter": {
+                "all": "All",
+                "upload": "Upload Versions",
+                "preview": "Preview Versions"
+            },
+            "validation": {
+                "version": {
+                    "required": "Version number is required"
+                }
+            },
+            "messages": {
+                "uploadSuccess": "Version uploaded successfully",
+                "uploadFailed": "Version upload failed",
+                "previewSuccess": "Preview QR code generated successfully",
+                "previewFailed": "Preview QR code generation failed",
+                "downloadSourceMapSuccess": "SourceMap downloaded successfully",
+                "downloadSourceMapFailed": "SourceMap download failed",
+                "loadFailed": "Failed to load version history"
+            },
+            "table": {
+                "version": "Version",
+                "type": "Type",
+                "status": "Status",
+                "description": "Description",
+                "packageSize": "Package Size",
+                "uploaderName": "Uploader",
+                "createdAt": "Created At",
+                "qrcodeUrl": "Preview QR Code",
+                "errorMessage": "Error Message"
+            }
         }
     }
 }
