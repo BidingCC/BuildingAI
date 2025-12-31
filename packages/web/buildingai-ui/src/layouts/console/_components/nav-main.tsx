@@ -18,12 +18,12 @@ import {
   SidebarMenuSubItem,
 } from "@buildingai/ui/components/ui/sidebar";
 import type { MenuItem } from "@buildingai/web-types";
-import { ChevronRight } from "lucide-react";
-import dynamicIconImports from "lucide-react/dynamicIconImports";
+import { Annoyed, ChevronRight } from "lucide-react";
+// import dynamicIconImports from "lucide-react/dynamicIconImports";
 import { useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 
-import { LucideIcon } from "@/components/lucide-icon";
+// import { LucideIcon } from "@/components/lucide-icon";
 
 /**
  * Filter visible menu items (type !== 3 && isHidden !== 1)
@@ -60,9 +60,11 @@ function NavMenuItem({ menu, basePath = "" }: { menu: MenuItem; basePath?: strin
         <SidebarMenuItem>
           <CollapsibleTrigger asChild>
             <SidebarMenuButton tooltip={menu.name}>
-              <LucideIcon
+              {/* TODO: 这里临时注释掉动态图标 */}
+              {/* <LucideIcon
                 name={menu.icon.replace("i-lucide-", "") as keyof typeof dynamicIconImports}
-              />
+              /> */}
+              <Annoyed />
               {/* <span>{menu.name}</span> */}
               <span>一级菜单</span>
               <SidebarMenuAction asChild className="[[data-state=open]_>_&]:rotate-90">
@@ -99,9 +101,11 @@ function NavMenuItem({ menu, basePath = "" }: { menu: MenuItem; basePath?: strin
     <SidebarMenuItem>
       <SidebarMenuButton asChild tooltip={menu.name} isActive={location.pathname === fullPath}>
         <Link to={fullPath}>
-          <LucideIcon
+          {/* TODO: 这里临时注释掉动态图标 */}
+          {/* <LucideIcon
             name={menu.icon.replace("i-lucide-", "") as keyof typeof dynamicIconImports}
-          />
+          /> */}
+          <Annoyed />
           {/* <span>{menu.name}</span> */}
           <span>顶级菜单</span>
         </Link>
