@@ -67,9 +67,10 @@
         "date-fns": "^4.1.0",
         "filesize": "^10.1.6",
         "fs-extra": "^11.3.1",
+        "glob": "7.1.2",
         "js-yaml": "^4.1.0",
         "mammoth": "^1.10.0",
-        "miniprogram-ci": "2.1.14",
+        "miniprogram-ci": "^2.1.26",
         "node-segment": "^0.0.2",
         "openai": "^5.13.1",
         "pg": "^8.16.3",
@@ -112,7 +113,8 @@
         "tsconfig-paths": "^4.2.0"
     },
     "overrides": {
-        "ms": "2.1.0"
+        "ms": "2.1.0",
+        "miniprogram-ci>glob": "7.1.2"
     },
     "jest": {
         "moduleFileExtensions": [

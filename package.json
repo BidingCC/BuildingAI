@@ -192,6 +192,7 @@
             "@nuxt/kit": "catalog:web",
             "buildingai": "link:packages/cli",
             "glob": "^11.0.3",
+            "miniprogram-ci>glob": "7.1.2",
             "source-map": "^0.7.4",
             "superagent": "^10.2.3",
             "@intlify/shared": "11.2.1",
