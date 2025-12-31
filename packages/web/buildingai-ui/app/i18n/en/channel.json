@@ -183,12 +183,13 @@
                         "placeholder": "Enter preview description (optional)"
                     }
                 },
-                "button": "Generate Preview QR Code"
+                "button": "Generate Preview QR Code",
+                "qrcodeTip": "Please scan the QR code with WeChat to preview the mini program"
             },
             "sourcemap": {
                 "title": "SourceMap Download",
                 "description": "Download SourceMap file for the latest uploaded version, used for error tracking and debugging",
-                "button": "Download SourceMap"
+                "button": "Download Latest Version SourceMap"
             },
             "history": {
                 "title": "Version History"
@@ -212,6 +213,10 @@
                     "required": "Version number is required"
                 }
             },
+            "alert": {
+                "title": "Submit for Review",
+                "description": "After the version is uploaded successfully, please go to the WeChat Mini Program backend to submit for review. Once approved, it can be published online"
+            },
             "messages": {
                 "uploadSuccess": "Version uploaded successfully",
                 "uploadFailed": "Version upload failed",
@@ -230,7 +235,8 @@
                 "uploaderName": "Uploader",
                 "createdAt": "Created At",
                 "qrcodeUrl": "Preview QR Code",
-                "errorMessage": "Error Message"
+                "errorMessage": "Error Message",
+                "preview": "Preview"
             }
         }
     }

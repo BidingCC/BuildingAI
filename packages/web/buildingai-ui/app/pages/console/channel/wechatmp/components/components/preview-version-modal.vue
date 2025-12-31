@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { apiPreviewMpVersion } from "@buildingai/service/consoleapi/mpversion";
+import { h } from "vue";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
@@ -14,6 +15,27 @@ const previewForm = shallowReactive({
     description: "",
 });
 
+// 显示二维码弹窗
+const showQrcodeModal = (qrcodeUrl: string) => {
+    useModal({
+        title: "",
+        description: "",
+        content: h("div", { class: "text-center" }, [
+            h("img", {
+                src: qrcodeUrl,
+                alt: "Preview QR Code",
+                class: "mx-auto max-w-xs rounded-lg mt-3",
+            }),
+            h("p", { class: "mt-4 text-sm text-muted" }, [
+                t("channel.wechatMP.version.preview.qrcodeTip"),
+            ]),
+        ]),
+        showCancel: false,
+        confirmText: t("console-common.close"),
+        ui: { content: "max-w-md" },
+    });
+};
+
 // 预览版本
 const { lockFn: handlePreview, isLock: isPreviewing } = useLockFn(async () => {
     try {
@@ -22,12 +44,11 @@ const { lockFn: handlePreview, isLock: isPreviewing } = useLockFn(async () => {
         });
         message.success(t("channel.wechatMP.version.messages.previewSuccess"));
         previewForm.description = "";
-        emits("close", true);
         // 显示预览二维码
         if (result.qrcodeUrl) {
-            // 可以在这里打开一个模态框显示二维码
-            console.log("Preview QR code:", result.qrcodeUrl);
+            showQrcodeModal(result.qrcodeUrl);
         }
+        emits("close", true);
     } catch (error) {
         console.error("Preview version failed:", error);
         const errorMessage = error instanceof Error ? error.message : String(error);
@@ -45,7 +66,9 @@ const { lockFn: handlePreview, isLock: isPreviewing } = useLockFn(async () => {
             >
                 <UTextarea
                     v-model="previewForm.description"
-                    :placeholder="t('channel.wechatMP.version.preview.form.description.placeholder')"
+                    :placeholder="
+                        t('channel.wechatMP.version.preview.form.description.placeholder')
+                    "
                     :ui="{ root: 'w-full' }"
                 />
             </UFormField>

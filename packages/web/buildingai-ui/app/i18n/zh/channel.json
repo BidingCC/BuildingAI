@@ -183,12 +183,13 @@
                         "placeholder": "请输入预览描述（可选）"
                     }
                 },
-                "button": "生成预览二维码"
+                "button": "生成预览二维码",
+                "qrcodeTip": "请使用微信扫码预览小程序"
             },
             "sourcemap": {
                 "title": "SourceMap 下载",
                 "description": "下载最近上传版本的 SourceMap 文件，用于错误定位和调试",
-                "button": "下载 SourceMap"
+                "button": "下载最新版本的SourceMap"
             },
             "history": {
                 "title": "版本历史"
@@ -212,6 +213,10 @@
                     "required": "版本号不能为空"
                 }
             },
+            "alert": {
+                "title": "提交审核提示",
+                "description": "版本上传成功后，请前往微信小程序后台提交审核，审核通过后即可发布上线"
+            },
             "messages": {
                 "uploadSuccess": "版本上传成功",
                 "uploadFailed": "版本上传失败",
@@ -230,7 +235,8 @@
                 "uploaderName": "上传者",
                 "createdAt": "创建时间",
                 "qrcodeUrl": "预览二维码",
-                "errorMessage": "错误信息"
+                "errorMessage": "错误信息",
+                "preview": "预览"
             }
         }
     }

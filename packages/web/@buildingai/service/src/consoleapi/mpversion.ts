@@ -6,6 +6,8 @@
  * @author BuildingAI Teams
  */
 
+import type { PaginationResult } from "../models/globals";
+
 // ==================== Type Definitions ====================
 
 /**
@@ -158,18 +160,8 @@ export function apiGetMpVersionHistory(params?: {
     page?: number;
     pageSize?: number;
     type?: WxMpVersionType;
-}): Promise<{
-    data: WxMpVersion[];
-    total: number;
-    page: number;
-    pageSize: number;
-}> {
-    return useConsoleGet<{
-        data: WxMpVersion[];
-        total: number;
-        page: number;
-        pageSize: number;
-    }>("/wxmp-version/history", params);
+}): Promise<PaginationResult<WxMpVersion>> {
+    return useConsoleGet<PaginationResult<WxMpVersion>>("/wxmp-version/history", params);
 }
 
 /**

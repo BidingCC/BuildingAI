@@ -13,6 +13,7 @@ import type { TableColumn } from "#ui/types";
 
 const UBadge = resolveComponent("UBadge");
 const TimeDisplay = resolveComponent("TimeDisplay");
+const UButton = resolveComponent("UButton");
 
 const UploadVersionModal = defineAsyncComponent(
     () => import("./components/upload-version-modal.vue"),
@@ -25,27 +26,17 @@ const { t } = useI18n();
 const message = useMessage();
 const overlay = useOverlay();
 
-// 版本历史列表
-const versionList = ref<WxMpVersion[]>([]);
-const total = ref(0);
-const page = ref(1);
-const pageSize = ref(10);
-const versionType = ref<WxMpVersionType | null>(null);
+// 筛选条件
+const searchForm = reactive<{
+    type?: WxMpVersionType;
+}>({
+    type: undefined,
+});
 
-// 加载版本历史
-const { lockFn: loadVersionHistory, isLock: isLoadingHistory } = useLockFn(async () => {
-    try {
-        const result = await apiGetMpVersionHistory({
-            page: page.value,
-            pageSize: pageSize.value,
-            type: versionType.value || undefined,
-        });
-        versionList.value = result.data;
-        total.value = result.total;
-    } catch (error) {
-        console.error("Load version history failed:", error);
-        message.error(t("channel.wechatMP.version.messages.loadFailed"));
-    }
+// 使用 usePaging hook 管理分页
+const { paging, getLists } = usePaging({
+    fetchFun: apiGetMpVersionHistory,
+    params: searchForm,
 });
 
 // 打开上传版本弹窗
@@ -54,7 +45,7 @@ const handleOpenUploadModal = async () => {
     const instance = modal.open();
     const shouldRefresh = await instance.result;
     if (shouldRefresh) {
-        await loadVersionHistory();
+        getLists();
     }
 };
 
@@ -64,7 +55,7 @@ const handleOpenPreviewModal = async () => {
     const instance = modal.open();
     const shouldRefresh = await instance.result;
     if (shouldRefresh) {
-        await loadVersionHistory();
+        getLists();
     }
 };
 
@@ -106,7 +97,8 @@ const columns = computed<TableColumn<WxMpVersion>[]>(() => [
             return h(
                 UBadge,
                 {
-                    color: type === WxMpVersionType.UPLOAD ? "blue" : "purple",
+                    variant: "soft",
+                    color: type === WxMpVersionType.UPLOAD ? "success" : "warning",
                 },
                 () => getTypeText(type),
             );
@@ -153,19 +145,50 @@ const columns = computed<TableColumn<WxMpVersion>[]>(() => [
             });
         },
     },
+    {
+        id: "actions",
+        header: t("console-common.operation"),
+        size: 100,
+        enableSorting: false,
+        enableHiding: false,
+        cell: ({ row }) => {
+            const version = row.original as WxMpVersion;
+            const actions = [];
+
+            // 如果有二维码URL，显示预览按钮
+            if (version.qrcodeUrl && version.status === WxMpVersionStatus.SUCCESS) {
+                actions.push(
+                    h(UButton, {
+                        icon: "i-lucide-qr-code",
+                        color: "primary",
+                        variant: "ghost",
+                        size: "xs",
+                        label: t("channel.wechatMP.version.table.preview"),
+                        onClick: () => {
+                            if (version.qrcodeUrl) {
+                                handlePreviewQrcode(version.qrcodeUrl);
+                            }
+                        },
+                    }),
+                );
+            }
+
+            return h("div", { class: "flex items-center gap-1" }, actions);
+        },
+    },
 ]);
 
 // 获取状态标签颜色
 const getStatusColor = (status: WxMpVersionStatus) => {
     switch (status) {
         case WxMpVersionStatus.SUCCESS:
-            return "green";
+            return "success";
         case WxMpVersionStatus.FAILED:
-            return "red";
+            return "error";
         case WxMpVersionStatus.UPLOADING:
-            return "yellow";
+            return "warning";
         default:
-            return "gray";
+            return "neutral";
     }
 };
 
@@ -190,25 +213,48 @@ const getStatusText = (status: WxMpVersionStatus) => {
     }
 };
 
-// 分页变化
-const handlePageChange = (newPage: number) => {
-    page.value = newPage;
-    loadVersionHistory();
-};
-
 // 类型筛选变化
 const handleTypeChange = () => {
-    page.value = 1;
-    loadVersionHistory();
+    paging.page = 1;
+    getLists();
+};
+
+// 预览二维码
+const handlePreviewQrcode = (qrcodeUrl: string) => {
+    useModal({
+        title: "",
+        description: "",
+        content: h("div", { class: "text-center" }, [
+            h("img", {
+                src: qrcodeUrl,
+                alt: "Preview QR Code",
+                class: "mx-auto max-w-xs rounded-lg mt-3",
+            }),
+            h("p", { class: "mt-4 text-sm text-muted" }, [
+                t("channel.wechatMP.version.preview.qrcodeTip"),
+            ]),
+        ]),
+        showCancel: false,
+        confirmText: t("console-common.close"),
+        ui: { content: "max-w-md" },
+    });
 };
 
 onMounted(() => {
-    loadVersionHistory();
+    getLists();
 });
 </script>
 
 <template>
     <div class="wechatmp-version flex h-full flex-col space-y-6">
+        <!-- 提示信息 -->
+        <UAlert
+            color="error"
+            variant="soft"
+            :title="t('channel.wechatMP.version.alert.title')"
+            :description="t('channel.wechatMP.version.alert.description')"
+            icon="i-lucide-info"
+        />
         <!-- 操作区域 - 横向排列 -->
         <div class="flex flex-wrap items-start gap-4">
             <!-- 上传版本 -->
@@ -242,9 +288,9 @@ onMounted(() => {
                 </h3>
                 <div class="flex items-center gap-4">
                     <USelect
-                        v-model="versionType"
+                        v-model="searchForm.type"
                         :items="[
-                            { label: t('channel.wechatMP.version.filter.all'), value: null },
+                            { label: t('channel.wechatMP.version.filter.all'), value: undefined },
                             {
                                 label: t('channel.wechatMP.version.filter.upload'),
                                 value: WxMpVersionType.UPLOAD,
@@ -262,8 +308,8 @@ onMounted(() => {
                     <UButton
                         color="neutral"
                         variant="ghost"
-                        @click="loadVersionHistory"
-                        :loading="isLoadingHistory"
+                        @click="getLists"
+                        :loading="paging.loading"
                     >
                         {{ t("console-common.refresh") }}
                     </UButton>
@@ -271,10 +317,10 @@ onMounted(() => {
             </div>
             <div class="flex h-full flex-1 flex-col overflow-hidden">
                 <UTable
-                    :data="versionList"
+                    :data="paging.items"
                     :columns="columns"
-                    :loading="isLoadingHistory"
-                    class="h-[calc(100vh-20rem)]"
+                    :loading="paging.loading"
+                    class="h-[calc(100vh-26rem)]"
                     :ui="{
                         base: 'table-fixed border-separate border-spacing-0',
                         thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
@@ -285,11 +331,11 @@ onMounted(() => {
                     }"
                 />
                 <div class="flex justify-end py-4">
-                    <UPagination
-                        v-model="page"
-                        :total="total"
-                        :page-size="pageSize"
-                        @update:model-value="handlePageChange"
+                    <BdPagination
+                        v-model:page="paging.page"
+                        v-model:size="paging.pageSize"
+                        :total="paging.total"
+                        @change="getLists"
                     />
                 </div>
             </div>
