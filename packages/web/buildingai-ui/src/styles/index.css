@@ -9,7 +9,7 @@ body {
   @apply h-full min-h-screen;
 }
 
-* {
+.chat-scroll {
   @apply border-border;
   scrollbar-width: thin;
   scrollbar-color: var(--sidebar) transparent;
