@@ -6,7 +6,7 @@ import {
   SidebarFooter,
   SidebarHeader,
 } from "@buildingai/ui/components/ui/sidebar";
-import { LifeBuoy, Send } from "lucide-react";
+import { Book, Send } from "lucide-react";
 import * as React from "react";
 
 import { ConsoleLogo } from "./console-logo";
@@ -16,13 +16,13 @@ import { NavUser } from "./nav-user";
 
 const navSecondary = [
   {
-    title: "Support",
-    url: "#",
-    icon: LifeBuoy,
+    title: "开发文档",
+    url: "https://www.buildingai.cc/docs/introduction/start",
+    icon: Book,
   },
   {
-    title: "Feedback",
-    url: "#",
+    title: "意见反馈",
+    url: "https://www.buildingai.cc/question",
     icon: Send,
   },
 ];

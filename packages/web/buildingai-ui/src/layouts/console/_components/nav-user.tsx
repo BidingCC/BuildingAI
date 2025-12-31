@@ -1,6 +1,9 @@
 "use client";
 
 import { useAuthStore } from "@buildingai/stores";
+import { ModeItems, ModeToggle } from "@buildingai/ui/components/mode-toggle";
+import { useTheme } from "@buildingai/ui/components/theme-provider";
+import { ScrollThemeItems } from "@buildingai/ui/components/theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@buildingai/ui/components/ui/avatar";
 import {
   DropdownMenu,
@@ -8,7 +11,11 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuPortal,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@buildingai/ui/components/ui/dropdown-menu";
 import {
@@ -17,13 +24,25 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@buildingai/ui/components/ui/sidebar";
-import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles } from "lucide-react";
+import {
+  BadgeCheck,
+  Bell,
+  ChevronsUpDown,
+  CreditCard,
+  Languages,
+  Laptop,
+  LogOut,
+  Moon,
+  Sparkles,
+  Sun,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
   const { userInfo } = useAuthStore((state) => state.auth);
   const { logout } = useAuthStore((state) => state.authActions);
+  const { setThemeColor, themeColor, theme } = useTheme();
   const navigate = useNavigate();
 
   return (
@@ -60,13 +79,15 @@ export function NavUser() {
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8 rounded-lg">
+                <Avatar className="h-8 w-8 rounded-lg after:rounded-lg">
                   <AvatarImage
                     className="rounded-lg"
                     src={userInfo?.avatar}
                     alt={userInfo?.nickname}
                   />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  <AvatarFallback className="rounded-lg">
+                    {userInfo?.nickname?.slice(0, 1) || "?"}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{userInfo?.nickname}</span>
@@ -83,17 +104,56 @@ export function NavUser() {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                  <Sparkles />
+                  主题配色
+                </DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent>
+                    <DropdownMenuLabel>选择配色</DropdownMenuLabel>
+                    <ScrollThemeItems themeColor={themeColor} onSelect={setThemeColor} />
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
+
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                  {
+                    {
+                      dark: (
+                        <>
+                          <Moon />
+                          深色模式
+                        </>
+                      ),
+                      light: (
+                        <>
+                          <Sun />
+                          浅色模式
+                        </>
+                      ),
+
+                      system: (
+                        <>
+                          <Laptop />
+                          系统跟随
+                        </>
+                      ),
+                    }[theme]
+                  }
+                </DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent>
+                    <DropdownMenuLabel>选择主题</DropdownMenuLabel>
+                    <ModeItems />
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
+
               <DropdownMenuItem>
-                <BadgeCheck />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
+                <Languages />
+                简体中文
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
@@ -104,7 +164,7 @@ export function NavUser() {
               }}
             >
               <LogOut />
-              Log out
+              退出登录
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

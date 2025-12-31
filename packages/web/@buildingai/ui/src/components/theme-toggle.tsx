@@ -1,16 +1,16 @@
-import { THEME_COLORS, ThemeColor, useTheme } from "@buildingai/ui/components/theme-provider";
-import { Button } from "@buildingai/ui/components/ui/button";
+import { Check, Palette } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+
+import { cn } from "../lib/utils";
+import { THEME_COLORS, ThemeColor, useTheme } from "./theme-provider";
+import { Button } from "./ui/button";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuTrigger,
-} from "@buildingai/ui/components/ui/dropdown-menu";
-import { Check, Palette } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-
-import { cn } from "../lib/utils";
+} from "./ui/dropdown-menu";
 import { ScrollArea } from "./ui/scroll-area";
 
 export function ThemeToggle() {
@@ -49,7 +49,7 @@ export function ThemeToggle() {
     );
 }
 
-const ScrollThemeItems = ({
+export const ScrollThemeItems = ({
     onSelect,
     themeColor,
 }: {
@@ -91,7 +91,9 @@ const ScrollThemeItems = ({
                             "bg-primary",
                         )}
                     >
-                        {themeColor === t.value && <Check className="size-2 text-white" />}
+                        {themeColor === t.value && (
+                            <Check className="text-primary-foreground size-2" />
+                        )}
                     </div>
                     {t.label}
                 </DropdownMenuItem>

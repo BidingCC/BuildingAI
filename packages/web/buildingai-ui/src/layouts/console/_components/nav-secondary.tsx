@@ -5,7 +5,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@buildingai/ui/components/ui/sidebar";
-import { type LucideIcon } from "lucide-react";
+import { ExternalLink, type LucideIcon } from "lucide-react";
 import * as React from "react";
 
 export function NavSecondary({
@@ -28,6 +28,7 @@ export function NavSecondary({
                 <a href={item.url}>
                   <item.icon />
                   <span>{item.title}</span>
+                  <ExternalLink className="ml-auto" />
                 </a>
               </SidebarMenuButton>
             </SidebarMenuItem>
