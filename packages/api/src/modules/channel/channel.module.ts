@@ -1,3 +1,4 @@
+import { UploadModule } from "@buildingai/core/modules/upload/upload.module";
 import { TypeOrmModule } from "@buildingai/db/@nestjs/typeorm";
 import { Dict } from "@buildingai/db/entities/dict.entity";
 import { WxMpVersion } from "@buildingai/db/entities/wx-mp-version.entity";
@@ -11,7 +12,7 @@ import { WxMpConfigService } from "@modules/channel/services/wxmpconfig.service"
 import { WxOaConfigService } from "@modules/channel/services/wxoaconfig.service";
 import { Module } from "@nestjs/common";
 @Module({
-    imports: [TypeOrmModule.forFeature([Dict, WxMpVersion])],
+    imports: [TypeOrmModule.forFeature([Dict, WxMpVersion]), UploadModule],
     controllers: [
         WxOaConfigConsoleController,
         WxMpConfigConsoleController,

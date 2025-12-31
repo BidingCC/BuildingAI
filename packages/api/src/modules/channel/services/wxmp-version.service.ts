@@ -1,5 +1,6 @@
 import { BaseService } from "@buildingai/base";
 import { BusinessCode } from "@buildingai/constants/shared/business-code.constant";
+import { FileUploadService } from "@buildingai/core/modules/upload/services/file-upload.service";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
 import {
     WxMpVersion,
@@ -10,7 +11,8 @@ import { Repository } from "@buildingai/db/typeorm";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { Injectable } from "@nestjs/common";
 import { randomUUID } from "crypto";
-import { existsSync, mkdirp, readdirSync, readFileSync, statSync, writeFileSync } from "fs-extra";
+import type { Request } from "express";
+import { existsSync, mkdirp, readdirSync, readFileSync, statSync } from "fs-extra";
 import * as ci from "miniprogram-ci";
 import { join, resolve } from "path";
 
@@ -25,11 +27,6 @@ import { WxMpConfigService } from "./wxmpconfig.service";
  */
 @Injectable()
 export class WxMpVersionService extends BaseService<WxMpVersion> {
-    /**
-     * 项目根目录
-     */
-    private readonly rootDir: string;
-
     /**
      * 小程序代码包路径
      */
@@ -50,16 +47,29 @@ export class WxMpVersionService extends BaseService<WxMpVersion> {
      */
     private readonly sourceMapDir: string;
 
+    /**
+     * 小程序编译配置（统一配置，避免重复）
+     */
+    private readonly compileSetting = {
+        es6: false,
+        es7: false,
+        minify: false,
+        autoPrefixWXSS: false,
+        codeProtect: false,
+        minifyJS: false,
+        minifyWXML: false,
+        minifyWXSS: false,
+    };
+
     constructor(
         @InjectRepository(WxMpVersion) repository: Repository<WxMpVersion>,
         private readonly wxMpConfigService: WxMpConfigService,
+        private readonly fileUploadService: FileUploadService,
     ) {
         super(repository);
-        // 查找项目根目录（通过查找 pnpm-workspace.yaml）
-        this.rootDir = this.findProjectRoot();
         // 初始化路径
-        this.projectPath = resolve(this.rootDir, "packages/mobile/uniapp/dist/build/mp-weixin");
-        this.storageRoot = resolve(this.rootDir, "storage");
+        this.projectPath = resolve(__dirname, "../../../../../mobile/uniapp/dist/build/mp-weixin");
+        this.storageRoot = resolve(__dirname, "../../../../../storage");
         this.qrcodeDir = join(this.storageRoot, "static", "wxmp", "qrcode");
         this.sourceMapDir = join(this.storageRoot, "static", "wxmp", "sourcemap");
         // 确保存储目录存在
@@ -69,34 +79,6 @@ export class WxMpVersionService extends BaseService<WxMpVersion> {
         mkdirp(this.sourceMapDir).catch((err) => {
             this.logger.error(`创建 SourceMap 目录失败: ${err.message}`);
         });
-    }
-
-    /**
-     * 查找项目根目录
-     * 通过查找 pnpm-workspace.yaml 文件来确定项目根目录
-     * @returns 项目根目录路径
-     */
-    private findProjectRoot(): string {
-        let currentDir = process.cwd();
-        let maxDepth = 10; // 防止无限循环
-
-        while (maxDepth > 0) {
-            const workspaceYamlPath = join(currentDir, "pnpm-workspace.yaml");
-            if (existsSync(workspaceYamlPath)) {
-                return currentDir;
-            }
-
-            const parentDir = resolve(currentDir, "..");
-            if (parentDir === currentDir) {
-                // 已经到达文件系统根目录
-                break;
-            }
-            currentDir = parentDir;
-            maxDepth--;
-        }
-
-        // 如果找不到 workspace 标记文件，返回当前工作目录
-        return process.cwd();
     }
 
     /**
@@ -148,15 +130,7 @@ export class WxMpVersionService extends BaseService<WxMpVersion> {
                 project,
                 version: dto.version,
                 desc: dto.description || `版本 ${dto.version}`,
-                setting: {
-                    es6: true,
-                    es7: true,
-                    minify: true,
-                    codeProtect: false,
-                    minifyJS: true,
-                    minifyWXML: true,
-                    minifyWXSS: true,
-                },
+                setting: this.compileSetting,
             });
 
             await this.updateById(versionRecord.id, {
@@ -189,9 +163,15 @@ export class WxMpVersionService extends BaseService<WxMpVersion> {
      * @param dto 预览版本 DTO
      * @param userId 用户ID
      * @param username 用户名
+     * @param request Express 请求对象
      * @returns 预览结果（包含二维码URL）
      */
-    async previewVersion(dto: PreviewMpVersionDto, userId: string, username: string) {
+    async previewVersion(
+        dto: PreviewMpVersionDto,
+        userId: string,
+        username: string,
+        request: Request,
+    ) {
         const config = await this.wxMpConfigService.getConfig();
         if (!config.appId || !config.uploadKey) {
             throw HttpErrorFactory.paramError(
@@ -231,36 +211,36 @@ export class WxMpVersionService extends BaseService<WxMpVersion> {
             const qrcodeFileName = `${randomUUID()}.jpg`;
             const qrcodePath = join(this.qrcodeDir, qrcodeFileName);
 
+            // 生成预览二维码
             await ci.preview({
                 project,
                 version: previewVersion,
                 desc: dto.description || "预览版本",
-                setting: {
-                    es6: true,
-                    es7: true,
-                    minify: true,
-                    codeProtect: false,
-                    minifyJS: true,
-                    minifyWXML: true,
-                    minifyWXSS: true,
-                },
+                setting: this.compileSetting,
                 qrcodeFormat: "image",
                 qrcodeOutputDest: qrcodePath,
             } as any);
 
+            // 读取二维码文件并使用公共上传接口上传
+            const qrcodeFile = this.createMulterFile(qrcodePath, qrcodeFileName);
+            const uploadResult = await this.fileUploadService.uploadFile(
+                qrcodeFile,
+                request,
+                `小程序预览二维码 - ${previewVersion}`,
+            );
+
             const packageSize = this.calculateDirSize(this.projectPath);
-            const qrcodeUrl = `/storage/static/wxmp/qrcode/${qrcodeFileName}`;
 
             await this.updateById(versionRecord.id, {
                 status: WxMpVersionStatus.SUCCESS,
                 packageSize,
-                qrcodeUrl,
-                qrcodePath,
+                qrcodeUrl: uploadResult.url,
+                qrcodePath: uploadResult.id,
             });
 
             return {
                 id: versionRecord.id,
-                qrcodeUrl,
+                qrcodeUrl: uploadResult.url,
                 status: WxMpVersionStatus.SUCCESS,
                 message: "预览成功",
             };
@@ -384,6 +364,29 @@ export class WxMpVersionService extends BaseService<WxMpVersion> {
                 BusinessCode.BUSINESS_ERROR,
             );
         }
+    }
+
+    /**
+     * 创建 Multer.File 对象
+     *
+     * @param filePath 文件路径
+     * @param fileName 文件名
+     * @returns Multer.File 对象
+     */
+    private createMulterFile(filePath: string, fileName: string): Express.Multer.File {
+        const buffer = readFileSync(filePath);
+        return {
+            fieldname: "qrcode",
+            originalname: fileName,
+            encoding: "7bit",
+            mimetype: "image/jpeg",
+            size: buffer.length,
+            buffer,
+            destination: "",
+            filename: fileName,
+            path: filePath,
+            stream: null as any,
+        };
     }
 
     /**
