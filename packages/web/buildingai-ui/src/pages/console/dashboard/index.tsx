@@ -1,5 +1,16 @@
+import { Card } from "@buildingai/ui/components/ui/card";
+
 const DashboardPage = () => {
-  return <div className="h-screen">DashboardPage</div>;
+  return (
+    <div className="h-screen">
+      <div className="grid grid-cols-4 gap-4">
+        <Card>123</Card>
+        <Card>123</Card>
+        <Card>123</Card>
+        <Card>123</Card>
+      </div>
+    </div>
+  );
 };
 
 export default DashboardPage;

@@ -10,6 +10,7 @@ import { useRoutes } from "react-router-dom";
 import NotFoundPage from "../../components/exception/not-found-page";
 import AppNavbar from "./_components/app-navbar";
 import { AppSidebar } from "./_components/app-sidebar";
+import DashboardPage from "@/pages/console/dashboard";
 
 const modules = import.meta.glob<{ default: ComponentType }>(
   ["@/pages/console/**/*.tsx", "!@/pages/console/**/_components/**"],
@@ -48,10 +49,12 @@ function ConsoleRoutes() {
 
   const routes = useMemo<RouteObject[]>(() => {
     const dynamicRoutes = generateRoutes(userInfo?.menus ?? []);
-    return [...dynamicRoutes, { path: "*", element: <NotFoundPage /> }];
+    return [
+      { path: "/dashboard", element: <DashboardPage /> },
+      ...dynamicRoutes,
+      { path: "*", element: <NotFoundPage /> },
+    ];
   }, [userInfo?.menus]);
-  console.log(userInfo?.menus);
-  console.log(routes);
 
   return useRoutes(routes);
 }
@@ -62,8 +65,10 @@ export default function ConsoleLayout() {
       <AppSidebar />
       <SidebarInset className="flex flex-col">
         <AppNavbar />
-        <ScrollArea className="flex-1 overflow-y-auto p-4 pt-0">
-          <ConsoleRoutes />
+        <ScrollArea className="flex-1 overflow-y-auto">
+          <div className="m-4 mt-1">
+            <ConsoleRoutes />
+          </div>
         </ScrollArea>
       </SidebarInset>
     </SidebarProvider>

@@ -25,7 +25,16 @@ import {
   useSidebar,
 } from "@buildingai/ui/components/ui/sidebar";
 import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog.js";
-import { ChevronsUpDown, Languages, Laptop, LogOut, Moon, Sparkles, Sun } from "lucide-react";
+import {
+  ChevronsUpDown,
+  Languages,
+  Laptop,
+  LogOut,
+  Moon,
+  Palette,
+  Sparkles,
+  Sun,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export function NavUser() {
@@ -98,7 +107,7 @@ export function NavUser() {
             <DropdownMenuGroup>
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger>
-                  <Sparkles />
+                  <Palette className="text-primary fill-primary/20" />
                   主题配色
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
