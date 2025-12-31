@@ -632,7 +632,6 @@ export const PromptInput = ({
                 }
             }
         },
-        // eslint-disable-next-line react-hooks/exhaustive-deps -- cleanup only on unmount; filesRef always current
         [usingProvider],
     );
 
@@ -690,6 +689,7 @@ export const PromptInput = ({
 
         // Convert blob URLs to data URLs asynchronously
         Promise.all(
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             files.map(async ({ id, ...item }) => {
                 if (item.url && item.url.startsWith("blob:")) {
                     const dataUrl = await convertBlobUrlToDataUrl(item.url);
@@ -1075,7 +1075,7 @@ export const PromptInputSpeechButton = ({
 
                 for (let i = event.resultIndex; i < event.results.length; i++) {
                     const result = event.results[i];
-                    if (result.isFinal) {
+                    if (result?.isFinal) {
                         finalTranscript += result[0]?.transcript ?? "";
                     }
                 }
