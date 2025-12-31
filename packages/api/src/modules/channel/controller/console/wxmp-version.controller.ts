@@ -5,7 +5,8 @@ import { BuildFileUrl } from "@buildingai/decorators/file-url.decorator";
 import { UUIDValidationPipe } from "@buildingai/pipe/param-validate.pipe";
 import { Permissions } from "@common/decorators";
 import { ConsoleController } from "@common/decorators/controller.decorator";
-import { Body, Get, Param, Post, Query } from "@nestjs/common";
+import { Body, Get, Param, Post, Query, Req } from "@nestjs/common";
+import type { Request } from "express";
 
 import { PreviewMpVersionDto } from "../../dto/preview-mp-version.dto";
 import { UploadMpVersionDto } from "../../dto/upload-mp-version.dto";
@@ -51,8 +52,12 @@ export class WxMpVersionConsoleController extends BaseController {
         description: "生成小程序预览二维码",
     })
     @BuildFileUrl(["**.qrcodeUrl"])
-    async previewVersion(@Body() dto: PreviewMpVersionDto, @Playground() user: UserPlayground) {
-        return this.wxMpVersionService.previewVersion(dto, user.id, user.username);
+    async previewVersion(
+        @Body() dto: PreviewMpVersionDto,
+        @Playground() user: UserPlayground,
+        @Req() request: Request,
+    ) {
+        return this.wxMpVersionService.previewVersion(dto, user.id, user.username, request);
     }
 
     /**
