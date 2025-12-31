@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuthStore } from "@buildingai/stores";
-import { ModeItems, ModeToggle } from "@buildingai/ui/components/mode-toggle";
+import { ModeItems } from "@buildingai/ui/components/mode-toggle";
 import { useTheme } from "@buildingai/ui/components/theme-provider";
 import { ScrollThemeItems } from "@buildingai/ui/components/theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@buildingai/ui/components/ui/avatar";
@@ -24,26 +24,18 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@buildingai/ui/components/ui/sidebar";
-import {
-  BadgeCheck,
-  Bell,
-  ChevronsUpDown,
-  CreditCard,
-  Languages,
-  Laptop,
-  LogOut,
-  Moon,
-  Sparkles,
-  Sun,
-} from "lucide-react";
+import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog.js";
+import { ChevronsUpDown, Languages, Laptop, LogOut, Moon, Sparkles, Sun } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
   const { userInfo } = useAuthStore((state) => state.auth);
   const { logout } = useAuthStore((state) => state.authActions);
+
   const { setThemeColor, themeColor, theme } = useTheme();
   const navigate = useNavigate();
+  const { confirm } = useAlertDialog();
 
   return (
     <SidebarMenu>
@@ -158,7 +150,11 @@ export function NavUser() {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => {
+              onClick={async () => {
+                await confirm({
+                  title: "退出确认",
+                  description: "确定要退出登录吗？",
+                });
                 logout();
                 navigate("/login");
               }}

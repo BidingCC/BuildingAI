@@ -11,6 +11,8 @@
     "prefix": ""
   },
   "iconLibrary": "lucide",
+  "menuColor": "default",
+  "menuAccent": "subtle",
   "aliases": {
     "components": "@buildingai/ui/components",
     "utils": "@buildingai/ui/lib/utils",
@@ -18,7 +20,7 @@
     "lib": "@buildingai/ui/lib",
     "hooks": "@buildingai/ui/hooks"
   },
-  "menuColor": "default",
-  "menuAccent": "subtle",
-  "registries": {}
+  "registries": {
+    "@ai-elements": "https://registry.ai-sdk.dev/{name}.json"
+  }
 }

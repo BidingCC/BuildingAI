@@ -12,8 +12,10 @@ import { AccountLog } from "@buildingai/db/entities";
 import { EntityManager, Repository } from "@buildingai/db/typeorm";
 import { Injectable, Logger } from "@nestjs/common";
 
-export interface ExtensionPowerDeductionOptions
-    extends Omit<PowerDeductionOptions, "source" | "accountType"> {}
+export interface ExtensionPowerDeductionOptions extends Omit<
+    PowerDeductionOptions,
+    "source" | "accountType"
+> {}
 
 /**
  * Extension Billing Service

@@ -1,5 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 
+import WorkflowExample from "@/pages/workflow";
+
 import ErrorPage from "../components/exception/error-page";
 import NotFoundPage from "../components/exception/not-found-page";
 import AuthGuard from "../components/guard/auth-guard";
@@ -20,6 +22,10 @@ export const router = createBrowserRouter([
       {
         path: "/login",
         element: <LoginPage />,
+      },
+      {
+        path: "/workflow",
+        element: <WorkflowExample />,
       },
       {
         element: <AuthGuard />,

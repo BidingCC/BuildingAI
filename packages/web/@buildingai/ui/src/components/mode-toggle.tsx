@@ -18,8 +18,6 @@ export function ModeToggle({
     align?: "center" | "end" | "start" | undefined;
     side?: "top" | "bottom" | "left" | "right";
 }) {
-    const { setTheme } = useTheme();
-
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
