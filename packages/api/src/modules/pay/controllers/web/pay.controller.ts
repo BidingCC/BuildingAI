@@ -62,13 +62,7 @@ export class PayWebController extends BaseController {
     @Post("notifyAlipay")
     async notifyAlipay(@Body() body: Record<string, any>, @Res() res: Response) {
         try {
-            // 打印日志（便于调试）
-            console.log("============ 支付宝异步回调开始 ============");
-            console.log("回调时间:", new Date().toISOString());
-            console.log("回调数据:", JSON.stringify(body, null, 2));
-
             await this.payService.notifyAlipay(body);
-
             return res.status(200).send("success");
         } catch {
             return res.status(200).send("fail");
@@ -79,10 +73,7 @@ export class PayWebController extends BaseController {
     @Get("returnAlipay")
     async returnAlipay(@Query() query: any, @Res() res: Response) {
         try {
-            console.log("============ 支付宝同步回调 ============");
-            console.log("回调参数:", query);
-
-            // 可选：验证签名
+            // validate signature
             // const alipayService = await this.payfactoryService.getPayService(
             //     PayConfigPayType.ALIPAY,
             // );
@@ -91,11 +82,10 @@ export class PayWebController extends BaseController {
             //     return res.redirect("/payment/fail");
             // }
 
-            // 跳转到支付成功页面
             const orderNo = query.out_trade_no;
             return res.redirect(`/payment/success?orderNo=${orderNo}&payType=2`);
         } catch (error) {
-            console.error("支付宝同步回调处理失败:", error);
+            console.error("Alipay sync callback processing failed:", error);
             return res.redirect("/payment/fail");
         }
     }
