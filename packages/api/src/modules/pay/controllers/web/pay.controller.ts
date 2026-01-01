@@ -54,4 +54,49 @@ export class PayWebController extends BaseController {
         //商户需告知微信支付接收回调成功，HTTP应答状态码需返回200或204，无需返回应答报文
         res.status(200).send("");
     }
+
+    /**
+     * Ref: https://opendocs.alipay.com/open/270/105902?pathHash=d5cd617e#%E5%BC%82%E6%AD%A5%E9%80%9A%E7%9F%A5%E7%89%B9%E6%80%A7
+     */
+    @Public()
+    @Post("notifyAlipay")
+    async notifyAlipay(@Body() body: Record<string, any>, @Res() res: Response) {
+        try {
+            // 打印日志（便于调试）
+            console.log("============ 支付宝异步回调开始 ============");
+            console.log("回调时间:", new Date().toISOString());
+            console.log("回调数据:", JSON.stringify(body, null, 2));
+
+            await this.payService.notifyAlipay(body);
+
+            return res.status(200).send("success");
+        } catch {
+            return res.status(200).send("fail");
+        }
+    }
+
+    @Public()
+    @Get("returnAlipay")
+    async returnAlipay(@Query() query: any, @Res() res: Response) {
+        try {
+            console.log("============ 支付宝同步回调 ============");
+            console.log("回调参数:", query);
+
+            // 可选：验证签名
+            // const alipayService = await this.payfactoryService.getPayService(
+            //     PayConfigPayType.ALIPAY,
+            // );
+            // const isValid = alipayService.checkNotifySignV2(query);
+            // if (!isValid) {
+            //     return res.redirect("/payment/fail");
+            // }
+
+            // 跳转到支付成功页面
+            const orderNo = query.out_trade_no;
+            return res.redirect(`/payment/success?orderNo=${orderNo}&payType=2`);
+        } catch (error) {
+            console.error("支付宝同步回调处理失败:", error);
+            return res.redirect("/payment/fail");
+        }
+    }
 }

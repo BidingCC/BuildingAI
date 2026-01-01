@@ -112,8 +112,10 @@ export interface PrepaidParams {
 export interface PrepaidInfo {
     /** Payment method */
     payType: number;
-    /** Payment QR code (base64 format) */
-    qrCode: QrCode;
+    /** Payment QR code (base64 format), WeChat payment returns the QR-Code */
+    qrCode?: QrCode;
+    /** Alipay payment returns the HTML(form) code */
+    payForm?: string;
 }
 
 /**

@@ -138,9 +138,9 @@ export class RechargeService extends BaseService<Dict> {
         if (false == rechargeStatus) {
             throw HttpErrorFactory.badRequest("充值已关闭");
         }
-        if (PayConfigPayType.WECHAT != payType) {
-            throw HttpErrorFactory.badRequest("支付方式错误");
-        }
+        // if (PayConfigPayType.WECHAT != payType) {
+        //     throw HttpErrorFactory.badRequest("支付方式错误");
+        // }
         const recharge = await this.rechargeRepository.findOne({
             where: {
                 id,

@@ -26,6 +26,7 @@
         "test:e2e": "jest --config ./test/jest-e2e.json"
     },
     "dependencies": {
+        "@buildingai/alipay-sdk": "workspace:*",
         "@buildingai/ai-sdk": "workspace:*",
         "@buildingai/base": "workspace:*",
         "@buildingai/cache": "workspace:*",

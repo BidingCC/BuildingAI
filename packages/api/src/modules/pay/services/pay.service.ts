@@ -16,11 +16,13 @@ import {
     WechatPayNotifyAnalysisParams,
     WechatPayNotifyParams,
 } from "@buildingai/wechat-sdk/interfaces/pay";
+import { AlipayService } from "@common/modules/pay/services/alipay.service";
 import { PayfactoryService } from "@common/modules/pay/services/payfactory.service";
 import { WxPayService } from "@common/modules/pay/services/wxpay.service";
 import { PrepayDto } from "@modules/pay/dto/prepay.dto";
 import { Injectable } from "@nestjs/common";
 import { MoreThan, Repository } from "typeorm";
+
 @Injectable()
 export class PayService extends BaseService<Payconfig> {
     constructor(
@@ -29,6 +31,7 @@ export class PayService extends BaseService<Payconfig> {
         @InjectRepository(RechargeOrder)
         private readonly rechargeOrderRepository: Repository<RechargeOrder>,
         private readonly wxpayService: WxPayService, // 注入wxpay服务
+        private readonly alipayService: AlipayService, // 注入 alipay 服务
         private readonly payfactoryService: PayfactoryService,
         private readonly appBillingService: AppBillingService,
         @InjectRepository(MembershipOrder)
@@ -90,12 +93,19 @@ export class PayService extends BaseService<Payconfig> {
             from,
             amount: orderAmount,
         };
-        const qrCode = await this.wxpayService.createwxPayOrder(PayOrder);
 
-        return {
-            qrCode,
-            payType,
-        };
+        switch (payType) {
+            case PayConfigPayType.WECHAT: {
+                const qrCode = await this.wxpayService.createwxPayOrder(PayOrder);
+                return { qrCode, payType };
+            }
+            case PayConfigPayType.ALIPAY: {
+                const payForm = await this.alipayService.createWebPayOrder(PayOrder);
+                return { payForm, payType };
+            }
+            default:
+                throw HttpErrorFactory.badRequest("Not supported");
+        }
     }
 
     /**
@@ -158,6 +168,68 @@ export class PayService extends BaseService<Payconfig> {
         } catch (error) {
             this.logger.error(`微信支付回调处理失败: ${error.message}`);
             console.log(`微信支付回调处理失败: ${error.message}`);
+        }
+    }
+
+    /**
+     * Alipay asynchronous callback processing
+     *
+     * Ref: https://opendocs.alipay.com/open/270/105902?pathHash=d5cd617e
+     */
+    async notifyAlipay(body: Record<string, any>) {
+        try {
+            const alipayService = await this.payfactoryService.getPayService(
+                PayConfigPayType.ALIPAY,
+            );
+
+            const isValid = alipayService.checkNotifySign(body);
+            if (!isValid) {
+                throw new Error("Signature verification failed");
+            }
+
+            // Status: https://opendocs.alipay.com/open/270/105902?pathHash=d5cd617e#%E4%BA%A4%E6%98%93%E7%8A%B6%E6%80%81%E8%AF%B4%E6%98%8E
+            const tradeStatus = body.trade_status;
+            if (tradeStatus !== "TRADE_SUCCESS" && tradeStatus !== "TRADE_FINISHED") {
+                this.logger.warn("Abnormal transaction status");
+                return;
+            }
+
+            // Get the business type (recharge or membership) from the passback_params field
+            const method: "recharge" | "membership" = body.passback_params || body.attach;
+            if (!method) {
+                throw new Error("Business type parameter is missing");
+            }
+
+            // Maintain the same format as WeChat Pay
+            const analysisParams: WechatPayNotifyAnalysisParams = {
+                outTradeNo: body.out_trade_no,
+
+                // The trade_no is similar to transaction_id
+                transactionId: body.trade_no,
+
+                attach: method,
+
+                // 支付宝返回的是元，需要转换为分
+                // eg: "100.00" yuan → 10000 fen
+                amount: {
+                    t: Math.round(parseFloat(body.total_amount) * 100),
+                },
+
+                payer: {
+                    buyer_id: body.buyer_id,
+                },
+            };
+
+            // method = "recharge", Call this.recharge()
+            // method = "membership", Call this.membership()
+            if ("function" === typeof this[method]) {
+                await this[method](analysisParams);
+            } else {
+                throw new Error(`The ${method} method is undefined`);
+            }
+        } catch (error) {
+            this.logger.error(`Alipay payment callback processing failed: ${error.message}`);
+            throw error;
         }
     }
 
