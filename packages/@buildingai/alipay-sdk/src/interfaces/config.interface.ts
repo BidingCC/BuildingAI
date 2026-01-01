@@ -79,7 +79,7 @@ export interface AlipayWebPayParams {
 
     notifyUrl?: string;
 
-    returnUrl?: string;
+    // returnUrl?: string;
 }
 
 export interface AlipayWapPayParams extends AlipayWebPayParams {

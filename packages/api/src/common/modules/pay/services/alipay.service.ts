@@ -28,7 +28,6 @@ export class AlipayService {
 
             const domain = await this.getDomain();
             const notifyUrl = `${domain}${process.env.VITE_APP_WEB_API_PREFIX}/pay/notifyAlipay`;
-            // const returnUrl = `${domain}${process.env.VITE_APP_WEB_API_PREFIX}/pay/returnAlipay`;
 
             return await alipayService.createWebPay({
                 outTradeNo: orderSn,
@@ -39,7 +38,6 @@ export class AlipayService {
                 passbackParams: from,
                 timeoutExpress: "10m",
                 notifyUrl,
-                // returnUrl,
             });
         } catch (error) {
             throw HttpErrorFactory.internal(`Payment order creation failed: ${error.message}`);

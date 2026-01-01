@@ -115,7 +115,7 @@ export class AlipayService {
             const result = this.alipaySdk.pageExecute("alipay.trade.page.pay", {
                 bizContent,
                 method: "POST",
-                returnUrl: params.returnUrl,
+                // returnUrl: params.returnUrl,
                 notifyUrl: params.notifyUrl,
             });
 
