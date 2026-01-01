@@ -150,22 +150,22 @@ watch(
                     <!-- Payment Steps -->
                     <div class="space-y-2 text-center">
                         <p class="text-lg font-medium">
-                            {{ t("marketing.frontend.alipayTips.tip1") }}
+                            {{ t("marketing.frontend.recharge.alipayTips.tip1") }}
                         </p>
                         <p class="text-muted-foreground text-sm">
-                            {{ t("marketing.frontend.alipayTips.tip2") }}
+                            {{ t("marketing.frontend.recharge.alipayTips.tip2") }}
                         </p>
                     </div>
 
                     <!-- Payment Instructions -->
                     <div class="bg-muted w-full space-y-2 rounded-lg p-4 text-left">
                         <p class="font-medium">
-                            {{ t("marketing.frontend.alipayTips.stepTitle") }}
+                            {{ t("marketing.frontend.recharge.alipayTips.stepTitle") }}
                         </p>
                         <ol class="text-muted-foreground space-y-1 text-sm">
-                            <li>{{ t("marketing.frontend.alipayTips.step1") }}</li>
-                            <li>{{ t("marketing.frontend.alipayTips.step2") }}</li>
-                            <li>{{ t("marketing.frontend.alipayTips.step3") }}</li>
+                            <li>{{ t("marketing.frontend.recharge.alipayTips.step1") }}</li>
+                            <li>{{ t("marketing.frontend.recharge.alipayTips.step2") }}</li>
+                            <li>{{ t("marketing.frontend.recharge.alipayTips.step3") }}</li>
                         </ol>
                     </div>
                 </div>
