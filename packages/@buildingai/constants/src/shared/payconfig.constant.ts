@@ -31,15 +31,7 @@ export interface WeChatPayConfig {
     merchantType: MerchantType;
     payVersion: PayVersionType;
     payAuthDir?: string;
-    // subMchId?: string;
 }
-
-// 预留
-// export const AlipayMerchant = {
-//     SELF: "self",
-//     ISV: "isv",
-// } as const;
-// export type AlipayMerchantType = (typeof AlipayMerchant)[keyof typeof AlipayMerchant];
 
 export const AlipaySignType = {
     RSA: "RSA",
@@ -65,3 +57,24 @@ export interface PayConfigMap {
 }
 
 export type PaymentConfig = WeChatPayConfig | AlipayConfig;
+
+interface BasePayConfigInfo {
+    id: string;
+    name: string;
+    logo: string;
+    isEnable: number;
+    isDefault: number;
+    sort: number;
+}
+
+export interface AlipayPayConfigInfo extends BasePayConfigInfo {
+    payType: typeof PayConfigPayType.ALIPAY;
+    config: AlipayConfig | null;
+}
+
+export interface WeChatPayConfigInfo extends BasePayConfigInfo {
+    payType: typeof PayConfigPayType.WECHAT;
+    config: WeChatPayConfig | null;
+}
+
+export type PayConfigInfo = WeChatPayConfigInfo | AlipayPayConfigInfo;

@@ -6,24 +6,12 @@
  * @author BuildingAI Teams
  */
 
+import type { PayConfigType } from "@buildingai/constants/shared";
+import { PayConfigPayType } from "@buildingai/constants/shared";
+
 // ==================== Type Definitions ====================
 
-/**
- * Payment method constants
- * @description Available payment method types
- */
-export const PayConfigPayType = {
-    /** WeChat Pay */
-    WECHAT: "wechat",
-    /** Alipay */
-    ALIPAY: "alipay",
-} as const;
-
-/**
- * Payment method type
- * @description Type for payment method values
- */
-export type PayConfigType = (typeof PayConfigPayType)[keyof typeof PayConfigPayType];
+export { PayConfigPayType, type PayConfigType };
 
 /**
  * Payment method key type

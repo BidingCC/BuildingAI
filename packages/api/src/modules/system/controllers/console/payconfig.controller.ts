@@ -9,15 +9,7 @@ import { Body, Get, Param, Patch, Post } from "@nestjs/common";
 import { UpdatePayconfigDto, UpdatePayConfigStatusDto } from "../../dto/update-payconfig";
 import { PayconfigService } from "../../services/payconfig.service";
 
-// @ConsoleController("system-payconfig", "支付配置")
-@ConsoleController(
-    {
-        path: "system-payconfig",
-        skipAuth: true,
-        skipPermissionCheck: true,
-    },
-    "支付配置",
-)
+@ConsoleController("system-payconfig", "支付配置")
 export class PayconfigConsoleController extends BaseController {
     constructor(private readonly payconfigService: PayconfigService) {
         super();
