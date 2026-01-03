@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import {
     type BooleanNumberType,
+    PayConfigPayType,
     type PayconfigTableData,
     type PayConfigType,
 } from "@buildingai/service/consoleapi/payconfig";
@@ -106,7 +107,7 @@ onMounted(() => getPayconfigList());
                 <UAvatar
                     :src="row.original.logo"
                     :alt="
-                        row.original.payType === 1
+                        row.original.payType === PayConfigPayType.WECHAT
                             ? t('payment-config.wxPay')
                             : t('payment-config.alipayPay')
                     "
@@ -116,7 +117,7 @@ onMounted(() => getPayconfigList());
             </template>
             <template #payType-cell="{ row }">
                 {{
-                    row.original.payType === 1
+                    row.original.payType === PayConfigPayType.WECHAT
                         ? t("payment-config.wxPay")
                         : t("payment-config.aliPay")
                 }}

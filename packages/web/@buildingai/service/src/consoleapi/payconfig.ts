@@ -14,9 +14,9 @@
  */
 export const PayConfigPayType = {
     /** WeChat Pay */
-    WECHAT: 1,
+    WECHAT: "wechat",
     /** Alipay */
-    ALIPAY: 2,
+    ALIPAY: "alipay",
 } as const;
 
 /**
