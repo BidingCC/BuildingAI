@@ -1,5 +1,11 @@
 import { BaseService } from "@buildingai/base";
-import { type PayConfigType } from "@buildingai/constants/shared/payconfig.constant";
+import {
+    AlipayConfig,
+    PayConfigPayType,
+    type PayConfigType,
+    PaymentConfig,
+    WeChatPayConfig,
+} from "@buildingai/constants/shared/payconfig.constant";
 import {
     BooleanNumber,
     type BooleanNumberType,
@@ -12,7 +18,7 @@ import { PAY_EVENTS } from "@common/modules/pay/constants/pay-events.contant";
 import { Injectable } from "@nestjs/common";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 
-import { UpdatePayconfigDto } from "../dto/update-payconfig";
+import { UpdatePayconfigDto, UpdatePayConfigStatusDto } from "../dto/update-payconfig";
 
 @Injectable()
 export class PayconfigService extends BaseService<Payconfig> {
@@ -43,19 +49,41 @@ export class PayconfigService extends BaseService<Payconfig> {
         return await queryBuilder.getMany();
     }
 
+    async getDetail(id: string): Promise<Payconfig> {
+        const payconfig = await this.repository.findOne({
+            where: { id },
+        });
+
+        if (!payconfig) {
+            throw HttpErrorFactory.notFound("支付配置不存在");
+        }
+
+        return payconfig;
+    }
+
     /**
      * 根据id更改支付配置状态
      *
      * @param id 支付配置id
-     * @param isEnable 是否启用
+     * @param dto
      * @returns 更新后的支付配置
      */
-    async updateStatus(id: string, isEnable: BooleanNumberType): Promise<Partial<Payconfig>> {
+    async updateStatus(id: string, dto: UpdatePayConfigStatusDto): Promise<Partial<Payconfig>> {
         const payconfig = await this.repository.findOne({ where: { id } });
         if (!payconfig) {
             throw HttpErrorFactory.notFound("支付配置不存在");
         }
-        return await this.updateById(id, { isEnable });
+
+        payconfig.isEnable = dto.isEnable;
+
+        const result = await this.repository.save(payconfig);
+
+        this.eventEmitter.emit(PAY_EVENTS.REFRESH, payconfig.payType);
+
+        const rest = { ...result };
+        delete rest.config;
+
+        return rest;
     }
     /**
      * 根据id更新支付配置
@@ -77,19 +105,23 @@ export class PayconfigService extends BaseService<Payconfig> {
         return result;
     }
 
+    async getPayconfig(payType: typeof PayConfigPayType.WECHAT): Promise<WeChatPayConfig>;
+    async getPayconfig(payType: typeof PayConfigPayType.ALIPAY): Promise<AlipayConfig>;
+
     /**
      * 根据支付方式获取支付配置
      *
      * @param payType 支付方式
      * @returns 支付配置
      */
-    async getPayconfig(payType: PayConfigType) {
+    async getPayconfig(payType: PayConfigType): Promise<PaymentConfig> {
         const payconfig = await this.repository.findOne({
             where: { isEnable: BooleanNumber.YES, payType },
         });
         if (!payconfig) {
             throw HttpErrorFactory.notFound("支付配置不存在");
         }
-        return payconfig;
+
+        return payconfig.config as unknown as PaymentConfig;
     }
 }

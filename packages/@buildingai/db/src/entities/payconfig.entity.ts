@@ -2,12 +2,9 @@
  * 支付配置实体
  */
 import {
-    Merchant,
-    type MerchantType,
+    type PayConfigMap,
     PayConfigPayType,
     type PayConfigType,
-    PayVersion,
-    type PayVersionType,
 } from "@buildingai/constants/shared/payconfig.constant";
 /**
  * 支付配置实体
@@ -72,58 +69,8 @@ export class Payconfig extends BaseEntity {
     sort: number;
 
     /**
-     * 支付版本
+     * 具体配置
      */
-    @Column({
-        type: "enum",
-        enum: PayVersion,
-        comment: "支付版本",
-    })
-    payVersion: PayVersionType;
-
-    /**
-     * 商户类型
-     */
-    @Column({
-        type: "enum",
-        enum: Merchant,
-        comment: "商户类型",
-    })
-    merchantType: MerchantType;
-
-    /**
-     * 商户号
-     */
-    @Column({ nullable: true })
-    mchId: string;
-
-    /**
-     * 商户api密钥
-     */
-    @Column({ nullable: true })
-    apiKey: string;
-
-    /**
-     * 微信支付密钥
-     */
-    @Column({ nullable: true })
-    paySignKey: string;
-
-    /**
-     * 微信支付证书
-     */
-    @Column({ nullable: true })
-    cert: string;
-
-    /**
-     * 支付授权目录
-     */
-    @Column({ nullable: true })
-    payAuthDir: string;
-
-    /**
-     * appid
-     */
-    @Column({ nullable: true })
-    appId: string;
+    @Column({ type: "jsonb", nullable: true, comment: "具体支付方式的配置" })
+    config: PayConfigMap[PayConfigType] | null;
 }

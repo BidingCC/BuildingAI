@@ -83,38 +83,47 @@ export class PayfactoryService {
         }
 
         try {
-            // 获取配置
-            const config = await this.getPayServiceConfig(payType);
+            const domain = await this.getDomain();
+            if (!domain) {
+                throw HttpErrorFactory.badGateway("域名未配置，请在.env中配置APP_DOMAIN");
+            }
+
             let service: PayServiceInstance;
 
             switch (payType) {
-                case PayConfigPayType.WECHAT:
+                case PayConfigPayType.WECHAT: {
+                    // 获取配置
+                    const config = await this.payconfigService.getPayconfig(
+                        PayConfigPayType.WECHAT,
+                    );
                     service = new WechatPayService({
                         appId: config.appId,
                         mchId: config.mchId,
-                        publicKey: config.publicKey,
-                        privateKey: config.privateKey,
-                        apiSecret: config.apiSecret,
-                        domain: config.domain,
-                    });
-                    break;
-                case PayConfigPayType.ALIPAY: {
-                    const appCert = await readFile("", { encoding: "utf8" });
-                    const alipayRootCert = await readFile("", { encoding: "utf8" });
-                    const alipayPublicCert = await readFile("", { encoding: "utf8" });
-                    service = new AlipayService({
-                        appId: "",
-                        privateKey: "",
-                        gateway: "",
-                        appCertContent: appCert,
-                        alipayPublicCertContent: alipayPublicCert,
-                        alipayRootCertContent: alipayRootCert,
-                        useCert: true,
+                        publicKey: config.cert,
+                        privateKey: config.paySignKey,
+                        apiSecret: config.apiKey,
+                        domain: domain,
                     });
                     break;
                 }
+                case PayConfigPayType.ALIPAY: {
+                    const config = await this.payconfigService.getPayconfig(
+                        PayConfigPayType.ALIPAY,
+                    );
+                    const res = {
+                        appId: config.appId,
+                        privateKey: config.privateKey,
+                        gateway: config.gateway,
+                        appCertContent: config.appCert,
+                        alipayPublicCertContent: config.alipayPublicCert,
+                        alipayRootCertContent: config.alipayRootCert,
+                        useCert: true,
+                    };
+                    service = new AlipayService(res);
+                    break;
+                }
                 default:
-                    throw new Error(`No support: ${payType}`);
+                    throw new Error(`Not supported: ${payType}`);
             }
 
             // 缓存服务实例
@@ -127,29 +136,29 @@ export class PayfactoryService {
         }
     }
 
-    /**
-     * 获取支付服务配置
-     *
-     * @param payType 支付类型
-     * @returns 支付服务配置
-     */
-    private async getPayServiceConfig(payType: PayConfigType): Promise<PayServiceConfig> {
-        const payconfig = await this.payconfigService.getPayconfig(payType);
-        const domain = await this.getDomain();
-
-        if (!domain) {
-            throw HttpErrorFactory.badGateway("域名未配置，请在.env中配置APP_DOMAIN");
-        }
-
-        return {
-            appId: payconfig.appId,
-            mchId: payconfig.mchId,
-            publicKey: payconfig.cert,
-            privateKey: payconfig.paySignKey,
-            apiSecret: payconfig.apiKey,
-            domain,
-        };
-    }
+    // /**
+    //  * 获取支付服务配置
+    //  *
+    //  * @param payType 支付类型
+    //  * @returns 支付服务配置
+    //  */
+    // private async getPayServiceConfig(payType: PayConfigType): Promise<PayServiceConfig> {
+    //     const payconfig = await this.payconfigService.getPayconfig(payType);
+    //     const domain = await this.getDomain();
+    //
+    //     if (!domain) {
+    //         throw HttpErrorFactory.badGateway("域名未配置，请在.env中配置APP_DOMAIN");
+    //     }
+    //
+    //     return {
+    //         appId: payconfig.appId,
+    //         mchId: payconfig.mchId,
+    //         publicKey: payconfig.cert,
+    //         privateKey: payconfig.paySignKey,
+    //         apiSecret: payconfig.apiKey,
+    //         domain,
+    //     };
+    // }
 
     /**
      * 获取域名配置
