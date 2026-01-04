@@ -6,7 +6,10 @@ import UserPhone from "@/components/user/user-phone.vue?async";
 import UserProfile from "@/components/user/user-profile.vue?async";
 import UserVersion from "@/components/widget/user-version/user-version.vue?async";
 import { useHalfPopupInteraction } from "@/hooks/use-half-popup-interaction";
+import { apiBindWechatOa, apiGetWechatOAuthAuthUrl } from "@/service/user";
 import { apiBindWechat } from "@/service/weixin";
+import { isApp, isH5, isMp, isWechatOa } from "@/utils/env";
+
 const { t, currentLocaleLabel } = useLocale();
 
 definePage({
@@ -19,6 +22,7 @@ definePage({
 const router = useRouter();
 const userStore = useUserStore();
 const appStore = useAppStore();
+const { value: code } = useQuery("code");
 
 const userProfileRefs = ref<InstanceType<typeof UserProfile>>();
 const userPhoneRefs = ref<InstanceType<typeof UserPhone>>();
@@ -29,11 +33,23 @@ const { isPopupOpen, handleSlideProgress, handlePopupOpen, handlePopupClose, pag
     useHalfPopupInteraction();
 
 const handleBindWechat = async () => {
-    const { code } = await uni.login({ provider: "weixin" });
     try {
+        // #ifdef MP
+        const { code } = await uni.login({ provider: "weixin" });
         await apiBindWechat({ code });
         await userStore.getUser();
         useToast().success("绑定成功");
+        // #endif
+
+        // #ifdef H5
+        if (!isWechatOa) {
+            useToast().error("请在微信环境下操作");
+            return;
+        }
+        const res = await apiGetWechatOAuthAuthUrl(`${router.currentUrl.value}`);
+        window.location.href = res;
+
+        // #endif
     } catch (error) {
         console.log("Bind wechat error", error);
         useToast().error("绑定微信失败");
@@ -59,6 +75,18 @@ const handleHapticFeedbackChange = (e: { detail: { value: boolean } }) => {
         });
     }
 };
+
+onLoad(() => {
+    // #ifdef H5
+    if (code.value) {
+        apiBindWechatOa({ code: code.value }).then(async () => {
+            await userStore.getUser();
+            useToast().success("绑定成功");
+            // router.replaceAll({ url: "/packages/user-settings/index" });
+        });
+    }
+    // #endif
+});
 </script>
 
 <template>
@@ -166,7 +194,8 @@ const handleHapticFeedbackChange = (e: { detail: { value: boolean } }) => {
                                 t("common.wechatBind")
                             }}</view>
                             <view class="text-muted-foreground flex items-center">
-                                <text text-sm :class="{ 'mr-1': userStore.userInfo?.phone }">
+                                <!-- #ifdef MP -->
+                                <text text-sm :class="{ 'mr-1': userStore.userInfo?.bindWechat }">
                                     {{
                                         userStore.userInfo?.bindWechat
                                             ? t("common.bind")
@@ -177,6 +206,20 @@ const handleHapticFeedbackChange = (e: { detail: { value: boolean } }) => {
                                     v-if="!userStore.userInfo?.bindWechat"
                                     class="i-carbon-chevron-right mt-px"
                                 />
+                                <!-- #endif -->
+                                <!-- #ifdef H5 -->
+                                <text text-sm :class="{ 'mr-1': userStore.userInfo?.bindWechatOa }">
+                                    {{
+                                        userStore.userInfo?.bindWechatOa
+                                            ? t("common.bind")
+                                            : t("common.notBind")
+                                    }}
+                                </text>
+                                <text
+                                    v-if="!userStore.userInfo?.bindWechatOa"
+                                    class="i-carbon-chevron-right mt-px"
+                                />
+                                <!-- #endif -->
                             </view>
                         </view>
                     </view>

@@ -307,17 +307,13 @@ export class WechatOaService {
             // 授权阶段拉到的微信头像/昵称，补齐用户资料
             const wxUserInfo = scene.wx_userinfo;
             if (wxUserInfo) {
-                try {
-                    await this.authService.update(
-                        {
-                            nickname: wxUserInfo.nickname,
-                            avatar: wxUserInfo.avatar,
-                        },
-                        { where: { openid } },
-                    );
-                } catch (e) {
-                    this.logger.warn(`更新微信用户资料失败: ${e.message}`);
-                }
+                await this.authService.update(
+                    {
+                        nickname: wxUserInfo.nickname,
+                        avatar: wxUserInfo.avatar,
+                    },
+                    { where: { openid } },
+                );
             }
             await this.sendTemplateMessage(openid, "注册并登录成功");
 
@@ -562,5 +558,156 @@ export class WechatOaService {
 
         // 将场景值和openid关联起来，设置60秒过期时间
         await this.redisService.set(this.SCENE_PREFIX + ":" + state, playground, 60);
+    }
+
+    /**
+     * 获取公众号登录授权跳转链接
+     * @param state 场景值
+     * @returns
+     */
+    async getOAuthAuthUrl(url: string) {
+        const { appId, webAuthDomain } = await this.wxoaconfigService.getConfig();
+        const redirectUri = encodeURIComponent(`${webAuthDomain}/${url}`);
+        return `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appId}&redirect_uri=${redirectUri}&response_type=code&scope=snsapi_userinfo#wechat_redirect`;
+    }
+
+    /**
+     * 微信公众号code登录
+     * @param code 微信公众号code
+     * @returns
+     */
+    async loginByCode(code: string) {
+        try {
+            const { appId, appSecret, token, encodingAESKey } =
+                await this.wxoaconfigService.getConfig();
+
+            // 初始化客户端（若尚未初始化）
+            this.wechatOaClient = new WechatOaClient(token, encodingAESKey, appId);
+
+            // 通过 code 置换 OAuth access_token 与 openid
+            const oauth = await this.wechatOaClient.getOAuthAccessToken(appId, appSecret, code);
+
+            // // 拉取用户信息（需要 scope=snsapi_userinfo）
+            const userInfo = await this.wechatOaClient.getOAuthUserInfo(
+                oauth.access_token,
+                oauth.openid,
+            );
+            let existingUser: User | null = null;
+            if (oauth.unionid) {
+                // 场景A: 有 unionid（已绑定微信开放平台）
+                // 优先使用 unionid 查找用户，因为它是跨平台统一标识
+                const whereCondition: FindOptionsWhere<User> = { unionid: oauth.unionid };
+                existingUser = await this.authService.findOne({
+                    where: whereCondition,
+                });
+            } else {
+                // 场景B: 没有 unionid（未绑定微信开放平台）
+                // 使用 openid 查找用户（注意：这里 openid 实际是小程序的 openid，应作为 openid 使用）
+                const whereCondition: FindOptionsWhere<User> = { openid: oauth.openid };
+                existingUser = await this.authService.findOne({
+                    where: whereCondition,
+                });
+            }
+            // 步骤3: 处理用户已存在的情况（登录流程）
+            if (existingUser) {
+                if (!isEnabled(existingUser.status)) {
+                    throw HttpErrorFactory.business("账号已被停用，请联系管理员处理");
+                }
+                // 更新用户的公众号 openid（如果缺失）
+                // 这可以确保用户在不同场景下都能被正确识别
+                if (!existingUser.openid) {
+                    await this.authService.updateById(existingUser.id, { openid: oauth.openid });
+                }
+
+                // 如果用户有 unionid 但数据库中没有，则更新（这种情况理论上不应该发生，但为了数据一致性）
+                if (oauth.unionid && !existingUser.unionid) {
+                    await this.authService.updateById(existingUser.id, { unionid: oauth.unionid });
+                }
+
+                // 执行登录
+                const result = await this.authService.loginByUser(existingUser, UserTerminal.H5);
+                return result.user;
+            }
+
+            // 步骤4: 处理用户不存在的情况（注册流程）
+            // 检查是否允许微信注册
+            await this.checkWechatRegisterAllowed();
+
+            // 注册新用户
+            // openid 字段用于存储公众号的 openid
+            const result = await this.authService.registerByWechat(
+                { openid: oauth.openid },
+                UserTerminal.H5,
+            );
+            // 如果有 unionid，注册后需要更新用户的 unionid
+            // unionid 是微信开放平台的统一标识，用于跨平台用户识别
+            if (oauth.unionid) {
+                await this.authService.updateById(result.user.id, { unionid: oauth.unionid });
+            }
+            if (userInfo) {
+                await this.authService.update(
+                    {
+                        nickname: userInfo.nickname,
+                        avatar: userInfo.headimgurl,
+                    },
+                    { where: { openid: oauth.openid } },
+                );
+            }
+            return result.user;
+        } catch (error) {
+            // 如果是业务错误（如注册功能关闭），直接抛出
+            if (error.status && error.status >= 400 && error.status < 500) {
+                throw error;
+            }
+
+            // 其他错误记录日志并包装
+            this.logger.error(`公众号登录失败: ${error.message}`, error.stack);
+            throw HttpErrorFactory.internal(`公众号登录失败: ${error.message}`);
+        }
+    }
+
+    /**
+     * 绑定微信公众号
+     * @param code 微信公众号登录凭证 code
+     * @param userId 用户ID
+     * @returns
+     */
+    async bindWechat(code: string, userId: string) {
+        const { appId, appSecret, token, encodingAESKey } =
+            await this.wxoaconfigService.getConfig();
+
+        // 初始化客户端（若尚未初始化）
+        this.wechatOaClient = new WechatOaClient(token, encodingAESKey, appId);
+
+        // 通过 code 置换 OAuth access_token 与 openid
+        const { openid, unionid } = await this.wechatOaClient.getOAuthAccessToken(
+            appId,
+            appSecret,
+            code,
+        );
+
+        if (!openid) {
+            throw HttpErrorFactory.internal("获取 openid 失败");
+        }
+        const user = await this.authService.findOne({ where: { id: userId } });
+        if (!user) {
+            throw HttpErrorFactory.badRequest("用户不存在");
+        }
+        // if (user.mpOpenid) {
+        //     throw HttpErrorFactory.badRequest("用户已绑定微信");
+        // }
+        // 检查该 openid 是否已被其他用户使用
+        const existingUser = await this.authService.findOne({
+            where: { openid },
+        });
+        if (existingUser && existingUser.id !== userId) {
+            throw HttpErrorFactory.badRequest("该微信账号已被其他用户绑定");
+        }
+        // 更新用户的 openid unionid
+        await this.authService.updateById(userId, { openid });
+        if (unionid) {
+            await this.authService.updateById(userId, { unionid });
+        }
+        return { message: "success" };
     }
 }

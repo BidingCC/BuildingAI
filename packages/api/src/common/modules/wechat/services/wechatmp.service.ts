@@ -146,7 +146,6 @@ export class WechatMpService {
 
             // 注册新用户
             // 注意：小程序的 openid 应存储在 mpOpenid 字段中（而不是 openid 字段）
-            // openid 字段用于存储公众号的 openid
             const result = await this.authService.registerByWechat(
                 { mpOpenid: openid },
                 terminal,

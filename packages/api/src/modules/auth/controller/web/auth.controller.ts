@@ -12,6 +12,7 @@ import { ChangePasswordDto } from "@common/modules/auth/dto/change-password.dto"
 import { LoginDto } from "@common/modules/auth/dto/login.dto";
 import { RegisterDto } from "@common/modules/auth/dto/register.dto";
 import { WxMpLoginDto } from "@common/modules/auth/dto/wxmp-login.dto";
+import { WxOaLoginDto } from "@common/modules/auth/dto/wxoa-login.dto";
 import { AuthService } from "@common/modules/auth/services/auth.service";
 import { WechatMpService } from "@common/modules/wechat/services/wechatmp.service";
 import { WechatOaService } from "@common/modules/wechat/services/wechatoa.service";
@@ -357,5 +358,37 @@ export class AuthWebController extends BaseController {
     @Post("bind-wechat")
     async bindWechat(@Body() bindWechatDto: WxMpLoginDto, @Playground() user: UserPlayground) {
         return this.wechatMpService.bindWechat(bindWechatDto.code, user.id);
+    }
+
+    /**
+     * 获取公众号登录授权跳转链接
+     * @param url 跳转链接
+     * @returns
+     */
+    @Public()
+    @Get("wechat-oauth-auth-url")
+    async getWechatOAuthAuthUrl(@Query("url") url: string) {
+        return this.wechatOaService.getOAuthAuthUrl(url);
+    }
+
+    /**
+     * 微信公众号code登录
+     * @param code 微信公众号code
+     * @returns
+     */
+    @Public()
+    @Post("wechat-oauth-login")
+    async wechatOaLogin(@Body() wechatOaLoginDto: WxOaLoginDto) {
+        return this.wechatOaService.loginByCode(wechatOaLoginDto.code);
+    }
+
+    /**
+     * 绑定微信公众号
+     * @param bindWechatDto 绑定微信信息，包含 code
+     * @returns
+     */
+    @Post("bind-wechatoa")
+    async bindWechatOa(@Body() bindWechatDto: WxOaLoginDto, @Playground() user: UserPlayground) {
+        return this.wechatOaService.bindWechat(bindWechatDto.code, user.id);
     }
 }

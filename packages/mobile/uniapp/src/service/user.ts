@@ -185,3 +185,36 @@ export function apiChangePassword(params: {
 }): Promise<{ message?: string } | null> {
     return useWebPost("/auth/change-password", params);
 }
+
+// ==================== WeChat OAuth Related APIs ====================
+
+/**
+ * Get WeChat OAuth auth URL
+ * @description Get WeChat OAuth auth URL
+ * @param url 跳转链接
+ * @returns Promise with auth URL
+ */
+export function apiGetWechatOAuthAuthUrl(url: string): Promise<string> {
+    return useWebGet(`/auth/wechat-oauth-auth-url?url=${encodeURIComponent(url)}`);
+}
+
+/**
+ * WeChat OAuth login
+ * @description WeChat OAuth login
+ * @param code 微信公众号code
+ * @returns Promise with login result
+ */
+export function apiAuthWxOaLogin(params: { code: string }): Promise<LoginResponse> {
+    return useWebPost("/auth/wechat-oauth-login", params);
+}
+
+/**
+ * Bind WeChat OAuth
+ * @description Bind WeChat OAuth
+ * @param code 微信公众号code
+ * @returns Promise with bind result
+ */
+
+export function apiBindWechatOa(params: { code: string }): Promise<{ message: string }> {
+    return useWebPost("/auth/bind-wechatoa", params);
+}

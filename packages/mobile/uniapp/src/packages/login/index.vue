@@ -9,7 +9,12 @@ import LoginAccount from "@/components/login/login-account.vue?async";
 import LoginWeixin from "@/components/login/login-weixin.vue?async";
 import NewUser from "@/components/login/new-user.vue?async";
 import WebsiteInfo from "@/components/login/website-info.vue?async";
-import { apiAuthLogin, apiAuthWxMpLogin } from "@/service/user";
+import {
+    apiAuthLogin,
+    apiAuthWxMpLogin,
+    apiAuthWxOaLogin,
+    apiGetWechatOAuthAuthUrl,
+} from "@/service/user";
 import { isApp, isH5, isMp, isWechatOa } from "@/utils/env";
 
 const { t } = useI18n();
@@ -22,6 +27,8 @@ definePage({
 });
 
 const { value: redirect } = useQuery("redirect");
+const { value: code } = useQuery("code");
+const router = useRouter();
 const appStore = useAppStore();
 const userStore = useUserStore();
 
@@ -48,6 +55,13 @@ const wxMpPhoneNumber = shallowRef<GetPhoneNumberEvent["detail"]>();
 // 账号登录参数
 const accountLoginParams = shallowRef<SystemLoginAccountParams>();
 
+const handleH5Login = async () => {
+    const res = await apiGetWechatOAuthAuthUrl(
+        `${router.currentUrl.value}?redirect=${redirect.value}`,
+    );
+    window.location.href = res;
+};
+
 const handleLoginPreset = async (
     e: GetPhoneNumberEvent["detail"] | SystemLoginAccountParams | undefined,
 ) => {
@@ -72,7 +86,6 @@ const handleLoginPreset = async (
 const handleAccountLogin = async () => {
     try {
         const data = unref(accountLoginParams);
-
         loginResult(await apiAuthLogin(data));
     } catch (error) {
         console.log("AccountLogin error", error);
@@ -118,6 +131,16 @@ const handleAgreement = (type: "service" | "privacy") => {
 const handleNewUserClose = () => {
     userStore.handleRedirect(redirect.value);
 };
+
+onLoad(() => {
+    // #ifdef H5
+    if (code.value) {
+        apiAuthWxOaLogin({ code: code.value }).then((res) => {
+            loginResult(res);
+        });
+    }
+    // #endif
+});
 </script>
 
 <template>
@@ -126,7 +149,12 @@ const handleNewUserClose = () => {
         <WebsiteInfo class="mb-4" />
         <!-- 微信登录 -->
         <template v-if="(!isH5 || isWechatOa) && currentLoginMethod === LoginMethod.WEIXIN">
+            <!-- #ifdef MP -->
             <LoginWeixin class="mt-14 w-full" @getPhoneNumber="handleLoginPreset" />
+            <!-- #endif -->
+            <!-- #ifdef H5 -->
+            <LoginWeixin class="mt-14 w-full" @handleLogin="handleH5Login" />
+            <!-- #endif -->
         </template>
         <!-- 账号登录 -->
         <template v-else-if="currentLoginMethod === LoginMethod.ACCOUNT">

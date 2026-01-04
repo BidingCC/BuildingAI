@@ -72,6 +72,8 @@ export interface UserInfo extends BaseEntity {
     bindWechat: boolean;
     /** Whether has password */
     hasPassword: boolean;
+    /** Whether is bind wechat oa */
+    bindWechatOa: boolean;
 }
 
 /**
@@ -135,6 +137,7 @@ export type BaseUserInfo = Omit<
     | "isRoot"
     | "bindWechat"
     | "hasPassword"
+    | "bindWechatOa"
 >;
 
 /**
