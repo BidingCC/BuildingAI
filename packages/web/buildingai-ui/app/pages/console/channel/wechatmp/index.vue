@@ -8,14 +8,23 @@ const tabs = computed<{ name: string; label: string }[]>(() => [
     { name: "version", label: t("channel.wechatMP.tabs.version") },
 ]);
 
-const currentComponent = computed(() => {
-    const index = parseInt(activeTab.value, 10);
-    const tab = tabs.value[index];
-    if (!tab) {
-        return defineAsyncComponent(() => import("./components/info.vue"));
-    }
-    return defineAsyncComponent(() => import(`./components/${tab.name}.vue`));
-});
+const currentComponent = shallowRef(defineAsyncComponent(() => import("./components/info.vue")));
+
+watch(
+    activeTab,
+    (newTab) => {
+        const index = parseInt(newTab, 10);
+        const tab = tabs.value[index];
+        if (!tab) {
+            currentComponent.value = defineAsyncComponent(() => import("./components/info.vue"));
+        } else {
+            currentComponent.value = defineAsyncComponent(
+                () => import(`./components/${tab.name}.vue`),
+            );
+        }
+    },
+    { immediate: true },
+);
 </script>
 
 <template>
@@ -29,7 +38,7 @@ const currentComponent = computed(() => {
             />
         </div>
         <div>
-            <component :is="currentComponent" class="lg:max-w-2xl xl:max-w-4xl" />
+            <component :is="currentComponent" :key="activeTab" />
         </div>
     </div>
 </template>
