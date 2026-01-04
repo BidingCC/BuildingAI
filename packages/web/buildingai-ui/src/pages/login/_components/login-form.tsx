@@ -1,4 +1,4 @@
-import { postCheckAccount, postLogin } from "@buildingai/services/web";
+import { useLoginMutation } from "@buildingai/services/web";
 import { useAuthStore, useConfigStore } from "@buildingai/stores";
 import { Button } from "@buildingai/ui/components/ui/button";
 import {
@@ -97,6 +97,8 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
     },
   });
 
+  const { mutateAsync: login, isPending } = useLoginMutation();
+
   const ensureAgreed = async () => {
     if (agree) return true;
     try {
@@ -135,13 +137,13 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
     const agreed = await ensureAgreed();
     if (!agreed) return;
 
-    const { token } = await postLogin({
+    const data = await login({
       username: values.username,
       password: values.password,
       terminal: 1,
     });
-    setToken(token);
-    navigate("/console");
+    setToken(data.token);
+    navigate("/console/dashboard");
   };
 
   return (
@@ -230,7 +232,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                 </Field>
 
                 <Field>
-                  <Button type="submit" className="w-full">
+                  <Button type="submit" className="w-full" loading={isPending}>
                     {SubmitButtonText[page]} <ArrowRight />
                   </Button>
 

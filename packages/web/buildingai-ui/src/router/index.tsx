@@ -2,7 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 
 import WorkflowExample from "@/pages/workflow";
 
-import ErrorPage from "../components/exception/error-page";
+import GlobalError from "../components/exception/global-error";
 import NotFoundPage from "../components/exception/not-found-page";
 import AuthGuard from "../components/guard/auth-guard";
 import ConsoleLayout from "../layouts/console";
@@ -13,7 +13,7 @@ import { LoginPage } from "../pages/login";
 export const router = createBrowserRouter([
   {
     element: <MainLayout />,
-    errorElement: <ErrorPage />,
+    errorElement: <GlobalError />,
     children: [
       {
         index: true,
@@ -33,6 +33,11 @@ export const router = createBrowserRouter([
           {
             path: "/console/*",
             element: <ConsoleLayout />,
+            errorElement: (
+              <ConsoleLayout>
+                <GlobalError />
+              </ConsoleLayout>
+            ),
           },
         ],
       },

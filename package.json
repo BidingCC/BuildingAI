@@ -105,6 +105,8 @@
         "@tiptap/vue-3": "catalog:web",
         "@types/fs-extra": "^11.0.4",
         "@vueuse/core": "catalog:web",
+        "@tanstack/react-query": "^5.90.16",
+        "@tanstack/react-query-devtools": "^5.91.2",
         "@vueuse/motion": "catalog:web",
         "axios": "catalog:",
         "bing-translate-api": "^4.1.0",

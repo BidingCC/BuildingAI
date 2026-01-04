@@ -7,10 +7,11 @@ import { useMemo } from "react";
 import type { RouteObject } from "react-router-dom";
 import { useRoutes } from "react-router-dom";
 
+import DashboardPage from "@/pages/console/dashboard";
+
 import NotFoundPage from "../../components/exception/not-found-page";
 import AppNavbar from "./_components/app-navbar";
 import { AppSidebar } from "./_components/app-sidebar";
-import DashboardPage from "@/pages/console/dashboard";
 
 const modules = import.meta.glob<{ default: ComponentType }>(
   ["@/pages/console/**/*.tsx", "!@/pages/console/**/_components/**"],
@@ -59,16 +60,14 @@ function ConsoleRoutes() {
   return useRoutes(routes);
 }
 
-export default function ConsoleLayout() {
+export default function ConsoleLayout({ children }: { children?: React.ReactNode }) {
   return (
-    <SidebarProvider className="h-screen">
+    <SidebarProvider className="bd-console-layout h-screen">
       <AppSidebar />
-      <SidebarInset className="flex flex-col">
+      <SidebarInset className="flex flex-col md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-0">
         <AppNavbar />
         <ScrollArea className="flex-1 overflow-y-auto">
-          <div className="m-4 mt-1">
-            <ConsoleRoutes />
-          </div>
+          <div className="m-4 mt-1">{children ? children : <ConsoleRoutes />}</div>
         </ScrollArea>
       </SidebarInset>
     </SidebarProvider>

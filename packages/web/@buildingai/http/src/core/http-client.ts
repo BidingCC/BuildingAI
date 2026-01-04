@@ -254,10 +254,6 @@ export class HttpClient {
             url,
             method: "POST",
             data: form,
-            headers: {
-                ...(config.headers ?? {}),
-                "Content-Type": "multipart/form-data",
-            },
         });
     }
 

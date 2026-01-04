@@ -32,7 +32,8 @@
     "dependencies": {
         "@buildingai/constants": "workspace:*",
         "@buildingai/http": "workspace:*",
-        "@buildingai/stores": "workspace:*"
+        "@buildingai/stores": "workspace:*",
+        "@tanstack/react-query": "^5.62.16"
     },
     "devDependencies": {
         "@buildingai/eslint-config": "workspace:*",

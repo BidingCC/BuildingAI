@@ -9,6 +9,10 @@ body {
   @apply h-full min-h-screen;
 }
 
+@utility h-inset {
+  @apply h-[calc(100vh-1rem-4rem-0.25rem)] md:h-[calc(100vh-1rem-4rem-1rem-0.25rem)];
+}
+
 .chat-scroll {
   @apply border-border;
   scrollbar-width: thin;
