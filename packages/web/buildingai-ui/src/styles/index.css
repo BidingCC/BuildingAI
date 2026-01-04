@@ -12,9 +12,5 @@ body {
 .chat-scroll {
   @apply border-border;
   scrollbar-width: thin;
-  scrollbar-color: var(--sidebar) transparent;
-
-  &:hover {
-    scrollbar-color: var(--sidebar-ring) transparent;
-  }
+  scrollbar-color: var(--sidebar-ring) transparent;
 }
