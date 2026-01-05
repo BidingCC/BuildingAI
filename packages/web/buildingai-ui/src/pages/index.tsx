@@ -59,7 +59,7 @@ const IndexPage = () => {
 
   return (
     <AssistantProvider {...assistant}>
-      <main className="flex h-dvh w-full">
+      <main className="flex h-full w-full">
         <ThreadList />
         <Thread title="AI 助手对话" />
       </main>

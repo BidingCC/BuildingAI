@@ -8,7 +8,7 @@ import { Link } from "react-router-dom";
 
 import SvgIcons from "@/components/svg-icons";
 
-export function ConsoleLogo() {
+export function DefaultLogo() {
   const { websiteConfig } = useConfigStore((state) => state.config);
 
   return (
@@ -24,7 +24,6 @@ export function ConsoleLogo() {
               )}
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{websiteConfig?.webinfo.name}</span>
-                <span className="truncate text-xs">工作台</span>
               </div>
             </>
           </Link>

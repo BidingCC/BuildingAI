@@ -606,7 +606,7 @@ importers:
         version: link:../dto
       '@buildingai/errors':
         specifier: workspace:*
-        version: link:../../web/@buildingai/errors
+        version: link:../errors
     devDependencies:
       '@buildingai/eslint-config':
         specifier: workspace:*
@@ -619,7 +619,7 @@ importers:
     dependencies:
       '@buildingai/errors':
         specifier: workspace:*
-        version: link:../../web/@buildingai/errors
+        version: link:../errors
       '@buildingai/logger':
         specifier: workspace:*
         version: link:../logger
@@ -711,7 +711,7 @@ importers:
         version: link:../db
       '@buildingai/errors':
         specifier: workspace:*
-        version: link:../../web/@buildingai/errors
+        version: link:../errors
       '@buildingai/utils':
         specifier: workspace:*
         version: link:../utils
@@ -730,7 +730,7 @@ importers:
     dependencies:
       '@buildingai/errors':
         specifier: workspace:*
-        version: link:../../web/@buildingai/errors
+        version: link:../errors
     devDependencies:
       '@buildingai/eslint-config':
         specifier: workspace:*
@@ -758,7 +758,7 @@ importers:
         version: link:../dto
       '@buildingai/errors':
         specifier: workspace:*
-        version: link:../../web/@buildingai/errors
+        version: link:../errors
       '@buildingai/logger':
         specifier: workspace:*
         version: link:../logger
@@ -853,7 +853,7 @@ importers:
         version: link:../decorators
       '@buildingai/errors':
         specifier: workspace:*
-        version: link:../../web/@buildingai/errors
+        version: link:../errors
       '@buildingai/pipe':
         specifier: workspace:*
         version: link:../pipe
@@ -1025,7 +1025,7 @@ importers:
         version: link:../@buildingai/dto
       '@buildingai/errors':
         specifier: workspace:*
-        version: link:../web/@buildingai/errors
+        version: link:../@buildingai/errors
       '@buildingai/logger':
         specifier: workspace:*
         version: link:../@buildingai/logger
@@ -1270,7 +1270,7 @@ importers:
         version: link:../@buildingai/dto
       '@buildingai/errors':
         specifier: workspace:*
-        version: link:../web/@buildingai/errors
+        version: link:../@buildingai/errors
       '@buildingai/logger':
         specifier: workspace:*
         version: link:../@buildingai/logger
@@ -1303,18 +1303,6 @@ importers:
       '@tauri-apps/cli':
         specifier: ^2
         version: 2.9.6
-
-  packages/web/@buildingai/errors:
-    devDependencies:
-      '@buildingai/eslint-config':
-        specifier: workspace:*
-        version: link:../../../@buildingai/eslint-config
-      '@buildingai/typescript-config':
-        specifier: workspace:*
-        version: link:../../../@buildingai/typescript-config
-      '@buildingai/web-types':
-        specifier: workspace:*
-        version: link:../types
 
   packages/web/@buildingai/hooks:
     dependencies:

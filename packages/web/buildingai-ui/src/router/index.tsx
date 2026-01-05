@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 
+import DefaultLayout from "@/layouts/styles/default";
 import WorkflowExample from "@/pages/workflow";
 
 import GlobalError from "../components/exception/global-error";
@@ -16,20 +17,25 @@ export const router = createBrowserRouter([
     errorElement: <GlobalError />,
     children: [
       {
-        index: true,
-        element: <IndexPage />,
-      },
-      {
-        path: "/c/:id",
-        element: <IndexPage />,
-      },
-      {
         path: "/login",
         element: <LoginPage />,
       },
       {
-        path: "/workflow",
-        element: <WorkflowExample />,
+        element: <DefaultLayout />,
+        children: [
+          {
+            index: true,
+            element: <IndexPage />,
+          },
+          {
+            path: "/c/:id",
+            element: <IndexPage />,
+          },
+          {
+            path: "/workflow",
+            element: <WorkflowExample />,
+          },
+        ],
       },
       {
         element: <AuthGuard />,

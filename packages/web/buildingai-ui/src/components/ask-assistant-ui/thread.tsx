@@ -130,14 +130,14 @@ export const Thread = memo(function Thread({ title, onShare, welcomeMessage }: T
     <div className="flex h-full min-h-0 w-full flex-col">
       <header className="bg-background relative flex items-center justify-between px-4 py-2">
         <div className="flex items-center gap-2">
-          <Button onClick={onToggleSidebar} size="icon-sm" variant="ghost">
+          {/*<Button onClick={onToggleSidebar} size="icon-sm" variant="ghost">
             {sidebarOpen ? (
               <PanelLeftIcon className="size-4" />
             ) : (
               <PanelRightIcon className="size-4" />
             )}
             <span className="sr-only">{sidebarOpen ? "收起侧边栏" : "展开侧边栏"}</span>
-          </Button>
+          </Button>*/}
           <ModelSelector
             models={models}
             onModelChange={onSelectModel}
