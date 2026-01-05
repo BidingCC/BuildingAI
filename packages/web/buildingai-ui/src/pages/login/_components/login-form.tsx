@@ -97,7 +97,11 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
     },
   });
 
-  const { mutateAsync: login, isPending } = useLoginMutation();
+  const { mutateAsync: login, isPending } = useLoginMutation({
+    username: form.getValues("username"),
+    password: form.getValues("password"),
+    terminal: 1,
+  });
 
   const ensureAgreed = async () => {
     if (agree) return true;
