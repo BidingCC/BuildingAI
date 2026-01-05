@@ -6,61 +6,46 @@ import {
 import type { PromptInputMessage } from "@buildingai/ui/components/ai-elements/prompt-input";
 import { Button } from "@buildingai/ui/components/ui/button";
 import { PanelLeftIcon, PanelRightIcon, ShareIcon } from "lucide-react";
-import type { FormEvent } from "react";
-import type React from "react";
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import type { FormEvent, ReactNode } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import type { MessageData } from "./components/message";
 import { Message } from "./components/message";
 import { ModelSelector } from "./components/model-selector";
 import { PromptInput } from "./components/prompt-input";
-import type { SuggestionData } from "./components/suggestions";
 import { Suggestions } from "./components/suggestions";
 import { ViewportSlack } from "./components/viewport-slack";
-import { AskAssistantContext } from "./context";
+import { useAssistantContext } from "./context";
+import type { Message as MessageType } from "./types";
 
 export interface ThreadProps {
   title?: string;
   onShare?: () => void;
-  welcomeMessage?: React.ReactNode | string;
+  welcomeMessage?: ReactNode | string;
 }
 
-export const Thread = ({ title, onShare, welcomeMessage }: ThreadProps) => {
-  const context = useContext(AskAssistantContext);
-
-  if (!context) {
-    throw new Error("Thread must be used within AskAssistantProvider");
-  }
-
+export const Thread = memo(function Thread({ title, onShare, welcomeMessage }: ThreadProps) {
   const {
     messages,
     models,
     selectedModelId,
     suggestions,
-    setSelectedModelId,
-    onSubmit,
-    onSuggestionClick,
-    onLikeChange,
-    onDislikeChange,
-    onRetry,
-    onCopy,
-    modelSelectorOpen,
-    setModelSelectorOpen,
     status,
-    setStatus,
-    textareaRef,
     liked,
-    setLiked,
     disliked,
-    setDisliked,
     sidebarOpen,
-    setSidebarOpen,
-    addUserMessage,
-  } = context;
+    textareaRef,
+    onSend,
+    onToggleSidebar,
+    onSelectModel,
+    onLike,
+    onDislike,
+  } = useAssistantContext();
+
+  const [modelSelectorOpen, setModelSelectorOpen] = useState(false);
 
   const conversationPairs = useMemo(() => {
-    const pairs: Array<{ userMessage: MessageData; assistantMessage: MessageData }> = [];
-    let currentUserMessage: MessageData | null = null;
+    const pairs: Array<{ userMessage: MessageType; assistantMessage: MessageType }> = [];
+    let currentUserMessage: MessageType | null = null;
 
     for (const message of messages) {
       if (message.from === "user") {
@@ -126,101 +111,67 @@ export const Thread = ({ title, onShare, welcomeMessage }: ThreadProps) => {
   const getBottomAreaHeight = useCallback(() => bottomAreaHeight, [bottomAreaHeight]);
 
   const handleSubmit = useCallback(
-    (message: PromptInputMessage, event: FormEvent<HTMLFormElement>) => {
-      onSubmit?.(message, event);
+    (message: PromptInputMessage, _event: FormEvent<HTMLFormElement>) => {
+      if (message.text?.trim()) {
+        onSend(message.text.trim());
+      }
     },
-    [onSubmit],
-  );
-
-  const handleLikeChange = useCallback(
-    (messageKey: string, liked: boolean) => {
-      setLiked((prev) => ({
-        ...prev,
-        [messageKey]: liked,
-      }));
-      onLikeChange?.(messageKey, liked);
-    },
-    [setLiked, onLikeChange],
-  );
-
-  const handleDislikeChange = useCallback(
-    (messageKey: string, disliked: boolean) => {
-      setDisliked((prev) => ({
-        ...prev,
-        [messageKey]: disliked,
-      }));
-      onDislikeChange?.(messageKey, disliked);
-    },
-    [setDisliked, onDislikeChange],
+    [onSend],
   );
 
   const handleSuggestionClick = useCallback(
-    (suggestion: SuggestionData) => {
-      if (addUserMessage) {
-        setStatus("submitted");
-        addUserMessage(suggestion.text);
-      } else if (textareaRef?.current) {
-        textareaRef.current.value = suggestion.text;
-        textareaRef.current.dispatchEvent(new Event("input", { bubbles: true }));
-      }
-      onSuggestionClick?.(suggestion);
+    (suggestion: { id: string; text: string }) => {
+      onSend(suggestion.text);
     },
-    [addUserMessage, setStatus, textareaRef, onSuggestionClick],
+    [onSend],
   );
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-col overflow-x-hidden">
-      {/* Top bar with sidebar toggle, title, and share button */}
-      <div className="bg-background relative flex items-center justify-between px-4 py-2">
-        {/* Left: Sidebar toggle and model selector */}
+    <div className="flex h-full min-h-0 w-full flex-col">
+      <header className="bg-background relative flex items-center justify-between px-4 py-2">
         <div className="flex items-center gap-2">
-          {setSidebarOpen && (
-            <Button onClick={() => setSidebarOpen(!sidebarOpen)} size="icon-sm" variant="ghost">
-              {sidebarOpen ? (
-                <PanelLeftIcon className="size-4" />
-              ) : (
-                <PanelRightIcon className="size-4" />
-              )}
-              <span className="sr-only">{sidebarOpen ? "收起侧边栏" : "展开侧边栏"}</span>
-            </Button>
-          )}
+          <Button onClick={onToggleSidebar} size="icon-sm" variant="ghost">
+            {sidebarOpen ? (
+              <PanelLeftIcon className="size-4" />
+            ) : (
+              <PanelRightIcon className="size-4" />
+            )}
+            <span className="sr-only">{sidebarOpen ? "收起侧边栏" : "展开侧边栏"}</span>
+          </Button>
           <ModelSelector
             models={models}
-            onModelChange={setSelectedModelId}
+            onModelChange={onSelectModel}
             onOpenChange={setModelSelectorOpen}
             open={modelSelectorOpen}
             selectedModelId={selectedModelId}
           />
         </div>
 
-        {/* Center: Title */}
         {title && (
           <div className="absolute left-1/2 -translate-x-1/2">
             <h1 className="text-base font-semibold">{title}</h1>
           </div>
         )}
 
-        {/* Right: Share button */}
         {onShare && (
           <Button onClick={onShare} size="icon-sm" variant="ghost">
             <ShareIcon className="size-4" />
             <span className="sr-only">分享</span>
           </Button>
         )}
-      </div>
+      </header>
 
       <AIConversation className="chat-scroll flex-1">
         <AIConversationContent className="flex min-h-full flex-col gap-4 pb-0">
-          {/* Conversation messages */}
           <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4">
             {hasMessages ? (
               conversationPairs.map((pair, index) => {
                 const isLastPair = index === conversationPairs.length - 1;
-                const userMessageKey = pair.userMessage.key;
-                const assistantMessageKey = pair.assistantMessage.key;
+                const userKey = pair.userMessage.key;
+                const assistantKey = pair.assistantMessage.key;
                 return (
                   <ViewportSlack
-                    key={`${userMessageKey}-${assistantMessageKey}`}
+                    key={`${userKey}-${assistantKey}`}
                     isLast={isLastPair}
                     getViewportHeight={getViewportHeight}
                     getBottomAreaHeight={getBottomAreaHeight}
@@ -228,25 +179,17 @@ export const Thread = ({ title, onShare, welcomeMessage }: ThreadProps) => {
                     <div className="flex flex-col gap-4">
                       <Message
                         message={pair.userMessage}
-                        liked={liked[userMessageKey]}
-                        disliked={disliked[userMessageKey]}
-                        onLikeChange={(liked) => handleLikeChange(userMessageKey, liked)}
-                        onDislikeChange={(disliked) =>
-                          handleDislikeChange(userMessageKey, disliked)
-                        }
-                        onRetry={() => onRetry?.(userMessageKey)}
-                        onCopy={(content) => onCopy?.(userMessageKey, content)}
+                        liked={liked[userKey]}
+                        disliked={disliked[userKey]}
+                        onLikeChange={(v) => onLike(userKey, v)}
+                        onDislikeChange={(v) => onDislike(userKey, v)}
                       />
                       <Message
                         message={pair.assistantMessage}
-                        liked={liked[assistantMessageKey]}
-                        disliked={disliked[assistantMessageKey]}
-                        onLikeChange={(liked) => handleLikeChange(assistantMessageKey, liked)}
-                        onDislikeChange={(disliked) =>
-                          handleDislikeChange(assistantMessageKey, disliked)
-                        }
-                        onRetry={() => onRetry?.(assistantMessageKey)}
-                        onCopy={(content) => onCopy?.(assistantMessageKey, content)}
+                        liked={liked[assistantKey]}
+                        disliked={disliked[assistantKey]}
+                        onLikeChange={(v) => onLike(assistantKey, v)}
+                        onDislikeChange={(v) => onDislike(assistantKey, v)}
                       />
                     </div>
                   </ViewportSlack>
@@ -264,11 +207,9 @@ export const Thread = ({ title, onShare, welcomeMessage }: ThreadProps) => {
             )}
           </div>
 
-          {/* Bottom fixed area - inside scroll container for full-width scrollbar */}
           <div ref={bottomAreaRef} className="sticky bottom-0 z-10">
             <AIConversationScrollButton className="top-[-40px] z-20" />
             <div className="bg-background mx-auto w-full max-w-3xl rounded-t-lg">
-              {/* Show suggestions when there are no messages */}
               {!hasMessages && suggestions.length > 0 && (
                 <Suggestions suggestions={suggestions} onSuggestionClick={handleSuggestionClick} />
               )}
@@ -288,4 +229,4 @@ export const Thread = ({ title, onShare, welcomeMessage }: ThreadProps) => {
       </AIConversation>
     </div>
   );
-};
+});
