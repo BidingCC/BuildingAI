@@ -20,6 +20,10 @@ export const router = createBrowserRouter([
         element: <IndexPage />,
       },
       {
+        path: "/c/:id",
+        element: <IndexPage />,
+      },
+      {
         path: "/login",
         element: <LoginPage />,
       },

@@ -1,28 +1,20 @@
 import type { ComponentProps } from "react";
-import { useContext } from "react";
+import { memo } from "react";
 
-import { AskAssistantContext } from "./context";
+import { useAssistantContext } from "./context";
 import { ThreadListSidebar } from "./threadlist-sidebar";
 
 export interface ThreadListProps extends ComponentProps<"div"> {
   sidebarWidth?: string;
 }
 
-export const ThreadList = ({ sidebarWidth = "256px", className, ...props }: ThreadListProps) => {
-  const context = useContext(AskAssistantContext);
-
-  if (!context) {
-    throw new Error("ThreadList must be used within AskAssistantProvider");
-  }
-
-  const {
-    sidebarOpen,
-    threads,
-    selectedThreadId,
-    setSelectedThreadId,
-    createThread,
-    deleteThread,
-  } = context;
+export const ThreadList = memo(function ThreadList({
+  sidebarWidth = "256px",
+  className,
+  ...props
+}: ThreadListProps) {
+  const { sidebarOpen, threads, currentThreadId, onSelectThread, onNewChat, onDeleteThread } =
+    useAssistantContext();
 
   if (!sidebarOpen) {
     return null;
@@ -36,11 +28,11 @@ export const ThreadList = ({ sidebarWidth = "256px", className, ...props }: Thre
     >
       <ThreadListSidebar
         threads={threads}
-        selectedThreadId={selectedThreadId}
-        onThreadSelect={setSelectedThreadId}
-        onCreateNewThread={createThread}
-        onDeleteThread={deleteThread}
+        selectedThreadId={currentThreadId}
+        onThreadSelect={onSelectThread}
+        onCreateNewThread={onNewChat}
+        onDeleteThread={onDeleteThread}
       />
     </div>
   );
-};
+});
