@@ -1,6 +1,6 @@
 import type { PromptInputMessage } from "@buildingai/ui/components/ai-elements/prompt-input";
 import { nanoid } from "nanoid";
-import type { FormEvent } from "react";
+import { type FormEvent } from "react";
 
 import type { MessageData } from "../components/ask-assistant-ui/components/message";
 import type { ModelData } from "../components/ask-assistant-ui/components/model-selector";

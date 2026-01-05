@@ -353,6 +353,9 @@ importers:
       '@xyflow/react':
         specifier: ^12.10.0
         version: 12.10.0(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      ai:
+        specifier: ^6.0.5
+        version: 6.0.5(zod@4.2.1)
       axios:
         specifier: 'catalog:'
         version: 1.13.2
@@ -434,6 +437,9 @@ importers:
       semver:
         specifier: ^7.7.3
         version: 7.7.3
+      sonner:
+        specifier: ^2.0.7
+        version: 2.0.7(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       tailwind-merge:
         specifier: catalog:web
         version: 3.4.0
@@ -600,7 +606,7 @@ importers:
         version: link:../dto
       '@buildingai/errors':
         specifier: workspace:*
-        version: link:../errors
+        version: link:../../web/@buildingai/errors
     devDependencies:
       '@buildingai/eslint-config':
         specifier: workspace:*
@@ -613,7 +619,7 @@ importers:
     dependencies:
       '@buildingai/errors':
         specifier: workspace:*
-        version: link:../errors
+        version: link:../../web/@buildingai/errors
       '@buildingai/logger':
         specifier: workspace:*
         version: link:../logger
@@ -705,7 +711,7 @@ importers:
         version: link:../db
       '@buildingai/errors':
         specifier: workspace:*
-        version: link:../errors
+        version: link:../../web/@buildingai/errors
       '@buildingai/utils':
         specifier: workspace:*
         version: link:../utils
@@ -724,7 +730,7 @@ importers:
     dependencies:
       '@buildingai/errors':
         specifier: workspace:*
-        version: link:../errors
+        version: link:../../web/@buildingai/errors
     devDependencies:
       '@buildingai/eslint-config':
         specifier: workspace:*
@@ -752,7 +758,7 @@ importers:
         version: link:../dto
       '@buildingai/errors':
         specifier: workspace:*
-        version: link:../errors
+        version: link:../../web/@buildingai/errors
       '@buildingai/logger':
         specifier: workspace:*
         version: link:../logger
@@ -847,7 +853,7 @@ importers:
         version: link:../decorators
       '@buildingai/errors':
         specifier: workspace:*
-        version: link:../errors
+        version: link:../../web/@buildingai/errors
       '@buildingai/pipe':
         specifier: workspace:*
         version: link:../pipe
@@ -1019,7 +1025,7 @@ importers:
         version: link:../@buildingai/dto
       '@buildingai/errors':
         specifier: workspace:*
-        version: link:../@buildingai/errors
+        version: link:../web/@buildingai/errors
       '@buildingai/logger':
         specifier: workspace:*
         version: link:../@buildingai/logger
@@ -1264,7 +1270,7 @@ importers:
         version: link:../@buildingai/dto
       '@buildingai/errors':
         specifier: workspace:*
-        version: link:../@buildingai/errors
+        version: link:../web/@buildingai/errors
       '@buildingai/logger':
         specifier: workspace:*
         version: link:../@buildingai/logger
@@ -1297,6 +1303,18 @@ importers:
       '@tauri-apps/cli':
         specifier: ^2
         version: 2.9.6
+
+  packages/web/@buildingai/errors:
+    devDependencies:
+      '@buildingai/eslint-config':
+        specifier: workspace:*
+        version: link:../../../@buildingai/eslint-config
+      '@buildingai/typescript-config':
+        specifier: workspace:*
+        version: link:../../../@buildingai/typescript-config
+      '@buildingai/web-types':
+        specifier: workspace:*
+        version: link:../types
 
   packages/web/@buildingai/hooks:
     dependencies:
@@ -1350,6 +1368,9 @@ importers:
       '@buildingai/stores':
         specifier: workspace:*
         version: link:../stores
+      '@tanstack/react-query':
+        specifier: ^5.62.16
+        version: 5.90.16(react@19.2.3)
     devDependencies:
       '@buildingai/eslint-config':
         specifier: workspace:*

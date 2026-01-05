@@ -1,31 +1,17 @@
-import { getWebsiteConfig } from "@buildingai/services/shared";
+import { useWebsiteConfigQuery } from "@buildingai/services/shared";
 import { useConfigStore } from "@buildingai/stores";
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect } from "react";
 
 export const useRefreshWebsiteConfig = (manualOnly: boolean = false) => {
     const { setWebsiteConfig } = useConfigStore((state) => state.configActions);
 
-    const isFetchingRef = useRef(false);
-
-    const refreshConfig = useCallback(async () => {
-        if (isFetchingRef.current) return;
-
-        isFetchingRef.current = true;
-        try {
-            const data = await getWebsiteConfig();
-            setWebsiteConfig(data);
-        } catch (error) {
-            console.error("Failed to fetch website config:", error);
-        } finally {
-            isFetchingRef.current = false;
-        }
-    }, [setWebsiteConfig]);
+    const { data, refetch, isFetching } = useWebsiteConfigQuery({
+        enabled: !manualOnly,
+    });
 
     useEffect(() => {
-        if (manualOnly) return;
+        if (data) setWebsiteConfig(data);
+    }, [data, setWebsiteConfig]);
 
-        refreshConfig();
-    }, [refreshConfig, manualOnly]);
-
-    return { refreshConfig };
+    return { refreshConfig: refetch, isFetching };
 };

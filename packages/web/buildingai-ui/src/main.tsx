@@ -1,6 +1,7 @@
 import "./styles/index.css";
 
 import { ThemeProvider } from "@buildingai/ui/components/theme-provider";
+import { Toaster } from "@buildingai/ui/components/ui/sonner";
 import { AlertDialogProvider } from "@buildingai/ui/hooks/use-alert-dialog.js";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -18,7 +19,7 @@ createRoot(document.getElementById("root")!).render(
       <ThemeProvider>
         <AlertDialogProvider>
           <ReactQueryDevtools />
-
+          <Toaster />
           <RouterProvider router={router} />
         </AlertDialogProvider>
       </ThemeProvider>
