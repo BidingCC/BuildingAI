@@ -1,0 +1,56 @@
+{
+    "provider": "moonshot",
+    "label": "Moonshot",
+    "icon_url": "/static/ai/providers/moonshot.png",
+    "supported_model_types": ["llm"],
+    "models": [
+        {
+            "model": "moonshot-v1-8k",
+            "label": "moonshot-v1-8k",
+            "model_type": "llm",
+            "features": ["agent-thought", "tool-call", "multi-tool-call", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 8192,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/moonshot.png"
+        },
+        {
+            "model": "moonshot-v1-32k",
+            "label": "moonshot-v1-32k",
+            "model_type": "llm",
+            "features": ["agent-thought", "tool-call", "multi-tool-call", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 32000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/moonshot.png"
+        },
+        {
+            "model": "moonshot-v1-128k",
+            "label": "moonshot-v1-128k",
+            "model_type": "llm",
+            "features": ["agent-thought", "tool-call", "multi-tool-call", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 128000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/moonshot.png"
+        },
+        {
+            "model": "kimi-k2-0711-preview",
+            "label": "kimi-k2-0711-preview",
+            "model_type": "llm",
+            "features": ["agent-thought", "tool-call", "multi-tool-call", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 128000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/moonshot.png"
+        }
+    ]
+}

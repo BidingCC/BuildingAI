@@ -1,0 +1,44 @@
+{
+    "provider": "deepseek",
+    "label": "DeepSeek",
+    "icon_url": "/static/ai/providers/deepseek.png",
+    "supported_model_types": ["llm"],
+    "models": [
+        {
+            "model": "deepseek-chat",
+            "label": "deepseek-chat",
+            "model_type": "llm",
+            "features": ["agent-thought", "tool-call", "multi-tool-call", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 128000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/deepseek.png"
+        },
+        {
+            "model": "deepseek-coder",
+            "label": "deepseek-coder",
+            "model_type": "llm",
+            "features": ["agent-thought", "tool-call", "multi-tool-call", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 128000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/deepseek.png"
+        },
+        {
+            "model": "deepseek-reasoner",
+            "label": "deepseek-reasoner",
+            "model_type": "llm",
+            "features": ["agent-thought", "tool-call", "multi-tool-call", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 128000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/deepseek.png"
+        }
+    ]
+}

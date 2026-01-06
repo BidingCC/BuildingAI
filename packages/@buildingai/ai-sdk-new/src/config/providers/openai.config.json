@@ -1,0 +1,628 @@
+{
+    "provider": "openai",
+    "label": "OpenAI",
+    "icon_url": "/static/ai/providers/openai.png",
+    "supported_model_types": ["llm", "text-embedding", "speech2text", "moderation", "tts"],
+    "models": [
+        {
+            "model": "o1",
+            "label": "o1",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call", "vision"],
+            "model_properties": {
+                "context_size": 200000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "o1-mini",
+            "label": "o1-mini",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 128000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "o1-mini-2024-09-12",
+            "label": "o1-mini-2024-09-12",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 128000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "o3-mini",
+            "label": "o3-mini",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 200000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "o3-mini-2025-01-31",
+            "label": "o3-mini-2025-01-31",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 200000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "gpt-4",
+            "label": "gpt-4",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 8192,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "gpt-4o",
+            "label": "gpt-4o",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call", "vision"],
+            "model_properties": {
+                "context_size": 128000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "gpt-4o-2024-05-13",
+            "label": "gpt-4o-2024-05-13",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call", "vision"],
+            "model_properties": {
+                "context_size": 128000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "gpt-4-turbo",
+            "label": "gpt-4-turbo",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call", "vision"],
+            "model_properties": {
+                "context_size": 128000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "gpt-4-turbo-2024-04-09",
+            "label": "gpt-4-turbo-2024-04-09",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call", "vision"],
+            "model_properties": {
+                "context_size": 128000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "gpt-4-turbo-preview",
+            "label": "gpt-4-turbo-preview",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 128000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "gpt-4-32k",
+            "label": "gpt-4-32k",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 32768,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "gpt-4-1106-preview",
+            "label": "gpt-4-1106-preview",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 128000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "gpt-4-0125-preview",
+            "label": "gpt-4-0125-preview",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 128000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "gpt-4-vision-preview",
+            "label": "gpt-4-vision-preview",
+            "model_type": "llm",
+            "features": ["vision"],
+            "model_properties": {
+                "context_size": 128000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "gpt-3.5-turbo",
+            "label": "gpt-3.5-turbo",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 16385,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "gpt-3.5-turbo-16k",
+            "label": "gpt-3.5-turbo-16k",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 16385,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "gpt-3.5-turbo-0125",
+            "label": "gpt-3.5-turbo-0125",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 16385,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "gpt-3.5-turbo-1106",
+            "label": "gpt-3.5-turbo-1106",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 16385,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "gpt-3.5-turbo-instruct",
+            "label": "gpt-3.5-turbo-instruct",
+            "model_type": "llm",
+            "features": [],
+            "model_properties": {
+                "context_size": 4096,
+                "mode": "completion"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "chatgpt-4o-latest",
+            "label": "chatgpt-4o-latest",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call", "vision"],
+            "model_properties": {
+                "context_size": 128000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "gpt-4o-2024-08-06",
+            "label": "gpt-4o-2024-08-06",
+            "model_type": "llm",
+            "features": [
+                "multi-tool-call",
+                "agent-thought",
+                "stream-tool-call",
+                "vision",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 128000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "gpt-4o-2024-11-20",
+            "label": "gpt-4o-2024-11-20",
+            "model_type": "llm",
+            "features": [
+                "multi-tool-call",
+                "agent-thought",
+                "stream-tool-call",
+                "vision",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 128000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "gpt-4o-audio-preview",
+            "label": "gpt-4o-audio-preview",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call", "audio"],
+            "model_properties": {
+                "context_size": 128000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "gpt-4o-mini-2024-07-18",
+            "label": "gpt-4o-mini-2024-07-18",
+            "model_type": "llm",
+            "features": [
+                "multi-tool-call",
+                "agent-thought",
+                "stream-tool-call",
+                "vision",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 128000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "gpt-4o-mini",
+            "label": "gpt-4o-mini",
+            "model_type": "llm",
+            "features": [
+                "multi-tool-call",
+                "agent-thought",
+                "stream-tool-call",
+                "vision",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 128000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "o1-preview-2024-09-12",
+            "label": "o1-preview-2024-09-12",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 128000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "o1-preview",
+            "label": "o1-preview",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 128000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "text-moderation-stable",
+            "label": "text-moderation-stable",
+            "model_type": "moderation",
+            "features": null,
+            "model_properties": {
+                "max_characters_per_chunk": 2000,
+                "max_chunks": 32
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "whisper-1",
+            "label": "whisper-1",
+            "model_type": "speech2text",
+            "features": null,
+            "model_properties": {
+                "file_upload_limit": 25,
+                "supported_file_extensions": "flac,mp3,mp4,mpeg,mpga,m4a,ogg,wav,webm"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "text-embedding-3-large",
+            "label": "text-embedding-3-large",
+            "model_type": "text-embedding",
+            "features": null,
+            "model_properties": {
+                "context_size": 8191,
+                "max_chunks": 32
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "text-embedding-3-small",
+            "label": "text-embedding-3-small",
+            "model_type": "text-embedding",
+            "features": null,
+            "model_properties": {
+                "context_size": 8191,
+                "max_chunks": 32
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "text-embedding-ada-002",
+            "label": "text-embedding-ada-002",
+            "model_type": "text-embedding",
+            "features": null,
+            "model_properties": {
+                "context_size": 8097,
+                "max_chunks": 32
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "tts-1-hd",
+            "label": "tts-1-hd",
+            "model_type": "tts",
+            "features": null,
+            "model_properties": {
+                "audio_type": "mp3",
+                "default_voice": "alloy",
+                "max_workers": 5,
+                "voices": [
+                    {
+                        "language": [
+                            "zh-Hans",
+                            "en-US",
+                            "de-DE",
+                            "fr-FR",
+                            "es-ES",
+                            "it-IT",
+                            "th-TH",
+                            "id-ID"
+                        ],
+                        "mode": "alloy",
+                        "name": "Alloy"
+                    },
+                    {
+                        "language": [
+                            "zh-Hans",
+                            "en-US",
+                            "de-DE",
+                            "fr-FR",
+                            "es-ES",
+                            "it-IT",
+                            "th-TH",
+                            "id-ID"
+                        ],
+                        "mode": "echo",
+                        "name": "Echo"
+                    },
+                    {
+                        "language": [
+                            "zh-Hans",
+                            "en-US",
+                            "de-DE",
+                            "fr-FR",
+                            "es-ES",
+                            "it-IT",
+                            "th-TH",
+                            "id-ID"
+                        ],
+                        "mode": "fable",
+                        "name": "Fable"
+                    },
+                    {
+                        "language": [
+                            "zh-Hans",
+                            "en-US",
+                            "de-DE",
+                            "fr-FR",
+                            "es-ES",
+                            "it-IT",
+                            "th-TH",
+                            "id-ID"
+                        ],
+                        "mode": "onyx",
+                        "name": "Onyx"
+                    },
+                    {
+                        "language": [
+                            "zh-Hans",
+                            "en-US",
+                            "de-DE",
+                            "fr-FR",
+                            "es-ES",
+                            "it-IT",
+                            "th-TH",
+                            "id-ID"
+                        ],
+                        "mode": "nova",
+                        "name": "Nova"
+                    },
+                    {
+                        "language": [
+                            "zh-Hans",
+                            "en-US",
+                            "de-DE",
+                            "fr-FR",
+                            "es-ES",
+                            "it-IT",
+                            "th-TH",
+                            "id-ID"
+                        ],
+                        "mode": "shimmer",
+                        "name": "Shimmer"
+                    }
+                ],
+                "word_limit": 3500
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        },
+        {
+            "model": "tts-1",
+            "label": "tts-1",
+            "model_type": "tts",
+            "features": null,
+            "model_properties": {
+                "audio_type": "mp3",
+                "default_voice": "alloy",
+                "max_workers": 5,
+                "voices": [
+                    {
+                        "language": [
+                            "zh-Hans",
+                            "en-US",
+                            "de-DE",
+                            "fr-FR",
+                            "es-ES",
+                            "it-IT",
+                            "th-TH",
+                            "id-ID"
+                        ],
+                        "mode": "alloy",
+                        "name": "Alloy"
+                    },
+                    {
+                        "language": [
+                            "zh-Hans",
+                            "en-US",
+                            "de-DE",
+                            "fr-FR",
+                            "es-ES",
+                            "it-IT",
+                            "th-TH",
+                            "id-ID"
+                        ],
+                        "mode": "echo",
+                        "name": "Echo"
+                    },
+                    {
+                        "language": [
+                            "zh-Hans",
+                            "en-US",
+                            "de-DE",
+                            "fr-FR",
+                            "es-ES",
+                            "it-IT",
+                            "th-TH",
+                            "id-ID"
+                        ],
+                        "mode": "fable",
+                        "name": "Fable"
+                    },
+                    {
+                        "language": [
+                            "zh-Hans",
+                            "en-US",
+                            "de-DE",
+                            "fr-FR",
+                            "es-ES",
+                            "it-IT",
+                            "th-TH",
+                            "id-ID"
+                        ],
+                        "mode": "onyx",
+                        "name": "Onyx"
+                    },
+                    {
+                        "language": [
+                            "zh-Hans",
+                            "en-US",
+                            "de-DE",
+                            "fr-FR",
+                            "es-ES",
+                            "it-IT",
+                            "th-TH",
+                            "id-ID"
+                        ],
+                        "mode": "nova",
+                        "name": "Nova"
+                    },
+                    {
+                        "language": [
+                            "zh-Hans",
+                            "en-US",
+                            "de-DE",
+                            "fr-FR",
+                            "es-ES",
+                            "it-IT",
+                            "th-TH",
+                            "id-ID"
+                        ],
+                        "mode": "shimmer",
+                        "name": "Shimmer"
+                    }
+                ],
+                "word_limit": 3500
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/openai.png"
+        }
+    ]
+}
