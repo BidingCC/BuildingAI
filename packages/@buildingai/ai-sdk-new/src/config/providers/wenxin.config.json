@@ -1,0 +1,223 @@
+{
+    "provider": "wenxin",
+    "label": "文心一言",
+    "icon_url": "/static/ai/providers/wenxin.png",
+    "supported_model_types": ["llm", "text-embedding", "rerank"],
+    "models": [
+        {
+            "model": "ernie-3.5-128k",
+            "label": "Ernie-3.5-128K",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 128000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/wenxin.png"
+        },
+        {
+            "model": "ernie-3.5-8k",
+            "label": "Ernie-3.5-8K",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 8192,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/wenxin.png"
+        },
+        {
+            "model": "ernie-4.0-8k-latest",
+            "label": "Ernie-4.0-8K-Latest",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 8192,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/wenxin.png"
+        },
+        {
+            "model": "ernie-4.0-8k",
+            "label": "Ernie-4.0-8K",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 8192,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/wenxin.png"
+        },
+        {
+            "model": "ernie-4.0-turbo-128k",
+            "label": "Ernie-4.0-turbo-128K",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/wenxin.png"
+        },
+        {
+            "model": "ernie-4.0-turbo-8k-preview",
+            "label": "Ernie-4.0-turbo-8k-preview",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 8192,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/wenxin.png"
+        },
+        {
+            "model": "ernie-4.0-turbo-8k",
+            "label": "Ernie-4.0-turbo-8K",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 8192,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/wenxin.png"
+        },
+        {
+            "model": "ernie-4.5-turbo-128k",
+            "label": "Ernie-4.5-turbo-128K",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/wenxin.png"
+        },
+        {
+            "model": "ernie-lite-pro-128k",
+            "label": "Ernie-Lite-Pro-128K",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 128000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/wenxin.png"
+        },
+        {
+            "model": "ernie-speed-128k",
+            "label": "ERNIE-Speed-128K",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 128000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/wenxin.png"
+        },
+        {
+            "model": "ernie-speed-8k",
+            "label": "ERNIE-Speed-8K",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 8192,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/wenxin.png"
+        },
+        {
+            "model": "ernie-speed-pro-128k",
+            "label": "Ernie-speed-pro-128k",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 128000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/wenxin.png"
+        },
+        {
+            "model": "ernie-x1-turbo-32k",
+            "label": "Ernie-X1-Turbo-32K",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 32768,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/wenxin.png"
+        },
+        {
+            "model": "bce-reranker-base",
+            "label": "bce-reranker-base",
+            "model_type": "rerank",
+            "features": null,
+            "model_properties": {
+                "context_size": 4096
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/wenxin.png"
+        },
+        {
+            "model": "bge-large-en",
+            "label": "bge-large-en",
+            "model_type": "text-embedding",
+            "features": null,
+            "model_properties": {
+                "context_size": 512,
+                "max_chunks": 16
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/wenxin.png"
+        },
+        {
+            "model": "bge-large-zh",
+            "label": "bge-large-zh",
+            "model_type": "text-embedding",
+            "features": null,
+            "model_properties": {
+                "context_size": 512,
+                "max_chunks": 16
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/wenxin.png"
+        },
+        {
+            "model": "embedding-v1",
+            "label": "embedding-v1",
+            "model_type": "text-embedding",
+            "features": null,
+            "model_properties": {
+                "context_size": 384,
+                "max_chunks": 16
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/wenxin.png"
+        },
+        {
+            "model": "tao-8k",
+            "label": "tao-8k",
+            "model_type": "text-embedding",
+            "features": null,
+            "model_properties": {
+                "context_size": 8192,
+                "max_chunks": 1
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/wenxin.png"
+        }
+    ]
+}

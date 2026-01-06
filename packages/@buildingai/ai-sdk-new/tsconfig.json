@@ -1,0 +1,3 @@
+{
+    "extends": "@buildingai/typescript-config/base.json"
+}

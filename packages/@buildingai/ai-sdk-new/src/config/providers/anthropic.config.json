@@ -1,0 +1,92 @@
+{
+    "provider": "anthropic",
+    "label": "Anthropic",
+    "icon_url": "/static/ai/providers/anthropic.png",
+    "supported_model_types": ["llm"],
+    "models": [
+        {
+            "model": "claude-3-5-haiku-20241022",
+            "label": "claude-3-5-haiku-20241022",
+            "model_type": "llm",
+            "features": ["agent-thought", "tool-call", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 200000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/anthropic.png"
+        },
+        {
+            "model": "claude-3-5-sonnet-20241022",
+            "label": "claude-3-5-sonnet-20241022",
+            "model_type": "llm",
+            "features": ["agent-thought", "vision", "tool-call", "stream-tool-call", "document"],
+            "model_properties": {
+                "context_size": 200000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/anthropic.png"
+        },
+        {
+            "model": "claude-3-5-sonnet-20240620",
+            "label": "claude-3-5-sonnet-20240620",
+            "model_type": "llm",
+            "features": ["agent-thought", "vision", "tool-call", "stream-tool-call", "document"],
+            "model_properties": {
+                "context_size": 200000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/anthropic.png"
+        },
+        {
+            "model": "claude-3-haiku-20240307",
+            "label": "claude-3-haiku-20240307",
+            "model_type": "llm",
+            "features": ["agent-thought", "vision", "tool-call", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 200000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/anthropic.png"
+        },
+        {
+            "model": "claude-3-opus-20240229",
+            "label": "claude-3-opus-20240229",
+            "model_type": "llm",
+            "features": ["agent-thought", "vision", "tool-call", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 200000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/anthropic.png"
+        },
+        {
+            "model": "claude-3-sonnet-20240229",
+            "label": "claude-3-sonnet-20240229",
+            "model_type": "llm",
+            "features": ["agent-thought", "vision", "tool-call", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 200000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/anthropic.png"
+        },
+        {
+            "model": "claude-2.1",
+            "label": "claude-2.1",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 200000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/anthropic.png"
+        }
+    ]
+}

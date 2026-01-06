@@ -1,0 +1,421 @@
+{
+    "provider": "zhipuai",
+    "label": "智谱 AI",
+    "icon_url": "/static/ai/providers/zhipuai.png",
+    "supported_model_types": ["llm", "text-embedding"],
+    "models": [
+        {
+            "model": "glm-4.5",
+            "label": "glm-4.5",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/zhipuai.png"
+        },
+        {
+            "model": "glm-4.5-x",
+            "label": "glm-4.5-x",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/zhipuai.png"
+        },
+        {
+            "model": "glm-4.5-air",
+            "label": "glm-4.5-air",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/zhipuai.png"
+        },
+        {
+            "model": "glm-4.5-airx",
+            "label": "glm-4.5-airx",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/zhipuai.png"
+        },
+        {
+            "model": "glm-4.5-flash",
+            "label": "glm-4.5-flash",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/zhipuai.png"
+        },
+        {
+            "model": "glm-4.5v",
+            "label": "glm-4.5v",
+            "model_type": "llm",
+            "features": ["vision", "agent-thought"],
+            "model_properties": {
+                "context_size": 16384,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/zhipuai.png"
+        },
+        {
+            "model": "glm-4.1v-thinking-flash",
+            "label": "glm-4.1v-thinking-flash",
+            "model_type": "llm",
+            "features": ["vision", "video", "agent-thought"],
+            "model_properties": {
+                "context_size": 65536,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/zhipuai.png"
+        },
+        {
+            "model": "glm-4.1v-thinking-flashx",
+            "label": "glm-4.1v-thinking-flashx",
+            "model_type": "llm",
+            "features": ["vision", "video", "agent-thought"],
+            "model_properties": {
+                "context_size": 65536,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/zhipuai.png"
+        },
+        {
+            "model": "glm-4-plus",
+            "label": "glm-4-plus",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/zhipuai.png"
+        },
+        {
+            "model": "glm-4",
+            "label": "glm-4",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/zhipuai.png"
+        },
+        {
+            "model": "glm-4-0520",
+            "label": "glm-4-0520",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/zhipuai.png"
+        },
+        {
+            "model": "glm-4-air",
+            "label": "glm-4-air",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/zhipuai.png"
+        },
+        {
+            "model": "glm-4-air-0111",
+            "label": "glm-4-air-0111",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/zhipuai.png"
+        },
+        {
+            "model": "glm-4-air-250414",
+            "label": "glm-4-air-250414",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/zhipuai.png"
+        },
+        {
+            "model": "glm-4-airx",
+            "label": "glm-4-airx",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 8192,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/zhipuai.png"
+        },
+        {
+            "model": "glm-4-flash",
+            "label": "glm-4-flash",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/zhipuai.png"
+        },
+        {
+            "model": "glm-4-flash-250414",
+            "label": "glm-4-flash-250414",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/zhipuai.png"
+        },
+        {
+            "model": "glm-4-flashx",
+            "label": "glm-4-flashx",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/zhipuai.png"
+        },
+        {
+            "model": "glm-4-flashx-250414",
+            "label": "glm-4-flashx-250414",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/zhipuai.png"
+        },
+        {
+            "model": "glm-4-long",
+            "label": "glm-4-long",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 1048576,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/zhipuai.png"
+        },
+        {
+            "model": "glm-4v",
+            "label": "glm-4v",
+            "model_type": "llm",
+            "features": ["vision"],
+            "model_properties": {
+                "context_size": 8192,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/zhipuai.png"
+        },
+        {
+            "model": "glm-4v-flash",
+            "label": "glm-4v-flash",
+            "model_type": "llm",
+            "features": ["vision"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/zhipuai.png"
+        },
+        {
+            "model": "glm-4v-plus",
+            "label": "glm-4v-plus",
+            "model_type": "llm",
+            "features": ["vision", "video"],
+            "model_properties": {
+                "context_size": 8192,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/zhipuai.png"
+        },
+        {
+            "model": "glm-4v-plus-0111",
+            "label": "glm-4v-plus-0111",
+            "model_type": "llm",
+            "features": ["vision", "video"],
+            "model_properties": {
+                "context_size": 16384,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/zhipuai.png"
+        },
+        {
+            "model": "glm-z1-air",
+            "label": "glm-z1-air",
+            "model_type": "llm",
+            "features": ["agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/zhipuai.png"
+        },
+        {
+            "model": "glm-z1-airx",
+            "label": "glm-z1-airx",
+            "model_type": "llm",
+            "features": ["agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 32768,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/zhipuai.png"
+        },
+        {
+            "model": "glm-z1-flash",
+            "label": "glm-z1-flash",
+            "model_type": "llm",
+            "features": ["agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/zhipuai.png"
+        },
+        {
+            "model": "glm-z1-flashx",
+            "label": "glm-z1-flashx",
+            "model_type": "llm",
+            "features": ["agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/zhipuai.png"
+        },
+        {
+            "model": "glm-3-turbo",
+            "label": "glm-3-turbo",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/zhipuai.png"
+        },
+        {
+            "model": "embedding-2",
+            "label": "embedding-2",
+            "model_type": "text-embedding",
+            "features": null,
+            "model_properties": {
+                "context_size": 8192
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/zhipuai.png"
+        },
+        {
+            "model": "embedding-3",
+            "label": "embedding-3",
+            "model_type": "text-embedding",
+            "features": null,
+            "model_properties": {
+                "context_size": 8192
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/zhipuai.png"
+        },
+        {
+            "model": "text_embedding",
+            "label": "text_embedding",
+            "model_type": "text-embedding",
+            "features": null,
+            "model_properties": {
+                "context_size": 512
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/zhipuai.png"
+        }
+    ]
+}

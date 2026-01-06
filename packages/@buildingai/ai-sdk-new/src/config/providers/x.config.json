@@ -1,0 +1,85 @@
+{
+    "provider": "x",
+    "label": "xAI",
+    "icon_url": "/static/ai/providers/x.png",
+    "supported_model_types": ["llm"],
+    "models": [
+        {
+            "model": "grok-3-mini",
+            "label": "grok-3-mini",
+            "model_type": "llm",
+            "features": [
+                "agent-thought",
+                "tool-call",
+                "multi-tool-call",
+                "stream-tool-call",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/x.png"
+        },
+        {
+            "model": "grok-3",
+            "label": "grok-3",
+            "model_type": "llm",
+            "features": [
+                "agent-thought",
+                "tool-call",
+                "multi-tool-call",
+                "stream-tool-call",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/x.png"
+        },
+        {
+            "model": "grok-4-0709",
+            "label": "grok-4-0709",
+            "model_type": "llm",
+            "features": [
+                "vision",
+                "agent-thought",
+                "tool-call",
+                "multi-tool-call",
+                "stream-tool-call",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 256000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/x.png"
+        },
+        {
+            "model": "grok-code-fast-1-0825",
+            "label": "grok-code-fast-1-0825",
+            "model_type": "llm",
+            "features": [
+                "agent-thought",
+                "tool-call",
+                "multi-tool-call",
+                "stream-tool-call",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 256000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/x.png"
+        }
+    ]
+}

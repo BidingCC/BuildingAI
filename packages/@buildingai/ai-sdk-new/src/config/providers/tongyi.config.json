@@ -1,0 +1,1216 @@
+{
+    "provider": "tongyi",
+    "label": "通义千问",
+    "icon_url": "/static/ai/providers/tongyi.png",
+    "supported_model_types": ["llm", "text-embedding", "rerank", "speech2text", "tts"],
+    "models": [
+        {
+            "model": "qvq-max-latest",
+            "label": "qvq-max-latest",
+            "model_type": "llm",
+            "features": ["vision", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qvq-max",
+            "label": "qvq-max",
+            "model_type": "llm",
+            "features": ["vision", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwq-plus-0305",
+            "label": "qwq-plus-0305",
+            "model_type": "llm",
+            "features": ["agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwq-plus",
+            "label": "qwq-plus",
+            "model_type": "llm",
+            "features": ["agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwq-32b",
+            "label": "qwq-32b",
+            "model_type": "llm",
+            "features": ["agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "deepseek-r1",
+            "label": "DeepSeek-R1",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 64000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "deepseek-r1-distill-qwen-14b",
+            "label": "DeepSeek-R1-Distill-Qwen-14B",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 32000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "deepseek-r1-distill-qwen-32b",
+            "label": "DeepSeek-R1-Distill-Qwen-32B",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 32000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "deepseek-v3",
+            "label": "DeepSeek-V3",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 64000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen2.5-vl-72b-instruct",
+            "label": "qwen2.5-vl-72b-instruct",
+            "model_type": "llm",
+            "features": ["vision", "agent-thought", "video"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen2.5-vl-7b-instruct",
+            "label": "qwen2.5-vl-7b-instruct",
+            "model_type": "llm",
+            "features": ["vision", "agent-thought", "video"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen2.5-vl-3b-instruct",
+            "label": "qwen2.5-vl-3b-instruct",
+            "model_type": "llm",
+            "features": ["vision", "agent-thought", "video"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-vl-max-latest",
+            "label": "qwen-vl-max-latest",
+            "model_type": "llm",
+            "features": ["vision", "agent-thought", "video"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-vl-max-2025-01-25",
+            "label": "qwen-vl-max-2025-01-25",
+            "model_type": "llm",
+            "features": ["vision", "agent-thought", "video"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-vl-max-0809",
+            "label": "qwen-vl-max-0809",
+            "model_type": "llm",
+            "features": ["vision", "agent-thought", "video"],
+            "model_properties": {
+                "context_size": 32000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-vl-max",
+            "label": "qwen-vl-max",
+            "model_type": "llm",
+            "features": ["vision", "agent-thought", "video"],
+            "model_properties": {
+                "context_size": 32000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-max-latest",
+            "label": "qwen-max-latest",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-max-0125",
+            "label": "qwen-max-0125",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-max-0919",
+            "label": "qwen-max-0919",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 32768,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-max-0428",
+            "label": "qwen-max-0428",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 8000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-max-0403",
+            "label": "qwen-max-0403",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 8000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-max",
+            "label": "qwen-max",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 32768,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-plus-latest",
+            "label": "qwen-plus-latest(Qwen3)",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-plus-2025-04-28",
+            "label": "qwen-plus-2025-04-28(Qwen3)",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-plus-0125",
+            "label": "qwen-plus-0125",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-plus-0112",
+            "label": "qwen-plus-0112",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-plus-1220",
+            "label": "qwen-plus-1220",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-plus-1127",
+            "label": "qwen-plus-1127",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-plus-1125",
+            "label": "qwen-plus-1125",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-plus-0919",
+            "label": "qwen-plus-0919",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-plus-0806",
+            "label": "qwen-plus-0806",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-plus-0723",
+            "label": "qwen-plus-0723",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 32000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-plus",
+            "label": "qwen-plus",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-vl-plus-latest",
+            "label": "qwen-vl-plus-latest",
+            "model_type": "llm",
+            "features": ["vision", "agent-thought", "video"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-vl-plus-2025-01-25",
+            "label": "qwen-vl-plus-2025-01-25",
+            "model_type": "llm",
+            "features": ["vision", "agent-thought", "video"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-vl-plus-2025-01-02",
+            "label": "qwen-vl-plus-2025-01-02",
+            "model_type": "llm",
+            "features": ["vision", "agent-thought", "video"],
+            "model_properties": {
+                "context_size": 32768,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-vl-plus-0809",
+            "label": "qwen-vl-plus-0809",
+            "model_type": "llm",
+            "features": ["vision", "agent-thought", "video"],
+            "model_properties": {
+                "context_size": 32768,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-vl-plus",
+            "label": "qwen-vl-plus",
+            "model_type": "llm",
+            "features": ["vision", "agent-thought", "video"],
+            "model_properties": {
+                "context_size": 8000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-turbo-latest",
+            "label": "qwen-turbo-latest(Qwen3)",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 1000000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-turbo-2025-04-28",
+            "label": "qwen-turbo-2025-04-28(Qwen3)",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-turbo-0919",
+            "label": "qwen-turbo-0919",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-turbo-0624",
+            "label": "qwen-turbo-0624",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 8000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-turbo",
+            "label": "qwen-turbo",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 128000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen3-235b-a22b",
+            "label": "qwen3-235b-a22b",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen3-30b-a3b",
+            "label": "qwen3-30b-a3b",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen3-32b",
+            "label": "qwen3-32b",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen3-14b",
+            "label": "qwen3-14b",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen3-8b",
+            "label": "qwen3-8b",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen3-4b",
+            "label": "qwen3-4b",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen3-1.7b",
+            "label": "qwen3-1.7b",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 32768,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen3-0.6b",
+            "label": "qwen3-0.6b",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 32768,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen3-coder-plus",
+            "label": "qwen3-coder-plus",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 1048576,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen2.5-72b-instruct",
+            "label": "qwen2.5-72b-instruct",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen2.5-32b-instruct",
+            "label": "qwen2.5-32b-instruct",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen2.5-14b-instruct-1m",
+            "label": "qwen2.5-14b-instruct-1m",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 1000000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen2.5-14b-instruct",
+            "label": "qwen2.5-14b-instruct",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen2.5-7b-instruct-1m",
+            "label": "qwen2.5-7b-instruct-1m",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 1000000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen2.5-7b-instruct",
+            "label": "qwen2.5-7b-instruct",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen2.5-3b-instruct",
+            "label": "qwen2.5-3b-instruct",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 32768,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen2.5-1.5b-instruct",
+            "label": "qwen2.5-1.5b-instruct",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 32768,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen2.5-0.5b-instruct",
+            "label": "qwen2.5-0.5b-instruct",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 32768,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen2.5-coder-7b-instruct",
+            "label": "qwen2.5-coder-7b-instruct",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-long",
+            "label": "qwen-long",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call", "document"],
+            "model_properties": {
+                "context_size": 10000000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-math-plus-latest",
+            "label": "qwen-math-plus-latest",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 4096,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-math-plus-0919",
+            "label": "qwen-math-plus-0919",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 4096,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-math-plus-0816",
+            "label": "qwen-math-plus-0816",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 4096,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-math-plus",
+            "label": "qwen-math-plus",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 4096,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-math-turbo-latest",
+            "label": "qwen-math-turbo-latest",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 4096,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-math-turbo-0919",
+            "label": "qwen-math-turbo-0919",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 4096,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-math-turbo",
+            "label": "qwen-math-turbo",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 4096,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-coder-turbo-latest",
+            "label": "qwen-coder-turbo-latest",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-coder-turbo-0919",
+            "label": "qwen-coder-turbo-0919",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "qwen-coder-turbo",
+            "label": "qwen-coder-turbo",
+            "model_type": "llm",
+            "features": ["agent-thought"],
+            "model_properties": {
+                "context_size": 131072,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "farui-plus",
+            "label": "farui-plus",
+            "model_type": "llm",
+            "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
+            "model_properties": {
+                "context_size": 12288,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "gte-rerank",
+            "label": "gte-rerank",
+            "model_type": "rerank",
+            "features": null,
+            "model_properties": {
+                "context_size": 4000
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "gte-rerank-v2",
+            "label": "gte-rerank-v2",
+            "model_type": "rerank",
+            "features": null,
+            "model_properties": {
+                "context_size": 4000
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "paraformer-realtime-v1",
+            "label": "paraformer-realtime-v1",
+            "model_type": "speech2text",
+            "features": null,
+            "model_properties": {
+                "file_upload_limit": 100,
+                "supported_file_extensions": "aac,amr,avi,flac,flv,m4a,mkv,mov,mp3,mp4,mpeg,ogg,opus,wav,webm,wma,wmv"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "paraformer-realtime-v2",
+            "label": "paraformer-realtime-v2",
+            "model_type": "speech2text",
+            "features": null,
+            "model_properties": {
+                "file_upload_limit": 100,
+                "supported_file_extensions": "aac,amr,avi,flac,flv,m4a,mkv,mov,mp3,mp4,mpeg,ogg,opus,wav,webm,wma,wmv"
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "text-embedding-v1",
+            "label": "text-embedding-v1",
+            "model_type": "text-embedding",
+            "features": null,
+            "model_properties": {
+                "context_size": 2048,
+                "max_chunks": 25
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "text-embedding-v2",
+            "label": "text-embedding-v2",
+            "model_type": "text-embedding",
+            "features": null,
+            "model_properties": {
+                "context_size": 2048,
+                "max_chunks": 25
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "text-embedding-v3",
+            "label": "text-embedding-v3",
+            "model_type": "text-embedding",
+            "features": null,
+            "model_properties": {
+                "context_size": 8192,
+                "max_chunks": 10
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "text-embedding-v4",
+            "label": "text-embedding-v4",
+            "model_type": "text-embedding",
+            "features": null,
+            "model_properties": {
+                "context_size": 8192,
+                "max_chunks": 10
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        },
+        {
+            "model": "tts-1",
+            "label": "tts-1",
+            "model_type": "tts",
+            "features": null,
+            "model_properties": {
+                "audio_type": "mp3",
+                "default_voice": "sambert-zhiru-v1",
+                "max_workers": 5,
+                "voices": [
+                    {
+                        "language": ["zh-Hans", "en-US"],
+                        "mode": "sambert-zhinan-v1",
+                        "name": "知楠（广告男声）"
+                    },
+                    {
+                        "language": ["zh-Hans", "en-US"],
+                        "mode": "sambert-zhiqi-v1",
+                        "name": "知琪（温柔女声）"
+                    },
+                    {
+                        "language": ["zh-Hans", "en-US"],
+                        "mode": "sambert-zhichu-v1",
+                        "name": "知厨（新闻播报）"
+                    },
+                    {
+                        "language": ["zh-Hans", "en-US"],
+                        "mode": "sambert-zhide-v1",
+                        "name": "知德（新闻男声）"
+                    },
+                    {
+                        "language": ["zh-Hans", "en-US"],
+                        "mode": "sambert-zhijia-v1",
+                        "name": "知佳（标准女声）"
+                    },
+                    {
+                        "language": ["zh-Hans", "en-US"],
+                        "mode": "sambert-zhiru-v1",
+                        "name": "知茹（新闻女声）"
+                    },
+                    {
+                        "language": ["zh-Hans", "en-US"],
+                        "mode": "sambert-zhiqian-v1",
+                        "name": "知倩（配音解说、新闻播报）"
+                    },
+                    {
+                        "language": ["zh-Hans", "en-US"],
+                        "mode": "sambert-zhixiang-v1",
+                        "name": "知祥（配音解说）"
+                    },
+                    {
+                        "language": ["zh-Hans", "en-US"],
+                        "mode": "sambert-zhiwei-v1",
+                        "name": "知薇（萝莉女声）"
+                    },
+                    {
+                        "language": ["zh-Hans", "en-US"],
+                        "mode": "sambert-zhihao-v1",
+                        "name": "知浩（咨询男声）"
+                    },
+                    {
+                        "language": ["zh-Hans", "en-US"],
+                        "mode": "sambert-zhijing-v1",
+                        "name": "知婧（严厉女声）"
+                    },
+                    {
+                        "language": ["zh-Hans", "en-US"],
+                        "mode": "sambert-zhiming-v1",
+                        "name": "知茗（诙谐男声）"
+                    },
+                    {
+                        "language": ["zh-Hans", "en-US"],
+                        "mode": "sambert-zhimo-v1",
+                        "name": "知墨（情感男声）"
+                    },
+                    {
+                        "language": ["zh-Hans", "en-US"],
+                        "mode": "sambert-zhina-v1",
+                        "name": "知娜（浙普女声）"
+                    },
+                    {
+                        "language": ["zh-Hans", "en-US"],
+                        "mode": "sambert-zhishu-v1",
+                        "name": "知树（资讯男声）"
+                    },
+                    {
+                        "language": ["zh-Hans", "en-US"],
+                        "mode": "sambert-zhistella-v1",
+                        "name": "知莎（知性女声）"
+                    },
+                    {
+                        "language": ["zh-Hans", "en-US"],
+                        "mode": "sambert-zhiting-v1",
+                        "name": "知婷（电台女声）"
+                    },
+                    {
+                        "language": ["zh-Hans", "en-US"],
+                        "mode": "sambert-zhixiao-v1",
+                        "name": "知笑（资讯女声）"
+                    },
+                    {
+                        "language": ["zh-Hans", "en-US"],
+                        "mode": "sambert-zhiya-v1",
+                        "name": "知雅（严厉女声）"
+                    },
+                    {
+                        "language": ["zh-Hans", "en-US"],
+                        "mode": "sambert-zhiye-v1",
+                        "name": "知晔（青年男声）"
+                    },
+                    {
+                        "language": ["zh-Hans", "en-US"],
+                        "mode": "sambert-zhiying-v1",
+                        "name": "知颖（软萌童声）"
+                    },
+                    {
+                        "language": ["zh-Hans", "en-US"],
+                        "mode": "sambert-zhiyuan-v1",
+                        "name": "知媛（知心姐姐）"
+                    },
+                    {
+                        "language": ["zh-Hans", "en-US"],
+                        "mode": "sambert-zhigui-v1",
+                        "name": "知柜（直播女声）"
+                    },
+                    {
+                        "language": ["zh-Hans", "en-US"],
+                        "mode": "sambert-zhishuo-v1",
+                        "name": "知硕（自然男声）"
+                    },
+                    {
+                        "language": ["zh-Hans", "en-US"],
+                        "mode": "sambert-zhimiao-emo-v1",
+                        "name": "知妙（多种情感女声）"
+                    },
+                    {
+                        "language": ["zh-Hans", "en-US"],
+                        "mode": "sambert-zhimao-v1",
+                        "name": "知猫（直播女声）"
+                    },
+                    {
+                        "language": ["zh-Hans", "en-US"],
+                        "mode": "sambert-zhilun-v1",
+                        "name": "知伦（悬疑解说）"
+                    },
+                    {
+                        "language": ["zh-Hans", "en-US"],
+                        "mode": "sambert-zhifei-v1",
+                        "name": "知飞（激昂解说）"
+                    },
+                    {
+                        "language": ["zh-Hans", "en-US"],
+                        "mode": "sambert-zhida-v1",
+                        "name": "知达（标准男声）"
+                    },
+                    {
+                        "language": ["es-ES"],
+                        "mode": "sambert-camila-v1",
+                        "name": "Camila（西班牙语女声）"
+                    },
+                    {
+                        "language": ["it-IT"],
+                        "mode": "sambert-perla-v1",
+                        "name": "Perla（意大利语女声）"
+                    },
+                    {
+                        "language": ["id-ID"],
+                        "mode": "sambert-indah-v1",
+                        "name": "Indah（印尼语女声）"
+                    },
+                    {
+                        "language": ["fr-FR"],
+                        "mode": "sambert-clara-v1",
+                        "name": "Clara（法语女声）"
+                    },
+                    {
+                        "language": ["de-DE"],
+                        "mode": "sambert-hanna-v1",
+                        "name": "Hanna（德语女声）"
+                    },
+                    {
+                        "language": ["en-US"],
+                        "mode": "sambert-beth-v1",
+                        "name": "Beth（咨询女声）"
+                    },
+                    {
+                        "language": ["en-US"],
+                        "mode": "sambert-betty-v1",
+                        "name": "Betty（客服女声）"
+                    },
+                    {
+                        "language": ["en-US"],
+                        "mode": "sambert-cally-v1",
+                        "name": "Cally（自然女声）"
+                    },
+                    {
+                        "language": ["en-US"],
+                        "mode": "sambert-cindy-v1",
+                        "name": "Cindy（对话女声）"
+                    },
+                    {
+                        "language": ["en-US"],
+                        "mode": "sambert-eva-v1",
+                        "name": "Eva（陪伴女声）"
+                    },
+                    {
+                        "language": ["en-US"],
+                        "mode": "sambert-donna-v1",
+                        "name": "Donna（教育女声）"
+                    },
+                    {
+                        "language": ["en-US"],
+                        "mode": "sambert-brian-v1",
+                        "name": "Brian（客服男声）"
+                    },
+                    {
+                        "language": ["th-TH"],
+                        "mode": "sambert-waan-v1",
+                        "name": "Waan（泰语女声）"
+                    }
+                ],
+                "word_limit": 7000
+            },
+            "deprecated": false,
+            "icon_url": "/static/ai/providers/tongyi.png"
+        }
+    ]
+}

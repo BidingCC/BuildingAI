@@ -1,0 +1,902 @@
+{
+    "provider": "google",
+    "label": "Gemini",
+    "icon_url": "/static/ai/providers/google.png",
+    "supported_model_types": ["llm", "text-embedding"],
+    "models": [
+        {
+            "model": "gemini-2.5-pro",
+            "label": "Gemini 2.5 Pro",
+            "model_type": "llm",
+            "features": [
+                "tool-call",
+                "multi-tool-call",
+                "agent-thought",
+                "vision",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 1048576,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-2.5-flash",
+            "label": "Gemini 2.5 Flash",
+            "model_type": "llm",
+            "features": [
+                "tool-call",
+                "multi-tool-call",
+                "agent-thought",
+                "vision",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 1048576,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-2.5-flash-lite",
+            "label": "Gemini 2.5 Flash-Lite",
+            "model_type": "llm",
+            "features": [
+                "tool-call",
+                "multi-tool-call",
+                "agent-thought",
+                "vision",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 1048576,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-2.5-flash-lite-preview-06-17",
+            "label": "Gemini 2.5 Flash-Lite Preview 06-17",
+            "model_type": "llm",
+            "features": [
+                "tool-call",
+                "multi-tool-call",
+                "agent-thought",
+                "vision",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 1000000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-2.5-pro-preview-06-05",
+            "label": "Gemini 2.5 Pro Preview 06-05",
+            "model_type": "llm",
+            "features": [
+                "tool-call",
+                "multi-tool-call",
+                "agent-thought",
+                "vision",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 1048576,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-2.5-pro-preview-05-06",
+            "label": "Gemini 2.5 Pro Preview 05-06",
+            "model_type": "llm",
+            "features": [
+                "tool-call",
+                "multi-tool-call",
+                "agent-thought",
+                "vision",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 1048576,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-2.5-pro-preview-03-25",
+            "label": "Gemini 2.5 Pro Preview 03-25",
+            "model_type": "llm",
+            "features": [
+                "tool-call",
+                "multi-tool-call",
+                "agent-thought",
+                "vision",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 1048576,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-2.5-flash-preview-05-20",
+            "label": "Gemini 2.5 Flash Preview 05-20",
+            "model_type": "llm",
+            "features": [
+                "tool-call",
+                "multi-tool-call",
+                "agent-thought",
+                "vision",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 1048576,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-2.5-flash-preview-04-17",
+            "label": "Gemini 2.5 Flash Preview 04-17",
+            "model_type": "llm",
+            "features": [
+                "tool-call",
+                "multi-tool-call",
+                "agent-thought",
+                "vision",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 1048576,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-2.0-flash-exp",
+            "label": "Gemini 2.0 Flash Exp",
+            "model_type": "llm",
+            "features": [
+                "agent-thought",
+                "vision",
+                "tool-call",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 1048576,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-2.0-flash",
+            "label": "Gemini 2.0 Flash",
+            "model_type": "llm",
+            "features": [
+                "agent-thought",
+                "vision",
+                "tool-call",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 1048576,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-2.0-flash-001",
+            "label": "Gemini 2.0 Flash 001",
+            "model_type": "llm",
+            "features": [
+                "agent-thought",
+                "vision",
+                "tool-call",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 1048576,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-2.0-flash-lite-001",
+            "label": "Gemini 2.0 Flash-Lite 001",
+            "model_type": "llm",
+            "features": [
+                "agent-thought",
+                "vision",
+                "tool-call",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 1048576,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-2.0-flash-lite",
+            "label": "Gemini 2.0 Flash-Lite",
+            "model_type": "llm",
+            "features": [
+                "agent-thought",
+                "vision",
+                "tool-call",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 1048576,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-2.0-flash-lite-preview-02-05",
+            "label": "Gemini 2.0 Flash-Lite Preview 02-05",
+            "model_type": "llm",
+            "features": [
+                "agent-thought",
+                "vision",
+                "tool-call",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 1048576,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-2.0-flash-lite-preview",
+            "label": "Gemini 2.0 Flash-Lite Preview",
+            "model_type": "llm",
+            "features": [
+                "agent-thought",
+                "vision",
+                "tool-call",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 1048576,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-2.0-flash-preview-image-generation",
+            "label": "Gemini 2.0 Flash Preview Image Generation",
+            "model_type": "llm",
+            "features": ["vision", "document", "video", "audio", "structured-output"],
+            "model_properties": {
+                "context_size": 32000,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-2.0-pro-exp",
+            "label": "Gemini 2.0 Pro Experimental",
+            "model_type": "llm",
+            "features": [
+                "agent-thought",
+                "vision",
+                "tool-call",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 2097152,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-2.0-pro-exp-02-05",
+            "label": "Gemini 2.0 Pro Experimental 02-05",
+            "model_type": "llm",
+            "features": [
+                "agent-thought",
+                "vision",
+                "tool-call",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 2097152,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-exp-1206",
+            "label": "Gemini Experimental 1206",
+            "model_type": "llm",
+            "features": [
+                "agent-thought",
+                "vision",
+                "tool-call",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 2097152,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-2.0-flash-thinking-exp-01-21",
+            "label": "Gemini 2.0 Flash Thinking Experimental 01-21",
+            "model_type": "llm",
+            "features": [
+                "agent-thought",
+                "vision",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 1048576,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-2.0-flash-thinking-exp-1219",
+            "label": "Gemini 2.0 Flash Thinking Experimental",
+            "model_type": "llm",
+            "features": [
+                "agent-thought",
+                "vision",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 1048576,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-1.5-pro",
+            "label": "Gemini 1.5 Pro",
+            "model_type": "llm",
+            "features": [
+                "agent-thought",
+                "vision",
+                "tool-call",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 2097152,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-1.5-pro-latest",
+            "label": "Gemini 1.5 Pro Latest",
+            "model_type": "llm",
+            "features": [
+                "agent-thought",
+                "vision",
+                "tool-call",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 2097152,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-1.5-pro-001",
+            "label": "Gemini 1.5 Pro 001",
+            "model_type": "llm",
+            "features": [
+                "agent-thought",
+                "vision",
+                "tool-call",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 2097152,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-1.5-pro-002",
+            "label": "Gemini 1.5 Pro 002",
+            "model_type": "llm",
+            "features": [
+                "agent-thought",
+                "vision",
+                "tool-call",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 2097152,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-1.5-pro-exp-0801",
+            "label": "Gemini 1.5 Pro 0801",
+            "model_type": "llm",
+            "features": [
+                "agent-thought",
+                "vision",
+                "tool-call",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 2097152,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-1.5-pro-exp-0827",
+            "label": "Gemini 1.5 Pro 0827",
+            "model_type": "llm",
+            "features": [
+                "agent-thought",
+                "vision",
+                "tool-call",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 2097152,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-1.5-flash",
+            "label": "Gemini 1.5 Flash",
+            "model_type": "llm",
+            "features": [
+                "agent-thought",
+                "vision",
+                "tool-call",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 1048576,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-1.5-flash-latest",
+            "label": "Gemini 1.5 Flash Latest",
+            "model_type": "llm",
+            "features": [
+                "agent-thought",
+                "vision",
+                "tool-call",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 1048576,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-1.5-flash-001",
+            "label": "Gemini 1.5 Flash 001",
+            "model_type": "llm",
+            "features": [
+                "agent-thought",
+                "vision",
+                "tool-call",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 1048576,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-1.5-flash-002",
+            "label": "Gemini 1.5 Flash 002",
+            "model_type": "llm",
+            "features": [
+                "agent-thought",
+                "vision",
+                "tool-call",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 1048576,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-1.5-flash-exp-0827",
+            "label": "Gemini 1.5 Flash 0827",
+            "model_type": "llm",
+            "features": [
+                "agent-thought",
+                "vision",
+                "tool-call",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 1048576,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-1.5-flash-8b-exp-0827",
+            "label": "Gemini 1.5 Flash 8B 0827",
+            "model_type": "llm",
+            "features": [
+                "agent-thought",
+                "vision",
+                "tool-call",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 1048576,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-1.5-flash-8b-exp-0924",
+            "label": "Gemini 1.5 Flash 8B 0924",
+            "model_type": "llm",
+            "features": [
+                "agent-thought",
+                "vision",
+                "tool-call",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 1048576,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-exp-1121",
+            "label": "Gemini exp 1121",
+            "model_type": "llm",
+            "features": [
+                "agent-thought",
+                "vision",
+                "tool-call",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 32767,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-exp-1114",
+            "label": "Gemini exp 1114",
+            "model_type": "llm",
+            "features": [
+                "agent-thought",
+                "vision",
+                "tool-call",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 32767,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-2.5-pro-exp-03-25",
+            "label": "Gemini 2.5 Pro Experimental 03-25",
+            "model_type": "llm",
+            "features": [
+                "tool-call",
+                "multi-tool-call",
+                "agent-thought",
+                "vision",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 1048576,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "learnlm-1.5-pro-experimental",
+            "label": "LearnLM 1.5 Pro Experimental",
+            "model_type": "llm",
+            "features": [
+                "agent-thought",
+                "vision",
+                "tool-call",
+                "stream-tool-call",
+                "document",
+                "video",
+                "audio",
+                "structured-output"
+            ],
+            "model_properties": {
+                "context_size": 32767,
+                "mode": "chat"
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "embedding-001",
+            "label": "embedding-001",
+            "model_type": "text-embedding",
+            "features": null,
+            "model_properties": {
+                "context_size": 2048,
+                "max_chunks": 100
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "gemini-embedding-exp-03-07",
+            "label": "gemini-embedding-exp-03-07",
+            "model_type": "text-embedding",
+            "features": null,
+            "model_properties": {
+                "context_size": 8192,
+                "max_chunks": 100
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        },
+        {
+            "model": "text-embedding-004",
+            "label": "text-embedding-004",
+            "model_type": "text-embedding",
+            "features": null,
+            "model_properties": {
+                "context_size": 2048,
+                "max_chunks": 100
+            },
+            "deprecated": false,
+            "has_invalid_load_balancing_configs": false,
+            "icon_url": "/static/ai/providers/google.png"
+        }
+    ]
+}
