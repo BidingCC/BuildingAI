@@ -1,3 +1,6 @@
+import { Loader2 } from "lucide-react";
+import { useParams } from "react-router-dom";
+
 import type { Model, Suggestion } from "../components/ask-assistant-ui";
 import {
   AssistantProvider,

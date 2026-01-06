@@ -6,27 +6,8 @@ import {
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
-  useSidebar,
 } from "@buildingai/ui/components/ui/sidebar";
-import { SidebarTrigger } from "@buildingai/ui/components/ui/sidebar";
-import {
-  AudioWaveform,
-  BookOpen,
-  Bot,
-  Brush,
-  Command,
-  Edit,
-  FolderClock,
-  Frame,
-  GalleryVerticalEnd,
-  LayoutGrid,
-  Map,
-  PenLineIcon,
-  PieChart,
-  Settings2,
-  SquareTerminal,
-  Video,
-} from "lucide-react";
+import { Bot, Brush, Edit, FolderClock, LayoutGrid, PenLineIcon, Video } from "lucide-react";
 import * as React from "react";
 
 import { DefaultNavApps } from "./default-apps";
@@ -96,20 +77,17 @@ const data = {
 };
 
 export function DefaultAppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { state } = useSidebar();
-
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader className="flex flex-row items-center">
         <DefaultLogo />
-        {state === "expanded" && <SidebarTrigger />}
       </SidebarHeader>
       <SidebarContent>
         <DefaultNavMain items={data.navMain} />
         <DefaultNavApps projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>
-        <DefaultNavUser user={data.user} />
+        <DefaultNavUser />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

@@ -1,5 +1,3 @@
-"use client";
-
 import { useAuthStore } from "@buildingai/stores";
 import { ModeItems } from "@buildingai/ui/components/mode-toggle";
 import { useTheme } from "@buildingai/ui/components/theme-provider";
@@ -24,7 +22,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@buildingai/ui/components/ui/sidebar";
-import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog.js";
+import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog";
 import {
   ChevronsUpDown,
   Languages,

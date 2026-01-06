@@ -16,9 +16,9 @@
         },
         "./styles/*": "./src/styles/*",
         "./hooks/*": {
-            "import": "./src/hooks/*",
-            "require": "./src/hooks/*",
-            "types": "./src/hooks/*"
+            "import": "./src/hooks/*.tsx",
+            "require": "./src/hooks/*.tsx",
+            "types": "./src/hooks/*.tsx"
         },
         "./lib/*": {
             "import": "./src/lib/*.ts",

@@ -8,6 +8,7 @@ import { Button } from "@buildingai/ui/components/ui/button";
 import { PanelLeftIcon, PanelRightIcon, ShareIcon } from "lucide-react";
 import type { FormEvent, ReactNode } from "react";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
 
 import { Message } from "./components/message";
 import { ModelSelector } from "./components/model-selector";
@@ -31,6 +32,7 @@ export const Thread = memo(function Thread({ title, onShare, welcomeMessage }: T
     suggestions,
     status,
     liked,
+    isLoading,
     disliked,
     // sidebarOpen,
     textareaRef,
@@ -66,6 +68,8 @@ export const Thread = memo(function Thread({ title, onShare, welcomeMessage }: T
 
   const bottomAreaRef = useRef<HTMLDivElement>(null);
   const [bottomAreaHeight, setBottomAreaHeight] = useState(0);
+
+  const { id } = useParams<{ id: string }>();
 
   useEffect(() => {
     if (!bottomAreaRef.current) {
@@ -160,11 +164,10 @@ export const Thread = memo(function Thread({ title, onShare, welcomeMessage }: T
           </Button>
         )}
       </header>
-
       <AIConversation className="chat-scroll flex-1">
         <AIConversationContent className="flex min-h-full flex-col gap-4 pb-0">
           <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4">
-            {hasMessages ? (
+            {hasMessages || (id && isLoading) ? (
               conversationPairs.map((pair, index) => {
                 const isLastPair = index === conversationPairs.length - 1;
                 const userKey = pair.userMessage.key;
@@ -210,7 +213,7 @@ export const Thread = memo(function Thread({ title, onShare, welcomeMessage }: T
           <div ref={bottomAreaRef} className="sticky bottom-0 z-10">
             <AIConversationScrollButton className="-top-12 z-20" />
             <div className="bg-background mx-auto w-full max-w-3xl rounded-t-lg">
-              {!hasMessages && suggestions.length > 0 && (
+              {!hasMessages && suggestions.length > 0 && !isLoading && (
                 <Suggestions suggestions={suggestions} onSuggestionClick={handleSuggestionClick} />
               )}
               <PromptInput
