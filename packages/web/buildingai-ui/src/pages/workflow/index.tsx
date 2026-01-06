@@ -189,7 +189,7 @@ const WorkflowExample = () => {
   );
 
   return (
-    <div className="h-screen w-screen">
+    <div className="size-full">
       <ReactFlowProvider>
         <Canvas
           edges={edges}

@@ -1,40 +1,52 @@
 "use client";
 
-import { ChevronRight, type LucideIcon } from "lucide-react";
-
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@buildingai/ui/components/ui/collapsible";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@buildingai/ui/components/ui/dropdown-menu";
+import {
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarMenu,
+  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@buildingai/ui/components/ui/sidebar";
+import { ChevronRight, EllipsisVertical, type LucideIcon, PenLine, Trash2 } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 
 export function DefaultNavMain({
   items,
 }: {
   items: {
     title: string;
-    url: string;
+    path?: string;
     icon?: LucideIcon;
     isActive?: boolean;
     items?: {
       title: string;
-      url: string;
+      path: string;
     }[];
   }[];
 }) {
+  const { pathname } = useLocation();
+
+  const isItemActive = (path?: string) => path === pathname;
+  const hasActiveChild = (items?: { path: string }[]) =>
+    items?.some((subItem) => subItem.path === pathname) ?? false;
+
   return (
     <SidebarGroup>
-      <SidebarMenu className="gap-0">
+      <SidebarMenu className="gap-1">
         {items.map((item) => (
           <Collapsible
             key={item.title}
@@ -45,21 +57,50 @@ export function DefaultNavMain({
             {item.items && item.items.length > 0 ? (
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
-                  <SidebarMenuButton tooltip={item.title} className="h-9">
+                  <SidebarMenuButton
+                    isActive={hasActiveChild(item.items)}
+                    tooltip={item.title}
+                    className="h-9"
+                  >
                     {item.icon && <item.icon />}
                     <span>{item.title}</span>
                     <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <SidebarMenuSub>
+                  <SidebarMenuSub className="mr-0 pr-0">
                     {item.items?.map((subItem) => (
                       <SidebarMenuSubItem key={subItem.title}>
-                        <SidebarMenuSubButton asChild>
-                          <a href={subItem.url}>
-                            <span>{subItem.title}</span>
-                          </a>
+                        <SidebarMenuSubButton
+                          asChild
+                          isActive={isItemActive(subItem.path)}
+                          className="h-9"
+                        >
+                          <Link to={subItem.path} className="flex items-center justify-between">
+                            <span className="line-clamp-1">{subItem.title}</span>
+                          </Link>
                         </SidebarMenuSubButton>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <SidebarMenuAction
+                              showOnHover
+                              className="group-focus-within/menu-item:opacity-0 group-hover/menu-item:opacity-0 group-hover/menu-sub-item:opacity-100"
+                            >
+                              <EllipsisVertical />
+                              <span className="sr-only">More</span>
+                            </SidebarMenuAction>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="start">
+                            <DropdownMenuItem>
+                              <PenLine />
+                              重命名
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                              <Trash2 />
+                              删除
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </SidebarMenuSubItem>
                     ))}
                   </SidebarMenuSub>
@@ -67,9 +108,16 @@ export function DefaultNavMain({
               </SidebarMenuItem>
             ) : (
               <SidebarMenuItem>
-                <SidebarMenuButton tooltip={item.title} className="h-9">
-                  {item.icon && <item.icon />}
-                  <span>{item.title}</span>
+                <SidebarMenuButton
+                  tooltip={item.title}
+                  className="h-9"
+                  isActive={isItemActive(item.path)}
+                  asChild
+                >
+                  <Link to={item.path || ""}>
+                    {item.icon && <item.icon strokeWidth={isItemActive(item.path) ? 2.5 : 2} />}
+                    <span>{item.title}</span>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             )}

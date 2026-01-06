@@ -66,7 +66,7 @@ export default function ConsoleLayout({ children }: { children?: React.ReactNode
       <AppSidebar />
       <SidebarInset className="flex flex-col md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-0">
         <AppNavbar />
-        <ScrollArea className="flex-1 overflow-y-auto">
+        <ScrollArea className="flex-1 overflow-y-auto" scrollHideDelay={100000}>
           <div className="m-4 mt-1">{children ? children : <ConsoleRoutes />}</div>
         </ScrollArea>
       </SidebarInset>

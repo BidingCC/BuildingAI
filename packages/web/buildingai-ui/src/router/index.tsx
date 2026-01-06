@@ -22,6 +22,11 @@ export const router = createBrowserRouter([
       },
       {
         element: <DefaultLayout />,
+        errorElement: (
+          <DefaultLayout>
+            <GlobalError />
+          </DefaultLayout>
+        ),
         children: [
           {
             index: true,
@@ -34,6 +39,10 @@ export const router = createBrowserRouter([
           {
             path: "/workflow",
             element: <WorkflowExample />,
+          },
+          {
+            path: "*",
+            element: <NotFoundPage />,
           },
         ],
       },

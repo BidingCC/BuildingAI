@@ -59,10 +59,10 @@ const IndexPage = () => {
 
   return (
     <AssistantProvider {...assistant}>
-      <main className="flex h-full w-full">
+      <div className="flex h-full w-full">
         <ThreadList />
-        <Thread title="AI 助手对话" />
-      </main>
+        <Thread title="关于这个那个的标题" />
+      </div>
     </AssistantProvider>
   );
 };

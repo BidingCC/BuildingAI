@@ -4,8 +4,10 @@ type Theme = "dark" | "light" | "system";
 
 export const THEME_COLORS = [
     { value: "neutral", label: "Neutral" },
-    { value: "indigo", label: "Indigo" },
+    { value: "doom-64", label: "Doom 64" },
     { value: "claude", label: "Claude" },
+    { value: "perpetuity", label: "Perpetuity" },
+    { value: "indigo", label: "Indigo" },
     { value: "amethyst-haze", label: "Amethyst Haze" },
     { value: "bold-tech", label: "Bold Tech" },
     { value: "bubblegum", label: "Bubblegum" },
@@ -17,7 +19,6 @@ export const THEME_COLORS = [
     { value: "cosmic-night", label: "Cosmic Night" },
     { value: "cyberpunk", label: "Cyberpunk" },
     { value: "darkmatter", label: "Darkmatter" },
-    { value: "doom-64", label: "Doom 64" },
     { value: "graphite", label: "Graphite" },
     { value: "kodama-grove", label: "Kodama Grove" },
     { value: "midnight-bloom", label: "Midnight Bloom" },
@@ -30,7 +31,6 @@ export const THEME_COLORS = [
     { value: "notebook", label: "Notebook" },
     { value: "ocean-breeze", label: "Ocean Breeze" },
     { value: "pastel-dreams", label: "Pastel Dreams" },
-    { value: "perpetuity", label: "Perpetuity" },
     { value: "quantum-rose", label: "Quantum Rose" },
     { value: "retro-arcade", label: "Retro Arcade" },
     { value: "sage-garden", label: "Sage Garden" },

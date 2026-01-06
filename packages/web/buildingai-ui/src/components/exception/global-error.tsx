@@ -1,5 +1,5 @@
 import { Button } from "@buildingai/ui/components/ui/button";
-import { ArrowLeft, Home, RotateCcw } from "lucide-react";
+import { Home, RotateCcw } from "lucide-react";
 import { isRouteErrorResponse, useNavigate, useRouteError } from "react-router-dom";
 
 import Error401 from "./errors/401";

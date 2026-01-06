@@ -1,7 +1,5 @@
 "use client";
 
-import { Folder, Forward, MoreHorizontal, Trash2, type LucideIcon } from "lucide-react";
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,13 +16,15 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@buildingai/ui/components/ui/sidebar";
+import { EllipsisVertical, Folder, Forward, type LucideIcon, Trash2 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export function DefaultNavApps({
   projects,
 }: {
   projects: {
     name: string;
-    url: string;
+    path: string;
     icon: LucideIcon;
   }[];
 }) {
@@ -33,21 +33,21 @@ export function DefaultNavApps({
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>应用</SidebarGroupLabel>
-      <SidebarMenu>
+      <SidebarMenu className="gap-1">
         {projects.map((item) => (
           <SidebarMenuItem key={item.name}>
-            <SidebarMenuButton asChild className="h-9">
-              <a href={item.url}>
+            <SidebarMenuButton asChild className="h-9 items-center">
+              <Link to={item.path}>
                 <div className="bg-primary rounded-sm p-1">
                   <item.icon className="text-primary-foreground size-3!" />
                 </div>
                 <span>{item.name}</span>
-              </a>
+              </Link>
             </SidebarMenuButton>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuAction showOnHover>
-                  <MoreHorizontal />
+                  <EllipsisVertical />
                   <span className="sr-only">More</span>
                 </SidebarMenuAction>
               </DropdownMenuTrigger>

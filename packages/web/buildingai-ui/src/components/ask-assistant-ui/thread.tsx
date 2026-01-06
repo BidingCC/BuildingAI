@@ -32,10 +32,10 @@ export const Thread = memo(function Thread({ title, onShare, welcomeMessage }: T
     status,
     liked,
     disliked,
-    sidebarOpen,
+    // sidebarOpen,
     textareaRef,
     onSend,
-    onToggleSidebar,
+    // onToggleSidebar,
     onSelectModel,
     onLike,
     onDislike,
@@ -128,8 +128,8 @@ export const Thread = memo(function Thread({ title, onShare, welcomeMessage }: T
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col">
-      <header className="bg-background relative flex items-center justify-between px-4 py-2">
-        <div className="flex items-center gap-2">
+      <header className="bg-background relative flex flex-row-reverse items-center justify-between px-4 py-2 md:flex-row">
+        <div className="flex shrink-0 items-center gap-2">
           {/*<Button onClick={onToggleSidebar} size="icon-sm" variant="ghost">
             {sidebarOpen ? (
               <PanelLeftIcon className="size-4" />
@@ -148,7 +148,7 @@ export const Thread = memo(function Thread({ title, onShare, welcomeMessage }: T
         </div>
 
         {title && (
-          <div className="absolute left-1/2 -translate-x-1/2">
+          <div className="line-clamp-1 md:absolute md:left-1/2 md:-translate-x-1/2">
             <h1 className="text-base font-semibold">{title}</h1>
           </div>
         )}
@@ -208,7 +208,7 @@ export const Thread = memo(function Thread({ title, onShare, welcomeMessage }: T
           </div>
 
           <div ref={bottomAreaRef} className="sticky bottom-0 z-10">
-            <AIConversationScrollButton className="top-[-40px] z-20" />
+            <AIConversationScrollButton className="-top-12 z-20" />
             <div className="bg-background mx-auto w-full max-w-3xl rounded-t-lg">
               {!hasMessages && suggestions.length > 0 && (
                 <Suggestions suggestions={suggestions} onSuggestionClick={handleSuggestionClick} />
