@@ -1,10 +1,5 @@
 import type { Model, Suggestion } from "../components/ask-assistant-ui";
-import {
-  AssistantProvider,
-  Thread,
-  ThreadList,
-  useAssistant,
-} from "../components/ask-assistant-ui";
+import { AssistantProvider, Thread, useAssistant } from "../components/ask-assistant-ui";
 
 const MODELS: Model[] = [
   {
@@ -59,10 +54,7 @@ const IndexPage = () => {
 
   return (
     <AssistantProvider {...assistant}>
-      <div className="flex h-full w-full">
-        <ThreadList />
-        <Thread title="关于这个那个的标题" />
-      </div>
+      <Thread title="关于这个那个的标题" />
     </AssistantProvider>
   );
 };

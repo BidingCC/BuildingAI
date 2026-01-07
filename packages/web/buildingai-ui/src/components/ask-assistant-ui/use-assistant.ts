@@ -20,25 +20,12 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
   const [liked, setLiked] = useState<Record<string, boolean>>({});
   const [disliked, setDisliked] = useState<Record<string, boolean>>({});
 
-  const {
-    threads,
-    currentThreadId,
-    messages,
-    isLoadingThreads,
-    isLoadingMessages,
-    selectThread,
-    deleteThread,
-    newChat,
-    refreshThreads,
-    setMessages,
-    skipNextLoad,
-  } = useThreads();
+  const { currentThreadId, messages, isLoadingMessages, setMessages, skipNextLoad } = useThreads();
 
   const { status, streamingMessageId, send, stop } = useChat({
     currentThreadId,
     messages,
     setMessages,
-    onThreadCreated: refreshThreads,
     skipNextLoad,
   });
 
@@ -56,11 +43,11 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
 
   return {
     messages,
-    threads,
+    threads: [],
     currentThreadId,
     status,
     streamingMessageId,
-    isLoading: isLoadingMessages || isLoadingThreads,
+    isLoading: isLoadingMessages,
 
     models,
     selectedModelId,
@@ -74,9 +61,9 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
 
     onSend: send,
     onStop: stop,
-    onSelectThread: selectThread,
-    onDeleteThread: deleteThread,
-    onNewChat: newChat,
+    onSelectThread: () => {},
+    onDeleteThread: async () => {},
+    onNewChat: () => {},
     onToggleSidebar,
     onSelectModel: setSelectedModelId,
     onLike,
