@@ -27,6 +27,7 @@
     },
     "dependencies": {
         "@buildingai/ai-sdk": "workspace:*",
+        "@buildingai/ai-sdk-new": "workspace:*",
         "@buildingai/base": "workspace:*",
         "@buildingai/cache": "workspace:*",
         "@buildingai/config": "workspace:*",

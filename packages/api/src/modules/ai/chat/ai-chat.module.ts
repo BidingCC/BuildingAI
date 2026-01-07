@@ -10,6 +10,7 @@ import {
     AccountLog,
     AiChatMessage,
     AiChatRecord,
+    AiChatToolCall,
     AiMcpServer,
     AiMcpTool,
     AiUserMcpServer,
@@ -25,24 +26,18 @@ import { AiProviderService } from "../provider/services/ai-provider.service";
 import { AiChatRecordConsoleController } from "./controllers/console/ai-chat-record.controller";
 import { AiChatMessageWebController } from "./controllers/web/ai-chat-message.controller";
 import { AiChatRecordWebController } from "./controllers/web/ai-chat-record.controller";
-import {
-    ChatCompletionCommandHandler,
-    ConversationCommandHandler,
-    McpServerCommandHandler,
-    MembershipValidationCommandHandler,
-    MessageContextCommandHandler,
-    ModelValidationCommandHandler,
-    PowerDeductionCommandHandler,
-    TitleGenerationCommandHandler,
-    ToolCallCommandHandler,
-    UserPowerValidationCommandHandler,
-} from "./handlers";
 import { AiChatsMessageService } from "./services/ai-chat-message.service";
 import { AiChatRecordService } from "./services/ai-chat-record.service";
+import { ChatCompletionService } from "./services/chat-completion.service";
 import { ChatConfigService } from "./services/chat-config.service";
 
 /**
- * AI对话记录后台管理模块
+ * AI对话模块
+ *
+ * 提供完整的AI对话功能，包括:
+ * - 流式/非流式对话 (兼容 AI SDK useChat)
+ * - 对话记录管理
+ * - 消息管理
  */
 @Module({
     imports: [
@@ -54,6 +49,7 @@ import { ChatConfigService } from "./services/chat-config.service";
             AiMcpTool,
             AiChatRecord,
             AiChatMessage,
+            AiChatToolCall,
             Dict,
             AccountLog,
             Secret,
@@ -69,6 +65,7 @@ import { ChatConfigService } from "./services/chat-config.service";
     ],
     providers: [
         ChatConfigService,
+        ChatCompletionService,
         AiModelService,
         AiProviderService,
         SecretService,
@@ -78,18 +75,7 @@ import { ChatConfigService } from "./services/chat-config.service";
         AiUserMcpServer,
         AiChatRecordService,
         AiChatsMessageService,
-        // Command Handlers
-        ConversationCommandHandler,
-        ModelValidationCommandHandler,
-        MembershipValidationCommandHandler,
-        UserPowerValidationCommandHandler,
-        McpServerCommandHandler,
-        MessageContextCommandHandler,
-        ToolCallCommandHandler,
-        PowerDeductionCommandHandler,
-        TitleGenerationCommandHandler,
-        ChatCompletionCommandHandler,
     ],
-    exports: [ChatConfigService, AiChatRecordService, AiChatsMessageService],
+    exports: [ChatConfigService, ChatCompletionService, AiChatRecordService, AiChatsMessageService],
 })
 export class AiChatModule {}

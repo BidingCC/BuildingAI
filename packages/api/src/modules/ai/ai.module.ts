@@ -1,4 +1,4 @@
-import { AiAgentModule } from "@modules/ai/agent/agent.module";
+// import { AiAgentModule } from "@modules/ai/agent/agent.module";
 import { AiChatModule } from "@modules/ai/chat/ai-chat.module";
 import { AiDatasetsModule } from "@modules/ai/datasets/datasets.module";
 import { AiMcpModule } from "@modules/ai/mcp/ai-mcp.module";
@@ -9,7 +9,7 @@ import { Module } from "@nestjs/common";
 
 @Module({
     imports: [
-        AiAgentModule,
+        // AiAgentModule,
         AiChatModule,
         AiDatasetsModule,
         AiMcpModule,
@@ -20,7 +20,7 @@ import { Module } from "@nestjs/common";
     controllers: [],
     providers: [],
     exports: [
-        AiAgentModule,
+        // AiAgentModule,
         AiChatModule,
         AiDatasetsModule,
         AiMcpModule,

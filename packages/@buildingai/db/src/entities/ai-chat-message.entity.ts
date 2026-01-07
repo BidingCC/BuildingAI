@@ -1,36 +1,14 @@
-import { MCPTool } from "@buildingai/ai-sdk";
 import type { Attachment, MessageContent } from "@buildingai/types/ai/message-content.interface";
 
 import { AppEntity } from "../decorators/app-entity.decorator";
-import { Column, Index, JoinColumn, ManyToOne, type Relation } from "../typeorm";
+import { Column, Index, JoinColumn, ManyToOne, OneToMany, type Relation } from "../typeorm";
 import { AiChatRecord } from "./ai-chat-record.entity";
-import { AiMcpServer } from "./ai-mcp-server.entity";
+import { AiChatToolCall } from "./ai-chat-tool-call.entity";
 import { AiModel } from "./ai-model.entity";
 import { BaseEntity } from "./base";
 
 /**
- * MCP工具调用记录接口
- */
-export interface McpToolCall {
-    id?: string;
-    mcpServer?: AiMcpServer;
-    tool?: MCPTool;
-    /** 工具输入参数 */
-    input?: Record<string, any>;
-    /** 工具输出结果 */
-    output?: Record<string, any>;
-    /** 调用时间戳 */
-    timestamp?: number;
-    /** 执行状态 */
-    status?: "success" | "error";
-    /** 错误信息（如果有） */
-    error?: string;
-    /** 执行耗时（毫秒） */
-    duration?: number;
-}
-
-/**
- * AI对话消息实体
+ * 对话消息实体
  * 存储对话中的具体消息内容
  */
 @AppEntity({ name: "ai_chat_message", comment: "AI对话消息记录" })
@@ -62,10 +40,47 @@ export class AiChatMessage extends BaseEntity {
     @Column({
         type: "varchar",
         length: 20,
-        comment: "消息角色: user-用户, assistant-AI助手, system-系统",
+        comment:
+            "消息角色: system-系统, user-用户, assistant-助手, tool-工具结果, function-函数调用, data-数据",
     })
     @Index()
-    role: "user" | "assistant" | "system";
+    role: "system" | "user" | "assistant" | "tool" | "function" | "data";
+
+    /**
+     * 工具/函数名称
+     * 当 role 为 tool 或 function 时使用
+     */
+    @Column({
+        type: "varchar",
+        length: 100,
+        nullable: true,
+        comment: "工具/函数名称（role为tool/function时使用）",
+    })
+    name?: string;
+
+    /**
+     * 工具调用ID
+     * 当 role 为 tool 时，关联到对应的工具调用
+     */
+    @Column({
+        type: "varchar",
+        length: 100,
+        nullable: true,
+        comment: "工具调用ID（role为tool时使用，关联tool_calls中的id）",
+    })
+    toolCallId?: string;
+
+    /**
+     * 父消息ID
+     * 用于关联工具调用链，如 assistant 消息调用工具，tool 消息是结果
+     */
+    @Column({
+        type: "uuid",
+        nullable: true,
+        comment: "父消息ID（用于工具调用链的关联）",
+    })
+    @Index()
+    parentMessageId?: string;
 
     /**
      * 消息内容
@@ -98,18 +113,32 @@ export class AiChatMessage extends BaseEntity {
     attachments?: Attachment[];
 
     /**
-     * Token消耗
+     * Token使用情况
      */
     @Column({
         type: "jsonb",
         nullable: true,
-        comment: "Token使用情况",
+        comment: "Token使用情况，包含promptTokens、completionTokens、totalTokens、cachedTokens等",
     })
-    tokens?: {
-        prompt_tokens?: number;
-        completion_tokens?: number;
-        total_tokens?: number;
+    usage?: {
+        promptTokens?: number;
+        completionTokens?: number;
+        totalTokens?: number;
+        cachedTokens?: number;
     };
+
+    /**
+     * 完成原因
+     */
+    @Column({
+        type: "varchar",
+        length: 30,
+        nullable: true,
+        comment:
+            "完成原因: stop-正常结束, length-达到最大长度, tool-calls-工具调用, content-filter-内容过滤, error-错误, other-其他",
+    })
+    @Index()
+    finishReason?: "stop" | "length" | "tool-calls" | "content-filter" | "error" | "other";
 
     /**
      * 用户积分消耗
@@ -128,9 +157,10 @@ export class AiChatMessage extends BaseEntity {
         type: "varchar",
         length: 20,
         default: "completed",
-        comment: "消息状态: sending-发送中, completed-已完成, failed-失败",
+        comment:
+            "消息状态: sending-发送中, streaming-流式传输中, completed-已完成, failed-失败, cancelled-已取消",
     })
-    status: "sending" | "completed" | "failed";
+    status: "sending" | "streaming" | "completed" | "failed" | "cancelled";
 
     /**
      * 错误信息
@@ -183,15 +213,39 @@ export class AiChatMessage extends BaseEntity {
     metadata?: Record<string, any>;
 
     /**
-     * MCP工具调用记录
-     * 记录该消息使用的MCP工具调用情况
+     * 工具调用记录
+     * JSONB格式，用于快速查询
      */
     @Column({
         type: "jsonb",
         nullable: true,
-        comment: "MCP工具调用记录",
+        comment: "工具调用记录（JSONB格式，用于快速查询）",
     })
-    mcpToolCalls?: McpToolCall[];
+    toolCalls?: Array<{
+        id: string;
+        type: "function" | "mcp";
+        name: string;
+        arguments?: Record<string, any>;
+        result?: Record<string, any>;
+        error?: string;
+        duration?: number;
+        mcpServerId?: string;
+    }>;
+
+    /**
+     * 推理内容
+     * 用于存储模型的思考过程
+     */
+    @Column({
+        type: "jsonb",
+        nullable: true,
+        comment: "推理内容（模型的思考过程）",
+    })
+    reasoning?: {
+        content?: string;
+        startTime?: number;
+        endTime?: number;
+    };
 
     /**
      * 所属对话
@@ -210,4 +264,28 @@ export class AiChatMessage extends BaseEntity {
     })
     @JoinColumn({ name: "model_id" })
     model: Relation<AiModel>;
+
+    /**
+     * 父消息关联
+     */
+    @ManyToOne(() => AiChatMessage, (message) => message.childMessages, {
+        nullable: true,
+        onDelete: "SET NULL",
+    })
+    @JoinColumn({ name: "parent_message_id" })
+    parentMessage?: Relation<AiChatMessage>;
+
+    /**
+     * 子消息列表（工具调用结果等）
+     */
+    @OneToMany(() => AiChatMessage, (message) => message.parentMessage)
+    childMessages?: Relation<AiChatMessage[]>;
+
+    /**
+     * 关联的工具调用记录
+     */
+    @OneToMany(() => AiChatToolCall, (toolCall) => toolCall.message, {
+        cascade: true,
+    })
+    toolCallRecords?: Relation<AiChatToolCall[]>;
 }

@@ -35,14 +35,14 @@ export function DefaultNavMain({
     isActive?: boolean;
     items?: {
       title: string;
-      path: string;
+      path?: string;
     }[];
   }[];
 }) {
   const { pathname } = useLocation();
 
   const isItemActive = (path?: string) => path === pathname;
-  const hasActiveChild = (items?: { path: string }[]) =>
+  const hasActiveChild = (items?: { path?: string }[]) =>
     items?.some((subItem) => subItem.path === pathname) ?? false;
 
   return (
@@ -77,7 +77,10 @@ export function DefaultNavMain({
                           isActive={isItemActive(subItem.path)}
                           className="h-9"
                         >
-                          <Link to={subItem.path} className="flex items-center justify-between">
+                          <Link
+                            to={subItem.path || ""}
+                            className="flex items-center justify-between"
+                          >
                             <span
                               className={cn(
                                 "line-clamp-1",
@@ -91,29 +94,41 @@ export function DefaultNavMain({
                             </span>
                           </Link>
                         </SidebarMenuSubButton>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <SidebarMenuAction
-                              showOnHover
-                              className="group-focus-within/menu-item:opacity-0 group-hover/menu-item:opacity-0 group-hover/menu-sub-item:opacity-100"
-                            >
-                              <EllipsisVertical />
-                              <span className="sr-only">More</span>
-                            </SidebarMenuAction>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="start">
-                            <DropdownMenuItem>
-                              <PenLine />
-                              重命名
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Trash2 />
-                              删除
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        {subItem.path && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <SidebarMenuAction
+                                showOnHover
+                                className="group-focus-within/menu-item:opacity-0 group-hover/menu-item:opacity-0 group-hover/menu-sub-item:opacity-100"
+                              >
+                                <EllipsisVertical />
+                                <span className="sr-only">More</span>
+                              </SidebarMenuAction>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="start">
+                              <DropdownMenuItem>
+                                <PenLine />
+                                重命名
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>
+                                <Trash2 />
+                                删除
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
                       </SidebarMenuSubItem>
                     ))}
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton
+                        onClick={() => {
+                          console.log("查看全部");
+                        }}
+                        className="h-9"
+                      >
+                        <span className="line-clamp-1 font-bold">查看全部</span>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
                   </SidebarMenuSub>
                 </CollapsibleContent>
               </SidebarMenuItem>
