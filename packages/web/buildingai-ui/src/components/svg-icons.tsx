@@ -43,21 +43,21 @@ const SvgIcons = {
         height="128"
         rx="36.7255"
         fill="url(#paint0_radial_1545_316)"
-        fill-opacity="0.2"
+        fillOpacity="0.2"
       />
       <rect
         width="128"
         height="128"
         rx="36.7255"
         fill="url(#paint1_radial_1545_316)"
-        fill-opacity="0.3"
+        fillOpacity="0.3"
       />
       <rect
         width="128"
         height="128"
         rx="36.7255"
         fill="url(#paint2_radial_1545_316)"
-        fill-opacity="0.6"
+        fillOpacity="0.6"
       />
       <rect width="128" height="128" rx="36.7255" fill="url(#paint3_radial_1545_316)" />
       <path
@@ -77,8 +77,8 @@ const SvgIcons = {
           gradientUnits="userSpaceOnUse"
           gradientTransform="translate(-0.903957 54.6014) scale(62.6779 139.549)"
         >
-          <stop stop-color="#BFDCFF" />
-          <stop offset="1" stop-color="#BFDCFF" stop-opacity="0" />
+          <stop stopColor="#BFDCFF" />
+          <stop offset="1" stopColor="#BFDCFF" stopOpacity="0" />
         </radialGradient>
         <radialGradient
           id="paint1_radial_1545_316"
@@ -88,8 +88,8 @@ const SvgIcons = {
           gradientTransform="matrix(-26.6848 -82.6396 103.476 -29.5982 98.3503 119.565)"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="white" />
-          <stop offset="1" stop-color="white" stop-opacity="0" />
+          <stop stopColor="white" />
+          <stop offset="1" stopColor="white" stopOpacity="0" />
         </radialGradient>
         <radialGradient
           id="paint2_radial_1545_316"
@@ -99,8 +99,8 @@ const SvgIcons = {
           gradientTransform="matrix(0.253108 -46.953 65.3519 0.937541 1.15706 131.834)"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#AB5DFF" />
-          <stop offset="1" stop-color="#AB5DFF" stop-opacity="0" />
+          <stop stopColor="#AB5DFF" />
+          <stop offset="1" stopColor="#AB5DFF" stopOpacity="0" />
         </radialGradient>
         <radialGradient
           id="paint3_radial_1545_316"
@@ -110,8 +110,8 @@ const SvgIcons = {
           gradientTransform="matrix(-56.6238 -105.488 48.3405 -69.0545 68.2667 157.986)"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#AB5DFF" />
-          <stop offset="1" stop-color="#7800FF" stop-opacity="0" />
+          <stop stopColor="#AB5DFF" />
+          <stop offset="1" stopColor="#7800FF" stopOpacity="0" />
         </radialGradient>
       </defs>
     </svg>
@@ -171,7 +171,7 @@ const SvgIcons = {
       <path
         d="M355.348 27.7353C355.811 26.8388 357.096 26.8388 357.262 27.7353L357.364 28.2907C358.287 33.282 361.374 37.3407 365.896 39.5086L366.049 39.5821C366.786 39.9354 366.602 41.0497 365.748 41.403L365.57 41.4765C360.331 43.6444 355.902 47.703 353.329 52.6944L353.043 53.2497C352.581 54.1463 351.295 54.1463 351.13 53.2497L351.027 52.6944C350.104 47.703 347.018 43.6444 342.495 41.4765L342.342 41.403C341.605 41.0497 341.789 39.9354 342.643 39.5821L342.821 39.5086C348.06 37.3407 352.489 33.282 355.062 28.2907L355.348 27.7353Z"
         fill="url(#paint0_radial_3486_7491)"
-        fill-opacity="0.6"
+        fillOpacity="0.6"
       />
       <path
         d="M355.348 27.7353C355.811 26.8388 357.096 26.8388 357.262 27.7353L357.364 28.2907C358.287 33.282 361.374 37.3407 365.896 39.5086L366.049 39.5821C366.786 39.9354 366.602 41.0497 365.748 41.403L365.57 41.4765C360.331 43.6444 355.902 47.703 353.329 52.6944L353.043 53.2497C352.581 54.1463 351.295 54.1463 351.13 53.2497L351.027 52.6944C350.104 47.703 347.018 43.6444 342.495 41.4765L342.342 41.403C341.605 41.0497 341.789 39.9354 342.643 39.5821L342.821 39.5086C348.06 37.3407 352.489 33.282 355.062 28.2907L355.348 27.7353Z"
@@ -183,21 +183,21 @@ const SvgIcons = {
         height="160"
         rx="45.9069"
         fill="url(#paint2_radial_3486_7491)"
-        fill-opacity="0.2"
+        fillOpacity="0.2"
       />
       <rect
         width="160"
         height="160"
         rx="45.9069"
         fill="url(#paint3_radial_3486_7491)"
-        fill-opacity="0.3"
+        fillOpacity="0.3"
       />
       <rect
         width="160"
         height="160"
         rx="45.9069"
         fill="url(#paint4_radial_3486_7491)"
-        fill-opacity="0.6"
+        fillOpacity="0.6"
       />
       <rect width="160" height="160" rx="45.9069" fill="url(#paint5_radial_3486_7491)" />
       <path
@@ -217,8 +217,8 @@ const SvgIcons = {
           gradientTransform="matrix(3.88649 -27.2357 33.4319 -0.353798 337.977 56.9091)"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#AB5DFF" />
-          <stop offset="1" stop-color="#AB5DFF" stop-opacity="0" />
+          <stop stopColor="#AB5DFF" />
+          <stop offset="1" stopColor="#AB5DFF" stopOpacity="0" />
         </radialGradient>
         <radialGradient
           id="paint1_radial_3486_7491"
@@ -228,8 +228,8 @@ const SvgIcons = {
           gradientTransform="matrix(-7.94646 -25.5292 13.151 -16.7119 351.352 63.2381)"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#AB5DFF" />
-          <stop offset="1" stop-color="#7800FF" stop-opacity="0" />
+          <stop stopColor="#AB5DFF" />
+          <stop offset="1" stopColor="#7800FF" stopOpacity="0" />
         </radialGradient>
         <radialGradient
           id="paint2_radial_3486_7491"
@@ -239,8 +239,8 @@ const SvgIcons = {
           gradientUnits="userSpaceOnUse"
           gradientTransform="translate(-1.12995 68.2517) scale(78.3473 174.436)"
         >
-          <stop stop-color="#BFDCFF" />
-          <stop offset="1" stop-color="#BFDCFF" stop-opacity="0" />
+          <stop stopColor="#BFDCFF" />
+          <stop offset="1" stopColor="#BFDCFF" stopOpacity="0" />
         </radialGradient>
         <radialGradient
           id="paint3_radial_3486_7491"
@@ -250,8 +250,8 @@ const SvgIcons = {
           gradientTransform="matrix(-33.3559 -103.3 129.345 -36.9977 122.938 149.456)"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="white" />
-          <stop offset="1" stop-color="white" stop-opacity="0" />
+          <stop stopColor="white" />
+          <stop offset="1" stopColor="white" stopOpacity="0" />
         </radialGradient>
         <radialGradient
           id="paint4_radial_3486_7491"
@@ -261,8 +261,8 @@ const SvgIcons = {
           gradientTransform="matrix(0.316385 -58.6913 81.6899 1.17193 1.44633 164.793)"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#AB5DFF" />
-          <stop offset="1" stop-color="#AB5DFF" stop-opacity="0" />
+          <stop stopColor="#AB5DFF" />
+          <stop offset="1" stopColor="#AB5DFF" stopOpacity="0" />
         </radialGradient>
         <radialGradient
           id="paint5_radial_3486_7491"
@@ -272,8 +272,8 @@ const SvgIcons = {
           gradientTransform="matrix(-70.7797 -131.86 60.4256 -86.3182 85.3334 197.483)"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#AB5DFF" />
-          <stop offset="1" stop-color="#7800FF" stop-opacity="0" />
+          <stop stopColor="#AB5DFF" />
+          <stop offset="1" stopColor="#7800FF" stopOpacity="0" />
         </radialGradient>
       </defs>
     </svg>

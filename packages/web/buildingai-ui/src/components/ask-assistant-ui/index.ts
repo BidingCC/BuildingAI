@@ -24,10 +24,6 @@ export { useThreads } from "./use-threads";
 // Main components
 export type { ThreadProps } from "./thread";
 export { Thread } from "./thread";
-export type { ThreadListProps } from "./thread-list";
-export { ThreadList } from "./thread-list";
-export type { ThreadItem, ThreadListSidebarProps } from "./threadlist-sidebar";
-export { ThreadListSidebar } from "./threadlist-sidebar";
 
 // Sub components
 export type {
