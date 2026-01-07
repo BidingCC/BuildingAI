@@ -21,6 +21,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@buildingai/ui/components/ui/sidebar";
+import { cn } from "@buildingai/ui/lib/utils";
 import { ChevronRight, EllipsisVertical, type LucideIcon, PenLine, Trash2 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -35,15 +36,13 @@ export function DefaultNavMain({
     items?: {
       title: string;
       path?: string;
-      onClick?: () => void;
-      isAction?: boolean;
     }[];
   }[];
 }) {
   const { pathname } = useLocation();
 
   const isItemActive = (path?: string) => path === pathname;
-  const hasActiveChild = (items?: { path?: string; onClick?: () => void; isAction?: boolean }[]) =>
+  const hasActiveChild = (items?: { path?: string }[]) =>
     items?.some((subItem) => subItem.path === pathname) ?? false;
 
   return (
@@ -64,7 +63,7 @@ export function DefaultNavMain({
                     tooltip={item.title}
                     className="h-9"
                   >
-                    {item.icon && <item.icon />}
+                    {item.icon && <item.icon strokeWidth={hasActiveChild(item.items) ? 2.5 : 2} />}
                     <span>{item.title}</span>
                     <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                   </SidebarMenuButton>
@@ -73,33 +72,29 @@ export function DefaultNavMain({
                   <SidebarMenuSub className="mr-0 pr-0">
                     {item.items?.map((subItem) => (
                       <SidebarMenuSubItem key={subItem.title}>
-                        {subItem.onClick ? (
-                          <SidebarMenuSubButton onClick={subItem.onClick} className="h-9">
+                        <SidebarMenuSubButton
+                          asChild
+                          isActive={isItemActive(subItem.path)}
+                          className="h-9"
+                        >
+                          <Link
+                            to={subItem.path || ""}
+                            className="flex items-center justify-between"
+                          >
                             <span
-                              className={`line-clamp-1 ${subItem.isAction ? "font-semibold" : ""}`}
+                              className={cn(
+                                "line-clamp-1",
+                                "group-focus-within/menu-sub-item:pr-4 group-hover/menu-sub-item:pr-4",
+                                {
+                                  "font-bold": isItemActive(subItem.path),
+                                },
+                              )}
                             >
                               {subItem.title}
                             </span>
-                          </SidebarMenuSubButton>
-                        ) : (
-                          <SidebarMenuSubButton
-                            asChild
-                            isActive={isItemActive(subItem.path)}
-                            className="h-9"
-                          >
-                            <Link
-                              to={subItem.path || ""}
-                              className="flex items-center justify-between"
-                            >
-                              <span
-                                className={`line-clamp-1 ${subItem.isAction ? "font-semibold" : ""}`}
-                              >
-                                {subItem.title}
-                              </span>
-                            </Link>
-                          </SidebarMenuSubButton>
-                        )}
-                        {!subItem.isAction && subItem.path && (
+                          </Link>
+                        </SidebarMenuSubButton>
+                        {subItem.path && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <SidebarMenuAction
@@ -124,6 +119,16 @@ export function DefaultNavMain({
                         )}
                       </SidebarMenuSubItem>
                     ))}
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton
+                        onClick={() => {
+                          console.log("查看全部");
+                        }}
+                        className="h-9"
+                      >
+                        <span className="line-clamp-1 font-bold">查看全部</span>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
                   </SidebarMenuSub>
                 </CollapsibleContent>
               </SidebarMenuItem>

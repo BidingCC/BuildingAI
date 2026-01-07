@@ -5,7 +5,7 @@ import {
 } from "@buildingai/ui/components/ai-elements/conversation";
 import type { PromptInputMessage } from "@buildingai/ui/components/ai-elements/prompt-input";
 import { Button } from "@buildingai/ui/components/ui/button";
-import { PanelLeftIcon, PanelRightIcon, ShareIcon } from "lucide-react";
+import { ShareIcon } from "lucide-react";
 import type { FormEvent, ReactNode } from "react";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";

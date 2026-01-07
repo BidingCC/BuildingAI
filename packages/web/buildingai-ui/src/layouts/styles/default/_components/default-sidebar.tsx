@@ -84,16 +84,7 @@ export function DefaultAppSidebar({ ...props }: React.ComponentProps<typeof Side
         title: "历史记录",
         icon: FolderClock,
         isActive: true,
-        items: [
-          ...conversationItems,
-          {
-            title: "查看全部",
-            onClick: () => {
-              console.log("查看全部");
-            },
-            isAction: true,
-          },
-        ],
+        items: conversationItems,
       },
     ];
   }, [conversationsData]);

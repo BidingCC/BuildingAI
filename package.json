@@ -179,7 +179,8 @@
         "typescript-eslint": "catalog:dev",
         "vite-plugin-eslint2": "catalog:dev",
         "vue-eslint-parser": "catalog:dev",
-        "vue-tsc": "catalog:dev"
+        "vue-tsc": "catalog:dev",
+        "globals": "^16.5.0"
     },
     "overrides": {
         "mime-types": "3.0.1",
