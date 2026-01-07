@@ -163,7 +163,7 @@ export function DefaultAppSidebar({ ...props }: React.ComponentProps<typeof Side
             <SidebarMenuButton className="h-9" asChild>
               <Link to="/console/dashboard">
                 <LayoutDashboard />
-                工作台
+                <span className="whitespace-nowrap">工作台</span>
                 <SidebarMenuAction asChild>
                   <div>
                     <ArrowUpRight />

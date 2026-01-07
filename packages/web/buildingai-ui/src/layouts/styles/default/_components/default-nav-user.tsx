@@ -1,6 +1,6 @@
 import { useAuthStore } from "@buildingai/stores";
 import { ModeItems } from "@buildingai/ui/components/mode-toggle";
-import { useTheme, THEME_COLORS } from "@buildingai/ui/components/theme-provider";
+import { THEME_COLORS, useTheme } from "@buildingai/ui/components/theme-provider";
 import { ScrollThemeItems } from "@buildingai/ui/components/theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@buildingai/ui/components/ui/avatar";
 import {

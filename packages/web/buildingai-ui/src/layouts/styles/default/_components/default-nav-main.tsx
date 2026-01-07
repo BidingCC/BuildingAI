@@ -32,6 +32,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  useSidebar,
 } from "@buildingai/ui/components/ui/sidebar";
 import { cn } from "@buildingai/ui/lib/utils";
 import {
@@ -171,32 +172,44 @@ function ChatHistoryMenuItem({
   onOpenDialog: () => void;
 }) {
   const { pathname } = useLocation();
+  const { state } = useSidebar();
   const isItemActive = (path?: string) => path === pathname;
 
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
         tooltip={item.title}
-        className="group/history-chat-icon h-9 pl-8"
+        className="group/history-chat-icon h-9"
         onClick={onOpenDialog}
       >
-        <div>
-          {item.icon && (
-            <CollapsibleTrigger asChild>
-              <SidebarMenuAction
-                className="center hover:bg-sidebar-accent-foreground/5 right-auto left-2"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <item.icon
-                  className="block group-hover/history-chat-icon:hidden"
-                  strokeWidth={isActive ? 2.5 : 2}
-                />
-                <ChevronRight className="hidden transition-transform duration-200 group-hover/history-chat-icon:block group-data-[state=open]/collapsible:rotate-90" />
-              </SidebarMenuAction>
-            </CollapsibleTrigger>
-          )}
-          <span className={cn("line-clamp-1", { "font-medium": isActive })}>{item.title}</span>
-        </div>
+        {item.icon && (
+          <>
+            {state === "expanded" ? (
+              <CollapsibleTrigger asChild>
+                <SidebarMenuAction
+                  className="center hover:bg-sidebar-accent-foreground/5 right-auto left-2 shrink-0"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <item.icon
+                    className="block group-hover/history-chat-icon:hidden"
+                    strokeWidth={isActive ? 2.5 : 2}
+                  />
+                  <ChevronRight className="hidden transition-transform duration-200 group-hover/history-chat-icon:block group-data-[state=open]/collapsible:rotate-90" />
+                </SidebarMenuAction>
+              </CollapsibleTrigger>
+            ) : (
+              <item.icon strokeWidth={isActive ? 2.5 : 2} />
+            )}
+          </>
+        )}
+        <span
+          className={cn("line-clamp-1 whitespace-nowrap", {
+            "font-medium": isActive,
+            "ml-6": state === "expanded",
+          })}
+        >
+          {item.title}
+        </span>
       </SidebarMenuButton>
       <CollapsibleContent>
         <SidebarMenuSub className="mr-0 pr-0">
@@ -220,7 +233,7 @@ function ChatHistoryMenuItem({
                   <DropdownMenuTrigger asChild>
                     <SidebarMenuAction
                       showOnHover
-                      className="group-focus-within/menu-item:opacity-0 group-hover/menu-item:opacity-0 group-hover/menu-sub-item:opacity-100"
+                      className="group-hover/menu-sub-item:opacity-100 md:group-focus-within/menu-item:opacity-0 md:group-hover/menu-item:opacity-0"
                     >
                       <EllipsisVertical />
                       <span className="sr-only">More</span>
@@ -304,8 +317,8 @@ function LinkMenuItem({ item, isActive }: { item: NavItem; isActive: boolean }) 
         asChild
       >
         <Link to={item.path || ""}>
-          {item.icon && <item.icon strokeWidth={isActive ? 2.5 : 2} />}
-          <span className="mr-auto">{item.title}</span>
+          {item.icon && <item.icon className="shrink-0" strokeWidth={isActive ? 2.5 : 2} />}
+          <span className="mr-auto flex-1 whitespace-nowrap">{item.title}</span>
           {item.action}
         </Link>
       </SidebarMenuButton>

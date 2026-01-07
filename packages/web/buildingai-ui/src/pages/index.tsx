@@ -54,7 +54,7 @@ const IndexPage = () => {
 
   return (
     <AssistantProvider {...assistant}>
-      <Thread title="关于这个那个的标题" />
+      <Thread title="新对话" />
     </AssistantProvider>
   );
 };

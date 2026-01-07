@@ -5,6 +5,7 @@ import {
 } from "@buildingai/ui/components/ai-elements/conversation";
 import type { PromptInputMessage } from "@buildingai/ui/components/ai-elements/prompt-input";
 import { Button } from "@buildingai/ui/components/ui/button";
+import { SidebarTrigger } from "@buildingai/ui/components/ui/sidebar";
 import { ShareIcon } from "lucide-react";
 import type { FormEvent, ReactNode } from "react";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -152,8 +153,11 @@ export const Thread = memo(function Thread({ title, onShare, welcomeMessage }: T
         </div>
 
         {title && (
-          <div className="line-clamp-1 md:absolute md:left-1/2 md:-translate-x-1/2">
-            <h1 className="text-base font-semibold">{title}</h1>
+          <div className="flex items-center gap-2">
+            <SidebarTrigger className="md:hidden" />
+            <div className="line-clamp-1 md:absolute md:left-1/2 md:-translate-x-1/2">
+              <h1 className="text-base leading-none font-semibold">{title}</h1>
+            </div>
           </div>
         )}
 
