@@ -2,6 +2,7 @@ import { BaseController } from "@buildingai/base";
 import { type UserPlayground } from "@buildingai/db";
 import { Playground } from "@buildingai/decorators/playground.decorator";
 import { PaginationDto } from "@buildingai/dto/pagination.dto";
+import { HttpErrorFactory } from "@buildingai/errors";
 import { WebController } from "@common/decorators/controller.decorator";
 import {
     CreateAIChatRecordDto,
@@ -112,7 +113,7 @@ export class AiChatRecordWebController extends BaseController {
         );
 
         if (!conversation) {
-            throw new Error("对话不存在或无权访问");
+            throw HttpErrorFactory.notFound("对话不存在或无权访问");
         }
 
         return await this.AiChatRecordService.getConversationMessages(
