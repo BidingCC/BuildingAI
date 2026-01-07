@@ -1,5 +1,6 @@
 export { DocumentParser } from "./document-parser";
 export {
+    type CallableProvider,
     getProvider,
     getProviderForEmbedding,
     getProviderForImage,
@@ -8,7 +9,6 @@ export {
     getProviderForSpeech,
     getProviderForText,
     getProviderForTranscription,
-    type CallableProvider,
     type ProviderEmbeddingConfig,
     type ProviderImageConfig,
     type ProviderModelConfig,

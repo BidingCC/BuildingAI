@@ -21,7 +21,7 @@ export interface UseChatReturn {
 }
 
 export function useChat(options: UseChatOptions): UseChatReturn {
-  const { currentThreadId, messages, setMessages, onThreadCreated, skipNextLoad } = options;
+  const { currentThreadId, setMessages, onThreadCreated, skipNextLoad } = options;
   const navigate = useNavigate();
 
   const [status, setStatus] = useState<ChatStatus>("ready");

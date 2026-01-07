@@ -41,9 +41,7 @@ class CustomProviderImpl implements AIProvider {
             name: this.id,
             baseURL: settings.baseURL,
             headers: {
-                ...(settings.apiKey
-                    ? { Authorization: `Bearer ${settings.apiKey}` }
-                    : {}),
+                ...(settings.apiKey ? { Authorization: `Bearer ${settings.apiKey}` } : {}),
                 ...settings.headers,
             },
         });

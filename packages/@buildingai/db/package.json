@@ -69,7 +69,6 @@
         "@buildingai/eslint-config": "workspace:*",
         "@buildingai/types": "workspace:*",
         "@buildingai/typescript-config": "workspace:*",
-        "@types/pg": "^8.15.5",
-        "globals": "^16.5.0"
+        "@types/pg": "^8.15.5"
     }
 }
