@@ -1,5 +1,3 @@
-"use client";
-
 import { useConversationsQuery } from "@buildingai/services/web";
 import {
   Sidebar,
@@ -12,7 +10,17 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@buildingai/ui/components/ui/sidebar";
-import { Bot, Brush, Edit, FolderClock, LayoutGrid, PenLineIcon, Video } from "lucide-react";
+import {
+  ArrowUpRight,
+  Bot,
+  Brush,
+  Edit,
+  FolderClock,
+  LayoutDashboard,
+  LayoutGrid,
+  PenLineIcon,
+  Video,
+} from "lucide-react";
 import { useMemo } from "react";
 import * as React from "react";
 import { Link } from "react-router-dom";
