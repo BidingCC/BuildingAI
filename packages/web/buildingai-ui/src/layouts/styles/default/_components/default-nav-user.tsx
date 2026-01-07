@@ -1,6 +1,6 @@
 import { useAuthStore } from "@buildingai/stores";
 import { ModeItems } from "@buildingai/ui/components/mode-toggle";
-import { useTheme } from "@buildingai/ui/components/theme-provider";
+import { useTheme, THEME_COLORS } from "@buildingai/ui/components/theme-provider";
 import { ScrollThemeItems } from "@buildingai/ui/components/theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@buildingai/ui/components/ui/avatar";
 import {
@@ -110,7 +110,7 @@ export function DefaultNavUser() {
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
                   <DropdownMenuSubContent>
-                    <DropdownMenuLabel>选择配色</DropdownMenuLabel>
+                    <DropdownMenuLabel>选择配色({THEME_COLORS.length})</DropdownMenuLabel>
                     <ScrollThemeItems themeColor={themeColor} onSelect={setThemeColor} />
                   </DropdownMenuSubContent>
                 </DropdownMenuPortal>
