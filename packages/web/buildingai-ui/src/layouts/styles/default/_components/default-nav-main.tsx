@@ -25,20 +25,20 @@ import { cn } from "@buildingai/ui/lib/utils";
 import { ChevronRight, EllipsisVertical, type LucideIcon, PenLine, Trash2 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
-export function DefaultNavMain({
-  items,
-}: {
-  items: {
+interface NavItem {
+  id: string;
+  title: string;
+  path?: string;
+  icon?: LucideIcon;
+  isActive?: boolean;
+  items?: {
+    id: string;
     title: string;
     path?: string;
-    icon?: LucideIcon;
-    isActive?: boolean;
-    items?: {
-      title: string;
-      path?: string;
-    }[];
   }[];
-}) {
+}
+
+export function DefaultNavMain({ items }: { items: NavItem[] }) {
   const { pathname } = useLocation();
 
   const isItemActive = (path?: string) => path === pathname;

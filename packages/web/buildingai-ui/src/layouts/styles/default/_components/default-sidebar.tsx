@@ -31,11 +31,6 @@ import { DefaultNavMain } from "./default-nav-main";
 import { DefaultNavUser } from "./default-nav-user";
 
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   projects: [
     {
       name: "AI绘图",
@@ -69,16 +64,19 @@ export function DefaultAppSidebar({ ...props }: React.ComponentProps<typeof Side
   const navMain = useMemo(() => {
     const baseItems = [
       {
+        id: "new-chat",
         title: "新聊天",
         path: "/",
         icon: Edit,
       },
       {
+        id: "app-center",
         title: "应用",
         path: "/apps",
         icon: LayoutGrid,
       },
       {
+        id: "agent-center",
         title: "智能体",
         path: "/agents",
         icon: Bot,
@@ -87,6 +85,7 @@ export function DefaultAppSidebar({ ...props }: React.ComponentProps<typeof Side
 
     const conversationItems =
       conversationsData?.items?.map((conversation) => ({
+        id: `conversation-${conversation.id}`,
         title: conversation.title || "新对话",
         path: `/c/${conversation.id}`,
       })) || [];
@@ -94,6 +93,7 @@ export function DefaultAppSidebar({ ...props }: React.ComponentProps<typeof Side
     return [
       ...baseItems,
       {
+        id: "chat-history",
         title: "历史记录",
         icon: FolderClock,
         isActive: true,
