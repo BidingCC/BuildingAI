@@ -24,7 +24,9 @@ export function ConsoleLogo() {
               )}
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{websiteConfig?.webinfo.name}</span>
-                <span className="truncate text-xs">工作台</span>
+                <span className="truncate text-xs">
+                  工作台 · <span className="text-muted-foreground">v26.0.0</span>
+                </span>
               </div>
             </>
           </Link>

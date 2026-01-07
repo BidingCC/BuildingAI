@@ -1,6 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 
 import DefaultLayout from "@/layouts/styles/default";
+import InstallPage from "@/pages/install";
 import WorkflowExample from "@/pages/workflow";
 
 import GlobalError from "../components/exception/global-error";
@@ -19,6 +20,10 @@ export const router = createBrowserRouter([
       {
         path: "/login",
         element: <LoginPage />,
+      },
+      {
+        path: "/install",
+        element: <InstallPage />,
       },
       {
         element: <DefaultLayout />,

@@ -181,35 +181,38 @@ function ChatHistoryMenuItem({
         tooltip={item.title}
         className="group/history-chat-icon h-9"
         onClick={onOpenDialog}
+        asChild
       >
-        {item.icon && (
-          <>
-            {state === "expanded" ? (
-              <CollapsibleTrigger asChild>
-                <SidebarMenuAction
-                  className="center hover:bg-sidebar-accent-foreground/5 right-auto left-2 shrink-0"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <item.icon
-                    className="block group-hover/history-chat-icon:hidden"
-                    strokeWidth={isActive ? 2.5 : 2}
-                  />
-                  <ChevronRight className="hidden transition-transform duration-200 group-hover/history-chat-icon:block group-data-[state=open]/collapsible:rotate-90" />
-                </SidebarMenuAction>
-              </CollapsibleTrigger>
-            ) : (
-              <item.icon strokeWidth={isActive ? 2.5 : 2} />
-            )}
-          </>
-        )}
-        <span
-          className={cn("line-clamp-1 whitespace-nowrap", {
-            "font-medium": isActive,
-            "ml-6": state === "expanded",
-          })}
-        >
-          {item.title}
-        </span>
+        <div>
+          {item.icon && (
+            <>
+              {state === "expanded" ? (
+                <CollapsibleTrigger asChild className="group/collapsible">
+                  <SidebarMenuAction
+                    className="center hover:bg-sidebar-accent-foreground/5 right-auto left-2 shrink-0"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <item.icon
+                      className="block group-hover/history-chat-icon:hidden"
+                      strokeWidth={isActive ? 2.5 : 2}
+                    />
+                    <ChevronRight className="hidden transition-transform duration-200 group-hover/history-chat-icon:block group-data-[state=open]/collapsible:rotate-90" />
+                  </SidebarMenuAction>
+                </CollapsibleTrigger>
+              ) : (
+                <item.icon strokeWidth={isActive ? 2.5 : 2} />
+              )}
+            </>
+          )}
+          <span
+            className={cn("line-clamp-1 whitespace-nowrap", {
+              "font-medium": isActive,
+              "ml-6": state === "expanded",
+            })}
+          >
+            {item.title}
+          </span>
+        </div>
       </SidebarMenuButton>
       <CollapsibleContent>
         <SidebarMenuSub className="mr-0 pr-0">
@@ -256,10 +259,14 @@ function ChatHistoryMenuItem({
           <SidebarMenuSubItem>
             <SidebarMenuSubButton onClick={onOpenDialog} className="h-9 cursor-pointer">
               <span className="text-muted-foreground line-clamp-1 text-xs">查看全部</span>
-              <SidebarMenuAction showOnHover>
-                <ArrowUpRight className="text-muted-foreground size-3" />
-              </SidebarMenuAction>
+              <span className="sr-only">查看全部</span>
             </SidebarMenuSubButton>
+            <SidebarMenuAction
+              showOnHover
+              className="group-hover/menu-sub-item:opacity-100! md:group-focus-within/menu-item:opacity-0 md:group-hover/menu-item:opacity-0"
+            >
+              <ArrowUpRight className="text-muted-foreground size-3" />
+            </SidebarMenuAction>
           </SidebarMenuSubItem>
         </SidebarMenuSub>
       </CollapsibleContent>
@@ -276,7 +283,7 @@ function CollapsibleMenuItem({ item, isActive }: { item: NavItem; isActive: bool
 
   return (
     <SidebarMenuItem>
-      <CollapsibleTrigger asChild>
+      <CollapsibleTrigger asChild className="group/collapsible">
         <SidebarMenuButton isActive={isActive} tooltip={item.title} className="h-9">
           {item.icon && <item.icon strokeWidth={isActive ? 2.5 : 2} />}
           <span>{item.title}</span>
