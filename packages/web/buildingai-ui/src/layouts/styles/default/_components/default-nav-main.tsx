@@ -34,14 +34,16 @@ export function DefaultNavMain({
     isActive?: boolean;
     items?: {
       title: string;
-      path: string;
+      path?: string;
+      onClick?: () => void;
+      isAction?: boolean;
     }[];
   }[];
 }) {
   const { pathname } = useLocation();
 
   const isItemActive = (path?: string) => path === pathname;
-  const hasActiveChild = (items?: { path: string }[]) =>
+  const hasActiveChild = (items?: { path?: string; onClick?: () => void; isAction?: boolean }[]) =>
     items?.some((subItem) => subItem.path === pathname) ?? false;
 
   return (
@@ -71,36 +73,55 @@ export function DefaultNavMain({
                   <SidebarMenuSub className="mr-0 pr-0">
                     {item.items?.map((subItem) => (
                       <SidebarMenuSubItem key={subItem.title}>
-                        <SidebarMenuSubButton
-                          asChild
-                          isActive={isItemActive(subItem.path)}
-                          className="h-9"
-                        >
-                          <Link to={subItem.path} className="flex items-center justify-between">
-                            <span className="line-clamp-1">{subItem.title}</span>
-                          </Link>
-                        </SidebarMenuSubButton>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <SidebarMenuAction
-                              showOnHover
-                              className="group-focus-within/menu-item:opacity-0 group-hover/menu-item:opacity-0 group-hover/menu-sub-item:opacity-100"
+                        {subItem.onClick ? (
+                          <SidebarMenuSubButton onClick={subItem.onClick} className="h-9">
+                            <span
+                              className={`line-clamp-1 ${subItem.isAction ? "font-semibold" : ""}`}
                             >
-                              <EllipsisVertical />
-                              <span className="sr-only">More</span>
-                            </SidebarMenuAction>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="start">
-                            <DropdownMenuItem>
-                              <PenLine />
-                              重命名
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Trash2 />
-                              删除
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                              {subItem.title}
+                            </span>
+                          </SidebarMenuSubButton>
+                        ) : (
+                          <SidebarMenuSubButton
+                            asChild
+                            isActive={isItemActive(subItem.path)}
+                            className="h-9"
+                          >
+                            <Link
+                              to={subItem.path || ""}
+                              className="flex items-center justify-between"
+                            >
+                              <span
+                                className={`line-clamp-1 ${subItem.isAction ? "font-semibold" : ""}`}
+                              >
+                                {subItem.title}
+                              </span>
+                            </Link>
+                          </SidebarMenuSubButton>
+                        )}
+                        {!subItem.isAction && subItem.path && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <SidebarMenuAction
+                                showOnHover
+                                className="group-focus-within/menu-item:opacity-0 group-hover/menu-item:opacity-0 group-hover/menu-sub-item:opacity-100"
+                              >
+                                <EllipsisVertical />
+                                <span className="sr-only">More</span>
+                              </SidebarMenuAction>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="start">
+                              <DropdownMenuItem>
+                                <PenLine />
+                                重命名
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>
+                                <Trash2 />
+                                删除
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
                       </SidebarMenuSubItem>
                     ))}
                   </SidebarMenuSub>

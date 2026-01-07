@@ -18,7 +18,7 @@ export const Suggestions = memo(
     }
 
     return (
-      <div className="mx-auto w-full max-w-3xl px-4 py-4">
+      <div className="mx-auto w-full max-w-3xl py-4 pr-4">
         <div className="flex flex-wrap gap-2">
           {suggestions.map((suggestion) => (
             <Button

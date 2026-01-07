@@ -1,5 +1,6 @@
 "use client";
 
+import { useConversationsQuery } from "@buildingai/services/web";
 import {
   Sidebar,
   SidebarContent,
@@ -8,6 +9,7 @@ import {
   SidebarRail,
 } from "@buildingai/ui/components/ui/sidebar";
 import { Bot, Brush, Edit, FolderClock, LayoutGrid, PenLineIcon, Video } from "lucide-react";
+import { useMemo } from "react";
 import * as React from "react";
 
 import { DefaultNavApps } from "./default-apps";
@@ -21,42 +23,6 @@ const data = {
     email: "m@example.com",
     avatar: "/avatars/shadcn.jpg",
   },
-  navMain: [
-    {
-      title: "新聊天",
-      path: "/",
-      icon: Edit,
-    },
-    {
-      title: "应用",
-      path: "/apps",
-      icon: LayoutGrid,
-    },
-    {
-      title: "智能体",
-      path: "/agents",
-      icon: Bot,
-    },
-    {
-      title: "历史记录",
-      icon: FolderClock,
-      isActive: true,
-      items: [
-        {
-          title: "使用js写一个冒泡排序算法，我需要",
-          path: "/c/7PBaqoYg2flwsG61ql04T",
-        },
-        {
-          title: "如何用js实现一个计算器",
-          path: "/c/kQAqx0N0KVRaSQCvUwUoj",
-        },
-        {
-          title: "为什么会写代码",
-          path: "/c/gwY9YWicogwmAg9Z0awnJ",
-        },
-      ],
-    },
-  ],
   projects: [
     {
       name: "AI绘图",
@@ -77,13 +43,68 @@ const data = {
 };
 
 export function DefaultAppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { data: conversationsData } = useConversationsQuery(
+    {
+      page: 1,
+      pageSize: 6,
+    },
+    {
+      refetchOnWindowFocus: false,
+    },
+  );
+
+  const navMain = useMemo(() => {
+    const baseItems = [
+      {
+        title: "新聊天",
+        path: "/",
+        icon: Edit,
+      },
+      {
+        title: "应用",
+        path: "/apps",
+        icon: LayoutGrid,
+      },
+      {
+        title: "智能体",
+        path: "/agents",
+        icon: Bot,
+      },
+    ];
+
+    const conversationItems =
+      conversationsData?.items?.map((conversation) => ({
+        title: conversation.title || "新对话",
+        path: `/c/${conversation.id}`,
+      })) || [];
+
+    return [
+      ...baseItems,
+      {
+        title: "历史记录",
+        icon: FolderClock,
+        isActive: true,
+        items: [
+          ...conversationItems,
+          {
+            title: "查看全部",
+            onClick: () => {
+              console.log("查看全部");
+            },
+            isAction: true,
+          },
+        ],
+      },
+    ];
+  }, [conversationsData]);
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader className="flex flex-row items-center">
         <DefaultLogo />
       </SidebarHeader>
       <SidebarContent>
-        <DefaultNavMain items={data.navMain} />
+        <DefaultNavMain items={navMain} />
         <DefaultNavApps projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>
