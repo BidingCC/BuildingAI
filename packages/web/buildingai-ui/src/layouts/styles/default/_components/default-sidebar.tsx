@@ -5,10 +5,25 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
+  SidebarMenu,
+  SidebarMenuAction,
+  SidebarMenuButton,
+  SidebarMenuItem,
   SidebarRail,
 } from "@buildingai/ui/components/ui/sidebar";
-import { Bot, Brush, Edit, FolderClock, LayoutGrid, PenLineIcon, Video } from "lucide-react";
+import {
+  ArrowUpRight,
+  Bot,
+  Brush,
+  Edit,
+  FolderClock,
+  LayoutDashboard,
+  LayoutGrid,
+  PenLineIcon,
+  Video,
+} from "lucide-react";
 import * as React from "react";
+import { Link } from "react-router-dom";
 
 import { DefaultNavApps } from "./default-apps";
 import { DefaultLogo } from "./default-logo";
@@ -87,6 +102,22 @@ export function DefaultAppSidebar({ ...props }: React.ComponentProps<typeof Side
         <DefaultNavApps projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton className="h-9" asChild>
+              <Link to="/console/dashboard">
+                <LayoutDashboard />
+                工作台
+                <SidebarMenuAction asChild>
+                  <div>
+                    <ArrowUpRight />
+                    <span className="sr-only">Toggle</span>
+                  </div>
+                </SidebarMenuAction>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
         <DefaultNavUser />
       </SidebarFooter>
       <SidebarRail />

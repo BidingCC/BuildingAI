@@ -31,12 +31,15 @@ export function DefaultNavApps({
   const { isMobile } = useSidebar();
 
   return (
-    <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+    <SidebarGroup>
       <SidebarGroupLabel>应用</SidebarGroupLabel>
       <SidebarMenu className="gap-1">
         {projects.map((item) => (
           <SidebarMenuItem key={item.name}>
-            <SidebarMenuButton asChild className="h-9 items-center">
+            <SidebarMenuButton
+              asChild
+              className="h-9 items-center group-data-[collapsible=icon]:p-1.5!"
+            >
               <Link to={item.path}>
                 <div className="bg-primary rounded-sm p-1">
                   <item.icon className="text-primary-foreground size-3!" />
