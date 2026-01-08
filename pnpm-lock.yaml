@@ -5,235 +5,16 @@ settings:
   excludeLinksFromLockfile: false
 
 catalogs:
-  api:
-    '@nestjs/axios':
-      specifier: ^4.0.1
-      version: 4.0.1
-    '@nestjs/bullmq':
-      specifier: ^11.0.4
-      version: 11.0.4
-    '@nestjs/cache-manager':
-      specifier: ^3.0.1
-      version: 3.1.0
-    '@nestjs/cli':
-      specifier: ^11.0.10
-      version: 11.0.14
-    '@nestjs/common':
-      specifier: ^11.1.8
-      version: 11.1.10
-    '@nestjs/config':
-      specifier: ^4.0.2
-      version: 4.0.2
-    '@nestjs/core':
-      specifier: ^11.1.8
-      version: 11.1.10
-    '@nestjs/event-emitter':
-      specifier: ^3.0.1
-      version: 3.0.1
-    '@nestjs/jwt':
-      specifier: ^11.0.1
-      version: 11.0.2
-    '@nestjs/mapped-types':
-      specifier: ^2.1.0
-      version: 2.1.0
-    '@nestjs/platform-express':
-      specifier: ^11.1.8
-      version: 11.1.10
-    '@nestjs/schedule':
-      specifier: ^6.0.1
-      version: 6.1.0
-    '@nestjs/schematics':
-      specifier: ^11.0.9
-      version: 11.0.9
-    '@nestjs/serve-static':
-      specifier: ^5.0.4
-      version: 5.0.4
-    '@nestjs/terminus':
-      specifier: ^11.0.0
-      version: 11.0.0
-    '@nestjs/testing':
-      specifier: ^11.1.8
-      version: 11.1.10
-    '@nestjs/typeorm':
-      specifier: ^11.0.0
-      version: 11.0.0
-    '@types/express':
-      specifier: ^5.0.5
-      version: 5.0.6
-    adm-zip:
-      specifier: ^0.5.16
-      version: 0.5.16
-    bullmq:
-      specifier: ^5.63.0
-      version: 5.66.2
-    class-transformer:
-      specifier: ^0.5.1
-      version: 0.5.1
-    class-validator:
-      specifier: ^0.14.2
-      version: 0.14.3
-    express:
-      specifier: ^5.1.0
-      version: 5.2.1
-    pg:
-      specifier: ^8.16.3
-      version: 8.16.3
-    typeorm-naming-strategies:
-      specifier: ^4.1.0
-      version: 4.1.0
-  default:
-    axios:
-      specifier: ^1.13.2
-      version: 1.13.2
-    callsites:
-      specifier: ^4.2.0
-      version: 4.2.0
-    cli-table3:
-      specifier: 0.6.5
-      version: 0.6.5
-    dotenv:
-      specifier: ^17.2.3
-      version: 17.2.3
-    globals:
-      specifier: ^16.5.0
-      version: 16.5.0
-  dev:
-    '@types/node':
-      specifier: ^24.10.0
-      version: 24.10.4
-    eslint:
-      specifier: ^9.39.1
-      version: 9.39.2
-    eslint-plugin-format:
-      specifier: ^1.0.2
-      version: 1.1.0
-    eslint-plugin-vue:
-      specifier: ^10.5.1
-      version: 10.6.2
-    prettier:
-      specifier: ^3.6.2
-      version: 3.7.4
-    prettier-plugin-tailwindcss:
-      specifier: ^0.6.14
-      version: 0.6.14
-    typescript:
-      specifier: ^5.9.3
-      version: 5.9.3
-    typescript-eslint:
-      specifier: ^8.46.3
-      version: 8.50.1
-    vite-plugin-eslint2:
-      specifier: ^5.0.4
-      version: 5.0.4
-    vue-eslint-parser:
-      specifier: ^10.2.0
-      version: 10.2.0
-    vue-tsc:
-      specifier: ^2.2.12
-      version: 2.2.12
   web:
-    '@internationalized/date':
-      specifier: ^3.10.0
-      version: 3.10.1
-    '@tailwindcss/vite':
-      specifier: ^4.1.17
-      version: 4.1.18
-    '@tiptap/extension-color':
-      specifier: ^2.27.1
-      version: 2.27.1
-    '@tiptap/extension-highlight':
-      specifier: ^2.27.1
-      version: 2.27.1
-    '@tiptap/extension-image':
-      specifier: ^2.27.1
-      version: 2.27.1
-    '@tiptap/extension-link':
-      specifier: ^2.27.1
-      version: 2.27.1
-    '@tiptap/extension-list-item':
-      specifier: ^2.27.1
-      version: 2.27.1
-    '@tiptap/extension-placeholder':
-      specifier: ^2.27.1
-      version: 2.27.1
-    '@tiptap/extension-text-style':
-      specifier: ^2.27.1
-      version: 2.27.1
-    '@tiptap/extension-underline':
-      specifier: ^2.27.1
-      version: 2.27.1
-    '@tiptap/starter-kit':
-      specifier: ^2.27.1
-      version: 2.27.1
-    '@tiptap/vue-3':
-      specifier: ^2.27.1
-      version: 2.27.1
     '@types/react':
       specifier: ^19.2.7
       version: 19.2.7
-    '@vueuse/core':
-      specifier: ^13.9.0
-      version: 13.9.0
-    '@vueuse/motion':
-      specifier: ^3.0.3
-      version: 3.0.3
-    clsx:
-      specifier: ^2.1.1
-      version: 2.1.1
-    echarts:
-      specifier: ^5.6.0
-      version: 5.6.0
-    motion-v:
-      specifier: ^1.7.4
-      version: 1.7.4
-    panzoom:
-      specifier: ^9.4.3
-      version: 9.4.3
-    pinia:
-      specifier: ^3.0.4
-      version: 3.0.4
     react:
       specifier: ^19.2.3
       version: 19.2.3
     react-dom:
       specifier: ^19.2.0
       version: 19.2.3
-    reka-ui:
-      specifier: ^2.6.0
-      version: 2.7.0
-    sass:
-      specifier: 1.78.0
-      version: 1.78.0
-    tailwind-merge:
-      specifier: ^3.3.1
-      version: 3.4.0
-    tailwindcss:
-      specifier: ^4.1.17
-      version: 4.1.18
-    tailwindcss-animate:
-      specifier: ^1.0.7
-      version: 1.0.7
-    tiptap-markdown:
-      specifier: ^0.8.10
-      version: 0.8.10
-    vue:
-      specifier: ^3.5.24
-      version: 3.5.26
-    vue-dompurify-html:
-      specifier: ^5.3.0
-      version: 5.3.0
-    vue-renderer-markdown:
-      specifier: 0.0.61-beta.7
-      version: 0.0.61-beta.7
-    vue-router:
-      specifier: ^4.6.3
-      version: 4.6.4
-    vuedraggable:
-      specifier: ^4.1.0
-      version: 4.1.0
-    yup:
-      specifier: ^1.7.1
-      version: 1.7.1
 
 overrides:
   cron: 4.3.5
@@ -1497,7 +1278,7 @@ importers:
         version: 1.2.2(@types/react@19.2.7)(react@19.2.3)
       '@tailwindcss/vite':
         specifier: ^4.1.17
-        version: 4.1.18(vite@7.3.0(@types/node@24.10.4)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.78.0)(terser@5.44.1))
+        version: 4.1.18(rolldown-vite@7.3.0(@types/node@24.10.4)(esbuild@0.27.2)(jiti@2.6.1)(sass@1.78.0)(terser@5.44.1))
       ai:
         specifier: ^6.0.5
         version: 6.0.5(zod@4.2.1)
@@ -1525,9 +1306,6 @@ importers:
       motion:
         specifier: ^12.23.26
         version: 12.23.26(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      next-themes:
-        specifier: ^0.4.6
-        version: 0.4.6(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       radix-ui:
         specifier: ^1.4.3
         version: 1.4.3(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -1603,7 +1381,7 @@ importers:
         version: 19.2.3(@types/react@19.2.7)
       '@vitejs/plugin-react':
         specifier: ^5.1.1
-        version: 5.1.2(vite@7.3.0(@types/node@24.10.4)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.78.0)(terser@5.44.1))
+        version: 5.1.2(rolldown-vite@7.3.0(@types/node@24.10.4)(esbuild@0.27.2)(jiti@2.6.1)(sass@1.78.0)(terser@5.44.1))
       eslint:
         specifier: ^9.39.1
         version: 9.39.2(jiti@2.6.1)
@@ -1640,6 +1418,9 @@ importers:
       '@buildingai/web-types':
         specifier: workspace:*
         version: link:../@buildingai/types
+      '@gsap/react':
+        specifier: ^2.1.2
+        version: 2.1.2(gsap@3.14.2)(react@19.2.3)
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.69.0(react@19.2.3))
@@ -1649,6 +1430,9 @@ importers:
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
+      gsap:
+        specifier: ^3.14.2
+        version: 3.14.2
       lucide-react:
         specifier: ^0.561.0
         version: 0.561.0(react@19.2.3)
@@ -2381,6 +2165,12 @@ packages:
 
   '@fontsource-variable/inter@5.2.8':
     resolution: {integrity: sha512-kOfP2D+ykbcX/P3IFnokOhVRNoTozo5/JxhAIVYLpea/UBmCQ/YWPBfWIDuBImXX/15KH+eKh4xpEUyS2sQQGQ==}
+
+  '@gsap/react@2.1.2':
+    resolution: {integrity: sha512-JqliybO1837UcgH2hVOM4VO+38APk3ECNrsuSM4MuXp+rbf+/2IG2K1YJiqfTcXQHH7XlA0m3ykniFYstfq0Iw==}
+    peerDependencies:
+      gsap: ^3.12.5
+      react: '>=17'
 
   '@hookform/resolvers@5.2.2':
     resolution: {integrity: sha512-A/IxlMLShx3KjV/HeTcTfaMxdwy690+L/ZADoeaTltLx+CVuzkeVIPuybK3jrRfw7YZnmdKsVVHAlEPIAEUNlA==}
@@ -7291,6 +7081,9 @@ packages:
     resolution: {integrity: sha512-DKKrynuQRne0PNpEbzuEdHlYOMksHSUI8Zc9Unei5gTsMNA2/vMpoMz/yKba50pejK56qj98qM0SjYxAKi13gQ==}
     engines: {node: ^12.22.0 || ^14.16.0 || ^16.0.0 || >=17.0.0}
 
+  gsap@3.14.2:
+    resolution: {integrity: sha512-P8/mMxVLU7o4+55+1TCnQrPmgjPKnwkzkXOK1asnR9Jg2lna4tEY5qBJjMmAaOBDDZWtlRjBXjLa0w53G/uBLA==}
+
   hachure-fill@0.5.2:
     resolution: {integrity: sha512-3GKBOn+m2LX9iq+JC1064cSFprJY4jL1jCXTcpnfER5HYE2l/4EfWSGzkPa/ZDBmYI0ZOEj5VHV/eKnPGkHuOg==}
 
@@ -8587,12 +8380,6 @@ packages:
   netmask@2.0.2:
     resolution: {integrity: sha512-dBpDMdxv9Irdq66304OLfEmQ9tbNRFnFTuZiLo+bD+r332bBmMJ8GBLXklIXXgxd3+v9+KUnZaUR5PJMa75Gsg==}
     engines: {node: '>= 0.4.0'}
-
-  next-themes@0.4.6:
-    resolution: {integrity: sha512-pZvgD5L0IEvX5/9GWyHMf3m8BKiVQwsCMHfoFosXtXBMnaS0ZnIJ9ST4b4NqLVKDEm8QBxoNNGNaBv2JNF6XNA==}
-    peerDependencies:
-      react: ^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc
-      react-dom: ^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc
 
   ngraph.events@1.4.0:
     resolution: {integrity: sha512-NeDGI4DSyjBNBRtA86222JoYietsmCXbs8CEB0dZ51Xeh4lhVl1y3wpWLumczvnha8sFQIW4E0vvVWwgmX2mGw==}
@@ -10670,46 +10457,6 @@ packages:
       vite:
         optional: true
 
-  vite@7.3.0:
-    resolution: {integrity: sha512-dZwN5L1VlUBewiP6H9s2+B3e3Jg96D0vzN+Ry73sOefebhYr9f94wwkMNN/9ouoU8pV1BqA1d1zGk8928cx0rg==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    hasBin: true
-    peerDependencies:
-      '@types/node': ^20.19.0 || >=22.12.0
-      jiti: '>=1.21.0'
-      less: ^4.0.0
-      lightningcss: ^1.21.0
-      sass: ^1.70.0
-      sass-embedded: ^1.70.0
-      stylus: '>=0.54.8'
-      sugarss: ^5.0.0
-      terser: ^5.16.0
-      tsx: ^4.8.1
-      yaml: ^2.4.2
-    peerDependenciesMeta:
-      '@types/node':
-        optional: true
-      jiti:
-        optional: true
-      less:
-        optional: true
-      lightningcss:
-        optional: true
-      sass:
-        optional: true
-      sass-embedded:
-        optional: true
-      stylus:
-        optional: true
-      sugarss:
-        optional: true
-      terser:
-        optional: true
-      tsx:
-        optional: true
-      yaml:
-        optional: true
-
   vizion@2.2.1:
     resolution: {integrity: sha512-sfAcO2yeSU0CSPFI/DmZp3FsFE9T+8913nv1xWBOyzODv13fwkn6Vl7HqxGpkr9F608M+8SuFId3s+BlZqfXww==}
     engines: {node: '>=4.0'}
@@ -11251,7 +10998,7 @@ snapshots:
       '@babel/types': 7.28.5
       '@jridgewell/remapping': 2.3.5
       convert-source-map: 2.0.0
-      debug: 4.4.3(supports-color@5.5.0)
+      debug: 4.4.3
       gensync: 1.0.0-beta.2
       json5: 2.2.3
       semver: 6.3.1
@@ -11494,7 +11241,7 @@ snapshots:
       '@babel/parser': 7.28.5
       '@babel/template': 7.27.2
       '@babel/types': 7.28.5
-      debug: 4.4.3(supports-color@5.5.0)
+      debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
 
@@ -11688,7 +11435,7 @@ snapshots:
   '@eslint/config-array@0.21.1':
     dependencies:
       '@eslint/object-schema': 2.1.7
-      debug: 4.4.3(supports-color@5.5.0)
+      debug: 4.4.3
       minimatch: 3.1.2
     transitivePeerDependencies:
       - supports-color
@@ -11704,7 +11451,7 @@ snapshots:
   '@eslint/eslintrc@3.3.3':
     dependencies:
       ajv: 6.12.6
-      debug: 4.4.3(supports-color@5.5.0)
+      debug: 4.4.3
       espree: 10.4.0
       globals: 14.0.0
       ignore: 5.3.2
@@ -11758,6 +11505,11 @@ snapshots:
       - vue
 
   '@fontsource-variable/inter@5.2.8': {}
+
+  '@gsap/react@2.1.2(gsap@3.14.2)(react@19.2.3)':
+    dependencies:
+      gsap: 3.14.2
+      react: 19.2.3
 
   '@hookform/resolvers@5.2.2(react-hook-form@7.69.0(react@19.2.3))':
     dependencies:
@@ -13810,13 +13562,6 @@ snapshots:
       tailwindcss: 4.1.18
       vite: rolldown-vite@7.3.0(@types/node@24.10.4)(esbuild@0.27.2)(jiti@2.6.1)(sass@1.78.0)(terser@5.44.1)
 
-  '@tailwindcss/vite@4.1.18(vite@7.3.0(@types/node@24.10.4)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.78.0)(terser@5.44.1))':
-    dependencies:
-      '@tailwindcss/node': 4.1.18
-      '@tailwindcss/oxide': 4.1.18
-      tailwindcss: 4.1.18
-      vite: 7.3.0(@types/node@24.10.4)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.78.0)(terser@5.44.1)
-
   '@tanstack/query-core@5.90.16': {}
 
   '@tanstack/query-devtools@5.92.0': {}
@@ -14515,7 +14260,7 @@ snapshots:
       '@typescript-eslint/types': 8.50.1
       '@typescript-eslint/typescript-estree': 8.50.1(typescript@5.9.3)
       '@typescript-eslint/visitor-keys': 8.50.1
-      debug: 4.4.3(supports-color@5.5.0)
+      debug: 4.4.3
       eslint: 9.39.2(jiti@2.6.1)
       typescript: 5.9.3
     transitivePeerDependencies:
@@ -14525,7 +14270,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/tsconfig-utils': 8.50.1(typescript@5.9.3)
       '@typescript-eslint/types': 8.50.1
-      debug: 4.4.3(supports-color@5.5.0)
+      debug: 4.4.3
       typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
@@ -14544,7 +14289,7 @@ snapshots:
       '@typescript-eslint/types': 8.50.1
       '@typescript-eslint/typescript-estree': 8.50.1(typescript@5.9.3)
       '@typescript-eslint/utils': 8.50.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
-      debug: 4.4.3(supports-color@5.5.0)
+      debug: 4.4.3
       eslint: 9.39.2(jiti@2.6.1)
       ts-api-utils: 2.1.0(typescript@5.9.3)
       typescript: 5.9.3
@@ -14559,7 +14304,7 @@ snapshots:
       '@typescript-eslint/tsconfig-utils': 8.50.1(typescript@5.9.3)
       '@typescript-eslint/types': 8.50.1
       '@typescript-eslint/visitor-keys': 8.50.1
-      debug: 4.4.3(supports-color@5.5.0)
+      debug: 4.4.3
       minimatch: 9.0.5
       semver: 7.7.3
       tinyglobby: 0.2.15
@@ -14658,18 +14403,6 @@ snapshots:
       '@types/babel__core': 7.20.5
       react-refresh: 0.18.0
       vite: rolldown-vite@7.3.0(@types/node@24.10.4)(esbuild@0.27.2)(jiti@2.6.1)(sass@1.78.0)(terser@5.44.1)
-    transitivePeerDependencies:
-      - supports-color
-
-  '@vitejs/plugin-react@5.1.2(vite@7.3.0(@types/node@24.10.4)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.78.0)(terser@5.44.1))':
-    dependencies:
-      '@babel/core': 7.28.5
-      '@babel/plugin-transform-react-jsx-self': 7.27.1(@babel/core@7.28.5)
-      '@babel/plugin-transform-react-jsx-source': 7.27.1(@babel/core@7.28.5)
-      '@rolldown/pluginutils': 1.0.0-beta.53
-      '@types/babel__core': 7.20.5
-      react-refresh: 0.18.0
-      vite: 7.3.0(@types/node@24.10.4)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.78.0)(terser@5.44.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -16039,6 +15772,10 @@ snapshots:
     dependencies:
       ms: 2.1.3
 
+  debug@4.4.3:
+    dependencies:
+      ms: 2.1.3
+
   debug@4.4.3(supports-color@5.5.0):
     dependencies:
       ms: 2.1.3
@@ -16401,7 +16138,7 @@ snapshots:
       ajv: 6.12.6
       chalk: 4.1.2
       cross-spawn: 7.0.6
-      debug: 4.4.3(supports-color@5.5.0)
+      debug: 4.4.3
       escape-string-regexp: 4.0.0
       eslint-scope: 8.4.0
       eslint-visitor-keys: 4.2.1
@@ -16931,6 +16668,8 @@ snapshots:
   graceful-fs@4.2.11: {}
 
   graphql@16.12.0: {}
+
+  gsap@3.14.2: {}
 
   hachure-fill@0.5.2: {}
 
@@ -18625,11 +18364,6 @@ snapshots:
   neo-async@2.6.2: {}
 
   netmask@2.0.2: {}
-
-  next-themes@0.4.6(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
-    dependencies:
-      react: 19.2.3
-      react-dom: 19.2.3(react@19.2.3)
 
   ngraph.events@1.4.0: {}
 
@@ -20957,7 +20691,7 @@ snapshots:
 
   vite-tsconfig-paths@5.1.4(rolldown-vite@7.3.0(@types/node@24.10.4)(esbuild@0.27.2)(jiti@2.6.1)(sass@1.78.0)(terser@5.44.1))(typescript@5.9.3):
     dependencies:
-      debug: 4.4.3(supports-color@5.5.0)
+      debug: 4.4.3
       globrex: 0.1.2
       tsconfck: 3.1.6(typescript@5.9.3)
     optionalDependencies:
@@ -20965,22 +20699,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
       - typescript
-
-  vite@7.3.0(@types/node@24.10.4)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.78.0)(terser@5.44.1):
-    dependencies:
-      esbuild: 0.27.2
-      fdir: 6.5.0(picomatch@4.0.3)
-      picomatch: 4.0.3
-      postcss: 8.5.6
-      rollup: 4.54.0
-      tinyglobby: 0.2.15
-    optionalDependencies:
-      '@types/node': 24.10.4
-      fsevents: 2.3.3
-      jiti: 2.6.1
-      lightningcss: 1.30.2
-      sass: 1.78.0
-      terser: 5.44.1
 
   vizion@2.2.1:
     dependencies:

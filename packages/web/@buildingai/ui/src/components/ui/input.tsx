@@ -1,5 +1,8 @@
 import { cn } from "@buildingai/ui/lib/utils";
+import { Eye, EyeClosed } from "lucide-react";
 import * as React from "react";
+
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "./input-group";
 
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
     return (
@@ -15,4 +18,23 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
     );
 }
 
-export { Input };
+function PasswordInput({ className, ...props }: React.ComponentProps<"input">) {
+    const [showPassword, setShowPassword] = React.useState(false);
+
+    return (
+        <InputGroup {...props}>
+            <InputGroupInput className={className} type={showPassword ? "text" : "password"} />
+            <InputGroupAddon align="inline-end">
+                <InputGroupButton
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                    {showPassword ? <EyeClosed /> : <Eye />}
+                </InputGroupButton>
+            </InputGroupAddon>
+        </InputGroup>
+    );
+}
+
+export { Input, PasswordInput };

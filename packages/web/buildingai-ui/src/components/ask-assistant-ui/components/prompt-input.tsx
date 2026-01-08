@@ -55,7 +55,7 @@ export const PromptInput = ({
             <AIPromptInputActionMenu>
               <AIPromptInputActionMenuTrigger />
               <AIPromptInputActionMenuContent>
-                <AIPromptInputActionAddAttachments />
+                <AIPromptInputActionAddAttachments label="Add files" />
               </AIPromptInputActionMenuContent>
             </AIPromptInputActionMenu>
             <AIPromptInputSpeechButton textareaRef={textareaRef} />
