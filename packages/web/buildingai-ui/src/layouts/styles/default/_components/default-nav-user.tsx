@@ -131,7 +131,7 @@ export function DefaultNavUser() {
                   <span className="text-muted-foreground truncate text-xs">
                     {isLogin() ? (
                       <div className="flex items-center gap-0.5">
-                        {userInfo?.membershipLevel.name}
+                        {userInfo?.membershipLevel?.name || "未设置会员等级"}
                       </div>
                     ) : (
                       "请先登录后使用"

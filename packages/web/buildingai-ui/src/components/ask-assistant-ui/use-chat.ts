@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import type { ChatStatus, UIMessage } from "ai";
 import { DefaultChatTransport } from "ai";
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const getApiBaseUrl = () => {
   const isDev = import.meta.env.DEV;
@@ -35,19 +35,17 @@ export interface UseChatReturn {
 export function useChatStream(options: UseChatOptions): UseChatReturn {
   const { modelId, onThreadCreated } = options;
   const { id: currentThreadId } = useParams<{ id: string }>();
-  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const token = useAuthStore((state) => state.auth.token);
   const queryClient = useQueryClient();
   const conversationIdRef = useRef<string | undefined>(currentThreadId);
   const chatRef = useRef<Chat<UIMessage> | null>(null);
-  const isFromStream = searchParams.get("fromStream") === "true";
   const lastMessageDbIdRef = useRef<string | null>(null);
   const pendingParentIdRef = useRef<string | null>(null);
 
   const { data: messagesData, isLoading: isLoadingMessages } = useConversationMessagesQuery(
     { conversationId: currentThreadId || "", page: 1, pageSize: 100 },
-    { enabled: !!currentThreadId && !isFromStream, refetchOnWindowFocus: false },
+    { enabled: !!currentThreadId, refetchOnWindowFocus: false },
   );
 
   const chat = useMemo(() => {
@@ -71,7 +69,7 @@ export function useChatStream(options: UseChatOptions): UseChatReturn {
             conversationIdRef.current = newConversationId;
 
             if (isNewConversation) {
-              navigate(`/c/${newConversationId}?fromStream=true`);
+              navigate(`/c/${newConversationId}`);
               queryClient.invalidateQueries({ queryKey: ["conversations"] });
             }
             onThreadCreated?.();
@@ -85,8 +83,7 @@ export function useChatStream(options: UseChatOptions): UseChatReturn {
           }
         },
         onFinish: () => {
-          // queryClient.invalidateQueries({ queryKey: ["conversations"] });
-          setSearchParams({});
+          queryClient.invalidateQueries({ queryKey: ["conversations"] });
         },
         onError: () => console.error("Error streaming chat"),
       });
@@ -101,16 +98,16 @@ export function useChatStream(options: UseChatOptions): UseChatReturn {
   useEffect(() => {
     if (currentThreadId) {
       conversationIdRef.current = currentThreadId;
-    } else {
+    } else if (!messagesData?.items.length) {
       conversationIdRef.current = undefined;
       setMessages([]);
     }
   }, [currentThreadId, setMessages]);
 
   useEffect(() => {
-    if (isFromStream || !currentThreadId) return;
+    if (!currentThreadId) return;
 
-    if (messagesData?.items && !messages.length) {
+    if (messagesData?.items.length) {
       const sortedMessages = messagesData.items
         .sort((a, b) => a.sequence - b.sequence)
         .map((item) => ({
@@ -127,11 +124,11 @@ export function useChatStream(options: UseChatOptions): UseChatReturn {
       if (sortedMessages.length > 0) {
         lastMessageDbIdRef.current = sortedMessages[sortedMessages.length - 1].id;
       }
-    } else if (messagesData?.items.length === 0) {
+    } else if (messagesData?.items.length === 0 && !currentThreadId) {
       setMessages([]);
       lastMessageDbIdRef.current = null;
     }
-  }, [currentThreadId, messagesData, setMessages, isFromStream]);
+  }, [currentThreadId, messagesData, setMessages]);
 
   const handleRegenerate = useCallback(
     (messageId: string) => {
