@@ -1,8 +1,6 @@
-import { Button } from "@buildingai/ui/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -11,44 +9,64 @@ import {
 import { Input, PasswordInput } from "@buildingai/ui/components/ui/input";
 import { cn } from "@buildingai/ui/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-const formSchema = z.object({
-  username: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
-  }),
-  password: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
-  }),
-  confirmPassword: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
-  }),
-  email: z.string().email({
-    message: "Invalid email address.",
-  }),
-});
+const formSchema = z
+  .object({
+    username: z.string().min(2, {
+      message: "用户名至少需要2个字符",
+    }),
+    password: z.string().min(6, {
+      message: "密码至少需要6个字符",
+    }),
+    confirmPassword: z.string().min(6, {
+      message: "确认密码至少需要6个字符",
+    }),
+    email: z.email({ message: "请输入有效的邮箱地址" }).optional().or(z.literal("")),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "两次输入的密码不一致",
+    path: ["confirmPassword"],
+  });
 
-type FormValues = z.infer<typeof formSchema>;
+export type AdminAccountFormValues = z.infer<typeof formSchema>;
 
-const AdminAccountForm = ({ step }: { step: number }) => {
-  const form = useForm<FormValues>({
+interface AdminAccountFormProps {
+  step: number;
+  defaultValues?: Partial<AdminAccountFormValues>;
+  onChange?: (values: AdminAccountFormValues, isValid: boolean) => void;
+}
+
+const AdminAccountForm = ({ step, defaultValues, onChange }: AdminAccountFormProps) => {
+  const form = useForm<AdminAccountFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       username: "",
       password: "",
       confirmPassword: "",
       email: "",
+      ...defaultValues,
     },
+    mode: "onChange",
   });
-  const onSubmit = (values: FormValues) => {
-    console.log(values);
-  };
+
+  useEffect(() => {
+    const subscription = form.watch(async (_value, { name }) => {
+      if (!name) return;
+      await form.trigger(name);
+      const isValid = form.formState.isValid;
+      const values = form.getValues();
+      onChange?.(values, isValid);
+    });
+    return () => subscription.unsubscribe();
+  }, [form, onChange]);
 
   return (
     <div className={cn("flex justify-center", { hidden: step !== 1 })}>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="w-xs space-y-6">
+        <form className="w-xs space-y-6">
           <h1 className="text-xl font-bold">创建管理员账号</h1>
           <FormField
             control={form.control}
@@ -57,7 +75,7 @@ const AdminAccountForm = ({ step }: { step: number }) => {
               <FormItem>
                 <FormLabel>Username</FormLabel>
                 <FormControl>
-                  <Input placeholder="username" {...field} autoComplete="username" />
+                  <Input placeholder="username" required {...field} autoComplete="off" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -72,10 +90,11 @@ const AdminAccountForm = ({ step }: { step: number }) => {
                 <FormLabel>Password</FormLabel>
                 <FormControl>
                   <PasswordInput
+                    required
                     placeholder="password"
-                    {...field}
                     type="password"
-                    autoComplete="current-password"
+                    autoComplete="off"
+                    {...field}
                   />
                 </FormControl>
                 <FormMessage />
@@ -91,9 +110,10 @@ const AdminAccountForm = ({ step }: { step: number }) => {
                 <FormLabel>Confirm Password</FormLabel>
                 <FormControl>
                   <PasswordInput
+                    required
                     placeholder="confirm password"
+                    autoComplete="off"
                     {...field}
-                    autoComplete="confirm-password"
                   />
                 </FormControl>
                 <FormMessage />
@@ -108,7 +128,7 @@ const AdminAccountForm = ({ step }: { step: number }) => {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input placeholder="email" {...field} autoComplete="email" />
+                  <Input placeholder="email" {...field} autoComplete="off" />
                 </FormControl>
                 <FormMessage />
               </FormItem>

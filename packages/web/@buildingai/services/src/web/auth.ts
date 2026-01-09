@@ -1,6 +1,6 @@
 import { type UserTerminalType } from "@buildingai/constants/shared";
-import type { UserInfo } from "@buildingai/web-types";
-import { useMutation, type UseMutationOptions } from "@tanstack/react-query";
+import type { MutationOptionsUtil, UserInfo } from "@buildingai/web-types";
+import { useMutation } from "@tanstack/react-query";
 
 import { apiHttpClient } from "../base";
 
@@ -31,7 +31,7 @@ export type CheckAccountResponse = {
  */
 export function useLoginMutation(
     data: LoginRequest,
-    options?: Omit<UseMutationOptions<LoginResponse, Error, LoginRequest>, "mutationFn">,
+    options?: MutationOptionsUtil<LoginResponse, LoginRequest>,
 ) {
     return useMutation<LoginResponse, Error, LoginRequest>({
         mutationFn: () => apiHttpClient.post<LoginResponse>("/auth/login", data),
@@ -45,10 +45,7 @@ export function useLoginMutation(
  */
 export function useCheckAccountMutation(
     data: CheckAccountRequest,
-    options?: Omit<
-        UseMutationOptions<CheckAccountResponse, Error, CheckAccountRequest>,
-        "mutationFn"
-    >,
+    options?: MutationOptionsUtil<CheckAccountResponse, CheckAccountRequest>,
 ) {
     return useMutation<CheckAccountResponse, Error, CheckAccountRequest>({
         mutationFn: () => apiHttpClient.post<CheckAccountResponse>("/auth/check-account", data),

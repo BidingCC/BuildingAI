@@ -22,8 +22,14 @@ function PasswordInput({ className, ...props }: React.ComponentProps<"input">) {
     const [showPassword, setShowPassword] = React.useState(false);
 
     return (
-        <InputGroup {...props}>
-            <InputGroupInput className={className} type={showPassword ? "text" : "password"} />
+        <InputGroup>
+            <InputGroupInput
+                className={className}
+                autoComplete={props.autoComplete}
+                {...props}
+                data-slot="input-group-control"
+                type={showPassword ? "text" : "password"}
+            />
             <InputGroupAddon align="inline-end">
                 <InputGroupButton
                     type="button"

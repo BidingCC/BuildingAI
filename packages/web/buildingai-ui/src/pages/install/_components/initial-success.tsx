@@ -9,14 +9,15 @@ const InitialSuccess = ({ step }: { step: number }) => {
       <CheckCircle2 className="size-22 text-green-500" />
       <h1 className="mt-4 text-2xl">系统初始化完成</h1>
       <p className="text-muted-foreground mt-2">您现在可以开始使用 BuildingAI 了</p>
-      <div className="mt-4 flex items-center gap-4">
-        <Button variant="outline">
+
+      <div className="mt-6 flex items-center gap-4">
+        <Button variant="outline" asChild>
           <Link to="/">
             访问前台
             <ExternalLink />
           </Link>
         </Button>
-        <Button>
+        <Button asChild>
           <Link to="/console/dashboard">
             前往工作台
             <ChevronRight />

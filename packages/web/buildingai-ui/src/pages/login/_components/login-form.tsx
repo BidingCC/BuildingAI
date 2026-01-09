@@ -30,7 +30,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@buildingai/ui/components/ui/form";
-import { Input } from "@buildingai/ui/components/ui/input";
+import { Input, PasswordInput } from "@buildingai/ui/components/ui/input";
 import { Label } from "@buildingai/ui/components/ui/label";
 import { Skeleton } from "@buildingai/ui/components/ui/skeleton";
 import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog";
@@ -193,7 +193,12 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                     <FormItem>
                       <FormLabel>Email / UserName</FormLabel>
                       <FormControl>
-                        <Input type="text" placeholder="m@example.com" {...field} />
+                        <Input
+                          type="text"
+                          placeholder="m@example.com"
+                          {...field}
+                          autoComplete="username"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -215,7 +220,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                           </a>
                         </div>
                         <FormControl>
-                          <Input type="password" autoComplete="current-password" {...field} />
+                          <PasswordInput autoComplete="current-password" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

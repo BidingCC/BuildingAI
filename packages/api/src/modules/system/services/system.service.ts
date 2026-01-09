@@ -59,6 +59,15 @@ export class SystemService {
      */
     async initialize(dto: initializeDto, ipAddress?: string, userAgent?: string) {
         try {
+            const existingUser = await this.userService.findOne({
+                where: {
+                    username: dto.username,
+                },
+            });
+
+            if (existingUser) {
+                throw HttpErrorFactory.badRequest("User already exists");
+            }
             const hashedPassword = await this.userService.hashPassword(dto.password);
 
             // 创建超级管理员账户

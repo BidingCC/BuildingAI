@@ -73,7 +73,11 @@ function FormItem({ className, ...props }: React.ComponentProps<"div">) {
 
     return (
         <FormItemContext.Provider value={{ id }}>
-            <div data-slot="form-item" className={cn("grid gap-2", className)} {...props} />
+            <div
+                data-slot="form-item"
+                className={cn("group/form-item grid gap-2", className)}
+                {...props}
+            />
         </FormItemContext.Provider>
     );
 }
@@ -85,7 +89,10 @@ function FormLabel({ className, ...props }: React.ComponentProps<typeof LabelPri
         <Label
             data-slot="form-label"
             data-error={!!error}
-            className={cn("data-[error=true]:text-destructive", className)}
+            className={cn(
+                "data-[error=true]:text-destructive group-has-[*[required]]/form-item:after:text-destructive group-has-[*[required]]/form-item:after:ml-0.5 group-has-[*[required]]/form-item:after:-translate-x-2 group-has-[*[required]]/form-item:after:content-['*']",
+                className,
+            )}
             htmlFor={formItemId}
             {...props}
         />

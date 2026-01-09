@@ -1,5 +1,9 @@
-import { useInitializeStatus } from "@buildingai/services/shared";
-import { Badge } from "@buildingai/ui/components/ui/badge";
+import {
+  type InitializeStatusRequest,
+  useCheckInitializeStatus,
+  useInitializeMutation,
+} from "@buildingai/services/shared";
+import { useAuthStore } from "@buildingai/stores";
 import { Button } from "@buildingai/ui/components/ui/button";
 import {
   DropdownMenu,
@@ -9,35 +13,79 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@buildingai/ui/components/ui/dropdown-menu";
-import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog";
 import { cn } from "@buildingai/ui/lib/utils";
-import {
-  ArrowLeft,
-  ArrowRight,
-  ChevronDown,
-  ExternalLink,
-  Languages,
-  SquareArrowOutUpRight,
-} from "lucide-react";
-import { useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import type { UserInfo } from "@buildingai/web-types";
+import { ArrowLeft, ArrowRight, ChevronDown, Languages, Loader2 } from "lucide-react";
+import { useCallback, useState } from "react";
+import { Navigate } from "react-router-dom";
 
 import AppLogo from "@/components/app-logo";
-import SplitText from "@/components/effects/split-text";
 
-import AdminAccountForm from "./_components/admiin-account-form";
+import AdminAccountForm, { type AdminAccountFormValues } from "./_components/admiin-account-form";
 import InitialSuccess from "./_components/initial-success";
-import WebsiteSettingForm from "./_components/website-setting-form";
+import WebsiteSettingForm, {
+  type WebsiteSettingFormValues,
+} from "./_components/website-setting-form";
 import WelcomeAnimate from "./_components/welcome-animate";
 
 const InstallPage = () => {
-  const { confirm } = useAlertDialog();
-  // const { data } = useInitializeStatus();
-  const [step, setStep] = useState(3);
+  const { data: initStatus } = useCheckInitializeStatus();
+  const { setToken } = useAuthStore((state) => state.authActions);
 
-  // if (data?.isInitialized) {
-  //   return <Navigate to="/" />;
-  // }
+  const [step, setStep] = useState(0);
+  const [adminFormData, setAdminFormData] = useState<AdminAccountFormValues>();
+  const [adminFormValid, setAdminFormValid] = useState(false);
+  const [websiteFormData, setWebsiteFormData] = useState<WebsiteSettingFormValues>();
+  const [websiteFormValid, setWebsiteFormValid] = useState(false);
+
+  const initializeRequest: InitializeStatusRequest = {
+    username: adminFormData?.username ?? "",
+    password: adminFormData?.password ?? "",
+    confirmPassword: adminFormData?.confirmPassword ?? "",
+    email: adminFormData?.email,
+    websiteName: websiteFormData?.websiteName,
+    websiteDescription: websiteFormData?.websiteDescription,
+    websiteLogo: websiteFormData?.websiteLogo,
+    websiteIcon: websiteFormData?.websiteIcon,
+  };
+
+  const { mutate: initialize, isPending } = useInitializeMutation(initializeRequest, {
+    onSuccess: (data) => {
+      setToken(data.token);
+      setStep(3);
+    },
+  });
+
+  const handleAdminFormChange = useCallback((values: AdminAccountFormValues, isValid: boolean) => {
+    setAdminFormData(values);
+    setAdminFormValid(isValid);
+  }, []);
+
+  const handleWebsiteFormChange = useCallback(
+    (values: WebsiteSettingFormValues, isValid: boolean) => {
+      setWebsiteFormData(values);
+      setWebsiteFormValid(isValid);
+    },
+    [],
+  );
+
+  const handleNextStep = () => {
+    if (step === 2) {
+      initialize(initializeRequest);
+    } else {
+      setStep(step + 1);
+    }
+  };
+
+  const canProceed = () => {
+    if (step === 1) return adminFormValid;
+    if (step === 2) return websiteFormValid;
+    return true;
+  };
+
+  if (initStatus?.isInitialized) {
+    return <Navigate to="/" />;
+  }
 
   return (
     <div className="bg-muted relative flex h-screen w-full items-center justify-center p-0 md:p-6">
@@ -72,22 +120,23 @@ const InstallPage = () => {
 
         <div className="flex flex-1 flex-col justify-center">
           <WelcomeAnimate step={step} setStep={setStep} />
-          <AdminAccountForm step={step} />
-          <WebsiteSettingForm step={step} />
+          <AdminAccountForm step={step} onChange={handleAdminFormChange} />
+          <WebsiteSettingForm step={step} onChange={handleWebsiteFormChange} />
           <InitialSuccess step={step} />
         </div>
 
         {step !== 0 && step !== 3 && (
           <div className="flex w-full items-center justify-between p-4 md:p-6">
-            <div>{step}/5</div>
+            <div>{step}/2</div>
             <div className="flex items-center gap-4">
-              <Button variant="outline" onClick={() => setStep(step - 1)}>
+              <Button variant="outline" onClick={() => setStep(step - 1)} disabled={isPending}>
                 <ArrowLeft />
                 上一步
               </Button>
-              <Button onClick={() => setStep(step + 1)}>
-                下一步
-                <ArrowRight />
+              <Button onClick={handleNextStep} disabled={!canProceed() || isPending}>
+                {isPending ? <Loader2 className="animate-spin" /> : null}
+                {step === 2 ? "完成安装" : "下一步"}
+                {!isPending && <ArrowRight />}
               </Button>
             </div>
           </div>

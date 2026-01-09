@@ -1,4 +1,3 @@
-import { Button } from "@buildingai/ui/components/ui/button";
 import {
   Form,
   FormControl,
@@ -8,108 +7,105 @@ import {
   FormLabel,
   FormMessage,
 } from "@buildingai/ui/components/ui/form";
-import { Input, PasswordInput } from "@buildingai/ui/components/ui/input";
+import { Input } from "@buildingai/ui/components/ui/input";
 import { cn } from "@buildingai/ui/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const formSchema = z.object({
-  username: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
+  websiteName: z.string().min(1, {
+    message: "请输入网站名称",
   }),
-  password: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
-  }),
-  confirmPassword: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
-  }),
-  email: z.string().email({
-    message: "Invalid email address.",
-  }),
+  websiteDescription: z.string().optional(),
+  websiteLogo: z.string().optional(),
+  websiteIcon: z.string().optional(),
 });
 
-type FormValues = z.infer<typeof formSchema>;
+export type WebsiteSettingFormValues = z.infer<typeof formSchema>;
 
-const WebsiteSettingForm = ({ step }: { step: number }) => {
-  const form = useForm<FormValues>({
+interface WebsiteSettingFormProps {
+  step: number;
+  defaultValues?: Partial<WebsiteSettingFormValues>;
+  onChange?: (values: WebsiteSettingFormValues, isValid: boolean) => void;
+}
+
+const WebsiteSettingForm = ({ step, defaultValues, onChange }: WebsiteSettingFormProps) => {
+  const form = useForm<WebsiteSettingFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: "",
-      password: "",
-      confirmPassword: "",
-      email: "",
+      websiteName: "",
+      websiteDescription: "",
+      websiteLogo: "",
+      websiteIcon: "",
+      ...defaultValues,
     },
+    mode: "onChange",
   });
-  const onSubmit = (values: FormValues) => {
-    console.log(values);
-  };
+
+  useEffect(() => {
+    const subscription = form.watch(async () => {
+      const isValid = await form.trigger();
+      const values = form.getValues();
+      onChange?.(values, isValid);
+    });
+    return () => subscription.unsubscribe();
+  }, [form, onChange]);
 
   return (
     <div className={cn("flex justify-center", { hidden: step !== 2 })}>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="w-xs space-y-6">
+        <form className="w-xs space-y-6">
           <h1 className="text-xl font-bold">网站基本信息</h1>
           <FormField
             control={form.control}
-            name="username"
+            name="websiteName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Username</FormLabel>
+                <FormLabel>网站名称</FormLabel>
                 <FormControl>
-                  <Input placeholder="username" {...field} autoComplete="username" />
+                  <Input required placeholder="BuildingAI" {...field} />
                 </FormControl>
-                <FormDescription>This is your public display name.</FormDescription>
+                <FormDescription>您的网站显示名称</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
-            name="password"
+            name="websiteDescription"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Password</FormLabel>
+                <FormLabel>网站描述</FormLabel>
                 <FormControl>
-                  <PasswordInput
-                    placeholder="password"
-                    {...field}
-                    type="password"
-                    autoComplete="current-password"
-                  />
+                  <Input placeholder="强大的开源企业智能体搭建平台" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
-            name="confirmPassword"
+            name="websiteLogo"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Confirm Password</FormLabel>
+                <FormLabel>网站 Logo</FormLabel>
                 <FormControl>
-                  <PasswordInput
-                    placeholder="confirm password"
-                    {...field}
-                    autoComplete="confirm-password"
-                  />
+                  <Input placeholder="https://example.com/logo.png" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
-            name="email"
+            name="websiteIcon"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>网站图标</FormLabel>
                 <FormControl>
-                  <Input placeholder="email" {...field} autoComplete="email" />
+                  <Input placeholder="https://example.com/favicon.ico" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

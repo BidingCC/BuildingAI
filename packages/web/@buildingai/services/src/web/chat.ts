@@ -1,17 +1,11 @@
-import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
+import type {
+    PaginatedQueryOptionsUtil,
+    PaginatedResponse,
+    QueryOptionsUtil,
+} from "@buildingai/web-types";
+import { useQuery } from "@tanstack/react-query";
 
 import { apiHttpClient } from "../base";
-
-/**
- * 分页响应类型
- */
-export type PaginatedResponse<T> = {
-    items: T[];
-    total: number;
-    page: number;
-    pageSize: number;
-    totalPages: number;
-};
 
 /**
  * 分页查询参数
@@ -104,7 +98,7 @@ export type QueryMessagesParams = PaginationParams & {
  */
 export function useConversationsQuery(
     params: QueryConversationsParams,
-    options?: Omit<UseQueryOptions<PaginatedResponse<ConversationRecord>>, "queryKey" | "queryFn">,
+    options?: PaginatedQueryOptionsUtil<ConversationRecord>,
 ) {
     return useQuery<PaginatedResponse<ConversationRecord>>({
         queryKey: ["conversations", params],
@@ -121,7 +115,7 @@ export function useConversationsQuery(
  */
 export function useConversationQuery(
     conversationId: string,
-    options?: Omit<UseQueryOptions<ConversationRecord>, "queryKey" | "queryFn">,
+    options?: QueryOptionsUtil<ConversationRecord>,
 ) {
     return useQuery<ConversationRecord>({
         queryKey: ["conversation", conversationId],
@@ -136,7 +130,7 @@ export function useConversationQuery(
  */
 export function useConversationMessagesQuery(
     params: QueryMessagesParams,
-    options?: Omit<UseQueryOptions<PaginatedResponse<MessageRecord>>, "queryKey" | "queryFn">,
+    options?: PaginatedQueryOptionsUtil<MessageRecord>,
 ) {
     return useQuery<PaginatedResponse<MessageRecord>>({
         queryKey: ["conversation-messages", params.conversationId, params],
