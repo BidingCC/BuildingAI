@@ -42,17 +42,12 @@ export function useChatStream(options: UseChatOptions): UseChatReturn {
   const conversationIdRef = useRef<string | undefined>(currentThreadId);
   const chatRef = useRef<Chat<UIMessage> | null>(null);
   const isFromStream = searchParams.get("fromStream") === "true";
+  const lastMessageDbIdRef = useRef<string | null>(null);
+  const pendingParentIdRef = useRef<string | null>(null);
 
   const { data: messagesData, isLoading: isLoadingMessages } = useConversationMessagesQuery(
-    {
-      conversationId: currentThreadId || "",
-      page: 1,
-      pageSize: 100,
-    },
-    {
-      enabled: !!currentThreadId && !isFromStream,
-      refetchOnWindowFocus: false,
-    },
+    { conversationId: currentThreadId || "", page: 1, pageSize: 100 },
+    { enabled: !!currentThreadId && !isFromStream, refetchOnWindowFocus: false },
   );
 
   const chat = useMemo(() => {
@@ -62,13 +57,12 @@ export function useChatStream(options: UseChatOptions): UseChatReturn {
         messages: [],
         transport: new DefaultChatTransport({
           api: `${getApiBaseUrl()}/api/ai-chat`,
-          headers: {
-            Authorization: token ? `Bearer ${token}` : "",
+          headers: { Authorization: token ? `Bearer ${token}` : "" },
+          body: () => {
+            const parentId = pendingParentIdRef.current;
+            pendingParentIdRef.current = null;
+            return { modelId, conversationId: conversationIdRef.current || undefined, parentId };
           },
-          body: () => ({
-            modelId,
-            conversationId: conversationIdRef.current || undefined,
-          }),
         }),
         onData: (data) => {
           if (data.type === "data-conversation-id" && data.data) {
@@ -80,21 +74,25 @@ export function useChatStream(options: UseChatOptions): UseChatReturn {
               navigate(`/c/${newConversationId}?fromStream=true`);
               queryClient.invalidateQueries({ queryKey: ["conversations"] });
             }
-
             onThreadCreated?.();
+          }
+
+          if (
+            (data.type === "data-user-message-id" || data.type === "data-assistant-message-id") &&
+            data.data
+          ) {
+            lastMessageDbIdRef.current = data.data as string;
           }
         },
         onFinish: () => {
+          // queryClient.invalidateQueries({ queryKey: ["conversations"] });
           setSearchParams({});
-          queryClient.invalidateQueries({ queryKey: ["conversations"] });
         },
-        onError: () => {
-          console.error("Error streaming chat");
-        },
+        onError: () => console.error("Error streaming chat"),
       });
     }
     return chatRef.current;
-  }, [modelId, token, navigate, queryClient, onThreadCreated, setSearchParams]);
+  }, [modelId, token, navigate, queryClient, onThreadCreated]);
 
   const { messages, setMessages, sendMessage, stop, status, regenerate, error } = useChat({
     chat,
@@ -110,11 +108,9 @@ export function useChatStream(options: UseChatOptions): UseChatReturn {
   }, [currentThreadId, setMessages]);
 
   useEffect(() => {
-    if (isFromStream || !currentThreadId) {
-      return;
-    }
+    if (isFromStream || !currentThreadId) return;
 
-    if (messagesData?.items) {
+    if (messagesData?.items && !messages.length) {
       const sortedMessages = messagesData.items
         .sort((a, b) => a.sequence - b.sequence)
         .map((item) => ({
@@ -127,30 +123,32 @@ export function useChatStream(options: UseChatOptions): UseChatReturn {
           },
         })) as UIMessage[];
       setMessages(sortedMessages);
+
+      if (sortedMessages.length > 0) {
+        lastMessageDbIdRef.current = sortedMessages[sortedMessages.length - 1].id;
+      }
     } else if (messagesData?.items.length === 0) {
       setMessages([]);
+      lastMessageDbIdRef.current = null;
     }
   }, [currentThreadId, messagesData, setMessages, isFromStream]);
 
   const handleRegenerate = useCallback(
-    (messageId: string) => regenerate({ messageId }),
-    [regenerate],
-  );
-
-  const handleSetMessages = useCallback(
-    (newMessages: UIMessage[]) => {
-      setMessages(newMessages);
+    (messageId: string) => {
+      const msgIndex = messages.findIndex((m) => m.id === messageId);
+      if (msgIndex > 0 && messages[msgIndex - 1].role === "user") {
+        pendingParentIdRef.current = messages[msgIndex - 1].id;
+      }
+      regenerate({ messageId });
     },
-    [setMessages],
+    [regenerate, messages],
   );
 
   const send = useCallback(
     (content: string) => {
       if (!content.trim() || status === "streaming") return;
-
-      sendMessage({
-        text: content.trim(),
-      });
+      pendingParentIdRef.current = lastMessageDbIdRef.current;
+      sendMessage({ text: content.trim() });
     },
     [sendMessage, status],
   );
@@ -167,7 +165,7 @@ export function useChatStream(options: UseChatOptions): UseChatReturn {
     status,
     streamingMessageId,
     error: error || null,
-    setMessages: handleSetMessages,
+    setMessages,
     send,
     stop,
     regenerate: handleRegenerate,

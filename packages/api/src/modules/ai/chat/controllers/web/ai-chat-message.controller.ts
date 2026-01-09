@@ -22,11 +22,8 @@ export class AiChatMessageWebController extends BaseController {
         @Req() req: Request,
     ) {
         const abortController = new AbortController();
-
         req.on("close", () => {
-            if (!res.writableEnded) {
-                abortController.abort();
-            }
+            if (!res.writableEnded) abortController.abort();
         });
 
         const conversationId = dto.id && dto.id !== "new" ? dto.id : dto.conversationId;
@@ -44,6 +41,8 @@ export class AiChatMessageWebController extends BaseController {
                 abortSignal: abortController.signal,
                 isRegenerate,
                 regenerateMessageId: dto.messageId,
+                parentId: isRegenerate ? undefined : dto.parentId,
+                regenerateParentId: isRegenerate ? dto.parentId : undefined,
             },
             res,
         );

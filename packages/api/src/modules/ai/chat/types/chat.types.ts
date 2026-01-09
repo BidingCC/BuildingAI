@@ -1,22 +1,8 @@
-/**
- * AI SDK 兼容的对话类型定义
- *
- * 这些类型与 @ai-sdk/react 的 useChat hook 完全兼容
- * 参考: https://sdk.vercel.ai/docs/reference/ai-sdk-ui/use-chat
- */
-
 import type { AiChatMessage, AiChatRecord, AiModel, AiProvider } from "@buildingai/db/entities";
 import type { FinishReason, LanguageModelUsage, ModelMessage, UIMessage } from "ai";
 
-// ==================== Re-export AI SDK Types ====================
-
 export type { FinishReason, LanguageModelUsage, ModelMessage, UIMessage };
 
-// ==================== Internal Types ====================
-
-/**
- * 模型配置（包含 Provider 信息）
- */
 export interface ModelWithProvider {
     model: AiModel;
     provider: AiProvider;
@@ -24,33 +10,19 @@ export interface ModelWithProvider {
     baseURL?: string;
 }
 
-/**
- * 对话上下文
- */
 export interface ChatContext {
-    /** 对话ID */
     conversationId: string;
-    /** 用户ID */
     userId: string;
-    /** 模型配置 */
     modelConfig: ModelWithProvider;
-    /** 是否保存对话 */
     saveConversation: boolean;
-    /** 请求开始时间 */
     startTime: number;
-    /** AbortSignal 用于取消请求 */
     abortSignal?: AbortSignal;
 }
 
-/**
- * 消息保存参数
- */
 export interface SaveMessageParams {
     conversationId: string;
     modelId: string;
-    /** UIMessage 格式的消息 */
     message: UIMessage;
-    /** Token使用情况 */
     usage?: {
         inputTokens: number;
         outputTokens: number;
@@ -59,49 +31,30 @@ export interface SaveMessageParams {
     consumedPower?: number;
     status?: AiChatMessage["status"];
     errorMessage?: string;
-    /** 父消息ID（用于消息树结构） */
     parentId?: string;
 }
 
-/**
- * 对话请求参数（内部使用）
- */
 export interface ChatCompletionParams {
-    /** 用户ID */
     userId: string;
-    /** 对话ID（可选，不传则创建新对话） */
     conversationId?: string;
-    /** 模型ID */
     modelId: string;
-    /** 消息列表 (AI SDK UIMessage 格式，前端传入，后端会转换为 ModelMessage) */
     messages: UIMessage[];
-    /** 对话标题（新建对话时） */
     title?: string;
-    /** 是否保存对话记录 */
     saveConversation?: boolean;
-    /** 系统提示词 */
     systemPrompt?: string;
-    /** MCP服务器ID列表（预留） */
     mcpServers?: string[];
-    /** AbortSignal 用于取消请求 */
     abortSignal?: AbortSignal;
-    /** 是否为重写模式 */
     isRegenerate?: boolean;
-    /** 重写模式下的消息ID */
     regenerateMessageId?: string;
+    regenerateParentId?: string;
+    parentId?: string;
 }
 
-/**
- * 对话创建结果
- */
 export interface ConversationResult {
     conversation: AiChatRecord;
     isNew: boolean;
 }
 
-/**
- * Token 使用量（符合 AI SDK LanguageModelUsage 规范）
- */
 export interface TokenUsage {
     inputTokens: number;
     outputTokens: number;
@@ -109,9 +62,6 @@ export interface TokenUsage {
     cachedTokens?: number;
 }
 
-/**
- * 将 AI SDK LanguageModelUsage 转换为内部 TokenUsage
- */
 export function convertUsage(usage: LanguageModelUsage): TokenUsage {
     return {
         inputTokens: usage.inputTokens || 0,
@@ -121,20 +71,12 @@ export function convertUsage(usage: LanguageModelUsage): TokenUsage {
     };
 }
 
-/**
- * 计费规则
- */
 export interface BillingRule {
     power: number;
     tokens: number;
 }
 
-/**
- * 计算消耗的积分
- */
 export function calculatePower(usage: TokenUsage, billingRule: BillingRule): number {
-    if (!billingRule || billingRule.tokens === 0) {
-        return 0;
-    }
+    if (!billingRule || billingRule.tokens === 0) return 0;
     return Math.ceil((usage.totalTokens / billingRule.tokens) * billingRule.power);
 }

@@ -17,6 +17,15 @@ import { ChatCompletionParams, SaveMessageParams } from "../types/chat.types";
 import { AiChatsMessageService } from "./ai-chat-message.service";
 import { AiChatRecordService } from "./ai-chat-record.service";
 
+const VALID_PART_TYPES = new Set([
+    "text",
+    "file",
+    "image",
+    "reasoning",
+    "tool-call",
+    "tool-result",
+]);
+
 @Injectable()
 export class ChatCompletionService {
     constructor(
@@ -28,66 +37,8 @@ export class ChatCompletionService {
 
     async streamChat(params: ChatCompletionParams, response: ServerResponse): Promise<void> {
         let conversationId = params.conversationId;
-        let messagesToSend = params.messages;
-        let parentId: string | undefined;
 
         try {
-            if (params.isRegenerate && params.regenerateMessageId) {
-                const regenerateMessage = await this.aiChatsMessageService.findOneById(
-                    params.regenerateMessageId,
-                );
-
-                if (!regenerateMessage) {
-                    throw HttpErrorFactory.notFound("要重写的消息不存在");
-                }
-
-                conversationId = regenerateMessage.conversationId;
-
-                // 判断 regenerateMessageId 是用户消息还是 assistant 消息
-                const messageRole = regenerateMessage.message.role;
-
-                if (messageRole === "user") {
-                    // 如果传递的是用户消息ID，直接使用它作为 parentId
-                    parentId = regenerateMessage.id;
-                } else if (messageRole === "assistant") {
-                    // 如果传递的是 assistant 消息ID，获取它的 parentId（用户消息）
-                    parentId = regenerateMessage.parentId;
-
-                    if (!parentId) {
-                        throw HttpErrorFactory.badRequest("该 assistant 消息没有父消息，无法重写");
-                    }
-                } else {
-                    throw HttpErrorFactory.badRequest("只能重写用户消息或 assistant 消息");
-                }
-
-                // 验证 parentId 对应的消息存在（应该是用户消息）
-                const parentMessage = await this.aiChatsMessageService.findOneById(parentId);
-                if (!parentMessage) {
-                    throw HttpErrorFactory.notFound("父消息不存在");
-                }
-
-                if (parentMessage.message.role !== "user") {
-                    throw HttpErrorFactory.badRequest("父消息必须是用户消息");
-                }
-
-                // 获取所有消息并截取到 parentId 位置
-                const allMessages = await this.aiChatsMessageService.findAll({
-                    where: { conversationId },
-                    order: { sequence: "ASC" },
-                });
-
-                const parentIndex = allMessages.findIndex((m) => m.id === parentId);
-                if (parentIndex === -1) {
-                    throw HttpErrorFactory.notFound("父消息在对话中不存在");
-                }
-
-                // 截取消息到 parentId 位置（包含该用户消息）
-                messagesToSend = allMessages.slice(0, parentIndex + 1).map((m) => ({
-                    ...m.message,
-                    id: m.id,
-                }));
-            }
-
             if (!conversationId && params.saveConversation !== false) {
                 conversationId = (
                     await this.aiChatRecordService.createConversation(params.userId, {
@@ -114,10 +65,12 @@ export class ChatCompletionService {
                 baseURL: getProviderSecret("baseUrl", providerSecret) || undefined,
             });
 
-            const modelMessages = await convertToModelMessages(
-                messagesToSend.map(({ id: _id, ...msg }) => msg),
-            );
+            const cleanedMessages = params.messages.map(({ id: _id, ...msg }) => ({
+                ...msg,
+                parts: msg.parts?.filter((part) => VALID_PART_TYPES.has(part.type)) || [],
+            }));
 
+            const modelMessages = await convertToModelMessages(cleanedMessages);
             const messages = params.systemPrompt
                 ? [{ role: "system" as const, content: params.systemPrompt }, ...modelMessages]
                 : modelMessages;
@@ -131,53 +84,53 @@ export class ChatCompletionService {
             const stream = createUIMessageStream({
                 execute: async ({ writer }) => {
                     if (conversationId) {
-                        writer.write({
-                            type: "data-conversation-id",
-                            data: conversationId,
-                        });
+                        writer.write({ type: "data-conversation-id", data: conversationId });
                     }
 
                     const uiMessageStream = result.toUIMessageStream({
-                        originalMessages: messagesToSend,
+                        originalMessages: params.messages,
                         onFinish: async (event) => {
-                            if (params.saveConversation !== false && conversationId) {
-                                try {
-                                    const finalResult = await result;
-                                    let userMessageId: string | undefined;
+                            if (params.saveConversation === false || !conversationId) return;
 
-                                    if (params.isRegenerate && parentId) {
-                                        userMessageId = parentId;
-                                    } else {
-                                        const userMessage =
-                                            messagesToSend[messagesToSend.length - 1];
-                                        if (userMessage && userMessage.role === "user") {
-                                            // 普通发送时：user 消息的 parentId 应该是“当前分支的最后一条 assistant”
-                                            // 这样才能在数据库中形成正确的树形分支结构（在不同版本下继续对话）
-                                            const lastAssistantId = [...messagesToSend]
-                                                .reverse()
-                                                .find((m) => m.role === "assistant")?.id;
-                                            const savedUserMessage =
-                                                await this.aiChatsMessageService.createMessage({
-                                                    conversationId,
-                                                    modelId: params.modelId,
-                                                    message: userMessage,
-                                                    parentId: lastAssistantId || undefined,
-                                                });
-                                            userMessageId = savedUserMessage.id;
-                                        }
+                            try {
+                                const finalResult = await result;
+                                let userMessageId: string | undefined;
+
+                                if (params.isRegenerate) {
+                                    userMessageId = params.regenerateParentId;
+                                } else {
+                                    const userMessage = params.messages[params.messages.length - 1];
+                                    if (userMessage?.role === "user") {
+                                        const savedUserMessage =
+                                            await this.aiChatsMessageService.createMessage({
+                                                conversationId,
+                                                modelId: params.modelId,
+                                                message: userMessage,
+                                                parentId: params.parentId,
+                                            });
+                                        userMessageId = savedUserMessage.id;
+                                        writer.write({
+                                            type: "data-user-message-id",
+                                            data: savedUserMessage.id,
+                                        });
                                     }
-
-                                    await this.saveMessage({
-                                        conversationId,
-                                        modelId: params.modelId,
-                                        message: event.responseMessage,
-                                        usage: await finalResult.usage,
-                                        status: event.isAborted ? "failed" : "completed",
-                                        parentId: userMessageId,
-                                    });
-                                } catch (error) {
-                                    console.error("保存消息失败:", error);
                                 }
+
+                                const savedAssistantMessage = await this.saveMessage({
+                                    conversationId,
+                                    modelId: params.modelId,
+                                    message: event.responseMessage,
+                                    usage: await finalResult.usage,
+                                    status: event.isAborted ? "failed" : "completed",
+                                    parentId: userMessageId,
+                                });
+
+                                writer.write({
+                                    type: "data-assistant-message-id",
+                                    data: savedAssistantMessage.id,
+                                });
+                            } catch (error) {
+                                console.error("保存消息失败:", error);
                             }
                         },
                         onError: (error) =>
@@ -187,10 +140,7 @@ export class ChatCompletionService {
                 },
             });
 
-            pipeUIMessageStreamToResponse({
-                stream,
-                response,
-            });
+            pipeUIMessageStreamToResponse({ stream, response });
         } catch (error) {
             console.error("streamChat error:", error);
             this.handleError(error, response);

@@ -31,7 +31,10 @@ export class ChatRequestDto {
     @IsOptional()
     trigger?: string;
 
-    @IsUUID(4, { message: "消息ID必须是有效的UUID格式" })
     @IsOptional()
     messageId?: string;
+
+    @IsString()
+    @IsOptional()
+    parentId?: string;
 }

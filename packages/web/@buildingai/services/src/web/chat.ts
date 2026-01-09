@@ -188,7 +188,7 @@ export function useConversationMessagesQuery(
                     },
                 },
             ),
-        enabled: !!params.conversationId,
         ...options,
+        enabled: options?.enabled ?? false,
     });
 }
