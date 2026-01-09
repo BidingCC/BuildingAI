@@ -30,7 +30,8 @@ export class AiChatMessage extends BaseEntity {
     sequence: number;
 
     @Column({
-        type: "uuid",
+        type: "varchar",
+        length: 36,
         nullable: true,
         comment: "父消息ID（用于消息树结构）",
     })
