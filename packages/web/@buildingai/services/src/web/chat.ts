@@ -1,3 +1,4 @@
+import { useAuthStore } from "@buildingai/stores";
 import type {
     PaginatedQueryOptionsUtil,
     PaginatedResponse,
@@ -141,6 +142,8 @@ export function useConversationsQuery(
     params: QueryConversationsParams,
     options?: PaginatedQueryOptionsUtil<ConversationRecord>,
 ) {
+    const { isLogin } = useAuthStore((state) => state.authActions);
+    if (!isLogin()) return { data: { items: [], total: 0 } };
     return useQuery<PaginatedResponse<ConversationRecord>>({
         queryKey: ["conversations", params],
         queryFn: () =>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuthStore } from "@buildingai/stores";
 import { Button } from "@buildingai/ui/components/ui/button";
 import {
   Collapsible,
@@ -173,6 +174,7 @@ function ChatHistoryMenuItem({
 }) {
   const { pathname } = useLocation();
   const { state } = useSidebar();
+  const { isLogin } = useAuthStore((state) => state.authActions);
   const isItemActive = (path?: string) => path === pathname;
 
   return (
@@ -256,18 +258,20 @@ function ChatHistoryMenuItem({
               )}
             </SidebarMenuSubItem>
           ))}
-          <SidebarMenuSubItem>
-            <SidebarMenuSubButton onClick={onOpenDialog} className="h-9 cursor-pointer">
-              <span className="text-muted-foreground line-clamp-1 text-xs">查看全部</span>
-              <span className="sr-only">查看全部</span>
-            </SidebarMenuSubButton>
-            <SidebarMenuAction
-              showOnHover
-              className="group-hover/menu-sub-item:opacity-100! md:group-focus-within/menu-item:opacity-0 md:group-hover/menu-item:opacity-0"
-            >
-              <ArrowUpRight className="text-muted-foreground size-3" />
-            </SidebarMenuAction>
-          </SidebarMenuSubItem>
+          {isLogin() && (
+            <SidebarMenuSubItem>
+              <SidebarMenuSubButton onClick={onOpenDialog} className="h-9 cursor-pointer">
+                <span className="text-muted-foreground line-clamp-1 text-xs">查看全部</span>
+                <span className="sr-only">查看全部</span>
+              </SidebarMenuSubButton>
+              <SidebarMenuAction
+                showOnHover
+                className="group-hover/menu-sub-item:opacity-100! md:group-focus-within/menu-item:opacity-0 md:group-hover/menu-item:opacity-0"
+              >
+                <ArrowUpRight className="text-muted-foreground size-3" />
+              </SidebarMenuAction>
+            </SidebarMenuSubItem>
+          )}
         </SidebarMenuSub>
       </CollapsibleContent>
     </SidebarMenuItem>
@@ -335,6 +339,7 @@ function LinkMenuItem({ item, isActive }: { item: NavItem; isActive: boolean }) 
 
 export function DefaultNavMain({ items }: { items: NavItem[] }) {
   const { pathname } = useLocation();
+  const { isLogin } = useAuthStore((state) => state.authActions);
   const [open, setOpen] = useState(false);
 
   const isItemActive = (path?: string) => path === pathname;
@@ -350,7 +355,7 @@ export function DefaultNavMain({ items }: { items: NavItem[] }) {
         <ChatHistoryMenuItem
           item={item}
           isActive={hasActiveChild(item.items)}
-          onOpenDialog={() => setOpen(true)}
+          onOpenDialog={() => isLogin() && setOpen(true)}
         />
       );
     }
