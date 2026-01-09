@@ -2,7 +2,7 @@
 // import { DotLottieVue } from "@lottiefiles/dotlottie-vue";
 
 import { SMS_TYPE } from "@buildingai/constants/web";
-import type { LoginResponse } from "@buildingai/service/webapi/user";
+import { apiAuthLogin, type LoginResponse } from "@buildingai/service/webapi/user";
 import { apiSmsSend } from "@buildingai/service/webapi/user";
 
 const props = defineProps<{
@@ -104,7 +104,7 @@ onMounted(() => {
 
 <template>
     <div class="grid h-full grid-cols-2">
-        <div class="flex w-[300px] flex-col justify-between p-8">
+        <div class="flex w-[300px] flex-col justify-between">
             <div>
                 <div class="mb-6">
                     <UButton icon="i-lucide-chevron-left" @click="emits('back')" />

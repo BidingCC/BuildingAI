@@ -343,6 +343,17 @@ export function apiSmsSend(params?: {
     return useWebPost("/sms/sendCode", params);
 }
 
+export function apiSmsLogin(params: {
+    /** Scene type */
+    scene: string;
+    /** Mobile number */
+    mobile: string;
+    /** SMS code */
+    code: string;
+}) {
+    return useWebPost("/sms/login", params);
+}
+
 // ==================== Account Authentication Related APIs ====================
 
 /**

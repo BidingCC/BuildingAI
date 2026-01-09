@@ -67,7 +67,7 @@ const { lockFn: onPhoneSubmit, isLock } = useLockFn(async (event: FormSubmitEven
 </script>
 
 <template>
-    <div class="px-8 pt-8">
+    <div>
         <Motion
             :initial="{ opacity: 0, y: 10 }"
             :animate="{ opacity: 1, y: 0 }"
