@@ -18,7 +18,9 @@ body {
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;
 }
-
+.chat-scroll > div {
+  overflow-y: scroll;
+}
 .chat-scroll:hover {
   scrollbar-color: var(--border) transparent;
 }

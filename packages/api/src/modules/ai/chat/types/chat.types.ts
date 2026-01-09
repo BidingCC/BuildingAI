@@ -48,19 +48,19 @@ export interface ChatContext {
 export interface SaveMessageParams {
     conversationId: string;
     modelId: string;
-    role: AiChatMessage["role"];
-    content: string;
+    /** UIMessage 格式的消息 */
+    message: UIMessage;
+    /** Token使用情况 */
     usage?: {
-        promptTokens: number;
-        completionTokens: number;
+        inputTokens: number;
+        outputTokens: number;
         totalTokens: number;
     };
-    finishReason?: FinishReason;
     consumedPower?: number;
-    processingTime?: number;
     status?: AiChatMessage["status"];
     errorMessage?: string;
-    parentMessageId?: string;
+    /** 父消息ID（用于消息树结构） */
+    parentId?: string;
 }
 
 /**
@@ -73,7 +73,7 @@ export interface ChatCompletionParams {
     conversationId?: string;
     /** 模型ID */
     modelId: string;
-    /** 消息列表 (AI SDK UIMessage 格式) */
+    /** 消息列表 (AI SDK UIMessage 格式，前端传入，后端会转换为 ModelMessage) */
     messages: UIMessage[];
     /** 对话标题（新建对话时） */
     title?: string;
@@ -85,6 +85,10 @@ export interface ChatCompletionParams {
     mcpServers?: string[];
     /** AbortSignal 用于取消请求 */
     abortSignal?: AbortSignal;
+    /** 是否为重写模式 */
+    isRegenerate?: boolean;
+    /** 重写模式下的消息ID */
+    regenerateMessageId?: string;
 }
 
 /**
@@ -96,11 +100,11 @@ export interface ConversationResult {
 }
 
 /**
- * Token 使用量（内部格式）
+ * Token 使用量（符合 AI SDK LanguageModelUsage 规范）
  */
 export interface TokenUsage {
-    promptTokens: number;
-    completionTokens: number;
+    inputTokens: number;
+    outputTokens: number;
     totalTokens: number;
     cachedTokens?: number;
 }
@@ -110,8 +114,8 @@ export interface TokenUsage {
  */
 export function convertUsage(usage: LanguageModelUsage): TokenUsage {
     return {
-        promptTokens: usage.inputTokens || 0,
-        completionTokens: usage.outputTokens || 0,
+        inputTokens: usage.inputTokens || 0,
+        outputTokens: usage.outputTokens || 0,
         totalTokens: usage.totalTokens || 0,
         cachedTokens: usage.inputTokenDetails?.cacheReadTokens,
     };

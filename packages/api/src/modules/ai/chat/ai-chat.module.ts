@@ -26,9 +26,9 @@ import { AiProviderService } from "../provider/services/ai-provider.service";
 import { AiChatRecordConsoleController } from "./controllers/console/ai-chat-record.controller";
 import { AiChatMessageWebController } from "./controllers/web/ai-chat-message.controller";
 import { AiChatRecordWebController } from "./controllers/web/ai-chat-record.controller";
+import { ChatCompletionService } from "./services/ai-chat-completion.service";
 import { AiChatsMessageService } from "./services/ai-chat-message.service";
 import { AiChatRecordService } from "./services/ai-chat-record.service";
-import { ChatCompletionService } from "./services/chat-completion.service";
 import { ChatConfigService } from "./services/chat-config.service";
 
 /**

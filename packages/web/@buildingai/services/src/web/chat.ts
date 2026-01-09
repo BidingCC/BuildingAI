@@ -55,39 +55,80 @@ export type QueryConversationsParams = PaginationParams & {
 };
 
 /**
+ * 消息版本类型
+ */
+export type MessageVersion = {
+    id: string;
+    content: string;
+    attachments?: Array<{
+        type: "file";
+        url: string;
+        mediaType?: string;
+        filename?: string;
+    }>;
+};
+
+/**
+ * 信息来源类型
+ */
+export type MessageSource = {
+    href: string;
+    title: string;
+};
+
+/**
+ * AI推理过程类型
+ */
+export type MessageReasoning = {
+    content: string;
+    duration: number;
+};
+
+/**
+ * 工具调用类型
+ */
+export type MessageToolCall = {
+    name: string;
+    description: string;
+    status:
+        | "input-streaming"
+        | "input-available"
+        | "approval-requested"
+        | "approval-responded"
+        | "output-available"
+        | "output-error"
+        | "output-denied";
+    parameters: Record<string, unknown>;
+    result: string | undefined;
+    error: string | undefined;
+};
+
+/**
  * 消息记录类型
  */
 export type MessageRecord = {
     id: string;
     conversationId: string;
     modelId: string;
-    role: "system" | "user" | "assistant" | "tool" | "function" | "data";
-    name?: string | null;
-    toolCallId?: string | null;
-    parentMessageId?: string | null;
-    content: any;
-    messageType: "text" | "image" | "file";
-    attachments?: any[] | null;
-    usage?: {
-        promptTokens?: number;
-        completionTokens?: number;
-        totalTokens?: number;
-        cachedTokens?: number;
-    } | null;
-    finishReason?: "stop" | "length" | "tool-calls" | "content-filter" | "error" | "other" | null;
-    userConsumedPower?: number | null;
-    status: "sending" | "streaming" | "completed" | "failed" | "cancelled";
-    errorMessage?: string | null;
+    role: "user" | "assistant";
     sequence: number;
-    processingTime?: number | null;
-    rawResponse?: Record<string, any> | null;
-    metadata?: Record<string, any> | null;
-    toolCalls?: any[] | null;
-    reasoning?: {
-        content?: string;
-        startTime?: number;
-        endTime?: number;
+    parentId?: string | null;
+    message: {
+        role: "user" | "assistant" | "system" | "tool";
+        parts: Array<{
+            type: string;
+            [key: string]: any;
+        }>;
+        metadata?: Record<string, any>;
+    };
+    status: "streaming" | "completed" | "failed";
+    errorMessage?: string | null;
+    usage?: {
+        inputTokens?: number;
+        outputTokens?: number;
+        totalTokens?: number;
     } | null;
+    userConsumedPower?: number | null;
     createdAt: string;
     updatedAt: string;
 };

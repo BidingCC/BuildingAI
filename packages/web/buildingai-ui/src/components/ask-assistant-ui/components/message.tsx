@@ -4,47 +4,53 @@ import {
   MessageActions as AIMessageActions,
   MessageAttachment as AIMessageAttachment,
   MessageAttachments as AIMessageAttachments,
-  MessageBranch as AIMessageBranch,
-  MessageBranchContent as AIMessageBranchContent,
-  MessageBranchNext as AIMessageBranchNext,
-  MessageBranchPage as AIMessageBranchPage,
-  MessageBranchPrevious as AIMessageBranchPrevious,
-  MessageBranchSelector as AIMessageBranchSelector,
   MessageContent as AIMessageContent,
   MessageResponse as AIMessageResponse,
   MessageToolbar as AIMessageToolbar,
 } from "@buildingai/ui/components/ai-elements/message";
+import {
+  Reasoning,
+  ReasoningContent,
+  ReasoningTrigger,
+} from "@buildingai/ui/components/ai-elements/reasoning";
+import {
+  Source,
+  Sources,
+  SourcesContent,
+  SourcesTrigger,
+} from "@buildingai/ui/components/ai-elements/sources";
+import {
+  Tool,
+  ToolContent,
+  ToolHeader,
+  ToolInput,
+  ToolOutput,
+} from "@buildingai/ui/components/ai-elements/tool";
+import { Alert, AlertDescription, AlertTitle } from "@buildingai/ui/components/ui/alert";
+import { Button } from "@buildingai/ui/components/ui/button";
+import { ButtonGroup, ButtonGroupText } from "@buildingai/ui/components/ui/button-group";
+import type { UIMessage } from "ai";
+import { AlertCircleIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { CopyIcon, RefreshCcwIcon, ThumbsDownIcon, ThumbsUpIcon } from "lucide-react";
-import { memo, useCallback } from "react";
+import { memo, useCallback, useMemo } from "react";
 
-export type MessageAttachmentType = {
-  type: "file";
-  url: string;
-  mediaType?: string;
-  filename?: string;
-};
-
-export type MessageVersion = {
-  id: string;
-  content: string;
-};
-
-export interface MessageData {
-  key: string;
-  from: "user" | "assistant";
-  versions?: MessageVersion[];
-  content?: string;
-  attachments?: MessageAttachmentType[];
-}
+import { convertUIMessageToMessage } from "../message-converter";
+import { StreamingIndicator } from "./streaming-indicator";
 
 export interface MessageProps {
-  message: MessageData;
+  message: UIMessage;
   liked?: boolean;
   disliked?: boolean;
   onLikeChange?: (liked: boolean) => void;
   onDislikeChange?: (disliked: boolean) => void;
   onRetry?: () => void;
   onCopy?: (content: string) => void;
+  isStreaming?: boolean;
+  branchNumber?: number;
+  branchCount?: number;
+  branches?: string[];
+  onSwitchBranch?: (messageId: string) => void;
+  error?: string;
 }
 
 export const Message = memo(
@@ -56,7 +62,15 @@ export const Message = memo(
     onDislikeChange,
     onRetry,
     onCopy,
+    isStreaming = false,
+    branchNumber = 1,
+    branchCount = 1,
+    branches = [],
+    onSwitchBranch,
+    error,
   }: MessageProps) => {
+    const messageData = useMemo(() => convertUIMessageToMessage(message), [message]);
+
     const handleCopy = useCallback(
       (content: string) => {
         navigator.clipboard.writeText(content);
@@ -77,122 +91,191 @@ export const Message = memo(
       onDislikeChange?.(!disliked);
     }, [onDislikeChange, disliked]);
 
-    const messageContent =
-      message.versions && message.versions.length > 0
-        ? message.versions[0].content
-        : message.content || "";
+    const handleBranchPrevious = useCallback(() => {
+      if (branchNumber > 1 && branches.length > 0) {
+        const prevBranchId = branches[branchNumber - 2];
+        if (prevBranchId && onSwitchBranch) {
+          onSwitchBranch(prevBranchId);
+        }
+      }
+    }, [branchNumber, branches, onSwitchBranch]);
+
+    const handleBranchNext = useCallback(() => {
+      if (branchNumber < branchCount && branches.length > 0) {
+        const nextBranchId = branches[branchNumber];
+        if (nextBranchId && onSwitchBranch) {
+          onSwitchBranch(nextBranchId);
+        }
+      }
+    }, [branchNumber, branchCount, branches, onSwitchBranch]);
+
+    const activeIndex = messageData.activeVersionIndex ?? 0;
+    // 确保 versions 数组存在且不为空
+    if (!messageData.versions || messageData.versions.length === 0) {
+      return null;
+    }
+    const activeVersion = messageData.versions[activeIndex] || messageData.versions[0];
+    const messageContent = activeVersion?.content || "";
+    const attachments = activeVersion?.attachments;
+
+    // 检查是否有正在重写的版本（id 以 regenerating- 开头）
+    const isRegenerating = messageData.versions.some((v) => v.id.startsWith("regenerating-"));
+    const isEmpty = !messageContent || messageContent.trim() === "";
+    const showStreamingIndicator =
+      messageData.from === "assistant" && (isStreaming || isRegenerating) && isEmpty;
+    const isStreamingOrRegenerating = isStreaming || isRegenerating;
+
+    // 检查是否有多个分支（基于传入的分支信息）
+    const hasMultipleBranches = branchCount > 1;
+
+    // 渲染消息内容
+    const renderMessageContent = (content: string, versionAttachments?: typeof attachments) => (
+      <>
+        {versionAttachments && versionAttachments.length > 0 && (
+          <AIMessageAttachments className="mb-2">
+            {versionAttachments.map((attachment) => (
+              <AIMessageAttachment
+                data={{
+                  ...attachment,
+                  mediaType: attachment.mediaType ?? "",
+                }}
+                key={attachment.url}
+              />
+            ))}
+          </AIMessageAttachments>
+        )}
+        <AIMessageContent>
+          {showStreamingIndicator ? (
+            <StreamingIndicator />
+          ) : messageData.from === "assistant" ? (
+            <AIMessageResponse>{content}</AIMessageResponse>
+          ) : (
+            content
+          )}
+        </AIMessageContent>
+      </>
+    );
+
+    // 渲染消息操作按钮
+    const renderActions = () => (
+      <AIMessageActions>
+        <AIMessageAction label="Retry" onClick={handleRetry} tooltip="重新生成">
+          <RefreshCcwIcon className="size-4" />
+        </AIMessageAction>
+        <AIMessageAction label="Like" onClick={handleLike} tooltip="喜欢">
+          <ThumbsUpIcon className="size-4" fill={liked ? "currentColor" : "none"} />
+        </AIMessageAction>
+        <AIMessageAction label="Dislike" onClick={handleDislike} tooltip="不喜欢">
+          <ThumbsDownIcon className="size-4" fill={disliked ? "currentColor" : "none"} />
+        </AIMessageAction>
+        <AIMessageAction label="Copy" onClick={() => handleCopy(messageContent)} tooltip="复制">
+          <CopyIcon className="size-4" />
+        </AIMessageAction>
+      </AIMessageActions>
+    );
+
+    // 渲染分支选择器
+    const renderBranchSelector = () => {
+      if (!hasMultipleBranches) return null;
+
+      return (
+        <ButtonGroup
+          className="[&>*:not(:first-child)]:rounded-l-md [&>*:not(:last-child)]:rounded-r-md"
+          orientation="horizontal"
+        >
+          <Button
+            aria-label="Previous branch"
+            disabled={branchNumber <= 1}
+            onClick={handleBranchPrevious}
+            size="icon-sm"
+            type="button"
+            variant="ghost"
+          >
+            <ChevronLeftIcon size={14} />
+          </Button>
+          <ButtonGroupText className="text-muted-foreground border-none bg-transparent shadow-none">
+            {`${branchNumber}/${branchCount}`}
+          </ButtonGroupText>
+          <Button
+            aria-label="Next branch"
+            disabled={branchNumber >= branchCount}
+            onClick={handleBranchNext}
+            size="icon-sm"
+            type="button"
+            variant="ghost"
+          >
+            <ChevronRightIcon size={14} />
+          </Button>
+        </ButtonGroup>
+      );
+    };
 
     return (
-      <AIMessage from={message.from} key={message.key}>
-        {message.versions?.length && message.versions.length > 1 ? (
-          <AIMessageBranch defaultBranch={0} key={message.key} className="min-w-0">
-            <AIMessageBranchContent>
-              {message.versions?.map((version) => (
-                <AIMessageContent key={version.id}>
-                  <AIMessageResponse>{version.content}</AIMessageResponse>
-                </AIMessageContent>
-              ))}
-            </AIMessageBranchContent>
-            {message.from === "assistant" && (
-              <div className="mt-4 contents">
-                <AIMessageToolbar className="mt-0 min-w-0">
-                  <AIMessageBranchSelector from={message.from}>
-                    <AIMessageBranchPrevious />
-                    <AIMessageBranchPage />
-                    <AIMessageBranchNext />
-                  </AIMessageBranchSelector>
-                  <AIMessageActions>
-                    <AIMessageAction
-                      label="Retry"
-                      onClick={handleRetry}
-                      tooltip="Regenerate response"
-                    >
-                      <RefreshCcwIcon className="size-4" />
-                    </AIMessageAction>
-                    <AIMessageAction label="Like" onClick={handleLike} tooltip="Like this response">
-                      <ThumbsUpIcon className="size-4" fill={liked ? "currentColor" : "none"} />
-                    </AIMessageAction>
-                    <AIMessageAction
-                      label="Dislike"
-                      onClick={handleDislike}
-                      tooltip="Dislike this response"
-                    >
-                      <ThumbsDownIcon
-                        className="size-4"
-                        fill={disliked ? "currentColor" : "none"}
-                      />
-                    </AIMessageAction>
-                    <AIMessageAction
-                      label="Copy"
-                      onClick={() => handleCopy(message.versions?.find((v) => v.id)?.content || "")}
-                      tooltip="Copy to clipboard"
-                    >
-                      <CopyIcon className="size-4" />
-                    </AIMessageAction>
-                  </AIMessageActions>
-                </AIMessageToolbar>
-              </div>
-            )}
-          </AIMessageBranch>
-        ) : (
-          <div key={message.key}>
-            {message.attachments && message.attachments.length > 0 && (
-              <AIMessageAttachments className="mb-2">
-                {message.attachments.map((attachment) => (
-                  <AIMessageAttachment
-                    data={{
-                      ...attachment,
-                      mediaType: attachment.mediaType ?? "",
-                    }}
-                    key={attachment.url}
-                  />
-                ))}
-              </AIMessageAttachments>
-            )}
-            <AIMessageContent>
-              {message.from === "assistant" ? (
-                <AIMessageResponse>{messageContent}</AIMessageResponse>
-              ) : (
-                messageContent
-              )}
-            </AIMessageContent>
-            {message.from === "assistant" && message.versions && (
-              <AIMessageActions>
-                <AIMessageAction label="Retry" onClick={handleRetry} tooltip="Regenerate response">
-                  <RefreshCcwIcon className="size-4" />
-                </AIMessageAction>
-                <AIMessageAction label="Like" onClick={handleLike} tooltip="Like this response">
-                  <ThumbsUpIcon className="size-4" fill={liked ? "currentColor" : "none"} />
-                </AIMessageAction>
-                <AIMessageAction
-                  label="Dislike"
-                  onClick={handleDislike}
-                  tooltip="Dislike this response"
-                >
-                  <ThumbsDownIcon className="size-4" fill={disliked ? "currentColor" : "none"} />
-                </AIMessageAction>
-                <AIMessageAction
-                  label="Copy"
-                  onClick={() => handleCopy(messageContent)}
-                  tooltip="Copy to clipboard"
-                >
-                  <CopyIcon className="size-4" />
-                </AIMessageAction>
-              </AIMessageActions>
-            )}
-          </div>
+      <AIMessage from={messageData.from} key={messageData.key}>
+        {/* AI 推理过程 */}
+        {messageData.from === "assistant" && messageData.reasoning && (
+          <Reasoning duration={messageData.reasoning.duration} isStreaming={isStreaming}>
+            <ReasoningTrigger />
+            <ReasoningContent>{messageData.reasoning.content}</ReasoningContent>
+          </Reasoning>
         )}
+
+        {/* 信息来源 */}
+        {messageData.from === "assistant" &&
+          messageData.sources &&
+          messageData.sources.length > 0 && (
+            <Sources>
+              <SourcesTrigger count={messageData.sources.length} />
+              <SourcesContent>
+                {messageData.sources.map((source) => (
+                  <Source href={source.href} key={source.href} title={source.title} />
+                ))}
+              </SourcesContent>
+            </Sources>
+          )}
+
+        {/* 工具调用 */}
+        {messageData.from === "assistant" &&
+          messageData.tools &&
+          messageData.tools.map((tool, index) => (
+            <Tool key={`${tool.name}-${index}`}>
+              <ToolHeader state={tool.status} title={tool.name} type="tool-invocation" />
+              <ToolContent>
+                <ToolInput input={tool.parameters} />
+                <ToolOutput errorText={tool.error} output={tool.result} />
+              </ToolContent>
+            </Tool>
+          ))}
+
+        {/* 消息内容 */}
+        <div className="min-w-0">
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircleIcon className="size-4" />
+              <AlertTitle>chat error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          {renderMessageContent(messageContent, attachments)}
+          {messageData.from === "assistant" && (
+            <AIMessageToolbar className="mt-4 min-w-0">
+              {renderBranchSelector()}
+              {!isStreamingOrRegenerating && renderActions()}
+            </AIMessageToolbar>
+          )}
+        </div>
       </AIMessage>
     );
   },
   (prevProps, nextProps) => {
     return (
-      prevProps.message.key === nextProps.message.key &&
-      prevProps.message.content === nextProps.message.content &&
-      prevProps.message.versions === nextProps.message.versions &&
-      prevProps.message.attachments === nextProps.message.attachments &&
+      prevProps.message.id === nextProps.message.id &&
+      prevProps.message.parts === nextProps.message.parts &&
       prevProps.liked === nextProps.liked &&
-      prevProps.disliked === nextProps.disliked
+      prevProps.disliked === nextProps.disliked &&
+      prevProps.isStreaming === nextProps.isStreaming &&
+      prevProps.branchNumber === nextProps.branchNumber &&
+      prevProps.branchCount === nextProps.branchCount
     );
   },
 );

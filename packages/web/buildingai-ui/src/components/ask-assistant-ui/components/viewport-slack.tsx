@@ -58,7 +58,7 @@ export const ViewportSlack = ({
       const offset = parseCssLength(fillClampOffset, el);
       const clampAdjustment = offset;
 
-      const minHeight = Math.max(0, viewportHeight - bottomAreaHeight - clampAdjustment);
+      const minHeight = Math.max(0, viewportHeight - bottomAreaHeight - clampAdjustment - 50);
       el.style.minHeight = `${minHeight}px`;
       el.style.flexShrink = "0";
       el.style.transition = "min-height 0s";

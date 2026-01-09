@@ -1,10 +1,9 @@
+import type { ToolUIPart, UIMessage } from "ai";
 import type { ReactNode, RefObject } from "react";
 
-export interface MessageVersion {
-  id: string;
-  content: string;
-}
-
+/**
+ * 消息附件类型
+ */
 export interface MessageAttachment {
   type: "file";
   url: string;
@@ -12,12 +11,54 @@ export interface MessageAttachment {
   filename?: string;
 }
 
+/**
+ * 消息版本类型（支持分支对话和多模态）
+ */
+export interface MessageVersion {
+  id: string;
+  content: string;
+  attachments?: MessageAttachment[];
+}
+
+/**
+ * 信息来源类型
+ */
+export interface MessageSource {
+  href: string;
+  title: string;
+}
+
+/**
+ * AI推理过程类型
+ */
+export interface MessageReasoning {
+  content: string;
+  duration: number;
+}
+
+/**
+ * 工具调用类型
+ */
+export interface MessageToolCall {
+  name: string;
+  description: string;
+  status: ToolUIPart["state"];
+  parameters: Record<string, unknown>;
+  result: string | undefined;
+  error: string | undefined;
+}
+
+/**
+ * 消息类型
+ */
 export interface Message {
   key: string;
   from: "user" | "assistant";
-  content?: string;
-  versions?: MessageVersion[];
-  attachments?: MessageAttachment[];
+  versions: MessageVersion[];
+  activeVersionIndex?: number;
+  sources?: MessageSource[];
+  reasoning?: MessageReasoning;
+  tools?: MessageToolCall[];
 }
 
 export interface Thread {
@@ -42,19 +83,37 @@ export interface Suggestion {
 
 export type ChatStatus = "ready" | "submitted" | "streaming" | "error";
 
+/**
+ * 展示用的消息，包含分支信息
+ */
+export interface DisplayMessage {
+  stableKey: string;
+  id: string;
+  message: UIMessage;
+  parentId: string | null;
+  sequence: number;
+  branchNumber: number;
+  branchCount: number;
+  branches: string[];
+  isLast: boolean;
+}
+
 export interface AssistantContextValue {
-  messages: Message[];
+  /** 当前活跃分支的消息列表 */
+  messages: UIMessage[];
+  /** 当前活跃分支的展示消息列表（包含分支信息） */
+  displayMessages: DisplayMessage[];
   threads: Thread[];
   currentThreadId?: string;
   status: ChatStatus;
   streamingMessageId: string | null;
   isLoading: boolean;
+  error: Error | null;
 
   models: Model[];
   selectedModelId: string;
   suggestions: Suggestion[];
 
-  sidebarOpen: boolean;
   liked: Record<string, boolean>;
   disliked: Record<string, boolean>;
 
@@ -62,10 +121,8 @@ export interface AssistantContextValue {
 
   onSend: (content: string) => void;
   onStop: () => void;
-  onSelectThread: (id: string) => void;
-  onDeleteThread: (id: string) => void;
-  onNewChat: () => void;
-  onToggleSidebar: () => void;
+  onRegenerate: (messageKey: string) => void;
+  onSwitchBranch: (messageId: string) => void;
   onSelectModel: (id: string) => void;
   onLike: (messageKey: string, liked: boolean) => void;
   onDislike: (messageKey: string, disliked: boolean) => void;
