@@ -2,8 +2,12 @@
 export type {
   AssistantContextValue,
   ChatStatus,
+  DisplayMessage,
   Message,
   MessageAttachment,
+  MessageReasoning,
+  MessageSource,
+  MessageToolCall,
   MessageVersion,
   Model,
   Suggestion,
@@ -17,21 +21,20 @@ export { AssistantContext, AssistantProvider, useAssistantContext } from "./cont
 export type { UseAssistantOptions } from "./use-assistant";
 export { useAssistant } from "./use-assistant";
 export type { UseChatOptions, UseChatReturn } from "./use-chat";
-export { useChat } from "./use-chat";
-export type { UseThreadsReturn } from "./use-threads";
-export { useThreads } from "./use-threads";
+export { useChatStream } from "./use-chat";
+
+// Utils
+export type { RawMessageRecord } from "./utils/message-repository";
+export { MessageRepository } from "./utils/message-repository";
+export type { UseMessageRepositoryReturn } from "./utils/use-message-repository";
+export { useMessageRepository } from "./utils/use-message-repository";
 
 // Main components
 export type { ThreadProps } from "./thread";
 export { Thread } from "./thread";
 
 // Sub components
-export type {
-  MessageAttachmentType,
-  MessageData,
-  MessageProps,
-  MessageVersion as MessageVersionType,
-} from "./components/message";
+export type { MessageProps } from "./components/message";
 export { Message as MessageComponent } from "./components/message";
 export type { ModelData, ModelSelectorProps } from "./components/model-selector";
 export { ModelSelector } from "./components/model-selector";

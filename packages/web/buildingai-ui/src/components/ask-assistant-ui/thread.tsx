@@ -8,7 +8,7 @@ import { Button } from "@buildingai/ui/components/ui/button";
 import { SidebarTrigger } from "@buildingai/ui/components/ui/sidebar";
 import { ShareIcon } from "lucide-react";
 import type { FormEvent, ReactNode } from "react";
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { Message } from "./components/message";
@@ -17,7 +17,6 @@ import { PromptInput } from "./components/prompt-input";
 import { Suggestions } from "./components/suggestions";
 import { ViewportSlack } from "./components/viewport-slack";
 import { useAssistantContext } from "./context";
-import type { Message as MessageType } from "./types";
 
 export interface ThreadProps {
   title?: string;
@@ -27,7 +26,7 @@ export interface ThreadProps {
 
 export const Thread = memo(function Thread({ title, onShare, welcomeMessage }: ThreadProps) {
   const {
-    messages,
+    displayMessages,
     models,
     selectedModelId,
     suggestions,
@@ -35,37 +34,20 @@ export const Thread = memo(function Thread({ title, onShare, welcomeMessage }: T
     liked,
     isLoading,
     disliked,
-    // sidebarOpen,
     textareaRef,
+    streamingMessageId,
+    error,
     onSend,
-    // onToggleSidebar,
     onSelectModel,
     onLike,
     onDislike,
+    onRegenerate,
+    onSwitchBranch,
   } = useAssistantContext();
 
   const [modelSelectorOpen, setModelSelectorOpen] = useState(false);
 
-  const conversationPairs = useMemo(() => {
-    const pairs: Array<{ userMessage: MessageType; assistantMessage: MessageType }> = [];
-    let currentUserMessage: MessageType | null = null;
-
-    for (const message of messages) {
-      if (message.from === "user") {
-        currentUserMessage = message;
-      } else if (message.from === "assistant" && currentUserMessage) {
-        pairs.push({
-          userMessage: currentUserMessage,
-          assistantMessage: message,
-        });
-        currentUserMessage = null;
-      }
-    }
-
-    return pairs;
-  }, [messages]);
-
-  const hasMessages = conversationPairs.length > 0;
+  const hasMessages = displayMessages.length > 0;
 
   const bottomAreaRef = useRef<HTMLDivElement>(null);
   const [bottomAreaHeight, setBottomAreaHeight] = useState(0);
@@ -131,18 +113,13 @@ export const Thread = memo(function Thread({ title, onShare, welcomeMessage }: T
     [onSend],
   );
 
+  const lastAssistantId =
+    displayMessages.filter((msg) => msg.message.role === "assistant").pop()?.id || null;
+
   return (
     <div className="flex h-full min-h-0 w-full flex-col">
       <header className="bg-background relative flex flex-row-reverse items-center justify-between px-4 py-2 md:flex-row">
         <div className="flex shrink-0 items-center gap-2">
-          {/*<Button onClick={onToggleSidebar} size="icon-sm" variant="ghost">
-            {sidebarOpen ? (
-              <PanelLeftIcon className="size-4" />
-            ) : (
-              <PanelRightIcon className="size-4" />
-            )}
-            <span className="sr-only">{sidebarOpen ? "收起侧边栏" : "展开侧边栏"}</span>
-          </Button>*/}
           <ModelSelector
             models={models}
             onModelChange={onSelectModel}
@@ -171,37 +148,45 @@ export const Thread = memo(function Thread({ title, onShare, welcomeMessage }: T
       <AIConversation className="chat-scroll flex-1">
         <AIConversationContent className="flex min-h-full flex-col gap-4 pb-0">
           <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4">
-            {hasMessages || (id && isLoading) ? (
-              conversationPairs.map((pair, index) => {
-                const isLastPair = index === conversationPairs.length - 1;
-                const userKey = pair.userMessage.key;
-                const assistantKey = pair.assistantMessage.key;
-                return (
-                  <ViewportSlack
-                    key={`${userKey}-${assistantKey}`}
-                    isLast={isLastPair}
-                    getViewportHeight={getViewportHeight}
-                    getBottomAreaHeight={getBottomAreaHeight}
-                  >
-                    <div className="flex flex-col gap-4">
-                      <Message
-                        message={pair.userMessage}
-                        liked={liked[userKey]}
-                        disliked={disliked[userKey]}
-                        onLikeChange={(v) => onLike(userKey, v)}
-                        onDislikeChange={(v) => onDislike(userKey, v)}
-                      />
-                      <Message
-                        message={pair.assistantMessage}
-                        liked={liked[assistantKey]}
-                        disliked={disliked[assistantKey]}
-                        onLikeChange={(v) => onLike(assistantKey, v)}
-                        onDislikeChange={(v) => onDislike(assistantKey, v)}
-                      />
-                    </div>
-                  </ViewportSlack>
-                );
-              })
+            {hasMessages || id ? (
+              displayMessages.length > 0 ? (
+                displayMessages.map((displayMsg) => {
+                  const isStreaming = streamingMessageId === displayMsg.id;
+                  const hasError = error && displayMsg.id === lastAssistantId;
+
+                  return (
+                    <ViewportSlack
+                      key={displayMsg.stableKey}
+                      isLast={displayMsg.isLast}
+                      getViewportHeight={getViewportHeight}
+                      getBottomAreaHeight={getBottomAreaHeight}
+                    >
+                      <div className="flex flex-col gap-4">
+                        <Message
+                          message={displayMsg.message}
+                          liked={liked[displayMsg.id]}
+                          disliked={disliked[displayMsg.id]}
+                          onLikeChange={(v) => onLike(displayMsg.id, v)}
+                          onDislikeChange={(v) => onDislike(displayMsg.id, v)}
+                          onRetry={() => onRegenerate(displayMsg.id)}
+                          isStreaming={isStreaming}
+                          branchNumber={displayMsg.branchNumber}
+                          branchCount={displayMsg.branchCount}
+                          branches={displayMsg.branches}
+                          onSwitchBranch={onSwitchBranch}
+                          error={hasError ? error.message : undefined}
+                        />
+                      </div>
+                    </ViewportSlack>
+                  );
+                })
+              ) : isLoading ? (
+                <div className="flex flex-1 items-center justify-center py-4">
+                  <div className="text-center">
+                    <p className="text-muted-foreground">加载中...</p>
+                  </div>
+                </div>
+              ) : null
             ) : (
               <div className="flex flex-1 items-center justify-center py-4">
                 {welcomeMessage || (

@@ -1,10 +1,6 @@
-import { McpToolCall } from "@buildingai/db/entities";
 import { PaginationDto } from "@buildingai/dto/pagination.dto";
-import type {
-    Attachment as AttachmentType,
-    MessageContent,
-} from "@buildingai/types/ai/message-content.interface";
 import { isEnabled } from "@buildingai/utils";
+import type { UIMessage } from "ai";
 import { Transform, Type } from "class-transformer";
 import {
     ArrayNotEmpty,
@@ -247,25 +243,26 @@ export class AttachmentDto {
 
 /**
  * Token使用情况DTO
+ * 符合 AI SDK LanguageModelUsage 规范
  */
 export class TokenUsageDto {
     /**
-     * 提示Token数
+     * 输入Token数（符合 AI SDK 规范）
      */
-    @IsInt({ message: "提示Token数必须是整数" })
-    @Min(0, { message: "提示Token数不能小于0" })
+    @IsInt({ message: "输入Token数必须是整数" })
+    @Min(0, { message: "输入Token数不能小于0" })
     @IsOptional()
     @Type(() => Number)
-    prompt_tokens?: number;
+    inputTokens?: number;
 
     /**
-     * 完成Token数
+     * 输出Token数（符合 AI SDK 规范）
      */
-    @IsInt({ message: "完成Token数必须是整数" })
-    @Min(0, { message: "完成Token数不能小于0" })
+    @IsInt({ message: "输出Token数必须是整数" })
+    @Min(0, { message: "输出Token数不能小于0" })
     @IsOptional()
     @Type(() => Number)
-    completion_tokens?: number;
+    outputTokens?: number;
 
     /**
      * 总Token数
@@ -274,7 +271,7 @@ export class TokenUsageDto {
     @Min(0, { message: "总Token数不能小于0" })
     @IsOptional()
     @Type(() => Number)
-    total_tokens?: number;
+    totalTokens?: number;
 }
 
 /**
@@ -282,10 +279,10 @@ export class TokenUsageDto {
  */
 export class CreateMessageDto {
     /**
-     * 使用的模型ID（可选，不传则使用默认模型）
+     * 使用的模型ID
      */
     @IsUUID(undefined, { message: "模型ID必须是有效的UUID格式" })
-    @IsOptional()
+    @IsNotEmpty({ message: "模型ID不能为空" })
     modelId: string;
 
     /**
@@ -297,6 +294,35 @@ export class CreateMessageDto {
     conversationId: string;
 
     /**
+     * UIMessage 格式的消息
+     */
+    @IsObject({ message: "消息必须是有效的 UIMessage 对象" })
+    @IsNotEmpty({ message: "消息不能为空" })
+    message: UIMessage;
+
+    /**
+     * 父消息ID（用于消息树结构）
+     */
+    @IsUUID(4, { message: "父消息ID必须是有效的UUID格式" })
+    @IsOptional()
+    parentId?: string;
+
+    /**
+     * 错误信息
+     */
+    @IsString({ message: "错误信息必须是字符串" })
+    @IsOptional()
+    errorMessage?: string;
+
+    /**
+     * Token使用情况
+     */
+    @ValidateNested()
+    @Type(() => TokenUsageDto)
+    @IsOptional()
+    tokens?: TokenUsageDto;
+
+    /**
      * 用户积分消耗
      */
     @IsInt({ message: "用户积分消耗必须是整数" })
@@ -304,82 +330,6 @@ export class CreateMessageDto {
     @IsOptional()
     @Type(() => Number)
     userConsumedPower?: number;
-
-    /**
-     * 消息角色
-     */
-    @IsEnum(MessageRole, { message: "消息角色必须是有效的枚举值" })
-    role: MessageRole;
-
-    /**
-     * 消息内容
-     */
-    @IsOptional()
-    content: MessageContent;
-
-    /**
-     * 消息类型
-     */
-    @IsEnum(MessageType, { message: "消息类型必须是有效的枚举值" })
-    @IsOptional()
-    @Transform(({ value }) => value || MessageType.TEXT)
-    messageType?: MessageType;
-
-    /**
-     * 错误信息
-     */
-    @IsString({ message: "错误信息必须是字符串" })
-    @IsOptional()
-    errorMessage?: string;
-
-    /**
-     * 附件信息
-     */
-    @IsArray({ message: "附件信息必须是数组" })
-    @ValidateNested({ each: true })
-    @Type(() => AttachmentDto)
-    @IsOptional()
-    @Transform(({ value }) => value || [])
-    attachments?: AttachmentType[];
-
-    /**
-     * Token使用情况
-     */
-    @ValidateNested()
-    @Type(() => TokenUsageDto)
-    @IsOptional()
-    tokens?: TokenUsageDto;
-
-    /**
-     * 处理时长（毫秒）
-     */
-    @IsInt({ message: "处理时长必须是整数" })
-    @Min(0, { message: "处理时长不能小于0" })
-    @IsOptional()
-    @Type(() => Number)
-    processingTime?: number;
-
-    /**
-     * 模型响应的原始数据
-     */
-    @IsObject({ message: "原始响应数据必须是对象" })
-    @IsOptional()
-    rawResponse?: Record<string, any>;
-
-    /**
-     * 扩展数据
-     */
-    @IsObject({ message: "扩展数据必须是对象" })
-    @IsOptional()
-    @Transform(({ value }) => value || {})
-    metadata?: Record<string, any>;
-
-    /**
-     * MCP工具调用记录
-     */
-    @IsArray({ message: "MCP工具调用记录必须是数组" })
-    @IsOptional()
-    mcpToolCalls?: McpToolCall[];
 }
 
 /**
@@ -387,20 +337,20 @@ export class CreateMessageDto {
  */
 export class UpdateMessageDto {
     /**
-     * 消息内容
+     * UIMessage 格式的消息（只更新 parts 和 metadata）
      */
-    @IsString({ message: "消息内容必须是字符串" })
+    @IsObject({ message: "消息必须是有效的 UIMessage 对象" })
     @IsOptional()
-    content?: string;
+    message?: Partial<Pick<UIMessage, "parts" | "metadata">>;
 
     /**
      * 消息状态
      */
-    @IsEnum(["sending", "completed", "failed"], {
+    @IsEnum(["streaming", "completed", "failed"], {
         message: "消息状态必须是有效的枚举值",
     })
     @IsOptional()
-    status?: "sending" | "completed" | "failed";
+    status?: "streaming" | "completed" | "failed";
 
     /**
      * 错误信息
@@ -418,27 +368,13 @@ export class UpdateMessageDto {
     tokens?: TokenUsageDto;
 
     /**
-     * 处理时长（毫秒）
+     * 用户积分消耗
      */
-    @IsInt({ message: "处理时长必须是整数" })
-    @Min(0, { message: "处理时长不能小于0" })
+    @IsInt({ message: "用户积分消耗必须是整数" })
+    @Min(0, { message: "用户积分消耗不能小于0" })
     @IsOptional()
     @Type(() => Number)
-    processingTime?: number;
-
-    /**
-     * 模型响应的原始数据
-     */
-    @IsObject({ message: "原始响应数据必须是对象" })
-    @IsOptional()
-    rawResponse?: Record<string, any>;
-
-    /**
-     * 扩展数据
-     */
-    @IsObject({ message: "扩展数据必须是对象" })
-    @IsOptional()
-    metadata?: Record<string, any>;
+    userConsumedPower?: number;
 }
 
 /**
@@ -470,11 +406,11 @@ export class QueryMessageDto {
     /**
      * 消息状态筛选
      */
-    @IsEnum(["sending", "completed", "failed"], {
+    @IsEnum(["streaming", "completed", "failed"], {
         message: "消息状态必须是有效的枚举值",
     })
     @IsOptional()
-    status?: "sending" | "completed" | "failed";
+    status?: "streaming" | "completed" | "failed";
 
     /**
      * 搜索关键词（消息内容）
