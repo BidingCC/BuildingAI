@@ -7,6 +7,11 @@ import {
   CollapsibleTrigger,
 } from "@buildingai/ui/components/ui/collapsible";
 import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@buildingai/ui/components/ui/hover-card";
+import {
   SidebarGroup,
   SidebarGroupLabel,
   SidebarMenu,
@@ -16,6 +21,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  useSidebar,
 } from "@buildingai/ui/components/ui/sidebar";
 import type { MenuItem } from "@buildingai/web-types";
 import { Annoyed, ChevronRight } from "lucide-react";
@@ -49,12 +55,54 @@ function getVisibleChildren(menu: MenuItem): MenuItem[] {
 
 function NavMenuItem({ menu, basePath = "" }: { menu: MenuItem; basePath?: string }) {
   const location = useLocation();
+  const { state } = useSidebar();
+  const isCollapsed = state === "collapsed";
   const menuPath = basePath ? `${basePath}/${menu.path}`.replace(/\/+/g, "/") : menu.path;
   const fullPath = `/console/${menuPath}`.replace(/\/+/g, "/");
   const visibleChildren = getVisibleChildren(menu);
   const isActive = location.pathname.startsWith(fullPath);
 
   if (visibleChildren.length > 0) {
+    if (isCollapsed) {
+      return (
+        <SidebarMenuItem>
+          <HoverCard openDelay={0} closeDelay={0}>
+            <HoverCardTrigger asChild>
+              <SidebarMenuButton isActive={isActive}>
+                {/* TODO: 这里临时注释掉动态图标 */}
+                {/* <LucideIcon
+                  name={menu.icon.replace("i-lucide-", "") as keyof typeof dynamicIconImports}
+                /> */}
+                <Annoyed />
+                {/* <span>{menu.name}</span> */}
+                <span>一级菜单</span>
+              </SidebarMenuButton>
+            </HoverCardTrigger>
+            <HoverCardContent side="right" align="start" className="w-48 p-1">
+              <div className="flex flex-col gap-0.5">
+                {visibleChildren.map((child) => {
+                  const childPath = `/console/${menuPath}/${child.path}`.replace(/\/+/g, "/");
+                  const isChildActive = location.pathname === childPath;
+                  return (
+                    <Link
+                      key={child.id}
+                      to={childPath}
+                      className={`hover:bg-accent hover:text-accent-foreground rounded-md px-2 py-1.5 text-sm transition-colors ${
+                        isChildActive ? "bg-accent text-accent-foreground" : ""
+                      }`}
+                    >
+                      {/* {child.name} */}
+                      二级菜单
+                    </Link>
+                  );
+                })}
+              </div>
+            </HoverCardContent>
+          </HoverCard>
+        </SidebarMenuItem>
+      );
+    }
+
     return (
       <Collapsible asChild defaultOpen={isActive}>
         <SidebarMenuItem>
@@ -116,13 +164,15 @@ function NavMenuItem({ menu, basePath = "" }: { menu: MenuItem; basePath?: strin
 
 function NavMenuGroup({ group }: { group: MenuItem }) {
   const visibleChildren = getVisibleChildren(group);
+  const { state } = useSidebar();
+  const isExpanded = state === "expanded";
 
   if (visibleChildren.length === 0) return null;
 
   return (
     <SidebarGroup>
-      {/* <SidebarGroupLabel>{group.name}</SidebarGroupLabel> */}
-      <SidebarGroupLabel>分组</SidebarGroupLabel>
+      {/* isExpanded && <SidebarGroupLabel>{group.name}</SidebarGroupLabel> */}
+      {isExpanded && <SidebarGroupLabel>分组</SidebarGroupLabel>}
 
       <SidebarMenu>
         {visibleChildren.map((menu) => (

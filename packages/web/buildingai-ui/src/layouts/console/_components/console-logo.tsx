@@ -22,9 +22,11 @@ export function ConsoleLogo() {
               ) : (
                 <SvgIcons.buildingaiFull className="h-8" />
               )}
-              <div className="grid flex-1 text-left text-sm leading-tight">
+              <div className="flex flex-1 flex-col justify-center text-left text-sm">
                 <span className="truncate font-medium">{websiteConfig?.webinfo.name}</span>
-                <span className="truncate text-xs">工作台</span>
+                <span className="truncate text-xs">
+                  工作台 · <span className="text-muted-foreground">v26.0.0</span>
+                </span>
               </div>
             </>
           </Link>

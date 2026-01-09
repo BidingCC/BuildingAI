@@ -23,15 +23,16 @@ export function DefaultLogo() {
           <div>
             <div className="group/default-logo-button relative flex items-center justify-between">
               <SidebarTrigger
-                className={cn("absolute inset-0 z-2 opacity-0 transition-opacity", {
-                  "flex group-hover/default-logo-button:opacity-100": state === "collapsed",
+                className={cn("absolute inset-0 z-2 hidden opacity-0 transition-opacity md:flex", {
+                  "flex md:group-hover/default-logo-button:opacity-100": state === "collapsed",
                   hidden: state === "expanded",
                 })}
               />
               <Link
                 to="/"
                 className={cn("transition-opacity duration-200", {
-                  "relative z-1 group-hover/default-logo-button:opacity-0": state === "collapsed",
+                  "relative z-1 md:group-hover/default-logo-button:opacity-0":
+                    state === "collapsed",
                 })}
               >
                 <>

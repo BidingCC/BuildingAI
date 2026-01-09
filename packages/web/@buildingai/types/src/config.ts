@@ -26,3 +26,8 @@ export interface WebsiteConfig {
         appid: string;
     };
 }
+
+export interface InitializeStatus {
+    isInitialized: boolean;
+    version: string;
+}

@@ -19,7 +19,7 @@ createRoot(document.getElementById("root")!).render(
       <ThemeProvider>
         <AlertDialogProvider>
           <ReactQueryDevtools />
-          <Toaster />
+          <Toaster position="top-center" />
           <RouterProvider router={router} />
         </AlertDialogProvider>
       </ThemeProvider>
