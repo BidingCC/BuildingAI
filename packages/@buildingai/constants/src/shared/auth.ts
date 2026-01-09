@@ -10,7 +10,7 @@ export const LOGIN_TYPE = {
     /** 账号登录 */
     ACCOUNT: 1,
     /** 手机号登录 */
-    // PHONE: 2,
+    PHONE: 2,
     /** 微信登录 */
     WECHAT: 3,
 } as const;
