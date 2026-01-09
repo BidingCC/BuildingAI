@@ -25,6 +25,7 @@ import {
 import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog";
 import {
   ChevronsUpDown,
+  CircleStar,
   Languages,
   Laptop,
   LogOut,
@@ -32,17 +33,64 @@ import {
   Palette,
   Sparkles,
   Sun,
+  User,
+  Zap,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+
+function UserButton({ isLoggedIn, userInfo }: { isLoggedIn: boolean; userInfo?: any }) {
+  return (
+    <>
+      <Avatar className="h-8 w-8 rounded-lg after:rounded-lg">
+        {isLoggedIn && (
+          <AvatarImage className="rounded-lg" src={userInfo?.avatar} alt={userInfo?.nickname} />
+        )}
+        <AvatarFallback className="rounded-lg">
+          {isLoggedIn ? userInfo?.nickname?.slice(0, 1) : <User />}
+        </AvatarFallback>
+      </Avatar>
+      <div className="grid flex-1 text-left text-sm leading-tight">
+        <span className="truncate font-medium">{userInfo?.nickname || "未登录"}</span>
+        <span className="text-muted-foreground truncate text-xs">
+          {isLoggedIn ? (
+            <div className="flex items-center gap-0.5">
+              <Zap className="size-3!" />
+              <span className="">{userInfo?.power || "0"}</span>
+            </div>
+          ) : (
+            "请先登录后使用"
+          )}
+        </span>
+      </div>
+      <ChevronsUpDown className="ml-auto size-4" />
+    </>
+  );
+}
 
 export function DefaultNavUser() {
   const { isMobile } = useSidebar();
   const { userInfo } = useAuthStore((state) => state.auth);
-  const { logout } = useAuthStore((state) => state.authActions);
+  const { logout, isLogin } = useAuthStore((state) => state.authActions);
 
   const { setThemeColor, themeColor, theme } = useTheme();
   const navigate = useNavigate();
   const { confirm } = useAlertDialog();
+
+  const isLoggedIn = isLogin();
+
+  if (!isLoggedIn) {
+    return (
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton size="lg" asChild>
+            <Link to="/login">
+              <UserButton isLoggedIn={false} />
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    );
+  }
 
   return (
     <SidebarMenu>
@@ -53,21 +101,7 @@ export function DefaultNavUser() {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="h-8 w-8 rounded-lg after:rounded-lg">
-                <AvatarImage
-                  className="rounded-lg"
-                  src={userInfo?.avatar}
-                  alt={userInfo?.nickname}
-                />
-                <AvatarFallback className="rounded-lg">
-                  {userInfo?.nickname?.slice(0, 1)}
-                </AvatarFallback>
-              </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{userInfo?.nickname}</span>
-                <span className="truncate text-xs">{userInfo?.email}</span>
-              </div>
-              <ChevronsUpDown className="ml-auto size-4" />
+              <UserButton isLoggedIn={true} userInfo={userInfo} />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -79,18 +113,30 @@ export function DefaultNavUser() {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg after:rounded-lg">
-                  <AvatarImage
-                    className="rounded-lg"
-                    src={userInfo?.avatar}
-                    alt={userInfo?.nickname}
-                  />
+                  {isLoggedIn && (
+                    <AvatarImage
+                      className="rounded-lg"
+                      src={userInfo?.avatar}
+                      alt={userInfo?.nickname}
+                    />
+                  )}
                   <AvatarFallback className="rounded-lg">
-                    {userInfo?.nickname?.slice(0, 1) || "?"}
+                    {isLoggedIn ? userInfo?.nickname?.slice(0, 1) : <User />}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{userInfo?.nickname}</span>
-                  <span className="truncate text-xs">{userInfo?.email}</span>
+                  <span className="text-foreground truncate font-medium">
+                    {userInfo?.nickname || "未登录"}
+                  </span>
+                  <span className="text-muted-foreground truncate text-xs">
+                    {isLogin() ? (
+                      <div className="flex items-center gap-0.5">
+                        {userInfo?.membershipLevel.name}
+                      </div>
+                    ) : (
+                      "请先登录后使用"
+                    )}
+                  </span>
                 </div>
               </div>
             </DropdownMenuLabel>

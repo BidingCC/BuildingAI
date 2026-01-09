@@ -7,7 +7,6 @@ import {
   useSidebar,
 } from "@buildingai/ui/components/ui/sidebar";
 import { cn } from "@buildingai/ui/lib/utils";
-import { Home } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import SvgIcons from "@/components/svg-icons";
@@ -43,7 +42,7 @@ export function DefaultLogo() {
                       alt={websiteConfig?.webinfo.name}
                     />
                   ) : (
-                    <SvgIcons.buildingaiFull className="h-8" />
+                    <SvgIcons.buildingai className="size-8!" />
                   )}
                 </>
               </Link>

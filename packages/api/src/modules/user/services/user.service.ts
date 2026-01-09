@@ -12,7 +12,7 @@ import { type UserPlayground } from "@buildingai/db";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
 import { MembershipLevels, User, UserSubscription } from "@buildingai/db/entities";
 import { Role } from "@buildingai/db/entities";
-import { Between, DeepPartial, In, Like, Repository } from "@buildingai/db/typeorm";
+import { Between, DeepPartial, In, Like, MoreThan, Repository } from "@buildingai/db/typeorm";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { generateNo } from "@buildingai/utils";
 import { isEnabled } from "@buildingai/utils";
@@ -700,5 +700,51 @@ export class UserService extends BaseService<User> {
         }
 
         return result;
+    }
+
+    /**
+     * 获取用户当前最高会员等级ID
+     *
+     * @param userId 用户ID
+     * @returns 最高会员等级ID，无有效会员则返回 null
+     */
+    async getUserHighestMembershipLevel(userId: string): Promise<{
+        id: string | null;
+        name: string | null;
+        icon: string | null;
+    }> {
+        const now = new Date();
+
+        // 查询用户所有有效订阅的等级ID
+        const subscriptions = await this.userSubscriptionRepository.find({
+            where: {
+                userId,
+                endTime: MoreThan(now),
+            },
+            select: ["levelId"],
+        });
+
+        const levelIds = subscriptions.filter((sub) => sub.levelId).map((sub) => sub.levelId!);
+
+        if (levelIds.length === 0) {
+            return {
+                id: null,
+                name: null,
+                icon: null,
+            };
+        }
+
+        // 查询这些等级中 level 值最高的
+        const highestLevel = await this.membershipLevelsRepository.findOne({
+            where: { id: In(levelIds) },
+            order: { level: "DESC" },
+            select: ["id", "name", "icon"],
+        });
+
+        return {
+            id: highestLevel?.id ?? null,
+            name: highestLevel?.name ?? null,
+            icon: highestLevel?.icon ?? null,
+        };
     }
 }

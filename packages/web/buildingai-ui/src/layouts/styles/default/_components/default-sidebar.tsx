@@ -143,7 +143,6 @@ export function DefaultAppSidebar({ ...props }: React.ComponentProps<typeof Side
         icon: FolderClock,
         isActive: true,
         items: conversationItems,
-        // items: [],
       },
     ];
   }, [conversationsData]);

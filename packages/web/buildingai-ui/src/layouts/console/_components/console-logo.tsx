@@ -20,7 +20,7 @@ export function ConsoleLogo() {
               {websiteConfig?.webinfo.logo ? (
                 <img className="h-8" src={websiteConfig?.webinfo.logo} alt="logo" />
               ) : (
-                <SvgIcons.buildingaiFull className="h-8" />
+                <SvgIcons.buildingai className="size-8!" />
               )}
               <div className="flex flex-1 flex-col justify-center text-left text-sm">
                 <span className="truncate font-medium">{websiteConfig?.webinfo.name}</span>

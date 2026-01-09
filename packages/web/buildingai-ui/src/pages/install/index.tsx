@@ -14,7 +14,6 @@ import {
   DropdownMenuTrigger,
 } from "@buildingai/ui/components/ui/dropdown-menu";
 import { cn } from "@buildingai/ui/lib/utils";
-import type { UserInfo } from "@buildingai/web-types";
 import { ArrowLeft, ArrowRight, ChevronDown, Languages, Loader2 } from "lucide-react";
 import { useCallback, useState } from "react";
 import { Navigate } from "react-router-dom";

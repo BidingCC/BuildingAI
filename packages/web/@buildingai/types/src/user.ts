@@ -17,6 +17,11 @@ export interface UserInfo {
     isRoot: BooleanNumberType;
     menus: MenuItem[];
     permissionsCodes: string[];
+    membershipLevel: {
+        id: string | null;
+        name: string | null;
+        icon: string | null;
+    };
     role: {
         id: string;
         createdAt: string;
