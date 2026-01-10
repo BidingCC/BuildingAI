@@ -14,6 +14,7 @@ import { ExtensionFeatureService } from "@common/modules/auth/services/extension
 import { ExtensionFeatureScanService } from "@common/modules/auth/services/extension-feature-scan.service";
 import { RolePermissionService } from "@common/modules/auth/services/role-permission.service";
 import { UserTokenService } from "@common/modules/auth/services/user-token.service";
+import { SmsModule } from "@common/modules/sms/sms.module";
 import { WechatOaService } from "@common/modules/wechat/services/wechatoa.service";
 import { ChannelModule } from "@modules/channel/channel.module";
 import { Module } from "@nestjs/common";
@@ -30,6 +31,7 @@ import { AuthWebController } from "./controller/web/auth.controller";
  */
 @Module({
     imports: [
+        SmsModule,
         TypeOrmModule.forFeature([
             User,
             Role,

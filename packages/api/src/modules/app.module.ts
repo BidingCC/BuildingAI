@@ -18,6 +18,7 @@ import { ExtensionGuard } from "@common/guards/extension.guard";
 import { MemberOnlyGuard } from "@common/guards/member-only.guard";
 import { PermissionsGuard } from "@common/guards/permissions.guard";
 import { SuperAdminGuard } from "@common/guards/super-admin.guard";
+import { SmsModule } from "@common/modules/sms/sms.module";
 import { DatabaseModule } from "@core/database/database.module";
 import { AnalyseModule } from "@modules/analyse/analyse.module";
 import { AuthModule } from "@modules/auth/auth.module";
@@ -112,6 +113,7 @@ export class AppModule {
                 UserModule,
                 CloudStorageModule,
                 ScheduleModule,
+                SmsModule,
                 await ExtensionCoreModule.register(),
             ],
             controllers: [],
