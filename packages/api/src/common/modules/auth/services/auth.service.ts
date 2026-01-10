@@ -149,20 +149,17 @@ export class AuthService extends BaseService<User> {
         const salt = await bcrypt.genSalt();
         const hashedPassword = await bcrypt.hash(registerDto.password, salt);
 
-        // 生成随机昵称
-        const randomIndex = Math.floor(Math.random() * nicknameData.length);
-        const randomAvatarIndex = Math.floor(Math.random() * 36) + 1;
-        const randomNickname = nicknameData[randomIndex];
+        const { nickname, avatar } = this.generateRandomName();
         const userNo = await generateNo(this.userRepository, "userNo");
         // 创建用户
         const savedUser = await this.create(
             {
                 username: registerDto.username,
                 password: hashedPassword,
-                nickname: randomNickname,
+                nickname,
                 status: BooleanNumber.YES, // 默认启用
                 source: UserCreateSource.USERNAME,
-                avatar: `/static/avatars/${randomAvatarIndex}.png`,
+                avatar,
                 userNo,
             },
             { excludeFields: ["password"] },
@@ -322,25 +319,18 @@ export class AuthService extends BaseService<User> {
         ipAddress?: string,
         userAgent?: string,
     ) {
-        // 生成随机用户名（随机字符串）
-        const randomSuffix = Math.random().toString(36).substring(2, 8);
-        const username = `${randomSuffix}`;
-
-        // 生成随机昵称
-        const randomIndex = Math.floor(Math.random() * nicknameData.length);
-        const randomAvatarIndex = Math.floor(Math.random() * 36) + 1;
-        const randomNickname = nicknameData[randomIndex];
+        const { nickname, username, avatar } = this.generateRandomName();
 
         // 创建用户
         const savedUser = await this.create(
             {
                 openid,
                 username,
+                nickname,
                 password: "",
-                nickname: randomNickname,
                 status: BooleanNumber.YES, // 默认启用
                 source: UserCreateSource.WECHAT, // 标记为微信注册
-                avatar: `/static/avatars/${randomAvatarIndex}.png`,
+                avatar,
             },
             { excludeFields: ["password", "openid"] },
         );
@@ -537,5 +527,94 @@ export class AuthService extends BaseService<User> {
             this.logger.error(`退出登录失败: ${error.message}`);
             throw HttpErrorFactory.internal("退出登录失败", BusinessCode.OPERATION_FAILED);
         }
+    }
+
+    async loginBySms(
+        phone: string,
+        phoneAreaCode: string,
+        terminal: UserTerminalType = UserTerminal.PC,
+        ipAddress?: string,
+        userAgent?: string,
+    ) {
+        const user = await this.findOne({ where: { phone, phoneAreaCode } });
+
+        if (!user) {
+            return this.registerByPhone(phone, phoneAreaCode, terminal, ipAddress, userAgent);
+        }
+
+        return this.loginByUser(user, terminal, ipAddress, userAgent);
+    }
+
+    private async registerByPhone(
+        phone: string,
+        phoneAreaCode: string,
+        terminal: UserTerminalType = UserTerminal.PC,
+        ipAddress?: string,
+        userAgent?: string,
+    ) {
+        const { username, nickname, avatar } = this.generateRandomName();
+        const userNo = await generateNo(this.userRepository, "userNo");
+
+        // Create user
+        const savedUser = await this.create(
+            {
+                phone,
+                phoneAreaCode,
+                username,
+                nickname,
+                avatar,
+                userNo,
+                password: "",
+                status: BooleanNumber.YES,
+                source: UserCreateSource.PHONE,
+            },
+            { excludeFields: ["password"] },
+        );
+
+        // Create token
+        const payload = checkUserLoginPlayground({
+            id: savedUser.id,
+            username: savedUser.username,
+            isRoot: BooleanNumber.NO,
+            terminal,
+        });
+
+        const tokenResult = await this.userTokenService.createToken(
+            savedUser.id,
+            payload,
+            terminal,
+            ipAddress,
+            userAgent,
+        );
+
+        return {
+            token: tokenResult.token,
+            expiresAt: tokenResult.expiresAt,
+            user: {
+                ...savedUser,
+                permission: [],
+                role: {},
+            },
+        };
+    }
+
+    private generateRandomName() {
+        // 生成随机用户名（随机字符串）
+        const randomSuffix = Math.random().toString(36).substring(2, 8);
+        const randomUsername = `${randomSuffix}`;
+
+        // 生成随机昵称
+        const randomIndex = Math.floor(Math.random() * nicknameData.length);
+        const randomNickname = nicknameData[randomIndex];
+
+        // 随机头像索引
+        const randomAvatarIndex = Math.floor(Math.random() * 36) + 1;
+        const randomAvatar = `/static/avatars/${randomAvatarIndex}.png`;
+
+        return {
+            username: randomUsername,
+            nickname: randomNickname,
+            avatar: randomAvatar,
+        };
     }
 }

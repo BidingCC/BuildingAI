@@ -5,6 +5,7 @@ export * from "./datasets.constants";
 export * from "./dict.constant";
 export * from "./extension.constant";
 export * from "./payconfig.constant";
+export * from "./sms.constant";
 export * from "./status-codes.constant";
 export * from "./storage-config.constant";
 export * from "./tag.constant";
