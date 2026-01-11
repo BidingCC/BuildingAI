@@ -37,6 +37,9 @@ export type WechatLoginStatus = (typeof WECHAT_LOGIN_STATUS)[keyof typeof WECHAT
 
 /**
  * SMS verification code types
+ *
+ * @see {@link SmsScene}
+ * @deprecated
  */
 export const SMS_TYPE = {
     /** Login verification code */

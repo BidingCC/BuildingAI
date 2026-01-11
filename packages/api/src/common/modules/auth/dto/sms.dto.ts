@@ -1,3 +1,4 @@
+import { SmsScene, type SmsSceneType } from "@buildingai/constants";
 import {
     UserTerminal,
     type UserTerminalType,
@@ -20,21 +21,26 @@ export class SendSmsCodeDto {
     @IsNotEmpty()
     @IsString()
     @Matches(/^1[3-9]\d{9}$/, { message: "请输入有效的手机号" })
-    phone: string;
+    mobile: string;
+
+    @IsNotEmpty()
+    @IsNumber()
+    @IsEnum(SmsScene)
+    scene: SmsSceneType;
 
     @IsOptional()
     @IsString()
-    areaCode: string;
+    areaCode: string = "86";
 }
 
 export class SmsLoginDto {
     @IsNotEmpty()
     @Matches(/^1[3-9]\d{9}$/, { message: "请输入有效的手机号" })
-    phone: string;
+    mobile: string;
 
     @IsOptional()
     @IsString()
-    areaCode: string;
+    areaCode: string = "86";
 
     @IsNotEmpty()
     @IsString()

@@ -266,7 +266,7 @@ export class AuthWebController extends BaseController {
     @Post("sms/send-code")
     async sendSmsCode(@Body() sendSmsCodeDto: SendSmsCodeDto) {
         await this.smsService.sendCode(
-            sendSmsCodeDto.phone,
+            sendSmsCodeDto.mobile,
             sendSmsCodeDto.areaCode,
             SmsScene.LOGIN,
         );
@@ -281,8 +281,8 @@ export class AuthWebController extends BaseController {
         @Headers("user-agent") userAgent?: string,
         @Headers("x-real-ip") ipAddress?: string,
     ) {
-        const { phone, areaCode, code, terminal } = smsLoginDto;
-        await this.smsService.verifyCode(phone, areaCode, code, SmsScene.LOGIN);
-        return this.authService.loginBySms(phone, areaCode, terminal, ipAddress, userAgent);
+        const { mobile, areaCode, code, terminal } = smsLoginDto;
+        await this.smsService.verifyCode(mobile, areaCode, code, SmsScene.LOGIN);
+        return this.authService.loginBySms(mobile, areaCode, terminal, ipAddress, userAgent);
     }
 }

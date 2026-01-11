@@ -417,7 +417,6 @@ export class AuthService extends BaseService<User> {
             userAgent,
         );
 
-        // 更新用户最后登录时间
         await this.updateById(user.id, {
             lastLoginAt: new Date(),
         });
@@ -426,8 +425,8 @@ export class AuthService extends BaseService<User> {
 
         return {
             expiresAt: tokenResult.expiresAt,
+            token: tokenResult.token,
             user: {
-                token: tokenResult.token,
                 ...userInfo,
                 role,
                 permissions,
