@@ -48,6 +48,7 @@ export interface ChatCompletionParams {
     regenerateMessageId?: string;
     regenerateParentId?: string;
     parentId?: string;
+    isToolApprovalFlow?: boolean;
 }
 
 export interface ConversationResult {

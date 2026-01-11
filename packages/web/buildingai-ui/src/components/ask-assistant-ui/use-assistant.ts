@@ -142,6 +142,7 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
     send,
     stop,
     regenerate,
+    addToolApprovalResponse,
   } = useChatStream({
     modelId: "5f325ca6-03da-4f7f-8e42-025474e48b44",
   });
@@ -258,5 +259,6 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
     onSelectModel: setSelectedModelId,
     onLike,
     onDislike,
+    addToolApprovalResponse,
   };
 }

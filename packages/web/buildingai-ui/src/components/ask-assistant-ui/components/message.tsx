@@ -36,6 +36,7 @@ import { memo, useCallback, useMemo } from "react";
 
 import { convertUIMessageToMessage } from "../message-converter";
 import { StreamingIndicator } from "./streaming-indicator";
+import { Weather } from "./weather";
 
 export interface MessageProps {
   message: UIMessage;
@@ -51,6 +52,7 @@ export interface MessageProps {
   branches?: string[];
   onSwitchBranch?: (messageId: string) => void;
   error?: string;
+  addToolApprovalResponse?: (args: { id: string; approved: boolean; reason?: string }) => void;
 }
 
 export const Message = memo(
@@ -68,6 +70,7 @@ export const Message = memo(
     branches = [],
     onSwitchBranch,
     error,
+    addToolApprovalResponse,
   }: MessageProps) => {
     const messageData = useMemo(() => convertUIMessageToMessage(message), [message]);
 
@@ -236,16 +239,135 @@ export const Message = memo(
 
         {/* 工具调用 */}
         {messageData.from === "assistant" &&
-          messageData.tools &&
-          messageData.tools.map((tool, index) => (
-            <Tool key={`${tool.name}-${index}`}>
-              <ToolHeader state={tool.status} title={tool.name} type="tool-invocation" />
-              <ToolContent>
-                <ToolInput input={tool.parameters} />
-                <ToolOutput errorText={tool.error} output={tool.result} />
-              </ToolContent>
-            </Tool>
-          ))}
+          message.parts &&
+          message.parts
+            .filter((part) => typeof part.type === "string" && part.type.startsWith("tool-"))
+            .map((part, index) => {
+              // 特殊处理 getWeather 工具
+              if (part.type === "tool-getWeather") {
+                const toolPart = part as {
+                  toolCallId: string;
+                  state: string;
+                  input?: Record<string, unknown>;
+                  output?: any;
+                  errorText?: string;
+                  approval?: { id?: string; approved?: boolean };
+                };
+
+                const state = toolPart.state;
+                const approvalId = (toolPart as any).approval?.id;
+                const isDenied =
+                  state === "output-denied" ||
+                  (state === "approval-responded" &&
+                    toolPart.approval?.approved === false);
+                const widthClass = "w-[min(100%,450px)]";
+
+                // 输出可用 - 显示天气组件
+                if (state === "output-available") {
+                  return (
+                    <div className={widthClass} key={toolPart.toolCallId || `tool-weather-${index}`}>
+                      <Weather weatherAtLocation={toolPart.output} />
+                    </div>
+                  );
+                }
+
+                // 被拒绝
+                if (isDenied) {
+                  return (
+                    <div className={widthClass} key={toolPart.toolCallId || `tool-${index}`}>
+                      <Tool className="w-full" defaultOpen={true}>
+                        <ToolHeader state="output-denied" type="tool-getWeather" />
+                        <ToolContent>
+                          <div className="px-4 py-3 text-muted-foreground text-sm">
+                            Weather lookup was denied.
+                          </div>
+                        </ToolContent>
+                      </Tool>
+                    </div>
+                  );
+                }
+
+                // 错误处理
+                if (toolPart.errorText || toolPart.output?.error) {
+                  return (
+                    <div
+                      className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-500 dark:bg-red-950/50"
+                      key={toolPart.toolCallId || `tool-error-${index}`}
+                    >
+                      错误: {String(toolPart.errorText || toolPart.output?.error)}
+                    </div>
+                  );
+                }
+
+                // 其他状态（input-available, approval-requested, approval-responded）
+                return (
+                  <div className={widthClass} key={toolPart.toolCallId || `tool-${index}`}>
+                    <Tool className="w-full" defaultOpen={true}>
+                      <ToolHeader state={state as any} type="tool-getWeather" />
+                      <ToolContent>
+                        {(state === "input-available" || state === "approval-requested") && (
+                          <ToolInput input={toolPart.input} />
+                        )}
+                        {state === "approval-requested" && approvalId && addToolApprovalResponse && (
+                          <div className="flex items-center justify-end gap-2 border-t px-4 py-3">
+                            <button
+                              className="rounded-md px-3 py-1.5 text-muted-foreground text-sm transition-colors hover:bg-muted hover:text-foreground"
+                              onClick={() => {
+                                addToolApprovalResponse({
+                                  id: approvalId,
+                                  approved: false,
+                                  reason: "User denied weather lookup",
+                                });
+                              }}
+                              type="button"
+                            >
+                              Deny
+                            </button>
+                            <button
+                              className="rounded-md bg-primary px-3 py-1.5 text-primary-foreground text-sm transition-colors hover:bg-primary/90"
+                              onClick={() => {
+                                addToolApprovalResponse({
+                                  id: approvalId,
+                                  approved: true,
+                                });
+                              }}
+                              type="button"
+                            >
+                              Allow
+                            </button>
+                          </div>
+                        )}
+                      </ToolContent>
+                    </Tool>
+                  </div>
+                );
+              }
+
+              // 其他工具使用通用 Tool 组件
+              const toolPart = part as {
+                toolCallId: string;
+                state: string;
+                input: Record<string, unknown>;
+                output?: unknown;
+                errorText?: string;
+              };
+
+              const toolName = part.type.replace("tool-", "");
+
+              return (
+                <Tool key={toolPart.toolCallId || `tool-${index}`}>
+                  <ToolHeader
+                    state={toolPart.state as any}
+                    title={toolName}
+                    type="tool-invocation"
+                  />
+                  <ToolContent>
+                    <ToolInput input={toolPart.input} />
+                    <ToolOutput errorText={toolPart.errorText} output={toolPart.output} />
+                  </ToolContent>
+                </Tool>
+              );
+            })}
 
         {/* 消息内容 */}
         <div className="min-w-0">

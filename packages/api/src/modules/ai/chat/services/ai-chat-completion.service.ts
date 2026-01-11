@@ -13,6 +13,7 @@ import {
 import type { ServerResponse } from "http";
 
 import { AiModelService } from "../../model/services/ai-model.service";
+import { getWeather } from "../tools/weather.tools";
 import { ChatCompletionParams, SaveMessageParams } from "../types/chat.types";
 import { AiChatsMessageService } from "./ai-chat-message.service";
 import { AiChatRecordService } from "./ai-chat-record.service";
@@ -24,6 +25,8 @@ const VALID_PART_TYPES = new Set([
     "reasoning",
     "tool-call",
     "tool-result",
+    "step-start",
+    "step-finish",
 ]);
 
 @Injectable()
@@ -37,6 +40,7 @@ export class ChatCompletionService {
 
     async streamChat(params: ChatCompletionParams, response: ServerResponse): Promise<void> {
         let conversationId = params.conversationId;
+        const isToolApprovalFlow = params.isToolApprovalFlow || false;
 
         try {
             if (!conversationId && params.saveConversation !== false) {
@@ -67,7 +71,14 @@ export class ChatCompletionService {
 
             const cleanedMessages = params.messages.map(({ id: _id, ...msg }) => ({
                 ...msg,
-                parts: msg.parts?.filter((part) => VALID_PART_TYPES.has(part.type)) || [],
+                parts: msg.parts?.filter((part) => {
+                    const partType = typeof part.type === "string" ? part.type : "";
+                    return (
+                        VALID_PART_TYPES.has(part.type) ||
+                        partType.startsWith("tool-") ||
+                        partType.startsWith("step-")
+                    );
+                }) || [],
             }));
 
             const modelMessages = await convertToModelMessages(cleanedMessages);
@@ -75,60 +86,109 @@ export class ChatCompletionService {
                 ? [{ role: "system" as const, content: params.systemPrompt }, ...modelMessages]
                 : modelMessages;
 
-            const result = streamText({
-                ...provider(model.model),
-                messages,
-                abortSignal: params.abortSignal,
-            });
-
             const stream = createUIMessageStream({
+                originalMessages: isToolApprovalFlow ? params.messages : undefined,
                 execute: async ({ writer }) => {
                     if (conversationId) {
                         writer.write({ type: "data-conversation-id", data: conversationId });
                     }
 
+                    const languageModelConfig = provider(model.model);
+                    const languageModel = languageModelConfig.model;
+
+                    const tools = {
+                        getWeather,
+                    };
+
+                    const result = streamText({
+                        model: languageModel,
+                        messages,
+                        tools,
+                        abortSignal: params.abortSignal,
+                    });
+
+                    result.consumeStream();
+
                     const uiMessageStream = result.toUIMessageStream({
                         originalMessages: params.messages,
-                        onFinish: async (event) => {
+                        onFinish: async ({
+                            messages: finishedMessages,
+                            responseMessage,
+                            isAborted,
+                        }) => {
                             if (params.saveConversation === false || !conversationId) return;
 
                             try {
                                 const finalResult = await result;
-                                let userMessageId: string | undefined;
 
-                                if (params.isRegenerate) {
-                                    userMessageId = params.regenerateParentId;
-                                } else {
-                                    const userMessage = params.messages[params.messages.length - 1];
-                                    if (userMessage?.role === "user") {
-                                        const savedUserMessage =
+                                if (isToolApprovalFlow) {
+                                    for (const finishedMsg of finishedMessages) {
+                                        const existingMsg = params.messages.find(
+                                            (m) => m.id === finishedMsg.id,
+                                        );
+                                        if (existingMsg) {
+                                            const dbMessage =
+                                                await this.aiChatsMessageService.findOne({
+                                                    where: { id: finishedMsg.id },
+                                                });
+                                            if (dbMessage) {
+                                                await this.aiChatsMessageService.updateMessage(
+                                                    finishedMsg.id,
+                                                    {
+                                                        message: {
+                                                            ...(dbMessage.message as any),
+                                                            parts: finishedMsg.parts,
+                                                            metadata: finishedMsg.metadata,
+                                                        },
+                                                    },
+                                                );
+                                            }
+                                        } else {
                                             await this.aiChatsMessageService.createMessage({
                                                 conversationId,
                                                 modelId: params.modelId,
-                                                message: userMessage,
-                                                parentId: params.parentId,
+                                                message: finishedMsg,
                                             });
-                                        userMessageId = savedUserMessage.id;
-                                        writer.write({
-                                            type: "data-user-message-id",
-                                            data: savedUserMessage.id,
-                                        });
+                                        }
                                     }
+                                } else if (finishedMessages.length > 0) {
+                                    let userMessageId: string | undefined;
+
+                                    if (params.isRegenerate) {
+                                        userMessageId = params.regenerateParentId;
+                                    } else {
+                                        const userMessage =
+                                            params.messages[params.messages.length - 1];
+                                        if (userMessage?.role === "user") {
+                                            const savedUserMessage =
+                                                await this.aiChatsMessageService.createMessage({
+                                                    conversationId,
+                                                    modelId: params.modelId,
+                                                    message: userMessage,
+                                                    parentId: params.parentId,
+                                                });
+                                            userMessageId = savedUserMessage.id;
+                                            writer.write({
+                                                type: "data-user-message-id",
+                                                data: savedUserMessage.id,
+                                            });
+                                        }
+                                    }
+
+                                    const savedAssistantMessage = await this.saveMessage({
+                                        conversationId,
+                                        modelId: params.modelId,
+                                        message: responseMessage,
+                                        usage: await finalResult.usage,
+                                        status: isAborted ? "failed" : "completed",
+                                        parentId: userMessageId,
+                                    });
+
+                                    writer.write({
+                                        type: "data-assistant-message-id",
+                                        data: savedAssistantMessage.id,
+                                    });
                                 }
-
-                                const savedAssistantMessage = await this.saveMessage({
-                                    conversationId,
-                                    modelId: params.modelId,
-                                    message: event.responseMessage,
-                                    usage: await finalResult.usage,
-                                    status: event.isAborted ? "failed" : "completed",
-                                    parentId: userMessageId,
-                                });
-
-                                writer.write({
-                                    type: "data-assistant-message-id",
-                                    data: savedAssistantMessage.id,
-                                });
                             } catch (error) {
                                 console.error("保存消息失败:", error);
                             }
@@ -136,6 +196,7 @@ export class ChatCompletionService {
                         onError: (error) =>
                             error instanceof Error ? error.message : "An error occurred.",
                     });
+
                     writer.merge(uiMessageStream);
                 },
             });

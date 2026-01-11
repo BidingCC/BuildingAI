@@ -85,13 +85,25 @@ export function convertMessageToUIMessage(msg: Message): UIMessage {
     for (const tool of msg.tools) {
       // ToolUIPart 是动态类型，根据工具名称和状态有不同的结构
       // 使用类型断言，因为工具名称是动态的
+
+      // 处理 tool.result：如果是字符串，尝试解析为 JSON；否则保持原样
+      let output: unknown = tool.result;
+      if (tool.status === "output-available" && tool.result && typeof tool.result === "string") {
+        try {
+          output = JSON.parse(tool.result);
+        } catch {
+          // 如果解析失败，保持原字符串
+          output = tool.result;
+        }
+      }
+
       const toolPart = {
         type: `tool-${tool.name}` as const,
         toolCallId: `${msg.key}-${tool.name}-${Date.now()}`,
         state: tool.status,
         input: tool.parameters,
         // 根据状态添加相应的字段
-        ...(tool.status === "output-available" && tool.result && { output: tool.result }),
+        ...(tool.status === "output-available" && output && { output }),
         ...(tool.status === "output-error" && tool.error && { errorText: tool.error }),
       } as UIMessagePart<never, never>;
 
@@ -208,9 +220,10 @@ export function convertUIMessageToMessage(uiMsg: UIMessage): Message {
             description: toolDescriptionsMap.get(toolName) ?? "",
             status: toolPart.state,
             parameters: toolPart.input,
+            // 保持 output 的原始类型（可能是对象或字符串）
             result:
               toolPart.state === "output-available" && toolPart.output !== undefined
-                ? String(toolPart.output)
+                ? toolPart.output
                 : undefined,
             error:
               toolPart.state === "output-error" && toolPart.errorText

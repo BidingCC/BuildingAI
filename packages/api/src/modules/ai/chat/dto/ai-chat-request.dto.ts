@@ -1,9 +1,14 @@
 import type { UIMessage } from "ai";
-import { IsArray, IsOptional, IsString, IsUUID } from "class-validator";
+import { IsArray, IsOptional, IsObject, IsString, IsUUID, ValidateIf } from "class-validator";
 
 export class ChatRequestDto {
+    @ValidateIf((o) => !o.message)
     @IsArray({ message: "消息列表必须是数组" })
-    messages: UIMessage[];
+    messages?: UIMessage[];
+
+    @ValidateIf((o) => !o.messages)
+    @IsObject({ message: "消息必须是对象" })
+    message?: UIMessage;
 
     @IsUUID(undefined, { message: "模型ID必须是有效的UUID格式" })
     @IsString({ message: "模型ID不能为空" })

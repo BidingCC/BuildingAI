@@ -126,6 +126,7 @@ export interface AssistantContextValue {
   onSelectModel: (id: string) => void;
   onLike: (messageKey: string, liked: boolean) => void;
   onDislike: (messageKey: string, disliked: boolean) => void;
+  addToolApprovalResponse?: (args: { id: string; approved: boolean; reason?: string }) => void;
 }
 
 export interface AssistantProviderProps extends AssistantContextValue {

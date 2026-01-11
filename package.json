@@ -92,6 +92,8 @@
         "@nestjs/terminus": "catalog:api",
         "@nestjs/typeorm": "catalog:api",
         "@tailwindcss/vite": "catalog:web",
+        "@tanstack/react-query": "^5.90.16",
+        "@tanstack/react-query-devtools": "^5.91.2",
         "@tanstack/table-core": "^8.21.3",
         "@tiptap/extension-color": "catalog:web",
         "@tiptap/extension-highlight": "catalog:web",
@@ -105,8 +107,6 @@
         "@tiptap/vue-3": "catalog:web",
         "@types/fs-extra": "^11.0.4",
         "@vueuse/core": "catalog:web",
-        "@tanstack/react-query": "^5.90.16",
-        "@tanstack/react-query-devtools": "^5.91.2",
         "@vueuse/motion": "catalog:web",
         "@xyflow/react": "^12.10.0",
         "ai": "^6.0.5",
@@ -151,7 +151,8 @@
         "vue-renderer-markdown": "catalog:web",
         "vue-router": "catalog:web",
         "vuedraggable": "catalog:web",
-        "yup": "catalog:web"
+        "yup": "catalog:web",
+        "zod": "^4.2.1"
     },
     "devDependencies": {
         "@nestjs/cli": "catalog:api",
@@ -169,6 +170,7 @@
         "eslint": "catalog:dev",
         "eslint-plugin-format": "catalog:dev",
         "eslint-plugin-vue": "catalog:dev",
+        "globals": "^16.5.0",
         "mime-types": "3.0.1",
         "prettier": "catalog:dev",
         "prettier-plugin-tailwindcss": "catalog:dev",
@@ -179,8 +181,7 @@
         "typescript-eslint": "catalog:dev",
         "vite-plugin-eslint2": "catalog:dev",
         "vue-eslint-parser": "catalog:dev",
-        "vue-tsc": "catalog:dev",
-        "globals": "^16.5.0"
+        "vue-tsc": "catalog:dev"
     },
     "overrides": {
         "mime-types": "3.0.1",

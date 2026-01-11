@@ -1,4 +1,4 @@
-import { Chat, useChat } from "@ai-sdk/react";
+import { useChat } from "@ai-sdk/react";
 import { useConversationMessagesQuery } from "@buildingai/services/web";
 import { useAuthStore } from "@buildingai/stores";
 import { useQueryClient } from "@tanstack/react-query";
@@ -30,6 +30,7 @@ export interface UseChatReturn {
   regenerate: (messageId: string) => void;
   send: (content: string) => void;
   stop: () => void;
+  addToolApprovalResponse?: (args: { id: string; approved: boolean; reason?: string }) => void;
 }
 
 export function useChatStream(options: UseChatOptions): UseChatReturn {
@@ -39,7 +40,6 @@ export function useChatStream(options: UseChatOptions): UseChatReturn {
   const token = useAuthStore((state) => state.auth.token);
   const queryClient = useQueryClient();
   const conversationIdRef = useRef<string | undefined>(currentThreadId);
-  const chatRef = useRef<Chat<UIMessage> | null>(null);
   const lastMessageDbIdRef = useRef<string | null>(null);
   const pendingParentIdRef = useRef<string | null>(null);
 
@@ -48,51 +48,83 @@ export function useChatStream(options: UseChatOptions): UseChatReturn {
     { enabled: !!currentThreadId, refetchOnWindowFocus: false },
   );
 
-  const chat = useMemo(() => {
-    if (!chatRef.current) {
-      chatRef.current = new Chat<UIMessage>({
-        id: "new",
-        messages: [],
-        transport: new DefaultChatTransport({
-          api: `${getApiBaseUrl()}/api/ai-chat`,
-          headers: { Authorization: token ? `Bearer ${token}` : "" },
-          body: () => {
-            const parentId = pendingParentIdRef.current;
-            pendingParentIdRef.current = null;
-            return { modelId, conversationId: conversationIdRef.current || undefined, parentId };
+  const {
+    messages,
+    setMessages,
+    sendMessage,
+    stop,
+    status,
+    regenerate,
+    error,
+    addToolApprovalResponse,
+  } = useChat({
+    id: "new",
+    sendAutomaticallyWhen: ({ messages: currentMessages }) => {
+      const lastMessage = currentMessages.at(-1);
+      const shouldContinue =
+        lastMessage?.parts?.some(
+          (part) =>
+            "state" in part &&
+            part.state === "approval-responded" &&
+            "approval" in part &&
+            (part.approval as { approved?: boolean })?.approved === true,
+        ) ?? false;
+      return shouldContinue;
+    },
+    transport: new DefaultChatTransport({
+      api: `${getApiBaseUrl()}/api/ai-chat`,
+      headers: { Authorization: token ? `Bearer ${token}` : "" },
+      body: () => {
+        const parentId = pendingParentIdRef.current;
+        pendingParentIdRef.current = null;
+        return { modelId, conversationId: conversationIdRef.current || undefined, parentId };
+      },
+      prepareSendMessagesRequest(request) {
+        const lastMessage = request.messages.at(-1);
+
+        const isToolApprovalContinuation =
+          lastMessage?.role !== "user" ||
+          request.messages.some((msg) =>
+            msg.parts?.some((part) => {
+              const state = (part as { state?: string }).state;
+              return state === "approval-responded" || state === "output-denied";
+            }),
+          );
+
+        return {
+          body: {
+            ...request.body,
+            ...(isToolApprovalContinuation
+              ? { messages: request.messages }
+              : { message: lastMessage }),
           },
-        }),
-        onData: (data) => {
-          if (data.type === "data-conversation-id" && data.data) {
-            const newConversationId = data.data as string;
-            const isNewConversation = !conversationIdRef.current;
-            conversationIdRef.current = newConversationId;
+        };
+      },
+    }),
+    onData: (data) => {
+      if (data.type === "data-conversation-id" && data.data) {
+        const newConversationId = data.data as string;
+        const isNewConversation = !conversationIdRef.current;
+        conversationIdRef.current = newConversationId;
 
-            if (isNewConversation) {
-              navigate(`/c/${newConversationId}`);
-              queryClient.invalidateQueries({ queryKey: ["conversations"] });
-            }
-            onThreadCreated?.();
-          }
-
-          if (
-            (data.type === "data-user-message-id" || data.type === "data-assistant-message-id") &&
-            data.data
-          ) {
-            lastMessageDbIdRef.current = data.data as string;
-          }
-        },
-        onFinish: () => {
+        if (isNewConversation) {
+          navigate(`/c/${newConversationId}`);
           queryClient.invalidateQueries({ queryKey: ["conversations"] });
-        },
-        onError: () => console.error("Error streaming chat"),
-      });
-    }
-    return chatRef.current;
-  }, [modelId, token, navigate, queryClient, onThreadCreated]);
+        }
+        onThreadCreated?.();
+      }
 
-  const { messages, setMessages, sendMessage, stop, status, regenerate, error } = useChat({
-    chat,
+      if (
+        (data.type === "data-user-message-id" || data.type === "data-assistant-message-id") &&
+        data.data
+      ) {
+        lastMessageDbIdRef.current = data.data as string;
+      }
+    },
+    onFinish: () => {
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+    },
+    onError: () => console.error("Error streaming chat"),
   });
 
   useEffect(() => {
@@ -166,5 +198,6 @@ export function useChatStream(options: UseChatOptions): UseChatReturn {
     send,
     stop,
     regenerate: handleRegenerate,
+    addToolApprovalResponse,
   };
 }

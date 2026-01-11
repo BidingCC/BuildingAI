@@ -43,6 +43,7 @@ export const Thread = memo(function Thread({ title, onShare, welcomeMessage }: T
     onDislike,
     onRegenerate,
     onSwitchBranch,
+    addToolApprovalResponse,
   } = useAssistantContext();
 
   const [modelSelectorOpen, setModelSelectorOpen] = useState(false);
@@ -175,6 +176,7 @@ export const Thread = memo(function Thread({ title, onShare, welcomeMessage }: T
                           branches={displayMsg.branches}
                           onSwitchBranch={onSwitchBranch}
                           error={hasError ? error.message : undefined}
+                          addToolApprovalResponse={addToolApprovalResponse}
                         />
                       </div>
                     </ViewportSlack>
