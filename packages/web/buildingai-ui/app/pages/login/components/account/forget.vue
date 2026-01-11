@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { SMS_TYPE } from "@buildingai/constants/web/auth.constant";
 import { apiPostResetPassword, apiSmsSend } from "@buildingai/service/webapi/user";
 import { Motion } from "motion-v";
 import { reactive, ref } from "vue";
 import { object, ref as yupRef, string } from "yup";
+import { SmsScene } from "@buildingai/constants/shared";
 
 const emits = defineEmits<{
     (e: "switchComponent", component: string): void;
@@ -57,7 +57,7 @@ const { lockFn: onSmsSend, isLock: smsLoading } = useLockFn(async () => {
 
     try {
         await apiSmsSend({
-            scene: SMS_TYPE.FIND_PASSWORD,
+            scene: SmsScene.FIND_PASSWORD,
             mobile: forgetState.mobile,
         });
         codeBtnState.isCounting = true;

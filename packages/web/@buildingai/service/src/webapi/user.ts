@@ -6,6 +6,8 @@
  * @author BuildingAI Teams
  */
 
+import type { SmsSceneType, UserTerminalType } from "@buildingai/constants/shared";
+
 import type { MenuFormData } from "../consoleapi/menu";
 import type { BaseEntity, Pagination } from "../models/globals";
 
@@ -334,24 +336,28 @@ export function apiCheckTicket(params?: { key: string }): Promise<WechatLoginTic
  * @param params Send parameters
  * @returns Promise with send result
  */
-export function apiSmsSend(params?: {
+export function apiSmsSend(params: {
     /** Scene type */
-    scene: string;
+    scene: SmsSceneType;
     /** Mobile number */
     mobile: string;
+    /** Area code */
+    areaCode?: string;
 }): Promise<{ data: string }> {
-    return useWebPost("/sms/sendCode", params);
+    return useWebPost("/auth/sms/send-code", params);
 }
 
 export function apiSmsLogin(params: {
-    /** Scene type */
-    scene: string;
     /** Mobile number */
     mobile: string;
     /** SMS code */
     code: string;
-}) {
-    return useWebPost("/sms/login", params);
+    /** Login terminal */
+    terminal: UserTerminalType;
+    /** Area code */
+    areaCode?: string;
+}): Promise<LoginResponse> {
+    return useWebPost("/auth/sms/login", params);
 }
 
 // ==================== Account Authentication Related APIs ====================

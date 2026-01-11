@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { SmsScene } from "@buildingai/constants/shared";
+import { apiSmsSend } from "@buildingai/service/webapi/user";
 import { Motion } from "motion-v";
 import { reactive, ref } from "vue";
 import type { InferType } from "yup";
@@ -6,13 +8,10 @@ import { object, string } from "yup";
 
 import type { FormSubmitEvent } from "#ui/types";
 
-// import { SMS_TYPE } from "@buildingai/constants/web";
-// import { apiSmsSend } from "@/services/web/user";
-
 const PrivacyTerms = defineAsyncComponent(() => import("../privacy-terms.vue"));
 
 const emit = defineEmits<{
-    (e: "next", v: string): void;
+    (e: "next", phone: string, areaCode: string): void;
     (e: "switchComponent", component: string): void;
 }>();
 
@@ -45,17 +44,27 @@ const { lockFn: onPhoneSubmit, isLock } = useLockFn(async (event: FormSubmitEven
         return;
     }
 
+    const areaCode = selected.value?.label;
+    if (!areaCode) {
+        toast.warning("请选择电话区号", {
+            title: "温馨提示",
+            duration: 3000,
+        });
+        return;
+    }
+
     try {
-        // await apiSmsSend({
-        //     scene: SMS_TYPE.LOGIN,
-        //     mobile: phoneState.phone,
-        // });
+        await apiSmsSend({
+            scene: SmsScene.LOGIN,
+            mobile: phoneState.phone,
+            areaCode,
+        });
         toast.success("验证码已发送，请注意查收", {
             title: "发送成功",
             duration: 3000,
         });
         // 验证成功，进入下一步
-        emit("next", event.data.phone);
+        emit("next", event.data.phone, areaCode);
     } catch (error) {
         console.error("发送验证码失败:", error);
         toast.error("验证码发送失败，请稍后重试", {

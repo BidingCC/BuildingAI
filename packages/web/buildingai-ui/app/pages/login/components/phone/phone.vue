@@ -22,17 +22,16 @@ const emits = defineEmits<{
 }>();
 
 const step = ref<"phone" | "code">("phone");
-const phone = ref<string>("");
+const phaseCachedPhone = ref({ phone: "", areaCode: "" });
 const container: PhoneLoginContainer = {
     phone: { width: "420px", height: "396px" },
     code: { width: "660px", height: "450px" },
 };
 
 // 处理手机号验证完成
-function handlePhoneNext(phoneNumber: string) {
-    // TODO: 发送验证码
+function handlePhoneNext(phone: string, areaCode: string) {
     step.value = "code";
-    phone.value = phoneNumber;
+    phaseCachedPhone.value = { phone, areaCode };
 
     emits("update:showLoginMethods", false);
     emits("updateStyle", container[step.value]);
@@ -71,5 +70,11 @@ onMounted(() => {
     />
 
     <!-- 验证码输入步骤 -->
-    <CodeInput v-else :phone="phone" @back="handleCodeBack" @success="handleSuccess" />
+    <CodeInput
+        v-else
+        :phone="phaseCachedPhone.phone"
+        :area-code="phaseCachedPhone.areaCode"
+        @back="handleCodeBack"
+        @success="handleSuccess"
+    />
 </template>

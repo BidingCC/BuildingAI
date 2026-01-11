@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SMS_TYPE } from "@buildingai/constants/web";
+import { SmsScene } from "@buildingai/constants/shared";
 import { apiSmsSend, apiUserMobileBind } from "@buildingai/service/webapi/user";
 import { Motion } from "motion-v";
 import { object, string } from "yup";
@@ -37,11 +37,22 @@ const bindState = reactive({
 
 const { lockFn: onSmsSend, isLock: smsLoading } = useLockFn(async () => {
     if (codeBtnState.value.isCounting === true) return;
+
+    const areaCode = selected.value?.label;
+    if (!areaCode) {
+        toast.warning("请选择电话区号", {
+            title: "温馨提示",
+            duration: 3000,
+        });
+        return;
+    }
+
     codeBtnState.value.text = "正在发送中";
     try {
         await apiSmsSend({
-            scene: SMS_TYPE.BIND_MOBILE,
+            scene: SmsScene.BIND_MOBILE,
             mobile: bindState.mobile,
+            areaCode,
         });
         toast.success("验证码已发送，请注意查收", { title: "发送成功" });
         codeBtnState.value.isCounting = true;
