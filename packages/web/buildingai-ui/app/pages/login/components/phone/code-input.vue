@@ -15,20 +15,15 @@ const emits = defineEmits<{
 const toast = useMessage();
 
 const loginState = reactive({
-    succeed: false,
+    checking: false,
+    succeed: true,
     error: "",
 });
-const codeState = reactive<{
-    phone: string;
-    code: number[];
-}>({
+const codeState = reactive<{ phone: string; code: number[] }>({
     phone: "",
     code: [],
 });
-const codeBtnState = ref<{
-    isCounting: boolean;
-    text: string;
-}>({
+const codeBtnState = ref({
     isCounting: false,
     text: "获取验证码",
 });
@@ -82,6 +77,8 @@ async function handleResendCode() {
 async function handlePinInputComplete() {
     if (Array.isArray(codeState.code) && codeState.code.length === 6) {
         try {
+            loginState.checking = true;
+
             const data: LoginResponse = await apiSmsLogin({
                 terminal: UserTerminal.PC,
                 mobile: props.phone,
@@ -90,11 +87,15 @@ async function handlePinInputComplete() {
             });
             loginState.error = "";
             loginState.succeed = true;
+            loginState.checking = false;
+
             setTimeout(() => {
                 emits("success", data);
             }, 200);
         } catch (error) {
             loginState.error = error as string;
+            loginState.succeed = false;
+            loginState.checking = false;
         }
     }
 }
@@ -117,7 +118,11 @@ onMounted(() => {
 
                 <div class="flex flex-col">
                     <UForm ref="form" :state="codeState">
-                        <UFormField label="" name="code" :error="loginState.error">
+                        <UFormField
+                            label=""
+                            name="code"
+                            :error="!loginState.succeed && loginState.error"
+                        >
                             <UPinInput
                                 v-model="codeState.code"
                                 :length="6"
@@ -125,7 +130,6 @@ onMounted(() => {
                                 type="number"
                                 class="mb-6"
                                 :highlight="true"
-                                :color="loginState.succeed ? 'success' : 'neutral'"
                                 @update:model-value="handlePinInputComplete"
                             />
                         </UFormField>
@@ -134,7 +138,7 @@ onMounted(() => {
                     <UButton
                         size="lg"
                         class="inline-block text-sm"
-                        :disabled="codeBtnState.isCounting"
+                        :disabled="codeBtnState.isCounting || loginState.checking"
                         @click="handleResendCode"
                     >
                         {{ codeBtnState.text }}
