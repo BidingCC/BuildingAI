@@ -5,19 +5,19 @@ import globals from "globals";
 
 /** @type {import("eslint").Linter.Config} */
 export default defineConfig([
-    ...baseConfig,
-    {
-        files: ["src/**/*.{ts,tsx}"],
-        extends: [reactRefresh.configs.vite],
-        languageOptions: {
-            ecmaVersion: 2020,
-            globals: globals.browser,
-            parserOptions: {
-                tsconfigRootDir: import.meta.dirname,
-            },
-        },
-        rules: {
-            "react-refresh/only-export-components": "off",
-        },
+  ...baseConfig,
+  {
+    files: ["src/**/*.{ts,tsx}"],
+    extends: [reactRefresh.configs.vite],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.browser,
+      parserOptions: {
+        tsconfigRootDir: import.meta.dirname,
+      },
     },
+    rules: {
+      "react-refresh/only-export-components": "off",
+    },
+  },
 ]);

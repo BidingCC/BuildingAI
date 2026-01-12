@@ -71,14 +71,15 @@ export class ChatCompletionService {
 
             const cleanedMessages = params.messages.map(({ id: _id, ...msg }) => ({
                 ...msg,
-                parts: msg.parts?.filter((part) => {
-                    const partType = typeof part.type === "string" ? part.type : "";
-                    return (
-                        VALID_PART_TYPES.has(part.type) ||
-                        partType.startsWith("tool-") ||
-                        partType.startsWith("step-")
-                    );
-                }) || [],
+                parts:
+                    msg.parts?.filter((part) => {
+                        const partType = typeof part.type === "string" ? part.type : "";
+                        return (
+                            VALID_PART_TYPES.has(part.type) ||
+                            partType.startsWith("tool-") ||
+                            partType.startsWith("step-")
+                        );
+                    }) || [],
             }));
 
             const modelMessages = await convertToModelMessages(cleanedMessages);

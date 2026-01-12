@@ -1,10 +1,9 @@
+import SplitText from "@buildingai/ui/components/effects/split-text";
 import { Button } from "@buildingai/ui/components/ui/button";
 import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog";
 import { cn } from "@buildingai/ui/lib/utils";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
-
-import SplitText from "@/components/effects/split-text";
 
 const WelcomeAnimate = ({ step, setStep }: { step: number; setStep: (step: number) => void }) => {
   const { confirm } = useAlertDialog();

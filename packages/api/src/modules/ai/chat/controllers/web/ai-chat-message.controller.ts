@@ -33,7 +33,8 @@ export class AiChatMessageWebController extends BaseController {
         const isToolApprovalFlow = Boolean(dto.messages);
 
         // For tool approval flow, use all messages; otherwise use single message
-        const messages = isToolApprovalFlow && dto.messages ? dto.messages : dto.message ? [dto.message] : [];
+        const messages =
+            isToolApprovalFlow && dto.messages ? dto.messages : dto.message ? [dto.message] : [];
 
         await this.chatCompletionService.streamChat(
             {

@@ -1,5 +1,5 @@
 import type { UIMessage } from "ai";
-import { IsArray, IsOptional, IsObject, IsString, IsUUID, ValidateIf } from "class-validator";
+import { IsArray, IsObject, IsOptional, IsString, IsUUID, ValidateIf } from "class-validator";
 
 export class ChatRequestDto {
     @ValidateIf((o) => !o.message)
