@@ -258,14 +258,16 @@ export const Message = memo(
                 const approvalId = (toolPart as any).approval?.id;
                 const isDenied =
                   state === "output-denied" ||
-                  (state === "approval-responded" &&
-                    toolPart.approval?.approved === false);
+                  (state === "approval-responded" && toolPart.approval?.approved === false);
                 const widthClass = "w-[min(100%,450px)]";
 
                 // 输出可用 - 显示天气组件
                 if (state === "output-available") {
                   return (
-                    <div className={widthClass} key={toolPart.toolCallId || `tool-weather-${index}`}>
+                    <div
+                      className={widthClass}
+                      key={toolPart.toolCallId || `tool-weather-${index}`}
+                    >
                       <Weather weatherAtLocation={toolPart.output} />
                     </div>
                   );
@@ -278,7 +280,7 @@ export const Message = memo(
                       <Tool className="w-full" defaultOpen={true}>
                         <ToolHeader state="output-denied" type="tool-getWeather" />
                         <ToolContent>
-                          <div className="px-4 py-3 text-muted-foreground text-sm">
+                          <div className="text-muted-foreground px-4 py-3 text-sm">
                             Weather lookup was denied.
                           </div>
                         </ToolContent>
@@ -308,35 +310,37 @@ export const Message = memo(
                         {(state === "input-available" || state === "approval-requested") && (
                           <ToolInput input={toolPart.input} />
                         )}
-                        {state === "approval-requested" && approvalId && addToolApprovalResponse && (
-                          <div className="flex items-center justify-end gap-2 border-t px-4 py-3">
-                            <button
-                              className="rounded-md px-3 py-1.5 text-muted-foreground text-sm transition-colors hover:bg-muted hover:text-foreground"
-                              onClick={() => {
-                                addToolApprovalResponse({
-                                  id: approvalId,
-                                  approved: false,
-                                  reason: "User denied weather lookup",
-                                });
-                              }}
-                              type="button"
-                            >
-                              Deny
-                            </button>
-                            <button
-                              className="rounded-md bg-primary px-3 py-1.5 text-primary-foreground text-sm transition-colors hover:bg-primary/90"
-                              onClick={() => {
-                                addToolApprovalResponse({
-                                  id: approvalId,
-                                  approved: true,
-                                });
-                              }}
-                              type="button"
-                            >
-                              Allow
-                            </button>
-                          </div>
-                        )}
+                        {state === "approval-requested" &&
+                          approvalId &&
+                          addToolApprovalResponse && (
+                            <div className="flex items-center justify-end gap-2 border-t px-4 py-3">
+                              <button
+                                className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-md px-3 py-1.5 text-sm transition-colors"
+                                onClick={() => {
+                                  addToolApprovalResponse({
+                                    id: approvalId,
+                                    approved: false,
+                                    reason: "User denied weather lookup",
+                                  });
+                                }}
+                                type="button"
+                              >
+                                Deny
+                              </button>
+                              <button
+                                className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-3 py-1.5 text-sm transition-colors"
+                                onClick={() => {
+                                  addToolApprovalResponse({
+                                    id: approvalId,
+                                    approved: true,
+                                  });
+                                }}
+                                type="button"
+                              >
+                                Allow
+                              </button>
+                            </div>
+                          )}
                       </ToolContent>
                     </Tool>
                   </div>

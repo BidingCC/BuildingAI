@@ -15,7 +15,7 @@ const AppNavbar = () => {
       <div className="flex items-center gap-2 px-4">
         <SidebarTrigger className="size-fit bg-transparent p-0 hover:bg-transparent" />
         <div>
-          <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-3.5" />
+          <Separator orientation="vertical" className="mx-1.5 data-[orientation=vertical]:h-3.5" />
         </div>
         <Breadcrumb>
           <BreadcrumbList>

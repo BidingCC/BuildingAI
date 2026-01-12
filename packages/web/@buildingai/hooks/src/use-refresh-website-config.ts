@@ -13,5 +13,5 @@ export const useRefreshWebsiteConfig = (manualOnly: boolean = false) => {
         if (data) setWebsiteConfig(data);
     }, [data, setWebsiteConfig]);
 
-    return { refreshConfig: refetch, isFetching };
+    return { refreshConfig: refetch, isFetching, websiteConfig: data };
 };
