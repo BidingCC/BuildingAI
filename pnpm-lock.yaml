@@ -198,6 +198,9 @@ catalogs:
     react-dom:
       specifier: ^19.2.0
       version: 19.2.3
+    recharts:
+      specifier: 2.15.4
+      version: 2.15.4
     reka-ui:
       specifier: ^2.6.0
       version: 2.7.0
@@ -1553,7 +1556,7 @@ importers:
         specifier: ^3.0.6
         version: 3.0.6(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       recharts:
-        specifier: 2.15.4
+        specifier: catalog:web
         version: 2.15.4(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       shadcn:
         specifier: ^3.6.2
@@ -1676,6 +1679,9 @@ importers:
       react-router-dom:
         specifier: ^7.10.1
         version: 7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      recharts:
+        specifier: catalog:web
+        version: 2.15.4(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       zod:
         specifier: ^4.2.1
         version: 4.2.1

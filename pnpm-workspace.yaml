@@ -75,6 +75,7 @@ catalogs:
     '@vueuse/motion': ^3.0.3
     react: ^19.2.3
     react-dom: ^19.2.0
+    recharts: 2.15.4
     clsx: ^2.1.1
     echarts: ^5.6.0
     mermaid: ^11.12.1

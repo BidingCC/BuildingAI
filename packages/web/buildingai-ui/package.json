@@ -29,6 +29,7 @@
         "react-dom": "catalog:web",
         "react-hook-form": "^7.68.0",
         "react-router-dom": "^7.10.1",
+        "recharts": "catalog:web",
         "zod": "^4.2.1"
     },
     "devDependencies": {
