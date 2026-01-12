@@ -74,7 +74,7 @@ const { start: startPolling, clear: stopPolling } = usePollingTask(
                 loginStatus.value = WECHAT_LOGIN_STATUS.LOGIN_SUCCESS;
                 stopPolling();
 
-                handleLoginSuccess(data.user);
+                handleLoginSuccess(data);
             }
         } catch (error) {
             console.error("检查登录状态失败:", error);

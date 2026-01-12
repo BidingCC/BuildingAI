@@ -244,7 +244,7 @@ export class WechatOaService {
 
                 // 用户状态正常，直接登录
                 const result = await this.authService.loginOrRegisterByOpenid(openid as string);
-                if (result.user.token) {
+                if (result.token) {
                     // 发送登录成功消息
                     await this.sendTemplateMessage(openid as string, "登录成功");
                 }
@@ -273,7 +273,7 @@ export class WechatOaService {
 
                 // 允许微信注册，进行自动注册
                 const result = await this.authService.loginOrRegisterByOpenid(openid as string);
-                if (result.user.token) {
+                if (result.token) {
                     // 发送注册成功消息
                     await this.sendTemplateMessage(openid as string, "注册并登录成功");
                 }

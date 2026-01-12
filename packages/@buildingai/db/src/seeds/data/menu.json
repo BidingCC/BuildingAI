@@ -1342,6 +1342,31 @@
                 ]
             },
             {
+                "name": "console-menu.notification.title",
+                "code": "notification",
+                "path": "notification",
+                "icon": "i-lucide-bell",
+                "component": "",
+                "sort": 1150,
+                "isHidden": 0,
+                "type": 1,
+                "sourceType": 1,
+                "children": [
+                    {
+                        "name": "console-menu.notification.sms-config",
+                        "code": "sms-config",
+                        "path": "sms-config",
+                        "icon": "",
+                        "component": "/console/notification/channels/sms-config/index",
+                        "permissionCode": "sms-config:list",
+                        "sort": 0,
+                        "isHidden": 0,
+                        "type": 2,
+                        "sourceType": 1
+                    }
+                ]
+            },
+            {
                 "name": "console-menu.systemSettings.title",
                 "code": "system-settings",
                 "path": "system",

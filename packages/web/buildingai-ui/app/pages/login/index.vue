@@ -76,7 +76,8 @@ function switchLoginMethod(methodName: string | number): void {
 }
 
 function loginHandle(data: LoginResponse & { hasBind: boolean }): void {
-    if (appStore.loginWay.coerceMobile * 1 && !data.hasBind && !data.mobile) {
+    const user = data.user;
+    if (appStore.loginWay.coerceMobile * 1 && !user.hasBind && !user.mobile) {
         userStore.tempLogin(data.token);
         currentLoginMethod.value = LOGIN_STATUS.BIND;
         return;

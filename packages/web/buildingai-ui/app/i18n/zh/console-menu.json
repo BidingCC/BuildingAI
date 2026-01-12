@@ -94,6 +94,10 @@
         "roleList": "角色管理",
         "menuList": "菜单管理"
     },
+    "notification": {
+        "title": "消息通知",
+        "sms-config": "短信配置"
+    },
     "systemSettings": {
         "title": "系统设置",
         "siteInfo": "网站信息",

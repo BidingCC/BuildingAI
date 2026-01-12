@@ -364,8 +364,8 @@ export class AuthService extends BaseService<User> {
         // 返回登录结果
         return {
             expiresAt: tokenResult.expiresAt,
+            token: tokenResult.token,
             user: {
-                token: tokenResult.token,
                 ...fullUser,
                 permission: [],
                 role: {},
