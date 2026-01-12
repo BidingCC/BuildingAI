@@ -38,6 +38,7 @@ export const Thread = memo(function Thread({ title, onShare, welcomeMessage }: T
     streamingMessageId,
     error,
     onSend,
+    onStop,
     onSelectModel,
     onLike,
     onDislike,
@@ -211,6 +212,7 @@ export const Thread = memo(function Thread({ title, onShare, welcomeMessage }: T
                 textareaRef={textareaRef}
                 status={status}
                 onSubmit={handleSubmit}
+                onStop={onStop}
                 globalDrop
                 multiple
               />

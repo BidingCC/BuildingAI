@@ -4,7 +4,7 @@ import { useAuthStore } from "@buildingai/stores";
 import { useQueryClient } from "@tanstack/react-query";
 import type { ChatStatus, UIMessage } from "ai";
 import { DefaultChatTransport } from "ai";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 const getApiBaseUrl = () => {
@@ -28,7 +28,7 @@ export interface UseChatReturn {
   error: Error | null;
   setMessages: (messages: UIMessage[]) => void;
   regenerate: (messageId: string) => void;
-  send: (content: string) => void;
+  send: (content: string, parentId?: string | null) => void;
   stop: () => void;
   addToolApprovalResponse?: (args: { id: string; approved: boolean; reason?: string }) => void;
 }
@@ -82,21 +82,19 @@ export function useChatStream(options: UseChatOptions): UseChatReturn {
       prepareSendMessagesRequest(request) {
         const lastMessage = request.messages.at(-1);
 
-        const isToolApprovalContinuation =
-          lastMessage?.role !== "user" ||
-          request.messages.some((msg) =>
-            msg.parts?.some((part) => {
-              const state = (part as { state?: string }).state;
-              return state === "approval-responded" || state === "output-denied";
-            }),
-          );
+        const isToolApprovalContinuation = request.messages.some((msg) =>
+          msg.parts?.some((part) => {
+            const state = (part as { state?: string }).state;
+            return state === "approval-responded" || state === "output-denied";
+          }),
+        );
 
         return {
           body: {
             ...request.body,
             ...(isToolApprovalContinuation
-              ? { messages: request.messages }
-              : { message: lastMessage }),
+              ? { message: lastMessage }
+              : { messages: request.messages }),
           },
         };
       },
@@ -128,13 +126,13 @@ export function useChatStream(options: UseChatOptions): UseChatReturn {
   });
 
   useEffect(() => {
-    if (currentThreadId) {
-      conversationIdRef.current = currentThreadId;
-    } else if (!messagesData?.items.length) {
-      conversationIdRef.current = undefined;
+    pendingParentIdRef.current = null;
+    lastMessageDbIdRef.current = null;
+    conversationIdRef.current = currentThreadId || undefined;
+    if (!currentThreadId && !messagesData?.items.length) {
       setMessages([]);
     }
-  }, [currentThreadId, setMessages]);
+  }, [currentThreadId, setMessages, stop]);
 
   useEffect(() => {
     if (!currentThreadId) return;
@@ -156,9 +154,6 @@ export function useChatStream(options: UseChatOptions): UseChatReturn {
       if (sortedMessages.length > 0) {
         lastMessageDbIdRef.current = sortedMessages[sortedMessages.length - 1].id;
       }
-    } else if (messagesData?.items.length === 0 && !currentThreadId) {
-      setMessages([]);
-      lastMessageDbIdRef.current = null;
     }
   }, [currentThreadId, messagesData, setMessages]);
 
@@ -168,15 +163,15 @@ export function useChatStream(options: UseChatOptions): UseChatReturn {
       if (msgIndex > 0 && messages[msgIndex - 1].role === "user") {
         pendingParentIdRef.current = messages[msgIndex - 1].id;
       }
-      regenerate({ messageId });
+      regenerate({ messageId, body: { trigger: "regenerate-message" } });
     },
     [regenerate, messages],
   );
 
   const send = useCallback(
-    (content: string) => {
+    (content: string, parentId?: string | null) => {
       if (!content.trim() || status === "streaming") return;
-      pendingParentIdRef.current = lastMessageDbIdRef.current;
+      pendingParentIdRef.current = parentId !== undefined ? parentId : lastMessageDbIdRef.current;
       sendMessage({ text: content.trim() });
     },
     [sendMessage, status],

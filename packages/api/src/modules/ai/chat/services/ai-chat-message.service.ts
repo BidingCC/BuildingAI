@@ -5,6 +5,7 @@ import { Repository } from "@buildingai/db/typeorm";
 import { PaginationDto } from "@buildingai/dto/pagination.dto";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { Injectable } from "@nestjs/common";
+import { validate as isUUID } from "uuid";
 
 import { CreateMessageDto, UpdateMessageDto } from "../dto/ai-chat-record.dto";
 
@@ -24,11 +25,20 @@ export class AiChatsMessageService extends BaseService<AiChatMessage> {
                 order: { sequence: "DESC" },
             });
 
+            let resolvedParentId = dto.parentId;
+            if (dto.parentId && !isUUID(dto.parentId)) {
+                const parentMessage = await this.findByFrontendId(dto.conversationId, dto.parentId);
+                resolvedParentId = parentMessage?.id ?? null;
+            }
+
+            const frontendId = dto.message?.id || null;
+
             const messageData = {
                 conversationId: dto.conversationId,
                 modelId: dto.modelId,
                 sequence: (lastMessage?.sequence || 0) + 1,
-                parentId: dto.parentId,
+                parentId: resolvedParentId,
+                frontendId,
                 message: dto.message,
                 status: "completed" as const,
                 errorMessage: dto.errorMessage,
@@ -47,6 +57,15 @@ export class AiChatsMessageService extends BaseService<AiChatMessage> {
             this.logger.error(`创建消息失败: ${error.message}`, error.stack);
             throw HttpErrorFactory.badRequest("Failed to create message.");
         }
+    }
+
+    async findByFrontendId(
+        conversationId: string,
+        frontendId: string,
+    ): Promise<AiChatMessage | null> {
+        return this.messageRepository.findOne({
+            where: { conversationId, frontendId },
+        });
     }
 
     async findMessages(paginationDto: PaginationDto, queryDto?: { conversationId?: string }) {

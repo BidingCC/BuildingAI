@@ -39,6 +39,15 @@ export class AiChatMessage extends BaseEntity {
     parentId?: string;
 
     @Column({
+        type: "varchar",
+        length: 64,
+        nullable: true,
+        comment: "前端消息ID（用于映射前端临时ID到数据库ID）",
+    })
+    @Index()
+    frontendId?: string;
+
+    @Column({
         type: "jsonb",
         comment: "消息内容（包含 role 和 parts）",
     })

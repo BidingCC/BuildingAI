@@ -304,9 +304,18 @@ export class MessageRepository {
     createdAt?: string,
   ): void {
     const existingItem = this.messages.get(message.id);
-    const prev = parentId ? this.messages.get(parentId) : null;
-    if (prev === undefined) {
-      throw new Error("MessageRepository(addOrUpdateMessage): Parent message not found.");
+
+    // 如果 parentId 存在但找不到对应消息，降级为 root 级别，避免崩溃
+    let prev: RepositoryMessage | null = null;
+    if (parentId) {
+      const foundPrev = this.messages.get(parentId);
+      if (foundPrev) {
+        prev = foundPrev;
+      } else {
+        console.warn(
+          `MessageRepository(addOrUpdateMessage): Parent message not found: ${parentId}, treating as root`,
+        );
+      }
     }
 
     // update existing message

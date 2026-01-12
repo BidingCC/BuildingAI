@@ -22,29 +22,42 @@ export class AiChatMessageWebController extends BaseController {
         @Req() req: Request,
     ) {
         const abortController = new AbortController();
-        req.on("close", () => {
-            if (!res.writableEnded) abortController.abort();
-        });
+        const abortSignal =
+            (req as any).signal instanceof AbortSignal
+                ? (req as any).signal
+                : abortController.signal;
+
+        if (!((req as any).signal instanceof AbortSignal)) {
+            const handleDisconnect = () => {
+                if (!res.writableEnded && !abortSignal.aborted) abortController.abort();
+            };
+            req.on("close", handleDisconnect);
+            req.on("aborted", handleDisconnect);
+            res.on("close", handleDisconnect);
+            if (req.aborted || req.socket?.destroyed) abortController.abort();
+        }
 
         const conversationId = dto.id && dto.id !== "new" ? dto.id : dto.conversationId;
         const isRegenerate = dto.trigger === "regenerate-message" && !!dto.messageId;
-
-        // Check if this is a tool approval flow (all messages sent)
-        const isToolApprovalFlow = Boolean(dto.messages);
-
-        // For tool approval flow, use all messages; otherwise use single message
-        const messages = isToolApprovalFlow && dto.messages ? dto.messages : dto.message ? [dto.message] : [];
+        const isToolApprovalFlow =
+            dto.message &&
+            !dto.messages &&
+            dto.message.role === "assistant" &&
+            dto.message.parts?.some((part) => {
+                const state = (part as { state?: string }).state;
+                return ["approval-responded", "output-denied"].includes(state || "");
+            });
 
         await this.chatCompletionService.streamChat(
             {
                 userId: playground.id,
                 modelId: dto.modelId,
                 conversationId,
-                messages,
+                messages: dto.messages ?? (dto.message ? [dto.message] : []),
                 title: dto.title,
                 systemPrompt: dto.systemPrompt,
                 mcpServers: dto.mcpServers,
-                abortSignal: abortController.signal,
+                abortSignal,
                 isRegenerate,
                 regenerateMessageId: dto.messageId,
                 parentId: isRegenerate ? undefined : dto.parentId,
