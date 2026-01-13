@@ -1,0 +1,63 @@
+import type { Model, Suggestion } from "../components/ask-assistant-ui";
+import { AssistantProvider, Thread, useAssistant } from "../components/ask-assistant-ui";
+
+const MODELS: Model[] = [
+  {
+    id: "gpt-4o",
+    name: "GPT-4o",
+    chef: "OpenAI",
+    chefSlug: "openai",
+    providers: ["openai", "azure"],
+  },
+  {
+    id: "gpt-4o-mini",
+    name: "GPT-4o Mini",
+    chef: "OpenAI",
+    chefSlug: "openai",
+    providers: ["openai", "azure"],
+  },
+  {
+    id: "claude-opus-4-20250514",
+    name: "Claude 4 Opus",
+    chef: "Anthropic",
+    chefSlug: "anthropic",
+    providers: ["anthropic", "azure", "google", "amazon-bedrock"],
+  },
+  {
+    id: "claude-sonnet-4-20250514",
+    name: "Claude 4 Sonnet",
+    chef: "Anthropic",
+    chefSlug: "anthropic",
+    providers: ["anthropic", "azure", "google", "amazon-bedrock"],
+  },
+  {
+    id: "gemini-2.0-flash-exp",
+    name: "Gemini 2.0 Flash",
+    chef: "Google",
+    chefSlug: "google",
+    providers: ["google"],
+  },
+];
+
+const SUGGESTIONS: Suggestion[] = [
+  { id: "1", text: "如何开始使用 React Hooks？" },
+  { id: "2", text: "TypeScript 的最佳实践是什么？" },
+  { id: "3", text: "如何优化 React 应用的性能？" },
+];
+
+const IndexPage = () => {
+    console.log("__TAURI_INTERNALS__" in window)
+  const assistant = useAssistant({
+    models: MODELS,
+    defaultModelId: MODELS[0].id,
+    suggestions: SUGGESTIONS,
+  });
+
+  return (
+    <AssistantProvider {...assistant}>
+      <Thread title="新对话" />
+    </AssistantProvider>
+  );
+};
+
+export default IndexPage;

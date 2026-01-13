@@ -12,7 +12,11 @@ module.exports = {
     plugins: ["prettier-plugin-tailwindcss"],
     overrides: [
         {
-            files: ["packages/web/@buildingai/ui/**/*", "packages/web/buildingai-ui/**/*"],
+            files: [
+                "packages/client/**/*",
+                "packages/web/@buildingai/ui/**/*",
+                "packages/web/buildingai-ui/**/*",
+            ],
             options: {
                 tabWidth: 2,
             },

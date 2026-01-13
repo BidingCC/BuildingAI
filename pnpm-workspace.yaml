@@ -1,9 +1,8 @@
 packages:
   - packages/*
   - extensions/*
-  - packages/web/*
   - packages/@buildingai/*
-  - packages/web/@buildingai/*
+  - packages/@buildingai/web/*
 
 catalog:
   axios: ^1.13.2
