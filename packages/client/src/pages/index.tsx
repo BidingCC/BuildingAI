@@ -46,7 +46,6 @@ const SUGGESTIONS: Suggestion[] = [
 ];
 
 const IndexPage = () => {
-    console.log("__TAURI_INTERNALS__" in window)
   const assistant = useAssistant({
     models: MODELS,
     defaultModelId: MODELS[0].id,

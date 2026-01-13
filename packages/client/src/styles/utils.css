@@ -1,0 +1,15 @@
+@utility h-inset {
+  @apply h-[calc(100vh-1rem-4rem-0.25rem)] md:h-[calc(100vh-1rem-4rem-1rem-0.25rem)];
+}
+
+@utility center {
+  @apply flex items-center justify-center;
+}
+
+@utility start {
+  @apply flex items-center justify-start;
+}
+
+@utility end {
+  @apply flex items-center justify-end;
+}
