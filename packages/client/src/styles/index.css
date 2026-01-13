@@ -30,9 +30,18 @@ body {
     scrollbar-width: thin;
     scrollbar-color: transparent transparent;
 }
-.chat-scroll > div {
-    overflow-y: scroll;
-}
 .chat-scroll:hover {
     scrollbar-color: var(--border) transparent;
+}
+.chat-scroll > div {
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+}
+.chat-scroll > div::-webkit-scrollbar {
+    width: 10px;
+    background: transparent;
+}
+.chat-scroll > div::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 10px;
 }
