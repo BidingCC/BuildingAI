@@ -238,7 +238,7 @@ function ChatHistoryMenuItem({
                   <DropdownMenuTrigger asChild>
                     <SidebarMenuAction
                       showOnHover
-                      className="group-hover/menu-sub-item:opacity-100 md:group-focus-within/menu-item:opacity-0 md:group-hover/menu-item:opacity-0"
+                      className="group-hover/menu-sub-item:opacity-100! md:group-focus-within/menu-item:opacity-0 md:group-hover/menu-item:opacity-0"
                     >
                       <EllipsisVertical />
                       <span className="sr-only">More</span>
