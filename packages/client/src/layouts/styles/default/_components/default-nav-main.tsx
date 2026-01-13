@@ -444,7 +444,7 @@ export function DefaultNavMain({ items }: { items: NavItem[] }) {
   }, [data?.total, allConversations.length]);
 
   useEffect(() => {
-    if (!open) {
+    if (open) {
       setPage(1);
       setKeyword("");
       setAllConversations([]);
