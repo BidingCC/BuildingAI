@@ -35,7 +35,7 @@ const DataCard = ({
         </div>
         {action}
       </CardHeader>
-      <CardContent className={cn("mt-3", contentClassName)}>{children}</CardContent>
+      <CardContent className={cn("mt-4", contentClassName)}>{children}</CardContent>
     </Card>
   );
 };

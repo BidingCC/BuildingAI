@@ -1,15 +1,8 @@
 import CountUp from "@buildingai/ui/components/effects/count-up";
 import { Avatar, AvatarFallback, AvatarImage } from "@buildingai/ui/components/ui/avatar";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@buildingai/ui/components/ui/card";
 import { ScrollArea } from "@buildingai/ui/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@buildingai/ui/components/ui/tabs";
-import { Info, TrendingDown, TrendingUp } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@buildingai/ui/components/ui/tabs";
+import { TrendingDown, TrendingUp } from "lucide-react";
 
 import DataCard from "./_components/data-card";
 import { AreaChartCard } from "./_components/line-chart";
@@ -228,7 +221,7 @@ const DashboardPage = () => {
         <DataCard
           title="排行订单"
           description="这是副标题"
-          contentClassName="flex flex-col gap-1 px-4 md:gap-2"
+          contentClassName="flex flex-col gap-1 px-0 md:gap-2"
           action={
             <Tabs defaultValue="account">
               <TabsList>
@@ -238,11 +231,18 @@ const DashboardPage = () => {
             </Tabs>
           }
         >
-          <ScrollArea className="h-[300px]">
+          <ScrollArea className="h-[300px] px-4">
             <div className="flex flex-col gap-3">
+              <div className="bg-card sticky top-0 z-1 flex items-center gap-2">
+                <span className="text-muted-foreground min-w-6 text-xs">排名</span>
+                <span className="text-muted-foreground text-xs">模型信息</span>
+
+                <div className="text-muted-foreground ml-auto text-xs">消耗</div>
+              </div>
+
               {Array.from({ length: 10 }).map((_, index) => {
                 return (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2" key={index}>
                     <span className="text-muted-foreground min-w-6">#{index + 1}</span>
                     <Avatar className="rounded-lg">
                       <AvatarImage src="https://github.com/evilrabbit.png" alt="@evilrabbit" />
@@ -251,6 +251,11 @@ const DashboardPage = () => {
                     <div>
                       <div>模型名称</div>
                       <div className="text-muted-foreground text-xs">模型名称</div>
+                    </div>
+
+                    <div className="ml-auto">
+                      <div>102k</div>
+                      <div className="text-muted-foreground text-xs">106次</div>
                     </div>
                   </div>
                 );
@@ -273,36 +278,51 @@ const DashboardPage = () => {
           className="lg:col-span-2"
           onTimeRangeChange={(range) => console.log("时间范围变化:", range)}
         />
-        <Card className="gap-0 py-4">
-          <CardHeader className="px-4">
-            <CardTitle className="">对话统计</CardTitle>
-            <CardDescription className="flex items-center gap-1 text-xs">
-              <Info className="size-3" />
-              <span className="leading-none">这是副标题</span>
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="mt-2 px-4">
-            <ScrollArea className="h-[300px]">
-              <div className="flex flex-col gap-3">
-                {Array.from({ length: 10 }).map((_, index) => {
-                  return (
-                    <div className="flex items-center gap-2">
-                      <span className="text-muted-foreground min-w-6">#{index + 1}</span>
-                      <Avatar className="rounded-lg">
-                        <AvatarImage src="https://github.com/evilrabbit.png" alt="@evilrabbit" />
-                        <AvatarFallback>ER</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div>模型名称</div>
-                        <div className="text-muted-foreground text-xs">模型名称</div>
-                      </div>
-                    </div>
-                  );
-                })}
+        <DataCard
+          title="排行订单"
+          description="这是副标题"
+          contentClassName="flex flex-col gap-1 px-0 md:gap-2"
+          action={
+            <Tabs defaultValue="account">
+              <TabsList>
+                <TabsTrigger value="account">模型</TabsTrigger>
+                <TabsTrigger value="password">供应商</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          }
+        >
+          <ScrollArea className="h-[300px] px-4">
+            <div className="flex flex-col gap-3">
+              <div className="bg-card sticky top-0 z-1 flex items-center gap-2">
+                <span className="text-muted-foreground min-w-6 text-xs">排名</span>
+                <span className="text-muted-foreground text-xs">模型信息</span>
+
+                <div className="text-muted-foreground ml-auto text-xs">消耗</div>
               </div>
-            </ScrollArea>
-          </CardContent>
-        </Card>
+
+              {Array.from({ length: 10 }).map((_, index) => {
+                return (
+                  <div className="flex items-center gap-2" key={index}>
+                    <span className="text-muted-foreground min-w-6">#{index + 1}</span>
+                    <Avatar className="rounded-lg">
+                      <AvatarImage src="https://github.com/evilrabbit.png" alt="@evilrabbit" />
+                      <AvatarFallback>ER</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div>模型名称</div>
+                      <div className="text-muted-foreground text-xs">模型名称</div>
+                    </div>
+
+                    <div className="ml-auto">
+                      <div>102k</div>
+                      <div className="text-muted-foreground text-xs">106次</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </ScrollArea>
+        </DataCard>
       </div>
     </div>
   );
