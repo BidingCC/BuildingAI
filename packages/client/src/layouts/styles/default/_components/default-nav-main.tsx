@@ -1,6 +1,13 @@
 "use client";
 
+import {
+  type ConversationRecord,
+  useConversationsQuery,
+  useDeleteConversation,
+  useUpdateConversation,
+} from "@buildingai/services/web";
 import { useAuthStore } from "@buildingai/stores";
+import { InfiniteScroll } from "@buildingai/ui/components/infinite-scroll";
 import { Button } from "@buildingai/ui/components/ui/button";
 import {
   Collapsible,
@@ -24,6 +31,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@buildingai/ui/components/ui/dropdown-menu";
+import { Input } from "@buildingai/ui/components/ui/input";
 import {
   SidebarGroup,
   SidebarMenu,
@@ -46,8 +54,15 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { useCallback, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+
+import {
+  formatRelativeTime,
+  groupConversationsByTime,
+  TIME_GROUP_LABELS,
+  type TimeGroup,
+} from "./utils/conversation-group";
 
 interface NavSubItem {
   id: string;
@@ -74,18 +89,29 @@ function HistoryCommandItem({
   time,
   onDelete,
   onRename,
+  onSelect,
 }: {
   id: string;
   title: string;
   time: string;
   onDelete: (id: string) => void;
-  onRename: (id: string) => void;
+  onRename: (id: string, newTitle: string) => void;
+  onSelect?: (id: string) => void;
 }) {
   const [showConfirm, setShowConfirm] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(title);
+
+  const handleSelect = useCallback(() => {
+    if (!showConfirm && !isEditing) {
+      onSelect?.(id);
+    }
+  }, [id, onSelect, showConfirm, isEditing]);
 
   const handleDelete = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     setShowConfirm(true);
+    setIsEditing(false);
   }, []);
 
   const handleConfirm = useCallback(
@@ -97,22 +123,60 @@ function HistoryCommandItem({
     [id, onDelete],
   );
 
-  const handleCancel = useCallback((e: React.MouseEvent) => {
+  const handleCancel = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      setShowConfirm(false);
+      setIsEditing(false);
+      setEditValue(title);
+    },
+    [title],
+  );
+
+  const handleRename = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
+    setIsEditing(true);
     setShowConfirm(false);
   }, []);
 
-  const handleRename = useCallback(
+  const handleSaveRename = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
-      onRename(id);
+      if (editValue.trim() && editValue !== title) {
+        onRename(id, editValue.trim());
+      }
+      setIsEditing(false);
     },
-    [id, onRename],
+    [id, editValue, title, onRename],
+  );
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter") {
+        e.stopPropagation();
+        handleSaveRename(e as any);
+      } else if (e.key === "Escape") {
+        e.stopPropagation();
+        handleCancel(e as any);
+      }
+    },
+    [handleSaveRename, handleCancel],
   );
 
   return (
-    <CommandItem className="h-9">
-      <span>{title}</span>
+    <CommandItem className="h-9" value={id} onSelect={handleSelect}>
+      {isEditing ? (
+        <Input
+          value={editValue}
+          onChange={(e) => setEditValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onClick={(e) => e.stopPropagation()}
+          className="h-7 flex-1"
+          autoFocus
+        />
+      ) : (
+        <span className="line-clamp-1 flex-1">{title}</span>
+      )}
       <CommandShortcut>
         {showConfirm ? (
           <div className="flex gap-1">
@@ -127,6 +191,23 @@ function HistoryCommandItem({
               variant="ghost"
               className="hover:bg-muted-foreground/10 size-6"
               onClick={handleConfirm}
+            >
+              <Check className="size-3.5" />
+            </Button>
+          </div>
+        ) : isEditing ? (
+          <div className="flex gap-1">
+            <Button
+              variant="ghost"
+              className="hover:bg-muted-foreground/10 size-6"
+              onClick={handleCancel}
+            >
+              <X className="size-3.5" />
+            </Button>
+            <Button
+              variant="ghost"
+              className="hover:bg-muted-foreground/10 size-6"
+              onClick={handleSaveRename}
             >
               <Check className="size-3.5" />
             </Button>
@@ -217,51 +298,53 @@ function ChatHistoryMenuItem({
         </div>
       </SidebarMenuButton>
       <CollapsibleContent>
-        <SidebarMenuSub className="mr-0 pr-0">
-          {item.items?.map((subItem) => (
-            <SidebarMenuSubItem key={subItem.id}>
-              <SidebarMenuSubButton asChild isActive={isItemActive(subItem.path)} className="h-9">
-                <Link to={subItem.path || ""} className="flex items-center justify-between">
-                  <span
-                    className={cn(
-                      "line-clamp-1",
-                      "group-focus-within/menu-sub-item:pr-4 group-hover/menu-sub-item:pr-4",
-                      { "font-bold": isItemActive(subItem.path) },
-                    )}
-                  >
-                    {subItem.title}
-                  </span>
-                </Link>
-              </SidebarMenuSubButton>
-              {subItem.path && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <SidebarMenuAction
-                      showOnHover
-                      className="group-hover/menu-sub-item:opacity-100! md:group-focus-within/menu-item:opacity-0 md:group-hover/menu-item:opacity-0"
+        {isLogin() && !!item.items?.length && (
+          <SidebarMenuSub className="mr-0 pr-0">
+            {item.items?.map((subItem) => (
+              <SidebarMenuSubItem key={subItem.id}>
+                <SidebarMenuSubButton asChild isActive={isItemActive(subItem.path)} className="h-9">
+                  <Link to={subItem.path || ""} className="flex items-center justify-between">
+                    <span
+                      className={cn(
+                        "line-clamp-1",
+                        "group-focus-within/menu-sub-item:pr-4 group-hover/menu-sub-item:pr-4",
+                        { "font-bold": isItemActive(subItem.path) },
+                      )}
                     >
-                      <EllipsisVertical />
-                      <span className="sr-only">More</span>
-                    </SidebarMenuAction>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start">
-                    <DropdownMenuItem>
-                      <PenLine />
-                      重命名
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Trash2 />
-                      删除
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-            </SidebarMenuSubItem>
-          ))}
-          {isLogin() && (
+                      {subItem.title}
+                    </span>
+                  </Link>
+                </SidebarMenuSubButton>
+                {subItem.path && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <SidebarMenuAction
+                        showOnHover
+                        className="group-hover/menu-sub-item:opacity-100! md:group-focus-within/menu-item:opacity-0 md:group-hover/menu-item:opacity-0"
+                      >
+                        <EllipsisVertical />
+                        <span className="sr-only">More</span>
+                      </SidebarMenuAction>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start">
+                      <DropdownMenuItem>
+                        <PenLine />
+                        重命名
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <Trash2 />
+                        删除
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </SidebarMenuSubItem>
+            ))}
             <SidebarMenuSubItem>
               <SidebarMenuSubButton onClick={onOpenDialog} className="h-9 cursor-pointer">
-                <span className="text-muted-foreground line-clamp-1 text-xs">查看全部</span>
+                <span className="text-muted-foreground line-clamp-1 text-xs font-medium">
+                  查看全部
+                </span>
                 <span className="sr-only">查看全部</span>
               </SidebarMenuSubButton>
               <SidebarMenuAction
@@ -271,8 +354,8 @@ function ChatHistoryMenuItem({
                 <ArrowUpRight className="text-muted-foreground size-3" />
               </SidebarMenuAction>
             </SidebarMenuSubItem>
-          )}
-        </SidebarMenuSub>
+          </SidebarMenuSub>
+        )}
       </CollapsibleContent>
     </SidebarMenuItem>
   );
@@ -339,8 +422,103 @@ function LinkMenuItem({ item, isActive }: { item: NavItem; isActive: boolean }) 
 
 export function DefaultNavMain({ items }: { items: NavItem[] }) {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const { isLogin } = useAuthStore((state) => state.authActions);
   const [open, setOpen] = useState(false);
+  const [keyword, setKeyword] = useState("");
+  const [page, setPage] = useState(1);
+  const [allConversations, setAllConversations] = useState<ConversationRecord[]>([]);
+  const pageSize = 20;
+
+  const queryResult = useConversationsQuery(
+    { page, pageSize, keyword: keyword || undefined },
+    { enabled: open },
+  );
+  const data = queryResult?.data;
+  const isLoading = "isLoading" in queryResult ? queryResult.isLoading : false;
+  const isFetching = "isFetching" in queryResult ? queryResult.isFetching : false;
+
+  const hasMore = useMemo(() => {
+    if (!data?.total) return false;
+    return allConversations.length < data.total;
+  }, [data?.total, allConversations.length]);
+
+  useEffect(() => {
+    if (open) {
+      setPage(1);
+      setKeyword("");
+      setAllConversations([]);
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (data?.items) {
+      if (page === 1) {
+        setAllConversations(data.items);
+      } else {
+        setAllConversations((prev) => {
+          const existingIds = new Set(prev.map((c) => c.id));
+          const newItems = data.items.filter((item) => !existingIds.has(item.id));
+          return [...prev, ...newItems];
+        });
+      }
+    }
+  }, [data?.items, page]);
+
+  const handleLoadMore = useCallback(() => {
+    if (!isFetching && hasMore) {
+      setPage((prev) => prev + 1);
+    }
+  }, [isFetching, hasMore]);
+
+  const handleSearch = useCallback((value: string) => {
+    setKeyword(value);
+    setPage(1);
+    setAllConversations([]);
+  }, []);
+
+  const deleteMutation = useDeleteConversation();
+  const updateMutation = useUpdateConversation();
+
+  const handleSelect = useCallback(
+    (id: string) => {
+      navigate(`/c/${id}`);
+      setOpen(false);
+    },
+    [navigate],
+  );
+
+  const handleDelete = useCallback(
+    (id: string) => {
+      deleteMutation.mutate(id, {
+        onSuccess: () => {
+          setAllConversations((prev) => prev.filter((c) => c.id !== id));
+        },
+      });
+    },
+    [deleteMutation],
+  );
+
+  const handleRename = useCallback(
+    (id: string, newTitle: string) => {
+      updateMutation.mutate(
+        { id, title: newTitle },
+        {
+          onSuccess: () => {
+            setAllConversations((prev) =>
+              prev.map((c) => (c.id === id ? { ...c, title: newTitle } : c)),
+            );
+          },
+        },
+      );
+    },
+    [updateMutation],
+  );
+
+  const groupedConversations = useMemo(
+    () => groupConversationsByTime(allConversations),
+    [allConversations],
+  );
 
   const isItemActive = (path?: string) => path === pathname;
   const hasActiveChild = (items?: NavSubItem[]) =>
@@ -367,6 +545,40 @@ export function DefaultNavMain({ items }: { items: NavItem[] }) {
     return <LinkMenuItem item={item} isActive={isItemActive(item.path)} />;
   };
 
+  const renderGroups = () => {
+    const groups: React.ReactNode[] = [];
+    const order: TimeGroup[] = ["today", "yesterday", "3days", "7days", "30days", "older"];
+    let isFirst = true;
+
+    for (const group of order) {
+      const conversations = groupedConversations.get(group) || [];
+      if (conversations.length === 0) continue;
+
+      if (!isFirst) {
+        groups.push(<CommandSeparator key={`sep-${group}`} />);
+      }
+      isFirst = false;
+
+      groups.push(
+        <CommandGroup key={group} heading={TIME_GROUP_LABELS[group]}>
+          {conversations.map((conversation) => (
+            <HistoryCommandItem
+              key={conversation.id}
+              id={conversation.id}
+              title={conversation.title || "new chat"}
+              time={formatRelativeTime(conversation.createdAt)}
+              onDelete={handleDelete}
+              onRename={handleRename}
+              onSelect={handleSelect}
+            />
+          ))}
+        </CommandGroup>,
+      );
+    }
+
+    return groups;
+  };
+
   return (
     <>
       <SidebarGroup>
@@ -384,36 +596,26 @@ export function DefaultNavMain({ items }: { items: NavItem[] }) {
         </SidebarMenu>
       </SidebarGroup>
       <CommandDialog open={open} onOpenChange={setOpen}>
-        <Command>
-          {/* TODO: 此处需要实现下拉分页加载，距今时间分组（今天、昨天、3天前、7天前、一个月前、更早） */}
-          <CommandInput placeholder="Search..." />
-          <CommandList>
-            <CommandEmpty>No results found.</CommandEmpty>
-            <CommandGroup heading="今天">
-              {Array.from({ length: 5 }).map((_, index) => (
-                <HistoryCommandItem
-                  key={index}
-                  id={`today-${index}`}
-                  title={`这样那样的${index + 1}`}
-                  time="3小时前"
-                  onDelete={(id) => console.log("delete", id)}
-                  onRename={(id) => console.log("rename", id)}
-                />
-              ))}
-            </CommandGroup>
-            <CommandSeparator />
-            <CommandGroup heading="7天前">
-              {Array.from({ length: 5 }).map((_, index) => (
-                <HistoryCommandItem
-                  key={index}
-                  id={`week-${index}`}
-                  title={`这里的那里的${index + 1}`}
-                  time="7天前"
-                  onDelete={(id) => console.log("delete", id)}
-                  onRename={(id) => console.log("rename", id)}
-                />
-              ))}
-            </CommandGroup>
+        <Command shouldFilter={false}>
+          <CommandInput placeholder="搜索对话..." value={keyword} onValueChange={handleSearch} />
+          <CommandList className="h-[400px] max-h-[400px]">
+            <InfiniteScroll
+              loading={isFetching}
+              hasMore={hasMore}
+              onLoadMore={handleLoadMore}
+              threshold={50}
+              emptyText=""
+            >
+              {isLoading && allConversations.length === 0 ? (
+                <div className="text-muted-foreground flex h-20 items-center justify-center text-sm">
+                  加载中...
+                </div>
+              ) : allConversations.length === 0 ? (
+                <CommandEmpty>没有找到对话记录</CommandEmpty>
+              ) : (
+                renderGroups()
+              )}
+            </InfiniteScroll>
           </CommandList>
         </Command>
       </CommandDialog>

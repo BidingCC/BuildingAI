@@ -4,7 +4,7 @@ import type {
     PaginatedResponse,
     QueryOptionsUtil,
 } from "@buildingai/web-types";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { apiHttpClient } from "../base";
 
@@ -190,5 +190,34 @@ export function useConversationMessagesQuery(
             ),
         ...options,
         enabled: options?.enabled ?? false,
+    });
+}
+
+/**
+ * 删除会话
+ */
+export function useDeleteConversation() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (conversationId: string) =>
+            apiHttpClient.delete(`/ai-conversations/${conversationId}`),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["conversations"] });
+        },
+    });
+}
+
+/**
+ * 更新会话
+ */
+export function useUpdateConversation() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, title }: { id: string; title: string }) =>
+            apiHttpClient.patch<ConversationRecord>(`/ai-conversations/${id}`, { title }),
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({ queryKey: ["conversations"] });
+            queryClient.invalidateQueries({ queryKey: ["conversation", variables.id] });
+        },
     });
 }

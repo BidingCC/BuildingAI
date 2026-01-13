@@ -1,5 +1,5 @@
 import type { UIMessage } from "ai";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { AssistantContextValue, DisplayMessage, Model, Suggestion } from "./types";
 import { useChatStream } from "./use-chat";
@@ -122,18 +122,20 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
       return;
     }
 
-    const records = buildMessageRecords(streamMessages, parentMapRef.current);
+    startTransition(() => {
+      const records = buildMessageRecords(streamMessages, parentMapRef.current);
 
-    for (const record of records) {
-      parentMapRef.current.set(record.id, record.parentId ?? null);
-    }
+      for (const record of records) {
+        parentMapRef.current.set(record.id, record.parentId ?? null);
+      }
 
-    if (isFirstLoadRef.current) {
-      importMessages(records, true);
-      isFirstLoadRef.current = false;
-    } else {
-      importIncremental(records, true);
-    }
+      if (isFirstLoadRef.current) {
+        importMessages(records, true);
+        isFirstLoadRef.current = false;
+      } else {
+        importIncremental(records, true);
+      }
+    });
   }, [streamMessages, importMessages, importIncremental, clearRepository]);
 
   useEffect(() => {
