@@ -298,48 +298,48 @@ function ChatHistoryMenuItem({
         </div>
       </SidebarMenuButton>
       <CollapsibleContent>
-        <SidebarMenuSub className="mr-0 pr-0">
-          {item.items?.map((subItem) => (
-            <SidebarMenuSubItem key={subItem.id}>
-              <SidebarMenuSubButton asChild isActive={isItemActive(subItem.path)} className="h-9">
-                <Link to={subItem.path || ""} className="flex items-center justify-between">
-                  <span
-                    className={cn(
-                      "line-clamp-1",
-                      "group-focus-within/menu-sub-item:pr-4 group-hover/menu-sub-item:pr-4",
-                      { "font-bold": isItemActive(subItem.path) },
-                    )}
-                  >
-                    {subItem.title}
-                  </span>
-                </Link>
-              </SidebarMenuSubButton>
-              {subItem.path && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <SidebarMenuAction
-                      showOnHover
-                      className="group-hover/menu-sub-item:opacity-100! md:group-focus-within/menu-item:opacity-0 md:group-hover/menu-item:opacity-0"
+        {isLogin() && !!item.items?.length && (
+          <SidebarMenuSub className="mr-0 pr-0">
+            {item.items?.map((subItem) => (
+              <SidebarMenuSubItem key={subItem.id}>
+                <SidebarMenuSubButton asChild isActive={isItemActive(subItem.path)} className="h-9">
+                  <Link to={subItem.path || ""} className="flex items-center justify-between">
+                    <span
+                      className={cn(
+                        "line-clamp-1",
+                        "group-focus-within/menu-sub-item:pr-4 group-hover/menu-sub-item:pr-4",
+                        { "font-bold": isItemActive(subItem.path) },
+                      )}
                     >
-                      <EllipsisVertical />
-                      <span className="sr-only">More</span>
-                    </SidebarMenuAction>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start">
-                    <DropdownMenuItem>
-                      <PenLine />
-                      重命名
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Trash2 />
-                      删除
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-            </SidebarMenuSubItem>
-          ))}
-          {isLogin() && item.items?.length && (
+                      {subItem.title}
+                    </span>
+                  </Link>
+                </SidebarMenuSubButton>
+                {subItem.path && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <SidebarMenuAction
+                        showOnHover
+                        className="group-hover/menu-sub-item:opacity-100! md:group-focus-within/menu-item:opacity-0 md:group-hover/menu-item:opacity-0"
+                      >
+                        <EllipsisVertical />
+                        <span className="sr-only">More</span>
+                      </SidebarMenuAction>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start">
+                      <DropdownMenuItem>
+                        <PenLine />
+                        重命名
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <Trash2 />
+                        删除
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </SidebarMenuSubItem>
+            ))}
             <SidebarMenuSubItem>
               <SidebarMenuSubButton onClick={onOpenDialog} className="h-9 cursor-pointer">
                 <span className="text-muted-foreground line-clamp-1 text-xs font-medium">
@@ -354,8 +354,8 @@ function ChatHistoryMenuItem({
                 <ArrowUpRight className="text-muted-foreground size-3" />
               </SidebarMenuAction>
             </SidebarMenuSubItem>
-          )}
-        </SidebarMenuSub>
+          </SidebarMenuSub>
+        )}
       </CollapsibleContent>
     </SidebarMenuItem>
   );

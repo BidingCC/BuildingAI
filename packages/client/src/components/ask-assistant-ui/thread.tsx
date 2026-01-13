@@ -8,7 +8,7 @@ import { Button } from "@buildingai/ui/components/ui/button";
 import { SidebarTrigger } from "@buildingai/ui/components/ui/sidebar";
 import { ShareIcon } from "lucide-react";
 import type { FormEvent, ReactNode } from "react";
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { memo, startTransition, useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { Message } from "./components/message";
@@ -63,24 +63,31 @@ export const Thread = memo(function Thread({ title, onShare, welcomeMessage }: T
     }
 
     let rafId: number;
-    let timeoutId: ReturnType<typeof setTimeout>;
     let lastHeight = 0;
+    let pendingHeight: number | null = null;
 
-    const updateHeight = (newHeight: number) => {
-      if (Math.abs(newHeight - lastHeight) > 2) {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => {
-          rafId = requestAnimationFrame(() => {
-            setBottomAreaHeight(newHeight);
-            lastHeight = newHeight;
-          });
-        }, 100);
+    const updateHeight = () => {
+      if (pendingHeight !== null && Math.abs(pendingHeight - lastHeight) > 2) {
+        startTransition(() => {
+          setBottomAreaHeight(pendingHeight!);
+        });
+        lastHeight = pendingHeight;
+        pendingHeight = null;
       }
+    };
+
+    const scheduleUpdate = (newHeight: number) => {
+      pendingHeight = newHeight;
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(updateHeight);
     };
 
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        updateHeight(entry.contentRect.height);
+        const newHeight = entry.contentRect.height;
+        if (Math.abs(newHeight - lastHeight) > 2) {
+          scheduleUpdate(newHeight);
+        }
       }
     });
 
@@ -91,7 +98,6 @@ export const Thread = memo(function Thread({ title, onShare, welcomeMessage }: T
 
     return () => {
       resizeObserver.disconnect();
-      clearTimeout(timeoutId);
       if (rafId) cancelAnimationFrame(rafId);
     };
   }, []);
