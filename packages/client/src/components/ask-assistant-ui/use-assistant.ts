@@ -1,5 +1,5 @@
 import type { UIMessage } from "ai";
-import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { startTransition, useCallback, useEffect, useRef, useState } from "react";
 
 import type { AssistantContextValue, DisplayMessage, Model, Suggestion } from "./types";
 import { useChatStream } from "./use-chat";
@@ -101,19 +101,6 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
     modelId: "5f325ca6-03da-4f7f-8e42-025474e48b44",
   });
 
-  const onSend = useCallback(
-    (content: string) => {
-      const branchMessages = [...repositoryMessages];
-      setMessages(branchMessages);
-
-      const lastMessage = branchMessages[branchMessages.length - 1];
-      const parentId = lastMessage?.id ?? null;
-
-      queueMicrotask(() => send(content, parentId));
-    },
-    [repositoryMessages, setMessages, send],
-  );
-
   useEffect(() => {
     if (streamMessages.length === 0) {
       clearRepository();
@@ -143,6 +130,15 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
     isFirstLoadRef.current = true;
   }, [currentThreadId]);
 
+  const onSend = useCallback(
+    (content: string) => {
+      const lastMessage = repositoryMessages[repositoryMessages.length - 1];
+      const parentId = lastMessage?.id ?? null;
+      queueMicrotask(() => send(content, parentId));
+    },
+    [repositoryMessages, send],
+  );
+
   const onLike = useCallback((messageKey: string, value: boolean) => {
     setLiked((prev) => ({ ...prev, [messageKey]: value }));
   }, []);
@@ -167,10 +163,8 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
     [getParentId, streamMessages, setMessages, regenerate],
   );
 
-  const messages = useMemo(() => [...repositoryMessages], [repositoryMessages]);
-
   return {
-    messages,
+    messages: [...repositoryMessages],
     displayMessages: displayMessages as DisplayMessage[],
     threads: [],
     currentThreadId,

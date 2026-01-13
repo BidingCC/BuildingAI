@@ -32,7 +32,7 @@ import { ButtonGroup, ButtonGroupText } from "@buildingai/ui/components/ui/butto
 import type { UIMessage } from "ai";
 import { AlertCircleIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { CopyIcon, RefreshCcwIcon, ThumbsDownIcon, ThumbsUpIcon } from "lucide-react";
-import { memo, useCallback, useMemo } from "react";
+import { memo } from "react";
 
 import { convertUIMessageToMessage } from "../message-converter";
 import { StreamingIndicator } from "./streaming-indicator";
@@ -42,366 +42,372 @@ export interface MessageProps {
   message: UIMessage;
   liked?: boolean;
   disliked?: boolean;
-  onLikeChange?: (liked: boolean) => void;
-  onDislikeChange?: (disliked: boolean) => void;
-  onRetry?: () => void;
-  onCopy?: (content: string) => void;
   isStreaming?: boolean;
   branchNumber?: number;
   branchCount?: number;
   branches?: string[];
-  onSwitchBranch?: (messageId: string) => void;
   error?: string;
+  onLikeChange?: (liked: boolean) => void;
+  onDislikeChange?: (disliked: boolean) => void;
+  onRetry?: () => void;
+  onSwitchBranch?: (messageId: string) => void;
   addToolApprovalResponse?: (args: { id: string; approved: boolean; reason?: string }) => void;
 }
 
-export const Message = memo(
-  ({
-    message,
-    liked = false,
-    disliked = false,
-    onLikeChange,
-    onDislikeChange,
-    onRetry,
-    onCopy,
-    isStreaming = false,
-    branchNumber = 1,
-    branchCount = 1,
-    branches = [],
-    onSwitchBranch,
-    error,
-    addToolApprovalResponse,
-  }: MessageProps) => {
-    const messageData = useMemo(() => convertUIMessageToMessage(message), [message]);
+interface ToolPartData {
+  toolCallId: string;
+  state: string;
+  input?: Record<string, unknown>;
+  output?: unknown;
+  errorText?: string;
+  approval?: { id?: string; approved?: boolean };
+}
 
-    const handleCopy = useCallback(
-      (content: string) => {
-        navigator.clipboard.writeText(content);
-        onCopy?.(content);
-      },
-      [onCopy],
-    );
+const BranchSelector = memo(function BranchSelector({
+  branchNumber,
+  branchCount,
+  branches,
+  onSwitchBranch,
+}: {
+  branchNumber: number;
+  branchCount: number;
+  branches: string[];
+  onSwitchBranch?: (messageId: string) => void;
+}) {
+  if (branchCount <= 1) return null;
 
-    const handleRetry = useCallback(() => {
-      onRetry?.();
-    }, [onRetry]);
-
-    const handleLike = useCallback(() => {
-      onLikeChange?.(!liked);
-    }, [onLikeChange, liked]);
-
-    const handleDislike = useCallback(() => {
-      onDislikeChange?.(!disliked);
-    }, [onDislikeChange, disliked]);
-
-    const handleBranchPrevious = useCallback(() => {
-      if (branchNumber > 1 && branches.length > 0) {
-        const prevBranchId = branches[branchNumber - 2];
-        if (prevBranchId && onSwitchBranch) {
-          onSwitchBranch(prevBranchId);
-        }
-      }
-    }, [branchNumber, branches, onSwitchBranch]);
-
-    const handleBranchNext = useCallback(() => {
-      if (branchNumber < branchCount && branches.length > 0) {
-        const nextBranchId = branches[branchNumber];
-        if (nextBranchId && onSwitchBranch) {
-          onSwitchBranch(nextBranchId);
-        }
-      }
-    }, [branchNumber, branchCount, branches, onSwitchBranch]);
-
-    const activeIndex = messageData.activeVersionIndex ?? 0;
-    // 确保 versions 数组存在且不为空
-    if (!messageData.versions || messageData.versions.length === 0) {
-      return null;
+  const handlePrevious = () => {
+    if (branchNumber > 1) {
+      const prevId = branches[branchNumber - 2];
+      if (prevId) onSwitchBranch?.(prevId);
     }
-    const activeVersion = messageData.versions[activeIndex] || messageData.versions[0];
-    const messageContent = activeVersion?.content || "";
-    const attachments = activeVersion?.attachments;
+  };
 
-    // 检查是否有正在重写的版本（id 以 regenerating- 开头）
-    const isRegenerating = messageData.versions.some((v) => v.id.startsWith("regenerating-"));
-    const isEmpty = !messageContent || messageContent.trim() === "";
-    const showStreamingIndicator =
-      messageData.from === "assistant" && (isStreaming || isRegenerating) && isEmpty;
-    const isStreamingOrRegenerating = isStreaming || isRegenerating;
+  const handleNext = () => {
+    if (branchNumber < branchCount) {
+      const nextId = branches[branchNumber];
+      if (nextId) onSwitchBranch?.(nextId);
+    }
+  };
 
-    // 检查是否有多个分支（基于传入的分支信息）
-    const hasMultipleBranches = branchCount > 1;
+  return (
+    <ButtonGroup
+      className="[&>*:not(:first-child)]:rounded-l-md [&>*:not(:last-child)]:rounded-r-md"
+      orientation="horizontal"
+    >
+      <Button
+        aria-label="Previous branch"
+        disabled={branchNumber <= 1}
+        onClick={handlePrevious}
+        size="icon-sm"
+        type="button"
+        variant="ghost"
+      >
+        <ChevronLeftIcon size={14} />
+      </Button>
+      <ButtonGroupText className="text-muted-foreground border-none bg-transparent shadow-none">
+        {branchNumber}/{branchCount}
+      </ButtonGroupText>
+      <Button
+        aria-label="Next branch"
+        disabled={branchNumber >= branchCount}
+        onClick={handleNext}
+        size="icon-sm"
+        type="button"
+        variant="ghost"
+      >
+        <ChevronRightIcon size={14} />
+      </Button>
+    </ButtonGroup>
+  );
+});
 
-    // 渲染消息内容
-    const renderMessageContent = (content: string, versionAttachments?: typeof attachments) => (
-      <>
-        {versionAttachments && versionAttachments.length > 0 && (
+const MessageActionButtons = memo(function MessageActionButtons({
+  liked,
+  disliked,
+  content,
+  onLikeChange,
+  onDislikeChange,
+  onRetry,
+}: {
+  liked: boolean;
+  disliked: boolean;
+  content: string;
+  onLikeChange?: (liked: boolean) => void;
+  onDislikeChange?: (disliked: boolean) => void;
+  onRetry?: () => void;
+}) {
+  const handleCopy = () => {
+    navigator.clipboard.writeText(content);
+  };
+
+  return (
+    <AIMessageActions>
+      <AIMessageAction label="Retry" onClick={onRetry} tooltip="重新生成">
+        <RefreshCcwIcon className="size-4" />
+      </AIMessageAction>
+      <AIMessageAction label="Like" onClick={() => onLikeChange?.(!liked)} tooltip="喜欢">
+        <ThumbsUpIcon className="size-4" fill={liked ? "currentColor" : "none"} />
+      </AIMessageAction>
+      <AIMessageAction
+        label="Dislike"
+        onClick={() => onDislikeChange?.(!disliked)}
+        tooltip="不喜欢"
+      >
+        <ThumbsDownIcon className="size-4" fill={disliked ? "currentColor" : "none"} />
+      </AIMessageAction>
+      <AIMessageAction label="Copy" onClick={handleCopy} tooltip="复制">
+        <CopyIcon className="size-4" />
+      </AIMessageAction>
+    </AIMessageActions>
+  );
+});
+
+const WeatherTool = memo(function WeatherTool({
+  toolPart,
+  addToolApprovalResponse,
+}: {
+  toolPart: ToolPartData;
+  addToolApprovalResponse?: (args: { id: string; approved: boolean; reason?: string }) => void;
+}) {
+  const { state, approval, input, output, errorText } = toolPart;
+  const approvalId = approval?.id;
+  const isDenied =
+    state === "output-denied" || (state === "approval-responded" && approval?.approved === false);
+  const widthClass = "w-[min(100%,450px)]";
+
+  if (state === "output-available") {
+    return (
+      <div className={widthClass}>
+        <Weather weatherAtLocation={output as Parameters<typeof Weather>[0]["weatherAtLocation"]} />
+      </div>
+    );
+  }
+
+  if (isDenied) {
+    return (
+      <div className={widthClass}>
+        <Tool className="w-full" defaultOpen>
+          <ToolHeader state="output-denied" type="tool-getWeather" />
+          <ToolContent>
+            <div className="text-muted-foreground px-4 py-3 text-sm">
+              Weather lookup was denied.
+            </div>
+          </ToolContent>
+        </Tool>
+      </div>
+    );
+  }
+
+  if (errorText || (output as { error?: string })?.error) {
+    return (
+      <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-500 dark:bg-red-950/50">
+        错误: {String(errorText || (output as { error?: string })?.error)}
+      </div>
+    );
+  }
+
+  return (
+    <div className={widthClass}>
+      <Tool className="w-full" defaultOpen>
+        <ToolHeader state={state as "input-available"} type="tool-getWeather" />
+        <ToolContent>
+          {(state === "input-available" || state === "approval-requested") && (
+            <ToolInput input={input} />
+          )}
+          {state === "approval-requested" && approvalId && addToolApprovalResponse && (
+            <div className="flex items-center justify-end gap-2 border-t px-4 py-3">
+              <button
+                className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-md px-3 py-1.5 text-sm transition-colors"
+                onClick={() =>
+                  addToolApprovalResponse({
+                    id: approvalId,
+                    approved: false,
+                    reason: "User denied weather lookup",
+                  })
+                }
+                type="button"
+              >
+                Deny
+              </button>
+              <button
+                className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-3 py-1.5 text-sm transition-colors"
+                onClick={() => addToolApprovalResponse({ id: approvalId, approved: true })}
+                type="button"
+              >
+                Allow
+              </button>
+            </div>
+          )}
+        </ToolContent>
+      </Tool>
+    </div>
+  );
+});
+
+const GenericTool = memo(function GenericTool({
+  toolName,
+  toolPart,
+}: {
+  toolName: string;
+  toolPart: ToolPartData;
+}) {
+  return (
+    <Tool>
+      <ToolHeader
+        state={toolPart.state as "input-available"}
+        title={toolName}
+        type="tool-invocation"
+      />
+      <ToolContent>
+        <ToolInput input={toolPart.input} />
+        <ToolOutput errorText={toolPart.errorText} output={toolPart.output} />
+      </ToolContent>
+    </Tool>
+  );
+});
+
+const ToolCalls = memo(function ToolCalls({
+  parts,
+  addToolApprovalResponse,
+}: {
+  parts: UIMessage["parts"];
+  addToolApprovalResponse?: (args: { id: string; approved: boolean; reason?: string }) => void;
+}) {
+  const toolParts = parts.filter(
+    (part) => typeof part.type === "string" && part.type.startsWith("tool-"),
+  );
+
+  if (toolParts.length === 0) return null;
+
+  return (
+    <>
+      {toolParts.map((part, index) => {
+        const toolPart = part as unknown as ToolPartData;
+        const key = toolPart.toolCallId || `tool-${index}`;
+
+        if (part.type === "tool-getWeather") {
+          return (
+            <WeatherTool
+              key={key}
+              toolPart={toolPart}
+              addToolApprovalResponse={addToolApprovalResponse}
+            />
+          );
+        }
+
+        const toolName = (part.type as string).replace("tool-", "");
+        return <GenericTool key={key} toolName={toolName} toolPart={toolPart} />;
+      })}
+    </>
+  );
+});
+
+export const Message = memo(function Message({
+  message,
+  liked = false,
+  disliked = false,
+  isStreaming = false,
+  branchNumber = 1,
+  branchCount = 1,
+  branches = [],
+  error,
+  onLikeChange,
+  onDislikeChange,
+  onRetry,
+  onSwitchBranch,
+  addToolApprovalResponse,
+}: MessageProps) {
+  const messageData = convertUIMessageToMessage(message);
+
+  if (!messageData.versions?.length) return null;
+
+  const activeIndex = messageData.activeVersionIndex ?? 0;
+  const activeVersion = messageData.versions[activeIndex] || messageData.versions[0];
+  const content = activeVersion?.content || "";
+  const attachments = activeVersion?.attachments;
+
+  const isAssistant = messageData.from === "assistant";
+  const isRegenerating = messageData.versions.some((v) => v.id.startsWith("regenerating-"));
+  const isEmpty = !content.trim();
+  const showStreamingIndicator = isAssistant && (isStreaming || isRegenerating) && isEmpty;
+  const isProcessing = isStreaming || isRegenerating;
+
+  return (
+    <AIMessage from={messageData.from}>
+      {isAssistant && messageData.reasoning && (
+        <Reasoning duration={messageData.reasoning.duration} isStreaming={isStreaming}>
+          <ReasoningTrigger />
+          <ReasoningContent>{messageData.reasoning.content}</ReasoningContent>
+        </Reasoning>
+      )}
+
+      {isAssistant && messageData.sources && messageData.sources.length > 0 && (
+        <Sources>
+          <SourcesTrigger count={messageData.sources.length} />
+          <SourcesContent>
+            {messageData.sources.map((source) => (
+              <Source href={source.href} key={source.href} title={source.title} />
+            ))}
+          </SourcesContent>
+        </Sources>
+      )}
+
+      {isAssistant && message.parts && (
+        <ToolCalls parts={message.parts} addToolApprovalResponse={addToolApprovalResponse} />
+      )}
+
+      <div className="min-w-0">
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircleIcon className="size-4" />
+            <AlertTitle>chat error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {attachments && attachments.length > 0 && (
           <AIMessageAttachments className="mb-2">
-            {versionAttachments.map((attachment) => (
+            {attachments.map((attachment) => (
               <AIMessageAttachment
-                data={{
-                  ...attachment,
-                  mediaType: attachment.mediaType ?? "",
-                }}
                 key={attachment.url}
+                data={{ ...attachment, mediaType: attachment.mediaType ?? "" }}
               />
             ))}
           </AIMessageAttachments>
         )}
+
         <AIMessageContent>
           {showStreamingIndicator ? (
             <StreamingIndicator />
-          ) : messageData.from === "assistant" ? (
+          ) : isAssistant ? (
             <AIMessageResponse>{content}</AIMessageResponse>
           ) : (
             content
           )}
         </AIMessageContent>
-      </>
-    );
 
-    // 渲染消息操作按钮
-    const renderActions = () => (
-      <AIMessageActions>
-        <AIMessageAction label="Retry" onClick={handleRetry} tooltip="重新生成">
-          <RefreshCcwIcon className="size-4" />
-        </AIMessageAction>
-        <AIMessageAction label="Like" onClick={handleLike} tooltip="喜欢">
-          <ThumbsUpIcon className="size-4" fill={liked ? "currentColor" : "none"} />
-        </AIMessageAction>
-        <AIMessageAction label="Dislike" onClick={handleDislike} tooltip="不喜欢">
-          <ThumbsDownIcon className="size-4" fill={disliked ? "currentColor" : "none"} />
-        </AIMessageAction>
-        <AIMessageAction label="Copy" onClick={() => handleCopy(messageContent)} tooltip="复制">
-          <CopyIcon className="size-4" />
-        </AIMessageAction>
-      </AIMessageActions>
-    );
-
-    // 渲染分支选择器
-    const renderBranchSelector = () => {
-      if (!hasMultipleBranches) return null;
-
-      return (
-        <ButtonGroup
-          className="[&>*:not(:first-child)]:rounded-l-md [&>*:not(:last-child)]:rounded-r-md"
-          orientation="horizontal"
-        >
-          <Button
-            aria-label="Previous branch"
-            disabled={branchNumber <= 1}
-            onClick={handleBranchPrevious}
-            size="icon-sm"
-            type="button"
-            variant="ghost"
-          >
-            <ChevronLeftIcon size={14} />
-          </Button>
-          <ButtonGroupText className="text-muted-foreground border-none bg-transparent shadow-none">
-            {`${branchNumber}/${branchCount}`}
-          </ButtonGroupText>
-          <Button
-            aria-label="Next branch"
-            disabled={branchNumber >= branchCount}
-            onClick={handleBranchNext}
-            size="icon-sm"
-            type="button"
-            variant="ghost"
-          >
-            <ChevronRightIcon size={14} />
-          </Button>
-        </ButtonGroup>
-      );
-    };
-
-    return (
-      <AIMessage from={messageData.from} key={messageData.key}>
-        {/* AI 推理过程 */}
-        {messageData.from === "assistant" && messageData.reasoning && (
-          <Reasoning duration={messageData.reasoning.duration} isStreaming={isStreaming}>
-            <ReasoningTrigger />
-            <ReasoningContent>{messageData.reasoning.content}</ReasoningContent>
-          </Reasoning>
+        {isAssistant && (
+          <AIMessageToolbar className="mt-4 min-w-0">
+            <BranchSelector
+              branchNumber={branchNumber}
+              branchCount={branchCount}
+              branches={branches}
+              onSwitchBranch={onSwitchBranch}
+            />
+            {!isProcessing && (
+              <MessageActionButtons
+                liked={liked}
+                disliked={disliked}
+                content={content}
+                onLikeChange={onLikeChange}
+                onDislikeChange={onDislikeChange}
+                onRetry={onRetry}
+              />
+            )}
+          </AIMessageToolbar>
         )}
-
-        {/* 信息来源 */}
-        {messageData.from === "assistant" &&
-          messageData.sources &&
-          messageData.sources.length > 0 && (
-            <Sources>
-              <SourcesTrigger count={messageData.sources.length} />
-              <SourcesContent>
-                {messageData.sources.map((source) => (
-                  <Source href={source.href} key={source.href} title={source.title} />
-                ))}
-              </SourcesContent>
-            </Sources>
-          )}
-
-        {/* 工具调用 */}
-        {messageData.from === "assistant" &&
-          message.parts &&
-          message.parts
-            .filter((part) => typeof part.type === "string" && part.type.startsWith("tool-"))
-            .map((part, index) => {
-              // 特殊处理 getWeather 工具
-              if (part.type === "tool-getWeather") {
-                const toolPart = part as {
-                  toolCallId: string;
-                  state: string;
-                  input?: Record<string, unknown>;
-                  output?: any;
-                  errorText?: string;
-                  approval?: { id?: string; approved?: boolean };
-                };
-
-                const state = toolPart.state;
-                const approvalId = (toolPart as any).approval?.id;
-                const isDenied =
-                  state === "output-denied" ||
-                  (state === "approval-responded" && toolPart.approval?.approved === false);
-                const widthClass = "w-[min(100%,450px)]";
-
-                // 输出可用 - 显示天气组件
-                if (state === "output-available") {
-                  return (
-                    <div
-                      className={widthClass}
-                      key={toolPart.toolCallId || `tool-weather-${index}`}
-                    >
-                      <Weather weatherAtLocation={toolPart.output} />
-                    </div>
-                  );
-                }
-
-                // 被拒绝
-                if (isDenied) {
-                  return (
-                    <div className={widthClass} key={toolPart.toolCallId || `tool-${index}`}>
-                      <Tool className="w-full" defaultOpen={true}>
-                        <ToolHeader state="output-denied" type="tool-getWeather" />
-                        <ToolContent>
-                          <div className="text-muted-foreground px-4 py-3 text-sm">
-                            Weather lookup was denied.
-                          </div>
-                        </ToolContent>
-                      </Tool>
-                    </div>
-                  );
-                }
-
-                // 错误处理
-                if (toolPart.errorText || toolPart.output?.error) {
-                  return (
-                    <div
-                      className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-500 dark:bg-red-950/50"
-                      key={toolPart.toolCallId || `tool-error-${index}`}
-                    >
-                      错误: {String(toolPart.errorText || toolPart.output?.error)}
-                    </div>
-                  );
-                }
-
-                // 其他状态（input-available, approval-requested, approval-responded）
-                return (
-                  <div className={widthClass} key={toolPart.toolCallId || `tool-${index}`}>
-                    <Tool className="w-full" defaultOpen={true}>
-                      <ToolHeader state={state as any} type="tool-getWeather" />
-                      <ToolContent>
-                        {(state === "input-available" || state === "approval-requested") && (
-                          <ToolInput input={toolPart.input} />
-                        )}
-                        {state === "approval-requested" &&
-                          approvalId &&
-                          addToolApprovalResponse && (
-                            <div className="flex items-center justify-end gap-2 border-t px-4 py-3">
-                              <button
-                                className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-md px-3 py-1.5 text-sm transition-colors"
-                                onClick={() => {
-                                  addToolApprovalResponse({
-                                    id: approvalId,
-                                    approved: false,
-                                    reason: "User denied weather lookup",
-                                  });
-                                }}
-                                type="button"
-                              >
-                                Deny
-                              </button>
-                              <button
-                                className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-3 py-1.5 text-sm transition-colors"
-                                onClick={() => {
-                                  addToolApprovalResponse({
-                                    id: approvalId,
-                                    approved: true,
-                                  });
-                                }}
-                                type="button"
-                              >
-                                Allow
-                              </button>
-                            </div>
-                          )}
-                      </ToolContent>
-                    </Tool>
-                  </div>
-                );
-              }
-
-              // 其他工具使用通用 Tool 组件
-              const toolPart = part as {
-                toolCallId: string;
-                state: string;
-                input: Record<string, unknown>;
-                output?: unknown;
-                errorText?: string;
-              };
-
-              const toolName = part.type.replace("tool-", "");
-
-              return (
-                <Tool key={toolPart.toolCallId || `tool-${index}`}>
-                  <ToolHeader
-                    state={toolPart.state as any}
-                    title={toolName}
-                    type="tool-invocation"
-                  />
-                  <ToolContent>
-                    <ToolInput input={toolPart.input} />
-                    <ToolOutput errorText={toolPart.errorText} output={toolPart.output} />
-                  </ToolContent>
-                </Tool>
-              );
-            })}
-
-        {/* 消息内容 */}
-        <div className="min-w-0">
-          {error && (
-            <Alert variant="destructive">
-              <AlertCircleIcon className="size-4" />
-              <AlertTitle>chat error</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-          {renderMessageContent(messageContent, attachments)}
-          {messageData.from === "assistant" && (
-            <AIMessageToolbar className="mt-4 min-w-0">
-              {renderBranchSelector()}
-              {!isStreamingOrRegenerating && renderActions()}
-            </AIMessageToolbar>
-          )}
-        </div>
-      </AIMessage>
-    );
-  },
-  (prevProps, nextProps) => {
-    return (
-      prevProps.message.id === nextProps.message.id &&
-      prevProps.message.parts === nextProps.message.parts &&
-      prevProps.liked === nextProps.liked &&
-      prevProps.disliked === nextProps.disliked &&
-      prevProps.isStreaming === nextProps.isStreaming &&
-      prevProps.branchNumber === nextProps.branchNumber &&
-      prevProps.branchCount === nextProps.branchCount
-    );
-  },
-);
+      </div>
+    </AIMessage>
+  );
+});

@@ -89,9 +89,6 @@ export function useMessageRepository(): UseMessageRepositoryReturn {
 
   const getSnapshot = useCallback(() => versionRef.current, []);
 
-  // 订阅仓库变化
-  useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
-
   // 包装仓库方法，添加通知逻辑
   const addOrUpdateMessage = useCallback(
     (parentId: string | null, message: UIMessage, sequence: number = 0, createdAt?: string) => {
@@ -169,14 +166,14 @@ export function useMessageRepository(): UseMessageRepositoryReturn {
     [repository],
   );
 
-  // 使用 useMemo 缓存返回的消息列表
-  const messages = useMemo(() => repository.getMessages(), [repository, versionRef.current]);
-  const displayMessages = useMemo(
-    () => repository.getDisplayMessages(),
-    [repository, versionRef.current],
-  );
-  const headId = useMemo(() => repository.headId, [repository, versionRef.current]);
-  const size = useMemo(() => repository.size, [repository, versionRef.current]);
+  // 使用 useSyncExternalStore 获取消息列表，确保只在仓库变化时更新
+  const version = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+
+  // 使用 useMemo 缓存返回的消息列表，依赖 version 确保在仓库变化时更新
+  const messages = useMemo(() => repository.getMessages(), [repository, version]);
+  const displayMessages = useMemo(() => repository.getDisplayMessages(), [repository, version]);
+  const headId = useMemo(() => repository.headId, [repository, version]);
+  const size = useMemo(() => repository.size, [repository, version]);
 
   return {
     messages,
