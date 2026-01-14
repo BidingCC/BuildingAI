@@ -13,8 +13,6 @@ const GlobalError = () => {
   const navigate = useNavigate();
   const error = useRouteError();
 
-  console.log("进来了", error, isRouteErrorResponse(error));
-
   const handleGoHome = () => {
     if (location.pathname.includes("/console")) {
       navigate("/console/dashboard");

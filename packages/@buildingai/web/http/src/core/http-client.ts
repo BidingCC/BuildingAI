@@ -177,12 +177,16 @@ export class HttpClient {
                 }
 
                 const status = isAxiosError(error) ? error.response?.status : undefined;
-
                 if (status === 401 && this.options.hooks?.refreshAccessToken) {
                     const refreshed = await this.options.hooks.refreshAccessToken();
                     if (refreshed) {
                         attempt += 1;
                         continue;
+                    }
+                } else {
+                    if (status === 401 && this.options.hooks?.onAuthError) {
+                        await this.options.hooks.onAuthError(error);
+                        throw toHttpError(error);
                     }
                 }
 

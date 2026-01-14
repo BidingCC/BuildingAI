@@ -13,6 +13,9 @@ export const apiHttpClient = createHttpClient({
         getAccessToken: async () => {
             return useAuthStore.getState().auth.token || "";
         },
+        onAuthError: async () => {
+            return useAuthStore.getState().authActions.logout();
+        },
     },
 });
 
@@ -23,6 +26,9 @@ export const consoleHttpClient = createHttpClient({
     hooks: {
         getAccessToken: async () => {
             return useAuthStore.getState().auth.token || "";
+        },
+        onAuthError: async () => {
+            return useAuthStore.getState().authActions.logout();
         },
     },
 });
