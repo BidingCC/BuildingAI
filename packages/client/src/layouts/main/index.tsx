@@ -1,8 +1,9 @@
 import { useDocumentHead, useRefreshUser, useRefreshWebsiteConfig } from "@buildingai/hooks";
 import { useCheckInitializeStatus } from "@buildingai/services/shared";
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 
 const MainLayout = () => {
+  const location = useLocation();
   const { data } = useCheckInitializeStatus();
   const { websiteConfig } = useRefreshWebsiteConfig();
 
@@ -13,6 +14,10 @@ const MainLayout = () => {
     description: websiteConfig?.webinfo.description,
     icon: websiteConfig?.webinfo.icon,
   });
+
+  if (location.pathname === "/install") {
+    return <Outlet />;
+  }
 
   if (data?.isInitialized === false) {
     return <Navigate to="/install" />;

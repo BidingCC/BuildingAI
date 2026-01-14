@@ -24,7 +24,7 @@ const AppLogo = ({
             alt={websiteConfig?.webinfo.name}
           />
         ) : (
-          <SvgIcons.buildingaiFull className="h-10 shrink-0" />
+          <SvgIcons.buildingai className="h-10 shrink-0" />
         )}
       </>
       {showAppName && (

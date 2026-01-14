@@ -132,8 +132,11 @@ const InstallPage = () => {
                 <ArrowLeft />
                 上一步
               </Button>
-              <Button onClick={handleNextStep} disabled={!canProceed() || isPending}>
-                {isPending ? <Loader2 className="animate-spin" /> : null}
+              <Button
+                loading={isPending}
+                onClick={handleNextStep}
+                disabled={!canProceed() || isPending}
+              >
                 {step === 2 ? "完成安装" : "下一步"}
                 {!isPending && <ArrowRight />}
               </Button>

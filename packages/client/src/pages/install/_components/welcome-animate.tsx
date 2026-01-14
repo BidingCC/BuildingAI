@@ -10,7 +10,7 @@ const WelcomeAnimate = ({ step, setStep }: { step: number; setStep: (step: numbe
 
   return (
     <div className={cn("flex flex-col items-center gap-8", { hidden: step !== 0 })}>
-      <div className="flex w-fit flex-col items-start lg:flex-row lg:gap-4">
+      <div className="flex w-fit flex-col items-start lg:gap-4 xl:flex-row">
         <SplitText
           text="Hello,"
           className="h-10 text-center text-3xl font-bold sm:h-14 sm:text-5xl md:h-17 md:text-6xl lg:h-20 lg:text-7xl"

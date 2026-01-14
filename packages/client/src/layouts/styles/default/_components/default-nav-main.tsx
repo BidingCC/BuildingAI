@@ -601,8 +601,16 @@ export function DefaultNavMain({ items }: { items: NavItem[] }) {
               hasMore={hasMore}
               onLoadMore={handleLoadMore}
               threshold={50}
+              showEmptyText={false}
+              showLoadingIcon={false}
             >
-              {renderGroups()}
+              {allConversations.length === 0 && !hasMore && !isLoading ? (
+                <div className="center text-muted-foreground py-8 text-sm">
+                  {keyword ? "未找到相关对话" : "历史对话记录为空"}
+                </div>
+              ) : (
+                renderGroups()
+              )}
             </InfiniteScroll>
           </CommandList>
         </Command>
