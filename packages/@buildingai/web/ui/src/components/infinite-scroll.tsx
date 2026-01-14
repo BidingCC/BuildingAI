@@ -1,5 +1,7 @@
 import { CSSProperties, type ReactNode, useEffect, useRef } from "react";
 
+import { Spinner } from "./ui/spinner";
+
 interface InfiniteScrollProps {
   /** 子元素 */
   children: ReactNode;
@@ -72,9 +74,7 @@ export function InfiniteScroll({
     <div ref={containerRef} className={className} style={style}>
       {children}
       <div ref={loadingRef} className="flex h-8 w-full items-center justify-center">
-        {loading && hasMore && (
-          <div className="border-primary h-6 w-6 animate-spin rounded-full border-2 border-t-transparent" />
-        )}
+        {loading && hasMore && <Spinner className="text-muted-foreground size-6" />}
         {!hasMore && <div className="text-muted-foreground text-sm">{emptyText}</div>}
       </div>
     </div>

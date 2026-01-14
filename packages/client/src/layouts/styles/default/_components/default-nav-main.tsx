@@ -604,7 +604,6 @@ export function DefaultNavMain({ items }: { items: NavItem[] }) {
               hasMore={hasMore}
               onLoadMore={handleLoadMore}
               threshold={50}
-              emptyText=""
             >
               {isLoading && allConversations.length === 0 ? (
                 <div className="text-muted-foreground flex h-20 items-center justify-center text-sm">
