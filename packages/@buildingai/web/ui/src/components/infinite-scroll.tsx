@@ -1,29 +1,29 @@
-import { CSSProperties, type ReactNode, useEffect, useRef } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 
 import { Spinner } from "./ui/spinner";
 
 interface InfiniteScrollProps {
-  /** 子元素 */
+  /** Child elements */
   children: ReactNode;
-  /** 是否正在加载 */
+  /** Whether currently loading */
   loading?: boolean;
-  /** 是否还有更多数据 */
+  /** Whether there is more data */
   hasMore?: boolean;
-  /** 触发加载的距离，单位为像素 @default 100 */
+  /** Distance to trigger loading in pixels @default 100 */
   threshold?: number;
-  /** 加载更多的回调函数 */
+  /** Callback function to load more */
   onLoadMore: () => void;
-  /** 容器的类名 */
+  /** Container class name */
   className?: string;
-  /** 容器的样式 */
-  style?: CSSProperties;
-  /** 空状态文本 */
+  /** Empty state text */
   emptyText?: string;
+  showEmptyText?: boolean;
+  showLoadingIcon?: boolean;
 }
 
 /**
- * 下滑加载组件
- * 当滚动到距离底部指定距离时，触发加载事件
+ * Infinite scroll component
+ * Triggers load event when scrolling to specified distance from bottom
  */
 export function InfiniteScroll({
   children,
@@ -32,8 +32,10 @@ export function InfiniteScroll({
   threshold = 100,
   onLoadMore,
   className,
-  style,
   emptyText = "没有更多数据了",
+  showEmptyText = true,
+  showLoadingIcon = true,
+  ...props
 }: InfiniteScrollProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const observer = useRef<IntersectionObserver | null>(null);
@@ -45,22 +47,19 @@ export function InfiniteScroll({
 
     if (!container || !loadingElement || !hasMore || loading) return;
 
-    // 创建 IntersectionObserver 实例
     observer.current = new IntersectionObserver(
       (entries) => {
-        // 当观察的元素进入视口时触发加载
         if (entries[0]?.isIntersecting) {
           onLoadMore();
         }
       },
       {
-        root: null, // 使用视口作为根
-        rootMargin: `${threshold}px`, // 设置触发距离
-        threshold: 0, // 当目标元素的任何部分可见时触发
+        root: null,
+        rootMargin: `${threshold}px`,
+        threshold: 0,
       },
     );
 
-    // 开始观察加载元素
     observer.current.observe(loadingElement);
 
     return () => {
@@ -71,11 +70,15 @@ export function InfiniteScroll({
   }, [hasMore, loading, onLoadMore, threshold]);
 
   return (
-    <div ref={containerRef} className={className} style={style}>
+    <div ref={containerRef} className={className} {...props}>
       {children}
       <div ref={loadingRef} className="flex h-8 w-full items-center justify-center">
-        {loading && hasMore && <Spinner className="text-muted-foreground size-6" />}
-        {!hasMore && <div className="text-muted-foreground text-sm">{emptyText}</div>}
+        {showLoadingIcon && loading && hasMore && (
+          <Spinner className="text-muted-foreground size-6" />
+        )}
+        {showEmptyText && !hasMore && (
+          <div className="text-muted-foreground text-sm">{emptyText}</div>
+        )}
       </div>
     </div>
   );
