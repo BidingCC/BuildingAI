@@ -171,7 +171,7 @@ function HistoryCommandItem({
           onChange={(e) => setEditValue(e.target.value)}
           onKeyDown={handleKeyDown}
           onClick={(e) => e.stopPropagation()}
-          className="h-9 flex-1 -translate-x-2"
+          className="h-9 flex-1 -translate-x-2 border-0 focus-within:ring-0 focus-visible:ring-0"
           autoFocus
         />
       ) : (
@@ -430,19 +430,16 @@ export function DefaultNavMain({ items }: { items: NavItem[] }) {
   const [allConversations, setAllConversations] = useState<ConversationRecord[]>([]);
   const pageSize = 20;
 
-  const { data, isFetching } = useConversationsQuery(
+  const { data, isLoading } = useConversationsQuery(
     { page, pageSize, keyword: keyword || undefined },
     { enabled: open },
   );
 
   const hasMore = useMemo(() => {
+    if (data === undefined) return true;
     if (!data?.total) return false;
     return allConversations.length < data.total;
-  }, [data?.total, allConversations.length]);
-
-  useEffect(() => {
-    console.log(isFetching);
-  }, [isFetching]);
+  }, [data, allConversations.length]);
 
   useEffect(() => {
     if (open) {
@@ -467,7 +464,7 @@ export function DefaultNavMain({ items }: { items: NavItem[] }) {
   }, [data?.items, page]);
 
   const handleLoadMore = useCallback(() => {
-    if (isFetching || !hasMore) return;
+    if (isLoading || !hasMore) return;
     setPage((prev) => prev + 1);
   }, [hasMore]);
 
@@ -600,20 +597,12 @@ export function DefaultNavMain({ items }: { items: NavItem[] }) {
           <CommandInput placeholder="搜索对话..." value={keyword} onValueChange={handleSearch} />
           <CommandList className="h-[400px] max-h-[400px]">
             <InfiniteScroll
-              loading={isFetching}
+              loading={isLoading}
               hasMore={hasMore}
               onLoadMore={handleLoadMore}
               threshold={50}
             >
-              {isFetching && allConversations.length === 0 ? (
-                <div className="text-muted-foreground flex h-20 items-center justify-center text-sm">
-                  加载中...
-                </div>
-              ) : allConversations.length === 0 ? (
-                <CommandEmpty>没有找到对话记录</CommandEmpty>
-              ) : (
-                renderGroups()
-              )}
+              {renderGroups()}
             </InfiniteScroll>
           </CommandList>
         </Command>
