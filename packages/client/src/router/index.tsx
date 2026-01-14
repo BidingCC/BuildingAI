@@ -1,8 +1,13 @@
 import { createBrowserRouter } from "react-router-dom";
 
 import DefaultLayout from "@/layouts/styles/default";
+import AgentsIndexPage from "@/pages/agents";
+import AgentsWorkspacePage from "@/pages/agents/workspace";
+import AppsIndexPage from "@/pages/apps";
 import InstallPage from "@/pages/install";
-import WorkflowExample from "@/pages/workflow";
+import KnowledgeIndexPage from "@/pages/knowledge";
+import WorkflowIndexPage from "@/pages/workflow";
+import WorkflowDetailPage from "@/pages/workflow/detail";
 
 import GlobalError from "../components/exception/global-error";
 import NotFoundPage from "../components/exception/not-found-page";
@@ -26,6 +31,10 @@ export const router = createBrowserRouter([
         element: <InstallPage />,
       },
       {
+        path: "/workflow/:id",
+        element: <WorkflowDetailPage />,
+      },
+      {
         element: <DefaultLayout />,
         errorElement: (
           <DefaultLayout>
@@ -42,9 +51,26 @@ export const router = createBrowserRouter([
             element: <IndexPage />,
           },
           {
-            path: "/workflow",
-            element: <WorkflowExample />,
+            path: "/apps",
+            element: <AppsIndexPage />,
           },
+          {
+            path: "/agents",
+            element: <AgentsIndexPage />,
+          },
+          {
+            path: "/knowledge",
+            element: <KnowledgeIndexPage />,
+          },
+          {
+            path: "/agents/workspace",
+            element: <AgentsWorkspacePage />,
+          },
+          {
+            path: "/workflow",
+            element: <WorkflowIndexPage />,
+          },
+
           {
             path: "*",
             element: <NotFoundPage />,

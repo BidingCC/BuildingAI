@@ -7,7 +7,7 @@ export default function DefaultLayout({ children }: { children?: React.ReactNode
   return (
     <SidebarProvider>
       <DefaultAppSidebar />
-      <SidebarInset className="h-dvh">{children || <Outlet />}</SidebarInset>
+      <SidebarInset className="h-dvh overflow-x-hidden">{children || <Outlet />}</SidebarInset>
     </SidebarProvider>
   );
 }

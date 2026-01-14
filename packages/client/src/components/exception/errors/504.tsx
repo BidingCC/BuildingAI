@@ -13,7 +13,7 @@ const Error504 = ({ statusText }: { statusText: string }) => {
     }
   };
   return (
-    <div className="in-[.bd-console-layout]:h-inset flex h-screen flex-1 flex-col items-center justify-center p-4">
+    <div className="in-[.bd-console-layout]:h-inset flex h-dvh flex-1 flex-col items-center justify-center p-4">
       <h1 className="text-4xl font-bold">Gateway Timeout</h1>
       <p className="mt-4 mb-6">{statusText}</p>
       <div className="flex gap-4">

@@ -3,11 +3,11 @@
 
 html,
 body {
-  @apply h-full min-h-screen;
+  @apply h-full min-h-dvh;
 }
 
 #root {
-  @apply h-full min-h-screen;
+  @apply h-full min-h-dvh;
 }
 
 .chat-scroll {

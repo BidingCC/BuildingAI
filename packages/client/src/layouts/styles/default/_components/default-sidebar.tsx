@@ -12,6 +12,7 @@ import {
 } from "@buildingai/ui/components/ui/sidebar";
 import {
   ArrowUpRight,
+  BookSearch,
   Bot,
   Brush,
   Edit,
@@ -20,6 +21,7 @@ import {
   LayoutGrid,
   PenLineIcon,
   Video,
+  Workflow,
 } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import * as React from "react";
@@ -125,6 +127,18 @@ export function DefaultAppSidebar({ ...props }: React.ComponentProps<typeof Side
         title: "智能体",
         path: "/agents",
         icon: Bot,
+      },
+      {
+        id: "knowledge",
+        title: "知识库",
+        path: "/knowledge",
+        icon: BookSearch,
+      },
+      {
+        id: "workflow",
+        title: "工作流",
+        path: "/workflow",
+        icon: Workflow,
       },
     ];
 

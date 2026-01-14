@@ -87,7 +87,7 @@ const InstallPage = () => {
   }
 
   return (
-    <div className="bg-muted relative flex h-screen w-full items-center justify-center p-0 md:p-6">
+    <div className="bg-muted relative flex h-dvh w-full items-center justify-center p-0 md:p-6">
       <div
         className={cn(
           "dark:bg-accent bg-background relative flex flex-col transition-[width,height] duration-500 md:rounded-xl",

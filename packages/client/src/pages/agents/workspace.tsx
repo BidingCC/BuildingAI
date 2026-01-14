@@ -15,10 +15,9 @@ import {
   ItemTitle,
 } from "@buildingai/ui/components/ui/item";
 import { SidebarTrigger } from "@buildingai/ui/components/ui/sidebar";
-import { ChevronRight, Plus, Search, Workflow } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Bot, ChevronRight, Plus, Search } from "lucide-react";
 
-const WorkflowIndexPage = () => {
+const AgentsWorkspacePage = () => {
   return (
     <div className="flex w-full flex-col items-center">
       <div className="flex h-13 w-full items-center px-2">
@@ -28,12 +27,12 @@ const WorkflowIndexPage = () => {
       <div className="w-full max-w-4xl px-4 py-8 pt-12 sm:pt-20 md:px-6">
         <div className="flex flex-col items-center justify-between gap-4 max-sm:items-start sm:flex-row">
           <div className="flex flex-col gap-2">
-            <h1 className="text-2xl">我的工作流</h1>
-            <p className="text-muted-foreground text-sm">管理我的工作流应用</p>
+            <h1 className="text-2xl">我的智能体</h1>
+            <p className="text-muted-foreground text-sm">管理我的智能体应用</p>
           </div>
           <div className="max-sm:w-full">
             <InputGroup className="rounded-full">
-              <InputGroupInput placeholder="搜索工作流" />
+              <InputGroupInput placeholder="搜索智能体" />
               <InputGroupAddon>
                 <Search />
               </InputGroupAddon>
@@ -55,7 +54,7 @@ const WorkflowIndexPage = () => {
           </div>
           <Button className="ml-auto rounded-full">
             <Plus />
-            创建工作流
+            创建智能体
           </Button>
         </div>
 
@@ -68,14 +67,14 @@ const WorkflowIndexPage = () => {
               >
                 <ItemMedia>
                   <Avatar className="size-10">
-                    <AvatarImage src="https://github.com/evilrabbit.png1" />
+                    <AvatarImage src="https://github.com/evilrabbit.png3" />
                     <AvatarFallback>
-                      <Workflow />
+                      <Bot />
                     </AvatarFallback>
                   </Avatar>
                 </ItemMedia>
                 <ItemContent>
-                  <ItemTitle>new workflow{index + 1}</ItemTitle>
+                  <ItemTitle>Evil Rabbit</ItemTitle>
                   <ItemDescription>Last seen 5 months ago</ItemDescription>
                 </ItemContent>
                 <ItemActions className="opacity-0 group-hover/apps-item:opacity-100">
@@ -84,11 +83,8 @@ const WorkflowIndexPage = () => {
                     variant="outline"
                     className="rounded-full"
                     aria-label="Invite"
-                    asChild
                   >
-                    <Link to={`/workflow/${index}`}>
-                      <ChevronRight />
-                    </Link>
+                    <ChevronRight />
                   </Button>
                 </ItemActions>
               </Item>
@@ -100,4 +96,4 @@ const WorkflowIndexPage = () => {
   );
 };
 
-export default WorkflowIndexPage;
+export default AgentsWorkspacePage;

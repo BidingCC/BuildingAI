@@ -24,7 +24,7 @@ const GlobalError = () => {
   if (isRouteErrorResponse(error)) {
     return (
       <div>
-        <div className="in-[.bd-console-layout]:h-inset flex h-screen flex-1 flex-col items-center justify-center p-4">
+        <div className="in-[.bd-console-layout]:h-inset flex h-dvh flex-1 flex-col items-center justify-center p-4">
           <h1 className="text-8xl font-bold">{error.status}</h1>
           <p className="mt-4 mb-6">{error.data}</p>
           <div className="flex gap-4">
@@ -62,7 +62,7 @@ const GlobalError = () => {
       default:
         return (
           <div>
-            <div className="in-[.bd-console-layout]:h-inset flex h-screen flex-1 flex-col items-center justify-center p-4">
+            <div className="in-[.bd-console-layout]:h-inset flex h-dvh flex-1 flex-col items-center justify-center p-4">
               <h1 className="text-8xl font-bold">{error.status}</h1>
               <p className="mt-4 mb-6">{error.statusText}</p>
               <div className="flex gap-4">
@@ -84,7 +84,7 @@ const GlobalError = () => {
   if (error instanceof Error) {
     return (
       <div>
-        <div className="in-[.bd-console-layout]:h-inset flex h-screen flex-1 flex-col items-center justify-center p-4">
+        <div className="in-[.bd-console-layout]:h-inset flex h-dvh flex-1 flex-col items-center justify-center p-4">
           <h1 className="text-4xl font-bold">{error.name || "出了一点小问题~"}</h1>
           <p className="mt-4 mb-6">{error.message || "请尝试重新操作，或者联系网站管理员处理"}</p>
           <div className="flex gap-4">
@@ -104,7 +104,7 @@ const GlobalError = () => {
 
   return (
     <div>
-      <div className="in-[.bd-console-layout]:h-inset flex h-screen flex-1 flex-col items-center justify-center p-4">
+      <div className="in-[.bd-console-layout]:h-inset flex h-dvh flex-1 flex-col items-center justify-center p-4">
         <h1 className="text-4xl font-bold">未知错误</h1>
         <p className="mt-4 mb-6">
           {JSON.stringify(error || {}) || "请尝试重新操作，或者联系网站管理员处理"}
