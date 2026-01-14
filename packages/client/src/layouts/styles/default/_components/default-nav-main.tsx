@@ -430,7 +430,7 @@ export function DefaultNavMain({ items }: { items: NavItem[] }) {
   const [allConversations, setAllConversations] = useState<ConversationRecord[]>([]);
   const pageSize = 20;
 
-  const { data, isLoading, isFetching } = useConversationsQuery(
+  const { data, isFetching } = useConversationsQuery(
     { page, pageSize, keyword: keyword || undefined },
     { enabled: open },
   );
@@ -605,7 +605,7 @@ export function DefaultNavMain({ items }: { items: NavItem[] }) {
               onLoadMore={handleLoadMore}
               threshold={50}
             >
-              {isLoading && allConversations.length === 0 ? (
+              {isFetching && allConversations.length === 0 ? (
                 <div className="text-muted-foreground flex h-20 items-center justify-center text-sm">
                   加载中...
                 </div>
