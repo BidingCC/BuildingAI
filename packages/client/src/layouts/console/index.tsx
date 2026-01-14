@@ -98,7 +98,6 @@ function ConsoleRoutes() {
           },
         ],
       },
-
       {
         path: "decorate",
         children: [

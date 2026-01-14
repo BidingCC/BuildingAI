@@ -143,13 +143,14 @@ export function useConversationsQuery(
     options?: PaginatedQueryOptionsUtil<ConversationRecord>,
 ) {
     const { isLogin } = useAuthStore((state) => state.authActions);
-    if (!isLogin()) return { data: { items: [], total: 0 } };
+
     return useQuery<PaginatedResponse<ConversationRecord>>({
         queryKey: ["conversations", params],
         queryFn: () =>
             apiHttpClient.get<PaginatedResponse<ConversationRecord>>("/ai-conversations", {
                 params,
             }),
+        enabled: isLogin() && options?.enabled !== false,
         ...options,
     });
 }

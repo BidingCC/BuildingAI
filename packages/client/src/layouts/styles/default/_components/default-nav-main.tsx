@@ -171,7 +171,7 @@ function HistoryCommandItem({
           onChange={(e) => setEditValue(e.target.value)}
           onKeyDown={handleKeyDown}
           onClick={(e) => e.stopPropagation()}
-          className="h-7 flex-1"
+          className="h-9 flex-1 -translate-x-2"
           autoFocus
         />
       ) : (
@@ -430,13 +430,10 @@ export function DefaultNavMain({ items }: { items: NavItem[] }) {
   const [allConversations, setAllConversations] = useState<ConversationRecord[]>([]);
   const pageSize = 20;
 
-  const queryResult = useConversationsQuery(
+  const { data, isLoading, isFetching } = useConversationsQuery(
     { page, pageSize, keyword: keyword || undefined },
     { enabled: open },
   );
-  const data = queryResult?.data;
-  const isLoading = "isLoading" in queryResult ? queryResult.isLoading : false;
-  const isFetching = "isFetching" in queryResult ? queryResult.isFetching : false;
 
   const hasMore = useMemo(() => {
     if (!data?.total) return false;
@@ -444,10 +441,14 @@ export function DefaultNavMain({ items }: { items: NavItem[] }) {
   }, [data?.total, allConversations.length]);
 
   useEffect(() => {
+    console.log(isFetching);
+  }, [isFetching]);
+
+  useEffect(() => {
     if (open) {
       setPage(1);
       setKeyword("");
-      setAllConversations([]);
+      setAllConversations(data?.items || []);
     }
   }, [open]);
 
@@ -466,10 +467,9 @@ export function DefaultNavMain({ items }: { items: NavItem[] }) {
   }, [data?.items, page]);
 
   const handleLoadMore = useCallback(() => {
-    if (!isFetching && hasMore) {
-      setPage((prev) => prev + 1);
-    }
-  }, [isFetching, hasMore]);
+    if (isFetching || !hasMore) return;
+    setPage((prev) => prev + 1);
+  }, [hasMore]);
 
   const handleSearch = useCallback((value: string) => {
     setKeyword(value);
