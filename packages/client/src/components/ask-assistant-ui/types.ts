@@ -87,7 +87,6 @@ export type ChatStatus = "ready" | "submitted" | "streaming" | "error";
  * 展示用的消息，包含分支信息
  */
 export interface DisplayMessage {
-  stableKey: string;
   id: string;
   message: UIMessage;
   parentId: string | null;
@@ -108,6 +107,10 @@ export interface AssistantContextValue {
   status: ChatStatus;
   streamingMessageId: string | null;
   isLoading: boolean;
+  /** 是否在上拉加载更多历史消息 */
+  isLoadingMoreMessages: boolean;
+  /** 是否还有更多历史消息可加载 */
+  hasMoreMessages: boolean;
   error: Error | null;
 
   models: Model[];
@@ -120,6 +123,8 @@ export interface AssistantContextValue {
   textareaRef: RefObject<HTMLTextAreaElement | null>;
 
   onSend: (content: string) => void;
+  /** 上拉加载更多历史消息 */
+  onLoadMoreMessages: () => void;
   onStop: () => void;
   onRegenerate: (messageKey: string) => void;
   onSwitchBranch: (messageId: string) => void;

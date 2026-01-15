@@ -1,7 +1,8 @@
 import type { UIMessage } from "ai";
 import { useCallback, useMemo, useRef, useSyncExternalStore } from "react";
 
-import type { DisplayMessage, RawMessageRecord } from "./message-repository";
+import type { DisplayMessage } from "../types";
+import type { RawMessageRecord } from "./message-repository";
 import { MessageRepository } from "./message-repository";
 
 /**

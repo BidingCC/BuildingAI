@@ -23,9 +23,11 @@ function buildMessageRecords(
   for (let i = 0; i < messages.length; i++) {
     const msg = messages[i];
     const metadataParentId = (msg.metadata as { parentId?: string } | undefined)?.parentId;
+    const metadataSequence = (msg.metadata as { sequence?: number } | undefined)?.sequence;
+    const sequence = typeof metadataSequence === "number" ? metadataSequence : i;
 
     if (metadataParentId !== undefined) {
-      records.push({ id: msg.id, parentId: metadataParentId || null, sequence: i, message: msg });
+      records.push({ id: msg.id, parentId: metadataParentId || null, sequence, message: msg });
       if (msg.role === "user") lastUserId = msg.id;
       else if (msg.role === "assistant") lastAssistantId = msg.id;
       continue;
@@ -35,7 +37,7 @@ function buildMessageRecords(
       records.push({
         id: msg.id,
         parentId: existingParentMap.get(msg.id),
-        sequence: i,
+        sequence,
         message: msg,
       });
       if (msg.role === "user") lastUserId = msg.id;
@@ -52,7 +54,7 @@ function buildMessageRecords(
       lastAssistantId = msg.id;
     }
 
-    records.push({ id: msg.id, parentId, sequence: i, message: msg });
+    records.push({ id: msg.id, parentId, sequence, message: msg });
   }
 
   return records;
@@ -89,6 +91,9 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
     currentThreadId,
     messages: streamMessages,
     isLoadingMessages,
+    isLoadingMoreMessages,
+    hasMoreMessages,
+    loadMoreMessages,
     status,
     streamingMessageId,
     error,
@@ -171,6 +176,8 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
     status,
     streamingMessageId,
     isLoading: isLoadingMessages,
+    isLoadingMoreMessages,
+    hasMoreMessages,
     error,
     models,
     selectedModelId,
@@ -179,6 +186,7 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
     disliked,
     textareaRef,
     onSend,
+    onLoadMoreMessages: loadMoreMessages,
     onStop: stop,
     onRegenerate,
     onSwitchBranch,
