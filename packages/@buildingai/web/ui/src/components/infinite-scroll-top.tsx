@@ -10,7 +10,7 @@ import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
 
 type MaybePromise<T> = T | Promise<T>;
 
-export type ChatListProps = Omit<ComponentProps<typeof StickToBottom>, "children"> & {
+export type InfiniteScrollTopProps = Omit<ComponentProps<typeof StickToBottom>, "children"> & {
   /** Chat messages / items */
   children: ReactNode;
   /** Print debug logs in devtools console */
@@ -32,10 +32,10 @@ export type ChatListProps = Omit<ComponentProps<typeof StickToBottom>, "children
   topLoadingSlot?: ReactNode;
   /** Hide built-in "scroll to bottom" button */
   hideScrollToBottomButton?: boolean;
+  /** Force full height when content is minimal (e.g., empty state) */
+  forceFullHeight?: boolean;
 };
 
-// Per requirement: do NOT retain scroll position on prepend.
-// We only stop any ongoing stick-to-bottom animation before loading more.
 function usePrependNoRetention() {
   const { stopScroll } = useStickToBottomContext();
   const beginTxn = useCallback(() => {
@@ -73,7 +73,6 @@ function TopLoadSentinel({
     observer: null as IntersectionObserver | null,
   });
 
-  // Update refs without causing re-renders
   useEffect(() => {
     stateRef.current.hasMore = hasMore;
     stateRef.current.isLoadingMore = isLoadingMore;
@@ -83,14 +82,12 @@ function TopLoadSentinel({
     stateRef.current.onBeforeLoadMore = onBeforeLoadMore;
   }, [hasMore, isLoadingMore, onLoadMore, topThreshold, debug, onBeforeLoadMore]);
 
-  // Unlock when loading completes
   useEffect(() => {
     if (!isLoadingMore && stateRef.current.locked) {
       stateRef.current.locked = false;
     }
   }, [isLoadingMore]);
 
-  // IntersectionObserver for top-load trigger
   useEffect(() => {
     const root = scrollRef.current;
     const sentinel = sentinelRef.current;
@@ -98,7 +95,6 @@ function TopLoadSentinel({
 
     const state = stateRef.current;
 
-    // Mark user has scrolled after initial mount
     let hasMarkedUserScrolled = false;
     const markUserScrolled = () => {
       if (!hasMarkedUserScrolled) {
@@ -107,10 +103,8 @@ function TopLoadSentinel({
       }
     };
 
-    // Track scroll to detect user interaction and enforce non-zero top
     const scrollHandler = () => {
       markUserScrolled();
-      // Enforce non-zero top when hasMore
       if (state.hasMore && root.scrollTop === 0) {
         root.scrollTop = 1;
       }
@@ -124,18 +118,14 @@ function TopLoadSentinel({
 
         const s = stateRef.current;
 
-        // Enforce non-zero top when hasMore
         if (s.hasMore && root.scrollTop === 0) {
           root.scrollTop = 1;
         }
 
-        // Skip if conditions not met
         if (!s.hasMore || s.isLoadingMore || !s.onLoadMore || s.locked) return;
 
-        // Skip if user hasn't scrolled yet (avoid initial auto-trigger)
         if (!s.hasUserScrolled) return;
 
-        // Skip if content is not scrollable
         if (root.scrollHeight <= root.clientHeight + 8) return;
 
         s.locked = true;
@@ -163,7 +153,7 @@ function TopLoadSentinel({
   return <div ref={sentinelRef} className="absolute top-0 h-px w-full" />;
 }
 
-export function ChatList({
+export function InfiniteScrollTop({
   className,
   children,
   prependKey,
@@ -176,8 +166,9 @@ export function ChatList({
   debug = false,
   initial = "instant",
   resize = "instant",
+  forceFullHeight = false,
   ...props
-}: ChatListProps) {
+}: InfiniteScrollTopProps) {
   return (
     <StickToBottom
       className={cn("relative flex-1 overflow-y-hidden", className)}
@@ -186,7 +177,7 @@ export function ChatList({
       role="log"
       {...props}
     >
-      <ChatListInner
+      <InfiniteScrollTopInner
         prependKey={prependKey}
         hasMore={hasMore}
         isLoadingMore={isLoadingMore}
@@ -195,14 +186,15 @@ export function ChatList({
         topLoadingSlot={topLoadingSlot}
         hideScrollToBottomButton={hideScrollToBottomButton}
         debug={debug}
+        forceFullHeight={forceFullHeight}
       >
         {children}
-      </ChatListInner>
+      </InfiniteScrollTopInner>
     </StickToBottom>
   );
 }
 
-function ChatListInner({
+function InfiniteScrollTopInner({
   children,
   prependKey: _prependKey,
   hasMore,
@@ -212,8 +204,9 @@ function ChatListInner({
   topLoadingSlot,
   hideScrollToBottomButton,
   debug,
+  forceFullHeight,
 }: Pick<
-  ChatListProps,
+  InfiniteScrollTopProps,
   | "children"
   | "prependKey"
   | "hasMore"
@@ -223,13 +216,19 @@ function ChatListInner({
   | "topLoadingSlot"
   | "hideScrollToBottomButton"
   | "debug"
+  | "forceFullHeight"
 >) {
   const { beginTxn } = usePrependNoRetention();
 
   return (
     <>
-      <StickToBottom.Content className="relative flex min-h-full scale-y-[-1] flex-col gap-4">
-        <div className="scale-y-[-1]">{children}</div>
+      <StickToBottom.Content
+        className={cn(
+          "relative flex scale-y-[-1] flex-col gap-4",
+          forceFullHeight ? "h-full" : "min-h-full",
+        )}
+      >
+        <div className="flex h-full min-h-0 scale-y-[-1] flex-col">{children}</div>
 
         {onLoadMore && (
           <div className="sticky top-0 scale-y-[-1]">
@@ -255,14 +254,17 @@ function ChatListInner({
         )}
       </StickToBottom.Content>
 
-      {!hideScrollToBottomButton && <ChatListScrollButton className="bottom-4" />}
+      {!hideScrollToBottomButton && <InfiniteScrollTopScrollButton className="bottom-4" />}
     </>
   );
 }
 
-export type ChatListScrollButtonProps = ComponentProps<typeof Button>;
+export type InfiniteScrollTopScrollButtonProps = ComponentProps<typeof Button>;
 
-export function ChatListScrollButton({ className, ...props }: ChatListScrollButtonProps) {
+export function InfiniteScrollTopScrollButton({
+  className,
+  ...props
+}: InfiniteScrollTopScrollButtonProps) {
   const { isAtBottom, scrollToBottom } = useStickToBottomContext();
 
   const handleScrollToBottom = useCallback(() => {

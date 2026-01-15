@@ -1,5 +1,5 @@
 import type { Model, Suggestion } from "../components/ask-assistant-ui";
-import { AssistantProvider, Thread, useAssistant } from "../components/ask-assistant-ui";
+import { AssistantProvider, Chat, useAssistant } from "../components/ask-assistant-ui";
 
 const MODELS: Model[] = [
   {
@@ -54,7 +54,7 @@ const IndexPage = () => {
 
   return (
     <AssistantProvider {...assistant}>
-      <Thread title="新对话" />
+      <Chat title="新对话" />
     </AssistantProvider>
   );
 };

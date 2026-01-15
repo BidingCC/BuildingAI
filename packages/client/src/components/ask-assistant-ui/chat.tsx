@@ -1,5 +1,8 @@
 import type { PromptInputMessage } from "@buildingai/ui/components/ai-elements/prompt-input";
-import { ChatList, ChatListScrollButton } from "@buildingai/ui/components/chat-list";
+import {
+  InfiniteScrollTop,
+  InfiniteScrollTopScrollButton,
+} from "@buildingai/ui/components/infinite-scroll-top";
 import { Button } from "@buildingai/ui/components/ui/button";
 import { SidebarTrigger } from "@buildingai/ui/components/ui/sidebar";
 import { cn } from "@buildingai/ui/lib/utils";
@@ -8,19 +11,19 @@ import type { FormEvent, ReactNode } from "react";
 import { memo, useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { MessageItem } from "./components/message-item";
+import { PromptInput } from "./components/input/prompt-input";
+import { Suggestions } from "./components/input/suggestions";
+import { MessageItem } from "./components/message/message-item";
 import { ModelSelector } from "./components/model-selector";
-import { PromptInput } from "./components/prompt-input";
-import { Suggestions } from "./components/suggestions";
 import { useAssistantContext } from "./context";
 
-export interface ThreadProps {
+export interface ChatProps {
   title?: string;
   onShare?: () => void;
   welcomeMessage?: ReactNode | string;
 }
 
-const ThreadHeader = memo(function ThreadHeader({
+const ChatHeader = memo(function ChatHeader({
   title,
   models,
   selectedModelId,
@@ -133,6 +136,7 @@ const MessageList = memo(function MessageList() {
 
 const InputArea = memo(function InputArea({ hasMessages }: { hasMessages: boolean }) {
   const { suggestions, status, textareaRef, isLoading, onSend, onStop } = useAssistantContext();
+  const { id } = useParams<{ id: string }>();
 
   const handleSubmit = useCallback(
     (message: PromptInputMessage, _event: FormEvent<HTMLFormElement>) => {
@@ -150,8 +154,8 @@ const InputArea = memo(function InputArea({ hasMessages }: { hasMessages: boolea
   );
 
   return (
-    <div className="sticky bottom-13 z-10">
-      <ChatListScrollButton className="-top-12 z-20" />
+    <div className={cn("sticky z-10", id ? "bottom-13" : "bottom-0")}>
+      <InfiniteScrollTopScrollButton className="-top-12 z-20" />
       <div className="bg-background mx-auto w-full max-w-3xl rounded-t-lg">
         {!hasMessages && suggestions.length > 0 && !isLoading && (
           <Suggestions suggestions={suggestions} onSuggestionClick={handleSuggestionClick} />
@@ -172,7 +176,7 @@ const InputArea = memo(function InputArea({ hasMessages }: { hasMessages: boolea
   );
 });
 
-export const Thread = memo(function Thread({ title, onShare, welcomeMessage }: ThreadProps) {
+export const Chat = memo(function Chat({ title, onShare, welcomeMessage }: ChatProps) {
   const {
     displayMessages,
     models,
@@ -190,7 +194,7 @@ export const Thread = memo(function Thread({ title, onShare, welcomeMessage }: T
 
   useEffect(() => {
     if ((hasMessages && !isLoading) || !id) {
-      const timer = setTimeout(() => setSmooth(true), 150);
+      const timer = setTimeout(() => setSmooth(true), 200);
       return () => clearTimeout(timer);
     }
   }, [isLoading, hasMessages, id]);
@@ -213,7 +217,7 @@ export const Thread = memo(function Thread({ title, onShare, welcomeMessage }: T
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col">
-      <ThreadHeader
+      <ChatHeader
         title={title}
         models={models}
         selectedModelId={selectedModelId}
@@ -221,25 +225,27 @@ export const Thread = memo(function Thread({ title, onShare, welcomeMessage }: T
         onShare={onShare}
       />
 
-      <ChatList
-        className={cn(
-          "chat-scroll will-change-opacity flex-1",
-          "contain-[layout_style_paint]",
-          "transition-opacity duration-200 ease-out",
-          smooth ? "opacity-100" : "opacity-0",
-        )}
+      <InfiniteScrollTop
+        className={cn("chat-scroll flex-1", "contain-[layout_style_paint]")}
         prependKey={displayMessages[0]?.id ?? null}
         hasMore={hasMoreMessages}
         isLoadingMore={isLoadingMoreMessages}
         onLoadMore={id ? onLoadMoreMessages : undefined}
         debug={import.meta.env.DEV}
         hideScrollToBottomButton
+        forceFullHeight={!id && !hasMessages}
       >
-        <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 pb-10">
+        <div
+          className={cn(
+            "mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 pb-10",
+            "transition-opacity duration-200 ease-out",
+            smooth ? "opacity-100" : "opacity-0",
+          )}
+        >
           {renderContent()}
         </div>
         <InputArea hasMessages={hasMessages} />
-      </ChatList>
+      </InfiniteScrollTop>
     </div>
   );
 });

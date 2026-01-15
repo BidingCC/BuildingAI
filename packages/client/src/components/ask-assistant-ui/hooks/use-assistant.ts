@@ -1,10 +1,11 @@
 import type { UIMessage } from "ai";
 import { startTransition, useCallback, useEffect, useRef, useState } from "react";
 
-import type { AssistantContextValue, DisplayMessage, Model, Suggestion } from "./types";
-import { useChatStream } from "./use-chat";
-import type { RawMessageRecord } from "./utils/message-repository";
-import { useMessageRepository } from "./utils/use-message-repository";
+import type { RawMessageRecord } from "../libs/message-repository";
+import type { AssistantContextValue, DisplayMessage, Model, Suggestion } from "../types";
+import { useChatStream } from "./use-chat-stream";
+import { useMessageRepository } from "./use-message-repository";
+import { useMessagesPaging } from "./use-messages-paging";
 
 export interface UseAssistantOptions {
   models: Model[];
@@ -87,24 +88,35 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
   const parentMapRef = useRef<Map<string, string | null>>(new Map());
   const isFirstLoadRef = useRef(true);
 
+  const lastMessageDbIdRef = useRef<string | null>(null);
+  const pendingParentIdRef = useRef<string | null>(null);
+  const conversationIdRef = useRef<string | undefined>(undefined);
+  const prevThreadIdRef = useRef<string | undefined>(undefined);
+
   const {
     currentThreadId,
     messages: streamMessages,
-    isLoadingMessages,
-    isLoadingMoreMessages,
-    hasMoreMessages,
-    loadMoreMessages,
+    setMessages,
     status,
     streamingMessageId,
     error,
-    setMessages,
     send,
     stop,
     regenerate,
     addToolApprovalResponse,
   } = useChatStream({
     modelId: "5f325ca6-03da-4f7f-8e42-025474e48b44",
+    lastMessageDbIdRef,
+    pendingParentIdRef,
+    conversationIdRef,
+    prevThreadIdRef,
   });
+
+  const { isLoadingMessages, isLoadingMoreMessages, hasMoreMessages, loadMoreMessages } =
+    useMessagesPaging({
+      setMessages,
+      lastMessageDbIdRef,
+    });
 
   useEffect(() => {
     if (streamMessages.length === 0) {
@@ -131,9 +143,19 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
   }, [streamMessages, importMessages, importIncremental, clearRepository]);
 
   useEffect(() => {
+    const prevThreadId = prevThreadIdRef.current;
+    const isSwitchingConversation =
+      prevThreadId && currentThreadId && prevThreadId !== currentThreadId;
+    const isNavigatingToHome = prevThreadId && !currentThreadId;
+
+    if (isSwitchingConversation || isNavigatingToHome) {
+      clearRepository();
+    }
+
     parentMapRef.current.clear();
     isFirstLoadRef.current = true;
-  }, [currentThreadId]);
+    prevThreadIdRef.current = currentThreadId;
+  }, [currentThreadId, clearRepository]);
 
   const onSend = useCallback(
     (content: string) => {
@@ -171,7 +193,6 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
   return {
     messages: [...repositoryMessages],
     displayMessages: displayMessages as DisplayMessage[],
-    threads: [],
     currentThreadId,
     status,
     streamingMessageId,

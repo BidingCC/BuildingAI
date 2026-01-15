@@ -1,6 +1,6 @@
 import { memo } from "react";
 
-import type { DisplayMessage } from "../types";
+import type { DisplayMessage } from "../../types";
 import { Message } from "./message";
 
 export interface MessageItemProps {

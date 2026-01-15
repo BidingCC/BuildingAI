@@ -3,7 +3,7 @@ import type { UIMessage } from "ai";
 import type { DisplayMessage } from "../types";
 
 /**
- * 消息记录类型（从API或流式获取）
+ * Message record type (from API or streaming)
  */
 export interface RawMessageRecord {
   id: string;
@@ -64,12 +64,12 @@ class CachedValue<T> {
 }
 
 /**
- * MessageRepository（照搬版）
+ * MessageRepository
  *
- * - children: 存储同一 parent 下的所有版本（分支）
- * - next: 指向当前活跃分支
- * - head: 指向当前活跃分支的叶子节点
- * - 渲染：通过 head → prev 回溯得到当前活跃分支消息链
+ * - children: Stores all versions (branches) under the same parent
+ * - next: Points to the current active branch
+ * - head: Points to the leaf node of the current active branch
+ * - Rendering: Traverse from head → prev to get the current active branch message chain
  */
 export class MessageRepository {
   /** Map of message IDs to repository message objects */
@@ -80,18 +80,19 @@ export class MessageRepository {
   private root: RepositoryParent = { children: [], next: null };
 
   /**
-   * 逻辑消息索引：用于处理 AI SDK 流式过程中“同一条 assistant 消息 id 变更”
+   * Logical message index: Used to handle "same assistant message id change" during AI SDK streaming
    *
-   * 现象：一次 send 期间 assistant 消息可能先出现临时 id，结束后变成另一个 id。
-   * 如果不归并，会被误判为“新增了一个分支版本”，导致版本 +1 且内容一样。
+   * Phenomenon: During a single send, an assistant message may first appear with a temporary id,
+   * then change to another id after completion. If not merged, it would be misidentified as
+   * "a new branch version", causing version +1 with the same content.
    */
   private logicalKeyIndex = new Map<string, string>();
 
   /**
-   * 上一次 importIncremental 看到的消息ID集合
-   * 用于区分：
-   * - 同一次流式 run 内的 id 漂移（上一帧见过旧 id）=> 归并
-   * - regenerate 新分支（截断后上一帧不会包含旧 assistant id）=> 不归并，正常新增版本
+   * Set of message IDs seen in the last importIncremental call
+   * Used to distinguish:
+   * - ID drift within the same streaming run (old id seen in previous frame) => merge
+   * - Regenerate new branch (previous frame won't contain old assistant id after truncation) => don't merge, normally add new version
    */
   private lastImportSeenIds = new Set<string>();
 
@@ -104,30 +105,24 @@ export class MessageRepository {
   }
 
   /**
-   * 将 oldId 的节点迁移为 newId（修正 children 引用 / next / head）
+   * Migrates a node from oldId to newId (fixes children references / next / head)
    */
   private renameMessageId(oldId: string, newId: string): void {
     if (oldId === newId) return;
     const msg = this.messages.get(oldId);
     if (!msg) return;
 
-    // 更新 message.id（保证渲染/查找一致）
     msg.current = { ...msg.current, id: newId } as UIMessage;
 
-    // messages map
     this.messages.delete(oldId);
     this.messages.set(newId, msg);
 
-    // 更新 parent.children 中的引用（只可能存在于一个 parent.children）
     const parentOrRoot: RepositoryParent = msg.prev ?? this.root;
     parentOrRoot.children = parentOrRoot.children.map((id) => (id === oldId ? newId : id));
 
-    // 更新 active next 指针
     if (parentOrRoot.next === msg) {
-      // no-op, next 指针是对象引用；但 children 中的 id 已经替换
     }
 
-    // 更新 head（如果 head 就是这个对象，id 已更新）
     if (this.head === msg) {
       this.head = msg;
     }
@@ -157,7 +152,6 @@ export class MessageRepository {
 
     if (operation === "relink" && parentOrRoot === newParentOrRoot) return;
 
-    // cut
     if (operation !== "link") {
       parentOrRoot.children = parentOrRoot.children.filter((m) => m !== child.current.id);
 
@@ -165,24 +159,21 @@ export class MessageRepository {
         const fallbackId = parentOrRoot.children.at(-1);
         const fallback = fallbackId ? this.messages.get(fallbackId) : null;
         if (fallback === undefined) {
-          throw new Error("MessageRepository: 查找备用兄弟消息失败");
+          throw new Error("MessageRepository: Failed to find fallback sibling message");
         }
         parentOrRoot.next = fallback;
       }
     }
 
-    // link
     if (operation !== "cut") {
-      // ensure the child is not part of parent tree
       for (let current: RepositoryMessage | null = newParent; current; current = current.prev) {
         if (current.current.id === child.current.id) {
-          throw new Error("MessageRepository: 检测到重复消息ID（循环/重复引用）");
+          throw new Error("MessageRepository: Detected duplicate message ID (circular/duplicate reference)");
         }
       }
 
       newParentOrRoot.children = [...newParentOrRoot.children, child.current.id];
 
-      // auto activate
       if (findHead(child) === this.head || newParentOrRoot.next === null) {
         newParentOrRoot.next = child;
       }
@@ -236,21 +227,21 @@ export class MessageRepository {
   }
 
   /**
-   * 获取当前活跃分支的消息列表
+   * Gets the list of messages in the current active branch
    */
   getMessages(): readonly UIMessage[] {
     return this._messages.value;
   }
 
   /**
-   * 获取当前活跃分支的展示消息列表
+   * Gets the list of display messages in the current active branch
    */
   getDisplayMessages(): readonly DisplayMessage[] {
     return this._displayMessages.value;
   }
 
   /**
-   * 获取消息总数
+   * Gets the total number of messages
    */
   get size(): number {
     return this.messages.size;
@@ -271,7 +262,7 @@ export class MessageRepository {
   }
 
   /**
-   * 添加或更新消息（支持 sequence/createdAt）
+   * Adds or updates a message (supports sequence/createdAt)
    */
   addOrUpdateMessage(
     parentId: string | null,
@@ -281,7 +272,6 @@ export class MessageRepository {
   ): void {
     const existingItem = this.messages.get(message.id);
 
-    // 如果 parentId 存在但找不到对应消息，降级为 root 级别，避免崩溃
     let prev: RepositoryMessage | null = null;
     if (parentId) {
       const foundPrev = this.messages.get(parentId);
@@ -294,7 +284,6 @@ export class MessageRepository {
       }
     }
 
-    // update existing message
     if (existingItem) {
       existingItem.current = message;
       existingItem.sequence = sequence;
@@ -340,7 +329,7 @@ export class MessageRepository {
   }
 
   /**
-   * 切换到指定分支：更新 parent.next 指针 + head 指向该分支叶子
+   * Switches to the specified branch: updates parent.next pointer and head to point to the branch leaf
    */
   switchToBranch(messageId: string): void {
     const message = this.messages.get(messageId);
@@ -357,7 +346,7 @@ export class MessageRepository {
   }
 
   /**
-   * 删除消息及其后代
+   * Deletes a message and its descendants
    */
   deleteMessage(messageId: string): void {
     const message = this.messages.get(messageId);
@@ -396,7 +385,7 @@ export class MessageRepository {
   }
 
   /**
-   * 增量导入：按 records 顺序 upsert
+   * Incrementally imports: upserts in the order of records
    */
   importIncremental(records: RawMessageRecord[], setNewAsActive = true): boolean {
     if (records.length === 0) return false;
@@ -413,7 +402,6 @@ export class MessageRepository {
       );
       const aliasedId = this.logicalKeyIndex.get(logicalKey);
 
-      // 仅当旧 id 在上一帧出现过，才认为是同一次 run 的 id 漂移替换
       if (
         !this.messages.has(record.id) &&
         aliasedId &&
@@ -433,16 +421,13 @@ export class MessageRepository {
       );
       if (!exists) changed = true;
 
-      // 记录逻辑 key -> 当前 id
       this.logicalKeyIndex.set(logicalKey, record.id);
     }
 
-    // 如果新叶子是当前 head（或当前还没有 head），让其成为活跃分支
     if (setNewAsActive) {
-      const lastId = sortedRecords.at(-1)?.id;
-      if (lastId) {
-        // 沿着 parent 链把 next 指针补齐（使 lastId 成为 head 的叶子）
-        const leaf = this.messages.get(lastId);
+        const lastId = sortedRecords.at(-1)?.id;
+        if (lastId) {
+          const leaf = this.messages.get(lastId);
         if (leaf) {
           for (let current: RepositoryMessage | null = leaf; current; current = current.prev) {
             const parent = current.prev ?? null;
@@ -462,7 +447,7 @@ export class MessageRepository {
   }
 
   /**
-   * 全量导入：清空后导入，并可选择最新分支
+   * Full import: clears then imports, optionally selects the latest branch
    */
   import(records: RawMessageRecord[], selectLatestBranch = true): void {
     this.clear();
@@ -484,7 +469,6 @@ export class MessageRepository {
     this.lastImportSeenIds = new Set(sortedRecords.map((r) => r.id));
 
     if (selectLatestBranch) {
-      // 对每个 parent 的 children 选择最后一个作为 next（按导入顺序/sequence）
       for (const [, msg] of this.messages) {
         const parentOrRoot: RepositoryParent = msg.prev ?? this.root;
         if (parentOrRoot.children.length > 0) {
