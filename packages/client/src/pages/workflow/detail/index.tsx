@@ -1,5 +1,5 @@
 import { WorkflowExample } from "../_components/demo";
-import WorkflowLayout from "../_components/layout";
+import WorkflowLayout from "../_layouts";
 
 const WorkflowDetailPage = () => {
   return (

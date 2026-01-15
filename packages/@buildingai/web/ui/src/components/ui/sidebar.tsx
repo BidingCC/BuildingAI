@@ -19,8 +19,7 @@ import { PanelLeftIcon } from "lucide-react";
 import { Slot } from "radix-ui";
 import * as React from "react";
 
-const SIDEBAR_COOKIE_NAME = "sidebar_state";
-const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
+const SIDEBAR_STORAGE_KEY = "sidebar_state";
 const SIDEBAR_WIDTH = "16rem";
 const SIDEBAR_WIDTH_MOBILE = "18rem";
 const SIDEBAR_WIDTH_ICON = "3rem";
@@ -34,6 +33,12 @@ type SidebarContextProps = {
   setOpenMobile: (open: boolean) => void;
   isMobile: boolean;
   toggleSidebar: () => void;
+  /** Temporarily override sidebar state without persisting to storage */
+  setTemporaryOpen: (open: boolean | null) => void;
+  /** Skip transition animation when temporary state is active */
+  skipTransition: boolean;
+  /** Whether sidebar is in temporary override mode */
+  isTemporaryOverride: boolean;
 };
 
 const SidebarContext = React.createContext<SidebarContextProps | null>(null);
@@ -47,10 +52,27 @@ function useSidebar() {
   return context;
 }
 
+/**
+ * Get the initial sidebar state from localStorage synchronously to prevent flash.
+ */
+function getInitialSidebarState(storageKey: string | null, defaultOpen: boolean): boolean {
+  if (typeof window === "undefined" || !storageKey) return defaultOpen;
+  try {
+    const stored = localStorage.getItem(storageKey);
+    if (stored !== null) {
+      return stored === "true";
+    }
+  } catch {
+    // localStorage might be unavailable
+  }
+  return defaultOpen;
+}
+
 function SidebarProvider({
   defaultOpen = true,
   open: openProp,
   onOpenChange: setOpenProp,
+  storageKey = SIDEBAR_STORAGE_KEY,
   className,
   style,
   children,
@@ -59,14 +81,31 @@ function SidebarProvider({
   defaultOpen?: boolean;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  /** Custom localStorage key for persisting state. Set to null to disable persistence. */
+  storageKey?: string | null;
 }) {
   const isMobile = useIsMobile();
   const [openMobile, setOpenMobile] = React.useState(false);
 
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
-  const [_open, _setOpen] = React.useState(defaultOpen);
-  const open = openProp ?? _open;
+  const [_open, _setOpen] = React.useState(() => getInitialSidebarState(storageKey, defaultOpen));
+  // Temporary override state (null means no override)
+  const [temporaryOpen, _setTemporaryOpen] = React.useState<boolean | null>(null);
+  // Skip transition animation momentarily when temporary state changes
+  const [skipTransition, setSkipTransition] = React.useState(false);
+  const open = openProp ?? (temporaryOpen !== null ? temporaryOpen : _open);
+
+  const setTemporaryOpen = React.useCallback((value: boolean | null) => {
+    setSkipTransition(true);
+    _setTemporaryOpen(value);
+    // Re-enable transitions after one frame
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setSkipTransition(false);
+      });
+    });
+  }, []);
   const setOpen = React.useCallback(
     (value: boolean | ((value: boolean) => boolean)) => {
       const openState = typeof value === "function" ? value(open) : value;
@@ -76,8 +115,14 @@ function SidebarProvider({
         _setOpen(openState);
       }
 
-      // This sets the cookie to keep the sidebar state.
-      document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
+      // Persist sidebar state to localStorage
+      if (storageKey) {
+        try {
+          localStorage.setItem(storageKey, String(openState));
+        } catch {
+          // localStorage might be unavailable
+        }
+      }
     },
     [setOpenProp, open],
   );
@@ -104,6 +149,8 @@ function SidebarProvider({
   // This makes it easier to style the sidebar with Tailwind classes.
   const state = open ? "expanded" : "collapsed";
 
+  const isTemporaryOverride = temporaryOpen !== null;
+
   const contextValue = React.useMemo<SidebarContextProps>(
     () => ({
       state,
@@ -113,8 +160,22 @@ function SidebarProvider({
       openMobile,
       setOpenMobile,
       toggleSidebar,
+      setTemporaryOpen,
+      skipTransition,
+      isTemporaryOverride,
     }),
-    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar],
+    [
+      state,
+      open,
+      setOpen,
+      isMobile,
+      openMobile,
+      setOpenMobile,
+      toggleSidebar,
+      setTemporaryOpen,
+      skipTransition,
+      isTemporaryOverride,
+    ],
   );
 
   return (
@@ -130,6 +191,7 @@ function SidebarProvider({
         }
         className={cn(
           "group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-svh w-full",
+          skipTransition && "**:transition-none!",
           className,
         )}
         {...props}
@@ -271,7 +333,9 @@ function SidebarTrigger({
 }
 
 function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
-  const { toggleSidebar } = useSidebar();
+  const { toggleSidebar, isTemporaryOverride } = useSidebar();
+
+  if (isTemporaryOverride) return null;
 
   return (
     <button

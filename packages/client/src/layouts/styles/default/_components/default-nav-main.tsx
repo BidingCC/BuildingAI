@@ -62,7 +62,7 @@ import {
   groupConversationsByTime,
   TIME_GROUP_LABELS,
   type TimeGroup,
-} from "./utils/conversation-group";
+} from "../utils/conversation-group";
 
 interface NavSubItem {
   id: string;
