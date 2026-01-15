@@ -4,6 +4,7 @@ import type {
     PaginatedResponse,
     QueryOptionsUtil,
 } from "@buildingai/web-types";
+import type { UseMutationResult, UseQueryResult } from "@tanstack/react-query";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { apiHttpClient } from "../base";
@@ -141,7 +142,7 @@ export type QueryMessagesParams = PaginationParams & {
 export function useConversationsQuery(
     params: QueryConversationsParams,
     options?: PaginatedQueryOptionsUtil<ConversationRecord>,
-) {
+): UseQueryResult<PaginatedResponse<ConversationRecord>, unknown> {
     const { isLogin } = useAuthStore((state) => state.authActions);
 
     return useQuery<PaginatedResponse<ConversationRecord>>({
@@ -161,7 +162,7 @@ export function useConversationsQuery(
 export function useConversationQuery(
     conversationId: string,
     options?: QueryOptionsUtil<ConversationRecord>,
-) {
+): UseQueryResult<ConversationRecord, unknown> {
     return useQuery<ConversationRecord>({
         queryKey: ["conversation", conversationId],
         queryFn: () => apiHttpClient.get<ConversationRecord>(`/ai-conversations/${conversationId}`),
@@ -176,7 +177,7 @@ export function useConversationQuery(
 export function useConversationMessagesQuery(
     params: QueryMessagesParams,
     options?: PaginatedQueryOptionsUtil<MessageRecord>,
-) {
+): UseQueryResult<PaginatedResponse<MessageRecord>, unknown> {
     return useQuery<PaginatedResponse<MessageRecord>>({
         queryKey: ["conversation-messages", params.conversationId, params],
         queryFn: () =>
@@ -194,10 +195,24 @@ export function useConversationMessagesQuery(
     });
 }
 
+export async function getConversationMessages(
+    params: QueryMessagesParams,
+): Promise<PaginatedResponse<MessageRecord>> {
+    return apiHttpClient.get<PaginatedResponse<MessageRecord>>(
+        `/ai-conversations/${params.conversationId}/messages`,
+        {
+            params: {
+                page: params.page,
+                pageSize: params.pageSize,
+            },
+        },
+    );
+}
+
 /**
  * 删除会话
  */
-export function useDeleteConversation() {
+export function useDeleteConversation(): UseMutationResult<unknown, unknown, string, unknown> {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (conversationId: string) =>
@@ -211,7 +226,12 @@ export function useDeleteConversation() {
 /**
  * 更新会话
  */
-export function useUpdateConversation() {
+export function useUpdateConversation(): UseMutationResult<
+    ConversationRecord,
+    unknown,
+    { id: string; title: string },
+    unknown
+> {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: ({ id, title }: { id: string; title: string }) =>
