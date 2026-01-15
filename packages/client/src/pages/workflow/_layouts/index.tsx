@@ -4,12 +4,12 @@ import { SidebarInset, SidebarProvider } from "@buildingai/ui/components/ui/side
 import { ChevronLeft, Edit, Workflow } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-import { WorkflowSidebar } from "./_components/sidebar";
+import { WorkflowSidebar } from "./sidebar";
 
 export default function WorkflowLayout({ children }: { children?: React.ReactNode }) {
   const navigate = useNavigate();
   return (
-    <SidebarProvider>
+    <SidebarProvider storageKey="__workflow_workspace_sidebar__">
       <WorkflowSidebar />
       <SidebarInset className="flex h-dvh flex-col overflow-x-hidden">
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 pl-2">

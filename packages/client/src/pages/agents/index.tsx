@@ -25,7 +25,7 @@ const AgentsIndexPage = () => {
       <div className="flex h-13 w-full items-center px-2">
         <SidebarTrigger className="md:hidden" />
         <div className="ml-auto">
-          <Button variant="ghost" className="ml-auto rounded-full" asChild>
+          <Button variant="ghost" size="icon-sm" className="ml-auto" asChild>
             <Link to="/agents/workspace">
               <Bot />
               我的智能体

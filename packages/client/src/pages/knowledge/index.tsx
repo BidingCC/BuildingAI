@@ -14,21 +14,16 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@buildingai/ui/components/ui/item";
-import { SidebarTrigger } from "@buildingai/ui/components/ui/sidebar";
-import { Book, ChevronRight, Plus, Search } from "lucide-react";
+import { ChevronRight, Search } from "lucide-react";
 
 const KnowledgeIndexPage = () => {
   return (
     <div className="flex w-full flex-col items-center">
-      <div className="flex h-13 w-full items-center px-2">
-        <SidebarTrigger className="md:hidden" />
-      </div>
-
-      <div className="w-full max-w-4xl px-4 py-8 pt-12 sm:pt-20 md:px-6">
-        <div className="flex flex-col items-center justify-between gap-4 max-sm:items-start sm:flex-row">
+      <div className="w-full max-w-4xl px-4 py-8 pt-12 sm:pt-14 md:px-6 md:pt-16 lg:pt-18 xl:pt-24">
+        <div className="flex flex-col items-center justify-between gap-4 max-sm:items-start sm:flex-row sm:px-3">
           <div className="flex flex-col gap-2">
-            <h1 className="text-2xl">我的知识库</h1>
-            <p className="text-muted-foreground text-sm">管理我的知识库</p>
+            <h1 className="text-2xl">知识库广场</h1>
+            <p className="text-muted-foreground text-sm">加入你喜爱的知识库进行交互</p>
           </div>
           <div className="max-sm:w-full">
             <InputGroup className="rounded-full">
@@ -40,25 +35,24 @@ const KnowledgeIndexPage = () => {
           </div>
         </div>
 
-        <div className="mt-8 flex items-center justify-between">
-          <div className="flex gap-2">
-            <Badge className="bg-primary text-primary-foreground h-9 px-4 font-medium text-nowrap sm:font-normal">
-              全部
+        <div className="no-scrollbar mt-8 flex flex-nowrap gap-2 overflow-x-auto sm:px-3">
+          <Badge className="bg-accent text-accent-foreground h-9 px-4 font-medium text-nowrap sm:font-normal">
+            精选
+          </Badge>
+          <Badge className="bg-accent text-accent-foreground h-9 px-4 font-medium text-nowrap sm:font-normal">
+            全部
+          </Badge>
+          {Array.from({ length: 5 }).map((_, index) => (
+            <Badge
+              className="bg-accent text-accent-foreground h-9 px-4 font-medium text-nowrap sm:font-normal"
+              key={index}
+            >
+              标签{index + 1}
             </Badge>
-            <Badge className="bg-accent text-accent-foreground h-9 px-4 font-medium text-nowrap sm:font-normal">
-              已公开
-            </Badge>
-            <Badge className="bg-accent text-accent-foreground h-9 px-4 font-medium text-nowrap sm:font-normal">
-              未公开
-            </Badge>
-          </div>
-          <Button className="ml-auto rounded-full">
-            <Plus />
-            创建知识库
-          </Button>
+          ))}
         </div>
 
-        <div className="mt-6">
+        <div className="mt-6 sm:px-3">
           <div className="grid gap-x-4 sm:grid-cols-2">
             {Array.from({ length: 10 }).map((_, index) => (
               <Item
@@ -67,10 +61,8 @@ const KnowledgeIndexPage = () => {
               >
                 <ItemMedia>
                   <Avatar className="size-10">
-                    <AvatarImage src="https://github.com/evilrabbit.png2" />
-                    <AvatarFallback>
-                      <Book />
-                    </AvatarFallback>
+                    <AvatarImage src="https://github.com/evilrabbit.png" />
+                    <AvatarFallback>ER</AvatarFallback>
                   </Avatar>
                 </ItemMedia>
                 <ItemContent>

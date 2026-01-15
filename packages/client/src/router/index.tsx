@@ -6,6 +6,10 @@ import AgentsWorkspacePage from "@/pages/agents/workspace";
 import AppsIndexPage from "@/pages/apps";
 import InstallPage from "@/pages/install";
 import KnowledgeIndexPage from "@/pages/knowledge";
+import KnowledgeLayout from "@/pages/knowledge/_layouts";
+import KnowledgeDetailPage from "@/pages/knowledge/detail";
+import JoinedKnowledgeIndexPage from "@/pages/knowledge/joined";
+import MyKnowledgeIndexPage from "@/pages/knowledge/my";
 import WorkflowIndexPage from "@/pages/workflow";
 import WorkflowDetailPage from "@/pages/workflow/detail";
 
@@ -60,7 +64,25 @@ export const router = createBrowserRouter([
           },
           {
             path: "/knowledge",
-            element: <KnowledgeIndexPage />,
+            element: <KnowledgeLayout />,
+            children: [
+              {
+                index: true,
+                element: <KnowledgeIndexPage />,
+              },
+              {
+                path: "/knowledge/my",
+                element: <MyKnowledgeIndexPage />,
+              },
+              {
+                path: "/knowledge/:id",
+                element: <KnowledgeDetailPage />,
+              },
+              {
+                path: "/knowledge/joined",
+                element: <JoinedKnowledgeIndexPage />,
+              },
+            ],
           },
           {
             path: "/agents/workspace",
