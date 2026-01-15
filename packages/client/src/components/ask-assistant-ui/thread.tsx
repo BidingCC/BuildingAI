@@ -1,9 +1,5 @@
-import {
-  Conversation as AIConversation,
-  ConversationContent as AIConversationContent,
-  ConversationScrollButton as AIConversationScrollButton,
-} from "@buildingai/ui/components/ai-elements/conversation";
 import type { PromptInputMessage } from "@buildingai/ui/components/ai-elements/prompt-input";
+import { ChatList, ChatListScrollButton } from "@buildingai/ui/components/chat-list";
 import { Button } from "@buildingai/ui/components/ui/button";
 import { SidebarTrigger } from "@buildingai/ui/components/ui/sidebar";
 import { cn } from "@buildingai/ui/lib/utils";
@@ -118,7 +114,7 @@ const MessageList = memo(function MessageList() {
     <>
       {displayMessages.map((displayMsg) => (
         <MessageItem
-          key={displayMsg.stableKey}
+          key={displayMsg.id}
           displayMessage={displayMsg}
           isStreaming={streamingMessageId === displayMsg.id}
           error={error && displayMsg.id === lastAssistantId ? error.message : undefined}
@@ -154,8 +150,8 @@ const InputArea = memo(function InputArea({ hasMessages }: { hasMessages: boolea
   );
 
   return (
-    <div className="sticky bottom-0 z-10">
-      <AIConversationScrollButton className="-top-12 z-20" />
+    <div className="sticky bottom-13 z-10">
+      <ChatListScrollButton className="-top-12 z-20" />
       <div className="bg-background mx-auto w-full max-w-3xl rounded-t-lg">
         {!hasMessages && suggestions.length > 0 && !isLoading && (
           <Suggestions suggestions={suggestions} onSuggestionClick={handleSuggestionClick} />
@@ -177,8 +173,16 @@ const InputArea = memo(function InputArea({ hasMessages }: { hasMessages: boolea
 });
 
 export const Thread = memo(function Thread({ title, onShare, welcomeMessage }: ThreadProps) {
-  const { displayMessages, models, selectedModelId, isLoading, onSelectModel } =
-    useAssistantContext();
+  const {
+    displayMessages,
+    models,
+    selectedModelId,
+    isLoading,
+    onSelectModel,
+    isLoadingMoreMessages,
+    hasMoreMessages,
+    onLoadMoreMessages,
+  } = useAssistantContext();
   const { id } = useParams<{ id: string }>();
 
   const [smooth, setSmooth] = useState(false);
@@ -217,21 +221,25 @@ export const Thread = memo(function Thread({ title, onShare, welcomeMessage }: T
         onShare={onShare}
       />
 
-      <AIConversation
+      <ChatList
         className={cn(
           "chat-scroll will-change-opacity flex-1",
           "contain-[layout_style_paint]",
           "transition-opacity duration-200 ease-out",
           smooth ? "opacity-100" : "opacity-0",
         )}
+        prependKey={displayMessages[0]?.id ?? null}
+        hasMore={hasMoreMessages}
+        isLoadingMore={isLoadingMoreMessages}
+        onLoadMore={id ? onLoadMoreMessages : undefined}
+        debug={import.meta.env.DEV}
+        hideScrollToBottomButton
       >
-        <AIConversationContent className="flex min-h-full flex-col gap-4 pb-0">
-          <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 pb-10">
-            {renderContent()}
-          </div>
-          <InputArea hasMessages={hasMessages} />
-        </AIConversationContent>
-      </AIConversation>
+        <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 pb-10">
+          {renderContent()}
+        </div>
+        <InputArea hasMessages={hasMessages} />
+      </ChatList>
     </div>
   );
 });

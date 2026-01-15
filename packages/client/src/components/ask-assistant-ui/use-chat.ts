@@ -1,10 +1,10 @@
 import { useChat } from "@ai-sdk/react";
-import { useConversationMessagesQuery } from "@buildingai/services/web";
+import { getConversationMessages, useConversationMessagesQuery } from "@buildingai/services/web";
 import { useAuthStore } from "@buildingai/stores";
 import { useQueryClient } from "@tanstack/react-query";
 import type { ChatStatus, UIMessage } from "ai";
 import { DefaultChatTransport } from "ai";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 const getApiBaseUrl = () => {
@@ -23,10 +23,13 @@ export interface UseChatReturn {
   currentThreadId?: string;
   messages: UIMessage[];
   isLoadingMessages: boolean;
+  isLoadingMoreMessages: boolean;
+  hasMoreMessages: boolean;
+  loadMoreMessages: () => void;
   status: ChatStatus;
   streamingMessageId: string | null;
   error: Error | null;
-  setMessages: (messages: UIMessage[]) => void;
+  setMessages: (messages: UIMessage[] | ((prev: UIMessage[]) => UIMessage[])) => void;
   regenerate: (messageId: string) => void;
   send: (content: string, parentId?: string | null) => void;
   stop: () => void;
@@ -43,10 +46,16 @@ export function useChatStream(options: UseChatOptions): UseChatReturn {
   const lastMessageDbIdRef = useRef<string | null>(null);
   const pendingParentIdRef = useRef<string | null>(null);
 
+  const pageSize = 20;
   const { data: messagesData, isLoading: isLoadingMessages } = useConversationMessagesQuery(
-    { conversationId: currentThreadId || "", page: 1, pageSize: 100 },
+    { conversationId: currentThreadId || "", page: 1, pageSize },
     { enabled: !!currentThreadId, refetchOnWindowFocus: false },
   );
+
+  const [isLoadingMoreMessages, setIsLoadingMoreMessages] = useState(false);
+  const [hasMoreMessages, setHasMoreMessages] = useState(false);
+  const nextPageRef = useRef(2);
+  const loadMoreLockRef = useRef(false);
 
   const {
     messages,
@@ -125,10 +134,31 @@ export function useChatStream(options: UseChatOptions): UseChatReturn {
     onError: () => console.error("Error streaming chat"),
   });
 
+  const mergeAndSortMessages = useCallback((base: UIMessage[], incoming: UIMessage[]) => {
+    const map = new Map<string, UIMessage>();
+    for (const m of base) map.set(m.id, m);
+    for (const m of incoming) {
+      if (!map.has(m.id)) map.set(m.id, m);
+    }
+    const arr = Array.from(map.values());
+    arr.sort((a, b) => {
+      const sa = (a.metadata as { sequence?: number } | undefined)?.sequence;
+      const sb = (b.metadata as { sequence?: number } | undefined)?.sequence;
+      const na = typeof sa === "number" ? sa : Number.POSITIVE_INFINITY;
+      const nb = typeof sb === "number" ? sb : Number.POSITIVE_INFINITY;
+      return na - nb;
+    });
+    return arr;
+  }, []);
+
   useEffect(() => {
     pendingParentIdRef.current = null;
     lastMessageDbIdRef.current = null;
     conversationIdRef.current = currentThreadId || undefined;
+    setHasMoreMessages(false);
+    nextPageRef.current = 2;
+    loadMoreLockRef.current = false;
+    setIsLoadingMoreMessages(false);
     if (!currentThreadId && !messagesData?.items.length) {
       setMessages([]);
     }
@@ -138,24 +168,79 @@ export function useChatStream(options: UseChatOptions): UseChatReturn {
     if (!currentThreadId) return;
 
     if (messagesData?.items.length) {
-      const sortedMessages = messagesData.items
+      setHasMoreMessages(messagesData.page < messagesData.totalPages);
+      nextPageRef.current = Math.max(2, messagesData.page + 1);
+
+      const pageMessages = messagesData.items
         .sort((a, b) => a.sequence - b.sequence)
         .map((item) => ({
           ...item.message,
           id: item.id,
           metadata: {
             ...(item.message.metadata || {}),
+            sequence: item.sequence,
             ...(item.parentId && { parentId: item.parentId }),
             ...(item.createdAt && { createdAt: item.createdAt }),
           },
         })) as UIMessage[];
-      setMessages(sortedMessages);
 
-      if (sortedMessages.length > 0) {
-        lastMessageDbIdRef.current = sortedMessages[sortedMessages.length - 1].id;
-      }
+      // If the user already has local (streaming) messages, keep them and merge DB messages in.
+      setMessages((prev) => {
+        const merged = mergeAndSortMessages(prev, pageMessages);
+        if (merged.length > 0) {
+          lastMessageDbIdRef.current = merged[merged.length - 1].id;
+        }
+        return merged;
+      });
     }
-  }, [currentThreadId, messagesData, setMessages]);
+  }, [currentThreadId, messagesData, mergeAndSortMessages, setMessages]);
+
+  const loadMoreMessages = useCallback(() => {
+    const conversationId = currentThreadId;
+    if (!conversationId) return;
+    if (!hasMoreMessages) return;
+    if (isLoadingMoreMessages) return;
+    if (loadMoreLockRef.current) return;
+
+    loadMoreLockRef.current = true;
+    setIsLoadingMoreMessages(true);
+
+    const page = nextPageRef.current;
+    void getConversationMessages({ conversationId, page, pageSize })
+      .then((res) => {
+        setHasMoreMessages(res.page < res.totalPages);
+        nextPageRef.current = res.page + 1;
+
+        const incoming = res.items
+          .sort((a, b) => a.sequence - b.sequence)
+          .map((item) => ({
+            ...item.message,
+            id: item.id,
+            metadata: {
+              ...(item.message.metadata || {}),
+              sequence: item.sequence,
+              ...(item.parentId && { parentId: item.parentId }),
+              ...(item.createdAt && { createdAt: item.createdAt }),
+            },
+          })) as UIMessage[];
+
+        setMessages((prev) => mergeAndSortMessages(prev, incoming));
+      })
+      .catch(() => {
+        // Keep silent here; UI can choose to show toast if needed.
+      })
+      .finally(() => {
+        setIsLoadingMoreMessages(false);
+        loadMoreLockRef.current = false;
+      });
+  }, [
+    currentThreadId,
+    hasMoreMessages,
+    isLoadingMoreMessages,
+    mergeAndSortMessages,
+    pageSize,
+    setMessages,
+  ]);
 
   const handleRegenerate = useCallback(
     (messageId: string) => {
@@ -186,6 +271,9 @@ export function useChatStream(options: UseChatOptions): UseChatReturn {
     currentThreadId,
     messages,
     isLoadingMessages,
+    isLoadingMoreMessages,
+    hasMoreMessages,
+    loadMoreMessages,
     status,
     streamingMessageId,
     error: error || null,

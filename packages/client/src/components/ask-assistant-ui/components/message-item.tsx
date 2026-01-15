@@ -32,28 +32,25 @@ export const MessageItem = memo(
     const { id, message, branchNumber, branchCount, branches } = displayMessage;
 
     return (
-      <div className="flex flex-col gap-4">
-        <Message
-          message={message}
-          liked={liked}
-          disliked={disliked}
-          isStreaming={isStreaming}
-          branchNumber={branchNumber}
-          branchCount={branchCount}
-          branches={branches}
-          error={error}
-          onLikeChange={(v) => onLike(id, v)}
-          onDislikeChange={(v) => onDislike(id, v)}
-          onRetry={() => onRegenerate(id)}
-          onSwitchBranch={onSwitchBranch}
-          addToolApprovalResponse={addToolApprovalResponse}
-        />
-      </div>
+      <Message
+        message={message}
+        liked={liked}
+        disliked={disliked}
+        isStreaming={isStreaming}
+        branchNumber={branchNumber}
+        branchCount={branchCount}
+        branches={branches}
+        error={error}
+        onLikeChange={(v) => onLike(id, v)}
+        onDislikeChange={(v) => onDislike(id, v)}
+        onRetry={() => onRegenerate(id)}
+        onSwitchBranch={onSwitchBranch}
+        addToolApprovalResponse={addToolApprovalResponse}
+      />
     );
   },
   (prev, next) => {
     if (prev.displayMessage.id !== next.displayMessage.id) return false;
-    if (prev.displayMessage.stableKey !== next.displayMessage.stableKey) return false;
 
     const prevMsg = prev.displayMessage.message;
     const nextMsg = next.displayMessage.message;

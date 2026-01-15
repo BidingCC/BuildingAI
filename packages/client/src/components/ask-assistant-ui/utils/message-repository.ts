@@ -1,5 +1,7 @@
 import type { UIMessage } from "ai";
 
+import type { DisplayMessage } from "../types";
+
 /**
  * 消息记录类型（从API或流式获取）
  */
@@ -9,30 +11,6 @@ export interface RawMessageRecord {
   sequence: number;
   message: UIMessage;
   createdAt?: string;
-}
-
-/**
- * 展示用的消息，包含分支信息
- */
-export interface DisplayMessage {
-  /** React 渲染用稳定 Key（同一位置切换版本时保持不变，避免卸载重挂导致跳闪） */
-  stableKey: string;
-  /** 消息ID */
-  id: string;
-  /** 消息数据 */
-  message: UIMessage;
-  /** 父消息ID */
-  parentId: string | null;
-  /** 消息序号 */
-  sequence: number;
-  /** 当前分支编号（从1开始） */
-  branchNumber: number;
-  /** 总分支数 */
-  branchCount: number;
-  /** 所有分支消息ID列表 */
-  branches: string[];
-  /** 是否是最后一条消息 */
-  isLast: boolean;
 }
 
 /**
@@ -235,9 +213,7 @@ export class MessageRepository {
       const parent = repoMsg?.prev ?? null;
       const parentOrRoot: RepositoryParent = parent ?? this.root;
       const branches = parentOrRoot.children;
-      const stableKey = `${parent?.current.id ?? "ROOT"}::${msg.role}::${repoMsg?.sequence ?? i}`;
       result.push({
-        stableKey,
         id: msg.id,
         message: msg,
         parentId: parent?.current.id ?? null,
