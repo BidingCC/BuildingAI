@@ -18,7 +18,7 @@ createRoot(document.getElementById("root")!).render(
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AlertDialogProvider>
-          <ReactQueryDevtools />
+          <ReactQueryDevtools buttonPosition="top-right" />
           <Toaster position="top-center" />
           <RouterProvider router={router} />
         </AlertDialogProvider>

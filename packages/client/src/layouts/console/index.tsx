@@ -14,8 +14,7 @@ import AgentIndexPage from "@/pages/console/ai/agent";
 import DatasetsIndexPage from "@/pages/console/ai/datasets";
 import AiMcpIndexPage from "@/pages/console/ai/mcp";
 import AiProviderIndexPage from "@/pages/console/ai/provider";
-import SecretConfigIndexPage from "@/pages/console/ai/secret/config";
-import SecretTemplateIndexPage from "@/pages/console/ai/secret/template";
+import AiSecretIndexPage from "@/pages/console/ai/secret";
 import ChannelWechatOaIndexPage from "@/pages/console/channel/wechat-oa";
 import ConversationConfigIndexPage from "@/pages/console/conversation/config";
 import ConversationRecordIndexPage from "@/pages/console/conversation/record";
@@ -85,19 +84,7 @@ function ConsoleRoutes() {
       { path: "/provider", element: <AiProviderIndexPage /> },
       { path: "/mcp", element: <AiMcpIndexPage /> },
       { path: "/extension", element: <ExtensionIndexPage /> },
-      {
-        path: "secret",
-        children: [
-          {
-            path: "template",
-            element: <SecretTemplateIndexPage />,
-          },
-          {
-            path: "config",
-            element: <SecretConfigIndexPage />,
-          },
-        ],
-      },
+      { path: "/secret", element: <AiSecretIndexPage /> },
       {
         path: "decorate",
         children: [
@@ -235,11 +222,15 @@ export default function ConsoleLayout({ children }: { children?: React.ReactNode
   return (
     <SidebarProvider className="bd-console-layout h-dvh">
       <AppSidebar />
-      <SidebarInset className="flex flex-col md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-0">
+      <SidebarInset className="flex h-[calc(100%-1rem)] flex-col md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-0">
         <AppNavbar />
-        <ScrollArea className="flex-1 overflow-y-auto">
-          <div className="m-4 mt-1">{children ? children : <ConsoleRoutes />}</div>
-        </ScrollArea>
+        <div className="flex-1 overflow-hidden">
+          <ScrollArea className="h-full">
+            <div className="m-4 mt-1 flex h-[calc(100vh-6.25rem)] flex-col">
+              {children ? children : <ConsoleRoutes />}
+            </div>
+          </ScrollArea>
+        </div>
       </SidebarInset>
     </SidebarProvider>
   );
