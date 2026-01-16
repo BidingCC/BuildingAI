@@ -13,7 +13,14 @@ import {
 } from "@buildingai/ui/components/ai-elements/model-selector";
 import { PromptInputButton as AIPromptInputButton } from "@buildingai/ui/components/ai-elements/prompt-input";
 import { Badge } from "@buildingai/ui/components/ui/badge";
-import { CheckIcon, ChevronDownIcon, ImageIcon } from "lucide-react";
+import {
+  AudioLinesIcon,
+  CheckIcon,
+  ChevronDownIcon,
+  FileIcon,
+  ImageIcon,
+  VideoIcon,
+} from "lucide-react";
 
 export interface ModelData {
   id: string;
@@ -61,7 +68,7 @@ export const ModelSelector = ({
           {selectedModel?.name && (
             <AIModelSelectorName>
               {selectedModel.name}
-              <Badge variant="outline" className="text-muted-foreground ml-1.5 text-xs">
+              <Badge variant="secondary" className="text-muted-foreground ml-1.5 text-xs">
                 {selectedModel.billingRule?.power
                   ? `${selectedModel.billingRule.power} 积分`
                   : "免费"}
@@ -88,15 +95,15 @@ export const ModelSelector = ({
                     <AIModelSelectorLogo provider={m.chefSlug} />
                     <AIModelSelectorName>
                       {m.name}
-                      <Badge variant="outline" className="text-muted-foreground ml-1.5 text-xs">
+                      <Badge variant="secondary" className="text-muted-foreground ml-1.5 text-xs">
                         {m.billingRule?.power ? `${m.billingRule.power} 积分` : "免费"}
                       </Badge>
                     </AIModelSelectorName>
-                    <AIModelSelectorLogoGroup>
+                    {/* <AIModelSelectorLogoGroup>
                       {m.providers.map((provider) => (
                         <AIModelSelectorLogo key={provider} provider={provider} />
                       ))}
-                    </AIModelSelectorLogoGroup>
+                    </AIModelSelectorLogoGroup> */}
                     <div className="ml-auto flex items-center gap-1.5">
                       {m.features?.includes("vision") && (
                         <ImageIcon
@@ -104,6 +111,22 @@ export const ModelSelector = ({
                           className="text-muted-foreground size-3.5"
                         />
                       )}
+                      {m.features?.includes("video") && (
+                        <VideoIcon
+                          aria-label="支持视频输入"
+                          className="text-muted-foreground size-4"
+                        />
+                      )}
+                      {m.features?.includes("audio") && (
+                        <AudioLinesIcon
+                          aria-label="支持音频输入/输出"
+                          className="text-muted-foreground size-3.5"
+                        />
+                      )}
+                      <FileIcon
+                        aria-label="支持文件处理"
+                        className="text-muted-foreground size-3.5"
+                      />
                       {selectedModelId === m.id ? (
                         <CheckIcon className="size-4" />
                       ) : (
