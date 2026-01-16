@@ -168,7 +168,9 @@ export class MessageRepository {
     if (operation !== "cut") {
       for (let current: RepositoryMessage | null = newParent; current; current = current.prev) {
         if (current.current.id === child.current.id) {
-          throw new Error("MessageRepository: Detected duplicate message ID (circular/duplicate reference)");
+          throw new Error(
+            "MessageRepository: Detected duplicate message ID (circular/duplicate reference)",
+          );
         }
       }
 
@@ -425,9 +427,9 @@ export class MessageRepository {
     }
 
     if (setNewAsActive) {
-        const lastId = sortedRecords.at(-1)?.id;
-        if (lastId) {
-          const leaf = this.messages.get(lastId);
+      const lastId = sortedRecords.at(-1)?.id;
+      if (lastId) {
+        const leaf = this.messages.get(lastId);
         if (leaf) {
           for (let current: RepositoryMessage | null = leaf; current; current = current.prev) {
             const parent = current.prev ?? null;

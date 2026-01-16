@@ -182,6 +182,7 @@ export const Chat = memo(function Chat({ title, onShare, welcomeMessage }: ChatP
     models,
     selectedModelId,
     isLoading,
+    status: chatStatus,
     onSelectModel,
     isLoadingMoreMessages,
     hasMoreMessages,
@@ -231,9 +232,10 @@ export const Chat = memo(function Chat({ title, onShare, welcomeMessage }: ChatP
         hasMore={hasMoreMessages}
         isLoadingMore={isLoadingMoreMessages}
         onLoadMore={id ? onLoadMoreMessages : undefined}
-        debug={import.meta.env.DEV}
         hideScrollToBottomButton
         forceFullHeight={!id && !hasMessages}
+        initial={chatStatus === "streaming" ? "smooth" : "instant"}
+        resize={chatStatus === "streaming" ? "smooth" : "instant"}
       >
         <div
           className={cn(

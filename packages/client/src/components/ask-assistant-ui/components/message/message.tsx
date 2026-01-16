@@ -128,7 +128,9 @@ export const Message = memo(function Message({
           {showStreamingIndicator ? (
             <StreamingIndicator />
           ) : isAssistant ? (
-            <AIMessageResponse>{smoothContent}</AIMessageResponse>
+            <AIMessageResponse isAnimating={isStreaming && message.role === "assistant"}>
+              {smoothContent}
+            </AIMessageResponse>
           ) : (
             content
           )}
