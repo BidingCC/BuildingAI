@@ -61,12 +61,28 @@ export function convertUIMessageToMessage(uiMsg: UIMessage): Message {
         });
         break;
 
-      case "reasoning":
-        reasoning = {
-          content: part.text,
-          duration: (part.providerMetadata as { duration?: number } | undefined)?.duration ?? 0,
-        };
+      case "reasoning": {
+        const reasoningPart = part as ReasoningUIPart;
+        const existingContent = reasoning?.content || "";
+        const newContent = reasoningPart.text || "";
+        if (!reasoning) {
+          reasoning = {
+            content: newContent,
+            duration:
+              (reasoningPart.providerMetadata as { duration?: number } | undefined)?.duration ?? 0,
+          };
+        } else {
+          reasoning.content = existingContent + newContent;
+          if (reasoningPart.providerMetadata) {
+            const duration = (reasoningPart.providerMetadata as { duration?: number } | undefined)
+              ?.duration;
+            if (duration !== undefined) {
+              reasoning.duration = duration;
+            }
+          }
+        }
         break;
+      }
 
       case "source-url":
         sources.push({

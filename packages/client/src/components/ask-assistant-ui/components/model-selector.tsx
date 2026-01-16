@@ -12,7 +12,8 @@ import {
   ModelSelectorTrigger as AIModelSelectorTrigger,
 } from "@buildingai/ui/components/ai-elements/model-selector";
 import { PromptInputButton as AIPromptInputButton } from "@buildingai/ui/components/ai-elements/prompt-input";
-import { CheckIcon, ChevronDownIcon } from "lucide-react";
+import { Badge } from "@buildingai/ui/components/ui/badge";
+import { CheckIcon, ChevronDownIcon, CoinsIcon, ImageIcon, SparklesIcon } from "lucide-react";
 
 export interface ModelData {
   id: string;
@@ -20,6 +21,11 @@ export interface ModelData {
   chef: string;
   chefSlug: string;
   providers: string[];
+  features?: string[];
+  billingRule?: {
+    power: number;
+    tokens: number;
+  };
 }
 
 export interface ModelSelectorProps {
@@ -52,7 +58,16 @@ export const ModelSelector = ({
           {selectedModel?.chefSlug && (
             <AIModelSelectorLogo className="size-5" provider={selectedModel.chefSlug} />
           )}
-          {selectedModel?.name && <AIModelSelectorName>{selectedModel.name}</AIModelSelectorName>}
+          {selectedModel?.name && (
+            <AIModelSelectorName>
+              {selectedModel.name}
+              <Badge variant="outline" className="text-muted-foreground ml-1.5 text-xs">
+                {selectedModel.billingRule?.power
+                  ? `${selectedModel.billingRule.power} 积分`
+                  : "免费"}
+              </Badge>
+            </AIModelSelectorName>
+          )}
           <ChevronDownIcon className="text-muted-foreground size-4" />
         </AIPromptInputButton>
       </AIModelSelectorTrigger>
@@ -71,17 +86,30 @@ export const ModelSelector = ({
                     value={m.id}
                   >
                     <AIModelSelectorLogo provider={m.chefSlug} />
-                    <AIModelSelectorName>{m.name}</AIModelSelectorName>
+                    <AIModelSelectorName>
+                      {m.name}
+                      <Badge variant="outline" className="text-muted-foreground ml-1.5 text-xs">
+                        {m.billingRule?.power ? `${m.billingRule.power} 积分` : "免费"}
+                      </Badge>
+                    </AIModelSelectorName>
                     <AIModelSelectorLogoGroup>
                       {m.providers.map((provider) => (
                         <AIModelSelectorLogo key={provider} provider={provider} />
                       ))}
                     </AIModelSelectorLogoGroup>
-                    {selectedModelId === m.id ? (
-                      <CheckIcon className="ml-auto size-4" />
-                    ) : (
-                      <div className="ml-auto size-4" />
-                    )}
+                    <div className="ml-auto flex items-center gap-1.5">
+                      {m.features?.includes("vision") && (
+                        <ImageIcon
+                          aria-label="支持多模态（图像）"
+                          className="text-muted-foreground size-3.5"
+                        />
+                      )}
+                      {selectedModelId === m.id ? (
+                        <CheckIcon className="size-4" />
+                      ) : (
+                        <div className="size-4" />
+                      )}
+                    </div>
                   </AIModelSelectorItem>
                 ))}
             </AIModelSelectorGroup>
