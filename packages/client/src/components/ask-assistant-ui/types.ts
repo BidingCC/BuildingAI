@@ -118,7 +118,10 @@ export interface AssistantContextValue {
 
   textareaRef: RefObject<HTMLTextAreaElement | null>;
 
-  onSend: (content: string) => void;
+  onSend: (
+    content: string,
+    files?: Array<{ type: "file"; url: string; mediaType?: string; filename?: string }>,
+  ) => void;
   /** Load more historical messages */
   onLoadMoreMessages: () => void;
   onStop: () => void;

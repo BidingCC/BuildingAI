@@ -1,7 +1,7 @@
 import { useChat } from "@ai-sdk/react";
 import { useAuthStore } from "@buildingai/stores";
 import { useQueryClient } from "@tanstack/react-query";
-import type { ChatStatus, UIMessage } from "ai";
+import type { ChatStatus, FileUIPart, UIMessage } from "ai";
 import { DefaultChatTransport } from "ai";
 import { useCallback, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -184,10 +184,29 @@ export function useChatStream(options: UseChatStreamOptions): UseChatStreamRetur
   );
 
   const send = useCallback(
-    (content: string, parentId?: string | null) => {
-      if (!content.trim() || status === "streaming") return;
+    (
+      content: string,
+      parentId?: string | null,
+      files?: Array<{ type: "file"; url: string; mediaType?: string; filename?: string }>,
+    ) => {
+      if (status === "streaming") return;
+      if (!content.trim() && (!files || files.length === 0)) return;
       pendingParentIdRef.current = parentId !== undefined ? parentId : lastMessageDbIdRef.current;
-      sendMessage({ text: content.trim() });
+
+      const fileParts: FileUIPart[] | undefined =
+        files && files.length > 0
+          ? files.map((file) => ({
+              type: "file" as const,
+              url: file.url,
+              mediaType: file.mediaType || "application/octet-stream",
+              ...(file.filename && { filename: file.filename }),
+            }))
+          : undefined;
+
+      sendMessage({
+        text: content.trim() || "",
+        ...(fileParts && { files: fileParts }),
+      });
     },
     [sendMessage, status, lastMessageDbIdRef],
   );

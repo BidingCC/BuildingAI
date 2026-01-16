@@ -1,6 +1,5 @@
 import {
   PromptInput as AIPromptInput,
-  PromptInputActionAddAttachments as AIPromptInputActionAddAttachments,
   PromptInputActionMenu as AIPromptInputActionMenu,
   PromptInputActionMenuContent as AIPromptInputActionMenuContent,
   PromptInputActionMenuTrigger as AIPromptInputActionMenuTrigger,
@@ -17,9 +16,13 @@ import {
   PromptInputTools as AIPromptInputTools,
 } from "@buildingai/ui/components/ai-elements/prompt-input";
 import { Button } from "@buildingai/ui/components/ui/button";
-import { GlobeIcon, Square } from "lucide-react";
+import { DropdownMenuItem } from "@buildingai/ui/components/ui/dropdown-menu";
+import { FileIcon, GlobeIcon, ImageIcon, MicIcon, Square, VideoIcon } from "lucide-react";
 import type { FormEvent, RefObject } from "react";
-import { memo } from "react";
+import { memo, useCallback, useMemo } from "react";
+
+import { type FileType, useFileUpload } from "../../hooks/use-file-upload";
+import { useAssistantContext } from "../../context";
 
 export interface PromptInputProps {
   textareaRef?: RefObject<HTMLTextAreaElement | null>;
@@ -50,46 +53,108 @@ const StopButton = memo(({ onStop }: { onStop: () => void }) => {
 
 StopButton.displayName = "StopButton";
 
-export const PromptInput = memo(
-  ({ textareaRef, status = "ready", onSubmit, onStop, globalDrop, multiple }: PromptInputProps) => {
-    const handleSubmit = (message: PromptInputMessage, event: FormEvent<HTMLFormElement>) => {
-      onSubmit?.(message, event);
-    };
+const FILE_MENU_ITEMS = [
+  { type: "image" as const, icon: ImageIcon, label: "添加图片" },
+  { type: "video" as const, icon: VideoIcon, label: "添加视频" },
+  { type: "audio" as const, icon: MicIcon, label: "添加音频" },
+  { type: "file" as const, icon: FileIcon, label: "添加文件" },
+] as const;
+
+const FileSelectMenu = memo(
+  ({
+    onFileSelect,
+    availableTypes,
+  }: {
+    onFileSelect: (type: FileType) => void;
+    availableTypes: FileType[];
+  }) => (
+    <AIPromptInputActionMenuContent>
+      {FILE_MENU_ITEMS.filter((item) => availableTypes.includes(item.type)).map(
+        ({ type, icon: Icon, label }) => (
+          <DropdownMenuItem key={type} onSelect={() => onFileSelect(type)}>
+            <Icon className="mr-2 size-4" />
+            {label}
+          </DropdownMenuItem>
+        ),
+      )}
+    </AIPromptInputActionMenuContent>
+  ),
+);
+
+FileSelectMenu.displayName = "FileSelectMenu";
+
+const PromptInputInner = memo(
+  ({ textareaRef, status, onStop, globalDrop, multiple, onSubmit }: PromptInputProps) => {
+    const { models, selectedModelId } = useAssistantContext();
+    const selectedModel = useMemo(
+      () => models.find((m) => m.id === selectedModelId),
+      [models, selectedModelId],
+    );
+
+    const { handleFileSelect, uploadFilesIfNeeded, availableFileTypes } = useFileUpload(
+      multiple,
+      selectedModel?.features,
+    );
+
+    const handleSubmit = useCallback(
+      async (message: PromptInputMessage, event: FormEvent<HTMLFormElement>) => {
+        if (message.files?.length) {
+          message.files = await uploadFilesIfNeeded(message.files);
+        }
+        onSubmit?.(message, event);
+      },
+      [onSubmit, uploadFilesIfNeeded],
+    );
 
     return (
-      <AIPromptInputProvider>
-        <AIPromptInput globalDrop={globalDrop} multiple={multiple} onSubmit={handleSubmit}>
-          <AIPromptInputAttachments>
-            {(attachment) => <AIPromptInputAttachment data={attachment} />}
-          </AIPromptInputAttachments>
-          <AIPromptInputBody>
-            <AIPromptInputTextarea ref={textareaRef} />
-          </AIPromptInputBody>
-          <AIPromptInputFooter>
-            <AIPromptInputTools>
-              <AIPromptInputActionMenu>
-                <AIPromptInputActionMenuTrigger />
-                <AIPromptInputActionMenuContent>
-                  <AIPromptInputActionAddAttachments label="Add files" />
-                </AIPromptInputActionMenuContent>
-              </AIPromptInputActionMenu>
-              <AIPromptInputSpeechButton textareaRef={textareaRef} />
-              <AIPromptInputButton>
-                <GlobeIcon size={16} />
-                <span>Search</span>
-              </AIPromptInputButton>
-            </AIPromptInputTools>
-            {status === "submitted" || status === "streaming" ? (
-              onStop ? (
-                <StopButton onStop={onStop} />
-              ) : (
-                <AIPromptInputSubmit status={status} />
-              )
+      <AIPromptInput globalDrop={globalDrop} multiple={multiple} onSubmit={handleSubmit}>
+        <AIPromptInputAttachments>
+          {(attachment) => <AIPromptInputAttachment data={attachment} />}
+        </AIPromptInputAttachments>
+        <AIPromptInputBody>
+          <AIPromptInputTextarea ref={textareaRef} />
+        </AIPromptInputBody>
+        <AIPromptInputFooter>
+          <AIPromptInputTools>
+            <AIPromptInputActionMenu>
+              <AIPromptInputActionMenuTrigger />
+              <FileSelectMenu onFileSelect={handleFileSelect} availableTypes={availableFileTypes} />
+            </AIPromptInputActionMenu>
+            <AIPromptInputSpeechButton textareaRef={textareaRef} />
+            <AIPromptInputButton>
+              <GlobeIcon size={16} />
+              <span>Search</span>
+            </AIPromptInputButton>
+          </AIPromptInputTools>
+          {status === "submitted" || status === "streaming" ? (
+            onStop ? (
+              <StopButton onStop={onStop} />
             ) : (
               <AIPromptInputSubmit status={status} />
-            )}
-          </AIPromptInputFooter>
-        </AIPromptInput>
+            )
+          ) : (
+            <AIPromptInputSubmit status={status} />
+          )}
+        </AIPromptInputFooter>
+      </AIPromptInput>
+    );
+  },
+);
+
+PromptInputInner.displayName = "PromptInputInner";
+
+export const PromptInput = memo(
+  ({ textareaRef, status = "ready", onSubmit, onStop, globalDrop, multiple }: PromptInputProps) => {
+    return (
+      <AIPromptInputProvider>
+        <PromptInputInner
+          textareaRef={textareaRef}
+          status={status}
+          onSubmit={onSubmit}
+          onStop={onStop}
+          globalDrop={globalDrop}
+          multiple={multiple}
+        />
       </AIPromptInputProvider>
     );
   },

@@ -13,7 +13,7 @@ import {
 } from "@buildingai/ui/components/ai-elements/model-selector";
 import { PromptInputButton as AIPromptInputButton } from "@buildingai/ui/components/ai-elements/prompt-input";
 import { Badge } from "@buildingai/ui/components/ui/badge";
-import { CheckIcon, ChevronDownIcon, CoinsIcon, ImageIcon, SparklesIcon } from "lucide-react";
+import { CheckIcon, ChevronDownIcon, ImageIcon } from "lucide-react";
 
 export interface ModelData {
   id: string;

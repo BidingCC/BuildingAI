@@ -1,12 +1,4 @@
-import type {
-  FileUIPart,
-  ReasoningUIPart,
-  SourceUrlUIPart,
-  TextUIPart,
-  ToolUIPart,
-  UIMessage,
-  UIMessagePart,
-} from "ai";
+import type { ReasoningUIPart, ToolUIPart, UIMessage } from "ai";
 
 import type { Message, MessageToolCall } from "../types";
 
@@ -102,15 +94,19 @@ export function convertUIMessageToMessage(uiMsg: UIMessage): Message {
             errorText?: string;
           };
 
+          const result =
+            toolPart.state === "output-available" &&
+            toolPart.output !== undefined &&
+            toolPart.output !== null
+              ? String(toolPart.output)
+              : undefined;
+
           tools.push({
             name: toolName,
             description: toolDescriptionsMap.get(toolName) ?? "",
             status: toolPart.state,
             parameters: toolPart.input,
-            result:
-              toolPart.state === "output-available" && toolPart.output !== undefined
-                ? toolPart.output
-                : undefined,
+            result,
             error:
               toolPart.state === "output-error" && toolPart.errorText
                 ? toolPart.errorText

@@ -136,7 +136,9 @@ const InputArea = memo(function InputArea({ hasMessages }: { hasMessages: boolea
   const handleSubmit = useCallback(
     (message: PromptInputMessage, _event: FormEvent<HTMLFormElement>) => {
       const text = message.text?.trim();
-      if (text) onSend(text);
+      if (text || (message.files && message.files.length > 0)) {
+        onSend(text || "", message.files);
+      }
     },
     [onSend],
   );

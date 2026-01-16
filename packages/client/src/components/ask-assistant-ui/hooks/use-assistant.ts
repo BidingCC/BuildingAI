@@ -195,10 +195,13 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
   }, [currentThreadId, clearRepository]);
 
   const onSend = useCallback(
-    (content: string) => {
+    (
+      content: string,
+      files?: Array<{ type: "file"; url: string; mediaType?: string; filename?: string }>,
+    ) => {
       const lastMessage = repositoryMessages[repositoryMessages.length - 1];
       const parentId = lastMessage?.id ?? null;
-      queueMicrotask(() => send(content, parentId));
+      queueMicrotask(() => send(content, parentId, files));
     },
     [repositoryMessages, send],
   );

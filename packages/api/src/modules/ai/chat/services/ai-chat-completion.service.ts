@@ -109,6 +109,11 @@ export class ChatCompletionService {
                         messages,
                         tools: { getWeather },
                         abortSignal: params.abortSignal,
+                        // experimental_download: async (requested) => {
+                        //     return requested.map((req) => {
+                        //         return undefined;
+                        //     });
+                        // },
                     });
 
                     result.consumeStream();
