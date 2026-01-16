@@ -30,7 +30,6 @@ export type CheckpointTriggerProps = ComponentProps<typeof Button> & {
 
 export const CheckpointTrigger = ({
   children,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   className,
   variant = "ghost",
   size = "sm",

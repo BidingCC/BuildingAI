@@ -1,17 +1,16 @@
 "use client";
 
+import { useControllableState } from "@radix-ui/react-use-controllable-state";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@buildingai/ui/components/ui/collapsible";
 import { cn } from "@buildingai/ui/lib/utils";
-import { useControllableState } from "@radix-ui/react-use-controllable-state";
 import { BrainIcon, ChevronDownIcon } from "lucide-react";
 import type { ComponentProps, ReactNode } from "react";
 import { createContext, memo, useContext, useEffect, useState } from "react";
 import { Streamdown } from "streamdown";
-
 import { Shimmer } from "./shimmer";
 
 type ReasoningContextValue = {

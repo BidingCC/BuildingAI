@@ -19,7 +19,6 @@ import { cn } from "@buildingai/ui/lib/utils";
 import { ChevronsUpDownIcon } from "lucide-react";
 import type { ComponentProps } from "react";
 import { createContext, useContext } from "react";
-
 import { Shimmer } from "./shimmer";
 
 type PlanContextValue = {

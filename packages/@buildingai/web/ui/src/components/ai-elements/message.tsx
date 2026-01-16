@@ -188,9 +188,7 @@ export type MessageBranchSelectorProps = HTMLAttributes<HTMLDivElement> & {
 };
 
 export const MessageBranchSelector = ({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   className,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   from,
   ...props
 }: MessageBranchSelectorProps) => {
@@ -232,7 +230,6 @@ export const MessageBranchPrevious = ({ children, ...props }: MessageBranchPrevi
 
 export type MessageBranchNextProps = ComponentProps<typeof Button>;
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const MessageBranchNext = ({ children, className, ...props }: MessageBranchNextProps) => {
   const { goToNext, totalBranches } = useMessageBranch();
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useControllableState } from "@radix-ui/react-use-controllable-state";
 import { Badge } from "@buildingai/ui/components/ui/badge";
 import {
   Collapsible,
@@ -7,7 +8,6 @@ import {
   CollapsibleTrigger,
 } from "@buildingai/ui/components/ui/collapsible";
 import { cn } from "@buildingai/ui/lib/utils";
-import { useControllableState } from "@radix-ui/react-use-controllable-state";
 import { BrainIcon, ChevronDownIcon, DotIcon, type LucideIcon } from "lucide-react";
 import type { ComponentProps, ReactNode } from "react";
 import { createContext, memo, useContext, useMemo } from "react";
