@@ -50,7 +50,7 @@ const AgentsIndexPage = () => {
           </div>
         </div>
 
-        <Carousel className="mt-8 w-full rounded-2xl bg-blue-500 sm:rounded-4xl">
+        <Carousel className="bg-primary mt-8 w-full rounded-2xl sm:rounded-4xl">
           <CarouselContent>
             {Array.from({ length: 5 }).map((_, index) => (
               <CarouselItem key={index}>
