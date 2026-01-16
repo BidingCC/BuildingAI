@@ -31,15 +31,15 @@ catalogs:
     '@nestjs/testing': ^11.1.8
     '@nestjs/typeorm': ^11.0.0
     '@types/express': ^5.0.5
+    adm-zip: ^0.5.16
     bullmq: ^5.63.0
     class-transformer: ^0.5.1
     class-validator: ^0.14.2
     cron: 4.3.5
     express: ^5.1.0
+    pg: ^8.16.3
     typeorm: 0.3.27
     typeorm-naming-strategies: ^4.1.0
-    adm-zip: ^0.5.16
-    pg: ^8.16.3
   dev:
     '@tsconfig/node22': ^22.0.2
     '@types/node': ^24.10.0
@@ -55,7 +55,6 @@ catalogs:
     vue-eslint-parser: ^10.2.0
     vue-tsc: ^2.2.12
   web:
-    '@types/react': ^19.2.7
     '@internationalized/date': ^3.10.0
     '@shikijs/langs': ^3.13.0
     '@shikijs/markdown-it': ^3.12.2
@@ -70,17 +69,18 @@ catalogs:
     '@tiptap/extension-underline': ^2.27.1
     '@tiptap/starter-kit': ^2.27.1
     '@tiptap/vue-3': ^2.27.1
+    '@types/react': ^19.2.8
     '@vueuse/core': ^13.9.0
     '@vueuse/motion': ^3.0.3
-    react: ^19.2.3
-    react-dom: ^19.2.0
-    recharts: 2.15.4
     clsx: ^2.1.1
     echarts: ^5.6.0
     mermaid: ^11.12.1
     motion-v: ^1.7.4
     panzoom: ^9.4.3
     pinia: ^3.0.4
+    react: ^19.2.3
+    react-dom: ^19.2.3
+    recharts: 2.15.4
     reka-ui: ^2.6.0
     sass: 1.78.0
     stream-markdown: ^0.0.8
