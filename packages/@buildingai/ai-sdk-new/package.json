@@ -43,7 +43,6 @@
         "@ai-sdk/provider": "^3.0.1",
         "@ai-sdk/provider-utils": "^4.0.2",
         "ai-sdk-ollama": "^3.0.1",
-        "qwen-ai-provider-v5": "^2.1.0",
         "vercel-minimax-ai-provider": "^0.0.1",
         "@buildingai/constants": "workspace:*",
         "@buildingai/utils": "workspace:*",

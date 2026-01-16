@@ -1,7 +1,10 @@
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import type { EmbeddingModelV3, LanguageModelV3, RerankingModelV3 } from "@ai-sdk/provider";
-import { createQwen, type QwenProvider as AISDKQwenProvider } from "qwen-ai-provider-v5";
 
 import type { AIProvider, BaseProviderSettings } from "../../types";
+import { adaptRerankModelV1ToV3 } from "../../utils/rerank-adapter";
+import { wrapLanguageModel } from "./model-wrapper";
+import { createTongYiRerankModel } from "./rerank-model";
 
 export interface TongYiProviderSettings extends BaseProviderSettings {
     baseURL?: string;
@@ -11,7 +14,7 @@ class TongYiProviderImpl implements AIProvider {
     readonly id = "tongyi";
     readonly name = "通义千问";
 
-    private baseProvider: AISDKQwenProvider;
+    private baseProvider: ReturnType<typeof createOpenAICompatible>;
     private settings: TongYiProviderSettings;
 
     constructor(settings: TongYiProviderSettings = {}) {
@@ -20,15 +23,21 @@ class TongYiProviderImpl implements AIProvider {
             baseURL: settings.baseURL || "https://dashscope.aliyuncs.com/compatible-mode/v1",
         };
 
-        this.baseProvider = createQwen({
-            apiKey: this.settings.apiKey,
-            baseURL: this.settings.baseURL,
-            headers: this.settings.headers,
+        this.baseProvider = createOpenAICompatible({
+            name: "tongyi",
+            baseURL: this.settings.baseURL!,
+            headers: {
+                ...(this.settings.apiKey
+                    ? { Authorization: `Bearer ${this.settings.apiKey}` }
+                    : {}),
+                ...this.settings.headers,
+            },
         });
     }
 
     languageModel(modelId: string): LanguageModelV3 {
-        return this.baseProvider.languageModel(modelId);
+        const baseModel = this.baseProvider.languageModel(modelId);
+        return wrapLanguageModel(baseModel);
     }
 
     embeddingModel(modelId: string): EmbeddingModelV3 {
@@ -36,7 +45,8 @@ class TongYiProviderImpl implements AIProvider {
     }
 
     rerankModel(modelId: string): RerankingModelV3 {
-        return this.baseProvider.rerankingModel(modelId);
+        const v1Model = createTongYiRerankModel(this.settings, modelId);
+        return adaptRerankModelV1ToV3(v1Model);
     }
 }
 
