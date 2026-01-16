@@ -3,7 +3,7 @@ import { useAuthStore } from "@buildingai/stores";
 import { useQueryClient } from "@tanstack/react-query";
 import type { ChatStatus, UIMessage } from "ai";
 import { DefaultChatTransport } from "ai";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 const getApiBaseUrl = () => {
@@ -27,7 +27,6 @@ export interface UseChatStreamReturn {
   messages: UIMessage[];
   status: ChatStatus;
   streamingMessageId: string | null;
-  error: Error | null;
   setMessages: (messages: UIMessage[] | ((prev: UIMessage[]) => UIMessage[])) => void;
   regenerate: (messageId: string) => void;
   send: (content: string, parentId?: string | null) => void;
@@ -50,6 +49,11 @@ export function useChatStream(options: UseChatStreamOptions): UseChatStreamRetur
   const token = useAuthStore((state) => state.auth.token);
   const queryClient = useQueryClient();
 
+  const modelIdRef = useRef(modelId);
+  useEffect(() => {
+    modelIdRef.current = modelId;
+  }, [modelId]);
+
   const {
     messages,
     setMessages: setChatMessages,
@@ -57,7 +61,6 @@ export function useChatStream(options: UseChatStreamOptions): UseChatStreamRetur
     stop,
     status,
     regenerate,
-    error,
     addToolApprovalResponse,
   } = useChat({
     id: "new",
@@ -79,7 +82,11 @@ export function useChatStream(options: UseChatStreamOptions): UseChatStreamRetur
       body: () => {
         const parentId = pendingParentIdRef.current;
         pendingParentIdRef.current = null;
-        return { modelId, conversationId: conversationIdRef.current || undefined, parentId };
+        return {
+          modelId: modelIdRef.current,
+          conversationId: conversationIdRef.current || undefined,
+          parentId,
+        };
       },
       prepareSendMessagesRequest(request) {
         const lastMessage = request.messages.at(-1);
@@ -124,7 +131,28 @@ export function useChatStream(options: UseChatStreamOptions): UseChatStreamRetur
     onFinish: () => {
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
     },
-    onError: () => console.error("Error streaming chat"),
+    onError: (error) => {
+      console.error("Error streaming chat", error);
+      setChatMessages((prev) => {
+        if (prev.length === 0) return prev;
+        const updated = [...prev];
+        const lastIndex = updated.length - 1;
+        const lastMessage = updated[lastIndex];
+        if (lastMessage && lastMessage.role === "assistant") {
+          updated[lastIndex] = {
+            ...lastMessage,
+            parts: [
+              ...(lastMessage.parts || []),
+              {
+                type: "data-error",
+                data: error?.message || "Unknown error",
+              },
+            ],
+          };
+        }
+        return updated;
+      });
+    },
   });
 
   useEffect(() => {
@@ -174,7 +202,6 @@ export function useChatStream(options: UseChatStreamOptions): UseChatStreamRetur
     messages,
     status,
     streamingMessageId,
-    error: error || null,
     setMessages: setChatMessages,
     send,
     stop,

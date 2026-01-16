@@ -13,8 +13,6 @@ type MaybePromise<T> = T | Promise<T>;
 export type InfiniteScrollTopProps = Omit<ComponentProps<typeof StickToBottom>, "children"> & {
   /** Chat messages / items */
   children: ReactNode;
-  /** Print debug logs in devtools console */
-  debug?: boolean;
   /**
    * Used to detect "prepend happened" and trigger scroll retention.
    * Pass something that changes when you prepend older messages, e.g. `oldestMessageId`.
@@ -50,14 +48,12 @@ function TopLoadSentinel({
   onLoadMore,
   topThreshold = 0,
   onBeforeLoadMore,
-  debug = false,
 }: {
   hasMore: boolean;
   isLoadingMore: boolean;
   onLoadMore?: () => MaybePromise<void>;
   topThreshold?: number;
   onBeforeLoadMore: () => void;
-  debug?: boolean;
 }) {
   const { scrollRef } = useStickToBottomContext();
   const sentinelRef = useRef<HTMLDivElement | null>(null);
@@ -66,7 +62,6 @@ function TopLoadSentinel({
     isLoadingMore,
     onLoadMore,
     topThreshold,
-    debug,
     onBeforeLoadMore,
     locked: false,
     hasUserScrolled: false,
@@ -78,9 +73,8 @@ function TopLoadSentinel({
     stateRef.current.isLoadingMore = isLoadingMore;
     stateRef.current.onLoadMore = onLoadMore;
     stateRef.current.topThreshold = topThreshold;
-    stateRef.current.debug = debug;
     stateRef.current.onBeforeLoadMore = onBeforeLoadMore;
-  }, [hasMore, isLoadingMore, onLoadMore, topThreshold, debug, onBeforeLoadMore]);
+  }, [hasMore, isLoadingMore, onLoadMore, topThreshold, onBeforeLoadMore]);
 
   useEffect(() => {
     if (!isLoadingMore && stateRef.current.locked) {
@@ -163,7 +157,6 @@ export function InfiniteScrollTop({
   topThreshold = 0,
   topLoadingSlot,
   hideScrollToBottomButton,
-  debug = false,
   initial = "instant",
   resize = "instant",
   forceFullHeight = false,
@@ -185,7 +178,6 @@ export function InfiniteScrollTop({
         topThreshold={topThreshold}
         topLoadingSlot={topLoadingSlot}
         hideScrollToBottomButton={hideScrollToBottomButton}
-        debug={debug}
         forceFullHeight={forceFullHeight}
       >
         {children}
@@ -203,7 +195,6 @@ function InfiniteScrollTopInner({
   topThreshold,
   topLoadingSlot,
   hideScrollToBottomButton,
-  debug,
   forceFullHeight,
 }: Pick<
   InfiniteScrollTopProps,
@@ -215,7 +206,6 @@ function InfiniteScrollTopInner({
   | "topThreshold"
   | "topLoadingSlot"
   | "hideScrollToBottomButton"
-  | "debug"
   | "forceFullHeight"
 >) {
   const { beginTxn } = usePrependNoRetention();
@@ -238,7 +228,6 @@ function InfiniteScrollTopInner({
               onLoadMore={onLoadMore}
               topThreshold={topThreshold}
               onBeforeLoadMore={beginTxn}
-              debug={debug}
             />
             {
               <div

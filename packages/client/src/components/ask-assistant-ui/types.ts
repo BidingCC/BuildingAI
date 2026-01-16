@@ -67,6 +67,11 @@ export interface Model {
   chef: string;
   chefSlug: string;
   providers: string[];
+  features?: string[];
+  billingRule?: {
+    power: number;
+    tokens: number;
+  };
 }
 
 export interface Suggestion {
@@ -103,7 +108,6 @@ export interface AssistantContextValue {
   isLoadingMoreMessages: boolean;
   /** Whether there are more historical messages to load */
   hasMoreMessages: boolean;
-  error: Error | null;
 
   models: Model[];
   selectedModelId: string;

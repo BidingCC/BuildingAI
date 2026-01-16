@@ -1,15 +1,16 @@
+import type { AiProvider } from "@buildingai/services/web";
 import type { UIMessage } from "ai";
-import { startTransition, useCallback, useEffect, useRef, useState } from "react";
+import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { RawMessageRecord } from "../libs/message-repository";
-import type { AssistantContextValue, DisplayMessage, Model, Suggestion } from "../types";
+import { convertProvidersToModels } from "../libs/provider-converter";
+import type { AssistantContextValue, DisplayMessage, Suggestion } from "../types";
 import { useChatStream } from "./use-chat-stream";
 import { useMessageRepository } from "./use-message-repository";
 import { useMessagesPaging } from "./use-messages-paging";
 
 export interface UseAssistantOptions {
-  models: Model[];
-  defaultModelId?: string;
+  providers: AiProvider[];
   suggestions?: Suggestion[];
 }
 
@@ -68,10 +69,47 @@ function sliceMessagesUntil(messages: UIMessage[], parentId: string | null): UIM
 }
 
 export function useAssistant(options: UseAssistantOptions): AssistantContextValue {
-  const { models, defaultModelId, suggestions = [] } = options;
+  const { providers, suggestions = [] } = options;
+
+  const models = useMemo(() => {
+    return convertProvidersToModels(providers);
+  }, [providers]);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [selectedModelId, setSelectedModelId] = useState(defaultModelId || models[0]?.id || "");
+  const STORAGE_KEY = "__selected_model_id__";
+
+  const getCachedModelId = () => {
+    if (typeof window === "undefined") return "";
+    return localStorage.getItem(STORAGE_KEY) || "";
+  };
+
+  const saveModelId = (modelId: string) => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(STORAGE_KEY, modelId);
+    }
+  };
+
+  const [selectedModelId, setSelectedModelId] = useState(getCachedModelId);
+
+  useEffect(() => {
+    if (models.length === 0) return;
+
+    const isValidModel = models.some((model) => model.id === selectedModelId);
+    const modelId = isValidModel ? selectedModelId : models[0].id;
+
+    if (modelId !== selectedModelId) {
+      setSelectedModelId(modelId);
+      saveModelId(modelId);
+    } else if (!selectedModelId) {
+      saveModelId(modelId);
+    }
+  }, [models, selectedModelId]);
+
+  const handleSelectModel = useCallback((modelId: string) => {
+    setSelectedModelId(modelId);
+    saveModelId(modelId);
+  }, []);
+
   const [liked, setLiked] = useState<Record<string, boolean>>({});
   const [disliked, setDisliked] = useState<Record<string, boolean>>({});
 
@@ -99,13 +137,12 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
     setMessages,
     status,
     streamingMessageId,
-    error,
     send,
     stop,
     regenerate,
     addToolApprovalResponse,
   } = useChatStream({
-    modelId: "5f325ca6-03da-4f7f-8e42-025474e48b44",
+    modelId: selectedModelId,
     lastMessageDbIdRef,
     pendingParentIdRef,
     conversationIdRef,
@@ -199,7 +236,6 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
     isLoading: isLoadingMessages,
     isLoadingMoreMessages,
     hasMoreMessages,
-    error,
     models,
     selectedModelId,
     suggestions,
@@ -211,7 +247,7 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
     onStop: stop,
     onRegenerate,
     onSwitchBranch,
-    onSelectModel: setSelectedModelId,
+    onSelectModel: handleSelectModel,
     onLike,
     onDislike,
     addToolApprovalResponse,

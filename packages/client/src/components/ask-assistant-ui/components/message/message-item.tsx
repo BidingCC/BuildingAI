@@ -1,3 +1,4 @@
+import type { UIMessage } from "ai";
 import { memo } from "react";
 
 import type { DisplayMessage } from "../../types";
@@ -6,7 +7,6 @@ import { Message } from "./message";
 export interface MessageItemProps {
   displayMessage: DisplayMessage;
   isStreaming: boolean;
-  error?: string;
   liked?: boolean;
   disliked?: boolean;
   onLike: (id: string, value: boolean) => void;
@@ -20,7 +20,6 @@ export const MessageItem = memo(
   function MessageItem({
     displayMessage,
     isStreaming,
-    error,
     liked,
     disliked,
     onLike,
@@ -40,7 +39,6 @@ export const MessageItem = memo(
         branchNumber={branchNumber}
         branchCount={branchCount}
         branches={branches}
-        error={error}
         onLikeChange={(v) => onLike(id, v)}
         onDislikeChange={(v) => onDislike(id, v)}
         onRetry={() => onRegenerate(id)}
@@ -50,26 +48,57 @@ export const MessageItem = memo(
     );
   },
   (prev, next) => {
-    if (prev.displayMessage.id !== next.displayMessage.id) return false;
+    const {
+      displayMessage: prevDm,
+      isStreaming: prevStreaming,
+      liked: prevLiked,
+      disliked: prevDisliked,
+    } = prev;
+    const {
+      displayMessage: nextDm,
+      isStreaming: nextStreaming,
+      liked: nextLiked,
+      disliked: nextDisliked,
+    } = next;
 
-    const prevMsg = prev.displayMessage.message;
-    const nextMsg = next.displayMessage.message;
-    if (prevMsg.parts !== nextMsg.parts) {
-      const getTextContent = (parts: typeof prevMsg.parts) =>
-        parts
-          ?.filter((p) => p.type === "text")
-          .map((p) => (p as { text: string }).text)
-          .join("") || "";
-      if (getTextContent(prevMsg.parts) !== getTextContent(nextMsg.parts)) return false;
-    }
+    if (
+      prevDm.id !== nextDm.id ||
+      prevDm.branchNumber !== nextDm.branchNumber ||
+      prevDm.branchCount !== nextDm.branchCount ||
+      prevStreaming !== nextStreaming ||
+      prevLiked !== nextLiked ||
+      prevDisliked !== nextDisliked
+    )
+      return false;
 
-    if (prev.displayMessage.branchNumber !== next.displayMessage.branchNumber) return false;
-    if (prev.displayMessage.branchCount !== next.displayMessage.branchCount) return false;
-    if (prev.isStreaming !== next.isStreaming) return false;
-    if (prev.error !== next.error) return false;
-    if (prev.liked !== next.liked) return false;
-    if (prev.disliked !== next.disliked) return false;
+    const serializeParts = (parts: UIMessage["parts"]) =>
+      parts
+        ?.map((p) => {
+          const type = p.type;
+          if (type === "text" || type === "reasoning") {
+            return `${type}:${(p as { text?: string }).text || ""}`;
+          }
+          if (type === "file") {
+            const fp = p as { url?: string; filename?: string; mediaType?: string };
+            return `file:${fp.url || ""}:${fp.filename || ""}:${fp.mediaType || ""}`;
+          }
+          if (type === "source-url") {
+            const sp = p as { url?: string; title?: string };
+            return `source-url:${sp.url || ""}:${sp.title || ""}`;
+          }
+          if (typeof type === "string" && type.startsWith("tool-")) {
+            const tp = p as {
+              toolCallId?: string;
+              state?: string;
+              input?: unknown;
+              output?: unknown;
+            };
+            return `${type}:${tp.toolCallId || ""}:${tp.state || ""}:${JSON.stringify(tp.input || {})}:${JSON.stringify(tp.output || {})}`;
+          }
+          return `${type}:${JSON.stringify(p)}`;
+        })
+        .join("|") || "";
 
-    return true;
+    return serializeParts(prevDm.message.parts) === serializeParts(nextDm.message.parts);
   },
 );

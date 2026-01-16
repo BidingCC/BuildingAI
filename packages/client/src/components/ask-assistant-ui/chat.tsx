@@ -100,7 +100,6 @@ const MessageList = memo(function MessageList() {
   const {
     displayMessages,
     streamingMessageId,
-    error,
     liked,
     disliked,
     onLike,
@@ -110,9 +109,6 @@ const MessageList = memo(function MessageList() {
     addToolApprovalResponse,
   } = useAssistantContext();
 
-  const lastAssistantId =
-    displayMessages.filter((msg) => msg.message.role === "assistant").pop()?.id || null;
-
   return (
     <>
       {displayMessages.map((displayMsg) => (
@@ -120,7 +116,6 @@ const MessageList = memo(function MessageList() {
           key={displayMsg.id}
           displayMessage={displayMsg}
           isStreaming={streamingMessageId === displayMsg.id}
-          error={error && displayMsg.id === lastAssistantId ? error.message : undefined}
           liked={liked[displayMsg.id]}
           disliked={disliked[displayMsg.id]}
           onLike={onLike}

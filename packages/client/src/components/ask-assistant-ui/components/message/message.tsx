@@ -18,7 +18,7 @@ import {
   SourcesTrigger,
 } from "@buildingai/ui/components/ai-elements/sources";
 import { Alert, AlertDescription, AlertTitle } from "@buildingai/ui/components/ui/alert";
-import type { UIMessage } from "ai";
+import type { ReasoningUIPart, UIMessage } from "ai";
 import { AlertCircleIcon } from "lucide-react";
 import { memo } from "react";
 
@@ -37,7 +37,6 @@ export interface MessageProps {
   branchNumber?: number;
   branchCount?: number;
   branches?: string[];
-  error?: string;
   onLikeChange?: (liked: boolean) => void;
   onDislikeChange?: (disliked: boolean) => void;
   onRetry?: () => void;
@@ -53,7 +52,6 @@ export const Message = memo(function Message({
   branchNumber = 1,
   branchCount = 1,
   branches = [],
-  error,
   onLikeChange,
   onDislikeChange,
   onRetry,
@@ -64,16 +62,17 @@ export const Message = memo(function Message({
 
   if (!messageData.versions?.length) return null;
 
-  const activeIndex = messageData.activeVersionIndex ?? 0;
-  const activeVersion = messageData.versions[activeIndex] || messageData.versions[0];
+  const activeVersion =
+    messageData.versions[messageData.activeVersionIndex ?? 0] || messageData.versions[0];
   const content = activeVersion?.content || "";
   const attachments = activeVersion?.attachments;
-
   const isAssistant = messageData.from === "assistant";
-  const isRegenerating = messageData.versions.some((v) => v.id.startsWith("regenerating-"));
+  const isProcessing =
+    isStreaming || messageData.versions.some((v) => v.id.startsWith("regenerating-"));
   const isEmpty = !content.trim();
-  const showStreamingIndicator = isAssistant && (isStreaming || isRegenerating) && isEmpty;
-  const isProcessing = isStreaming || isRegenerating;
+  const hasReasoning = message.parts?.some((part) => part.type === "reasoning") ?? false;
+  const showStreamingIndicator = isAssistant && isProcessing && isEmpty && !hasReasoning;
+  const sources = messageData.sources;
 
   const { text: smoothContent } = useSmoothText(content, {
     smooth: isAssistant && isStreaming,
@@ -82,18 +81,25 @@ export const Message = memo(function Message({
 
   return (
     <AIMessage from={messageData.from}>
-      {isAssistant && messageData.reasoning && (
-        <Reasoning duration={messageData.reasoning.duration} isStreaming={isStreaming}>
-          <ReasoningTrigger />
-          <ReasoningContent>{messageData.reasoning.content}</ReasoningContent>
-        </Reasoning>
-      )}
+      {isAssistant &&
+        message.parts
+          ?.filter((part): part is ReasoningUIPart => part.type === "reasoning")
+          .map((part, index, arr) => (
+            <Reasoning
+              key={`${message.id}-reasoning-${index}`}
+              defaultOpen={isStreaming}
+              isStreaming={isStreaming && index === arr.length - 1}
+            >
+              <ReasoningTrigger />
+              <ReasoningContent>{part.text || ""}</ReasoningContent>
+            </Reasoning>
+          ))}
 
-      {isAssistant && messageData.sources && messageData.sources.length > 0 && (
+      {isAssistant && sources && sources.length > 0 && (
         <Sources>
-          <SourcesTrigger count={messageData.sources.length} />
+          <SourcesTrigger count={sources.length} />
           <SourcesContent>
-            {messageData.sources.map((source) => (
+            {sources.map((source) => (
               <Source href={source.href} key={source.href} title={source.title} />
             ))}
           </SourcesContent>
@@ -105,13 +111,18 @@ export const Message = memo(function Message({
       )}
 
       <div className="min-w-0">
-        {error && (
-          <Alert variant="destructive">
-            <AlertCircleIcon className="size-4" />
-            <AlertTitle>chat error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
+        {message.parts
+          ?.filter((part) => part.type === "data-error")
+          .map((part, index) => {
+            const errorPart = part as { data?: string };
+            return (
+              <Alert key={`error-${index}`} variant="destructive">
+                <AlertCircleIcon className="size-4" />
+                <AlertTitle>chat error</AlertTitle>
+                <AlertDescription>{errorPart.data || "Unknown error"}</AlertDescription>
+              </Alert>
+            );
+          })}
 
         {attachments && attachments.length > 0 && (
           <AIMessageAttachments className="mb-2">
@@ -143,6 +154,7 @@ export const Message = memo(function Message({
               branchCount={branchCount}
               branches={branches}
               onSwitchBranch={onSwitchBranch}
+              disabled={isProcessing}
             />
             {!isProcessing && (
               <MessageActions

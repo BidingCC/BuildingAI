@@ -1,43 +1,7 @@
-import type { Model, Suggestion } from "../components/ask-assistant-ui";
-import { AssistantProvider, Chat, useAssistant } from "../components/ask-assistant-ui";
+import { useAiProvidersQuery } from "@buildingai/services/web";
 
-const MODELS: Model[] = [
-  {
-    id: "gpt-4o",
-    name: "GPT-4o",
-    chef: "OpenAI",
-    chefSlug: "openai",
-    providers: ["openai", "azure"],
-  },
-  {
-    id: "gpt-4o-mini",
-    name: "GPT-4o Mini",
-    chef: "OpenAI",
-    chefSlug: "openai",
-    providers: ["openai", "azure"],
-  },
-  {
-    id: "claude-opus-4-20250514",
-    name: "Claude 4 Opus",
-    chef: "Anthropic",
-    chefSlug: "anthropic",
-    providers: ["anthropic", "azure", "google", "amazon-bedrock"],
-  },
-  {
-    id: "claude-sonnet-4-20250514",
-    name: "Claude 4 Sonnet",
-    chef: "Anthropic",
-    chefSlug: "anthropic",
-    providers: ["anthropic", "azure", "google", "amazon-bedrock"],
-  },
-  {
-    id: "gemini-2.0-flash-exp",
-    name: "Gemini 2.0 Flash",
-    chef: "Google",
-    chefSlug: "google",
-    providers: ["google"],
-  },
-];
+import type { Suggestion } from "../components/ask-assistant-ui";
+import { AssistantProvider, Chat, useAssistant } from "../components/ask-assistant-ui";
 
 const SUGGESTIONS: Suggestion[] = [
   { id: "1", text: "如何开始使用 React Hooks？" },
@@ -46,9 +10,12 @@ const SUGGESTIONS: Suggestion[] = [
 ];
 
 const IndexPage = () => {
+  const { data: providers = [] } = useAiProvidersQuery({
+    supportedModelTypes: "llm",
+  });
+
   const assistant = useAssistant({
-    models: MODELS,
-    defaultModelId: MODELS[0].id,
+    providers,
     suggestions: SUGGESTIONS,
   });
 

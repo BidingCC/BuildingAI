@@ -8,6 +8,7 @@ export interface MessageBranchProps {
   branchCount: number;
   branches: string[];
   onSwitchBranch?: (messageId: string) => void;
+  disabled?: boolean;
 }
 
 export const MessageBranch = memo(function MessageBranch({
@@ -15,6 +16,7 @@ export const MessageBranch = memo(function MessageBranch({
   branchCount,
   branches,
   onSwitchBranch,
+  disabled = false,
 }: MessageBranchProps) {
   if (branchCount <= 1) return null;
 
@@ -39,7 +41,7 @@ export const MessageBranch = memo(function MessageBranch({
     >
       <Button
         aria-label="Previous branch"
-        disabled={branchNumber <= 1}
+        disabled={disabled || branchNumber <= 1}
         onClick={handlePrevious}
         size="icon-sm"
         type="button"
@@ -52,7 +54,7 @@ export const MessageBranch = memo(function MessageBranch({
       </ButtonGroupText>
       <Button
         aria-label="Next branch"
-        disabled={branchNumber >= branchCount}
+        disabled={disabled || branchNumber >= branchCount}
         onClick={handleNext}
         size="icon-sm"
         type="button"
