@@ -129,4 +129,5 @@
     "i18n-ally.enabledFrameworks": [
         "vue"
     ],
+    "typescript.tsdk": "node_modules/typescript/lib",
 }
