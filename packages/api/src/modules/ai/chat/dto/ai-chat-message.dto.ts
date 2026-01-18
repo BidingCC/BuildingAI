@@ -98,11 +98,11 @@ export class ChatRequestDto {
     messages: AiChatMessageDto[];
 
     /**
-     * MCP服务器列表
+     * MCP服务器ID列表
      */
     @IsOptional()
-    @IsArray({ message: "MCP服务器列表必须是数组" })
-    mcpServers?: string[];
+    @IsArray({ message: "MCP服务器ID列表必须是数组" })
+    mcpServerIds?: string[];
 }
 
 /**

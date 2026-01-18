@@ -1,3 +1,4 @@
+import { useMcpServersAllQuery } from "@buildingai/services/web";
 import {
   PromptInput as AIPromptInput,
   PromptInputActionMenu as AIPromptInputActionMenu,
@@ -21,8 +22,9 @@ import { FileIcon, GlobeIcon, ImageIcon, MicIcon, Square, VideoIcon } from "luci
 import type { FormEvent, RefObject } from "react";
 import { memo, useCallback, useMemo } from "react";
 
-import { type FileType, useFileUpload } from "../../hooks/use-file-upload";
 import { useAssistantContext } from "../../context";
+import { type FileType, useFileUpload } from "../../hooks/use-file-upload";
+import { McpSelector } from "../mcp-selector";
 
 export interface PromptInputProps {
   textareaRef?: RefObject<HTMLTextAreaElement | null>;
@@ -85,11 +87,16 @@ FileSelectMenu.displayName = "FileSelectMenu";
 
 const PromptInputInner = memo(
   ({ textareaRef, status, onStop, globalDrop, multiple, onSubmit }: PromptInputProps) => {
-    const { models, selectedModelId } = useAssistantContext();
+    const { models, selectedModelId, selectedMcpServerIds, onSelectMcpServers } =
+      useAssistantContext();
     const selectedModel = useMemo(
       () => models.find((m) => m.id === selectedModelId),
       [models, selectedModelId],
     );
+
+    const { data: mcpServers = [], isLoading: isLoadingMcpServers } = useMcpServersAllQuery({
+      enabled: true,
+    });
 
     const { handleFileSelect, uploadFilesIfNeeded, availableFileTypes } = useFileUpload(
       multiple,
@@ -125,6 +132,13 @@ const PromptInputInner = memo(
               <GlobeIcon size={16} />
               <span>Search</span>
             </AIPromptInputButton>
+            {!isLoadingMcpServers && mcpServers.length > 0 && (
+              <McpSelector
+                mcpServers={mcpServers}
+                selectedMcpServerIds={selectedMcpServerIds}
+                onSelectionChange={onSelectMcpServers}
+              />
+            )}
           </AIPromptInputTools>
           {status === "submitted" || status === "streaming" ? (
             onStop ? (

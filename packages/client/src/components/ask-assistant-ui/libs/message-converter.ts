@@ -1,4 +1,4 @@
-import type { ReasoningUIPart, ToolUIPart, UIMessage } from "ai";
+import type { DynamicToolUIPart, ReasoningUIPart, ToolUIPart, UIMessage } from "ai";
 
 import type { Message, MessageToolCall } from "../types";
 
@@ -110,6 +110,28 @@ export function convertUIMessageToMessage(uiMsg: UIMessage): Message {
             error:
               toolPart.state === "output-error" && toolPart.errorText
                 ? toolPart.errorText
+                : undefined,
+          });
+        } else if (part.type === "dynamic-tool") {
+          const toolPart = part as DynamicToolUIPart;
+          const toolName = toolPart.toolName;
+
+          const result =
+            toolPart.state === "output-available" &&
+            (toolPart as { output?: unknown }).output !== undefined &&
+            (toolPart as { output?: unknown }).output !== null
+              ? String((toolPart as { output?: unknown }).output)
+              : undefined;
+
+          tools.push({
+            name: toolName,
+            description: toolDescriptionsMap.get(toolName) ?? "",
+            status: toolPart.state as ToolUIPart["state"],
+            parameters: (toolPart as { input?: unknown }).input as Record<string, unknown>,
+            result,
+            error:
+              toolPart.state === "output-error" && (toolPart as { errorText?: string }).errorText
+                ? (toolPart as { errorText?: string }).errorText
                 : undefined,
           });
         }

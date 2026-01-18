@@ -111,6 +111,7 @@ export interface AssistantContextValue {
 
   models: Model[];
   selectedModelId: string;
+  selectedMcpServerIds: string[];
   suggestions: Suggestion[];
 
   liked: Record<string, boolean>;
@@ -128,6 +129,7 @@ export interface AssistantContextValue {
   onRegenerate: (messageKey: string) => void;
   onSwitchBranch: (messageId: string) => void;
   onSelectModel: (id: string) => void;
+  onSelectMcpServers: (ids: string[]) => void;
   onLike: (messageKey: string, liked: boolean) => void;
   onDislike: (messageKey: string, disliked: boolean) => void;
   addToolApprovalResponse?: (args: { id: string; approved: boolean; reason?: string }) => void;

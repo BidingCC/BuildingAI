@@ -26,9 +26,9 @@ export class ChatRequestDto {
     @IsOptional()
     systemPrompt?: string;
 
-    @IsArray({ message: "MCP服务器列表必须是数组" })
+    @IsArray({ message: "MCP服务器ID列表必须是数组" })
     @IsOptional()
-    mcpServers?: string[];
+    mcpServerIds?: string[];
 
     @IsOptional()
     id?: string;

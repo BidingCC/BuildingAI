@@ -15,6 +15,7 @@ const getApiBaseUrl = () => {
 
 export interface UseChatStreamOptions {
   modelId: string;
+  mcpServerIds?: string[];
   onThreadCreated?: () => void;
   lastMessageDbIdRef: React.RefObject<string | null>;
   pendingParentIdRef: React.RefObject<string | null>;
@@ -37,6 +38,7 @@ export interface UseChatStreamReturn {
 export function useChatStream(options: UseChatStreamOptions): UseChatStreamReturn {
   const {
     modelId,
+    mcpServerIds = [],
     onThreadCreated,
     lastMessageDbIdRef,
     pendingParentIdRef,
@@ -53,6 +55,11 @@ export function useChatStream(options: UseChatStreamOptions): UseChatStreamRetur
   useEffect(() => {
     modelIdRef.current = modelId;
   }, [modelId]);
+
+  const mcpServerIdsRef = useRef(mcpServerIds);
+  useEffect(() => {
+    mcpServerIdsRef.current = mcpServerIds;
+  }, [mcpServerIds]);
 
   const {
     messages,
@@ -82,10 +89,12 @@ export function useChatStream(options: UseChatStreamOptions): UseChatStreamRetur
       body: () => {
         const parentId = pendingParentIdRef.current;
         pendingParentIdRef.current = null;
+        const currentMcpServerIds = mcpServerIdsRef.current;
         return {
           modelId: modelIdRef.current,
           conversationId: conversationIdRef.current || undefined,
           parentId,
+          ...(currentMcpServerIds.length > 0 && { mcpServerIds: currentMcpServerIds }),
         };
       },
       prepareSendMessagesRequest(request) {

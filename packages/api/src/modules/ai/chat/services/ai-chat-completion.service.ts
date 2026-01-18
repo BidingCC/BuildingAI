@@ -1,4 +1,11 @@
-import { getProvider } from "@buildingai/ai-sdk-new";
+import {
+    closeMcpClients,
+    createClientsFromServerConfigs,
+    getProvider,
+    type McpClient,
+    type McpServerConfig,
+    mergeMcpTools,
+} from "@buildingai/ai-sdk-new";
 import { SecretService } from "@buildingai/core/modules";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { getProviderSecret } from "@buildingai/utils";
@@ -7,11 +14,15 @@ import {
     convertToModelMessages,
     createUIMessageStream,
     pipeUIMessageStreamToResponse,
+    stepCountIs,
     streamText,
+    ToolLoopAgent,
 } from "ai";
 import type { ServerResponse } from "http";
+import { In } from "typeorm";
 import { validate as isUUID } from "uuid";
 
+import { AiMcpServerService } from "../../mcp/services/ai-mcp-server.service";
 import { AiModelService } from "../../model/services/ai-model.service";
 import { getWeather } from "../tools/weather.tools";
 import type { ChatCompletionParams, UIMessage } from "../types/chat.types";
@@ -40,6 +51,7 @@ export class ChatCompletionService {
         private readonly secretService: SecretService,
         private readonly aiChatRecordService: AiChatRecordService,
         private readonly aiChatsMessageService: AiChatsMessageService,
+        private readonly aiMcpServerService: AiMcpServerService,
     ) {}
 
     async streamChat(params: ChatCompletionParams, response: ServerResponse): Promise<void> {
@@ -95,6 +107,16 @@ export class ChatCompletionService {
                 ? [{ role: "system" as const, content: params.systemPrompt }, ...modelMessages]
                 : modelMessages;
 
+            const { clients: mcpClients, tools: mcpTools } = await this.initializeMcpClients(
+                params.mcpServerIds,
+            );
+
+            if (Object.keys(mcpTools).length > 0) {
+                this.logger.log(
+                    `MCP tools loaded: ${Object.keys(mcpTools).join(", ")} (${Object.keys(mcpTools).length} tools)`,
+                );
+            }
+
             const stream = createUIMessageStream({
                 originalMessages: isToolApprovalFlow ? allMessages : undefined,
                 execute: async ({ writer }) => {
@@ -102,69 +124,101 @@ export class ChatCompletionService {
                         writer.write({ type: "data-conversation-id", data: conversationId });
                     }
 
-                    if (params.abortSignal?.aborted) return;
+                    if (params.abortSignal?.aborted) {
+                        await closeMcpClients(mcpClients);
+                        return;
+                    }
 
-                    const result = streamText({
-                        model: provider(model.model).model,
-                        messages,
-                        tools: { getWeather },
-                        abortSignal: params.abortSignal,
-                        // experimental_download: async (requested) => {
-                        //     return requested.map((req) => {
-                        //         return undefined;
-                        //     });
-                        // },
-                    });
+                    try {
+                        const agent = new ToolLoopAgent({
+                            model: provider(model.model).model,
+                            tools: {
+                                getWeather,
+                                ...mcpTools,
+                            },
+                            // 允许多步：tool call -> tool result -> 继续生成最终回复
+                            // 使用 stepCountIs 确保工具调用后继续生成最终回复
+                            // 设置为 10 步，允许多次工具调用和最终回复生成
+                            stopWhen: stepCountIs(10),
+                        });
 
-                    result.consumeStream();
+                        const result = await agent.stream({
+                            messages,
+                            abortSignal: params.abortSignal,
+                        });
 
-                    const uiMessageStream = result.toUIMessageStream({
-                        originalMessages: allMessages,
-                        onFinish: async ({
-                            messages: finishedMessages,
-                            responseMessage,
-                            isAborted,
-                        }) => {
-                            if (params.saveConversation === false || !conversationId) return;
+                        result.consumeStream();
 
-                            try {
-                                let finalResult: Awaited<ReturnType<typeof streamText>> | null =
-                                    null;
+                        const uiMessageStream = result.toUIMessageStream({
+                            originalMessages: allMessages,
+                            onFinish: async ({
+                                messages: finishedMessages,
+                                responseMessage,
+                                isAborted,
+                            }) => {
                                 try {
-                                    finalResult = (await result) as unknown as Awaited<
-                                        ReturnType<typeof streamText>
-                                    >;
-                                } catch {
-                                    finalResult = null;
-                                }
+                                    if (params.saveConversation === false || !conversationId) {
+                                        return;
+                                    }
 
-                                if (isToolApprovalFlow) {
-                                    await this.saveToolApprovalMessages(
-                                        finishedMessages,
-                                        conversationId,
+                                    let finalResult: Awaited<ReturnType<typeof streamText>> | null =
+                                        null;
+                                    try {
+                                        finalResult = (await result) as unknown as Awaited<
+                                            ReturnType<typeof streamText>
+                                        >;
+                                    } catch {
+                                        finalResult = null;
+                                    }
+
+                                    if (isToolApprovalFlow) {
+                                        await this.saveToolApprovalMessages(
+                                            finishedMessages,
+                                            conversationId,
+                                        );
+                                    } else if (finishedMessages.length > 0) {
+                                        await this.saveNormalFlowMessages(
+                                            responseMessage,
+                                            params,
+                                            conversationId,
+                                            finalResult,
+                                            isAborted,
+                                            writer,
+                                        );
+                                    }
+                                } catch (error) {
+                                    this.logger.error(
+                                        `Failed to save messages: ${error instanceof Error ? error.message : String(error)}`,
+                                        error instanceof Error ? error.stack : undefined,
                                     );
-                                } else if (finishedMessages.length > 0) {
-                                    await this.saveNormalFlowMessages(
-                                        responseMessage,
-                                        params,
-                                        conversationId,
-                                        finalResult,
-                                        isAborted,
-                                        writer,
-                                    );
+                                } finally {
+                                    // 确保在所有工具调用完成后再关闭 MCP 客户端连接
+                                    await closeMcpClients(mcpClients);
                                 }
-                            } catch (error) {
+                            },
+                            onError: (error) => {
+                                const errorMessage =
+                                    error instanceof Error ? error.message : "An error occurred.";
                                 this.logger.error(
-                                    `Failed to save messages: ${error instanceof Error ? error.message : String(error)}`,
+                                    `Stream error: ${errorMessage}`,
                                     error instanceof Error ? error.stack : undefined,
                                 );
-                            }
-                        },
-                        onError: (error) =>
-                            error instanceof Error ? error.message : "An error occurred.",
-                    });
+                                // 出错时也要关闭 MCP 客户端连接
+                                closeMcpClients(mcpClients).catch((closeError) => {
+                                    this.logger.warn(
+                                        `Failed to close MCP clients: ${closeError instanceof Error ? closeError.message : String(closeError)}`,
+                                    );
+                                });
+                                return errorMessage;
+                            },
+                        });
 
-                    writer.merge(uiMessageStream);
+                        writer.merge(uiMessageStream);
+                    } catch (error) {
+                        // 如果发生错误，立即关闭客户端
+                        await closeMcpClients(mcpClients);
+                        throw error;
+                    }
                 },
             });
 
@@ -175,6 +229,47 @@ export class ChatCompletionService {
                 error instanceof Error ? error.stack : undefined,
             );
             this.handleError(error, response);
+        }
+    }
+
+    private async initializeMcpClients(
+        mcpServerIds?: string[],
+    ): Promise<{ clients: McpClient[]; tools: Record<string, unknown> }> {
+        if (!mcpServerIds?.length) {
+            return { clients: [], tools: {} };
+        }
+
+        try {
+            const mcpServers = await this.aiMcpServerService.findAll({
+                where: {
+                    id: In(mcpServerIds),
+                    isDisabled: false,
+                },
+            });
+
+            const serverConfigs: McpServerConfig[] = mcpServers
+                .filter((server) => server.url && server.communicationType)
+                .map((server) => ({
+                    id: server.id,
+                    name: server.name,
+                    description: server.description || undefined,
+                    url: server.url,
+                    communicationType: server.communicationType,
+                    customHeaders: server.customHeaders || undefined,
+                }));
+
+            if (!serverConfigs.length) {
+                return { clients: [], tools: {} };
+            }
+
+            const clients = await createClientsFromServerConfigs(serverConfigs);
+            const tools = await mergeMcpTools(clients);
+            return { clients, tools };
+        } catch (error) {
+            this.logger.warn(
+                `Failed to initialize MCP clients: ${error instanceof Error ? error.message : String(error)}`,
+            );
+            return { clients: [], tools: {} };
         }
     }
 
@@ -235,7 +330,7 @@ export class ChatCompletionService {
         responseMessage: UIMessage | undefined,
         params: ChatCompletionParams,
         conversationId: string,
-        finalResult: Awaited<ReturnType<typeof streamText>> | null,
+        finalResult: any | null,
         isAborted: boolean,
         writer: { write: (part: { type: `data-${string}`; data: unknown }) => void },
     ): Promise<void> {

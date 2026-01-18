@@ -42,7 +42,7 @@ export interface ChatCompletionParams {
     title?: string;
     saveConversation?: boolean;
     systemPrompt?: string;
-    mcpServers?: string[];
+    mcpServerIds?: string[];
     abortSignal?: AbortSignal;
     isRegenerate?: boolean;
     regenerateMessageId?: string;

@@ -24,11 +24,7 @@ export interface GenericToolProps {
 export const GenericTool = memo(function GenericTool({ toolName, toolPart }: GenericToolProps) {
   return (
     <Tool>
-      <ToolHeader
-        state={toolPart.state as "input-available"}
-        title={toolName}
-        type="tool-invocation"
-      />
+      <ToolHeader state={toolPart.state as never} title={toolName} type="tool-invocation" />
       <ToolContent>
         <ToolInput input={toolPart.input} />
         <ToolOutput errorText={toolPart.errorText} output={toolPart.output} />

@@ -90,6 +90,7 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
   };
 
   const [selectedModelId, setSelectedModelId] = useState(getCachedModelId);
+  const [selectedMcpServerIds, setSelectedMcpServerIds] = useState<string[]>([]);
 
   useEffect(() => {
     if (models.length === 0) return;
@@ -108,6 +109,10 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
   const handleSelectModel = useCallback((modelId: string) => {
     setSelectedModelId(modelId);
     saveModelId(modelId);
+  }, []);
+
+  const handleSelectMcpServers = useCallback((ids: string[]) => {
+    setSelectedMcpServerIds(ids);
   }, []);
 
   const [liked, setLiked] = useState<Record<string, boolean>>({});
@@ -143,6 +148,7 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
     addToolApprovalResponse,
   } = useChatStream({
     modelId: selectedModelId,
+    mcpServerIds: selectedMcpServerIds,
     lastMessageDbIdRef,
     pendingParentIdRef,
     conversationIdRef,
@@ -241,6 +247,7 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
     hasMoreMessages,
     models,
     selectedModelId,
+    selectedMcpServerIds,
     suggestions,
     liked,
     disliked,
@@ -251,6 +258,7 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
     onRegenerate,
     onSwitchBranch,
     onSelectModel: handleSelectModel,
+    onSelectMcpServers: handleSelectMcpServers,
     onLike,
     onDislike,
     addToolApprovalResponse,

@@ -23,7 +23,9 @@ export const MessageTools = memo(function MessageTools({
   addToolApprovalResponse,
 }: MessageToolsProps) {
   const toolParts = parts.filter(
-    (part) => typeof part.type === "string" && part.type.startsWith("tool-"),
+    (part) =>
+      typeof part.type === "string" &&
+      (part.type.startsWith("tool-") || part.type === "dynamic-tool"),
   );
 
   if (toolParts.length === 0) return null;
@@ -44,7 +46,10 @@ export const MessageTools = memo(function MessageTools({
           );
         }
 
-        const toolName = (part.type as string).replace("tool-", "");
+        const toolName =
+          part.type === "dynamic-tool"
+            ? ((part as unknown as { toolName?: string }).toolName ?? "tool")
+            : (part.type as string).replace("tool-", "");
         return <GenericTool key={key} toolName={toolName} toolPart={toolPart} />;
       })}
     </>

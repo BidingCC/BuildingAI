@@ -56,7 +56,7 @@ export class AiChatMessageWebController extends BaseController {
                 messages: dto.messages ?? (dto.message ? [dto.message] : []),
                 title: dto.title,
                 systemPrompt: dto.systemPrompt,
-                mcpServers: dto.mcpServers,
+                mcpServerIds: dto.mcpServerIds,
                 abortSignal,
                 isRegenerate,
                 regenerateMessageId: dto.messageId,
