@@ -31,11 +31,11 @@ class AzureProviderImpl implements AIProvider {
     }
 
     languageModel(modelId: string): LanguageModelV3 {
-        return this.baseProvider(modelId);
+        return this.baseProvider(modelId) as unknown as LanguageModelV3;
     }
 
     embeddingModel(modelId: string): EmbeddingModelV3 {
-        return this.baseProvider.textEmbeddingModel(modelId);
+        return this.baseProvider.textEmbeddingModel(modelId) as unknown as EmbeddingModelV3;
     }
 }
 

@@ -28,7 +28,7 @@ class CohereProviderImpl implements AIProvider {
     }
 
     rerankModel(modelId: string): RerankingModelV3 {
-        return this.baseProvider.rerankModel(modelId);
+        return this.baseProvider.rerankingModel(modelId);
     }
 }
 
