@@ -21,6 +21,7 @@ export const MessageActions = memo(function MessageActions({
   disliked,
   content,
   usage,
+  userConsumedPower,
   onLikeChange,
   onDislikeChange,
   onRetry,
@@ -47,7 +48,7 @@ export const MessageActions = memo(function MessageActions({
       <AIMessageAction label="Copy" onClick={handleCopy} tooltip="复制">
         <CopyIcon className="size-4" />
       </AIMessageAction>
-      <MessageUsage usage={usage} />
+      <MessageUsage usage={usage} userConsumedPower={userConsumedPower} />
     </AIMessageActions>
   );
 });

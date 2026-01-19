@@ -67,6 +67,12 @@ export const Message = memo(function Message({
         ? message.metadata.usage
         : undefined
   ) as Record<string, unknown> | undefined;
+  const userConsumedPower =
+    message.metadata &&
+    typeof message.metadata === "object" &&
+    "userConsumedPower" in message.metadata
+      ? (message.metadata.userConsumedPower as number | null | undefined)
+      : undefined;
 
   if (!messageData.versions?.length) return null;
 
@@ -170,6 +176,7 @@ export const Message = memo(function Message({
                 disliked={disliked}
                 content={content}
                 usage={usage}
+                userConsumedPower={userConsumedPower}
                 onLikeChange={onLikeChange}
                 onDislikeChange={onDislikeChange}
                 onRetry={onRetry}
