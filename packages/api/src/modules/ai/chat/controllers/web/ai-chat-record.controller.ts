@@ -57,6 +57,17 @@ export class AiChatRecordWebController extends BaseController {
     }
 
     /**
+     * 获取对话信息（不包含消息）
+     */
+    @Get(":id/info")
+    async getConversationInfo(
+        @Param("id") conversationId: string,
+        @Playground() user: UserPlayground,
+    ) {
+        return await this.AiChatRecordService.getConversationInfo(conversationId, user.id);
+    }
+
+    /**
      * 更新对话信息
      */
     @Patch(":id")

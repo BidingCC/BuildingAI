@@ -132,6 +132,19 @@ export class AiChatRecordService extends BaseService<AiChatRecord> {
         }
     }
 
+    async getConversationInfo(conversationId: string, userId?: string): Promise<Partial<AiChatRecord> | null> {
+        try {
+            const where = buildWhere<AiChatRecord>({
+                isDeleted: false,
+                userId,
+            });
+            return await this.findOneById(conversationId, { where });
+        } catch (error) {
+            this.logger.error(`获取对话信息失败: ${error.message}`, error.stack);
+            throw HttpErrorFactory.badRequest("Failed to get conversation info.");
+        }
+    }
+
     /**
      * 更新对话信息
      * @param conversationId 对话ID

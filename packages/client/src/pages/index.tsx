@@ -1,4 +1,5 @@
-import { useAiProvidersQuery } from "@buildingai/services/web";
+import { useAiProvidersQuery, useConversationQuery } from "@buildingai/services/web";
+import { useParams } from "react-router-dom";
 
 import type { Suggestion } from "../components/ask-assistant-ui";
 import { AssistantProvider, Chat, useAssistant } from "../components/ask-assistant-ui";
@@ -10,9 +11,11 @@ const SUGGESTIONS: Suggestion[] = [
 ];
 
 const IndexPage = () => {
+  const { id } = useParams<{ id: string }>();
   const { data: providers = [] } = useAiProvidersQuery({
     supportedModelTypes: "llm",
   });
+  const { data: conversation } = useConversationQuery(id || "", { enabled: !!id });
 
   const assistant = useAssistant({
     providers,
@@ -21,7 +24,7 @@ const IndexPage = () => {
 
   return (
     <AssistantProvider {...assistant}>
-      <Chat title="新对话" />
+      <Chat title={conversation?.title || "新对话"} />
     </AssistantProvider>
   );
 };

@@ -1,4 +1,5 @@
 import { useChat } from "@ai-sdk/react";
+import { getConversationInfo } from "@buildingai/services/web";
 import { useAuthStore } from "@buildingai/stores";
 import { useQueryClient } from "@tanstack/react-query";
 import type { ChatStatus, FileUIPart, UIMessage } from "ai";
@@ -143,6 +144,15 @@ export function useChatStream(options: UseChatStreamOptions): UseChatStreamRetur
     },
     onFinish: () => {
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
+
+      const conversationId = conversationIdRef.current;
+      if (conversationId) {
+        void getConversationInfo(conversationId)
+          .then((info) => {
+            queryClient.setQueryData(["conversation", conversationId], info);
+          })
+          .catch(() => {});
+      }
     },
     onError: (error) => {
       console.error("Error streaming chat", error);

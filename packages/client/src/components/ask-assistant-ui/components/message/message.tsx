@@ -185,7 +185,7 @@ export const Message = memo(function Message({
         )}
 
         {isAssistant && (
-          <AIMessageToolbar className="mt-4 min-w-0">
+          <AIMessageToolbar className="mt-2 min-w-0">
             <MessageBranch
               branchNumber={branchNumber}
               branchCount={branchCount}
