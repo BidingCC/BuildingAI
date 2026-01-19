@@ -47,6 +47,11 @@ export class AiChatsMessageService extends BaseService<AiChatMessage> {
                           inputTokens: dto.tokens.inputTokens,
                           outputTokens: dto.tokens.outputTokens,
                           totalTokens: dto.tokens.totalTokens,
+                          inputTokenDetails: dto.tokens.inputTokenDetails,
+                          outputTokenDetails: dto.tokens.outputTokenDetails,
+                          reasoningTokens: dto.tokens.reasoningTokens,
+                          cachedInputTokens: dto.tokens.cachedInputTokens,
+                          raw: dto.tokens.raw,
                       }
                     : undefined,
                 userConsumedPower: dto.userConsumedPower,

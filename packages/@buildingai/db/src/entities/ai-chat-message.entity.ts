@@ -77,6 +77,18 @@ export class AiChatMessage extends BaseEntity {
         inputTokens?: number;
         outputTokens?: number;
         totalTokens?: number;
+        inputTokenDetails?: {
+            noCacheTokens?: number;
+            cacheReadTokens?: number;
+            cacheWriteTokens?: number;
+        };
+        outputTokenDetails?: {
+            textTokens?: number;
+            reasoningTokens?: number;
+        };
+        reasoningTokens?: number;
+        cachedInputTokens?: number;
+        raw?: Record<string, unknown>;
     };
 
     @Column({

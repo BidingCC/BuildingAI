@@ -5,7 +5,9 @@ import {
 import { CopyIcon, RefreshCcwIcon, ThumbsDownIcon, ThumbsUpIcon } from "lucide-react";
 import { memo } from "react";
 
-export interface MessageActionsProps {
+import { MessageUsage, type MessageUsageProps } from "./message-usage";
+
+export interface MessageActionsProps extends MessageUsageProps {
   liked: boolean;
   disliked: boolean;
   content: string;
@@ -18,6 +20,7 @@ export const MessageActions = memo(function MessageActions({
   liked,
   disliked,
   content,
+  usage,
   onLikeChange,
   onDislikeChange,
   onRetry,
@@ -44,6 +47,7 @@ export const MessageActions = memo(function MessageActions({
       <AIMessageAction label="Copy" onClick={handleCopy} tooltip="复制">
         <CopyIcon className="size-4" />
       </AIMessageAction>
+      <MessageUsage usage={usage} />
     </AIMessageActions>
   );
 });

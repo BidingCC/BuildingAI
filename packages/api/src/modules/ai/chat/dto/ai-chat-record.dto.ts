@@ -272,6 +272,49 @@ export class TokenUsageDto {
     @IsOptional()
     @Type(() => Number)
     totalTokens?: number;
+
+    /**
+     * 输入 Token 细节（缓存命中等）
+     */
+    @IsObject()
+    @IsOptional()
+    inputTokenDetails?: {
+        noCacheTokens?: number;
+        cacheReadTokens?: number;
+        cacheWriteTokens?: number;
+    };
+
+    /**
+     * 输出 Token 细节（text/reasoning）
+     */
+    @IsObject()
+    @IsOptional()
+    outputTokenDetails?: {
+        textTokens?: number;
+        reasoningTokens?: number;
+    };
+
+    /**
+     * 兼容 AI SDK 的顶层字段
+     */
+    @IsInt()
+    @Min(0)
+    @IsOptional()
+    @Type(() => Number)
+    reasoningTokens?: number;
+
+    @IsInt()
+    @Min(0)
+    @IsOptional()
+    @Type(() => Number)
+    cachedInputTokens?: number;
+
+    /**
+     * 兼容不同 provider 的原始 usage 字段
+     */
+    @IsObject()
+    @IsOptional()
+    raw?: Record<string, unknown>;
 }
 
 /**

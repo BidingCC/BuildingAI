@@ -66,10 +66,13 @@ export function useMessagesPaging({
           ...item.message,
           id: item.id,
           metadata: {
-            ...(item.message.metadata || {}),
+            ...(item.message.metadata ?? {}),
             sequence: item.sequence,
             ...(item.parentId && { parentId: item.parentId }),
             ...(item.createdAt && { createdAt: item.createdAt }),
+            ...(item.usage && {
+              usage: item.usage,
+            }),
           },
         })) as UIMessage[];
 
@@ -105,10 +108,13 @@ export function useMessagesPaging({
             ...item.message,
             id: item.id,
             metadata: {
-              ...(item.message.metadata || {}),
+              ...(item.message.metadata ?? {}),
               sequence: item.sequence,
               ...(item.parentId && { parentId: item.parentId }),
               ...(item.createdAt && { createdAt: item.createdAt }),
+              ...(item.usage && {
+                usage: item.usage,
+              }),
             },
           })) as UIMessage[];
 

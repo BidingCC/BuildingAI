@@ -1,10 +1,14 @@
 import {
     closeMcpClients,
     createClientsFromServerConfigs,
+    extractTextFromParts,
+    formatMessagesForTokenCount,
     getProvider,
     type McpClient,
     type McpServerConfig,
     mergeMcpTools,
+    normalizeChatUsage,
+    withEstimatedUsage,
 } from "@buildingai/ai-sdk-new";
 import { SecretService } from "@buildingai/core/modules";
 import { HttpErrorFactory } from "@buildingai/errors";
@@ -15,7 +19,6 @@ import {
     createUIMessageStream,
     pipeUIMessageStreamToResponse,
     stepCountIs,
-    streamText,
     ToolLoopAgent,
 } from "ai";
 import type { ServerResponse } from "http";
@@ -106,6 +109,7 @@ export class ChatCompletionService {
             const messages = params.systemPrompt
                 ? [{ role: "system" as const, content: params.systemPrompt }, ...modelMessages]
                 : modelMessages;
+            const promptTextForUsage = formatMessagesForTokenCount(messages);
 
             const { clients: mcpClients, tools: mcpTools } = await this.initializeMcpClients(
                 params.mcpServerIds,
@@ -146,7 +150,6 @@ export class ChatCompletionService {
                             messages,
                             abortSignal: params.abortSignal,
                         });
-
                         result.consumeStream();
 
                         const uiMessageStream = result.toUIMessageStream({
@@ -161,15 +164,28 @@ export class ChatCompletionService {
                                         return;
                                     }
 
-                                    let finalResult: Awaited<ReturnType<typeof streamText>> | null =
-                                        null;
-                                    try {
-                                        finalResult = (await result) as unknown as Awaited<
-                                            ReturnType<typeof streamText>
-                                        >;
-                                    } catch {
-                                        finalResult = null;
-                                    }
+                                    const { textText, reasoningText, fullText } =
+                                        extractTextFromParts(
+                                            (responseMessage?.parts ?? []) as Array<{
+                                                type?: unknown;
+                                                text?: string;
+                                            }>,
+                                        );
+
+                                    const rawUsage = await withEstimatedUsage(result, {
+                                        model: model.model,
+                                        inputText: promptTextForUsage,
+                                        outputTextPromise: Promise.resolve(fullText),
+                                    }).usage;
+
+                                    const usage = normalizeChatUsage({
+                                        rawUsage,
+                                        model: model.model,
+                                        textText,
+                                        reasoningText,
+                                    });
+
+                                    writer.write({ type: "data-usage", data: usage });
 
                                     if (isToolApprovalFlow) {
                                         await this.saveToolApprovalMessages(
@@ -181,7 +197,7 @@ export class ChatCompletionService {
                                             responseMessage,
                                             params,
                                             conversationId,
-                                            finalResult,
+                                            usage,
                                             isAborted,
                                             writer,
                                         );
@@ -330,20 +346,20 @@ export class ChatCompletionService {
         responseMessage: UIMessage | undefined,
         params: ChatCompletionParams,
         conversationId: string,
-        finalResult: any | null,
+        usage:
+            | {
+                  inputTokens?: number;
+                  outputTokens?: number;
+                  totalTokens?: number;
+                  cachedTokens?: number;
+              }
+            | undefined,
         isAborted: boolean,
         writer: { write: (part: { type: `data-${string}`; data: unknown }) => void },
     ): Promise<void> {
         const userMessageId = await this.ensureUserMessageSaved(params, conversationId, writer);
 
         if (!responseMessage?.parts?.length) return;
-
-        let usage;
-        try {
-            usage = finalResult ? await finalResult.usage : undefined;
-        } catch {
-            usage = undefined;
-        }
 
         const savedAssistantMessage = await this.aiChatsMessageService.createMessage({
             conversationId,

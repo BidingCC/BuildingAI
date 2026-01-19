@@ -59,6 +59,14 @@ export const Message = memo(function Message({
   addToolApprovalResponse,
 }: MessageProps) {
   const messageData = convertUIMessageToMessage(message);
+  const usagePart = message.parts?.find((part) => part.type === "data-usage");
+  const usage = (
+    usagePart && typeof usagePart === "object" && "data" in usagePart
+      ? usagePart.data
+      : message.metadata && typeof message.metadata === "object" && "usage" in message.metadata
+        ? message.metadata.usage
+        : undefined
+  ) as Record<string, unknown> | undefined;
 
   if (!messageData.versions?.length) return null;
 
@@ -161,6 +169,7 @@ export const Message = memo(function Message({
                 liked={liked}
                 disliked={disliked}
                 content={content}
+                usage={usage}
                 onLikeChange={onLikeChange}
                 onDislikeChange={onDislikeChange}
                 onRetry={onRetry}

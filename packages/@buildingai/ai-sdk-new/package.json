@@ -19,6 +19,11 @@
             "require": "./dist/providers/index.js",
             "import": "./dist/providers/index.js",
             "types": "./dist/providers/index.d.ts"
+        },
+        "./utils/token-usage": {
+            "require": "./dist/utils/token-usage.js",
+            "import": "./dist/utils/token-usage.js",
+            "types": "./dist/utils/token-usage.d.ts"
         }
     },
     "scripts": {

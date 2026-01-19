@@ -124,5 +124,7 @@ export {
     type ProviderTranscriptionConfig,
 } from "./utils/get-provider";
 export * from "./utils/mcp";
+export * from "./utils/text-with-usage";
+export * from "./utils/token-usage";
 export * from "ai";
 export { rerank as rerankV3 } from "ai";

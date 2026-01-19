@@ -123,6 +123,18 @@ export type MessageRecord = {
         inputTokens?: number;
         outputTokens?: number;
         totalTokens?: number;
+        inputTokenDetails?: {
+            noCacheTokens?: number;
+            cacheReadTokens?: number;
+            cacheWriteTokens?: number;
+        };
+        outputTokenDetails?: {
+            textTokens?: number;
+            reasoningTokens?: number;
+        };
+        reasoningTokens?: number;
+        cachedInputTokens?: number;
+        raw?: Record<string, unknown>;
     } | null;
     userConsumedPower?: number | null;
     createdAt: string;
