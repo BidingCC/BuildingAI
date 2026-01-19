@@ -1,5 +1,3 @@
-export type { ModelConfig, ModelProperties, ProviderConfig } from "./config/provider-config.types";
-export { ProviderConfigUtils } from "./config/provider-config.utils";
 export {
     generateImage,
     type GenerateImageParams,
