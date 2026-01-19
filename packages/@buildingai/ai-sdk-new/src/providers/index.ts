@@ -12,6 +12,7 @@ export { ollama, type OllamaProviderSettings } from "./ollama";
 export { openai, type OpenAIProviderSettings } from "./openai";
 export { openrouter, type OpenRouterProviderSettings } from "./openrouter";
 export { siliconflow, type SiliconFlowProviderSettings } from "./siliconflow";
+export { spark, type SparkProviderSettings } from "./spark";
 export { tongyi, type TongYiProviderSettings } from "./tongyi";
 export { volcengine, type VolcengineProviderSettings } from "./volcengine";
 export { wenxin, type WenXinProviderSettings } from "./wenxin";

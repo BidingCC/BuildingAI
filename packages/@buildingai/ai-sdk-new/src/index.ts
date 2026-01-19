@@ -68,6 +68,8 @@ export {
     type OpenRouterProviderSettings,
     siliconflow,
     type SiliconFlowProviderSettings,
+    spark,
+    type SparkProviderSettings,
     tongyi,
     type TongYiProviderSettings,
     volcengine,
