@@ -1,4 +1,10 @@
 import type {
+    ExtensionStatusType,
+    ExtensionSupportTerminalType,
+    ExtensionTypeType,
+} from "@buildingai/constants/shared/extension.constant";
+import type {
+    MutationOptionsUtil,
     PaginatedQueryOptionsUtil,
     PaginatedResponse,
     QueryOptionsUtil,
@@ -29,65 +35,72 @@ export type DownloadExtensionDto = {
 export type CreateExtensionDto = {
     name: string;
     identifier: string;
+    alias?: string;
     description?: string;
-    author?: {
-        name: string;
-        avatar?: string;
-        homepage?: string;
-    };
-    type: "application" | "functional";
-    // Add other fields as needed
-};
-
-export type UpdateExtensionDto = {
-    name?: string;
-    description?: string;
+    type: ExtensionTypeType;
     author?: {
         name?: string;
         avatar?: string;
         homepage?: string;
     };
-    // Add other fields as needed
+    homepage?: string;
+    documentation?: string;
+    config?: Record<string, any>;
+};
+
+export type UpdateExtensionDto = {
+    name?: string;
+    alias?: string;
+    description?: string;
+    type?: ExtensionTypeType;
+    author?: {
+        name?: string;
+        avatar?: string;
+        homepage?: string;
+    };
+    homepage?: string;
+    documentation?: string;
+    config?: Record<string, any>;
 };
 
 export type QueryExtensionDto = {
     page?: number;
-    limit?: number;
+    pageSize?: number;
     name?: string;
     identifier?: string;
-    type?: "application" | "functional";
-    status?: "active" | "inactive" | "error";
+    type?: ExtensionTypeType;
+    status?: ExtensionStatusType;
     isLocal?: boolean;
     isInstalled?: boolean;
 };
 
 export type BatchUpdateExtensionStatusDto = {
     ids: string[];
-    status: "active" | "inactive" | "error";
+    status: ExtensionStatusType;
 };
 
 export type Extension = {
     id: string;
     name: string;
+    alias?: string;
     identifier: string;
+    version: string;
     description?: string;
+    icon?: string;
+    type: ExtensionTypeType;
+    supportTerminal?: ExtensionSupportTerminalType[];
+    isLocal: boolean;
+    status: ExtensionStatusType;
     author?: {
-        name: string;
+        name?: string;
         avatar?: string;
         homepage?: string;
     };
-    type: "application" | "functional";
-    status: "active" | "inactive" | "error";
-    version: string;
-    isLocal: boolean;
-    isInstalled: boolean;
-    icon?: string;
-    engine?: {
-        buildingai: string;
-    };
+    homepage?: string;
+    documentation?: string;
+    config?: Record<string, any>;
     createdAt: string;
     updatedAt: string;
-    // Add other fields as needed
 };
 
 export type ExtensionVersion = {
@@ -121,48 +134,59 @@ export function usePlatformSecretQuery(options?: QueryOptionsUtil<PlatformSecret
 /**
  * Set platform secret
  */
-export function useSetPlatformSecretMutation() {
+export function useSetPlatformSecretMutation(
+    options?: MutationOptionsUtil<boolean, SetPlatformSecretDto>,
+) {
     return useMutation<boolean, Error, SetPlatformSecretDto>({
         mutationFn: (dto) => consoleHttpClient.post<boolean>("/extensions/platform-secret", dto),
+        ...options,
     });
 }
 
 /**
  * Install extension
  */
-export function useInstallExtensionMutation() {
+export function useInstallExtensionMutation(
+    options?: MutationOptionsUtil<Extension, { identifier: string; dto: DownloadExtensionDto }>,
+) {
     return useMutation<Extension, Error, { identifier: string; dto: DownloadExtensionDto }>({
         mutationFn: ({ identifier, dto }) =>
             consoleHttpClient.post<Extension>(`/extensions/install/${identifier}`, dto),
+        ...options,
     });
 }
 
 /**
  * Upgrade extension
  */
-export function useUpgradeExtensionMutation() {
+export function useUpgradeExtensionMutation(options?: MutationOptionsUtil<Extension, string>) {
     return useMutation<Extension, Error, string>({
         mutationFn: (identifier) =>
             consoleHttpClient.post<Extension>(`/extensions/upgrade/${identifier}`),
+        ...options,
     });
 }
 
 /**
  * Uninstall extension
  */
-export function useUninstallExtensionMutation() {
+export function useUninstallExtensionMutation(options?: MutationOptionsUtil<boolean, string>) {
     return useMutation<boolean, Error, string>({
         mutationFn: (identifier) =>
             consoleHttpClient.delete<boolean>(`/extensions/uninstall/${identifier}`),
+        ...options,
     });
 }
 
 /**
  * Create extension
  */
-export function useCreateExtensionMutation() {
+export function useCreateExtensionMutation(
+    options?: MutationOptionsUtil<Extension, CreateExtensionDto>,
+) {
     return useMutation<Extension, Error, CreateExtensionDto>({
         mutationFn: (dto) => consoleHttpClient.post<Extension>("/extensions", dto),
+        ...options,
     });
 }
 
@@ -223,7 +247,7 @@ export function useLocalExtensionsQuery(options?: QueryOptionsUtil<Extension[]>)
  * Get extensions by type
  */
 export function useExtensionsByTypeQuery(
-    type: "application" | "functional",
+    type: ExtensionTypeType,
     onlyEnabled?: boolean,
     options?: QueryOptionsUtil<Extension[]>,
 ) {
@@ -306,12 +330,15 @@ export function useExtensionFeaturesQuery(
 /**
  * Update feature membership levels
  */
-export function useUpdateFeatureLevelsMutation() {
+export function useUpdateFeatureLevelsMutation(
+    options?: MutationOptionsUtil<ExtensionFeature, { featureId: string; levelIds: string[] }>,
+) {
     return useMutation<ExtensionFeature, Error, { featureId: string; levelIds: string[] }>({
         mutationFn: ({ featureId, levelIds }) =>
             consoleHttpClient.patch<ExtensionFeature>(`/extensions/features/${featureId}/levels`, {
                 levelIds,
             }),
+        ...options,
     });
 }
 
@@ -330,78 +357,103 @@ export function useExtensionQuery(id: string, options?: QueryOptionsUtil<Extensi
 /**
  * Batch update extension status
  */
-export function useBatchUpdateStatusMutation() {
+export function useBatchUpdateStatusMutation(
+    options?: MutationOptionsUtil<
+        { message: string; count: number },
+        BatchUpdateExtensionStatusDto
+    >,
+) {
     return useMutation<{ message: string; count: number }, Error, BatchUpdateExtensionStatusDto>({
         mutationFn: (dto) =>
             consoleHttpClient.patch<{ message: string; count: number }>(
                 "/extensions/batch-status",
                 dto,
             ),
+        ...options,
     });
 }
 
 /**
  * Update extension
  */
-export function useUpdateExtensionMutation() {
+export function useUpdateExtensionMutation(
+    options?: MutationOptionsUtil<Extension, { id: string; dto: UpdateExtensionDto }>,
+) {
     return useMutation<Extension, Error, { id: string; dto: UpdateExtensionDto }>({
         mutationFn: ({ id, dto }) => consoleHttpClient.patch<Extension>(`/extensions/${id}`, dto),
+        ...options,
     });
 }
 
 /**
  * Enable extension
  */
-export function useEnableExtensionMutation() {
+export function useEnableExtensionMutation(options?: MutationOptionsUtil<Extension, string>) {
     return useMutation<Extension, Error, string>({
         mutationFn: (id) => consoleHttpClient.patch<Extension>(`/extensions/${id}/enable`),
+        ...options,
     });
 }
 
 /**
  * Disable extension
  */
-export function useDisableExtensionMutation() {
+export function useDisableExtensionMutation(options?: MutationOptionsUtil<Extension, string>) {
     return useMutation<Extension, Error, string>({
         mutationFn: (id) => consoleHttpClient.patch<Extension>(`/extensions/${id}/disable`),
+        ...options,
     });
 }
 
 /**
  * Set extension status
  */
-export function useSetExtensionStatusMutation() {
-    return useMutation<Extension, Error, { id: string; status: "active" | "inactive" | "error" }>({
+export function useSetExtensionStatusMutation(
+    options?: MutationOptionsUtil<Extension, { id: string; status: ExtensionStatusType }>,
+) {
+    return useMutation<Extension, Error, { id: string; status: ExtensionStatusType }>({
         mutationFn: ({ id, status }) =>
             consoleHttpClient.patch<Extension>(`/extensions/${id}/status`, { status }),
+        ...options,
     });
 }
 
 /**
  * Delete extension
  */
-export function useDeleteExtensionMutation() {
+export function useDeleteExtensionMutation(
+    options?: MutationOptionsUtil<{ message: string }, string>,
+) {
     return useMutation<{ message: string }, Error, string>({
         mutationFn: (id) => consoleHttpClient.delete<{ message: string }>(`/extensions/${id}`),
+        ...options,
     });
 }
 
 /**
  * Batch delete extensions
  */
-export function useBatchDeleteExtensionsMutation() {
+export function useBatchDeleteExtensionsMutation(
+    options?: MutationOptionsUtil<{ message: string; deleted: number }, string[]>,
+) {
     return useMutation<{ message: string; deleted: number }, Error, string[]>({
         mutationFn: (ids) =>
             consoleHttpClient.delete<{ message: string; deleted: number }>("/extensions", {
                 data: { ids },
             }),
+        ...options,
     });
 }
 
 /**
  * Sync member features
  */
-export function useSyncMemberFeaturesMutation() {
+export function useSyncMemberFeaturesMutation(
+    options?: MutationOptionsUtil<
+        { message: string; added: number; updated: number; removed: number },
+        string
+    >,
+) {
     return useMutation<
         { message: string; added: number; updated: number; removed: number },
         Error,
@@ -414,6 +466,7 @@ export function useSyncMemberFeaturesMutation() {
                 updated: number;
                 removed: number;
             }>(`/extensions/sync-member-features/${identifier}`),
+        ...options,
     });
 }
 

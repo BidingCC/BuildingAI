@@ -1,3 +1,4 @@
+import { useExtensionsListQuery } from "@buildingai/services/console";
 import { Avatar, AvatarFallback, AvatarImage } from "@buildingai/ui/components/ui/avatar";
 import { Badge } from "@buildingai/ui/components/ui/badge";
 import { Button } from "@buildingai/ui/components/ui/button";
@@ -18,15 +19,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@buildingai/ui/components/ui/select";
-import { Switch } from "@buildingai/ui/components/ui/switch";
+import { IconPuzzle } from "@tabler/icons-react";
 import {
-  ChevronRight,
   CircleFadingArrowUp,
-  Download,
   EllipsisVertical,
   ExternalLink,
-  FileClock,
-  FileJson2,
   FileText,
   Info,
   Plus,
@@ -36,6 +33,8 @@ import {
 } from "lucide-react";
 
 const ExtensionIndexPage = () => {
+  const { data } = useExtensionsListQuery();
+
   return (
     <div className="flex flex-col gap-4">
       <div className="bg-background sticky top-0 z-1 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
@@ -82,19 +81,18 @@ const ExtensionIndexPage = () => {
           </div>
         </div>
 
-        {Array.from({ length: 15 }).map((_, index) => (
+        {data?.items.map((item, index) => (
           <div key={index} className="relative flex flex-col gap-4 rounded-lg border p-4">
             <div className="flex items-center gap-3">
-              <img
-                src="https://buildingai.fishblog.cn/static/ai/providers/moonshot.png"
-                alt="model.name"
-                className="aspect-square size-12 rounded-lg"
-              />
+              <Avatar className="size-12 after:rounded-lg">
+                <AvatarImage src={item.icon} alt={item.name} className="rounded-lg" />
+                <AvatarFallback className="size-12 rounded-lg">
+                  <IconPuzzle />
+                </AvatarFallback>
+              </Avatar>
               <div className="flex flex-col">
-                <div>AI画图</div>
-                <p className="text-muted-foreground line-clamp-1 text-xs">
-                  这是一条非常复杂的应用简介
-                </p>
+                <div>{item.name}</div>
+                <p className="text-muted-foreground line-clamp-1 text-xs">{item.description}</p>
               </div>
 
               <DropdownMenu>
