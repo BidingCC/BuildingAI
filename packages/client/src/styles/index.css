@@ -24,3 +24,7 @@ body {
   scrollbar-color: transparent transparent;
   scrollbar-gutter: stable;
 }
+
+[data-streamdown="code-block"] {
+  content-visibility: visible !important;
+}
