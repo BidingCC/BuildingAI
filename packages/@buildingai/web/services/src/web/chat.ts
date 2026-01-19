@@ -177,10 +177,15 @@ export function useConversationQuery(
 ): UseQueryResult<ConversationRecord, unknown> {
     return useQuery<ConversationRecord>({
         queryKey: ["conversation", conversationId],
-        queryFn: () => apiHttpClient.get<ConversationRecord>(`/ai-conversations/${conversationId}`),
+        queryFn: () =>
+            apiHttpClient.get<ConversationRecord>(`/ai-conversations/${conversationId}/info`),
         enabled: !!conversationId,
         ...options,
     });
+}
+
+export async function getConversationInfo(conversationId: string): Promise<ConversationRecord> {
+    return apiHttpClient.get<ConversationRecord>(`/ai-conversations/${conversationId}/info`);
 }
 
 /**
