@@ -236,6 +236,19 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
     [getParentId, streamMessages, setMessages, regenerate],
   );
 
+  const onEditMessage = useCallback(
+    (messageId: string, newContent: string) => {
+      const parentId = getParentId(messageId);
+      if (parentId === undefined) return;
+
+      // Create a new sibling "version" under the same parent by re-sending the edited content.
+      // We also slice the client message list to keep the request context consistent with the branch.
+      setMessages(sliceMessagesUntil(streamMessages, parentId));
+      queueMicrotask(() => send(newContent, parentId));
+    },
+    [getParentId, streamMessages, setMessages, send],
+  );
+
   return {
     messages: [...repositoryMessages],
     displayMessages: displayMessages as DisplayMessage[],
@@ -256,6 +269,7 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
     onLoadMoreMessages: loadMoreMessages,
     onStop: stop,
     onRegenerate,
+    onEditMessage,
     onSwitchBranch,
     onSelectModel: handleSelectModel,
     onSelectMcpServers: handleSelectMcpServers,

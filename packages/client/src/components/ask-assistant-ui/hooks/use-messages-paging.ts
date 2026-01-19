@@ -73,9 +73,10 @@ export function useMessagesPaging({
             ...(item.usage && {
               usage: item.usage,
             }),
-            ...(item.userConsumedPower !== null && item.userConsumedPower !== undefined && {
-              userConsumedPower: item.userConsumedPower,
-            }),
+            ...(item.userConsumedPower !== null &&
+              item.userConsumedPower !== undefined && {
+                userConsumedPower: item.userConsumedPower,
+              }),
           },
         })) as UIMessage[];
 
@@ -118,9 +119,10 @@ export function useMessagesPaging({
               ...(item.usage && {
                 usage: item.usage,
               }),
-              ...(item.userConsumedPower !== null && item.userConsumedPower !== undefined && {
-                userConsumedPower: item.userConsumedPower,
-              }),
+              ...(item.userConsumedPower !== null &&
+                item.userConsumedPower !== undefined && {
+                  userConsumedPower: item.userConsumedPower,
+                }),
             },
           })) as UIMessage[];
 

@@ -127,6 +127,7 @@ export interface AssistantContextValue {
   onLoadMoreMessages: () => void;
   onStop: () => void;
   onRegenerate: (messageKey: string) => void;
+  onEditMessage: (messageId: string, newContent: string) => void;
   onSwitchBranch: (messageId: string) => void;
   onSelectModel: (id: string) => void;
   onSelectMcpServers: (ids: string[]) => void;

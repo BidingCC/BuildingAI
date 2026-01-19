@@ -12,6 +12,7 @@ export interface MessageItemProps {
   onLike: (id: string, value: boolean) => void;
   onDislike: (id: string, value: boolean) => void;
   onRegenerate: (id: string) => void;
+  onEditMessage: (messageId: string, newContent: string) => void;
   onSwitchBranch: (messageId: string) => void;
   addToolApprovalResponse?: (args: { id: string; approved: boolean; reason?: string }) => void;
 }
@@ -25,6 +26,7 @@ export const MessageItem = memo(
     onLike,
     onDislike,
     onRegenerate,
+    onEditMessage,
     onSwitchBranch,
     addToolApprovalResponse,
   }: MessageItemProps) {
@@ -42,6 +44,7 @@ export const MessageItem = memo(
         onLikeChange={(v) => onLike(id, v)}
         onDislikeChange={(v) => onDislike(id, v)}
         onRetry={() => onRegenerate(id)}
+        onEditMessage={onEditMessage}
         onSwitchBranch={onSwitchBranch}
         addToolApprovalResponse={addToolApprovalResponse}
       />

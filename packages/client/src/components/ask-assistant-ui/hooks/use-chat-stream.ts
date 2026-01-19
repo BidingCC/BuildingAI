@@ -30,7 +30,11 @@ export interface UseChatStreamReturn {
   streamingMessageId: string | null;
   setMessages: (messages: UIMessage[] | ((prev: UIMessage[]) => UIMessage[])) => void;
   regenerate: (messageId: string) => void;
-  send: (content: string, parentId?: string | null) => void;
+  send: (
+    content: string,
+    parentId?: string | null,
+    files?: Array<{ type: "file"; url: string; mediaType?: string; filename?: string }>,
+  ) => void;
   stop: () => void;
   addToolApprovalResponse?: (args: { id: string; approved: boolean; reason?: string }) => void;
 }

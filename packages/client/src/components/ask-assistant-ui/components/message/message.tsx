@@ -20,7 +20,7 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@buildingai/ui/components/ui/alert";
 import type { ReasoningUIPart, UIMessage } from "ai";
 import { AlertCircleIcon } from "lucide-react";
-import { memo } from "react";
+import { memo, useState } from "react";
 
 import { useSmoothText } from "../../hooks/use-smooth-text";
 import { convertUIMessageToMessage } from "../../libs/message-converter";
@@ -28,6 +28,7 @@ import { MessageActions } from "./message-actions";
 import { MessageBranch } from "./message-branch";
 import { MessageTools } from "./message-tools";
 import { StreamingIndicator } from "./streaming-indicator";
+import { UserMessageActions } from "./user-message-actions";
 
 export interface MessageProps {
   message: UIMessage;
@@ -42,6 +43,7 @@ export interface MessageProps {
   onRetry?: () => void;
   onSwitchBranch?: (messageId: string) => void;
   addToolApprovalResponse?: (args: { id: string; approved: boolean; reason?: string }) => void;
+  onEditMessage?: (messageId: string, newContent: string) => void;
 }
 
 export const Message = memo(function Message({
@@ -57,6 +59,7 @@ export const Message = memo(function Message({
   onRetry,
   onSwitchBranch,
   addToolApprovalResponse,
+  onEditMessage,
 }: MessageProps) {
   const messageData = convertUIMessageToMessage(message);
   const usagePart = message.parts?.find((part) => part.type === "data-usage");
@@ -93,8 +96,17 @@ export const Message = memo(function Message({
     id: message.id,
   });
 
+  const [isEditingMessage, setIsEditingMessage] = useState(false);
+
+  const handleEditMessage = (newContent: string) => {
+    onEditMessage?.(message.id, newContent);
+  };
+
   return (
-    <AIMessage from={messageData.from}>
+    <AIMessage
+      from={messageData.from}
+      className={isEditingMessage && !isAssistant ? "max-w-full" : undefined}
+    >
       {isAssistant &&
         message.parts
           ?.filter((part): part is ReasoningUIPart => part.type === "reasoning")
@@ -149,17 +161,28 @@ export const Message = memo(function Message({
           </AIMessageAttachments>
         )}
 
-        <AIMessageContent>
-          {showStreamingIndicator ? (
-            <StreamingIndicator />
-          ) : isAssistant ? (
-            <AIMessageResponse isAnimating={isStreaming && message.role === "assistant"}>
-              {smoothContent}
-            </AIMessageResponse>
-          ) : (
-            content
-          )}
-        </AIMessageContent>
+        {!isAssistant ? (
+          <UserMessageActions
+            content={content}
+            onSend={handleEditMessage}
+            onEditingChange={setIsEditingMessage}
+            branchNumber={branchNumber}
+            branchCount={branchCount}
+            branches={branches}
+            onSwitchBranch={onSwitchBranch}
+            disabled={isProcessing}
+          />
+        ) : (
+          <AIMessageContent>
+            {showStreamingIndicator ? (
+              <StreamingIndicator />
+            ) : (
+              <AIMessageResponse isAnimating={isStreaming && message.role === "assistant"}>
+                {smoothContent}
+              </AIMessageResponse>
+            )}
+          </AIMessageContent>
+        )}
 
         {isAssistant && (
           <AIMessageToolbar className="mt-4 min-w-0">
