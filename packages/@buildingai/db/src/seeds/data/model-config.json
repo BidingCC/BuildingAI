@@ -3,6 +3,15 @@
     "updated_at": "2026-01-19T10:11:01.145Z",
     "configs": [
         {
+            "provider": "spark",
+            "label": "讯飞星火",
+            "icon_url": "",
+            "supported_model_types": [
+                "llm"
+            ],
+            "models": []
+        },
+        {
             "provider": "ollama",
             "label": "Ollama",
             "icon_url": "",
