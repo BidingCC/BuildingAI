@@ -6,8 +6,6 @@ import {
   ModelSelectorInput as AIModelSelectorInput,
   ModelSelectorItem as AIModelSelectorItem,
   ModelSelectorList as AIModelSelectorList,
-  ModelSelectorLogo as AIModelSelectorLogo,
-  ModelSelectorLogoGroup as AIModelSelectorLogoGroup,
   ModelSelectorName as AIModelSelectorName,
   ModelSelectorTrigger as AIModelSelectorTrigger,
 } from "@buildingai/ui/components/ai-elements/model-selector";
@@ -21,6 +19,8 @@ import {
   ImageIcon,
   VideoIcon,
 } from "lucide-react";
+
+import { ProviderIcon } from "../../provider-icons";
 
 export interface ModelData {
   id: string;
@@ -63,7 +63,7 @@ export const ModelSelector = ({
       <AIModelSelectorTrigger asChild>
         <AIPromptInputButton>
           {selectedModel?.chefSlug && (
-            <AIModelSelectorLogo className="size-5" provider={selectedModel.chefSlug} />
+            <ProviderIcon className="size-5" provider={selectedModel.chefSlug} />
           )}
           {selectedModel?.name && (
             <AIModelSelectorName>
@@ -92,7 +92,7 @@ export const ModelSelector = ({
                     onSelect={() => handleModelSelect(m.id)}
                     value={m.id}
                   >
-                    <AIModelSelectorLogo provider={m.chefSlug} />
+                    <ProviderIcon provider={m.chefSlug} />
                     <AIModelSelectorName>
                       {m.name}
                       <Badge variant="secondary" className="text-muted-foreground ml-1.5 text-xs">
