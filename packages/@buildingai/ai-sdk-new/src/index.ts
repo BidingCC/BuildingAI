@@ -42,6 +42,8 @@ export {
 export {
     anthropic,
     type AnthropicProviderSettings,
+    azure,
+    type AzureProviderSettings,
     cohere,
     type CohereProviderSettings,
     custom,
@@ -62,6 +64,8 @@ export {
     type OllamaProviderSettings,
     openai,
     type OpenAIProviderSettings,
+    openrouter,
+    type OpenRouterProviderSettings,
     siliconflow,
     type SiliconFlowProviderSettings,
     tongyi,

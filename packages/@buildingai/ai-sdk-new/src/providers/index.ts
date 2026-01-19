@@ -1,4 +1,5 @@
 export { anthropic, type AnthropicProviderSettings } from "./anthropic";
+export { azure, type AzureProviderSettings } from "./azure";
 export { cohere, type CohereProviderSettings } from "./cohere";
 export { custom, type CustomProviderSettings } from "./custom";
 export { deepseek, type DeepSeekProviderSettings } from "./deepseek";
@@ -9,6 +10,7 @@ export { minimax, type MiniMaxProviderSettings } from "./minimax";
 export { moonshot, type MoonshotProviderSettings } from "./moonshot";
 export { ollama, type OllamaProviderSettings } from "./ollama";
 export { openai, type OpenAIProviderSettings } from "./openai";
+export { openrouter, type OpenRouterProviderSettings } from "./openrouter";
 export { siliconflow, type SiliconFlowProviderSettings } from "./siliconflow";
 export { tongyi, type TongYiProviderSettings } from "./tongyi";
 export { volcengine, type VolcengineProviderSettings } from "./volcengine";

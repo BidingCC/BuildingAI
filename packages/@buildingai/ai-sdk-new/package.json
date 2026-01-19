@@ -50,6 +50,8 @@
         "@ai-sdk/provider": "^3.0.4",
         "@ai-sdk/provider-utils": "^4.0.8",
         "@ai-sdk/xai": "^3.0.26",
+        "@openrouter/ai-sdk-provider": "^1.5.4",
+        "@quail-ai/azure-ai-provider": "^2.0.0",
         "@buildingai/constants": "workspace:*",
         "@buildingai/utils": "workspace:*",
         "@modelcontextprotocol/sdk": "1.21.0",
@@ -61,6 +63,7 @@
         "tiktoken": "^1.0.22",
         "vercel-minimax-ai-provider": "^0.0.1",
         "xlsx": "^0.18.5",
+        "zhipu-ai-provider": "^0.2.1",
         "zod": "^4.3.5"
     },
     "devDependencies": {
