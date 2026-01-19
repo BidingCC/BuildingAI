@@ -135,6 +135,9 @@ catalogs:
     '@internationalized/date':
       specifier: ^3.10.0
       version: 3.10.1
+    '@tabler/icons-react':
+      specifier: ^3.36.1
+      version: 3.36.1
     '@tailwindcss/vite':
       specifier: ^4.1.17
       version: 4.1.18
@@ -183,6 +186,9 @@ catalogs:
     echarts:
       specifier: ^5.6.0
       version: 5.6.0
+    lucide-react:
+      specifier: ^0.561.0
+      version: 0.561.0
     motion-v:
       specifier: ^1.7.4
       version: 1.7.4
@@ -619,6 +625,9 @@ importers:
       '@ai-sdk/google':
         specifier: ^3.0.2
         version: 3.0.5(zod@4.2.1)
+      '@ai-sdk/mcp':
+        specifier: ^1.0.0
+        version: 1.0.10(zod@4.2.1)
       '@ai-sdk/openai':
         specifier: ^3.0.2
         version: 3.0.7(zod@4.2.1)
@@ -655,9 +664,6 @@ importers:
       pdf-parse:
         specifier: ^1.1.4
         version: 1.1.4
-      qwen-ai-provider-v5:
-        specifier: ^2.1.0
-        version: 2.1.0(zod@4.2.1)
       tiktoken:
         specifier: ^1.0.22
         version: 1.0.22
@@ -1151,9 +1157,12 @@ importers:
       '@radix-ui/react-use-controllable-state':
         specifier: ^1.2.2
         version: 1.2.2(@types/react@19.2.8)(react@19.2.3)
+      '@tabler/icons-react':
+        specifier: catalog:web
+        version: 3.36.1(react@19.2.3)
       '@tailwindcss/vite':
         specifier: ^4.1.18
-        version: 4.1.18(rolldown-vite@7.3.0(@types/node@24.10.9)(esbuild@0.27.2)(jiti@2.6.1)(sass@1.78.0)(terser@5.44.1))
+        version: 4.1.18(vite@7.3.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.78.0)(terser@5.44.1))
       ai:
         specifier: ^6.0.37
         version: 6.0.38(zod@4.2.1)
@@ -1179,7 +1188,7 @@ importers:
         specifier: ^1.4.2
         version: 1.4.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       lucide-react:
-        specifier: ^0.561.0
+        specifier: catalog:web
         version: 0.561.0(react@19.2.3)
       motion:
         specifier: ^12.26.2
@@ -1259,7 +1268,7 @@ importers:
         version: 19.2.3(@types/react@19.2.8)
       '@vitejs/plugin-react':
         specifier: ^5.1.2
-        version: 5.1.2(rolldown-vite@7.3.0(@types/node@24.10.9)(esbuild@0.27.2)(jiti@2.6.1)(sass@1.78.0)(terser@5.44.1))
+        version: 5.1.2(vite@7.3.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.78.0)(terser@5.44.1))
       eslint:
         specifier: ^9.39.2
         version: 9.39.2(jiti@2.6.1)
@@ -1605,6 +1614,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.71.1(react@19.2.3))
+      '@tabler/icons-react':
+        specifier: catalog:web
+        version: 3.36.1(react@19.2.3)
       '@tauri-apps/api':
         specifier: ^2.9.1
         version: 2.9.1
@@ -1618,7 +1630,7 @@ importers:
         specifier: ^4.1.0
         version: 4.1.0
       lucide-react:
-        specifier: ^0.561.0
+        specifier: catalog:web
         version: 0.561.0(react@19.2.3)
       react:
         specifier: catalog:web
@@ -1636,7 +1648,7 @@ importers:
         specifier: catalog:web
         version: 2.15.4(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       zod:
-        specifier: ^4.3.5
+        specifier: ^4.2.1
         version: 4.3.5
     devDependencies:
       '@buildingai/eslint-config':
@@ -1774,6 +1786,12 @@ packages:
 
   '@ai-sdk/google@3.0.5':
     resolution: {integrity: sha512-+aaq8HEdEqJdXt/7ULHlc4oRL9RGdSNfJ8ptF/q1lWvuvH+Rz0c8zVk9DELCjQYxreuFgEMdtLtMD6cejNKjJg==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^4.2.1
+
+  '@ai-sdk/mcp@1.0.10':
+    resolution: {integrity: sha512-8/+l5oO/8jGXLD5Ddns6pDVO9AW5GEPB9jZ+vWkSKoBjHJlfdyHRXvonqLrJPitzPAoAixwqoRKCWNcctIZm9w==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^4.2.1
@@ -4549,6 +4567,14 @@ packages:
   '@szmarczak/http-timer@5.0.1':
     resolution: {integrity: sha512-+PmQX0PiAYPMeVYe237LJAYvOMYW1j2rH5YROyS3b4CTVJum34HfRvKvAzozHAQG0TnHNdUfY9nCeUyRAs//cw==}
     engines: {node: '>=14.16'}
+
+  '@tabler/icons-react@3.36.1':
+    resolution: {integrity: sha512-/8nOXeNeMoze9xY/QyEKG65wuvRhkT3q9aytaur6Gj8bYU2A98YVJyLc9MRmc5nVvpy+bRlrrwK/Ykr8WGyUWg==}
+    peerDependencies:
+      react: '>= 16'
+
+  '@tabler/icons@3.36.1':
+    resolution: {integrity: sha512-f4Jg3Fof/Vru5ioix/UO4GX+sdDsF9wQo47FbtvG+utIYYVQ/QVAC0QYgcBbAjQGfbdOh2CCf0BgiFOF9Ixtjw==}
 
   '@tailwindcss/node@4.1.18':
     resolution: {integrity: sha512-DoR7U1P7iYhw16qJ49fgXUlry1t4CpXeErJHnQ44JgTSKMaZUdf17cfn5mHchfJ4KRBZRFA/Coo+MUF5+gOaCQ==}
@@ -9543,12 +9569,6 @@ packages:
     resolution: {integrity: sha512-WuyALRjWPDGtt/wzJiadO5AXY+8hZ80hVpe6MyivgraREW751X3SbhRvG3eLKOYN+8VEvqLcf3wdnt44Z4S4SA==}
     engines: {node: '>=10'}
 
-  qwen-ai-provider-v5@2.1.0:
-    resolution: {integrity: sha512-I+Iv45ymrez1wieZFu0n/lc/lSkbAQMlujWBCfUWBUOf6DizYfvPKaydsojXM7CU8TcqJbYJuN3ofnaxFIwBZA==}
-    engines: {node: '>=18.0.0'}
-    peerDependencies:
-      zod: ^4.2.1
-
   radash@12.1.1:
     resolution: {integrity: sha512-h36JMxKRqrAxVD8201FrCpyeNuUY9Y5zZwujr20fFO77tpUtGa6EZzfKw/3WaiBX95fq7+MpsuMLNdSnORAwSA==}
     engines: {node: '>=14.18.0'}
@@ -11031,6 +11051,46 @@ packages:
       vite:
         optional: true
 
+  vite@7.3.1:
+    resolution: {integrity: sha512-w+N7Hifpc3gRjZ63vYBXA56dvvRlNWRczTdmCBBa+CotUzAPf5b7YMdMR/8CQoeYE5LX3W4wj6RYTgonm1b9DA==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    hasBin: true
+    peerDependencies:
+      '@types/node': ^20.19.0 || >=22.12.0
+      jiti: '>=1.21.0'
+      less: ^4.0.0
+      lightningcss: ^1.21.0
+      sass: ^1.70.0
+      sass-embedded: ^1.70.0
+      stylus: '>=0.54.8'
+      sugarss: ^5.0.0
+      terser: ^5.16.0
+      tsx: ^4.8.1
+      yaml: ^2.4.2
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+      jiti:
+        optional: true
+      less:
+        optional: true
+      lightningcss:
+        optional: true
+      sass:
+        optional: true
+      sass-embedded:
+        optional: true
+      stylus:
+        optional: true
+      sugarss:
+        optional: true
+      terser:
+        optional: true
+      tsx:
+        optional: true
+      yaml:
+        optional: true
+
   vizion@2.2.1:
     resolution: {integrity: sha512-sfAcO2yeSU0CSPFI/DmZp3FsFE9T+8913nv1xWBOyzODv13fwkn6Vl7HqxGpkr9F608M+8SuFId3s+BlZqfXww==}
     engines: {node: '>=4.0'}
@@ -11470,6 +11530,13 @@ snapshots:
     dependencies:
       '@ai-sdk/provider': 3.0.2
       '@ai-sdk/provider-utils': 4.0.4(zod@4.2.1)
+      zod: 4.2.1
+
+  '@ai-sdk/mcp@1.0.10(zod@4.2.1)':
+    dependencies:
+      '@ai-sdk/provider': 3.0.4
+      '@ai-sdk/provider-utils': 4.0.8(zod@4.2.1)
+      pkce-challenge: 5.0.1
       zod: 4.2.1
 
   '@ai-sdk/openai-compatible@2.0.4(zod@4.2.1)':
@@ -14550,6 +14617,13 @@ snapshots:
     dependencies:
       defer-to-connect: 2.0.1
 
+  '@tabler/icons-react@3.36.1(react@19.2.3)':
+    dependencies:
+      '@tabler/icons': 3.36.1
+      react: 19.2.3
+
+  '@tabler/icons@3.36.1': {}
+
   '@tailwindcss/node@4.1.18':
     dependencies:
       '@jridgewell/remapping': 2.3.5
@@ -14624,6 +14698,13 @@ snapshots:
       '@tailwindcss/oxide': 4.1.18
       tailwindcss: 4.1.18
       vite: rolldown-vite@7.3.0(@types/node@24.10.9)(esbuild@0.27.2)(jiti@2.6.1)(sass@1.78.0)(terser@5.44.1)
+
+  '@tailwindcss/vite@4.1.18(vite@7.3.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.78.0)(terser@5.44.1))':
+    dependencies:
+      '@tailwindcss/node': 4.1.18
+      '@tailwindcss/oxide': 4.1.18
+      tailwindcss: 4.1.18
+      vite: 7.3.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.78.0)(terser@5.44.1)
 
   '@tanstack/query-core@5.90.16': {}
 
@@ -15602,6 +15683,18 @@ snapshots:
       '@types/babel__core': 7.20.5
       react-refresh: 0.18.0
       vite: rolldown-vite@7.3.0(@types/node@24.10.9)(esbuild@0.27.2)(jiti@2.6.1)(sass@1.78.0)(terser@5.44.1)
+    transitivePeerDependencies:
+      - supports-color
+
+  '@vitejs/plugin-react@5.1.2(vite@7.3.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.78.0)(terser@5.44.1))':
+    dependencies:
+      '@babel/core': 7.28.6
+      '@babel/plugin-transform-react-jsx-self': 7.27.1(@babel/core@7.28.6)
+      '@babel/plugin-transform-react-jsx-source': 7.27.1(@babel/core@7.28.6)
+      '@rolldown/pluginutils': 1.0.0-beta.53
+      '@types/babel__core': 7.20.5
+      react-refresh: 0.18.0
+      vite: 7.3.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.78.0)(terser@5.44.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -20349,12 +20442,6 @@ snapshots:
 
   quick-lru@5.1.1: {}
 
-  qwen-ai-provider-v5@2.1.0(zod@4.2.1):
-    dependencies:
-      '@ai-sdk/provider': 3.0.1
-      '@ai-sdk/provider-utils': 4.0.2(zod@4.2.1)
-      zod: 4.2.1
-
   radash@12.1.1: {}
 
   radix-ui@1.4.3(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
@@ -22135,6 +22222,22 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
       - typescript
+
+  vite@7.3.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.78.0)(terser@5.44.1):
+    dependencies:
+      esbuild: 0.27.2
+      fdir: 6.5.0(picomatch@4.0.3)
+      picomatch: 4.0.3
+      postcss: 8.5.6
+      rollup: 4.54.0
+      tinyglobby: 0.2.15
+    optionalDependencies:
+      '@types/node': 24.10.9
+      fsevents: 2.3.3
+      jiti: 2.6.1
+      lightningcss: 1.30.2
+      sass: 1.78.0
+      terser: 5.44.1
 
   vizion@2.2.1:
     dependencies:

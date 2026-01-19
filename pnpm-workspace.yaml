@@ -59,6 +59,7 @@ catalogs:
     '@shikijs/langs': ^3.13.0
     '@shikijs/markdown-it': ^3.12.2
     '@tailwindcss/vite': ^4.1.17
+    '@tabler/icons-react': ^3.36.1
     '@tiptap/extension-color': ^2.27.1
     '@tiptap/extension-highlight': ^2.27.1
     '@tiptap/extension-image': ^2.27.1
@@ -76,6 +77,7 @@ catalogs:
     echarts: ^5.6.0
     mermaid: ^11.12.1
     motion-v: ^1.7.4
+    lucide-react: ^0.561.0
     panzoom: ^9.4.3
     pinia: ^3.0.4
     react: ^19.2.3

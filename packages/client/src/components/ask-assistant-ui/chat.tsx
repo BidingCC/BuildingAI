@@ -226,7 +226,7 @@ export const Chat = memo(function Chat({ title, onShare, welcomeMessage }: ChatP
       />
 
       <InfiniteScrollTop
-        className={cn("chat-scroll flex-1 pl-3", "contain-[layout_style_paint]")}
+        className={cn("chat-scroll flex-1", "contain-[layout_style_paint]")}
         prependKey={displayMessages[0]?.id ?? null}
         hasMore={hasMoreMessages}
         isLoadingMore={isLoadingMoreMessages}

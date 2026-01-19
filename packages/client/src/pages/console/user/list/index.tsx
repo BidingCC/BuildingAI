@@ -1,3 +1,4 @@
+import { useCopy } from "@buildingai/hooks";
 import { Badge } from "@buildingai/ui/components/ui/badge";
 import { Button } from "@buildingai/ui/components/ui/button";
 import {
@@ -26,9 +27,12 @@ import {
   SelectValue,
 } from "@buildingai/ui/components/ui/select";
 import { Switch } from "@buildingai/ui/components/ui/switch";
-import { EllipsisVertical, Plus } from "lucide-react";
+import { IconCircleCheckFilled } from "@tabler/icons-react";
+import { Copy, EllipsisVertical, Plus } from "lucide-react";
 
 const UserListIndexPage = () => {
+  const { copy, isCopying } = useCopy();
+
   return (
     <div className="flex h-full flex-col gap-4">
       <div className="bg-background sticky top-0 z-1 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
@@ -77,7 +81,17 @@ const UserListIndexPage = () => {
                 />
                 <div className="flex flex-col">
                   <span className="line-clamp-1">用户8jd92(9921hdk)</span>
-                  <p className="text-muted-foreground text-xs">编号：1289738917389127</p>
+                  <p className="text-muted-foreground group/user-number flex items-center text-xs">
+                    1289738917389127
+                    <Button
+                      className="size-fit rounded-[4px] p-0.5 opacity-0 group-hover/user-number:opacity-100"
+                      variant="ghost"
+                      onClick={() => copy("1289738917389127")}
+                      disabled={isCopying}
+                    >
+                      <Copy className="size-3" />
+                    </Button>
+                  </p>
                 </div>
 
                 <DropdownMenu>
@@ -94,7 +108,12 @@ const UserListIndexPage = () => {
               </div>
               <div>
                 <div className="mt-1 flex flex-wrap items-center gap-2">
+                  <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
+                    <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
+                    正常
+                  </Badge>
                   <Badge variant="secondary">角色</Badge>
+
                   <Switch className="ml-auto opacity-0 group-hover/provider-item:opacity-100" />
                 </div>
               </div>

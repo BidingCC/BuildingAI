@@ -13,7 +13,7 @@ const WelcomeAnimate = ({ step, setStep }: { step: number; setStep: (step: numbe
       <div className="flex w-fit flex-col items-start lg:gap-4 xl:flex-row">
         <SplitText
           text="Hello,"
-          className="h-10 text-center text-3xl font-bold sm:h-14 sm:text-5xl md:h-17 md:text-6xl lg:h-20 lg:text-7xl"
+          className="h-10 text-center text-2xl font-bold sm:h-14 sm:text-5xl md:h-17 md:text-6xl lg:h-20 lg:text-7xl"
           delay={100}
           duration={0.6}
           ease="power3.out"
@@ -27,7 +27,7 @@ const WelcomeAnimate = ({ step, setStep }: { step: number; setStep: (step: numbe
         <div className="flex w-fit items-center gap-4">
           <SplitText
             text="Welcome to"
-            className="h-10 text-3xl font-bold sm:h-14 sm:text-5xl md:h-17 md:text-6xl lg:h-20 lg:text-7xl"
+            className="h-10 text-2xl font-bold whitespace-nowrap sm:h-14 sm:text-5xl md:h-17 md:text-6xl lg:h-20 lg:text-7xl"
             delay={100}
             duration={0.6}
             ease="power3.out"
@@ -40,8 +40,8 @@ const WelcomeAnimate = ({ step, setStep }: { step: number; setStep: (step: numbe
             textAlign="center"
           />
           <SplitText
-            text="BuildingAI !"
-            className="text-primary h-10 text-3xl font-bold sm:h-14 sm:text-5xl md:h-17 md:text-6xl lg:h-20 lg:text-7xl"
+            text="BuildingAI!"
+            className="text-primary h-10 text-2xl font-bold sm:h-14 sm:text-5xl md:h-17 md:text-6xl lg:h-20 lg:text-7xl"
             delay={100}
             duration={0.6}
             ease="bounce.out"

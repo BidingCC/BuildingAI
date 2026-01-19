@@ -9,7 +9,7 @@ import {
 import { Input, PasswordInput } from "@buildingai/ui/components/ui/input";
 import { cn } from "@buildingai/ui/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -40,6 +40,8 @@ interface AdminAccountFormProps {
 }
 
 const AdminAccountForm = ({ step, defaultValues, onChange }: AdminAccountFormProps) => {
+  const [isVisible, setIsVisible] = useState(false);
+
   const form = useForm<AdminAccountFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -51,6 +53,15 @@ const AdminAccountForm = ({ step, defaultValues, onChange }: AdminAccountFormPro
     },
     mode: "onChange",
   });
+
+  // Handle fade-in effect when step becomes 1
+  useEffect(() => {
+    if (step === 1) {
+      setIsVisible(true);
+    } else {
+      setIsVisible(false);
+    }
+  }, [step]);
 
   useEffect(() => {
     const subscription = form.watch(async (_value, { name }) => {
@@ -64,7 +75,13 @@ const AdminAccountForm = ({ step, defaultValues, onChange }: AdminAccountFormPro
   }, [form, onChange]);
 
   return (
-    <div className={cn("flex justify-center", { hidden: step !== 1 })}>
+    <div
+      className={cn("flex justify-center transition-all delay-500 duration-1000 ease-in-out", {
+        "translate-y-4 opacity-0": !isVisible,
+        "translate-y-0 opacity-100": isVisible,
+        hidden: step !== 1,
+      })}
+    >
       <Form {...form}>
         <form className="w-xs space-y-6">
           <h1 className="text-xl font-bold">创建管理员账号</h1>

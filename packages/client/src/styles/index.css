@@ -19,7 +19,7 @@ body {
 }
 
 .chat-scroll > div {
-  overflow-y: auto;
+  @apply overflow-y-auto px-3 sm:pr-0;
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;
   scrollbar-gutter: stable;

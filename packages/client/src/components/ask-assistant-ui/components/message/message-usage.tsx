@@ -82,7 +82,7 @@ export const MessageUsage = memo(function MessageUsage({
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div className="text-sm font-semibold">
-              {viewMode === "token" ? "Token 使用量" : "积分消耗"}
+              {viewMode === "token" ? "Token用量" : "积分消耗"}
             </div>
             <div className="flex gap-1 rounded-md border p-0.5">
               <Button
