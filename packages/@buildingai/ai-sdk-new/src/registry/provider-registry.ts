@@ -1,7 +1,9 @@
 import {
     anthropic,
+    cohere,
     custom,
     deepseek,
+    giteeAi,
     google,
     hunyuan,
     minimax,
@@ -12,6 +14,7 @@ import {
     tongyi,
     volcengine,
     wenxin,
+    x,
     zhipuai,
 } from "../providers";
 import type { AIProvider, BaseProviderSettings, ProviderFactory } from "../types";
@@ -42,6 +45,9 @@ class ProviderRegistry {
         this.register("minimax", minimax, "MiniMax M2 系列模型");
         this.register("anthropic", anthropic, "Anthropic Claude 系列模型");
         this.register("google", google, "Google Gemini 系列模型");
+        this.register("cohere", cohere, "Cohere 系列模型");
+        this.register("gitee_ai", giteeAi, "Gitee AI 魔力方舟");
+        this.register("x", x, "xAI Grok 系列模型");
         this.register("custom", custom, "自定义 OpenAI 兼容 API");
     }
 

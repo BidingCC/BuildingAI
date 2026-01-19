@@ -1,6 +1,8 @@
 export { anthropic, type AnthropicProviderSettings } from "./anthropic";
+export { cohere, type CohereProviderSettings } from "./cohere";
 export { custom, type CustomProviderSettings } from "./custom";
 export { deepseek, type DeepSeekProviderSettings } from "./deepseek";
+export { giteeAi, type GiteeAIProviderSettings } from "./gitee-ai";
 export { google, type GoogleProviderSettings } from "./google";
 export { hunyuan, type HunyuanProviderSettings } from "./hunyuan";
 export { minimax, type MiniMaxProviderSettings } from "./minimax";
@@ -11,4 +13,5 @@ export { siliconflow, type SiliconFlowProviderSettings } from "./siliconflow";
 export { tongyi, type TongYiProviderSettings } from "./tongyi";
 export { volcengine, type VolcengineProviderSettings } from "./volcengine";
 export { wenxin, type WenXinProviderSettings } from "./wenxin";
+export { x, type XProviderSettings } from "./x";
 export { zhipuai, type ZhipuAIProviderSettings } from "./zhipuai";
