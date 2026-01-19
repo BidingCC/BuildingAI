@@ -95,12 +95,12 @@ export const McpSelector = memo(
           <Command>
             <div className="flex items-center gap-1 p-1 pb-0">
               <div className="flex-1">
-                <CommandInput placeholder="搜索 MCP 服务器..." />
+                <CommandInput placeholder="搜索 MCP 服务器..." className="h-7" />
               </div>
               <InputGroupButton
                 size="xs"
                 variant="default"
-                className="mt-1 size-8 shrink-0 rounded-full p-0"
+                className="mt-1 size-7 shrink-0 rounded-full p-0"
                 onClick={(e) => {
                   e.stopPropagation();
                   // TODO: 处理新增 MCP 服务器的逻辑

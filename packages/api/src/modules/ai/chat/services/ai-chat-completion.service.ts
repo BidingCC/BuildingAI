@@ -14,9 +14,11 @@ import { SecretService } from "@buildingai/core/modules";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { getProviderSecret } from "@buildingai/utils";
 import { Injectable, Logger } from "@nestjs/common";
+import type { LanguageModel } from "ai";
 import {
     convertToModelMessages,
     createUIMessageStream,
+    generateText,
     pipeUIMessageStreamToResponse,
     stepCountIs,
     ToolLoopAgent,
@@ -60,9 +62,11 @@ export class ChatCompletionService {
     async streamChat(params: ChatCompletionParams, response: ServerResponse): Promise<void> {
         let conversationId = params.conversationId;
         const { isToolApprovalFlow = false } = params;
+        const isNewConversation = !conversationId && params.saveConversation !== false;
+        const shouldGenerateTitle = isNewConversation && !params.title;
 
         try {
-            if (!conversationId && params.saveConversation !== false) {
+            if (isNewConversation) {
                 conversationId = (
                     await this.aiChatRecordService.createConversation(params.userId, {
                         title: params.title,
@@ -201,6 +205,20 @@ export class ChatCompletionService {
                                             isAborted,
                                             writer,
                                         );
+
+                                        if (shouldGenerateTitle && conversationId) {
+                                            const firstUserMessage = allMessages.find(
+                                                (m) => m.role === "user",
+                                            );
+                                            if (firstUserMessage) {
+                                                await this.generateConversationTitle({
+                                                    conversationId,
+                                                    userId: params.userId,
+                                                    message: firstUserMessage,
+                                                    model: provider(model.model).model,
+                                                }).catch(() => {});
+                                            }
+                                        }
                                     }
                                 } catch (error) {
                                     this.logger.error(
@@ -417,6 +435,30 @@ export class ChatCompletionService {
 
         writer.write({ type: "data-user-message-id", data: savedUserMessage.id });
         return savedUserMessage.id;
+    }
+
+    private async generateConversationTitle(args: {
+        conversationId: string;
+        userId: string;
+        message: UIMessage;
+        model: LanguageModel;
+    }): Promise<void> {
+        const { conversationId, userId, message, model } = args;
+
+        const { fullText } = extractTextFromParts(
+            (message.parts ?? []) as Array<{ type?: unknown; text?: string }>,
+        );
+        const input = fullText.trim().slice(0, 80);
+        if (!input) return;
+
+        const result = await generateText({
+            model,
+            prompt: `Title (same language, <=10 words). Only title.\n${input}`,
+        });
+        const title = result.text.trim().slice(0, 200);
+        if (!title) return;
+
+        await this.aiChatRecordService.updateConversation(conversationId, userId, { title });
     }
 
     private handleError(error: unknown, response: ServerResponse): void {
