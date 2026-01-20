@@ -28,14 +28,14 @@ export const providerIconsMap: Record<string, React.ReactNode> = {
       <path
         d="M4.709 15.955l4.72-2.647.08-.23-.08-.128H9.2l-.79-.048-2.698-.073-2.339-.097-2.266-.122-.571-.121L0 11.784l.055-.352.48-.321.686.06 1.52.103 2.278.158 1.652.097 2.449.255h.389l.055-.157-.134-.098-.103-.097-2.358-1.596-2.552-1.688-1.336-.972-.724-.491-.364-.462-.158-1.008.656-.722.881.06.225.061.893.686 1.908 1.476 2.491 1.833.365.304.145-.103.019-.073-.164-.274-1.355-2.446-1.446-2.49-.644-1.032-.17-.619a2.97 2.97 0 01-.104-.729L6.283.134 6.696 0l.996.134.42.364.62 1.414 1.002 2.229 1.555 3.03.456.898.243.832.091.255h.158V9.01l.128-1.706.237-2.095.23-2.695.08-.76.376-.91.747-.492.584.28.48.685-.067.444-.286 1.851-.559 2.903-.364 1.942h.212l.243-.242.985-1.306 1.652-2.064.73-.82.85-.904.547-.431h1.033l.76 1.129-.34 1.166-1.064 1.347-.881 1.142-1.264 1.7-.79 1.36.073.11.188-.02 2.856-.606 1.543-.28 1.841-.315.833.388.091.395-.328.807-1.969.486-2.309.462-3.439.813-.042.03.049.061 1.549.146.662.036h1.622l3.02.225.79.522.474.638-.079.485-1.215.62-1.64-.389-3.829-.91-1.312-.329h-.182v.11l1.093 1.068 2.006 1.81 2.509 2.33.127.578-.322.455-.34-.049-2.205-1.657-.851-.747-1.926-1.62h-.128v.17l.444.649 2.345 3.521.122 1.08-.17.353-.608.213-.668-.122-1.374-1.925-1.415-2.167-1.143-1.943-.14.08-.674 7.254-.316.37-.729.28-.607-.461-.322-.747.322-1.476.389-1.924.315-1.53.286-1.9.17-.632-.012-.042-.14.018-1.434 1.967-2.18 2.945-1.726 1.845-.414.164-.717-.37.067-.662.401-.589 2.388-3.036 1.44-1.882.93-1.086-.006-.158h-.055L4.132 18.56l-1.13.146-.487-.456.061-.746.231-.243 1.908-1.312-.006.006z"
         fill="#D97757"
-        fill-rule="nonzero"
+        fillRule="nonzero"
       ></path>
     </svg>
   ),
   x: (
     <svg
       fill="currentColor"
-      fill-rule="evenodd"
+      fillRule="evenodd"
       height="1em"
       style={{ flex: "none", lineHeight: 1 }}
       viewBox="0 0 24 24"
@@ -80,8 +80,8 @@ export const providerIconsMap: Record<string, React.ReactNode> = {
           y1="15.5"
           y2="12"
         >
-          <stop stop-color="#08B962"></stop>
-          <stop offset="1" stop-color="#08B962" stop-opacity="0"></stop>
+          <stop stopColor="#08B962"></stop>
+          <stop offset="1" stopColor="#08B962" stopOpacity="0"></stop>
         </linearGradient>
         <linearGradient
           gradientUnits="userSpaceOnUse"
@@ -91,8 +91,8 @@ export const providerIconsMap: Record<string, React.ReactNode> = {
           y1="5.5"
           y2="11"
         >
-          <stop stop-color="#F94543"></stop>
-          <stop offset="1" stop-color="#F94543" stop-opacity="0"></stop>
+          <stop stopColor="#F94543"></stop>
+          <stop offset="1" stopColor="#F94543" stopOpacity="0"></stop>
         </linearGradient>
         <linearGradient
           gradientUnits="userSpaceOnUse"
@@ -102,8 +102,8 @@ export const providerIconsMap: Record<string, React.ReactNode> = {
           y1="13.5"
           y2="12"
         >
-          <stop stop-color="#FABC12"></stop>
-          <stop offset=".46" stop-color="#FABC12" stop-opacity="0"></stop>
+          <stop stopColor="#FABC12"></stop>
+          <stop offset=".46" stopColor="#FABC12" stopOpacity="0"></stop>
         </linearGradient>
       </defs>
     </svg>
@@ -111,7 +111,7 @@ export const providerIconsMap: Record<string, React.ReactNode> = {
   ollama: (
     <svg
       fill="currentColor"
-      fill-rule="evenodd"
+      fillRule="evenodd"
       height="1em"
       style={{ flex: "none", lineHeight: 1 }}
       viewBox="0 0 24 24"
@@ -134,12 +134,12 @@ export const providerIconsMap: Record<string, React.ReactNode> = {
       <path
         d="M12.604 1.34c.393.69.784 1.382 1.174 2.075a.18.18 0 00.157.091h5.552c.174 0 .322.11.446.327l1.454 2.57c.19.337.24.478.024.837-.26.43-.513.864-.76 1.3l-.367.658c-.106.196-.223.28-.04.512l2.652 4.637c.172.301.111.494-.043.77-.437.785-.882 1.564-1.335 2.34-.159.272-.352.375-.68.37-.777-.016-1.552-.01-2.327.016a.099.099 0 00-.081.05 575.097 575.097 0 01-2.705 4.74c-.169.293-.38.363-.725.364-.997.003-2.002.004-3.017.002a.537.537 0 01-.465-.271l-1.335-2.323a.09.09 0 00-.083-.049H4.982c-.285.03-.553-.001-.805-.092l-1.603-2.77a.543.543 0 01-.002-.54l1.207-2.12a.198.198 0 000-.197 550.951 550.951 0 01-1.875-3.272l-.79-1.395c-.16-.31-.173-.496.095-.965.465-.813.927-1.625 1.387-2.436.132-.234.304-.334.584-.335a338.3 338.3 0 012.589-.001.124.124 0 00.107-.063l2.806-4.895a.488.488 0 01.422-.246c.524-.001 1.053 0 1.583-.006L11.704 1c.341-.003.724.032.9.34zm-3.432.403a.06.06 0 00-.052.03L6.254 6.788a.157.157 0 01-.135.078H3.253c-.056 0-.07.025-.041.074l5.81 10.156c.025.042.013.062-.034.063l-2.795.015a.218.218 0 00-.2.116l-1.32 2.31c-.044.078-.021.118.068.118l5.716.008c.046 0 .08.02.104.061l1.403 2.454c.046.081.092.082.139 0l5.006-8.76.783-1.382a.055.055 0 01.096 0l1.424 2.53a.122.122 0 00.107.062l2.763-.02a.04.04 0 00.035-.02.041.041 0 000-.04l-2.9-5.086a.108.108 0 010-.113l.293-.507 1.12-1.977c.024-.041.012-.062-.035-.062H9.2c-.059 0-.073-.026-.043-.077l1.434-2.505a.107.107 0 000-.114L9.225 1.774a.06.06 0 00-.053-.031zm6.29 8.02c.046 0 .058.02.034.06l-.832 1.465-2.613 4.585a.056.056 0 01-.05.029.058.058 0 01-.05-.029L8.498 9.841c-.02-.034-.01-.052.028-.054l.216-.012 6.722-.012z"
         fill="url(#lobe-icons-qwen-fill)"
-        fill-rule="nonzero"
+        fillRule="nonzero"
       ></path>
       <defs>
         <linearGradient id="lobe-icons-qwen-fill" x1="0%" x2="100%" y1="0%" y2="0%">
-          <stop offset="0%" stop-color="#6336E7" stop-opacity=".84"></stop>
-          <stop offset="100%" stop-color="#6F69F7" stop-opacity=".84"></stop>
+          <stop offset="0%" stopColor="#6336E7" stopOpacity=".84"></stop>
+          <stop offset="100%" stopColor="#6F69F7" stopOpacity=".84"></stop>
         </linearGradient>
       </defs>
     </svg>
@@ -221,9 +221,9 @@ export const providerIconsMap: Record<string, React.ReactNode> = {
           y1="89.199%"
           y2="12.194%"
         >
-          <stop offset=".06%" stop-color="#0867DF"></stop>
-          <stop offset="45.39%" stop-color="#0668E1"></stop>
-          <stop offset="85.91%" stop-color="#0064E0"></stop>
+          <stop offset=".06%" stopColor="#0867DF"></stop>
+          <stop offset="45.39%" stopColor="#0668E1"></stop>
+          <stop offset="85.91%" stopColor="#0064E0"></stop>
         </linearGradient>
         <linearGradient
           id="lobe-icons-meta-fill-1"
@@ -232,8 +232,8 @@ export const providerIconsMap: Record<string, React.ReactNode> = {
           y1="75.874%"
           y2="23.985%"
         >
-          <stop offset="13.23%" stop-color="#0064DF"></stop>
-          <stop offset="99.88%" stop-color="#0064E0"></stop>
+          <stop offset="13.23%" stopColor="#0064DF"></stop>
+          <stop offset="99.88%" stopColor="#0064E0"></stop>
         </linearGradient>
         <linearGradient
           id="lobe-icons-meta-fill-2"
@@ -242,8 +242,8 @@ export const providerIconsMap: Record<string, React.ReactNode> = {
           y1="89.127%"
           y2="16.131%"
         >
-          <stop offset="1.47%" stop-color="#0072EC"></stop>
-          <stop offset="68.81%" stop-color="#0064DF"></stop>
+          <stop offset="1.47%" stopColor="#0072EC"></stop>
+          <stop offset="68.81%" stopColor="#0064DF"></stop>
         </linearGradient>
         <linearGradient
           id="lobe-icons-meta-fill-3"
@@ -252,8 +252,8 @@ export const providerIconsMap: Record<string, React.ReactNode> = {
           y1="90.19%"
           y2="15.745%"
         >
-          <stop offset="7.31%" stop-color="#007CF6"></stop>
-          <stop offset="99.43%" stop-color="#0072EC"></stop>
+          <stop offset="7.31%" stopColor="#007CF6"></stop>
+          <stop offset="99.43%" stopColor="#0072EC"></stop>
         </linearGradient>
         <linearGradient
           id="lobe-icons-meta-fill-4"
@@ -262,8 +262,8 @@ export const providerIconsMap: Record<string, React.ReactNode> = {
           y1="58.301%"
           y2="37.004%"
         >
-          <stop offset="7.31%" stop-color="#007FF9"></stop>
-          <stop offset="100%" stop-color="#007CF6"></stop>
+          <stop offset="7.31%" stopColor="#007FF9"></stop>
+          <stop offset="100%" stopColor="#007CF6"></stop>
         </linearGradient>
         <linearGradient
           id="lobe-icons-meta-fill-5"
@@ -272,8 +272,8 @@ export const providerIconsMap: Record<string, React.ReactNode> = {
           y1="12.502%"
           y2="63.624%"
         >
-          <stop offset="7.31%" stop-color="#007FF9"></stop>
-          <stop offset="100%" stop-color="#0082FB"></stop>
+          <stop offset="7.31%" stopColor="#007FF9"></stop>
+          <stop offset="100%" stopColor="#0082FB"></stop>
         </linearGradient>
         <linearGradient
           id="lobe-icons-meta-fill-6"
@@ -282,8 +282,8 @@ export const providerIconsMap: Record<string, React.ReactNode> = {
           y1="68.859%"
           y2="23.174%"
         >
-          <stop offset="27.99%" stop-color="#007FF8"></stop>
-          <stop offset="91.41%" stop-color="#0082FB"></stop>
+          <stop offset="27.99%" stopColor="#007FF8"></stop>
+          <stop offset="91.41%" stopColor="#0082FB"></stop>
         </linearGradient>
         <linearGradient
           id="lobe-icons-meta-fill-7"
@@ -292,8 +292,8 @@ export const providerIconsMap: Record<string, React.ReactNode> = {
           y1="6.235%"
           y2="98.514%"
         >
-          <stop offset="0%" stop-color="#0082FB"></stop>
-          <stop offset="99.95%" stop-color="#0081FA"></stop>
+          <stop offset="0%" stopColor="#0082FB"></stop>
+          <stop offset="99.95%" stopColor="#0081FA"></stop>
         </linearGradient>
         <linearGradient
           id="lobe-icons-meta-fill-8"
@@ -302,8 +302,8 @@ export const providerIconsMap: Record<string, React.ReactNode> = {
           y1="4.661%"
           y2="69.077%"
         >
-          <stop offset="6.19%" stop-color="#0081FA"></stop>
-          <stop offset="100%" stop-color="#0080F9"></stop>
+          <stop offset="6.19%" stopColor="#0081FA"></stop>
+          <stop offset="100%" stopColor="#0080F9"></stop>
         </linearGradient>
         <linearGradient
           id="lobe-icons-meta-fill-9"
@@ -312,8 +312,8 @@ export const providerIconsMap: Record<string, React.ReactNode> = {
           y1="59.32%"
           y2="33.244%"
         >
-          <stop offset="0%" stop-color="#027AF3"></stop>
-          <stop offset="100%" stop-color="#0080F9"></stop>
+          <stop offset="0%" stopColor="#027AF3"></stop>
+          <stop offset="100%" stopColor="#0080F9"></stop>
         </linearGradient>
         <linearGradient
           id="lobe-icons-meta-fill-10"
@@ -322,8 +322,8 @@ export const providerIconsMap: Record<string, React.ReactNode> = {
           y1="50.001%"
           y2="50.001%"
         >
-          <stop offset="0%" stop-color="#0377EF"></stop>
-          <stop offset="99.94%" stop-color="#0279F1"></stop>
+          <stop offset="0%" stopColor="#0377EF"></stop>
+          <stop offset="99.94%" stopColor="#0279F1"></stop>
         </linearGradient>
         <linearGradient
           id="lobe-icons-meta-fill-11"
@@ -332,8 +332,8 @@ export const providerIconsMap: Record<string, React.ReactNode> = {
           y1="35.298%"
           y2="57.811%"
         >
-          <stop offset=".19%" stop-color="#0471E9"></stop>
-          <stop offset="100%" stop-color="#0377EF"></stop>
+          <stop offset=".19%" stopColor="#0471E9"></stop>
+          <stop offset="100%" stopColor="#0377EF"></stop>
         </linearGradient>
         <linearGradient
           id="lobe-icons-meta-fill-12"
@@ -342,8 +342,8 @@ export const providerIconsMap: Record<string, React.ReactNode> = {
           y1="19.719%"
           y2="84.908%"
         >
-          <stop offset="27.65%" stop-color="#0867DF"></stop>
-          <stop offset="100%" stop-color="#0471E9"></stop>
+          <stop offset="27.65%" stopColor="#0867DF"></stop>
+          <stop offset="100%" stopColor="#0471E9"></stop>
         </linearGradient>
       </defs>
     </svg>
@@ -360,14 +360,14 @@ export const providerIconsMap: Record<string, React.ReactNode> = {
       <path
         d="M11.991 23.503a.24.24 0 00-.244.248.24.24 0 00.244.249.24.24 0 00.245-.249.24.24 0 00-.22-.247l-.025-.001zM9.671 5.365a1.697 1.697 0 011.099 2.132l-.071.172-.016.04-.018.054c-.07.16-.104.32-.104.498-.035.71.47 1.279 1.186 1.314h.366c1.309.053 2.338 1.173 2.286 2.523-.052 1.332-1.152 2.38-2.478 2.327h-.174c-.715.018-1.274.64-1.239 1.368 0 .124.018.23.053.337.209.373.54.658.96.8.75.23 1.517-.125 1.9-.782l.018-.035c.402-.64 1.17-.96 1.92-.711.854.284 1.378 1.226 1.099 2.167a1.661 1.661 0 01-2.077 1.102 1.711 1.711 0 01-.907-.711l-.017-.035c-.2-.323-.463-.58-.851-.711l-.056-.018a1.646 1.646 0 00-1.954.746 1.66 1.66 0 01-1.065.764 1.677 1.677 0 01-1.989-1.279c-.209-.906.332-1.83 1.257-2.043a1.51 1.51 0 01.296-.035h.018c.68-.071 1.151-.622 1.116-1.333a1.307 1.307 0 00-.227-.693 2.515 2.515 0 01-.366-1.403 2.39 2.39 0 01.366-1.208c.14-.195.21-.444.227-.693.018-.71-.506-1.261-1.186-1.332l-.07-.018a1.43 1.43 0 01-.299-.07l-.05-.019a1.7 1.7 0 01-1.047-2.114 1.68 1.68 0 012.094-1.101zm-5.575 10.11c.26-.264.639-.367.994-.27.355.096.633.379.728.74.095.362-.007.748-.267 1.013-.402.41-1.053.41-1.455 0a1.062 1.062 0 010-1.482zm14.845-.294c.359-.09.738.024.992.297.254.274.344.665.237 1.025-.107.36-.396.634-.756.718-.551.128-1.1-.22-1.23-.781a1.05 1.05 0 01.757-1.26zm-.064-4.39c.314.32.49.753.49 1.206 0 .452-.176.886-.49 1.206-.315.32-.74.5-1.185.5-.444 0-.87-.18-1.184-.5a1.727 1.727 0 010-2.412 1.654 1.654 0 012.369 0zm-11.243.163c.364.484.447 1.128.218 1.691a1.665 1.665 0 01-2.188.923c-.855-.36-1.26-1.358-.907-2.228a1.68 1.68 0 011.33-1.038c.593-.08 1.183.169 1.547.652zm11.545-4.221c.368 0 .708.2.892.524.184.324.184.724 0 1.048a1.026 1.026 0 01-.892.524c-.568 0-1.03-.47-1.03-1.048 0-.579.462-1.048 1.03-1.048zm-14.358 0c.368 0 .707.2.891.524.184.324.184.724 0 1.048a1.026 1.026 0 01-.891.524c-.569 0-1.03-.47-1.03-1.048 0-.579.461-1.048 1.03-1.048zm10.031-1.475c.925 0 1.675.764 1.675 1.706s-.75 1.705-1.675 1.705-1.674-.763-1.674-1.705c0-.942.75-1.706 1.674-1.706zm-2.626-.684c.362-.082.653-.356.761-.718a1.062 1.062 0 00-.238-1.028 1.017 1.017 0 00-.996-.294c-.547.14-.881.7-.752 1.257.13.558.675.907 1.225.783zm0 16.876c.359-.087.644-.36.75-.72a1.062 1.062 0 00-.237-1.019 1.018 1.018 0 00-.985-.301 1.037 1.037 0 00-.762.717c-.108.361-.017.754.239 1.028.245.263.606.377.953.305l.043-.01zM17.19 3.5a.631.631 0 00.628-.64c0-.355-.279-.64-.628-.64a.631.631 0 00-.628.64c0 .355.28.64.628.64zm-10.38 0a.631.631 0 00.628-.64c0-.355-.28-.64-.628-.64a.631.631 0 00-.628.64c0 .355.279.64.628.64zm-5.182 7.852a.631.631 0 00-.628.64c0 .354.28.639.628.639a.63.63 0 00.627-.606l.001-.034a.62.62 0 00-.628-.64zm5.182 9.13a.631.631 0 00-.628.64c0 .355.279.64.628.64a.631.631 0 00.628-.64c0-.355-.28-.64-.628-.64zm10.38.018a.631.631 0 00-.628.64c0 .355.28.64.628.64a.631.631 0 00.628-.64c0-.355-.279-.64-.628-.64zm5.182-9.148a.631.631 0 00-.628.64c0 .354.279.639.628.639a.631.631 0 00.628-.64c0-.355-.28-.64-.628-.64zm-.384-4.992a.24.24 0 00.244-.249.24.24 0 00-.244-.249.24.24 0 00-.244.249c0 .142.122.249.244.249zM11.991.497a.24.24 0 00.245-.248A.24.24 0 0011.99 0a.24.24 0 00-.244.249c0 .133.108.236.223.247l.021.001zM2.011 6.36a.24.24 0 00.245-.249.24.24 0 00-.244-.249.24.24 0 00-.244.249.24.24 0 00.244.249zm0 11.263a.24.24 0 00-.243.248.24.24 0 00.244.249.24.24 0 00.244-.249.252.252 0 00-.244-.248zm19.995-.018a.24.24 0 00-.245.248.24.24 0 00.245.25.24.24 0 00.244-.25.252.252 0 00-.244-.248z"
         fill="#3859FF"
-        fill-rule="nonzero"
+        fillRule="nonzero"
       ></path>
     </svg>
   ),
   openrouter: (
     <svg
       fill="currentColor"
-      fill-rule="evenodd"
+      fillRule="evenodd"
       height="1em"
       style={{ flex: "none", lineHeight: 1 }}
       viewBox="0 0 24 24"
@@ -408,7 +408,7 @@ export const providerIconsMap: Record<string, React.ReactNode> = {
   baai: (
     <svg
       fill="currentColor"
-      fill-rule="evenodd"
+      fillRule="evenodd"
       height="1em"
       style={{ flex: "none", lineHeight: 1 }}
       viewBox="0 0 24 24"
@@ -439,21 +439,21 @@ export const providerIconsMap: Record<string, React.ReactNode> = {
           y1="8.678%"
           y2="91.322%"
         >
-          <stop offset="0%" stop-color="#FEC13E"></stop>
-          <stop offset="100%" stop-color="#FF6933"></stop>
+          <stop offset="0%" stopColor="#FEC13E"></stop>
+          <stop offset="100%" stopColor="#FF6933"></stop>
         </linearGradient>
       </defs>
       <path
         d="M7.333 2h-3.2l-2 4.333V17.8L0 22h5.2l2.028-4.2L7.333 2zm7.334 0h-5.2v20h5.2V2zM16.8 7.733H22V22h-5.2V7.733zM22 2h-5.2v4.133H22V2z"
         fill="url(#lobe-icons-baichuan-fill)"
-        fill-rule="nonzero"
+        fillRule="nonzero"
       ></path>
     </svg>
   ),
   moonshot: (
     <svg
       fill="currentColor"
-      fill-rule="evenodd"
+      fillRule="evenodd"
       height="1em"
       style={{ flex: "none", lineHeight: 1 }}
       viewBox="0 0 24 24"
@@ -492,13 +492,13 @@ export const providerIconsMap: Record<string, React.ReactNode> = {
         clip-rule="evenodd"
         d="M8.128 14.099c.592 0 1.77-.033 3.398-.703 1.897-.781 5.672-2.2 8.395-3.656 1.905-1.018 2.74-2.366 2.74-4.18A4.56 4.56 0 0018.1 1H7.549A6.55 6.55 0 001 7.55c0 3.617 2.745 6.549 7.128 6.549z"
         fill="#39594D"
-        fill-rule="evenodd"
+        fillRule="evenodd"
       ></path>
       <path
         clip-rule="evenodd"
         d="M9.912 18.61a4.387 4.387 0 012.705-4.052l3.323-1.38c3.361-1.394 7.06 1.076 7.06 4.715a5.104 5.104 0 01-5.105 5.104l-3.597-.001a4.386 4.386 0 01-4.386-4.387z"
         fill="#D18EE2"
-        fill-rule="evenodd"
+        fillRule="evenodd"
       ></path>
       <path
         d="M4.776 14.962A3.775 3.775 0 001 18.738v.489a3.776 3.776 0 007.551 0v-.49a3.775 3.775 0 00-3.775-3.775z"
@@ -579,7 +579,7 @@ export const providerIconsMap: Record<string, React.ReactNode> = {
   coze: (
     <svg
       fill="currentColor"
-      fill-rule="evenodd"
+      fillRule="evenodd"
       height="1em"
       style={{ flex: "none", lineHeight: 1 }}
       viewBox="0 0 24 24"
@@ -638,14 +638,14 @@ export const providerIconsMap: Record<string, React.ReactNode> = {
           y1="50.057%"
           y2="50.057%"
         >
-          <stop offset="0%" stop-color="#E2167E"></stop>
-          <stop offset="100%" stop-color="#FE603C"></stop>
+          <stop offset="0%" stopColor="#E2167E"></stop>
+          <stop offset="100%" stopColor="#FE603C"></stop>
         </linearGradient>
       </defs>
       <path
         d="M16.278 2c1.156 0 2.093.927 2.093 2.07v12.501a.74.74 0 00.744.709.74.74 0 00.743-.709V9.099a2.06 2.06 0 012.071-2.049A2.06 2.06 0 0124 9.1v6.561a.649.649 0 01-.652.645.649.649 0 01-.653-.645V9.1a.762.762 0 00-.766-.758.762.762 0 00-.766.758v7.472a2.037 2.037 0 01-2.048 2.026 2.037 2.037 0 01-2.048-2.026v-12.5a.785.785 0 00-.788-.753.785.785 0 00-.789.752l-.001 15.904A2.037 2.037 0 0113.441 22a2.037 2.037 0 01-2.048-2.026V18.04c0-.356.292-.645.652-.645.36 0 .652.289.652.645v1.934c0 .263.142.506.372.638.23.131.514.131.744 0a.734.734 0 00.372-.638V4.07c0-1.143.937-2.07 2.093-2.07zm-5.674 0c1.156 0 2.093.927 2.093 2.07v11.523a.648.648 0 01-.652.645.648.648 0 01-.652-.645V4.07a.785.785 0 00-.789-.78.785.785 0 00-.789.78v14.013a2.06 2.06 0 01-2.07 2.048 2.06 2.06 0 01-2.071-2.048V9.1a.762.762 0 00-.766-.758.762.762 0 00-.766.758v3.8a2.06 2.06 0 01-2.071 2.049A2.06 2.06 0 010 12.9v-1.378c0-.357.292-.646.652-.646.36 0 .653.29.653.646V12.9c0 .418.343.757.766.757s.766-.339.766-.757V9.099a2.06 2.06 0 012.07-2.048 2.06 2.06 0 012.071 2.048v8.984c0 .419.343.758.767.758.423 0 .766-.339.766-.758V4.07c0-1.143.937-2.07 2.093-2.07z"
         fill="url(#lobe-icons-minimax-fill)"
-        fill-rule="nonzero"
+        fillRule="nonzero"
       ></path>
     </svg>
   ),
@@ -670,7 +670,7 @@ export const providerIconsMap: Record<string, React.ReactNode> = {
         clip-rule="evenodd"
         d="M9.033 18.323c.709.354 1.542.56 2.495.56 4.764 0 6.583-4.937 4.894-8.099 0 0 4.071.693 4.418 3.811.156 1.403-.565 3.27-1.902 4.89-3.458 1.57-7.29.84-9.905-1.162z"
         fill="#1652D8"
-        fill-rule="evenodd"
+        fillRule="evenodd"
       ></path>
     </svg>
   ),
@@ -687,7 +687,7 @@ export const providerIconsMap: Record<string, React.ReactNode> = {
         clip-rule="evenodd"
         d="M22.956 6.521H12.522c-.577 0-1.044.468-1.044 1.044v3.13c0 .577-.466 1.044-1.043 1.044H1.044c-.577 0-1.044.467-1.044 1.044v4.174C0 17.533.467 18 1.044 18h10.434c.577 0 1.044-.467 1.044-1.043v-3.13c0-.578.466-1.044 1.043-1.044h9.391c.577 0 1.044-.467 1.044-1.044V7.565c0-.576-.467-1.044-1.044-1.044z"
         fill="#6E29F6"
-        fill-rule="evenodd"
+        fillRule="evenodd"
       ></path>
     </svg>
   ),
@@ -716,8 +716,8 @@ export const providerIconsMap: Record<string, React.ReactNode> = {
           y1="75.177%"
           y2="25.028%"
         >
-          <stop offset="0%" stop-color="#0A51C3"></stop>
-          <stop offset="100%" stop-color="#23A4FB"></stop>
+          <stop offset="0%" stopColor="#0A51C3"></stop>
+          <stop offset="100%" stopColor="#23A4FB"></stop>
         </linearGradient>
       </defs>
     </svg>
@@ -725,7 +725,7 @@ export const providerIconsMap: Record<string, React.ReactNode> = {
   gitee_ai: (
     <svg
       fill="currentColor"
-      fill-rule="evenodd"
+      fillRule="evenodd"
       height="1em"
       style={{ flex: "none", lineHeight: 1 }}
       viewBox="0 0 24 24"

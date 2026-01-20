@@ -64,7 +64,7 @@ const getTerminalLabel = (terminalType: ExtensionSupportTerminalType): string =>
 };
 
 const ExtensionIndexPage = () => {
-  const [queryParams, setQueryParams] = useState<QueryExtensionDto>({});
+  const [queryParams, setQueryParams] = useState<QueryExtensionDto>();
   const { data, refetch } = useExtensionsListQuery(queryParams);
   const { confirm } = useAlertDialog();
 
@@ -161,7 +161,11 @@ const ExtensionIndexPage = () => {
   return (
     <div className="flex flex-col gap-4">
       <div className="bg-background sticky top-0 z-1 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-        <Input placeholder="搜索应用名称或标识符" onChange={handleSearchChange} />
+        <Input
+          placeholder="搜索应用名称或标识符"
+          className="text-sm"
+          onChange={handleSearchChange}
+        />
         <Select onValueChange={handleStatusChange}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="应用状态" />
@@ -198,9 +202,9 @@ const ExtensionIndexPage = () => {
             </div>
           </div>
 
-          <div className="flex min-h-20 items-end gap-4">
+          <div className="flex min-h-26 flex-1 items-end gap-4">
             <Button size="xs" className="flex-1" variant="outline">
-              应用市场获取
+              获取激活码
               <ExternalLink />
             </Button>
             <Button size="xs" className="flex-1" variant="outline">
@@ -209,138 +213,148 @@ const ExtensionIndexPage = () => {
           </div>
         </div>
 
-        {data?.items.map((extension, index) => (
-          <div key={index} className="relative flex flex-col rounded-lg border p-4">
-            <div className="flex items-center gap-3">
-              <Avatar className="size-12 after:rounded-lg">
-                <AvatarImage src={extension.icon} alt={extension.name} className="rounded-lg" />
-                <AvatarFallback className="size-12 rounded-lg">
-                  <IconPuzzle />
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col">
-                <div>{extension.name}</div>
-                {extension.isCompatible ? (
-                  <p className="text-muted-foreground line-clamp-1 text-xs">
-                    {extension.description}
-                  </p>
-                ) : (
-                  <p className="text-destructive line-clamp-1 flex items-center gap-0.5 text-xs">
-                    <IconXboxXFilled className="fill-destructive size-3.5" />
-                    平台版本不兼容
-                  </p>
-                )}
-              </div>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button className="absolute top-2 right-2" size="icon-sm" variant="ghost">
-                    <EllipsisVertical />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem>
-                    <Info />
-                    详情
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <FileText />
-                    更新日志
-                  </DropdownMenuItem>
-                  {extension.isLocal && (
-                    <DropdownMenuItem>
-                      <Edit />
-                      编辑
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    variant={extension.status === ExtensionStatus.ENABLED ? "warning" : "default"}
-                    onClick={() => handleToggleStatus(extension)}
-                    disabled={enableMutation.isPending || disableMutation.isPending}
-                  >
-                    {extension.status === ExtensionStatus.ENABLED ? <PowerOff /> : <Power />}
-                    {extension.status === ExtensionStatus.ENABLED ? "禁用" : "启用"}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    variant="destructive"
-                    onClick={() => handleUninstall(extension)}
-                    disabled={uninstallMutation.isPending}
-                  >
-                    <Trash2 />
-                    卸载
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              <Badge variant="secondary">v{extension.version}</Badge>
-
-              {extension.status === ExtensionStatus.ENABLED && (
-                <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
-                  <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
-                  已启用
-                </Badge>
-              )}
-              {extension.status === ExtensionStatus.DISABLED && (
-                <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
-                  <IconXboxXFilled className="fill-destructive" />
-                  已禁用
-                </Badge>
-              )}
-
-              {extension.supportTerminal?.map((terminal) => (
-                <Badge key={terminal} variant="secondary">
-                  {getTerminalLabel(terminal)}
-                </Badge>
-              ))}
-              {extension.isLocal && <Badge variant="secondary">本地</Badge>}
-
-              {/* <Switch className="ml-auto opacity-0 group-hover/provider-item:opacity-100" /> */}
-            </div>
-
-            <div className="mt-6 flex items-end justify-between gap-2">
-              <div className="flex items-center gap-1.5">
-                <Avatar className="size-5">
-                  <AvatarImage src={extension.author?.avatar} />
-                  <AvatarFallback>
-                    <User className="size-3" />
+        {data?.items && data?.items.length > 0 ? (
+          data?.items.map((extension, index) => (
+            <div key={index} className="relative flex flex-col gap-4 rounded-lg border p-4">
+              <div className="flex items-center gap-3">
+                <Avatar className="size-12 after:rounded-lg">
+                  <AvatarImage src={extension.icon} alt={extension.name} className="rounded-lg" />
+                  <AvatarFallback className="size-12 rounded-lg">
+                    <IconPuzzle />
                   </AvatarFallback>
                 </Avatar>
-                <span className="line-clamp-1 text-xs">{extension.author?.name || "未知作者"}</span>
+                <div className="flex flex-col">
+                  <div>{extension.name}</div>
+                  {extension.isCompatible ? (
+                    <p className="text-muted-foreground line-clamp-1 text-xs">
+                      {extension.description}
+                    </p>
+                  ) : (
+                    <p className="text-destructive line-clamp-1 flex items-center gap-0.5 text-xs">
+                      <IconXboxXFilled className="fill-destructive size-3.5" />
+                      平台版本不兼容
+                    </p>
+                  )}
+                </div>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button className="absolute top-2 right-2" size="icon-sm" variant="ghost">
+                      <EllipsisVertical />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem>
+                      <Info />
+                      详情
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <FileText />
+                      更新日志
+                    </DropdownMenuItem>
+                    {extension.isLocal && (
+                      <DropdownMenuItem>
+                        <Edit />
+                        编辑
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      variant={extension.status === ExtensionStatus.ENABLED ? "warning" : "default"}
+                      onClick={() => handleToggleStatus(extension)}
+                      disabled={enableMutation.isPending || disableMutation.isPending}
+                    >
+                      {extension.status === ExtensionStatus.ENABLED ? <PowerOff /> : <Power />}
+                      {extension.status === ExtensionStatus.ENABLED ? "禁用" : "启用"}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onClick={() => handleUninstall(extension)}
+                      disabled={uninstallMutation.isPending}
+                    >
+                      <Trash2 />
+                      卸载
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
-              <div className="flex items-center gap-2">
-                {extension.status === ExtensionStatus.ENABLED && (
-                  <Button size="xs" variant="outline">
-                    <Settings />
-                    管理
-                  </Button>
-                )}
-                {extension.hasUpdate && extension.isCompatible && (
-                  <Button
-                    size="xs"
-                    onClick={() => handleUpgrade(extension)}
-                    disabled={upgradeMutation.isPending}
-                  >
-                    <CircleFadingArrowUp />
-                    升级
-                  </Button>
-                )}
-                {extension.status === ExtensionStatus.DISABLED && extension.isCompatible && (
-                  <Button
-                    size="xs"
-                    onClick={() => handleToggleStatus(extension)}
-                    disabled={enableMutation.isPending}
-                  >
-                    <Power />
-                    启用
-                  </Button>
-                )}
+
+              <div className="flex flex-col gap-4">
+                <div className="flex min-h-12 flex-wrap gap-2">
+                  <Badge variant="secondary">v{extension.version}</Badge>
+
+                  {extension.status === ExtensionStatus.ENABLED && (
+                    <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
+                      <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
+                      已启用
+                    </Badge>
+                  )}
+                  {extension.status === ExtensionStatus.DISABLED && (
+                    <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
+                      <IconXboxXFilled className="fill-destructive" />
+                      已禁用
+                    </Badge>
+                  )}
+
+                  {extension.supportTerminal?.map((terminal) => (
+                    <Badge key={terminal} variant="secondary">
+                      {getTerminalLabel(terminal)}
+                    </Badge>
+                  ))}
+                  {extension.isLocal && <Badge variant="secondary">本地</Badge>}
+
+                  {/* <Switch className="ml-auto opacity-0 group-hover/provider-item:opacity-100" /> */}
+                </div>
+
+                <div className="flex items-end justify-between gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <Avatar className="size-5">
+                      <AvatarImage src={extension.author?.avatar} />
+                      <AvatarFallback>
+                        <User className="size-3" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="line-clamp-1 text-xs">
+                      {extension.author?.name || "未知作者"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {extension.status === ExtensionStatus.ENABLED && (
+                      <Button size="xs" variant="outline">
+                        <Settings />
+                        管理
+                      </Button>
+                    )}
+                    {extension.hasUpdate && extension.isCompatible && (
+                      <Button
+                        size="xs"
+                        onClick={() => handleUpgrade(extension)}
+                        disabled={upgradeMutation.isPending}
+                      >
+                        <CircleFadingArrowUp />
+                        升级
+                      </Button>
+                    )}
+                    {extension.status === ExtensionStatus.DISABLED && extension.isCompatible && (
+                      <Button
+                        size="xs"
+                        onClick={() => handleToggleStatus(extension)}
+                        disabled={enableMutation.isPending}
+                      >
+                        <Power />
+                        启用
+                      </Button>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
+          ))
+        ) : (
+          <div className="col-span-1 flex h-46.5 items-center justify-center gap-4 sm:col-span-2 lg:col-span-3 xl:col-span-4 2xl:col-span-5">
+            <span className="text-muted-foreground text-sm">没有找到应用</span>
           </div>
-        ))}
+        )}
       </div>
     </div>
   );
