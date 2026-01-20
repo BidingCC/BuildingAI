@@ -1,4 +1,5 @@
 import type { AiProvider } from "@buildingai/services/web";
+import { getLocalStorage, safeJsonParse, safeJsonStringify } from "@buildingai/stores";
 import type { UIMessage } from "ai";
 import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -77,20 +78,19 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const STORAGE_KEY = "__selected_model_id__";
+  const MCP_SERVERS_STORAGE_KEY = "__selected_mcp_server_ids__";
 
-  const getCachedModelId = () => {
-    if (typeof window === "undefined") return "";
-    return localStorage.getItem(STORAGE_KEY) || "";
-  };
+  const storage = typeof window !== "undefined" ? getLocalStorage() : null;
 
-  const saveModelId = (modelId: string) => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem(STORAGE_KEY, modelId);
-    }
-  };
+  const [selectedModelId, setSelectedModelId] = useState(() => {
+    return storage?.getItem(STORAGE_KEY) || "";
+  });
 
-  const [selectedModelId, setSelectedModelId] = useState(getCachedModelId);
-  const [selectedMcpServerIds, setSelectedMcpServerIds] = useState<string[]>([]);
+  const [selectedMcpServerIds, setSelectedMcpServerIds] = useState<string[]>(() => {
+    if (!storage) return [];
+    const cached = safeJsonParse<string[]>(storage.getItem(MCP_SERVERS_STORAGE_KEY));
+    return Array.isArray(cached) ? cached : [];
+  });
 
   useEffect(() => {
     if (models.length === 0) return;
@@ -100,20 +100,27 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
 
     if (modelId !== selectedModelId) {
       setSelectedModelId(modelId);
-      saveModelId(modelId);
+      storage?.setItem(STORAGE_KEY, modelId);
     } else if (!selectedModelId) {
-      saveModelId(modelId);
+      storage?.setItem(STORAGE_KEY, modelId);
     }
-  }, [models, selectedModelId]);
+  }, [models, selectedModelId, storage]);
 
-  const handleSelectModel = useCallback((modelId: string) => {
-    setSelectedModelId(modelId);
-    saveModelId(modelId);
-  }, []);
+  const handleSelectModel = useCallback(
+    (modelId: string) => {
+      setSelectedModelId(modelId);
+      storage?.setItem(STORAGE_KEY, modelId);
+    },
+    [storage],
+  );
 
-  const handleSelectMcpServers = useCallback((ids: string[]) => {
-    setSelectedMcpServerIds(ids);
-  }, []);
+  const handleSelectMcpServers = useCallback(
+    (ids: string[]) => {
+      setSelectedMcpServerIds(ids);
+      storage?.setItem(MCP_SERVERS_STORAGE_KEY, safeJsonStringify(ids));
+    },
+    [storage],
+  );
 
   const [liked, setLiked] = useState<Record<string, boolean>>({});
   const [disliked, setDisliked] = useState<Record<string, boolean>>({});
