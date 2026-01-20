@@ -101,19 +101,23 @@ export const UserMessageActions = memo(function UserMessageActions({
       <AIMessageContent>{content}</AIMessageContent>
       <AIMessageToolbar className="mt-2 flex min-w-0 justify-end">
         <AIMessageActions className="opacity-0 transition-opacity group-hover:opacity-100">
-          <AIMessageAction label="Edit" onClick={handleEdit} tooltip="编辑">
-            <PencilIcon className="size-4" />
-          </AIMessageAction>
+          {onSend && (
+            <AIMessageAction label="Edit" onClick={handleEdit} tooltip="编辑">
+              <PencilIcon className="size-4" />
+            </AIMessageAction>
+          )}
           <AIMessageAction label="Copy" onClick={handleCopy} tooltip="复制">
             <CopyIcon className="size-4" />
           </AIMessageAction>
-          <MessageBranch
-            branchNumber={branchNumber}
-            branchCount={branchCount}
-            branches={branches}
-            onSwitchBranch={onSwitchBranch}
-            disabled={disabled}
-          />
+          {onSwitchBranch && (
+            <MessageBranch
+              branchNumber={branchNumber}
+              branchCount={branchCount}
+              branches={branches}
+              onSwitchBranch={onSwitchBranch}
+              disabled={disabled}
+            />
+          )}
         </AIMessageActions>
       </AIMessageToolbar>
     </>

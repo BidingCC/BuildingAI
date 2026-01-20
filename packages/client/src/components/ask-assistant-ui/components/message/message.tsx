@@ -174,8 +174,8 @@ export const Message = memo(function Message({
         {!isAssistant ? (
           <UserMessageActions
             content={content}
-            onSend={handleEditMessage}
-            onEditingChange={setIsEditingMessage}
+            onSend={onEditMessage ? handleEditMessage : undefined}
+            onEditingChange={onEditMessage ? setIsEditingMessage : undefined}
             branchNumber={branchNumber}
             branchCount={branchCount}
             branches={branches}
@@ -196,13 +196,15 @@ export const Message = memo(function Message({
 
         {isAssistant && (
           <AIMessageToolbar className="mt-2 min-w-0">
-            <MessageBranch
-              branchNumber={branchNumber}
-              branchCount={branchCount}
-              branches={branches}
-              onSwitchBranch={onSwitchBranch}
-              disabled={isProcessing}
-            />
+            {onSwitchBranch && (
+              <MessageBranch
+                branchNumber={branchNumber}
+                branchCount={branchCount}
+                branches={branches}
+                onSwitchBranch={onSwitchBranch}
+                disabled={isProcessing}
+              />
+            )}
             {!isProcessing && (
               <MessageActions
                 liked={liked}
