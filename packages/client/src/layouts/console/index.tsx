@@ -16,8 +16,8 @@ import AiMcpIndexPage from "@/pages/console/ai/mcp";
 import AiProviderIndexPage from "@/pages/console/ai/provider";
 import AiSecretIndexPage from "@/pages/console/ai/secret";
 import ChannelWechatOaIndexPage from "@/pages/console/channel/wechat-oa";
-import ConversationConfigIndexPage from "@/pages/console/conversation/config";
-import ConversationRecordIndexPage from "@/pages/console/conversation/record";
+import ChatConfigIndexPage from "@/pages/console/chat/config";
+import ChatRecordIndexPage from "@/pages/console/chat/record";
 import DashboardPage from "@/pages/console/dashboard";
 import DecorateAppsIndexPage from "@/pages/console/decorate/apps";
 import DecorateLayoutIndexPage from "@/pages/console/decorate/layout";
@@ -99,15 +99,15 @@ function ConsoleRoutes() {
         ],
       },
       {
-        path: "conversation",
+        path: "chat",
         children: [
           {
             path: "record",
-            element: <ConversationRecordIndexPage />,
+            element: <ChatRecordIndexPage />,
           },
           {
             path: "config",
-            element: <ConversationConfigIndexPage />,
+            element: <ChatConfigIndexPage />,
           },
         ],
       },

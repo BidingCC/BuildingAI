@@ -4,12 +4,12 @@ import DefaultLayout from "@/layouts/styles/default";
 import AgentsIndexPage from "@/pages/agents";
 import AgentsWorkspacePage from "@/pages/agents/workspace";
 import AppsIndexPage from "@/pages/apps";
+import DatasetsIndexPage from "@/pages/datasets";
+import DatasetsLayout from "@/pages/datasets/_layouts";
+import DatasetsDetailPage from "@/pages/datasets/detail";
+import JoinedDatasetsIndexPage from "@/pages/datasets/joined";
+import MyDatasetsIndexPage from "@/pages/datasets/my";
 import InstallPage from "@/pages/install";
-import KnowledgeIndexPage from "@/pages/knowledge";
-import KnowledgeLayout from "@/pages/knowledge/_layouts";
-import KnowledgeDetailPage from "@/pages/knowledge/detail";
-import JoinedKnowledgeIndexPage from "@/pages/knowledge/joined";
-import MyKnowledgeIndexPage from "@/pages/knowledge/my";
 import WorkflowIndexPage from "@/pages/workflow";
 import WorkflowDetailPage from "@/pages/workflow/detail";
 
@@ -63,24 +63,24 @@ export const router = createBrowserRouter([
             element: <AgentsIndexPage />,
           },
           {
-            path: "/knowledge",
-            element: <KnowledgeLayout />,
+            path: "/datasets",
+            element: <DatasetsLayout />,
             children: [
               {
                 index: true,
-                element: <KnowledgeIndexPage />,
+                element: <DatasetsIndexPage />,
               },
               {
-                path: "/knowledge/my",
-                element: <MyKnowledgeIndexPage />,
+                path: "/datasets/my",
+                element: <MyDatasetsIndexPage />,
               },
               {
-                path: "/knowledge/:id",
-                element: <KnowledgeDetailPage />,
+                path: "/datasets/:id",
+                element: <DatasetsDetailPage />,
               },
               {
-                path: "/knowledge/joined",
-                element: <JoinedKnowledgeIndexPage />,
+                path: "/datasets/joined",
+                element: <JoinedDatasetsIndexPage />,
               },
             ],
           },

@@ -129,9 +129,9 @@ export function DefaultAppSidebar({ ...props }: React.ComponentProps<typeof Side
         icon: Bot,
       },
       {
-        id: "knowledge",
+        id: "datasets",
         title: "知识库",
-        path: "/knowledge",
+        path: "/datasets",
         icon: BookSearch,
       },
       {
