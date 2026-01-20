@@ -43,7 +43,11 @@ export interface MessageProps {
   onRetry?: () => void;
   onSwitchBranch?: (messageId: string) => void;
   addToolApprovalResponse?: (args: { id: string; approved: boolean; reason?: string }) => void;
-  onEditMessage?: (messageId: string, newContent: string) => void;
+  onEditMessage?: (
+    messageId: string,
+    newContent: string,
+    files?: Array<{ type: "file"; url: string; mediaType?: string; filename?: string }>,
+  ) => void;
 }
 
 export const Message = memo(function Message({
@@ -99,7 +103,13 @@ export const Message = memo(function Message({
   const [isEditingMessage, setIsEditingMessage] = useState(false);
 
   const handleEditMessage = (newContent: string) => {
-    onEditMessage?.(message.id, newContent);
+    const files = attachments?.map((att) => ({
+      type: "file" as const,
+      url: att.url,
+      ...(att.mediaType && { mediaType: att.mediaType }),
+      ...(att.filename && { filename: att.filename }),
+    }));
+    onEditMessage?.(message.id, newContent, files);
   };
 
   return (

@@ -244,14 +244,18 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
   );
 
   const onEditMessage = useCallback(
-    (messageId: string, newContent: string) => {
+    (
+      messageId: string,
+      newContent: string,
+      files?: Array<{ type: "file"; url: string; mediaType?: string; filename?: string }>,
+    ) => {
       const parentId = getParentId(messageId);
       if (parentId === undefined) return;
 
       // Create a new sibling "version" under the same parent by re-sending the edited content.
       // We also slice the client message list to keep the request context consistent with the branch.
       setMessages(sliceMessagesUntil(streamMessages, parentId));
-      queueMicrotask(() => send(newContent, parentId));
+      queueMicrotask(() => send(newContent, parentId, files));
     },
     [getParentId, streamMessages, setMessages, send],
   );
