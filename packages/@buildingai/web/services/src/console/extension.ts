@@ -66,7 +66,7 @@ export type UpdateExtensionDto = {
 export type QueryExtensionDto = {
     page?: number;
     pageSize?: number;
-    name?: string;
+    keyword?: string;
     identifier?: string;
     type?: ExtensionTypeType;
     status?: ExtensionStatusType;
@@ -101,6 +101,10 @@ export type Extension = {
     config?: Record<string, any>;
     createdAt: string;
     updatedAt: string;
+    isInstalled: boolean;
+    isCompatible: boolean;
+    latestVersion?: string | null;
+    hasUpdate: boolean;
 };
 
 export type ExtensionVersion = {

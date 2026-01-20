@@ -48,15 +48,12 @@ export class ExtensionWebController extends BaseController {
         }
 
         // Extension filter conditions
-        if (query.name) {
-            extensionsList = extensionsList.filter((ext) =>
-                ext.name.toLowerCase().includes(query.name.toLowerCase()),
-            );
-        }
-
-        if (query.identifier) {
-            extensionsList = extensionsList.filter((ext) =>
-                ext.identifier.toLowerCase().includes(query.identifier.toLowerCase()),
+        if (query.keyword) {
+            const keyword = query.keyword.toLowerCase();
+            extensionsList = extensionsList.filter(
+                (ext) =>
+                    ext.name.toLowerCase().includes(keyword) ||
+                    ext.identifier.toLowerCase().includes(keyword),
             );
         }
 

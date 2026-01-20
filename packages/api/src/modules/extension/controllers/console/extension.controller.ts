@@ -199,9 +199,12 @@ export class ExtensionConsoleController extends BaseController {
         let extensionsList = await this.extensionMarketService.getMixedApplicationList();
 
         // Extension filter conditions
-        if (query.name) {
-            extensionsList = extensionsList.filter((ext) =>
-                ext.name.toLowerCase().includes(query.name.toLowerCase()),
+        if (query.keyword) {
+            const keyword = query.keyword.toLowerCase();
+            extensionsList = extensionsList.filter(
+                (ext) =>
+                    ext.name.toLowerCase().includes(keyword) ||
+                    ext.identifier.toLowerCase().includes(keyword),
             );
         }
 
