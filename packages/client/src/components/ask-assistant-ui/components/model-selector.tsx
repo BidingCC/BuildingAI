@@ -90,7 +90,7 @@ export const ModelSelector = ({
                   <AIModelSelectorItem
                     key={m.id}
                     onSelect={() => handleModelSelect(m.id)}
-                    value={m.id}
+                    value={`${m.name} ${m.id}`}
                   >
                     <ProviderIcon provider={m.chefSlug} />
                     <AIModelSelectorName>
