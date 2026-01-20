@@ -30,17 +30,28 @@ export const ModelSelectorTrigger = (props: ModelSelectorTriggerProps) => (
 
 export type ModelSelectorContentProps = ComponentProps<typeof DialogContent> & {
   title?: ReactNode;
+  /**
+   * Props forwarded to underlying `Command` (cmdk) container.
+   * Useful for disabling built-in filtering when doing virtualization.
+   */
+  commandProps?: ComponentProps<typeof Command>;
 };
 
 export const ModelSelectorContent = ({
   className,
   children,
   title = "Model Selector",
+  commandProps,
   ...props
 }: ModelSelectorContentProps) => (
   <DialogContent className={cn("p-0", className)} {...props}>
     <DialogTitle className="sr-only">{title}</DialogTitle>
-    <Command className="**:data-[slot=command-input-wrapper]:h-auto">{children}</Command>
+    <Command
+      {...commandProps}
+      className={cn("**:data-[slot=command-input-wrapper]:h-auto", commandProps?.className)}
+    >
+      {children}
+    </Command>
   </DialogContent>
 );
 

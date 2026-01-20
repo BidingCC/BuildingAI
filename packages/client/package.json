@@ -26,6 +26,7 @@
         "@buildingai/web-types": "workspace:*",
         "@hookform/resolvers": "^5.2.2",
         "@tabler/icons-react": "catalog:web",
+        "@tanstack/react-virtual": "^3.13.18",
         "@tauri-apps/api": "^2.9.1",
         "@tauri-apps/plugin-opener": "^2.5.3",
         "ai": "^6.0.38",
