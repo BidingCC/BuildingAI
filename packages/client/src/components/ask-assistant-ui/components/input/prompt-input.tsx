@@ -1,4 +1,4 @@
-import { useMcpServersAllQuery } from "@buildingai/services/web";
+import { useMcpServerQuickMenuQuery, useMcpServersAllQuery } from "@buildingai/services/web";
 import {
   PromptInput as AIPromptInput,
   PromptInputActionMenu as AIPromptInputActionMenu,
@@ -98,10 +98,25 @@ const PromptInputInner = memo(
       enabled: true,
     });
 
+    const { data: quickMenuMcpServer } = useMcpServerQuickMenuQuery({
+      enabled: true,
+    });
+
     const { handleFileSelect, uploadFilesIfNeeded, availableFileTypes } = useFileUpload(
       multiple,
       selectedModel?.features,
     );
+
+    const handleQuickMenuClick = useCallback(() => {
+      if (quickMenuMcpServer?.id) {
+        const isSelected = selectedMcpServerIds.includes(quickMenuMcpServer.id);
+        if (isSelected) {
+          onSelectMcpServers(selectedMcpServerIds.filter((id) => id !== quickMenuMcpServer.id));
+        } else {
+          onSelectMcpServers([...selectedMcpServerIds, quickMenuMcpServer.id]);
+        }
+      }
+    }, [quickMenuMcpServer, selectedMcpServerIds, onSelectMcpServers]);
 
     const handleSubmit = useCallback(
       async (message: PromptInputMessage, event: FormEvent<HTMLFormElement>) => {
@@ -128,10 +143,19 @@ const PromptInputInner = memo(
               <FileSelectMenu onFileSelect={handleFileSelect} availableTypes={availableFileTypes} />
             </AIPromptInputActionMenu>
             <AIPromptInputSpeechButton textareaRef={textareaRef} />
-            <AIPromptInputButton>
-              <GlobeIcon size={16} />
-              <span>Search</span>
-            </AIPromptInputButton>
+            {quickMenuMcpServer && (
+              <AIPromptInputButton
+                onClick={handleQuickMenuClick}
+                className={
+                  selectedMcpServerIds.includes(quickMenuMcpServer.id)
+                    ? "bg-accent text-accent-foreground"
+                    : undefined
+                }
+              >
+                <GlobeIcon size={16} />
+                <span>{quickMenuMcpServer.name || "Search"}</span>
+              </AIPromptInputButton>
+            )}
             {!isLoadingMcpServers && mcpServers.length > 0 && (
               <McpSelector
                 mcpServers={mcpServers}

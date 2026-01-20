@@ -141,7 +141,7 @@ export const McpSelector = memo(
               <CommandEmpty>未找到 MCP 服务器</CommandEmpty>
               {(filterType === "all" || filterType === "system") && systemServers.length > 0 && (
                 <>
-                  <CommandGroup heading="系统服务">
+                  <CommandGroup heading={filterType === "all" ? "系统服务" : undefined}>
                     {systemServers.map((server) => {
                       const isSelected = selectedMcpServerIds.includes(server.id);
                       return (
@@ -184,7 +184,7 @@ export const McpSelector = memo(
                 </>
               )}
               {(filterType === "all" || filterType === "user") && userServers.length > 0 && (
-                <CommandGroup heading="我的服务">
+                <CommandGroup heading={filterType === "all" ? "我的服务" : undefined}>
                   {userServers.map((server) => {
                     const isSelected = selectedMcpServerIds.includes(server.id);
                     return (
