@@ -1,17 +1,23 @@
 import {
     anthropic,
+    azure,
+    cohere,
     custom,
     deepseek,
+    giteeAi,
     google,
     hunyuan,
     minimax,
     moonshot,
     ollama,
     openai,
+    openrouter,
     siliconflow,
+    spark,
     tongyi,
     volcengine,
     wenxin,
+    x,
     zhipuai,
 } from "../providers";
 import type { AIProvider, BaseProviderSettings, ProviderFactory } from "../types";
@@ -38,10 +44,16 @@ class ProviderRegistry {
         this.register("volcengine", volcengine, "火山引擎豆包");
         this.register("hunyuan", hunyuan, "腾讯混元");
         this.register("wenxin", wenxin, "百度文心一言");
+        this.register("spark", spark, "讯飞星火大模型");
         this.register("ollama", ollama, "Ollama 本地模型");
         this.register("minimax", minimax, "MiniMax M2 系列模型");
         this.register("anthropic", anthropic, "Anthropic Claude 系列模型");
         this.register("google", google, "Google Gemini 系列模型");
+        this.register("cohere", cohere, "Cohere 系列模型");
+        this.register("gitee_ai", giteeAi, "Gitee AI 魔力方舟");
+        this.register("x", x, "xAI Grok 系列模型");
+        this.register("openrouter", openrouter, "OpenRouter 统一接入 300+ 模型");
+        this.register("azure", azure, "Azure AI 服务");
         this.register("custom", custom, "自定义 OpenAI 兼容 API");
     }
 

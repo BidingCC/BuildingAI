@@ -1,5 +1,3 @@
-export type { ModelConfig, ModelProperties, ProviderConfig } from "./config/provider-config.types";
-export { ProviderConfigUtils } from "./config/provider-config.utils";
 export {
     generateImage,
     type GenerateImageParams,
@@ -44,10 +42,16 @@ export {
 export {
     anthropic,
     type AnthropicProviderSettings,
+    azure,
+    type AzureProviderSettings,
+    cohere,
+    type CohereProviderSettings,
     custom,
     type CustomProviderSettings,
     deepseek,
     type DeepSeekProviderSettings,
+    giteeAi,
+    type GiteeAIProviderSettings,
     google,
     type GoogleProviderSettings,
     hunyuan,
@@ -60,12 +64,20 @@ export {
     type OllamaProviderSettings,
     openai,
     type OpenAIProviderSettings,
+    openrouter,
+    type OpenRouterProviderSettings,
     siliconflow,
     type SiliconFlowProviderSettings,
+    spark,
+    type SparkProviderSettings,
     tongyi,
     type TongYiProviderSettings,
     volcengine,
     type VolcengineProviderSettings,
+    wenxin,
+    type WenXinProviderSettings,
+    x,
+    type XProviderSettings,
     zhipuai,
     type ZhipuAIProviderSettings,
 } from "./providers";
