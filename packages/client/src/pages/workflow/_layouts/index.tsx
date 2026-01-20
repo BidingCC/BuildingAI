@@ -18,7 +18,7 @@ export default function WorkflowLayout({ children }: { children?: React.ReactNod
               <ChevronLeft />
             </Button>
             <div className="flex items-center gap-2">
-              <Avatar className="size-8 after:rounded-lg">
+              <Avatar className="size-8 rounded-lg after:rounded-lg">
                 <AvatarFallback className="rounded-lg">
                   <Workflow />
                 </AvatarFallback>

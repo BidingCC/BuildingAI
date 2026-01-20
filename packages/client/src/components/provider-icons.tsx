@@ -4,7 +4,6 @@ import React from "react";
 export const providerIconsMap: Record<string, React.ReactNode> = {
   openai: (
     <svg
-      fill="currentColor"
       fillRule="evenodd"
       height="1em"
       style={{ flex: "none", lineHeight: 1 }}
@@ -34,7 +33,6 @@ export const providerIconsMap: Record<string, React.ReactNode> = {
   ),
   x: (
     <svg
-      fill="currentColor"
       fillRule="evenodd"
       height="1em"
       style={{ flex: "none", lineHeight: 1 }}
@@ -452,7 +450,6 @@ export const providerIconsMap: Record<string, React.ReactNode> = {
   ),
   moonshot: (
     <svg
-      fill="currentColor"
       fillRule="evenodd"
       height="1em"
       style={{ flex: "none", lineHeight: 1 }}
@@ -746,7 +743,7 @@ interface ProviderIconProps {
   className?: string;
 }
 
-export const ProviderIcon: React.FC<ProviderIconProps> = ({ provider, className }) => {
+export const ProviderIcon: React.FC<ProviderIconProps> = ({ provider, className, ...props }) => {
   if (!provider) {
     return null;
   }
@@ -757,5 +754,12 @@ export const ProviderIcon: React.FC<ProviderIconProps> = ({ provider, className 
     return null;
   }
 
-  return <span className={className}>{icon}</span>;
+  const iconElement = icon as React.ReactElement<
+    { className?: string } & React.SVGAttributes<SVGSVGElement>
+  >;
+
+  return React.cloneElement(iconElement, {
+    className: `${iconElement.props?.className || ""} ${className || ""}`.trim(),
+    ...props,
+  });
 };

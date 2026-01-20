@@ -30,6 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@buildingai/ui/components/ui/select";
+import { Switch } from "@buildingai/ui/components/ui/switch";
 import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog";
 import { IconCircleCheckFilled, IconPuzzle, IconXboxXFilled } from "@tabler/icons-react";
 import {
@@ -64,7 +65,7 @@ const getTerminalLabel = (terminalType: ExtensionSupportTerminalType): string =>
 };
 
 const ExtensionIndexPage = () => {
-  const [queryParams, setQueryParams] = useState<QueryExtensionDto>();
+  const [queryParams, setQueryParams] = useState<QueryExtensionDto>({});
   const { data, refetch } = useExtensionsListQuery(queryParams);
   const { confirm } = useAlertDialog();
 
@@ -215,13 +216,23 @@ const ExtensionIndexPage = () => {
 
         {data?.items && data?.items.length > 0 ? (
           data?.items.map((extension, index) => (
-            <div key={index} className="relative flex flex-col gap-4 rounded-lg border p-4">
+            <div
+              key={index}
+              className="bg-card group/extension-item relative flex flex-col gap-4 rounded-lg border p-4"
+            >
               <div className="flex items-center gap-3">
-                <Avatar className="size-12 after:rounded-lg">
+                <Avatar className="relative size-12 rounded-lg after:rounded-lg">
                   <AvatarImage src={extension.icon} alt={extension.name} className="rounded-lg" />
                   <AvatarFallback className="size-12 rounded-lg">
                     <IconPuzzle />
                   </AvatarFallback>
+                  <div className="center absolute inset-0 z-1 rounded-lg bg-black/5 opacity-0 backdrop-blur-xl transition-opacity group-hover/extension-item:opacity-100 dark:bg-black/15">
+                    <Switch
+                      checked={extension.status === ExtensionStatus.ENABLED}
+                      onCheckedChange={() => handleToggleStatus(extension)}
+                      disabled={enableMutation.isPending || disableMutation.isPending}
+                    />
+                  </div>
                 </Avatar>
                 <div className="flex flex-col">
                   <div>{extension.name}</div>
@@ -302,8 +313,6 @@ const ExtensionIndexPage = () => {
                     </Badge>
                   ))}
                   {extension.isLocal && <Badge variant="secondary">本地</Badge>}
-
-                  {/* <Switch className="ml-auto opacity-0 group-hover/provider-item:opacity-100" /> */}
                 </div>
 
                 <div className="flex items-end justify-between gap-2">
@@ -352,7 +361,11 @@ const ExtensionIndexPage = () => {
           ))
         ) : (
           <div className="col-span-1 flex h-46.5 items-center justify-center gap-4 sm:col-span-2 lg:col-span-3 xl:col-span-4 2xl:col-span-5">
-            <span className="text-muted-foreground text-sm">没有找到应用</span>
+            <span className="text-muted-foreground text-sm">
+              {queryParams.keyword
+                ? `没有找到与“${queryParams.keyword}”相关的应用`
+                : "暂无应用数据"}
+            </span>
           </div>
         )}
       </div>

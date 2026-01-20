@@ -226,7 +226,7 @@ export default function ConsoleLayout({ children }: { children?: React.ReactNode
         <AppNavbar />
         <div className="flex-1 overflow-hidden">
           <ScrollArea className="h-full">
-            <div className="m-4 mt-1 flex h-[calc(100vh-6.25rem)] flex-col">
+            <div className="m-4 mt-1 flex min-h-[calc(100vh-6.25rem)] flex-col">
               {children ? children : <ConsoleRoutes />}
             </div>
           </ScrollArea>

@@ -130,7 +130,7 @@ const AiSecretIndexPage = () => {
         {Array.from({ length: 15 }).map((_, index) => (
           <div
             key={index}
-            className="group/provider-item relative flex flex-col gap-4 rounded-lg border p-4"
+            className="group/secret-item bg-card relative flex flex-col gap-4 rounded-lg border p-4"
           >
             <div className="flex items-center gap-3">
               <img
@@ -197,7 +197,7 @@ const AiSecretIndexPage = () => {
               <div className="mt-1 flex flex-wrap items-center gap-2">
                 <Badge variant="secondary">apiKey</Badge>
                 <Badge variant="secondary">baseUrl</Badge>
-                <Switch className="ml-auto opacity-0 group-hover/provider-item:opacity-100" />
+                <Switch className="ml-auto opacity-0 group-hover/secret-item:opacity-100" />
               </div>
             </div>
           </div>
