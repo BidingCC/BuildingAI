@@ -204,6 +204,18 @@ export class QueryAIChatRecordDto extends PaginationDto {
         return isNaN(date.getTime()) ? undefined : date;
     })
     endDate?: Date;
+
+    /**
+     * 反馈筛选
+     * high-like: 高赞率（赞率 >= 70%）
+     * high-dislike: 高踩率（踩率 >= 50%）
+     * has-feedback: 有反馈
+     */
+    @IsEnum(["high-like", "high-dislike", "has-feedback"], {
+        message: "反馈筛选必须是有效的枚举值",
+    })
+    @IsOptional()
+    feedbackFilter?: "high-like" | "high-dislike" | "has-feedback";
 }
 
 /**

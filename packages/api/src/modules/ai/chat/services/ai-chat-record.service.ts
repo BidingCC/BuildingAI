@@ -1,7 +1,7 @@
 import { BaseService } from "@buildingai/base";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { AiChatMessage, AiChatRecord } from "@buildingai/db/entities";
-import { Like, Repository } from "@buildingai/db/typeorm";
+import { AiChatFeedback, AiChatMessage, AiChatRecord } from "@buildingai/db/entities";
+import { Repository } from "@buildingai/db/typeorm";
 import { PaginationDto } from "@buildingai/dto/pagination.dto";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { buildWhere } from "@buildingai/utils";
@@ -26,6 +26,8 @@ export class AiChatRecordService extends BaseService<AiChatRecord> {
     constructor(
         @InjectRepository(AiChatRecord)
         conversationRepository: Repository<AiChatRecord>,
+        @InjectRepository(AiChatFeedback)
+        private readonly feedbackRepository: Repository<AiChatFeedback>,
         private readonly aiChatsMessageService: AiChatsMessageService,
     ) {
         super(conversationRepository);
@@ -54,51 +56,152 @@ export class AiChatRecordService extends BaseService<AiChatRecord> {
         }
     }
 
-    /**
-     * 分页查询用户对话
-     * @param userId 用户ID，空字符串表示查询所有用户
-     * @param queryDto 查询条件
-     * @param includeUserInfo 是否包含用户信息
-     */
     async findUserConversations(
         userId: string,
         queryDto?: QueryAIChatRecordDto,
         includeUserInfo: boolean = false,
     ) {
         try {
-            // 构建基础查询条件
-            const where = buildWhere<AiChatRecord>({
-                isDeleted: false,
-                userId: userId && userId.trim() !== "" ? userId : undefined,
-                status: queryDto?.status,
-                isPinned: queryDto?.isPinned,
-            });
+            const queryBuilder = this.repository.createQueryBuilder("conversation");
 
-            // 处理关键词搜索（需要使用数组形式实现OR查询）
-            let whereConditions: any = where;
-            if (queryDto?.keyword) {
-                whereConditions = [
-                    { ...where, title: Like(`%${queryDto.keyword}%`) },
-                    { ...where, summary: Like(`%${queryDto.keyword}%`) },
-                ];
+            if (includeUserInfo) {
+                queryBuilder.leftJoinAndSelect("conversation.user", "user");
             }
 
-            // 设置关联和排除字段
-            const relations = includeUserInfo ? ["user"] : [];
+            queryBuilder.where("conversation.isDeleted = :isDeleted", { isDeleted: false });
+
+            if (userId && userId.trim() !== "") {
+                queryBuilder.andWhere("conversation.userId = :userId", { userId });
+            }
+
+            if (queryDto?.status) {
+                queryBuilder.andWhere("conversation.status = :status", { status: queryDto.status });
+            }
+
+            if (queryDto?.isPinned !== undefined) {
+                queryBuilder.andWhere("conversation.isPinned = :isPinned", {
+                    isPinned: queryDto.isPinned,
+                });
+            }
+
+            if (queryDto?.keyword) {
+                queryBuilder.andWhere(
+                    "(conversation.title LIKE :keyword OR conversation.summary LIKE :keyword)",
+                    { keyword: `%${queryDto.keyword}%` },
+                );
+            }
+
+            if (queryDto?.feedbackFilter) {
+                if (queryDto.feedbackFilter === "high-like") {
+                    const likeCountSubQuery = this.repository.manager
+                        .createQueryBuilder()
+                        .subQuery()
+                        .select("COUNT(*)", "count")
+                        .from("ai_chat_feedback", "feedback")
+                        .where("feedback.conversation_id = conversation.id")
+                        .andWhere("feedback.type = 'like'")
+                        .getQuery();
+
+                    const totalCountSubQuery = this.repository.manager
+                        .createQueryBuilder()
+                        .subQuery()
+                        .select("COUNT(*)", "count")
+                        .from("ai_chat_feedback", "feedback")
+                        .where("feedback.conversation_id = conversation.id")
+                        .getQuery();
+
+                    queryBuilder.andWhere(
+                        `((${likeCountSubQuery})::float / NULLIF((${totalCountSubQuery}), 0) * 100) >= 70`,
+                    );
+                } else if (queryDto.feedbackFilter === "high-dislike") {
+                    const dislikeCountSubQuery = this.repository.manager
+                        .createQueryBuilder()
+                        .subQuery()
+                        .select("COUNT(*)", "count")
+                        .from("ai_chat_feedback", "feedback")
+                        .where("feedback.conversation_id = conversation.id")
+                        .andWhere("feedback.type = 'dislike'")
+                        .getQuery();
+
+                    const totalCountSubQuery = this.repository.manager
+                        .createQueryBuilder()
+                        .subQuery()
+                        .select("COUNT(*)", "count")
+                        .from("ai_chat_feedback", "feedback")
+                        .where("feedback.conversation_id = conversation.id")
+                        .getQuery();
+
+                    queryBuilder.andWhere(
+                        `((${dislikeCountSubQuery})::float / NULLIF((${totalCountSubQuery}), 0) * 100) >= 50`,
+                    );
+                } else if (queryDto.feedbackFilter === "has-feedback") {
+                    const hasFeedbackSubQuery = this.repository.manager
+                        .createQueryBuilder()
+                        .subQuery()
+                        .select("COUNT(*)", "count")
+                        .from("ai_chat_feedback", "feedback")
+                        .where("feedback.conversation_id = conversation.id")
+                        .getQuery();
+
+                    queryBuilder.andWhere(`(${hasFeedbackSubQuery}) > 0`);
+                }
+            }
+
+            queryBuilder.orderBy("conversation.isPinned", "DESC");
+            queryBuilder.addOrderBy("conversation.updatedAt", "DESC");
+
             const excludeFields = includeUserInfo ? ["user.password", "user.openid"] : [];
-
-            // 构建查询选项
-            const queryOptions = {
-                where: whereConditions,
-                relations,
-                order: {
-                    isPinned: "DESC" as const,
-                    updatedAt: "DESC" as const,
-                },
+            const result = await this.paginateQueryBuilder(
+                queryBuilder,
+                queryDto || {},
                 excludeFields,
-            };
+            );
 
-            return await this.paginate(queryDto, queryOptions);
+            if (result.items.length > 0) {
+                const conversationIds = result.items.map((item) => item.id);
+
+                const messageStats = await this.repository.manager
+                    .createQueryBuilder()
+                    .select("message.conversation_id", "conversationId")
+                    .addSelect("COUNT(message.id)", "messageCount")
+                    .addSelect(
+                        "COALESCE(SUM((message.usage->>'totalTokens')::int), 0)",
+                        "totalTokens",
+                    )
+                    .addSelect("COALESCE(SUM(message.user_consumed_power), 0)", "totalPower")
+                    .from("ai_chat_message", "message")
+                    .where("message.conversation_id IN (:...conversationIds)", { conversationIds })
+                    .groupBy("message.conversation_id")
+                    .getRawMany();
+
+                const statsMap = new Map<
+                    string,
+                    { messageCount: number; totalTokens: number; totalPower: number }
+                >();
+                messageStats.forEach((stat: any) => {
+                    statsMap.set(stat.conversationId, {
+                        messageCount: parseInt(stat.messageCount) || 0,
+                        totalTokens: parseInt(stat.totalTokens) || 0,
+                        totalPower: parseInt(stat.totalPower) || 0,
+                    });
+                });
+
+                result.items = result.items.map((item) => {
+                    const stats = statsMap.get(item.id) || {
+                        messageCount: 0,
+                        totalTokens: 0,
+                        totalPower: 0,
+                    };
+                    return {
+                        ...item,
+                        messageCount: stats.messageCount,
+                        totalTokens: stats.totalTokens,
+                        totalPower: stats.totalPower,
+                    };
+                });
+            }
+
+            return result;
         } catch (error) {
             this.logger.error(`查询用户对话失败: ${error.message}`, error.stack);
             throw HttpErrorFactory.badRequest("Failed to query user conversations.");
@@ -132,7 +235,10 @@ export class AiChatRecordService extends BaseService<AiChatRecord> {
         }
     }
 
-    async getConversationInfo(conversationId: string, userId?: string): Promise<Partial<AiChatRecord> | null> {
+    async getConversationInfo(
+        conversationId: string,
+        userId?: string,
+    ): Promise<Partial<AiChatRecord> | null> {
         try {
             const where = buildWhere<AiChatRecord>({
                 isDeleted: false,

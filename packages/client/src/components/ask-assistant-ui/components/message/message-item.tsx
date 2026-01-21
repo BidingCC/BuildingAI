@@ -1,5 +1,5 @@
 import type { UIMessage } from "ai";
-import { memo } from "react";
+import { memo, type ReactNode } from "react";
 
 import type { DisplayMessage } from "../../types";
 import { Message } from "./message";
@@ -15,6 +15,7 @@ export interface MessageItemProps {
   onEditMessage?: (messageId: string, newContent: string) => void;
   onSwitchBranch?: (messageId: string) => void;
   addToolApprovalResponse?: (args: { id: string; approved: boolean; reason?: string }) => void;
+  extraActions?: ReactNode;
 }
 
 export const MessageItem = memo(
@@ -29,6 +30,7 @@ export const MessageItem = memo(
     onEditMessage,
     onSwitchBranch,
     addToolApprovalResponse,
+    extraActions,
   }: MessageItemProps) {
     const { id, message, branchNumber, branchCount, branches } = displayMessage;
 
@@ -49,6 +51,7 @@ export const MessageItem = memo(
         onEditMessage={onEditMessage}
         onSwitchBranch={onSwitchBranch}
         addToolApprovalResponse={addToolApprovalResponse}
+        extraActions={extraActions}
       />
     );
   },

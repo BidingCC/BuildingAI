@@ -448,14 +448,26 @@ export class ChatCompletionService {
         const { fullText } = extractTextFromParts(
             (message.parts ?? []) as Array<{ type?: unknown; text?: string }>,
         );
-        const input = fullText.trim().slice(0, 80);
+        const input = fullText.trim().slice(0, 200);
         if (!input) return;
 
         const result = await generateText({
             model,
-            prompt: `Title (same language, <=10 words). Only title.\n${input}`,
+            prompt: `请为以下对话内容生成一个简洁的标题。要求：
+1. 标题要简洁明了，不超过10个字
+2. 准确概括对话的核心主题
+3. 使用与对话内容相同的语言
+4. 只输出标题，不要包含任何其他文字、标点或说明
+
+对话内容：
+${input}
+
+标题：`,
         });
-        const title = result.text.trim().slice(0, 200);
+        const title = result.text
+            .trim()
+            .replace(/^["'「」『』]|["'「」『』]$/g, "")
+            .slice(0, 200);
         if (!title) return;
 
         await this.aiChatRecordService.updateConversation(conversationId, userId, { title });

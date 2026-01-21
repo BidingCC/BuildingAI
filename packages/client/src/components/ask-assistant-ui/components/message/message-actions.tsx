@@ -3,7 +3,7 @@ import {
   MessageActions as AIMessageActions,
 } from "@buildingai/ui/components/ai-elements/message";
 import { CopyIcon, RefreshCcwIcon, ThumbsDownIcon, ThumbsUpIcon } from "lucide-react";
-import { memo } from "react";
+import { memo, type ReactNode } from "react";
 
 import { MessageUsage, type MessageUsageProps } from "./message-usage";
 
@@ -17,6 +17,7 @@ export interface MessageActionsProps extends MessageUsageProps {
   onDislikeChange?: (disliked: boolean, dislikeReason?: string, isUpdate?: boolean) => void;
   onRetry?: () => void;
   onShowFeedbackCard?: (show: boolean) => void;
+  extraActions?: ReactNode;
 }
 
 export const MessageActions = memo(function MessageActions({
@@ -31,6 +32,7 @@ export const MessageActions = memo(function MessageActions({
   onDislikeChange,
   onRetry,
   onShowFeedbackCard,
+  extraActions,
 }: MessageActionsProps) {
   const handleCopy = () => {
     navigator.clipboard.writeText(content);
@@ -84,6 +86,7 @@ export const MessageActions = memo(function MessageActions({
         provider={provider}
         modelName={modelName}
       />
+      {extraActions}
     </AIMessageActions>
   );
 });

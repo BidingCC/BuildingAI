@@ -44,6 +44,7 @@ export type QueryConversationsParams = {
     username?: string;
     startDate?: string | Date;
     endDate?: string | Date;
+    feedbackFilter?: "high-like" | "high-dislike" | "has-feedback";
 };
 
 export type CreateConversationDto = {
@@ -270,6 +271,85 @@ export function useConversationMessagesQuery(
                 },
             ),
         enabled: !!params.conversationId && options?.enabled !== false,
+        ...options,
+    });
+}
+
+export type FeedbackRecord = {
+    id: string;
+    messageId: string;
+    userId?: string;
+    user?: {
+        id: string;
+        username: string;
+        avatar?: string | null;
+    };
+    type: "like" | "dislike";
+    dislikeReason?: string | null;
+    confidenceScore: number;
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type FeedbackStats = {
+    total: number;
+    likeCount: number;
+    dislikeCount: number;
+    likeRate: number;
+    dislikeRate: number;
+    avgDislikeConfidence: number;
+};
+
+export type QueryFeedbacksParams = {
+    page?: number;
+    pageSize?: number;
+    conversationId: string;
+};
+
+export function useConversationFeedbacksQuery(
+    params: QueryFeedbacksParams,
+    options?: PaginatedQueryOptionsUtil<FeedbackRecord>,
+) {
+    return useQuery<PaginatedResponse<FeedbackRecord>>({
+        queryKey: ["console", "conversation-feedbacks", params.conversationId, params],
+        queryFn: () =>
+            consoleHttpClient.get<PaginatedResponse<FeedbackRecord>>(
+                `/ai-chat-feedback/conversation/${params.conversationId}`,
+                {
+                    params: {
+                        page: params.page,
+                        pageSize: params.pageSize,
+                    },
+                },
+            ),
+        enabled: !!params.conversationId && options?.enabled !== false,
+        ...options,
+    });
+}
+
+export function useConversationFeedbackStatsQuery(
+    conversationId: string,
+    options?: QueryOptionsUtil<FeedbackStats>,
+) {
+    return useQuery<FeedbackStats>({
+        queryKey: ["console", "conversation-feedback-stats", conversationId],
+        queryFn: () =>
+            consoleHttpClient.get<FeedbackStats>(
+                `/ai-chat-feedback/conversation/${conversationId}/stats`,
+            ),
+        enabled: !!conversationId && options?.enabled !== false,
+        ...options,
+    });
+}
+
+export function useMessageFeedbackQuery(
+    messageId: string,
+    options?: QueryOptionsUtil<FeedbackRecord>,
+) {
+    return useQuery<FeedbackRecord>({
+        queryKey: ["console", "message-feedback", messageId],
+        queryFn: () => consoleHttpClient.get<FeedbackRecord>(`/ai-chat-feedback/message/${messageId}`),
+        enabled: !!messageId && options?.enabled !== false,
         ...options,
     });
 }
