@@ -409,14 +409,18 @@ const AiProviderIndexPage = () => {
                       <div className="flex flex-col gap-1 md:hidden">
                         <span className="break-all">{model.name}</span>
                         <div className="flex items-center gap-1">
-                          <Badge variant="outline">{model.modelType}</Badge>
+                          <Badge variant="outline">
+                            {model.modelType.replace("-", " ").toUpperCase()}
+                          </Badge>
                           <ModelFeatureBadges features={model.features} />
                         </div>
                       </div>
 
                       <div className="flex flex-1 items-center justify-between gap-2">
                         <div className="hidden items-center gap-1 md:flex">
-                          <Badge variant="outline">{model.modelType}</Badge>
+                          <Badge variant="outline">
+                            {model.modelType.replace("-", " ").toUpperCase()}
+                          </Badge>
                           <ModelFeatureBadges features={model.features} showLabel />
                         </div>
                         <Button
