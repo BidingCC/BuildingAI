@@ -111,6 +111,20 @@ export type MessageRecord = {
         raw?: Record<string, unknown>;
     } | null;
     userConsumedPower?: number | null;
+    model?: {
+        name: string;
+        modelType: string;
+        features?: string[];
+        billingRule?: {
+            power: number;
+            tokens: number;
+        };
+        provider?: {
+            provider: string;
+            name: string;
+            iconUrl?: string;
+        };
+    };
     createdAt: string;
     updatedAt: string;
 };

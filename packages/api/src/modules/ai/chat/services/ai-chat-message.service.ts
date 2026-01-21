@@ -73,13 +73,36 @@ export class AiChatsMessageService extends BaseService<AiChatMessage> {
         });
     }
 
+    async findByFrontendIdOnly(frontendId: string, userId?: string): Promise<AiChatMessage | null> {
+        const queryBuilder = this.messageRepository
+            .createQueryBuilder("message")
+            .where("message.frontendId = :frontendId", { frontendId });
+
+        if (userId) {
+            queryBuilder
+                .innerJoin("message.conversation", "conversation")
+                .andWhere("conversation.userId = :userId", { userId });
+        }
+
+        return queryBuilder.getOne();
+    }
+
     async findMessages(paginationDto: PaginationDto, queryDto?: { conversationId?: string }) {
         return this.paginate(paginationDto, {
-            relations: ["conversation", "model"],
+            relations: ["conversation", "model", "model.provider"],
             order: { sequence: "DESC" as const },
             ...(queryDto?.conversationId && {
                 where: { conversationId: queryDto.conversationId },
             }),
+            includeFields: [
+                "model.name",
+                "model.modelType",
+                "model.features",
+                "model.billingRule",
+                "model.provider.provider",
+                "model.provider.name",
+                "model.provider.iconUrl",
+            ],
         });
     }
 

@@ -26,6 +26,7 @@ import { useSmoothText } from "../../hooks/use-smooth-text";
 import { convertUIMessageToMessage } from "../../libs/message-converter";
 import { MessageActions } from "./message-actions";
 import { MessageBranch } from "./message-branch";
+import { FeedbackCard, MessageFeedback } from "./message-feedback";
 import { MessageTools } from "./message-tools";
 import { StreamingIndicator } from "./streaming-indicator";
 import { UserMessageActions } from "./user-message-actions";
@@ -38,8 +39,12 @@ export interface MessageProps {
   branchNumber?: number;
   branchCount?: number;
   branches?: string[];
-  onLikeChange?: (liked: boolean) => void;
-  onDislikeChange?: (disliked: boolean) => void;
+  onLikeChange?: (liked: boolean) => void | Promise<void>;
+  onDislikeChange?: (
+    disliked: boolean,
+    dislikeReason?: string,
+    isUpdate?: boolean,
+  ) => void | Promise<void>;
   onRetry?: () => void;
   onSwitchBranch?: (messageId: string) => void;
   addToolApprovalResponse?: (args: { id: string; approved: boolean; reason?: string }) => void;
@@ -65,21 +70,26 @@ export const Message = memo(function Message({
   addToolApprovalResponse,
   onEditMessage,
 }: MessageProps) {
+  const [showFeedbackCard, setShowFeedbackCard] = useState(false);
+  const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
+  const [isEditingMessage, setIsEditingMessage] = useState(false);
   const messageData = convertUIMessageToMessage(message);
   const usagePart = message.parts?.find((part) => part.type === "data-usage");
+  const metadata = message.metadata && typeof message.metadata === "object" ? message.metadata : {};
   const usage = (
     usagePart && typeof usagePart === "object" && "data" in usagePart
       ? usagePart.data
-      : message.metadata && typeof message.metadata === "object" && "usage" in message.metadata
-        ? message.metadata.usage
+      : "usage" in metadata
+        ? metadata.usage
         : undefined
   ) as Record<string, unknown> | undefined;
   const userConsumedPower =
-    message.metadata &&
-    typeof message.metadata === "object" &&
-    "userConsumedPower" in message.metadata
-      ? (message.metadata.userConsumedPower as number | null | undefined)
+    "userConsumedPower" in metadata
+      ? (metadata.userConsumedPower as number | null | undefined)
       : undefined;
+  const provider = "provider" in metadata ? (metadata.provider as string | undefined) : undefined;
+  const modelName =
+    "modelName" in metadata ? (metadata.modelName as string | undefined) : undefined;
 
   if (!messageData.versions?.length) return null;
 
@@ -99,8 +109,6 @@ export const Message = memo(function Message({
     smooth: isAssistant && isStreaming,
     id: message.id,
   });
-
-  const [isEditingMessage, setIsEditingMessage] = useState(false);
 
   const handleEditMessage = (newContent: string) => {
     const files = attachments?.map((att) => ({
@@ -212,14 +220,49 @@ export const Message = memo(function Message({
                 content={content}
                 usage={usage}
                 userConsumedPower={userConsumedPower}
+                provider={provider}
+                modelName={modelName}
                 onLikeChange={onLikeChange}
                 onDislikeChange={onDislikeChange}
                 onRetry={onRetry}
+                onShowFeedbackCard={setShowFeedbackCard}
               />
             )}
           </AIMessageToolbar>
         )}
+        {isAssistant && showFeedbackCard && onDislikeChange && (
+          <FeedbackCard
+            onSelectReason={async (reason) => {
+              await onDislikeChange(true, reason, true);
+              setShowFeedbackCard(false);
+            }}
+            onMore={() => {
+              setFeedbackDialogOpen(true);
+            }}
+            onClose={() => setShowFeedbackCard(false)}
+          />
+        )}
       </div>
+      {isAssistant && (
+        <MessageFeedback
+          open={feedbackDialogOpen}
+          onOpenChange={(open) => {
+            if (!open) {
+              setFeedbackDialogOpen(false);
+            }
+          }}
+          onSubmit={async (reason) => {
+            if (onDislikeChange) {
+              await onDislikeChange(true, reason, true);
+            }
+            setFeedbackDialogOpen(false);
+            setShowFeedbackCard(false);
+          }}
+          onCancel={() => {
+            setFeedbackDialogOpen(false);
+          }}
+        />
+      )}
     </AIMessage>
   );
 });

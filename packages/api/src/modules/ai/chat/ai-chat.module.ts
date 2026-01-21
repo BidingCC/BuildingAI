@@ -8,6 +8,7 @@ import { SecretTemplate } from "@buildingai/db/entities";
 import { Dict } from "@buildingai/db/entities";
 import {
     AccountLog,
+    AiChatFeedback,
     AiChatMessage,
     AiChatRecord,
     AiChatToolCall,
@@ -24,9 +25,11 @@ import { AiMcpToolService } from "../mcp/services/ai-mcp-tool.service";
 import { AiModelService } from "../model/services/ai-model.service";
 import { AiProviderService } from "../provider/services/ai-provider.service";
 import { AiChatRecordConsoleController } from "./controllers/console/ai-chat-record.controller";
+import { AiChatFeedbackWebController } from "./controllers/web/ai-chat-feedback.controller";
 import { AiChatMessageWebController } from "./controllers/web/ai-chat-message.controller";
 import { AiChatRecordWebController } from "./controllers/web/ai-chat-record.controller";
 import { ChatCompletionService } from "./services/ai-chat-completion.service";
+import { AiChatFeedbackService } from "./services/ai-chat-feedback.service";
 import { AiChatsMessageService } from "./services/ai-chat-message.service";
 import { AiChatRecordService } from "./services/ai-chat-record.service";
 import { ChatConfigService } from "./services/chat-config.service";
@@ -49,6 +52,7 @@ import { ChatConfigService } from "./services/chat-config.service";
             AiMcpTool,
             AiChatRecord,
             AiChatMessage,
+            AiChatFeedback,
             AiChatToolCall,
             Dict,
             AccountLog,
@@ -62,6 +66,7 @@ import { ChatConfigService } from "./services/chat-config.service";
         AiChatRecordConsoleController,
         AiChatRecordWebController,
         AiChatMessageWebController,
+        AiChatFeedbackWebController,
     ],
     providers: [
         ChatConfigService,
@@ -75,6 +80,7 @@ import { ChatConfigService } from "./services/chat-config.service";
         AiUserMcpServer,
         AiChatRecordService,
         AiChatsMessageService,
+        AiChatFeedbackService,
     ],
     exports: [ChatConfigService, ChatCompletionService, AiChatRecordService, AiChatsMessageService],
 })

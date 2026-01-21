@@ -340,6 +340,11 @@ const ChatRecordIndexPage = () => {
         <DrawerContent className="h-full w-full max-w-3xl! outline-none">
           <DrawerHeader>
             <DrawerTitle>{selectedConversation?.title || "未命名对话"}</DrawerTitle>
+            <DrawerDescription className="sr-only">
+              {selectedConversation?.user?.username
+                ? `对话用户：${selectedConversation.user.username}`
+                : "对话详情"}
+            </DrawerDescription>
             {selectedConversation?.user?.username && (
               <div className="mt-2 flex items-center gap-2">
                 <Avatar className="size-6">
