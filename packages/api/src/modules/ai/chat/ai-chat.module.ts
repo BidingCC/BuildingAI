@@ -24,6 +24,7 @@ import { AiMcpServerService } from "../mcp/services/ai-mcp-server.service";
 import { AiMcpToolService } from "../mcp/services/ai-mcp-tool.service";
 import { AiModelService } from "../model/services/ai-model.service";
 import { AiProviderService } from "../provider/services/ai-provider.service";
+import { AiChatFeedbackConsoleController } from "./controllers/console/ai-chat-feedback.controller";
 import { AiChatRecordConsoleController } from "./controllers/console/ai-chat-record.controller";
 import { AiChatFeedbackWebController } from "./controllers/web/ai-chat-feedback.controller";
 import { AiChatMessageWebController } from "./controllers/web/ai-chat-message.controller";
@@ -64,6 +65,7 @@ import { ChatConfigService } from "./services/chat-config.service";
     ],
     controllers: [
         AiChatRecordConsoleController,
+        AiChatFeedbackConsoleController,
         AiChatRecordWebController,
         AiChatMessageWebController,
         AiChatFeedbackWebController,

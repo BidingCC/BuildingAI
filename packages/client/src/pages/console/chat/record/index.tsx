@@ -1,10 +1,11 @@
 import {
   type ConversationRecord,
+  type QueryConversationsParams,
+  useConversationFeedbackStatsQuery,
   useConversationsQuery,
   useDeleteConversationMutation,
 } from "@buildingai/services/console";
 import { Avatar, AvatarFallback, AvatarImage } from "@buildingai/ui/components/ui/avatar";
-import { Badge } from "@buildingai/ui/components/ui/badge";
 import { Button } from "@buildingai/ui/components/ui/button";
 import {
   Drawer,
@@ -21,15 +22,6 @@ import {
 } from "@buildingai/ui/components/ui/dropdown-menu";
 import { Input } from "@buildingai/ui/components/ui/input";
 import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@buildingai/ui/components/ui/pagination";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -38,31 +30,132 @@ import {
 } from "@buildingai/ui/components/ui/select";
 import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
-import { EllipsisVertical, MessageSquare, Trash2 } from "lucide-react";
+import { EllipsisVertical, MessageSquare, Trash2, Zap } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { ConversationMessages } from "./conversation-messages";
+import { usePagination } from "@/hooks/use-pagination";
+
+import {
+  ConversationFeedbackStats,
+  ConversationMessagesDrawer,
+} from "./conversation-messages-drawer";
+
+const formatCompactNumber = (num: number): string => {
+  if (num < 1000) {
+    return num.toString();
+  }
+  if (num < 1000000) {
+    const k = num / 1000;
+    return k % 1 === 0 ? `${k}k` : `${k.toFixed(1)}k`;
+  }
+  if (num < 1000000000) {
+    const m = num / 1000000;
+    return m % 1 === 0 ? `${m}M` : `${m.toFixed(1)}M`;
+  }
+  const b = num / 1000000000;
+  return b % 1 === 0 ? `${b}B` : `${b.toFixed(1)}B`;
+};
+
+interface ConversationCardItemProps {
+  conversation: ConversationRecord;
+  onOpen: (conversation: ConversationRecord) => void;
+  onDelete: (id: string) => void;
+}
+
+const ConversationCardItem = ({ conversation, onOpen, onDelete }: ConversationCardItemProps) => {
+  const { data: feedbackStats } = useConversationFeedbackStatsQuery(conversation.id, {
+    enabled: !!conversation.id,
+  });
+
+  return (
+    <div
+      className="group/conversation-item bg-card relative flex cursor-pointer flex-col gap-2 rounded-lg border p-4"
+      onClick={() => onOpen(conversation)}
+    >
+      <div className="flex items-center gap-3">
+        <Avatar className="relative size-12 rounded-lg after:rounded-lg">
+          <AvatarImage
+            src={conversation.user?.avatar || ""}
+            alt={conversation.user?.username || "用户"}
+            className="rounded-lg"
+          />
+          <AvatarFallback className="size-12 rounded-lg">
+            {conversation.user?.username?.charAt(0).toUpperCase() || "U"}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+          <span className="line-clamp-1 font-medium">{conversation.title || "未命名对话"}</span>
+          <span className="text-muted-foreground line-clamp-1 text-xs">
+            {conversation.user?.username || "未知用户"}
+          </span>
+        </div>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button className="absolute top-2 right-2" size="icon-sm" variant="ghost">
+              <EllipsisVertical />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem variant="destructive" onClick={() => onDelete(conversation.id)}>
+              <Trash2 className="mr-2 size-4" />
+              删除
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      {conversation.summary && (
+        <p className="text-muted-foreground line-clamp-2 text-sm">{conversation.summary}</p>
+      )}
+
+      <div className="text-muted-foreground flex items-center gap-4 py-3 text-xs">
+        <div className="flex items-center gap-1">
+          <MessageSquare className="size-3" />
+          <span>{conversation.messageCount || 0} 条消息</span>
+        </div>
+        {conversation.totalTokens > 0 && (
+          <div className="flex items-center gap-1">
+            <Zap className="size-3" />
+            <span>{formatCompactNumber(conversation.totalTokens)} tokens</span>
+          </div>
+        )}
+      </div>
+
+      <div className="flex items-center justify-between">
+        <ConversationFeedbackStats stats={feedbackStats} compact />
+        <span className="text-muted-foreground text-xs">
+          {formatDistanceToNow(new Date(conversation.createdAt), {
+            addSuffix: true,
+            locale: zhCN,
+          })}
+        </span>
+      </div>
+    </div>
+  );
+};
 
 const ChatRecordIndexPage = () => {
-  const [page, setPage] = useState(1);
-  const [pageSize] = useState(20);
-  const [keyword, setKeyword] = useState("");
-  const [status, setStatus] = useState<string | undefined>(undefined);
+  const [queryParams, setQueryParams] = useState<QueryConversationsParams>({
+    page: 1,
+    pageSize: 20,
+  });
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [selectedConversation, setSelectedConversation] = useState<ConversationRecord | null>(null);
 
-  const { data, isLoading, refetch } = useConversationsQuery(
-    {
-      page,
-      pageSize,
-      keyword: keyword || undefined,
-      status: status as "active" | "completed" | "failed" | "cancelled" | undefined,
+  const { data, isLoading, refetch } = useConversationsQuery(queryParams, {
+    enabled: true,
+  });
+
+  const { PaginationComponent } = usePagination({
+    total: data?.total || 0,
+    pageSize: 20,
+    page: queryParams.page || 1,
+    onPageChange: (page) => {
+      setQueryParams((prev) => ({ ...prev, page }));
     },
-    {
-      enabled: true,
-    },
-  );
+  });
 
   const deleteMutation = useDeleteConversationMutation({
     onSuccess: () => {
@@ -95,25 +188,29 @@ const ChatRecordIndexPage = () => {
   };
 
   const conversations = data?.items || [];
-  const total = data?.total || 0;
-  const totalPages = data?.totalPages || Math.ceil(total / pageSize);
 
   return (
     <div className="flex h-full flex-col gap-4">
       <div className="bg-background sticky top-0 z-10 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
         <Input
           placeholder="搜索对话标题、摘要或用户名"
-          value={keyword}
+          value={queryParams.keyword || ""}
           onChange={(e) => {
-            setKeyword(e.target.value);
-            setPage(1);
+            setQueryParams((prev) => ({
+              ...prev,
+              keyword: e.target.value || undefined,
+              page: 1,
+            }));
           }}
         />
         <Select
-          value={status || "all"}
+          value={queryParams.status || "all"}
           onValueChange={(value) => {
-            setStatus(value === "all" ? undefined : value);
-            setPage(1);
+            setQueryParams((prev) => ({
+              ...prev,
+              status: value === "all" ? undefined : (value as QueryConversationsParams["status"]),
+              page: 1,
+            }));
           }}
         >
           <SelectTrigger className="w-full">
@@ -125,6 +222,27 @@ const ChatRecordIndexPage = () => {
             <SelectItem value="completed">已完成</SelectItem>
             <SelectItem value="failed">失败</SelectItem>
             <SelectItem value="cancelled">已取消</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select
+          value={queryParams.feedbackFilter || "all"}
+          onValueChange={(value) => {
+            setQueryParams((prev) => ({
+              ...prev,
+              feedbackFilter:
+                value === "all" ? undefined : (value as QueryConversationsParams["feedbackFilter"]),
+              page: 1,
+            }));
+          }}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="反馈筛选" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">全部反馈</SelectItem>
+            <SelectItem value="high-like">高赞率</SelectItem>
+            <SelectItem value="high-dislike">高踩率</SelectItem>
+            <SelectItem value="has-feedback">有反馈</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -141,196 +259,20 @@ const ChatRecordIndexPage = () => {
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
             {conversations.map((conversation: ConversationRecord) => (
-              <div
+              <ConversationCardItem
                 key={conversation.id}
-                className="group/conversation-item hover:border-primary/50 relative flex cursor-pointer flex-col gap-4 rounded-lg border p-4"
-                onClick={() => handleOpenConversation(conversation)}
-              >
-                <div className="flex items-center gap-3">
-                  <Avatar className="size-12 rounded-lg">
-                    <AvatarImage
-                      src={conversation.user?.avatar || undefined}
-                      alt={conversation.user?.username || "用户"}
-                    />
-                    <AvatarFallback>
-                      {conversation.user?.username?.charAt(0).toUpperCase() || "U"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex min-w-0 flex-1 flex-col">
-                    <span className="line-clamp-1 font-medium">
-                      {conversation.title || "未命名对话"}
-                    </span>
-                    <span className="text-muted-foreground line-clamp-1 text-xs">
-                      {conversation.user?.username || "未知用户"}
-                    </span>
-                  </div>
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button className="absolute top-2 right-2" size="icon-sm" variant="ghost">
-                        <EllipsisVertical />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        variant="destructive"
-                        onClick={() => handleDelete(conversation.id)}
-                      >
-                        <Trash2 className="mr-2 size-4" />
-                        删除
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-
-                {conversation.summary && (
-                  <p className="text-muted-foreground line-clamp-2 text-sm">
-                    {conversation.summary}
-                  </p>
-                )}
-
-                <div className="text-muted-foreground flex items-center gap-2 text-xs">
-                  <div className="flex items-center gap-1">
-                    <MessageSquare className="size-3" />
-                    <span>{conversation.messageCount || 0} 条消息</span>
-                  </div>
-                  {conversation.totalTokens > 0 && (
-                    <div>
-                      <span>{conversation.totalTokens.toLocaleString()} tokens</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge
-                    variant={
-                      conversation.status === "completed"
-                        ? "default"
-                        : conversation.status === "failed"
-                          ? "destructive"
-                          : conversation.status === "active"
-                            ? "secondary"
-                            : "outline"
-                    }
-                  >
-                    {conversation.status === "active"
-                      ? "进行中"
-                      : conversation.status === "completed"
-                        ? "已完成"
-                        : conversation.status === "failed"
-                          ? "失败"
-                          : "已取消"}
-                  </Badge>
-                  <span className="text-muted-foreground ml-auto text-xs">
-                    {formatDistanceToNow(new Date(conversation.createdAt), {
-                      addSuffix: true,
-                      locale: zhCN,
-                    })}
-                  </span>
-                </div>
-              </div>
+                conversation={conversation}
+                onOpen={handleOpenConversation}
+                onDelete={handleDelete}
+              />
             ))}
           </div>
         )}
       </div>
 
-      {totalPages > 1 && (
-        <div className="bg-background sticky bottom-0 flex py-2">
-          <Pagination className="mx-0 w-fit">
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (page > 1) setPage(page - 1);
-                  }}
-                  className={page === 1 ? "pointer-events-none opacity-50" : ""}
-                />
-              </PaginationItem>
-              {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
-                let pageNum: number;
-                if (totalPages <= 7) {
-                  pageNum = i + 1;
-                } else if (page <= 4) {
-                  pageNum = i + 1;
-                } else if (page >= totalPages - 3) {
-                  pageNum = totalPages - 6 + i;
-                } else {
-                  pageNum = page - 3 + i;
-                }
-
-                if (i === 0 && page > 4) {
-                  return (
-                    <>
-                      <PaginationItem key="first">
-                        <PaginationLink
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setPage(1);
-                          }}
-                        >
-                          1
-                        </PaginationLink>
-                      </PaginationItem>
-                      <PaginationItem key="ellipsis1">
-                        <PaginationEllipsis />
-                      </PaginationItem>
-                    </>
-                  );
-                }
-
-                if (i === 6 && page < totalPages - 3) {
-                  return (
-                    <>
-                      <PaginationItem key="ellipsis2">
-                        <PaginationEllipsis />
-                      </PaginationItem>
-                      <PaginationItem key="last">
-                        <PaginationLink
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setPage(totalPages);
-                          }}
-                        >
-                          {totalPages}
-                        </PaginationLink>
-                      </PaginationItem>
-                    </>
-                  );
-                }
-
-                return (
-                  <PaginationItem key={pageNum}>
-                    <PaginationLink
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setPage(pageNum);
-                      }}
-                      isActive={page === pageNum}
-                    >
-                      {pageNum}
-                    </PaginationLink>
-                  </PaginationItem>
-                );
-              })}
-              <PaginationItem>
-                <PaginationNext
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (page < totalPages) setPage(page + 1);
-                  }}
-                  className={page === totalPages ? "pointer-events-none opacity-50" : ""}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
-      )}
+      <div className="bg-background sticky bottom-0 flex py-2">
+        <PaginationComponent className="mx-0 w-fit" />
+      </div>
 
       <Drawer
         open={!!selectedConversationId}
@@ -363,7 +305,7 @@ const ChatRecordIndexPage = () => {
 
           <div className="mt-6 flex h-[calc(100vh-8rem)] flex-col overflow-hidden">
             {selectedConversationId && (
-              <ConversationMessages
+              <ConversationMessagesDrawer
                 key={selectedConversationId}
                 conversationId={selectedConversationId}
               />

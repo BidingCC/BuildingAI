@@ -20,7 +20,7 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@buildingai/ui/components/ui/alert";
 import type { ReasoningUIPart, UIMessage } from "ai";
 import { AlertCircleIcon } from "lucide-react";
-import { memo, useState } from "react";
+import { memo, type ReactNode, useState } from "react";
 
 import { useSmoothText } from "../../hooks/use-smooth-text";
 import { convertUIMessageToMessage } from "../../libs/message-converter";
@@ -53,6 +53,7 @@ export interface MessageProps {
     newContent: string,
     files?: Array<{ type: "file"; url: string; mediaType?: string; filename?: string }>,
   ) => void;
+  extraActions?: ReactNode;
 }
 
 export const Message = memo(function Message({
@@ -69,6 +70,7 @@ export const Message = memo(function Message({
   onSwitchBranch,
   addToolApprovalResponse,
   onEditMessage,
+  extraActions,
 }: MessageProps) {
   const [showFeedbackCard, setShowFeedbackCard] = useState(false);
   const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
@@ -226,6 +228,7 @@ export const Message = memo(function Message({
                 onDislikeChange={onDislikeChange}
                 onRetry={onRetry}
                 onShowFeedbackCard={setShowFeedbackCard}
+                extraActions={extraActions}
               />
             )}
           </AIMessageToolbar>

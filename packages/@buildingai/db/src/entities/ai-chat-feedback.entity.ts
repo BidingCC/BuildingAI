@@ -5,7 +5,7 @@ import { BaseEntity } from "./base";
 import { User } from "./user.entity";
 
 @AppEntity({ name: "ai_chat_feedback", comment: "AI对话反馈" })
-@Index(["messageId", "userId"])
+@Index(["messageId", "userId", "conversationId"])
 export class AiChatFeedback extends BaseEntity {
     @Column({
         type: "uuid",
@@ -13,6 +13,13 @@ export class AiChatFeedback extends BaseEntity {
     })
     @Index()
     messageId: string;
+
+    @Column({
+        type: "uuid",
+        comment: "对话ID",
+    })
+    @Index()
+    conversationId: string;
 
     @Column({
         type: "uuid",
