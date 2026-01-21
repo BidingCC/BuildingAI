@@ -156,7 +156,7 @@ const PromptInputInner = memo(
                 <span>{quickMenuMcpServer.name || "Search"}</span>
               </AIPromptInputButton>
             )}
-            {!isLoadingMcpServers && mcpServers.length > 0 && (
+            {!isLoadingMcpServers && (
               <McpSelector
                 mcpServers={mcpServers}
                 selectedMcpServerIds={selectedMcpServerIds}

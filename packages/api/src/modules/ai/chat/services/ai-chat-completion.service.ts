@@ -138,12 +138,16 @@ export class ChatCompletionService {
                     }
 
                     try {
+                        const supportsToolCall = model.features?.some((f) => f.includes("tool"));
+
                         const agent = new ToolLoopAgent({
                             model: provider(model.model).model,
-                            tools: {
-                                getWeather,
-                                ...mcpTools,
-                            },
+                            ...(supportsToolCall && {
+                                tools: {
+                                    getWeather,
+                                    ...mcpTools,
+                                },
+                            }),
                             // 允许多步：tool call -> tool result -> 继续生成最终回复
                             // 使用 stepCountIs 确保工具调用后继续生成最终回复
                             // 设置为 10 步，允许多次工具调用和最终回复生成
