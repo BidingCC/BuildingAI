@@ -237,22 +237,27 @@ export class SecretService extends BaseService<Secret> {
      * Get configuration list by template ID
      * @param templateId Template ID
      * @param onlyActive Whether to return only active configurations
-     * @returns Configuration list
+     * @returns Configuration list with decrypted field values
      */
-    async getConfigsByTemplate(templateId: string, onlyActive: boolean = true): Promise<Secret[]> {
+    async getConfigsByTemplate(templateId: string, onlyActive: boolean = true): Promise<any[]> {
         const whereConditions = buildWhere<Secret>({
             templateId,
             status: onlyActive ? true : undefined,
         });
 
-        return await super.findAll({
+        const configs = await super.findAll({
             where: whereConditions,
             order: {
                 sortOrder: "DESC",
                 createdAt: "DESC",
             },
-            excludeFields: ["fieldValues"], // Do not return sensitive field values
         });
+
+        // Decrypt field values for each configuration
+        return configs.map((config) => ({
+            ...config,
+            fieldValues: this.decryptFieldValues(config.fieldValues || []),
+        }));
     }
 
     /**

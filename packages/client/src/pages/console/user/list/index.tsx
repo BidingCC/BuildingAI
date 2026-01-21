@@ -274,7 +274,7 @@ const UserListIndexPage = () => {
                 <div>
                   <p className="text-muted-foreground flex items-center gap-1 text-xs">
                     <ClockPlus className="size-3" />
-                    创建于 {new Date(user.createdAt).toLocaleString("zh-CN")}
+                    创建于 {new Date(user.createdAt).toLocaleString()}
                   </p>
                 </div>
               </div>
