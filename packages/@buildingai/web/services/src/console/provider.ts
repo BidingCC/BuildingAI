@@ -213,3 +213,18 @@ export function useToggleAiProviderActiveMutation(
         ...options,
     });
 }
+
+/**
+ * Toggle AI model active status
+ */
+export function useToggleAiModelActiveMutation(
+    options?: MutationOptionsUtil<AiProviderModel, { id: string; isActive: boolean }>,
+) {
+    return useMutation<AiProviderModel, Error, { id: string; isActive: boolean }>({
+        mutationFn: ({ id, isActive }) =>
+            consoleHttpClient.patch<AiProviderModel>(`/ai-models/${id}/toggle-active`, {
+                isActive,
+            }),
+        ...options,
+    });
+}

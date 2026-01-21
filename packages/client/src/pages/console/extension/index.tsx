@@ -30,6 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@buildingai/ui/components/ui/select";
+import { Skeleton } from "@buildingai/ui/components/ui/skeleton";
 import { Switch } from "@buildingai/ui/components/ui/switch";
 import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog";
 import { IconCircleCheckFilled, IconPuzzle, IconXboxXFilled } from "@tabler/icons-react";
@@ -51,22 +52,39 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 /**
- * Get terminal label
+ * Terminal type label mapping
  */
-const getTerminalLabel = (terminalType: ExtensionSupportTerminalType): string => {
-  const terminalMap: Record<ExtensionSupportTerminalType, string> = {
-    [ExtensionSupportTerminal.WEB]: "Web端",
-    [ExtensionSupportTerminal.WEIXIN]: "公众号",
-    [ExtensionSupportTerminal.H5]: "H5",
-    [ExtensionSupportTerminal.MP]: "小程序",
-    [ExtensionSupportTerminal.API]: "API端",
-  };
-  return terminalMap[terminalType] || "未知";
+const TERMINAL_LABEL_MAP: Record<ExtensionSupportTerminalType, string> = {
+  [ExtensionSupportTerminal.WEB]: "Web端",
+  [ExtensionSupportTerminal.WEIXIN]: "公众号",
+  [ExtensionSupportTerminal.H5]: "H5",
+  [ExtensionSupportTerminal.MP]: "小程序",
+  [ExtensionSupportTerminal.API]: "API端",
 };
+
+type StatusBadgeProps = {
+  isActive: boolean;
+};
+
+/**
+ * Reusable status badge component
+ */
+const StatusBadge = ({ isActive }: StatusBadgeProps) =>
+  isActive ? (
+    <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
+      <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
+      已启用
+    </Badge>
+  ) : (
+    <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
+      <IconXboxXFilled className="fill-destructive" />
+      已禁用
+    </Badge>
+  );
 
 const ExtensionIndexPage = () => {
   const [queryParams, setQueryParams] = useState<QueryExtensionDto>({});
-  const { data, refetch } = useExtensionsListQuery(queryParams);
+  const { data, refetch, isLoading } = useExtensionsListQuery(queryParams);
   const { confirm } = useAlertDialog();
 
   const enableMutation = useEnableExtensionMutation({
@@ -214,7 +232,31 @@ const ExtensionIndexPage = () => {
           </div>
         </div>
 
-        {data?.items && data?.items.length > 0 ? (
+        {isLoading ? (
+          Array.from({ length: 4 }).map((_, index) => (
+            <div key={index} className="bg-card flex h-46.5 flex-col gap-4 rounded-lg border p-4">
+              <div className="flex gap-3">
+                <Skeleton className="size-12" />
+                <div className="flex h-full flex-1 flex-col justify-between">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="mt-2 h-4 w-full" />
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <Skeleton className="h-4 w-full rounded-full" />
+              </div>
+
+              <div className="mt-auto flex items-end justify-between">
+                <div className="flex items-center gap-2">
+                  <Skeleton className="size-5 rounded-full" />
+                  <Skeleton className="h-5 w-14" />
+                </div>
+                <Skeleton className="h-5 w-14" />
+              </div>
+            </div>
+          ))
+        ) : data?.items && data?.items.length > 0 ? (
           data?.items.map((extension, index) => (
             <div
               key={index}
@@ -294,22 +336,11 @@ const ExtensionIndexPage = () => {
                 <div className="flex min-h-12 flex-wrap gap-2">
                   <Badge variant="secondary">v{extension.version}</Badge>
 
-                  {extension.status === ExtensionStatus.ENABLED && (
-                    <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
-                      <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
-                      已启用
-                    </Badge>
-                  )}
-                  {extension.status === ExtensionStatus.DISABLED && (
-                    <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
-                      <IconXboxXFilled className="fill-destructive" />
-                      已禁用
-                    </Badge>
-                  )}
+                  <StatusBadge isActive={extension.status === ExtensionStatus.ENABLED} />
 
                   {extension.supportTerminal?.map((terminal) => (
                     <Badge key={terminal} variant="secondary">
-                      {getTerminalLabel(terminal)}
+                      {TERMINAL_LABEL_MAP[terminal] || "未知"}
                     </Badge>
                   ))}
                   {extension.isLocal && <Badge variant="secondary">本地</Badge>}

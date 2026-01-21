@@ -1,13 +1,26 @@
+import { MODEL_FEATURES } from "@buildingai/ai-sdk/interfaces/model-features";
 import {
   type AiProvider,
+  type AiProviderModel,
   type QueryAiProviderDto,
   useAiProvidersQuery,
   useDeleteAiProviderMutation,
+  useToggleAiModelActiveMutation,
   useToggleAiProviderActiveMutation,
 } from "@buildingai/services/console";
 import { Avatar, AvatarFallback, AvatarImage } from "@buildingai/ui/components/ui/avatar";
 import { Badge } from "@buildingai/ui/components/ui/badge";
 import { Button } from "@buildingai/ui/components/ui/button";
+import {
+  Command,
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandShortcut,
+} from "@buildingai/ui/components/ui/command";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,31 +36,131 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@buildingai/ui/components/ui/select";
+import { Skeleton } from "@buildingai/ui/components/ui/skeleton";
 import { Switch } from "@buildingai/ui/components/ui/switch";
 import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog";
 import { IconCircleCheckFilled, IconXboxXFilled } from "@tabler/icons-react";
 import {
+  Activity,
   Brain,
   ChevronRight,
   Edit,
   EllipsisVertical,
+  Eye,
   FileJson2,
   Plus,
-  Power,
-  PowerOff,
+  PlusCircle,
+  Settings,
+  Settings2,
   Trash2,
+  Video,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { ProviderIcon, providerIconsMap } from "@/components/provider-icons";
 
+/**
+ * Feature icon mapping for model capabilities
+ */
+const FEATURE_ICON_MAP: Record<string, { icon: React.ElementType; label?: string }> = {
+  [MODEL_FEATURES.VISION]: { icon: Eye, label: "VISION" },
+  [MODEL_FEATURES.AUDIO]: { icon: Activity, label: "AUDIO" },
+  [MODEL_FEATURES.DOCUMENT]: { icon: FileJson2, label: "DOCUMENT" },
+  [MODEL_FEATURES.VIDEO]: { icon: Video, label: "VIDEO" },
+};
+
+type ProviderAvatarProps = {
+  provider: string;
+  iconUrl?: string;
+  name: string;
+  size?: "sm" | "md";
+  children?: React.ReactNode;
+};
+
+/**
+ * Reusable provider avatar component
+ */
+const ProviderAvatar = ({
+  provider,
+  iconUrl,
+  name,
+  size = "md",
+  children,
+}: ProviderAvatarProps) => {
+  const sizeClasses = size === "sm" ? "size-8" : "size-12";
+  const iconSizeClasses = size === "sm" ? "size-6" : "size-8";
+
+  return (
+    <Avatar className={`center bg-muted relative ${sizeClasses} rounded-lg after:rounded-lg`}>
+      <AvatarImage src={iconUrl} alt={name} className={`${iconSizeClasses} rounded-lg`} />
+      <AvatarFallback className={`${sizeClasses} rounded-lg`}>
+        {Object.keys(providerIconsMap).includes(provider) ? (
+          <ProviderIcon className={iconSizeClasses} provider={provider} />
+        ) : (
+          <Brain className={iconSizeClasses} />
+        )}
+      </AvatarFallback>
+      {children}
+    </Avatar>
+  );
+};
+
+type ModelFeatureBadgesProps = {
+  features: string[];
+  showLabel?: boolean;
+};
+
+/**
+ * Reusable model feature badges component
+ */
+const ModelFeatureBadges = ({ features, showLabel = false }: ModelFeatureBadgesProps) => (
+  <>
+    {Object.entries(FEATURE_ICON_MAP).map(([feature, { icon: Icon, label }]) =>
+      features.includes(feature) ? (
+        <Badge key={feature} variant="outline">
+          <Icon />
+          {showLabel && label}
+        </Badge>
+      ) : null,
+    )}
+  </>
+);
+
 const AiProviderIndexPage = () => {
-  const [queryParams, setQueryParams] = useState<QueryAiProviderDto>({
-    // keyword: "12313",
-  });
-  const { data, refetch } = useAiProvidersQuery(queryParams);
+  const [queryParams, setQueryParams] = useState<QueryAiProviderDto>({});
+  const [modelsDialogOpen, setModelsDialogOpen] = useState(false);
+  const [selectedProvider, setSelectedProvider] = useState<AiProvider | null>(null);
+  const { data, refetch, isLoading } = useAiProvidersQuery(queryParams);
   const { confirm } = useAlertDialog();
+
+  const handleManageModels = (provider: AiProvider) => {
+    setSelectedProvider(provider);
+    setModelsDialogOpen(true);
+  };
+
+  const toggleModelActiveMutation = useToggleAiModelActiveMutation({
+    onSuccess: (updatedModel, variables) => {
+      toast.success(variables.isActive ? "模型已启用" : "模型已禁用");
+      // Update selectedProvider's models locally
+      if (selectedProvider) {
+        setSelectedProvider({
+          ...selectedProvider,
+          models: selectedProvider.models?.map((m) =>
+            m.id === updatedModel.id ? { ...m, isActive: updatedModel.isActive } : m,
+          ),
+        });
+      }
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(`操作失败: ${error.message}`);
+    },
+  });
+
+  const handleToggleModelActive = (model: AiProviderModel) => {
+    toggleModelActiveMutation.mutate({ id: model.id, isActive: !model.isActive });
+  };
 
   const toggleActiveMutation = useToggleAiProviderActiveMutation({
     onSuccess: (_, variables) => {
@@ -124,7 +237,7 @@ const AiProviderIndexPage = () => {
         </Select>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
         <div className="flex flex-col gap-4 rounded-lg border border-dashed p-4 hover:border-solid">
           <div className="flex items-center gap-3">
             <Button className="size-12 rounded-lg border-dashed" variant="outline">
@@ -138,7 +251,7 @@ const AiProviderIndexPage = () => {
             </div>
           </div>
 
-          <div className="flex min-h-20 flex-1 items-end gap-4">
+          <div className="flex min-h-12 flex-1 items-end gap-4">
             <Button size="xs" className="flex-1" variant="outline">
               <FileJson2 /> 从配置文件导入
             </Button>
@@ -148,26 +261,34 @@ const AiProviderIndexPage = () => {
           </div>
         </div>
 
-        {data && data?.length > 0 ? (
+        {isLoading ? (
+          Array.from({ length: 4 }).map((_, index) => (
+            <div key={index} className="bg-card flex h-36.5 flex-col gap-4 rounded-lg border p-4">
+              <div className="flex gap-3">
+                <Skeleton className="size-12" />
+                <div className="flex h-full flex-1 flex-col justify-between">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="mt-2 h-4 w-full" />
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <Skeleton className="h-4 w-full rounded-full" />
+              </div>
+            </div>
+          ))
+        ) : data && data?.length > 0 ? (
           data.map((provider, index) => (
             <div
               key={index}
               className="group/provider-item bg-card relative flex flex-col gap-4 rounded-lg border p-4"
             >
               <div className="flex items-center gap-3">
-                <Avatar className="center bg-muted relative size-12 rounded-lg after:rounded-lg">
-                  <AvatarImage
-                    src={provider.iconUrl}
-                    alt={provider.name}
-                    className="size-8 rounded-lg"
-                  />
-                  <AvatarFallback className="size-12 rounded-lg">
-                    {Object.keys(providerIconsMap).includes(provider.provider) ? (
-                      <ProviderIcon className="size-8" provider={provider.provider} />
-                    ) : (
-                      <Brain className="size-8" />
-                    )}
-                  </AvatarFallback>
+                <ProviderAvatar
+                  provider={provider.provider}
+                  iconUrl={provider.iconUrl}
+                  name={provider.name}
+                >
                   <div className="center absolute inset-0 z-1 rounded-lg bg-black/5 opacity-0 backdrop-blur-xl transition-opacity group-hover/provider-item:opacity-100 dark:bg-black/15">
                     <Switch
                       checked={provider.isActive}
@@ -175,15 +296,17 @@ const AiProviderIndexPage = () => {
                       disabled={toggleActiveMutation.isPending}
                     />
                   </div>
-                </Avatar>
+                </ProviderAvatar>
                 <div className="flex flex-col">
                   <span>{provider.name}</span>
                   <Button
                     variant="ghost"
                     size="xs"
                     className="text-muted-foreground px-0 hover:px-2"
+                    onClick={() => handleManageModels(provider)}
                   >
-                    {provider.models?.length || 0}个模型
+                    <Settings />
+                    管理模型({provider.models?.length || 0})
                     <ChevronRight />
                   </Button>
                 </div>
@@ -199,19 +322,13 @@ const AiProviderIndexPage = () => {
                       <Edit />
                       编辑
                     </DropdownMenuItem>
+
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      variant={provider.isActive ? "warning" : "default"}
-                      onClick={() => handleToggleActive(provider)}
-                      disabled={toggleActiveMutation.isPending}
-                    >
-                      {provider.isActive ? <PowerOff /> : <Power />}
-                      {provider.isActive ? "禁用" : "启用"}
-                    </DropdownMenuItem>
+
                     <DropdownMenuItem
                       variant="destructive"
                       onClick={() => handleDelete(provider)}
-                      disabled={deleteMutation.isPending || provider.isBuiltIn}
+                      disabled={deleteMutation.isPending}
                     >
                       <Trash2 />
                       删除
@@ -220,7 +337,7 @@ const AiProviderIndexPage = () => {
                 </DropdownMenu>
               </div>
 
-              <div className="mt-1 flex flex-wrap items-center gap-2">
+              <div className="flex min-h-12 flex-wrap gap-2">
                 {provider.isActive ? (
                   <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
                     <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
@@ -250,6 +367,81 @@ const AiProviderIndexPage = () => {
           </div>
         )}
       </div>
+      <CommandDialog
+        open={modelsDialogOpen}
+        className="sm:max-w-3xl"
+        onOpenChange={setModelsDialogOpen}
+      >
+        <Command>
+          <div className="flex items-center justify-between pb-2">
+            <div className="flex items-center">
+              {selectedProvider && (
+                <div className="m-1 mb-0">
+                  <ProviderAvatar
+                    provider={selectedProvider.provider}
+                    iconUrl={selectedProvider.iconUrl}
+                    name={selectedProvider.name}
+                    size="sm"
+                  />
+                </div>
+              )}
+              <CommandInput className="w-full max-w-lg" placeholder="搜索模型名称..." />
+            </div>
+            <div className="p-1 pb-0">
+              <Button className="" size="sm" variant="ghost">
+                <PlusCircle />
+                添加模型
+              </Button>
+            </div>
+          </div>
+          <CommandList className="max-h-96 min-h-96">
+            <CommandEmpty>未找到模型</CommandEmpty>
+            {selectedProvider && (
+              <CommandGroup heading={`模型列表(${selectedProvider.models?.length || 0})`}>
+                {selectedProvider.models &&
+                  selectedProvider.models.length > 0 &&
+                  selectedProvider.models.map((model) => (
+                    <CommandItem
+                      key={model.id}
+                      className="group/model-item flex min-h-9 items-center justify-between"
+                    >
+                      <span className="hidden break-all md:block">{model.name}</span>
+                      <div className="flex flex-col gap-1 md:hidden">
+                        <span className="break-all">{model.name}</span>
+                        <div className="flex items-center gap-1">
+                          <Badge variant="outline">{model.modelType}</Badge>
+                          <ModelFeatureBadges features={model.features} />
+                        </div>
+                      </div>
+
+                      <div className="flex flex-1 items-center justify-between gap-2">
+                        <div className="hidden items-center gap-1 md:flex">
+                          <Badge variant="outline">{model.modelType}</Badge>
+                          <ModelFeatureBadges features={model.features} showLabel />
+                        </div>
+                        <Button
+                          size="xs"
+                          variant="outline"
+                          className="ml-auto group-hover/model-item:flex group-data-selected/model-item:flex md:hidden"
+                        >
+                          <Settings2 />
+                          配置
+                        </Button>
+                      </div>
+                      <CommandShortcut>
+                        <Switch
+                          checked={model.isActive}
+                          onCheckedChange={() => handleToggleModelActive(model)}
+                          disabled={toggleModelActiveMutation.isPending}
+                        />
+                      </CommandShortcut>
+                    </CommandItem>
+                  ))}
+              </CommandGroup>
+            )}
+          </CommandList>
+        </Command>
+      </CommandDialog>
     </div>
   );
 };
