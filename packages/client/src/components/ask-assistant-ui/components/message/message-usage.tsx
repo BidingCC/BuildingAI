@@ -1,7 +1,10 @@
-import { Button } from "@buildingai/ui/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@buildingai/ui/components/ui/popover";
+import { Tabs, TabsList, TabsTrigger } from "@buildingai/ui/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@buildingai/ui/components/ui/tooltip";
 import { BarChart3Icon } from "lucide-react";
 import { memo, useRef, useState } from "react";
+
+import { ProviderIcon } from "@/components/provider-icons";
 
 interface Usage {
   inputTokens?: number;
@@ -23,6 +26,8 @@ interface Usage {
 export interface MessageUsageProps {
   usage?: Usage;
   userConsumedPower?: number | null;
+  provider?: string;
+  modelName?: string;
 }
 
 type ViewMode = "token" | "power";
@@ -30,6 +35,8 @@ type ViewMode = "token" | "power";
 export const MessageUsage = memo(function MessageUsage({
   usage,
   userConsumedPower,
+  provider,
+  modelName,
 }: MessageUsageProps) {
   const [open, setOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("token");
@@ -55,7 +62,7 @@ export const MessageUsage = memo(function MessageUsage({
   const handleMouseLeave = () => {
     timeoutRef.current = setTimeout(() => {
       setOpen(false);
-    }, 150);
+    }, 500);
   };
 
   return (
@@ -81,35 +88,43 @@ export const MessageUsage = memo(function MessageUsage({
       >
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <div className="text-sm font-semibold">
-              {viewMode === "token" ? "Token用量" : "积分消耗"}
+            <div className="flex items-center gap-2">
+              {provider && <ProviderIcon provider={provider} className="size-4" />}
+              {modelName ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="line-clamp-1 max-w-[120px] text-sm font-semibold">
+                      {modelName}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{modelName}</p>
+                  </TooltipContent>
+                </Tooltip>
+              ) : (
+                <div className="text-sm font-semibold">
+                  {viewMode === "token" ? "Token用量" : "积分消耗"}
+                </div>
+              )}
             </div>
-            <div className="flex gap-1 rounded-md border p-0.5">
-              <Button
-                variant={viewMode === "token" ? "default" : "ghost"}
-                size="sm"
-                className="h-6 px-2 text-xs"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setViewMode("token");
-                }}
-                onMouseEnter={handleMouseEnter}
-              >
-                Token
-              </Button>
-              <Button
-                variant={viewMode === "power" ? "default" : "ghost"}
-                size="sm"
-                className="h-6 px-2 text-xs"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setViewMode("power");
-                }}
-                onMouseEnter={handleMouseEnter}
-              >
-                积分
-              </Button>
-            </div>
+            <Tabs
+              value={viewMode}
+              onValueChange={(value) => {
+                if (value === "token" || value === "power") {
+                  setViewMode(value);
+                }
+              }}
+              className="w-fit"
+            >
+              <TabsList className="h-7">
+                <TabsTrigger value="token" className="text-xs" onMouseEnter={handleMouseEnter}>
+                  Token
+                </TabsTrigger>
+                <TabsTrigger value="power" className="text-xs" onMouseEnter={handleMouseEnter}>
+                  积分
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
           {viewMode === "token" ? (
             <>

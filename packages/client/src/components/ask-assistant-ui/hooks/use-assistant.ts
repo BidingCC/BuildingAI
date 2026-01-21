@@ -7,6 +7,7 @@ import type { RawMessageRecord } from "../libs/message-repository";
 import { convertProvidersToModels } from "../libs/provider-converter";
 import type { AssistantContextValue, DisplayMessage, Suggestion } from "../types";
 import { useChatStream } from "./use-chat-stream";
+import { useFeedback } from "./use-feedback";
 import { useMessageRepository } from "./use-message-repository";
 import { useMessagesPaging } from "./use-messages-paging";
 
@@ -122,9 +123,6 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
     [storage],
   );
 
-  const [liked, setLiked] = useState<Record<string, boolean>>({});
-  const [disliked, setDisliked] = useState<Record<string, boolean>>({});
-
   const {
     messages: repositoryMessages,
     displayMessages,
@@ -161,6 +159,8 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
     conversationIdRef,
     prevThreadIdRef,
   });
+
+  const { liked, disliked, onLike, onDislike } = useFeedback(streamMessages, currentThreadId);
 
   const { isLoadingMessages, isLoadingMoreMessages, hasMoreMessages, loadMoreMessages } =
     useMessagesPaging({
@@ -219,14 +219,6 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
     [repositoryMessages, send],
   );
 
-  const onLike = useCallback((messageKey: string, value: boolean) => {
-    setLiked((prev) => ({ ...prev, [messageKey]: value }));
-  }, []);
-
-  const onDislike = useCallback((messageKey: string, value: boolean) => {
-    setDisliked((prev) => ({ ...prev, [messageKey]: value }));
-  }, []);
-
   const onSwitchBranch = useCallback(
     (messageId: string) => switchToBranch(messageId),
     [switchToBranch],
@@ -252,8 +244,6 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
       const parentId = getParentId(messageId);
       if (parentId === undefined) return;
 
-      // Create a new sibling "version" under the same parent by re-sending the edited content.
-      // We also slice the client message list to keep the request context consistent with the branch.
       setMessages(sliceMessagesUntil(streamMessages, parentId));
       queueMicrotask(() => send(newContent, parentId, files));
     },

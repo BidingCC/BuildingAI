@@ -11,9 +11,12 @@ export interface MessageActionsProps extends MessageUsageProps {
   liked: boolean;
   disliked: boolean;
   content: string;
+  provider?: string;
+  modelName?: string;
   onLikeChange?: (liked: boolean) => void;
-  onDislikeChange?: (disliked: boolean) => void;
+  onDislikeChange?: (disliked: boolean, dislikeReason?: string, isUpdate?: boolean) => void;
   onRetry?: () => void;
+  onShowFeedbackCard?: (show: boolean) => void;
 }
 
 export const MessageActions = memo(function MessageActions({
@@ -22,12 +25,26 @@ export const MessageActions = memo(function MessageActions({
   content,
   usage,
   userConsumedPower,
+  provider,
+  modelName,
   onLikeChange,
   onDislikeChange,
   onRetry,
+  onShowFeedbackCard,
 }: MessageActionsProps) {
   const handleCopy = () => {
     navigator.clipboard.writeText(content);
+  };
+
+  const handleLike = async () => {
+    if (!onLikeChange) return;
+    await onLikeChange(!liked);
+  };
+
+  const handleDislike = async () => {
+    if (!onDislikeChange) return;
+    await onDislikeChange(false);
+    onShowFeedbackCard?.(false);
   };
 
   return (
@@ -37,15 +54,22 @@ export const MessageActions = memo(function MessageActions({
           <RefreshCcwIcon className="size-4" />
         </AIMessageAction>
       )}
-      {onLikeChange && (
-        <AIMessageAction label="Like" onClick={() => onLikeChange(!liked)} tooltip="喜欢">
+      {onLikeChange && !disliked && (
+        <AIMessageAction label="Like" onClick={handleLike} tooltip="喜欢">
           <ThumbsUpIcon className="size-4" fill={liked ? "currentColor" : "none"} />
         </AIMessageAction>
       )}
-      {onDislikeChange && (
+      {onDislikeChange && !liked && (
         <AIMessageAction
           label="Dislike"
-          onClick={() => onDislikeChange(!disliked)}
+          onClick={async () => {
+            if (disliked) {
+              await handleDislike();
+            } else {
+              await onDislikeChange(true);
+              onShowFeedbackCard?.(true);
+            }
+          }}
           tooltip="不喜欢"
         >
           <ThumbsDownIcon className="size-4" fill={disliked ? "currentColor" : "none"} />
@@ -54,7 +78,12 @@ export const MessageActions = memo(function MessageActions({
       <AIMessageAction label="Copy" onClick={handleCopy} tooltip="复制">
         <CopyIcon className="size-4" />
       </AIMessageAction>
-      <MessageUsage usage={usage} userConsumedPower={userConsumedPower} />
+      <MessageUsage
+        usage={usage}
+        userConsumedPower={userConsumedPower}
+        provider={provider}
+        modelName={modelName}
+      />
     </AIMessageActions>
   );
 });

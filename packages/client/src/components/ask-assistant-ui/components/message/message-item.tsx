@@ -10,7 +10,7 @@ export interface MessageItemProps {
   liked?: boolean;
   disliked?: boolean;
   onLike?: (id: string, value: boolean) => void;
-  onDislike?: (id: string, value: boolean) => void;
+  onDislike?: (id: string, value: boolean, dislikeReason?: string, isUpdate?: boolean) => void;
   onRegenerate?: (id: string) => void;
   onEditMessage?: (messageId: string, newContent: string) => void;
   onSwitchBranch?: (messageId: string) => void;
@@ -42,7 +42,9 @@ export const MessageItem = memo(
         branchCount={branchCount}
         branches={branches}
         onLikeChange={onLike ? (v) => onLike(id, v) : undefined}
-        onDislikeChange={onDislike ? (v) => onDislike(id, v) : undefined}
+        onDislikeChange={
+          onDislike ? (v, reason, isUpdate) => onDislike(id, v, reason, isUpdate) : undefined
+        }
         onRetry={onRegenerate ? () => onRegenerate(id) : undefined}
         onEditMessage={onEditMessage}
         onSwitchBranch={onSwitchBranch}

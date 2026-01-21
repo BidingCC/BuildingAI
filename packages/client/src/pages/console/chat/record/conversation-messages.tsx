@@ -1,8 +1,5 @@
 import { type MessageRecord, useConversationMessagesQuery } from "@buildingai/services/console";
-import {
-  InfiniteScrollTop,
-  InfiniteScrollTopScrollButton,
-} from "@buildingai/ui/components/infinite-scroll-top";
+import { InfiniteScrollTop } from "@buildingai/ui/components/infinite-scroll-top";
 import { cn } from "@buildingai/ui/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import type { UIMessage } from "ai";
@@ -24,6 +21,8 @@ const convertMessageRecordToUIMessage = (record: MessageRecord): UIMessage => {
       userConsumedPower: record.userConsumedPower,
       status: record.status,
       errorMessage: record.errorMessage,
+      provider: record.model?.provider?.provider,
+      modelName: record.model?.name,
     },
   };
 };
