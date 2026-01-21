@@ -17,7 +17,7 @@
         "@ai-sdk/react": "^3.0.40",
         "@assistant-ui/react": "^0.11.53",
         "@assistant-ui/react-ai-sdk": "^1.1.20",
-        "@buildingai/ai-sdk": "workspace:*",
+        "@buildingai/ai-sdk-new": "workspace:*",
         "@buildingai/constants": "workspace:*",
         "@buildingai/hooks": "workspace:*",
         "@buildingai/http": "workspace:*",

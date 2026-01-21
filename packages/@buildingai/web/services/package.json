@@ -34,7 +34,7 @@
         "@buildingai/http": "workspace:*",
         "@buildingai/stores": "workspace:*",
         "@tanstack/react-query": "^5.62.16",
-        "@buildingai/ai-sdk": "workspace:*"
+        "@buildingai/ai-sdk-new": "workspace:*"
     },
     "devDependencies": {
         "@buildingai/eslint-config": "workspace:*",

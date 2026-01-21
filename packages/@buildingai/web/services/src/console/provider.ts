@@ -1,4 +1,4 @@
-import type { ModelType } from "@buildingai/ai-sdk";
+import type { ModelType } from "@buildingai/ai-sdk-new/interfaces/model-type";
 import type { MutationOptionsUtil, QueryOptionsUtil } from "@buildingai/web-types";
 import { useMutation, useQuery } from "@tanstack/react-query";
 

@@ -1,4 +1,4 @@
-import { MODEL_FEATURES } from "@buildingai/ai-sdk/interfaces/model-features";
+import { MODEL_FEATURES } from "@buildingai/ai-sdk-new/interfaces/model-features";
 import {
   type AiProvider,
   type AiProviderModel,

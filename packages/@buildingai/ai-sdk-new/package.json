@@ -24,6 +24,11 @@
             "require": "./dist/utils/token-usage.js",
             "import": "./dist/utils/token-usage.js",
             "types": "./dist/utils/token-usage.d.ts"
+        },
+        "./interfaces/*": {
+            "import": "./src/interfaces/*.ts",
+            "require": "./src/interfaces/*.ts",
+            "types": "./src/interfaces/*.ts"
         }
     },
     "scripts": {
