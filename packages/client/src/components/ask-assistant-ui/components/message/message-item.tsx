@@ -9,11 +9,11 @@ export interface MessageItemProps {
   isStreaming: boolean;
   liked?: boolean;
   disliked?: boolean;
-  onLike: (id: string, value: boolean) => void;
-  onDislike: (id: string, value: boolean) => void;
-  onRegenerate: (id: string) => void;
-  onEditMessage: (messageId: string, newContent: string) => void;
-  onSwitchBranch: (messageId: string) => void;
+  onLike?: (id: string, value: boolean) => void;
+  onDislike?: (id: string, value: boolean) => void;
+  onRegenerate?: (id: string) => void;
+  onEditMessage?: (messageId: string, newContent: string) => void;
+  onSwitchBranch?: (messageId: string) => void;
   addToolApprovalResponse?: (args: { id: string; approved: boolean; reason?: string }) => void;
 }
 
@@ -41,9 +41,9 @@ export const MessageItem = memo(
         branchNumber={branchNumber}
         branchCount={branchCount}
         branches={branches}
-        onLikeChange={(v) => onLike(id, v)}
-        onDislikeChange={(v) => onDislike(id, v)}
-        onRetry={() => onRegenerate(id)}
+        onLikeChange={onLike ? (v) => onLike(id, v) : undefined}
+        onDislikeChange={onDislike ? (v) => onDislike(id, v) : undefined}
+        onRetry={onRegenerate ? () => onRegenerate(id) : undefined}
         onEditMessage={onEditMessage}
         onSwitchBranch={onSwitchBranch}
         addToolApprovalResponse={addToolApprovalResponse}
