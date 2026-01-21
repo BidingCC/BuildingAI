@@ -3,6 +3,7 @@ export { Agent } from "./ai-agent.entity";
 export { AgentAnnotation, AnnotationReviewStatus } from "./ai-agent-annotation.entity";
 export { AgentChatMessage } from "./ai-agent-chat-message.entity";
 export { AgentChatRecord } from "./ai-agent-chat-record.entity";
+export { AiChatFeedback } from "./ai-chat-feedback.entity";
 export { AiChatMessage } from "./ai-chat-message.entity";
 export { AiChatRecord } from "./ai-chat-record.entity";
 export { AiChatToolCall } from "./ai-chat-tool-call.entity";
