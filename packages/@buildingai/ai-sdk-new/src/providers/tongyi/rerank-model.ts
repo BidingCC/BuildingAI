@@ -1,6 +1,9 @@
 import type { RerankModelV1, RerankParams, RerankResult } from "../../types";
 import type { TongYiProviderSettings } from "./index";
 
+const TONGYI_RERANK_ENDPOINT =
+    "https://dashscope.aliyuncs.com/api/v1/services/rerank/text-rerank/text-rerank";
+
 class TongYiRerankModel implements RerankModelV1 {
     readonly modelId: string;
     readonly provider = "tongyi";
@@ -13,57 +16,47 @@ class TongYiRerankModel implements RerankModelV1 {
     }
 
     async doRerank(params: RerankParams): Promise<RerankResult> {
-        try {
-            const requestBody = {
-                model: this.modelId || "gte-rerank-v2",
+        const response = await fetch(TONGYI_RERANK_ENDPOINT, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                ...(this.settings.apiKey
+                    ? { Authorization: `Bearer ${this.settings.apiKey}` }
+                    : {}),
+                ...this.settings.headers,
+            },
+            body: JSON.stringify({
+                model: this.modelId,
                 input: {
                     query: params.query,
                     documents: params.documents,
                 },
                 parameters: {
-                    return_documents: false,
+                    return_documents: params.returnDocuments ?? false,
                     top_n: params.topN || params.documents.length,
                 },
-            };
+            }),
+        });
 
-            const response = await fetch(
-                "https://dashscope.aliyuncs.com/api/v1/services/rerank/text-rerank/text-rerank",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${this.settings.apiKey}`,
-                        ...this.settings.headers,
-                    },
-                    body: JSON.stringify(requestBody),
-                },
-            );
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(
-                    `千问 rerank 请求失败: ${response.status} ${response.statusText} - ${errorText}`,
-                );
-            }
-
-            const data = await response.json();
-
-            if (data.code) {
-                throw new Error(`千问 rerank 服务错误: ${data.message || data.code}`);
-            }
-
-            const results = data.output?.results || [];
-            return {
-                results: results.map((item: { index: number; relevance_score: number }) => ({
-                    index: item.index,
-                    relevanceScore: item.relevance_score,
-                })),
-                model: requestBody.model,
-            };
-        } catch (error: unknown) {
-            const errorMessage = error instanceof Error ? error.message : "未知错误";
-            throw new Error(`千问 rerank 服务调用失败: ${errorMessage}`);
+        if (!response.ok) {
+            const error = await response.text();
+            throw new Error(`通义重排序请求失败: ${response.status} ${error}`);
         }
+
+        const data = await response.json();
+        if (data?.code) {
+            throw new Error(`通义重排序服务错误: ${data.message || data.code}`);
+        }
+
+        const results = data?.output?.results ?? [];
+        return {
+            results: results.map((item: any) => ({
+                index: item.index,
+                relevanceScore: item.relevance_score,
+                document: item.document?.text ?? item.document,
+            })),
+            model: data?.model || this.modelId,
+        };
     }
 }
 

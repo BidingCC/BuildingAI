@@ -230,18 +230,26 @@ export class ChatCompletionService {
                                         error instanceof Error ? error.stack : undefined,
                                     );
                                 } finally {
-                                    // 确保在所有工具调用完成后再关闭 MCP 客户端连接
                                     await closeMcpClients(mcpClients);
                                 }
                             },
                             onError: (error) => {
                                 const errorMessage =
-                                    error instanceof Error ? error.message : "An error occurred.";
+                                    error instanceof Error ? error.message : String(error);
+                                const errorObj: Record<string, unknown> = {
+                                    name: error instanceof Error ? error.name : "Error",
+                                    message: errorMessage,
+                                };
+                                if (error instanceof Error && "cause" in error && error.cause) {
+                                    errorObj.cause = error.cause;
+                                }
+                                const errorDetails = JSON.stringify(errorObj, null, 2);
+
                                 this.logger.error(
-                                    `Stream error: ${errorMessage}`,
+                                    `Stream error: ${errorMessage}\nDetails: ${errorDetails}`,
                                     error instanceof Error ? error.stack : undefined,
                                 );
-                                // 出错时也要关闭 MCP 客户端连接
+
                                 closeMcpClients(mcpClients).catch((closeError) => {
                                     this.logger.warn(
                                         `Failed to close MCP clients: ${closeError instanceof Error ? closeError.message : String(closeError)}`,
@@ -452,8 +460,10 @@ export class ChatCompletionService {
         const { fullText } = extractTextFromParts(
             (message.parts ?? []) as Array<{ type?: unknown; text?: string }>,
         );
-        const input = fullText.trim().slice(0, 200);
+        const input = fullText.trim().slice(0, 50);
         if (!input) return;
+
+        console.log("input 请求生成对话标题");
 
         const result = await generateText({
             model,

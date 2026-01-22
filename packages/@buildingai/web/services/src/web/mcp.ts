@@ -134,7 +134,10 @@ export function useMcpServerQuickMenuQuery(
 ): UseQueryResult<McpServer | null, unknown> {
     return useQuery<McpServer | null>({
         queryKey: ["mcp-servers", "quick-menu"],
-        queryFn: () => apiHttpClient.get<McpServer | null>("/ai-mcp-servers/quick-menu"),
+        queryFn: async () => {
+            const result = await apiHttpClient.get<McpServer | null>("/ai-mcp-servers/quick-menu");
+            return result ?? null;
+        },
         ...options,
     });
 }
