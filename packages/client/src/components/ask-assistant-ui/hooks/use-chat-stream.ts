@@ -17,6 +17,7 @@ const getApiBaseUrl = () => {
 export interface UseChatStreamOptions {
   modelId: string;
   mcpServerIds?: string[];
+  feature?: Record<string, boolean>;
   onThreadCreated?: () => void;
   lastMessageDbIdRef: React.RefObject<string | null>;
   pendingParentIdRef: React.RefObject<string | null>;
@@ -44,6 +45,7 @@ export function useChatStream(options: UseChatStreamOptions): UseChatStreamRetur
   const {
     modelId,
     mcpServerIds = [],
+    feature,
     onThreadCreated,
     lastMessageDbIdRef,
     pendingParentIdRef,
@@ -65,6 +67,11 @@ export function useChatStream(options: UseChatStreamOptions): UseChatStreamRetur
   useEffect(() => {
     mcpServerIdsRef.current = mcpServerIds;
   }, [mcpServerIds]);
+
+  const featureRef = useRef<Record<string, boolean> | undefined>(feature);
+  useEffect(() => {
+    featureRef.current = feature;
+  }, [feature]);
 
   const {
     messages,
@@ -95,10 +102,14 @@ export function useChatStream(options: UseChatStreamOptions): UseChatStreamRetur
         const parentId = pendingParentIdRef.current;
         pendingParentIdRef.current = null;
         const currentMcpServerIds = mcpServerIdsRef.current;
+        const currentFeature = featureRef.current;
+
         return {
           modelId: modelIdRef.current,
           conversationId: conversationIdRef.current || undefined,
           parentId,
+          ...(currentFeature &&
+            Object.keys(currentFeature).length > 0 && { feature: currentFeature }),
           ...(currentMcpServerIds.length > 0 && { mcpServerIds: currentMcpServerIds }),
         };
       },
@@ -184,16 +195,20 @@ export function useChatStream(options: UseChatStreamOptions): UseChatStreamRetur
       prevThreadId && currentThreadId && prevThreadId !== currentThreadId;
     const isNavigatingToHome = prevThreadId && !currentThreadId;
 
-    pendingParentIdRef.current = null;
-    lastMessageDbIdRef.current = null;
-    conversationIdRef.current = currentThreadId || undefined;
-
     if (isSwitchingConversation || isNavigatingToHome) {
+      // If currently streaming, stop the request first
+      if (status === "streaming") {
+        stop();
+      }
+      // Clear all messages
       setChatMessages([]);
     }
 
+    pendingParentIdRef.current = null;
+    lastMessageDbIdRef.current = null;
+    conversationIdRef.current = currentThreadId || undefined;
     prevThreadIdRef.current = currentThreadId;
-  }, [currentThreadId, setChatMessages]);
+  }, [currentThreadId, setChatMessages, status, stop]);
 
   const handleRegenerate = useCallback(
     (messageId: string) => {
