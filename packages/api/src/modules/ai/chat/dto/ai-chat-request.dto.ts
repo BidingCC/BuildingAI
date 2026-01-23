@@ -1,5 +1,13 @@
 import type { UIMessage } from "ai";
-import { IsArray, IsObject, IsOptional, IsString, IsUUID, ValidateIf } from "class-validator";
+import {
+    IsArray,
+    IsBoolean,
+    IsObject,
+    IsOptional,
+    IsString,
+    IsUUID,
+    ValidateIf,
+} from "class-validator";
 
 export class ChatRequestDto {
     @ValidateIf((o) => !o.message)
@@ -42,4 +50,8 @@ export class ChatRequestDto {
     @IsString()
     @IsOptional()
     parentId?: string;
+
+    @IsObject({ message: "feature 必须是对象" })
+    @IsOptional()
+    feature?: Record<string, boolean>;
 }

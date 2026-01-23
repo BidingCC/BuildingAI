@@ -22,7 +22,6 @@ class SiliconFlowProviderImpl implements AIProvider {
             baseURL: settings.baseURL || "https://api.siliconflow.cn/v1",
         };
 
-        console.log("this.settings", this.settings);
         this.baseProvider = createOpenAICompatible({
             name: "siliconflow",
             baseURL: this.settings.baseURL!,

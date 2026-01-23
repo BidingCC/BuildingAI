@@ -12,11 +12,9 @@ class VolcengineProviderImpl implements AIProvider {
     private baseProvider: ReturnType<typeof createOpenAICompatible>;
 
     constructor(settings: VolcengineProviderSettings = {}) {
-        const baseURL = settings.baseURL || "https://ark.cn-beijing.volces.com/api/v3";
-
         this.baseProvider = createOpenAICompatible({
             name: "volcengine",
-            baseURL,
+            baseURL: settings.baseURL || "https://ark.cn-beijing.volces.com/api/v3",
             headers: {
                 Authorization: `Bearer ${settings.apiKey}`,
                 ...settings.headers,

@@ -12,11 +12,9 @@ class HunyuanProviderImpl implements AIProvider {
     private baseProvider: ReturnType<typeof createOpenAICompatible>;
 
     constructor(settings: HunyuanProviderSettings = {}) {
-        const baseURL = settings.baseURL || "https://api.hunyuan.cloud.tencent.com/v1";
-
         this.baseProvider = createOpenAICompatible({
             name: "hunyuan",
-            baseURL,
+            baseURL: settings.baseURL || "https://api.hunyuan.cloud.tencent.com/v1",
             headers: {
                 Authorization: `Bearer ${settings.apiKey}`,
                 ...settings.headers,

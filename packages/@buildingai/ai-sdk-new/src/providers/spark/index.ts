@@ -12,11 +12,9 @@ class SparkProviderImpl implements AIProvider {
     private baseProvider: ReturnType<typeof createOpenAICompatible>;
 
     constructor(settings: SparkProviderSettings = {}) {
-        const baseURL = settings.baseURL || "https://spark-api-open.xf-yun.com/v1";
-
         this.baseProvider = createOpenAICompatible({
             name: "spark",
-            baseURL,
+            baseURL: settings.baseURL || "https://spark-api-open.xf-yun.com/v1",
             headers: {
                 Authorization: `Bearer ${settings.apiKey}`,
                 ...settings.headers,

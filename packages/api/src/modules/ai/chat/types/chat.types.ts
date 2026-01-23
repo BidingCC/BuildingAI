@@ -49,6 +49,7 @@ export interface ChatCompletionParams {
     regenerateParentId?: string;
     parentId?: string;
     isToolApprovalFlow?: boolean;
+    feature?: Record<string, boolean>;
 }
 
 export interface ConversationResult {

@@ -14,7 +14,7 @@ import { SecretService } from "@buildingai/core/modules";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { getProviderSecret } from "@buildingai/utils";
 import { Injectable, Logger } from "@nestjs/common";
-import type { LanguageModel } from "ai";
+import type { LanguageModel, Tool } from "ai";
 import {
     convertToModelMessages,
     createUIMessageStream,
@@ -29,6 +29,12 @@ import { validate as isUUID } from "uuid";
 
 import { AiMcpServerService } from "../../mcp/services/ai-mcp-server.service";
 import { AiModelService } from "../../model/services/ai-model.service";
+import {
+    createDalle2ImageGenerationTool,
+    createDalle3ImageGenerationTool,
+    createGptImageGenerationTool,
+} from "../tools/openai-image.tools";
+import { createDeepResearchTool } from "../tools/openai-research.tools";
 import { getWeather } from "../tools/weather.tools";
 import type { ChatCompletionParams, UIMessage } from "../types/chat.types";
 import { AiChatsMessageService } from "./ai-chat-message.service";
@@ -140,13 +146,24 @@ export class ChatCompletionService {
                     try {
                         const supportsToolCall = model.features?.some((f) => f.includes("tool"));
 
+                        const tools: Record<string, Tool> = {
+                            getWeather,
+                            ...mcpTools,
+                        };
+
+                        if (model.provider.provider === "openai") {
+                            tools.dalle2ImageGeneration = createDalle2ImageGenerationTool(provider);
+                            tools.dalle3ImageGeneration = createDalle3ImageGenerationTool(provider);
+                            tools.gptImageGeneration = createGptImageGenerationTool(provider);
+                            tools.deepResearch = createDeepResearchTool(provider);
+                        }
+
                         const agent = new ToolLoopAgent({
-                            model: provider(model.model).model,
+                            model: provider(model.model, {
+                                enableThinking: params.feature?.thinking ?? false,
+                            }).model,
                             ...(supportsToolCall && {
-                                tools: {
-                                    getWeather,
-                                    ...mcpTools,
-                                },
+                                tools,
                             }),
                             // 允许多步：tool call -> tool result -> 继续生成最终回复
                             // 使用 stepCountIs 确保工具调用后继续生成最终回复

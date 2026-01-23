@@ -18,3 +18,4 @@ export { volcengine, type VolcengineProviderSettings } from "./volcengine";
 export { wenxin, type WenXinProviderSettings } from "./wenxin";
 export { x, type XProviderSettings } from "./x";
 export { zhipuai, type ZhipuAIProviderSettings } from "./zhipuai";
+export * from "./reasoning";

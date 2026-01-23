@@ -1,6 +1,7 @@
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import type {
     EmbeddingModelV3,
+    JSONObject,
     LanguageModelV3,
     LanguageModelV3Middleware,
     RerankingModelV3,
@@ -25,10 +26,7 @@ const wrapTongyiLanguageModel = (baseModel: LanguageModelV3): LanguageModelV3 =>
         transformParams: async ({ params }) => transformTongyiCallOptionsForVideo(params),
     };
 
-    return wrapLanguageModel({
-        model: baseModel,
-        middleware,
-    });
+    return wrapLanguageModel({ model: baseModel, middleware });
 };
 
 class TongYiProviderImpl implements AIProvider {

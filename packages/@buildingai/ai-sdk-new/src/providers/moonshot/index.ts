@@ -12,11 +12,9 @@ class MoonshotProviderImpl implements AIProvider {
     private baseProvider: ReturnType<typeof createOpenAICompatible>;
 
     constructor(settings: MoonshotProviderSettings = {}) {
-        const baseURL = settings.baseURL || "https://api.moonshot.cn/v1";
-
         this.baseProvider = createOpenAICompatible({
             name: "moonshot",
-            baseURL,
+            baseURL: settings.baseURL || "https://api.moonshot.cn/v1",
             headers: {
                 Authorization: `Bearer ${settings.apiKey}`,
                 ...settings.headers,

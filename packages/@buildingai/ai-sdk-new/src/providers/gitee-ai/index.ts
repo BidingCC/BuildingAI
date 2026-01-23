@@ -12,11 +12,9 @@ class GiteeAIProviderImpl implements AIProvider {
     private baseProvider: ReturnType<typeof createOpenAICompatible>;
 
     constructor(settings: GiteeAIProviderSettings = {}) {
-        const baseURL = settings.baseURL || "https://ai.gitee.com/v1";
-
         this.baseProvider = createOpenAICompatible({
             name: "gitee_ai",
-            baseURL,
+            baseURL: settings.baseURL || "https://ai.gitee.com/v1",
             headers: {
                 Authorization: `Bearer ${settings.apiKey}`,
                 ...settings.headers,

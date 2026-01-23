@@ -63,6 +63,7 @@ export class AiChatMessageWebController extends BaseController {
                 parentId: isRegenerate ? undefined : dto.parentId,
                 regenerateParentId: isRegenerate ? dto.parentId : undefined,
                 isToolApprovalFlow,
+                feature: dto.feature,
             },
             res,
         );

@@ -81,6 +81,7 @@ export {
     zhipuai,
     type ZhipuAIProviderSettings,
 } from "./providers";
+export { getReasoningOptions } from "./providers/reasoning";
 export { listProviders, providerRegistry } from "./registry";
 export type {
     AIProvider,

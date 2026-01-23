@@ -61,14 +61,8 @@ class OpenAIProviderImpl implements AIProvider {
     }
 
     rerankModel(modelId: string): RerankingModelV3 {
-        console.log(
-            `[OpenAIProviderImpl.rerankModel] 创建 rerank model, modelId: ${modelId}, baseURL: ${this.settings.baseURL}`,
-        );
         const v1Model = createOpenAIRerankModel(this.settings, modelId);
-        console.log(`[OpenAIProviderImpl.rerankModel] v1Model created:`, v1Model);
-        const v3Model = adaptRerankModelV1ToV3(v1Model);
-        console.log(`[OpenAIProviderImpl.rerankModel] v3Model created:`, v3Model);
-        return v3Model;
+        return adaptRerankModelV1ToV3(v1Model);
     }
 
     moderationModel(modelId: string): ModerationModelV1 {
