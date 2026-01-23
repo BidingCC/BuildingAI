@@ -4,6 +4,7 @@ import {
   type SecretFieldValue,
   type SecretTemplate,
   useAllSecretTemplatesQuery,
+  useCreateSecretMutation,
   useDeleteSecretMutation,
   useDeleteSecretTemplateMutation,
   useSecretsByTemplateQuery,
@@ -96,10 +97,17 @@ type EditingField = {
   originalValue: string;
 };
 
+type NewSecretRow = {
+  name: string;
+  fieldValues: Record<string, string>;
+};
+
 const SecretsManageContent = ({ template }: SecretsManageContentProps) => {
   const { confirm } = useAlertDialog();
   const [editingField, setEditingField] = useState<EditingField | null>(null);
   const [hasError, setHasError] = useState(false);
+  const [newRow, setNewRow] = useState<NewSecretRow | null>(null);
+  const [newRowErrors, setNewRowErrors] = useState<Set<string>>(new Set());
 
   const { data: secrets, refetch, isLoading } = useSecretsByTemplateQuery(template.id, false);
 
@@ -134,6 +142,59 @@ const SecretsManageContent = ({ template }: SecretsManageContentProps) => {
       toast.error(`删除失败: ${error.message}`);
     },
   });
+
+  const createSecretMutation = useCreateSecretMutation({
+    onSuccess: () => {
+      toast.success("密钥已创建");
+      setNewRow(null);
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(`创建失败: ${error.message}`);
+    },
+  });
+
+  const handleAddRow = () => {
+    const initialFieldValues: Record<string, string> = {};
+    template.fieldConfig?.forEach((field) => {
+      initialFieldValues[field.name] = "";
+    });
+    setNewRow({ name: "", fieldValues: initialFieldValues });
+  };
+
+  const handleCancelNewRow = () => {
+    setNewRow(null);
+    setNewRowErrors(new Set());
+  };
+
+  const handleSaveNewRow = () => {
+    if (!newRow) return;
+    const errors = new Set<string>();
+    if (!newRow.name.trim()) {
+      errors.add("__name__");
+    }
+    template.fieldConfig?.forEach((field) => {
+      if (field.required && !newRow.fieldValues[field.name]?.trim()) {
+        errors.add(field.name);
+      }
+    });
+    if (errors.size > 0) {
+      setNewRowErrors(errors);
+      toast.error("请填写必填项");
+      return;
+    }
+    setNewRowErrors(new Set());
+    const fieldValues: SecretFieldValue[] =
+      template.fieldConfig?.map((field) => ({
+        name: field.name,
+        value: newRow.fieldValues[field.name] || "",
+      })) || [];
+    createSecretMutation.mutate({
+      name: newRow.name,
+      templateId: template.id,
+      fieldValues,
+    });
+  };
 
   const handleFieldFocus = (secret: Secret, fieldName: string, currentValue: string) => {
     if (editingField?.secretId === secret.id && editingField?.fieldName === fieldName) return;
@@ -241,6 +302,7 @@ const SecretsManageContent = ({ template }: SecretsManageContentProps) => {
         <DialogTitle>
           {template.name} - 密钥列表({secrets?.length}个)
         </DialogTitle>
+
         <DialogDescription className="flex items-center text-xs">
           <Info className="size-3" />
           点击字段项进行修改
@@ -249,11 +311,11 @@ const SecretsManageContent = ({ template }: SecretsManageContentProps) => {
       <ScrollArea className="max-h-96">
         {isLoading ? (
           <div>加载中...</div>
-        ) : secrets && secrets.length > 0 ? (
+        ) : (secrets && secrets.length > 0) || newRow ? (
           <div className="flex gap-1">
             <div className="flex w-[100px] flex-col">
               <span className="text-muted-foreground mb-2 px-2 text-xs">名称</span>
-              {secrets.map((secret) => {
+              {secrets?.map((secret) => {
                 const isEditingName =
                   editingField?.secretId === secret.id && editingField?.fieldName === "__name__";
                 return (
@@ -302,16 +364,36 @@ const SecretsManageContent = ({ template }: SecretsManageContentProps) => {
                   </div>
                 );
               })}
+              {newRow && (
+                <div
+                  className={`flex h-9 items-center border px-2 ${newRowErrors.has("__name__") ? "border-destructive bg-destructive/10" : "border-transparent"}`}
+                >
+                  <Input
+                    value={newRow.name}
+                    placeholder="请输入名称"
+                    className="h-full w-full border-0 border-none bg-transparent px-0 shadow-none ring-0 focus-within:ring-0 focus-visible:ring-0"
+                    onChange={(e) => {
+                      setNewRow({ ...newRow, name: e.target.value });
+                      if (newRowErrors.has("__name__")) {
+                        const next = new Set(newRowErrors);
+                        next.delete("__name__");
+                        setNewRowErrors(next);
+                      }
+                    }}
+                  />
+                </div>
+              )}
             </div>
             <div className="flex flex-1 flex-col">
               <div className="flex w-full justify-between">
                 {template.fieldConfig?.map((field) => (
                   <span className="text-muted-foreground mb-2 flex-1 px-2 text-xs" key={field.name}>
                     {field.name}
+                    <span className="text-destructive">{field.required ? "*" : ""}</span>
                   </span>
                 ))}
               </div>
-              {secrets.map((secret) => (
+              {secrets?.map((secret) => (
                 <div
                   key={secret.id}
                   className="flex h-9 w-full cursor-pointer justify-between text-sm break-all"
@@ -327,7 +409,7 @@ const SecretsManageContent = ({ template }: SecretsManageContentProps) => {
                       >
                         <Input
                           value={isEditing ? editingField.value : field.value || ""}
-                          placeholder=""
+                          placeholder={`请输入${field.name}`}
                           className="h-full w-full border-0 border-none bg-transparent px-0 shadow-none ring-0 focus-within:ring-0 focus-visible:ring-0"
                           onFocus={() => handleFieldFocus(secret, field.name, field.value || "")}
                           onChange={(e) => handleFieldChange(e.target.value)}
@@ -369,10 +451,37 @@ const SecretsManageContent = ({ template }: SecretsManageContentProps) => {
                   })}
                 </div>
               ))}
+              {newRow && (
+                <div className="flex h-9 w-full justify-between text-sm break-all">
+                  {template.fieldConfig?.map((field) => (
+                    <div
+                      key={field.name}
+                      className={`flex h-full flex-1 items-center border px-2 ${newRowErrors.has(field.name) ? "border-destructive bg-destructive/10" : "border-transparent"}`}
+                    >
+                      <Input
+                        value={newRow.fieldValues[field.name] || ""}
+                        placeholder={`请输入${field.name}`}
+                        className="h-full w-full border-0 border-none bg-transparent px-0 shadow-none ring-0 focus-within:ring-0 focus-visible:ring-0"
+                        onChange={(e) => {
+                          setNewRow({
+                            ...newRow,
+                            fieldValues: { ...newRow.fieldValues, [field.name]: e.target.value },
+                          });
+                          if (newRowErrors.has(field.name)) {
+                            const next = new Set(newRowErrors);
+                            next.delete(field.name);
+                            setNewRowErrors(next);
+                          }
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-            <div className="flex w-[60px] flex-col">
+            <div className="flex w-12 flex-col">
               <span className="text-muted-foreground mb-2 text-xs">状态</span>
-              {secrets.map((secret) => (
+              {secrets?.map((secret) => (
                 <div key={secret.id} className="flex h-9 items-center">
                   <Switch
                     checked={secret.status === BooleanNumber.YES}
@@ -381,35 +490,48 @@ const SecretsManageContent = ({ template }: SecretsManageContentProps) => {
                   />
                 </div>
               ))}
+              {newRow && <div className="flex h-9 items-center" />}
             </div>
-            <div className="flex w-[60px] flex-col">
-              <span className="text-muted-foreground mb-2 text-xs">操作</span>
-              {secrets.map((secret) => (
-                <div key={secret.id} className="flex h-9 items-center">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button size="icon-sm" variant="ghost">
-                        <EllipsisVertical className="size-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        variant="destructive"
-                        onClick={() => handleDelete(secret)}
-                        disabled={deleteMutation.isPending}
-                      >
-                        <Trash2 />
-                        删除
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+            <div className="flex w-16 flex-col">
+              <span className="text-muted-foreground end mb-2 text-xs">操作</span>
+              {secrets?.map((secret) => (
+                <div key={secret.id} className="end flex h-9 items-center">
+                  <Button
+                    size="icon-sm"
+                    variant="ghost"
+                    onClick={() => handleDelete(secret)}
+                    disabled={deleteMutation.isPending}
+                  >
+                    <Trash2 />
+                  </Button>
                 </div>
               ))}
+              {newRow && (
+                <div className="end flex h-9 items-center">
+                  <Button
+                    size="icon-sm"
+                    variant="ghost"
+                    onClick={handleSaveNewRow}
+                    disabled={createSecretMutation.isPending}
+                  >
+                    <Check className="size-4" />
+                  </Button>
+                  <Button size="icon-sm" variant="ghost" onClick={handleCancelNewRow}>
+                    <X className="size-4" />
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         ) : (
-          <div>no data</div>
+          <div className="center text-muted-foreground p-8 text-sm">no data</div>
         )}
+        <div className="mt-4 flex justify-end">
+          <Button size="sm" variant="outline" onClick={handleAddRow} disabled={!!newRow}>
+            <Plus className="size-4" />
+            添加
+          </Button>
+        </div>
       </ScrollArea>
     </>
   );
