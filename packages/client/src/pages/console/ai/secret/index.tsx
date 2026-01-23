@@ -3,7 +3,6 @@ import {
   type Secret,
   type SecretFieldValue,
   type SecretTemplate,
-  type SecretTemplateFieldConfig,
   useAllSecretTemplatesQuery,
   useDeleteSecretMutation,
   useDeleteSecretTemplateMutation,
@@ -31,6 +30,7 @@ import {
   DropdownMenuTrigger,
 } from "@buildingai/ui/components/ui/dropdown-menu";
 import { Input } from "@buildingai/ui/components/ui/input";
+import { ScrollArea } from "@buildingai/ui/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -40,14 +40,6 @@ import {
 } from "@buildingai/ui/components/ui/select";
 import { Skeleton } from "@buildingai/ui/components/ui/skeleton";
 import { Switch } from "@buildingai/ui/components/ui/switch";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@buildingai/ui/components/ui/table";
 import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog";
 import { IconCircleCheckFilled, IconXboxXFilled } from "@tabler/icons-react";
 import {
@@ -56,6 +48,7 @@ import {
   Edit,
   EllipsisVertical,
   FileJson2,
+  Info,
   KeyRound,
   Plus,
   Settings,
@@ -96,18 +89,25 @@ type SecretsManageContentProps = {
 /**
  * Content component for secrets management (only rendered when dialog is open)
  */
+type EditingField = {
+  secretId: string;
+  fieldName: string;
+  value: string;
+  originalValue: string;
+};
+
 const SecretsManageContent = ({ template }: SecretsManageContentProps) => {
   const { confirm } = useAlertDialog();
-  const [editingSecretId, setEditingSecretId] = useState<string | null>(null);
-  const [editingValues, setEditingValues] = useState<Record<string, string>>({});
+  const [editingField, setEditingField] = useState<EditingField | null>(null);
+  const [hasError, setHasError] = useState(false);
 
   const { data: secrets, refetch, isLoading } = useSecretsByTemplateQuery(template.id, false);
 
   const updateSecretMutation = useUpdateSecretMutation({
     onSuccess: () => {
       toast.success("密钥已更新");
-      setEditingSecretId(null);
-      setEditingValues({});
+      setEditingField(null);
+      setHasError(false);
       refetch();
     },
     onError: (error) => {
@@ -135,29 +135,87 @@ const SecretsManageContent = ({ template }: SecretsManageContentProps) => {
     },
   });
 
-  const handleStartEdit = (secret: Secret) => {
-    setEditingSecretId(secret.id);
-    const values: Record<string, string> = {};
-    secret.fieldValues?.forEach((fv) => {
-      values[fv.name] = fv.value;
+  const handleFieldFocus = (secret: Secret, fieldName: string, currentValue: string) => {
+    if (editingField?.secretId === secret.id && editingField?.fieldName === fieldName) return;
+    setEditingField({
+      secretId: secret.id,
+      fieldName,
+      value: currentValue,
+      originalValue: currentValue,
     });
-    setEditingValues(values);
+    setHasError(false);
+  };
+
+  const handleFieldChange = (value: string) => {
+    if (!editingField) return;
+    setEditingField({ ...editingField, value });
+    if (hasError) setHasError(false);
   };
 
   const handleCancelEdit = () => {
-    setEditingSecretId(null);
-    setEditingValues({});
+    setEditingField(null);
+    setHasError(false);
   };
 
-  const handleSaveEdit = (secret: Secret) => {
-    const fieldValues: SecretFieldValue[] = template.fieldConfig.map((field) => ({
-      name: field.name,
-      value: editingValues[field.name] || "",
+  const handleSaveField = (secret: Secret, inputRef?: HTMLInputElement | null) => {
+    if (!editingField || editingField.secretId !== secret.id) return;
+    if (editingField.fieldName === "__name__") return;
+    if (editingField.value === editingField.originalValue) {
+      setEditingField(null);
+      if (inputRef) setTimeout(() => inputRef.blur(), 0);
+      return;
+    }
+    const fieldConfig = template.fieldConfig?.find((f) => f.name === editingField.fieldName);
+    if (fieldConfig?.required && !editingField.value.trim()) {
+      toast.error(`${editingField.fieldName} 为必填项`);
+      setHasError(true);
+      return;
+    }
+    setHasError(false);
+    const fieldValues: SecretFieldValue[] = (secret.fieldValues || []).map((fv) => ({
+      name: fv.name,
+      value: fv.name === editingField.fieldName ? editingField.value : fv.value,
     }));
     updateSecretMutation.mutate({
       id: secret.id,
       data: { fieldValues },
     });
+  };
+
+  const handleFieldBlur = (secret: Secret, e: React.FocusEvent<HTMLInputElement>) => {
+    const relatedTarget = e.relatedTarget as HTMLElement | null;
+    if (relatedTarget?.tagName === "INPUT") return;
+    handleSaveField(secret);
+  };
+
+  const handleSaveName = (secret: Secret, inputRef?: HTMLInputElement | null) => {
+    if (
+      !editingField ||
+      editingField.secretId !== secret.id ||
+      editingField.fieldName !== "__name__"
+    )
+      return;
+    if (editingField.value === editingField.originalValue) {
+      setEditingField(null);
+      if (inputRef) setTimeout(() => inputRef.blur(), 0);
+      return;
+    }
+    if (!editingField.value.trim()) {
+      toast.error("名称为必填项");
+      setHasError(true);
+      return;
+    }
+    setHasError(false);
+    updateSecretMutation.mutate({
+      id: secret.id,
+      data: { name: editingField.value },
+    });
+  };
+
+  const handleNameBlur = (secret: Secret, e: React.FocusEvent<HTMLInputElement>) => {
+    const relatedTarget = e.relatedTarget as HTMLElement | null;
+    if (relatedTarget?.tagName === "INPUT") return;
+    handleSaveName(secret);
   };
 
   const handleToggleStatus = async (secret: Secret) => {
@@ -177,127 +235,182 @@ const SecretsManageContent = ({ template }: SecretsManageContentProps) => {
     deleteMutation.mutate(secret.id);
   };
 
-  const getFieldValue = (secret: Secret, fieldName: string) => {
-    const field = secret.fieldValues?.find((fv) => fv.name === fieldName);
-    if (!field) return "-";
-    return field.value || "-";
-  };
-
   return (
     <>
       <DialogHeader>
-        <DialogTitle>{template.name} - 密钥列表</DialogTitle>
-        <DialogDescription>管理该模板下的所有密钥配置</DialogDescription>
+        <DialogTitle>
+          {template.name} - 密钥列表({secrets?.length}个)
+        </DialogTitle>
+        <DialogDescription className="flex items-center text-xs">
+          <Info className="size-3" />
+          点击字段项进行修改
+        </DialogDescription>
       </DialogHeader>
-      <div className="max-h-96 overflow-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[120px]">名称</TableHead>
-              {template.fieldConfig?.map((field) => (
-                <TableHead key={field.name}>{field.name}</TableHead>
-              ))}
-              <TableHead className="w-[80px]">状态</TableHead>
-              <TableHead className="w-[100px] text-right">操作</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              <TableRow>
-                <TableCell
-                  colSpan={(template.fieldConfig?.length || 0) + 3}
-                  className="text-center"
-                >
-                  加载中...
-                </TableCell>
-              </TableRow>
-            ) : secrets && secrets.length > 0 ? (
-              secrets.map((secret) => (
-                <TableRow key={secret.id}>
-                  <TableCell className="font-medium">{secret.name}</TableCell>
-                  {template.fieldConfig?.map((field) => (
-                    <TableCell key={field.name}>
-                      {editingSecretId === secret.id ? (
-                        <Input
-                          value={editingValues[field.name] || ""}
-                          onChange={(e) =>
-                            setEditingValues((prev) => ({
-                              ...prev,
-                              [field.name]: e.target.value,
-                            }))
-                          }
-                          placeholder={field.placeholder || `请输入${field.name}`}
-                          className="h-8"
-                        />
-                      ) : (
-                        <span className="text-muted-foreground text-sm">
-                          {getFieldValue(secret, field.name)}
-                        </span>
-                      )}
-                    </TableCell>
-                  ))}
-                  <TableCell>
-                    <Switch
-                      checked={secret.status === BooleanNumber.YES}
-                      onCheckedChange={() => handleToggleStatus(secret)}
-                      disabled={setStatusMutation.isPending}
+      <ScrollArea className="max-h-96">
+        {isLoading ? (
+          <div>加载中...</div>
+        ) : secrets && secrets.length > 0 ? (
+          <div className="flex gap-1">
+            <div className="flex w-[100px] flex-col">
+              <span className="text-muted-foreground mb-2 px-2 text-xs">名称</span>
+              {secrets.map((secret) => {
+                const isEditingName =
+                  editingField?.secretId === secret.id && editingField?.fieldName === "__name__";
+                return (
+                  <div
+                    key={secret.id}
+                    className={`group/name-item hover:bg-muted focus-within:bg-muted flex h-9 items-center border px-2 ${isEditingName && hasError ? "border-destructive focus-within:bg-destructive/10 bg-destructive/10 focus-within:bg-destructive/10" : "focus-within:border-input border-transparent"}`}
+                  >
+                    <Input
+                      value={isEditingName ? editingField.value : secret.name}
+                      className="h-full w-full border-0 border-none bg-transparent px-0 shadow-none ring-0 focus-within:ring-0 focus-visible:ring-0"
+                      onFocus={() => handleFieldFocus(secret, "__name__", secret.name)}
+                      onChange={(e) => handleFieldChange(e.target.value)}
+                      onBlur={(e) => handleNameBlur(secret, e)}
+                      disabled={updateSecretMutation.isPending}
                     />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {editingSecretId === secret.id ? (
-                      <div className="flex justify-end gap-1">
+                    {isEditingName && (
+                      <div className="flex items-center gap-0">
                         <Button
-                          size="icon-sm"
+                          className="hover:bg-muted-foreground/10 size-5 border-0"
                           variant="ghost"
-                          onClick={() => handleSaveEdit(secret)}
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            const inputEl = e.currentTarget.parentElement
+                              ?.previousElementSibling as HTMLInputElement;
+                            handleSaveName(secret, inputEl);
+                          }}
                           disabled={updateSecretMutation.isPending}
                         >
-                          <Check className="size-4" />
+                          <Check className="size-3" />
                         </Button>
-                        <Button size="icon-sm" variant="ghost" onClick={handleCancelEdit}>
-                          <X className="size-4" />
+                        <Button
+                          className="hover:bg-muted-foreground/10 size-5 border-0"
+                          variant="ghost"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            handleCancelEdit();
+                            const inputEl = e.currentTarget.parentElement
+                              ?.previousElementSibling as HTMLInputElement;
+                            setTimeout(() => inputEl?.blur(), 0);
+                          }}
+                        >
+                          <X className="size-3" />
                         </Button>
                       </div>
-                    ) : (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button size="icon-sm" variant="ghost">
-                            <EllipsisVertical className="size-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleStartEdit(secret)}>
-                            <Edit />
-                            编辑
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            variant="destructive"
-                            onClick={() => handleDelete(secret)}
-                            disabled={deleteMutation.isPending}
-                          >
-                            <Trash2 />
-                            删除
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
                     )}
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={(template.fieldConfig?.length || 0) + 3}
-                  className="text-muted-foreground text-center"
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex flex-1 flex-col">
+              <div className="flex w-full justify-between">
+                {template.fieldConfig?.map((field) => (
+                  <span className="text-muted-foreground mb-2 flex-1 px-2 text-xs" key={field.name}>
+                    {field.name}
+                  </span>
+                ))}
+              </div>
+              {secrets.map((secret) => (
+                <div
+                  key={secret.id}
+                  className="flex h-9 w-full cursor-pointer justify-between text-sm break-all"
                 >
-                  暂无密钥配置
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+                  {secret.fieldValues?.map((field) => {
+                    const isEditing =
+                      editingField?.secretId === secret.id &&
+                      editingField?.fieldName === field.name;
+                    return (
+                      <div
+                        key={field.name}
+                        className={`group/field-item hover:bg-muted focus-within:bg-muted flex h-full flex-1 items-center border px-2 ${isEditing && hasError ? "border-destructive bg-destructive/10 focus-within:bg-destructive/10" : "focus-within:border-input border-transparent"}`}
+                      >
+                        <Input
+                          value={isEditing ? editingField.value : field.value || ""}
+                          placeholder=""
+                          className="h-full w-full border-0 border-none bg-transparent px-0 shadow-none ring-0 focus-within:ring-0 focus-visible:ring-0"
+                          onFocus={() => handleFieldFocus(secret, field.name, field.value || "")}
+                          onChange={(e) => handleFieldChange(e.target.value)}
+                          onBlur={(e) => handleFieldBlur(secret, e)}
+                          disabled={updateSecretMutation.isPending}
+                        />
+                        {isEditing && (
+                          <div className="flex items-center gap-0">
+                            <Button
+                              className="hover:bg-muted-foreground/10 size-5 border-0"
+                              variant="ghost"
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                const inputEl = e.currentTarget.parentElement
+                                  ?.previousElementSibling as HTMLInputElement;
+                                handleSaveField(secret, inputEl);
+                              }}
+                              disabled={updateSecretMutation.isPending}
+                            >
+                              <Check className="size-3" />
+                            </Button>
+                            <Button
+                              className="hover:bg-muted-foreground/10 size-5 border-0"
+                              variant="ghost"
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                handleCancelEdit();
+                                const inputEl = e.currentTarget.parentElement
+                                  ?.previousElementSibling as HTMLInputElement;
+                                setTimeout(() => inputEl?.blur(), 0);
+                              }}
+                            >
+                              <X className="size-3" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+            <div className="flex w-[60px] flex-col">
+              <span className="text-muted-foreground mb-2 text-xs">状态</span>
+              {secrets.map((secret) => (
+                <div key={secret.id} className="flex h-9 items-center">
+                  <Switch
+                    checked={secret.status === BooleanNumber.YES}
+                    onCheckedChange={() => handleToggleStatus(secret)}
+                    disabled={setStatusMutation.isPending}
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="flex w-[60px] flex-col">
+              <span className="text-muted-foreground mb-2 text-xs">操作</span>
+              {secrets.map((secret) => (
+                <div key={secret.id} className="flex h-9 items-center">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="icon-sm" variant="ghost">
+                        <EllipsisVertical className="size-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        variant="destructive"
+                        onClick={() => handleDelete(secret)}
+                        disabled={deleteMutation.isPending}
+                      >
+                        <Trash2 />
+                        删除
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div>no data</div>
+        )}
+      </ScrollArea>
     </>
   );
 };
@@ -317,7 +430,7 @@ const SecretsManageDialog = ({ template }: SecretsManageDialogProps) => {
           <ChevronRight />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-4xl">
+      <DialogContent className="sm:max-w-5xl" onOpenAutoFocus={(e) => e.preventDefault()}>
         {isOpen && <SecretsManageContent template={template} />}
       </DialogContent>
     </Dialog>
