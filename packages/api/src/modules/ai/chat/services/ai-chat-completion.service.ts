@@ -4,6 +4,7 @@ import {
     extractTextFromParts,
     formatMessagesForTokenCount,
     getProvider,
+    getReasoningOptions,
     type McpClient,
     type McpServerConfig,
     mergeMcpTools,
@@ -159,9 +160,12 @@ export class ChatCompletionService {
                         }
 
                         const agent = new ToolLoopAgent({
-                            model: provider(model.model, {
-                                enableThinking: params.feature?.thinking ?? false,
-                            }).model,
+                            model: provider(model.model).model,
+                            providerOptions: {
+                                ...getReasoningOptions(model.provider.provider, {
+                                    thinking: params.feature?.thinking ?? false,
+                                }),
+                            },
                             ...(supportsToolCall && {
                                 tools,
                             }),
@@ -197,6 +201,7 @@ export class ChatCompletionService {
                                             }>,
                                         );
 
+                                    console.log("fullText", JSON.stringify(result.totalUsage));
                                     const rawUsage = await withEstimatedUsage(result, {
                                         model: model.model,
                                         inputText: promptTextForUsage,
@@ -237,6 +242,7 @@ export class ChatCompletionService {
                                                     userId: params.userId,
                                                     message: firstUserMessage,
                                                     model: provider(model.model).model,
+                                                    providerId: model.provider.provider,
                                                 }).catch(() => {});
                                             }
                                         }
@@ -471,8 +477,9 @@ export class ChatCompletionService {
         userId: string;
         message: UIMessage;
         model: LanguageModel;
+        providerId: string;
     }): Promise<void> {
-        const { conversationId, userId, message, model } = args;
+        const { conversationId, userId, message, model, providerId } = args;
 
         const { fullText } = extractTextFromParts(
             (message.parts ?? []) as Array<{ type?: unknown; text?: string }>,
@@ -494,6 +501,11 @@ export class ChatCompletionService {
 ${input}
 
 标题：`,
+            providerOptions: {
+                ...getReasoningOptions(providerId, {
+                    thinking: false,
+                }),
+            },
         });
         const title = result.text
             .trim()
