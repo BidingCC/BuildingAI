@@ -426,7 +426,7 @@ const AiProviderIndexPage = () => {
                         <Button
                           size="xs"
                           variant="outline"
-                          className="ml-auto group-hover/model-item:flex group-data-selected/model-item:flex md:hidden"
+                          className="ml-auto group-hover/model-item:flex group-data-selected/model-item:flex! md:hidden"
                         >
                           <Settings2 />
                           配置

@@ -321,7 +321,7 @@ const SecretsManageContent = ({ template }: SecretsManageContentProps) => {
                 return (
                   <div
                     key={secret.id}
-                    className={`group/name-item hover:bg-muted focus-within:bg-muted flex h-9 items-center border px-2 ${isEditingName && hasError ? "border-destructive focus-within:bg-destructive/10 bg-destructive/10 focus-within:bg-destructive/10" : "focus-within:border-input border-transparent"}`}
+                    className={`group/name-item hover:bg-muted focus-within:bg-muted flex h-9 items-center border px-2 ${isEditingName && hasError ? "border-destructive focus-within:bg-destructive/10 bg-destructive/10" : "focus-within:border-input border-transparent"}`}
                   >
                     <Input
                       value={isEditingName ? editingField.value : secret.name}
