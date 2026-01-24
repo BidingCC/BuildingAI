@@ -49,6 +49,7 @@
         "typecheck": "turbo run check-types",
         "clean": "rimraf ./.turbo && turbo run clean",
         "sync-env": "node scripts/sync-env.mjs",
+        "skills": "node scripts/sync-skills.mjs",
         "buildingai": "node packages/cli/bin/cli.js",
         "pm2:start": "node packages/cli/bin/cli.js pm2:start",
         "pm2:reset": "rimraf logs/pm2 && pnpm delete && pnpm start",
