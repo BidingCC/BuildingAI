@@ -24,11 +24,6 @@ coverage
 # Turbo
 .turbo
 
-# Vercel
-.vercel
-.cursor
-.windsurf
-
 # Build Outputs
 .next/
 out/
