@@ -26,15 +26,44 @@ The BuildingAI project is a pnpm workspace monorepo with the following structure
 ```
 buildingai/
 ├── packages/
-│   ├── @buildingai/              # Shared packages (base utilities)
-│   ├── api/                      # Main NestJS API application
-│   ├── core/                     # Reusable business logic modules
-│   ├── cli/                      # CLI tooling
-│   └── client/                   # Desktop client (Tauri + React)
-├── skills/                        # AI skills for development guidance
-├── extensions/                    # Plugin extensions (runtime loaded)
-├── public/                        # Static web assets
-└── scripts/                       # Build and utility scripts
+│   ├── @buildingai/              # Shared packages
+│   │   ├── ai-sdk/                 # AI SDK (legacy)
+│   │   ├── ai-sdk-new/             # AI SDK (Vercel AI SDK 6.x)
+│   │   ├── base/                   # BaseController, BaseService
+│   │   ├── cache/                  # CacheService, RedisService
+│   │   ├── config/                 # Configuration management
+│   │   ├── constants/               # Shared constants
+│   │   ├── db/                     # TypeORM, entities, migrations
+│   │   ├── decorators/             # Custom decorators
+│   │   ├── di/                     # Dependency injection utilities
+│   │   ├── dict/                   # Dictionary/configuration management
+│   │   ├── dto/                    # Shared DTOs
+│   │   ├── errors/                 # HttpErrorFactory
+│   │   ├── eslint-config/          # ESLint configuration
+│   │   ├── extension-sdk/          # Extension development SDK
+│   │   ├── logger/                 # Logging utilities
+│   │   ├── pipe/                   # Validation pipes
+│   │   ├── types/                  # TypeScript type definitions
+│   │   ├── typescript-config/      # TypeScript configurations
+│   │   ├── upgrade/                # Version upgrade scripts
+│   │   ├── utils/                  # Utility functions, HTTP client
+│   │   ├── web/                    # Frontend shared packages
+│   │   │   ├── hooks/              # React hooks
+│   │   │   ├── http/               # HTTP client
+│   │   │   ├── services/           # Frontend services
+│   │   │   ├── stores/             # State management (Pinia)
+│   │   │   ├── types/              # TypeScript types
+│   │   │   └── ui/                 # UI components
+│   │   ├── di/                     # Dependency injection utilities
+│   │   └── wechat-sdk/             # WeChat integration SDK
+│   ├── api/                        # Main NestJS API application
+│   ├── core/                       # Reusable business logic modules
+│   ├── cli/                        # CLI tooling
+│   └── client/                     # Desktop client (Tauri + React)
+├── skills/                         # AI skills for development guidance
+├── extensions/                     # Plugin extensions (runtime loaded)
+├── public/                         # Static web assets
+└── scripts/                        # Build and utility scripts
 ```
 
 ### Using Reference Files
