@@ -1,0 +1,7 @@
+{
+    "extends": "@buildingai/typescript-config/base.json",
+    "compilerOptions": {
+        "strictPropertyInitialization": false,
+        "strict": false
+    }
+}
