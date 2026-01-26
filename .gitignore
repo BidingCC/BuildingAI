@@ -24,6 +24,17 @@ coverage
 # Turbo
 .turbo
 
+# Vercel
+.vercel
+.cursor
+.windsurf
+.trae
+.agent
+.agents
+.kiro
+.claude
+.gemini
+
 # Build Outputs
 .next/
 out/
