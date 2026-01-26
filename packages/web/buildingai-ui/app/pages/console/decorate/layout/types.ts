@@ -9,6 +9,7 @@ export interface MenuItem {
     link: LinkItem;
     icon?: string;
     children?: MenuItem[];
+    isHidden?: boolean;
 }
 
 /**

@@ -1,4 +1,4 @@
-import { DatasetsSegments } from "@buildingai/db/entities/datasets-segments.entity";
+import { DatasetsSegments } from "@buildingai/db/entities";
 
 import { VectorizationErrorType } from "../constants/vectorization.constants";
 

@@ -1,5 +1,54 @@
 {
     "backend": {
+        "membership": {
+            "pageTitle": "Member Order",
+            "pageDescription": "Member Order Details",
+            "orderCount": "Member Order Count",
+            "refundCount": "Number of refund orders",
+            "netIncome": "Net income",
+            "totalAmount": "Total Order Amount",
+            "totalRefundAmount": "Total Refund Amount",
+            "search": {
+                "userKeyword": "User ID/Nickname/Phone Number",
+                "orderNo": "Order Number",
+                "payType": "Payment Method",
+                "payState": "Payment Status",
+                "refundState": "Refund Status",
+                "refunded": "Refunded",
+                "notRefunded": "Not refunded"
+            },
+            "list": {
+                "pageTitle": "Member Order List",
+                "orderNo": "Order Number",
+                "user": "User",
+                "planName": "Subscription Plan",
+                "levelName": "Membership Level",
+                "duration": "Subscription Duration",
+                "orderAmount": "Amount Paid",
+                "paymentMethod": "Payment Method",
+                "paymentStatus": "Payment Status",
+                "createdAt": "Order Time",
+                "actions": "Operation",
+                "refund": "Refund",
+                "viewDetails": "View Details"
+            },
+            "detail": {
+                "pageTitle": "Order Details",
+                "orderSource": "Order Source",
+                "userInfo": "User Information",
+                "orderType": "Order Type",
+                "paymentStatus": "Payment Status",
+                "paymentMethod": "Payment Method",
+                "createdAt": "Order Time",
+                "paidAt": "Payment Time",
+                "refundStatus": "Refund Status",
+                "serialNumber": "Transaction number",
+                "close": "Close",
+                "refund": "Request a refund",
+                "paid": "Paid",
+                "unpaid": "Unpaid"
+            }
+        },
         "recharge": {
             "pageTitle": "Recharge Orders",
             "pageDescription": "Recharge order details",
@@ -44,7 +93,9 @@
                 "refundStatus": "Refund Status",
                 "serialNumber": "Transaction No",
                 "close": "Close",
-                "refund": "Request Refund"
+                "refund": "Request Refund",
+                "paid": "Paid",
+                "unpaid": "Unpaid"
             }
         }
     },
@@ -58,6 +109,24 @@
                 "paidInAmount": "Amount Paid",
                 "paymentMethod": "Payment Method",
                 "createdAt": "Order Time",
+                "refunded": "Refunded",
+                "wechat": "WeChat Pay",
+                "alipay": "Alipay"
+            }
+        },
+        "subscription": {
+            "tab": {
+                "recharge": "Recharge Records",
+                "subscription": "Subscription Records"
+            },
+            "list": {
+                "orderNo": "Order No",
+                "planName": "Subscription Plan",
+                "levelName": "Membership Level",
+                "duration": "Duration",
+                "paidInAmount": "Amount Paid",
+                "paymentMethod": "Payment Method",
+                "createdAt": "Purchase Time",
                 "refunded": "Refunded",
                 "wechat": "WeChat Pay",
                 "alipay": "Alipay"

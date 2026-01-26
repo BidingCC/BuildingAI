@@ -1,12 +1,17 @@
+import { AppConfig } from "@buildingai/config";
 import { TerminalLogger } from "@buildingai/logger";
-import { findStackTargetFile } from "@buildingai/utils";
+import { checkVersionCompatibility, ExtensionEngine, findStackTargetFile } from "@buildingai/utils";
 import { DynamicModule } from "@nestjs/common";
 import { existsSync } from "fs";
-import { readdir, readFile } from "fs/promises";
+import { readdir, readFile, writeFile } from "fs/promises";
 import { basename, join, normalize, sep } from "path";
 import { pathToFileURL } from "url";
 
-import { ExtensionInfo, ExtensionsJsonConfig } from "../interfaces/extension.interface";
+import {
+    ExtensionInfo,
+    ExtensionManifest,
+    ExtensionsJsonConfig,
+} from "../interfaces/extension.interface";
 
 /**
  * 堆栈查找函数类型
@@ -28,6 +33,137 @@ let extensionListCache: ExtensionInfo[] | null = null;
  */
 export function setStackFinderFn(fn: FindStackTargetFileFn): void {
     stackFinderFn = fn;
+}
+
+/**
+ * Get the platform version from AppConfig
+ *
+ * @returns Platform version string
+ */
+export function getPlatformVersion(): string {
+    return AppConfig.version || "0.0.0";
+}
+
+/**
+ * Get extension engine configuration from package.json
+ *
+ * @param identifier Extension identifier (directory name)
+ * @param extensionsDir Extensions directory path (optional)
+ * @returns Engine configuration or null if not found
+ */
+export async function getExtensionEngine(
+    identifier: string,
+    extensionsDir?: string,
+): Promise<ExtensionEngine | null> {
+    try {
+        const targetDir = extensionsDir || join(process.cwd(), "..", "..", "extensions");
+        const extensionPath = join(targetDir, identifier);
+        const packageJsonPath = join(extensionPath, "package.json");
+
+        if (!existsSync(packageJsonPath)) {
+            return null;
+        }
+
+        const content = await readFile(packageJsonPath, "utf-8");
+        const packageJson = JSON.parse(content) as { engine?: ExtensionEngine };
+
+        return packageJson.engine || { buildingai: "<=25.0.4" };
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        TerminalLogger.warn(
+            "Extension Engine",
+            `Failed to read engine config for "${identifier}": ${errorMessage}`,
+        );
+        return null;
+    }
+}
+
+/**
+ * Check if an extension is compatible with the current platform version
+ *
+ * @param identifier Extension identifier (directory name)
+ * @param extensionsDir Extensions directory path (optional)
+ * @returns True if compatible, false otherwise
+ */
+export async function isExtensionCompatible(
+    identifier: string,
+    extensionsDir?: string,
+): Promise<boolean> {
+    const engine = await getExtensionEngine(identifier, extensionsDir);
+    const platformVersion = getPlatformVersion();
+    const result = checkVersionCompatibility(platformVersion, engine);
+    return result.compatible;
+}
+
+/**
+ * Read extension manifest.json file
+ *
+ * @param extensionPath Extension directory path
+ * @returns Manifest content or null if not found
+ */
+async function readExtensionManifest(extensionPath: string): Promise<ExtensionManifest | null> {
+    try {
+        const manifestPath = join(extensionPath, "manifest.json");
+
+        if (!existsSync(manifestPath)) {
+            return null;
+        }
+
+        const content = await readFile(manifestPath, "utf-8");
+        return JSON.parse(content);
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        TerminalLogger.warn("Extension Manifest", `Failed to read manifest: ${errorMessage}`);
+        return null;
+    }
+}
+
+/**
+ * Update extension enabled status in extensions.json
+ *
+ * @param extensionsDir Extensions directory path
+ * @param identifier Extension identifier
+ * @param enabled New enabled status
+ */
+async function updateExtensionEnabledStatus(
+    extensionsDir: string,
+    identifier: string,
+    enabled: boolean,
+): Promise<void> {
+    try {
+        const configPath = join(extensionsDir, "extensions.json");
+
+        if (!existsSync(configPath)) {
+            return;
+        }
+
+        const content = await readFile(configPath, "utf-8");
+        const config = JSON.parse(content) as ExtensionsJsonConfig;
+
+        let updated = false;
+
+        // Update in applications
+        if (config.applications?.[identifier]) {
+            config.applications[identifier].enabled = enabled;
+            updated = true;
+        }
+
+        // Update in functionals
+        if (config.functionals?.[identifier]) {
+            config.functionals[identifier].enabled = enabled;
+            updated = true;
+        }
+
+        if (updated) {
+            await writeFile(configPath, JSON.stringify(config, null, 4), "utf-8");
+        }
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        TerminalLogger.error(
+            "Extension Config",
+            `Failed to update enabled status for ${identifier}: ${errorMessage}`,
+        );
+    }
 }
 
 /**
@@ -58,6 +194,7 @@ async function readExtensionsConfig(extensionsDir: string): Promise<ExtensionsJs
 
 /**
  * 从配置文件中获取已启用的插件标识符集合
+ * 同时检查版本兼容性，不兼容的插件将被禁用
  *
  * @param extensionsDir 插件目录路径
  * @returns 已启用插件的标识符集合
@@ -65,6 +202,7 @@ async function readExtensionsConfig(extensionsDir: string): Promise<ExtensionsJs
 export async function getEnabledExtensionsFromConfig(extensionsDir?: string): Promise<Set<string>> {
     const targetDir = extensionsDir || join(process.cwd(), "..", "..", "extensions");
     const config = await readExtensionsConfig(targetDir);
+    const platformVersion = getPlatformVersion();
 
     const enabledIdentifiers = new Set<string>();
 
@@ -76,26 +214,69 @@ export async function getEnabledExtensionsFromConfig(extensionsDir?: string): Pr
         return enabledIdentifiers;
     }
 
+    TerminalLogger.info("Platform Version", `Current platform version: ${platformVersion}`);
+
     // 处理 applications 类型的插件
-    for (const [_key, extensionConfig] of Object.entries(config.applications || {})) {
-        if (extensionConfig.enabled) {
-            enabledIdentifiers.add(extensionConfig.manifest.identifier);
-            TerminalLogger.log(
-                "Extension Config",
-                `Application "${extensionConfig.manifest.name}" (${extensionConfig.manifest.identifier}) is enabled`,
-            );
+    for (const [key, extensionConfig] of Object.entries(config.applications || {})) {
+        if (!extensionConfig.enabled) {
+            continue;
         }
+
+        const extensionPath = join(targetDir, key);
+        const manifest = await readExtensionManifest(extensionPath);
+        const engine = manifest?.engine || { buildingai: "<=25.0.4" };
+
+        // Check version compatibility
+        const compatResult = checkVersionCompatibility(platformVersion, engine);
+
+        if (!compatResult.compatible) {
+            TerminalLogger.warn(
+                "Extension Compatibility",
+                `Extension "${extensionConfig.manifest.name}" (${extensionConfig.manifest.identifier}) is incompatible: ${compatResult.reason}`,
+            );
+
+            // Disable the incompatible extension
+            await updateExtensionEnabledStatus(targetDir, key, false);
+            TerminalLogger.info(
+                "Extension Config",
+                `Disabled incompatible extension: ${extensionConfig.manifest.identifier}`,
+            );
+            continue;
+        }
+
+        enabledIdentifiers.add(extensionConfig.manifest.identifier);
+        TerminalLogger.log(
+            "Extension Config",
+            `Application "${extensionConfig.manifest.name}" (${extensionConfig.manifest.identifier}) is enabled and compatible`,
+        );
     }
 
     // TODO: 暂时不加载 functionals 类型的插件
-    // for (const [_key, extensionConfig] of Object.entries(config.functionals || {})) {
-    //     if (extensionConfig.enabled) {
-    //         enabledIdentifiers.add(extensionConfig.manifest.identifier);
-    //         TerminalLogger.log(
-    //             "Extension Config",
-    //             `Functional "${extensionConfig.manifest.name}" (${extensionConfig.manifest.identifier}) is enabled`,
-    //         );
+    // for (const [key, extensionConfig] of Object.entries(config.functionals || {})) {
+    //     if (!extensionConfig.enabled) {
+    //         continue;
     //     }
+    //
+    //     const extensionPath = join(targetDir, key);
+    //     const manifest = await readExtensionManifest(extensionPath);
+    //     const engine = manifest?.engine;
+    //
+    //     const compatResult = checkVersionCompatibility(platformVersion, engine);
+    //
+    //     if (!compatResult.compatible) {
+    //         TerminalLogger.warn(
+    //             "Extension Compatibility",
+    //             `Extension "${extensionConfig.manifest.name}" is incompatible: ${compatResult.reason}`,
+    //         );
+    //         await updateExtensionEnabledStatus(targetDir, key, false);
+    //         continue;
+    //     }
+    //
+    //     enabledIdentifiers.add(extensionConfig.manifest.identifier);
+    //     TerminalLogger.log(
+    //         "Extension Config",
+    //         `Functional "${extensionConfig.manifest.name}" (${extensionConfig.manifest.identifier}) is enabled`,
+    //     );
     // }
 
     if (enabledIdentifiers.size === 0) {
@@ -263,9 +444,14 @@ export async function getExtensionList(extensionsDir?: string): Promise<Extensio
 
             // Read package.json for metadata
             const packageJsonPath = join(extensionPath, "package.json");
+            const manifestJsonPath = join(extensionPath, "manifest.json");
             let version = "0.0.0";
             let description: string | undefined;
             let author: { name: string; avatar?: string; homepage?: string } | undefined;
+            let engine: string;
+            let manifestJson = existsSync(manifestJsonPath)
+                ? JSON.parse(await readFile(manifestJsonPath, "utf-8"))
+                : undefined;
 
             if (existsSync(packageJsonPath)) {
                 try {
@@ -275,17 +461,26 @@ export async function getExtensionList(extensionsDir?: string): Promise<Extensio
 
                     version = packageJson.version || "0.0.0";
                     description = packageJson.description;
+                    engine = packageJson.engine?.buildingai || "<=25.0.4";
 
                     // Parse author field (can be string or object)
-                    if (packageJson.author) {
-                        if (typeof packageJson.author === "string") {
-                            author = { name: packageJson.author };
-                        } else if (typeof packageJson.author === "object") {
-                            author = {
-                                name: packageJson.author.name || "Unknown",
-                                avatar: packageJson.author.avatar,
-                                homepage: packageJson.author.homepage || packageJson.author.url,
-                            };
+                    if (manifestJson && manifestJson.author) {
+                        author = {
+                            name: manifestJson.author.name || "Unknown",
+                            avatar: manifestJson.author.avatar,
+                            homepage: manifestJson.author.homepage,
+                        };
+                    } else {
+                        if (packageJson.author) {
+                            if (typeof packageJson.author === "string") {
+                                author = { name: packageJson.author };
+                            } else if (typeof packageJson.author === "object") {
+                                author = {
+                                    name: packageJson.author.name || "Unknown",
+                                    avatar: packageJson.author.avatar,
+                                    homepage: packageJson.author.homepage || packageJson.author.url,
+                                };
+                            }
                         }
                     }
                 } catch (error) {
@@ -304,6 +499,7 @@ export async function getExtensionList(extensionsDir?: string): Promise<Extensio
                 version,
                 description,
                 author,
+                engine,
             });
         }
 
@@ -333,14 +529,14 @@ export function getExtensionPackNameFromControllerSync(): string {
 
     // 如果有多个插件,需要通过调用栈来确定
     if (!stackFinderFn) {
-        throw new Error("未设置堆栈查找函数,请先调用 setStackFinderFn() 设置查找函数");
+        throw new Error("Stack finder function is not set. Please call setStackFinderFn() first.");
     }
 
     // 查找调用栈中的文件
     const callerFiles = stackFinderFn([".ts", ".js"]) || [];
 
     if (callerFiles.length === 0) {
-        throw new Error("无法从调用栈中找到文件");
+        throw new Error("No caller files found in stack trace.");
     }
 
     // 尝试从每个文件路径中提取插件名称
@@ -355,7 +551,7 @@ export function getExtensionPackNameFromControllerSync(): string {
         }
     }
 
-    throw new Error("无法从调用栈中确定插件名称");
+    throw new Error("Unable to determine extension name from stack trace.");
 }
 
 /**
@@ -520,6 +716,41 @@ export function getExtensionIdentifierFromStack(suffixes: string[]): string | nu
     }
 
     return extensionDir;
+}
+
+/**
+ * Get extension enabled status from extensions.json
+ *
+ * @param identifier - Extension identifier (directory name)
+ * @param extensionsDir - Extensions directory path (optional)
+ * @returns Enabled status (true/false), or null if not found
+ */
+export async function getExtensionEnabledStatus(
+    identifier: string,
+    extensionsDir?: string,
+): Promise<boolean | null> {
+    try {
+        const dir = extensionsDir || join(process.cwd(), "..", "..", "extensions");
+        const config = await readExtensionsConfig(dir);
+
+        if (!config) {
+            return null;
+        }
+
+        // Search in applications
+        if (config.applications?.[identifier]) {
+            return config.applications[identifier].enabled;
+        }
+
+        return null;
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        TerminalLogger.error(
+            "Extension Utils",
+            `Failed to get extension enabled status for ${identifier}: ${errorMessage}`,
+        );
+        return null;
+    }
 }
 
 /**

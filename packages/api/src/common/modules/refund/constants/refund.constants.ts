@@ -1,6 +1,6 @@
 export const REFUND_ORDER_FROM = {
     FROM_RECHARGE: 1,
-    // FROM_ORDER: 2,
+    FROM_MEMBERSHIP: 2,
 } as const;
 export type REFUND_ORDER_FROM_VALUE = (typeof REFUND_ORDER_FROM)[keyof typeof REFUND_ORDER_FROM];
 
@@ -13,7 +13,7 @@ export type REFUND_STATUS_VALUE = (typeof REFUND_STATUS)[keyof typeof REFUND_STA
 
 export const REFUND_ORDER_FROM_DESC = {
     FROM_RECHARGE: "充值订单",
-    // FROM_ORDER: "订单",
+    FROM_MEMBERSHIP: "会员订单",
 } as const;
 
 export const REFUND_STATUS_DESC = {

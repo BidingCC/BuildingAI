@@ -1,7 +1,7 @@
 import { BooleanNumberType } from "@buildingai/constants";
-import { SecretTemplate } from "@buildingai/db/entities/secret-template.entity";
 
 import { DataSource } from "../../typeorm";
+import { SecretTemplate } from "./../../entities/secret-template.entity";
 import { BaseSeeder } from "./base.seeder";
 
 /**
@@ -55,7 +55,6 @@ export class SecretTemplateSeeder extends BaseSeeder {
                 const templateData = {
                     name: templateConfig.name,
                     icon: templateConfig.icon,
-                    type: templateConfig.type,
                     fieldConfig: templateConfig.fieldConfig,
                     isEnabled: templateConfig.isEnabled,
                     sortOrder: templateConfig.sortOrder,

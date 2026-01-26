@@ -18,6 +18,8 @@ const props = defineProps<{
     agentId: string;
     /** 标注ID，如果为null则为创建模式 */
     annotationId: string | null;
+    /** 是否隐藏状态 */
+    hiddenStatus?: boolean;
     /** 对话消息ID，用于关联对话消息的metadata */
     messageId?: string | null;
     /** 是否为公开访问模式 */
@@ -190,7 +192,11 @@ onMounted(async () => {
                     <template #hint> {{ t("ai-agent.backend.logs.answerHint") }} </template>
                 </UFormField>
 
-                <UFormField :label="t('ai-agent.backend.logs.enabled')" name="enabled">
+                <UFormField
+                    v-if="hiddenStatus"
+                    :label="t('ai-agent.backend.logs.enabled')"
+                    name="enabled"
+                >
                     <div class="flex items-center gap-3">
                         <USwitch v-model="formData.enabled" color="primary" />
                         <span class="text-muted-foreground text-sm">

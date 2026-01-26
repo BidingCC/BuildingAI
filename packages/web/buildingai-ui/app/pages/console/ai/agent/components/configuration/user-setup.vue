@@ -5,6 +5,8 @@ import type {
     UpdateAgentConfigParams,
 } from "@buildingai/service/consoleapi/ai-agent";
 
+import { usePluginSlots } from "@//utils/plugins.utils";
+
 const ChatAvatar = defineAsyncComponent(() => import("./_user_components/chat-avatar.vue"));
 const Command = defineAsyncComponent(() => import("./_user_components/command.vue"));
 const Problem = defineAsyncComponent(() => import("./_user_components/problem.vue"));
@@ -20,18 +22,26 @@ const emit = defineEmits<{
 }>();
 
 const state = useVModel(props, "modelValue", emit);
+
+const isThirdParty = computed(() => {
+    return usePluginSlots("agent:config:third-party").value.filter(
+        (slot) => slot.meta?.platform === state.value.createMode,
+    ).length;
+});
 </script>
 
 <template>
     <div class="space-y-4 overflow-y-auto">
-        <!-- 开场白区域 -->
-        <Prologue v-model="state.openingStatement as string" />
+        <template v-if="!isThirdParty">
+            <!-- 开场白区域 -->
+            <Prologue v-model="state.openingStatement as string" />
 
-        <!-- 开场问题区域 -->
-        <Problem v-model="state.openingQuestions as string[]" />
+            <!-- 开场问题区域 -->
+            <Problem v-model="state.openingQuestions as string[]" />
 
-        <!-- 自动追问区域 -->
-        <Suggest v-model="state.autoQuestions as AutoQuestionsConfig" />
+            <!-- 自动追问区域 -->
+            <Suggest v-model="state.autoQuestions as AutoQuestionsConfig" />
+        </template>
 
         <!-- 快捷指令区域 -->
         <Command v-model="state.quickCommands as QuickCommandConfig[]" />

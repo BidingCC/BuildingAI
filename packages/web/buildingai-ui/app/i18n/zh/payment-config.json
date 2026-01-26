@@ -24,6 +24,7 @@
         "avatarFormats": "支持 JPG、PNG 格式，建议尺寸 200x200",
         "enable": "是否启用",
         "enableHelp": "启用后用户可以使用微信支付",
+        "alipayEnableHelp": "启用后用户可以使用支付宝支付",
         "isDefault": "是否默认",
         "isDefaultHelp": "设为默认支付方式，只能设置一个支付方式为默认",
         "payway": "支付方式",
@@ -60,8 +61,24 @@
         "updateSuccess": "更新支付配置成功",
         "updateFailed": "更新支付配置失败",
         "appId": "APPID",
-        "appIdHelp": "请填写APP在微信开发平台申请的应用ID信息",
-        "appIdInput": "请输入APPID"
+        "appIdHelp": "请填写开发平台申请的应用 ID 信息",
+        "appIdInput": "请输入APPID",
+
+        "gateway": "网关地址",
+        "gatewayInput": "https://openapi.alipay.com/gateway.do",
+        "gatewayHelp": "支付宝开放平台网关地址",
+        "privateKey": "应用私钥",
+        "privateKeyInput": "请输入应用私钥",
+        "privateKeyHelp": "应用私钥内容(PKCS8格式)",
+        "appCert": "应用公钥证书",
+        "appCertInput": "请输入应用公钥证书内容",
+        "appCertHelp": "应用公钥证书内容(appCertPublicKey)",
+        "alipayPublicCert": "支付宝公钥证书",
+        "alipayPublicCertInput": "请输入支付宝公钥证书内容",
+        "alipayPublicCertHelp": "支付宝公钥证书内容(alipayCertPublicKey)",
+        "alipayRootCert": "支付宝根证书",
+        "alipayRootCertInput": "请输入支付宝根证书内容",
+        "alipayRootCertHelp": "支付宝根证书内容(alipayRootCert)"
     },
     "validation": {
         "nameRequired": "请输入自定义显示名称",
@@ -72,6 +89,13 @@
         "paySignKeyRequired": "请输入微信支付密钥",
         "certRequired": "请上传微信支付证书",
         "sortRequired": "请输入排序",
-        "appIdRequired": "请输入APPID"
+        "appIdRequired": "请输入APPID",
+
+        "gatewayRequired": "请输入网关地址",
+        "gatewayUrl": "请输入有效的网关URL",
+        "privateKeyRequired": "请输入应用私钥",
+        "appCertRequired": "请输入应用公钥证书",
+        "alipayPublicCertRequired": "请输入支付宝公钥证书",
+        "alipayRootCertRequired": "请输入支付宝根证书"
     }
 }

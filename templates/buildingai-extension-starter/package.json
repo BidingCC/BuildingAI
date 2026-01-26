@@ -1,0 +1,65 @@
+{
+    "name": "buildingai-extension-starter",
+    "version": "0.0.1",
+    "description": "A simple blog extension",
+    "author": "BuildingAI Teams",
+    "private": true,
+    "main": "./manifest.json",
+    "module": "./manifest.json",
+    "files": [
+        "build/**/*"
+    ],
+    "exports": {
+        ".": {
+            "import": "./manifest.json",
+            "require": "./manifest.json"
+        },
+        "./api": {
+            "types": "./build/index.d.ts",
+            "import": "./build/index.js",
+            "require": "./build/index.js"
+        },
+        "./*": "./*"
+    },
+    "scripts": {
+        "build:clean": "rimraf build .nuxt .output .temp",
+        "dev:web": "rimraf .nuxt && cross-env NUXT_BUILD_SSR=false NUXT_BUILD_ENV=development nuxt dev --no-clear --dotenv ../../.env",
+        "dev:api": "cross-env NODE_ENV=development tsup --watch src/api",
+        "dev": "concurrently -n web,api -c cyan,magenta \"pnpm dev:web\" \"pnpm dev:api\"",
+        "build:api": "cross-env NODE_ENV=production tsup",
+        "build:web": "cross-env NODE_OPTIONS=--max-old-space-size=4096 NUXT_BUILD_SSR=false NUXT_BUILD_ENV=production nuxt generate --dotenv ../../.env",
+        "build:publish": "pnpm build:clean && pnpm run build:web && pnpm run build:api",
+        "format": "prettier --write src",
+        "lint": "eslint src --quiet",
+        "lint:fix": "eslint src --fix",
+        "check-types": "vue-tsc --noEmit",
+        "i18n:translate": "node ../../scripts/translate-i18n.mjs"
+    },
+    "dependencies": {
+        "@buildingai/constants": "workspace:*",
+        "@buildingai/core": "workspace:*",
+        "@buildingai/db": "workspace:*",
+        "@buildingai/decorators": "workspace:*",
+        "@buildingai/extension-sdk": "workspace:*",
+        "@buildingai/utils": "workspace:*",
+        "@buildingai/hooks": "workspace:*",
+        "@buildingai/service": "workspace:*",
+        "@buildingai/stores": "workspace:*",
+        "@buildingai/ui": "workspace:*",
+        "@buildingai/http": "workspace:*",
+        "@buildingai/layouts": "workspace:*",
+        "@buildingai/errors": "workspace:*",
+        "@buildingai/pipe": "workspace:*",
+        "@buildingai/dto": "workspace:*",
+        "@buildingai/base": "workspace:*"
+    },
+    "devDependencies": {
+        "@buildingai/eslint-config": "workspace:*",
+        "@buildingai/typescript-config": "workspace:*",
+        "@buildingai/nuxt": "workspace:*",
+        "@buildingai/i18n-config": "workspace:*"
+    },
+    "engine": {
+        "buildingai": ">=25.1.0"
+    }
+}

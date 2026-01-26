@@ -51,4 +51,9 @@ export interface PowerAdditionOptions {
     associationNo?: string;
     /** Associated user ID */
     associationUserId?: string;
+    /**
+     * 积分过期时间
+     * 仅对会员赠送积分有效,到期后积分清零
+     */
+    expireAt?: Date;
 }

@@ -35,6 +35,8 @@ const isMobile = useMediaQuery("(max-width: 768px)");
 const { params: URLQueryParams } = useRoute();
 const publishToken = computed(() => (URLQueryParams as Record<string, string>).id || "");
 
+const userStore = useUserStore();
+
 const toast = useMessage();
 const overlay = useOverlay();
 const scrollAreaRef = useTemplateRef("scrollAreaRef");
@@ -42,7 +44,9 @@ const { height: scrollAreaHeight } = useElementSize(scrollAreaRef);
 
 // 从cookie中获取当前对话ID
 const currentConversationCookie = useCookie(`public_agent_conversation_${publishToken.value}`);
-const conversationId = shallowRef<string | null>(currentConversationCookie.value || null);
+const conversationId = shallowRef<string | null>(
+    userStore.isLogin ? currentConversationCookie.value || null : null,
+);
 const isAtBottom = shallowRef(true);
 const agentError = shallowRef<string>("");
 
@@ -60,7 +64,11 @@ const annotationFormData = shallowRef<{
 const showOpeningStatement = shallowRef(false);
 
 watch(conversationId, (newVal) => {
-    currentConversationCookie.value = newVal;
+    if (userStore.isLogin) {
+        currentConversationCookie.value = newVal;
+    } else {
+        currentConversationCookie.value = null;
+    }
 });
 
 // 分页参数
@@ -135,6 +143,8 @@ const initialMessages = computed(() => {
         id: item.id || uuid(),
         avatar: agent.value?.chatAvatar || agent.value?.avatar,
         status: "completed" as const,
+        // 只保留助手消息的创建时间，用户消息不需要
+        ...(item.role === "assistant" && { createdAt: item.createdAt }),
     }));
 });
 
@@ -227,6 +237,28 @@ const { messages, input, files, handleSubmit, reload, stop, status, error } = us
 
 const isLoading = computed(() => status.value === "loading");
 
+watch(
+    () => userStore.isLogin,
+    (isLogin) => {
+        if (isLogin) return;
+
+        useCookie(`public_agent_conversation_${publishToken.value}`, {
+            maxAge: -1,
+            path: "/",
+        }).value = null;
+        useCookie(`public_agent_token_${publishToken.value}`, { maxAge: -1, path: "/" }).value =
+            null;
+
+        stop();
+        messages.value = [];
+        conversationId.value = null;
+        hasMore.value = false;
+        queryPaging.page = 1;
+        showOpeningStatement.value = true;
+    },
+    { immediate: true },
+);
+
 // 加载更多消息
 const loadMoreMessages = async () => {
     if (!hasMore.value || !conversationId.value || !publishToken.value || !accessToken.value)
@@ -248,6 +280,8 @@ const loadMoreMessages = async () => {
                 content: item.content,
                 status: "completed" as const,
                 mcpToolCalls: item.mcpToolCalls,
+                // 只保留助手消息的创建时间，用户消息不需要
+                ...(item.role === "assistant" && { createdAt: item.createdAt }),
             })) || [];
 
         messages.value.unshift(...newMessages);
@@ -376,6 +410,7 @@ const openAnnotationModal = (annotationId: string, messageId: string | null = nu
 
     modal.open({
         agentId: agent.value?.id as string,
+        hiddenStatus: true,
         annotationId,
         messageId,
         isPublic: true,
@@ -655,7 +690,7 @@ useHead({
                             }"
                             :spacing-offset="160"
                         >
-                            <template #content="{ message, index }">
+                            <template #content="{ message }">
                                 <BdMarkdown
                                     v-if="message.content.length"
                                     :content="message.content.toString()"
@@ -705,16 +740,17 @@ useHead({
                                         </template>
                                     </template>
                                 </BdMarkdown>
-                                <!-- 提问建议 -->
+                            </template>
+                            <template #after-tools="{ message: slotMessage, index: slotIndex }">
                                 <div
                                     v-if="
-                                        message.metadata?.suggestions &&
-                                        messages.length - 1 === index
+                                        slotMessage.metadata?.suggestions &&
+                                        messages.length - 1 === slotIndex
                                     "
-                                    class="mb-2 space-y-2"
+                                    class="m-2 space-y-2"
                                 >
                                     <div
-                                        v-for="suggestion in message.metadata.suggestions"
+                                        v-for="suggestion in slotMessage.metadata.suggestions"
                                         :key="suggestion"
                                     >
                                         <UButton
@@ -794,7 +830,7 @@ useHead({
                                 color="neutral"
                                 variant="soft"
                                 size="sm"
-                                @click="handleSubmitMessage(item.content)"
+                                @click="handleSubmitMessage(item.name)"
                             >
                                 <NuxtImg v-if="item.avatar" :src="item.avatar" class="h-4 w-4" />
                                 <span>{{ item.name }}</span>
@@ -806,9 +842,13 @@ useHead({
                     <ChatsPrompt
                         v-model="input"
                         v-model:file-list="files"
+                        :needAuth="true"
                         :is-loading="isLoading"
                         :placeholder="t('ai-chat.frontend.and', { name: agent.name })"
                         :attachmentSizeLimit="chatConfig?.attachmentSizeLimit"
+                        :model-features="agent.modelFeatures"
+                        :agent-create-mode="agent.createMode"
+                        :file-upload-config="agent.fileUploadConfig"
                         class="sticky bottom-0 z-10 [view-transition-name:chat-prompt]"
                         :rows="1"
                         @stop="stop"

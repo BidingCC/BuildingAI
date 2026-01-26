@@ -1,4 +1,21 @@
 {
+    "apps": {
+        "modalTitle": "App Center Banner",
+        "heroImage": "Banner Image",
+        "extensionCard": {
+            "statusEnabled": "Enabled",
+            "statusDisabled": "Disabled",
+            "aliasVisible": "Visible",
+            "aliasHidden": "Hidden",
+            "editAction": "Customize"
+        },
+        "extensionEdit": {
+            "displayName": "Display Name",
+            "displayNamePlaceholder": "Enter display name",
+            "aliasShowLabel": "Show App",
+            "aliasShowDescription": "Display this app in the App Center"
+        }
+    },
     "micropage": {
         "title": "Micro Page Management",
         "list": {

@@ -1,5 +1,5 @@
 import { BaseController } from "@buildingai/base";
-import { Role } from "@buildingai/db/entities/role.entity";
+import { Role } from "@buildingai/db/entities";
 import { BuildFileUrl } from "@buildingai/decorators/file-url.decorator";
 import { UUIDValidationPipe } from "@buildingai/pipe/param-validate.pipe";
 import { ConsoleController } from "@common/decorators";

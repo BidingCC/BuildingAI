@@ -167,7 +167,9 @@ export interface AiModelQueryRequest extends BaseQueryParams {
     /** Model capability filter */
     capability?: string;
     /** Model type filter */
-    modelType?: string[];
+    modelType?: string;
+    /** Search keyword (name or description) */
+    keyword?: string;
 }
 
 /**
@@ -210,6 +212,8 @@ export interface ModelConfigItem extends BaseConfigItem {
  * @description Interface for AI model information with all properties
  */
 export interface AiModelInfo extends BaseModel {
+    /** Model features */
+    features?: string[];
     /** Model configuration */
     modelConfig: ModelConfigItem[];
     /** Model type */
@@ -218,6 +222,8 @@ export interface AiModelInfo extends BaseModel {
     maxContext: number;
     /** Billing rule information */
     billingRule: BillingRule;
+    /** 会员等级 */
+    membershipLevel: string[];
 }
 
 /**

@@ -1,6 +1,6 @@
-import { Agent } from "@buildingai/db/entities/ai-agent.entity";
-import { User } from "@buildingai/db/entities/user.entity";
-import { type UserPlayground } from "@buildingai/db/interfaces/context.interface";
+import { type UserPlayground } from "@buildingai/db";
+import { User } from "@buildingai/db/entities";
+import { Agent } from "@buildingai/db/entities";
 import { Repository } from "@buildingai/db/typeorm";
 
 import { UserUtil } from "../utils/user.util";

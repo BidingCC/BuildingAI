@@ -43,6 +43,7 @@ export interface ExtensionFormData extends BaseEntity {
     supportTerminal?: ExtensionSupportTerminalType[];
     /** Extension status */
     status: ExtensionStatusType;
+    engine: string;
     /** Extension configuration */
     config?: Record<string, any>;
     /** Extension dependencies */
@@ -63,13 +64,31 @@ export interface ExtensionFormData extends BaseEntity {
     installedAt?: string;
     /** Whether it is a local development plugin */
     isLocal?: boolean;
-
+    /** Extension version compatible */
+    isCompatible?: boolean;
     /** Extension version list */
     versionLists?: ExtensionVersion[];
     /** Extension user */
     user?: string;
     /** Extension describe */
     describe?: string;
+    /** Extension alias */
+    alias?: string;
+    /** Extension alias description */
+    aliasDescription?: string;
+    /** Extension alias icon */
+    aliasIcon?: string;
+    /** Extension alias show */
+    aliasShow?: boolean;
+}
+
+export interface AppInfo {
+    appsNo: string;
+    cover: string;
+    describe: string;
+    icon: string;
+    key: string;
+    name: string;
 }
 
 /**
@@ -184,6 +203,8 @@ export interface ExtensionVersion {
  * @description Interface for extension install request
  */
 export interface ExtensionInstallRequest {
+    /** Extension identifier */
+    identifier?: string;
     /** Extension version to install */
     version?: string;
 }
@@ -198,7 +219,7 @@ export interface ExtensionInstallRequest {
  */
 export function apiCreateExtension(data: ExtensionCreateRequest): Promise<ExtensionFormData> {
     return useConsolePost("/extensions", data, {
-        timeout: 300000,
+        timeout: 1800000,
     });
 }
 
@@ -255,6 +276,39 @@ export function apiGetExtensionsByType(
  */
 export function apiGetExtensionByIdentifier(identifier: string): Promise<ExtensionFormData> {
     return useConsoleGet(`/extensions/identifier/${identifier}`);
+}
+
+/**
+ * Plugin layout configuration interface
+ * @description Interface for plugin layout configuration returned from backend
+ */
+export interface PluginLayoutConfig {
+    /** Plugin manifest.json content */
+    manifest: {
+        identifier: string;
+        name: string;
+        type: string;
+        version: string;
+        description: string;
+        homepage?: string;
+        author?: {
+            name: string;
+            homepage: string;
+        };
+        changelog?: any[];
+    } | null;
+    /** Console menu configuration array */
+    consoleMenu: any[] | null;
+}
+
+/**
+ * Get extension plugin layout configuration
+ * @description Retrieves router.options and manifest.json for plugin layout
+ * @param identifier Extension identifier
+ * @returns Promise with plugin layout configuration
+ */
+export function apiGetExtensionPluginLayout(identifier: string): Promise<PluginLayoutConfig> {
+    return useConsoleGet(`/extensions/${identifier}/plugin-layout`);
 }
 
 /**
@@ -329,8 +383,58 @@ export function apiInstallExtension(
 ): Promise<ExtensionFormData> {
     const data: ExtensionInstallRequest = version ? { version } : {};
     return useConsolePost(`/extensions/install/${identifier}`, data, {
-        timeout: 300000,
+        timeout: 1800000,
     });
+}
+
+/**
+ * Install extension by activation code
+ * @description Installs an extension by activation code
+ * @param activationCode Activation code
+ * @returns Promise with installed extension data
+ */
+export function apiInstallByActivationCode(
+    activationCode: string,
+    identifier: string,
+    version?: string,
+): Promise<ExtensionFormData> {
+    const data: ExtensionInstallRequest = version ? { version, identifier } : { identifier };
+    return useConsolePost(`/extensions/install-by-activation-code/${activationCode}`, data, {
+        timeout: 1800000,
+    });
+}
+
+/**
+ * Upgrade extension content
+ */
+export function apiUpgradeExtensionContent(identifier: string): Promise<ExtensionFormData> {
+    return useConsoleGet(`/extensions/upgrade-content/${identifier}`);
+}
+
+/**
+ * Get application by activation code
+ * @description Get application information by activation code
+ * @param activationCode Activation code
+ * @returns Promise with application data
+ */
+export function apiGetApplicationByActivationCode(activationCode: string): Promise<AppInfo> {
+    return useConsoleGet(`/extensions/get-by-activation-code/${activationCode}`);
+}
+
+/**
+ * Upgrade extension
+ * @description Upgrades an extension to the latest version
+ * @param identifier Extension identifier
+ * @returns Promise with upgraded extension data
+ */
+export function apiUpgradeExtension(identifier: string): Promise<ExtensionFormData> {
+    return useConsolePost(
+        `/extensions/upgrade/${identifier}`,
+        {},
+        {
+            timeout: 1800000,
+        },
+    );
 }
 
 /**
@@ -354,7 +458,7 @@ export function apiEnableExtension(id: string): Promise<ExtensionFormData> {
         `/extensions/${id}/enable`,
         {},
         {
-            timeout: 300000,
+            timeout: 1800000,
         },
     );
 }
@@ -370,7 +474,7 @@ export function apiDisableExtension(id: string): Promise<ExtensionFormData> {
         `/extensions/${id}/disable`,
         {},
         {
-            timeout: 300000,
+            timeout: 1800000,
         },
     );
 }
@@ -442,4 +546,70 @@ export function apiGetPlatformSecret(): Promise<PlatformSecretResponse> {
  */
 export function apiSetPlatformSecret(data: PlatformSecretRequest): Promise<boolean> {
     return useConsolePost("/extensions/platform-secret", data);
+}
+
+/**
+ * Sync member features response interface
+ * @description Interface for sync member features response
+ */
+export interface SyncMemberFeaturesResponse {
+    /** Operation message */
+    message: string;
+    /** Added count */
+    added: number;
+    /** Updated count */
+    updated: number;
+    /** Removed count */
+    removed: number;
+    /** Total count */
+    total: number;
+}
+
+/**
+ * Sync extension member features
+ * @description Scans and syncs @MemberOnly decorated features to database
+ * @param identifier Extension identifier
+ * @returns Promise with sync result
+ */
+export function apiSyncExtensionMemberFeatures(
+    identifier: string,
+): Promise<SyncMemberFeaturesResponse> {
+    return useConsolePost(`/extensions/sync-member-features/${identifier}`, {});
+}
+
+/**
+ * Extension feature interface
+ */
+export interface ExtensionFeatureItem {
+    id: string;
+    featureCode: string;
+    name: string;
+    description?: string;
+    extensionId: string;
+    status: boolean;
+    membershipLevels: Array<{ id: string; name: string; level: number }>;
+    createdAt: string;
+    updatedAt: string;
+}
+
+/**
+ * Get extension features
+ * @param identifier Extension identifier
+ * @returns Promise with features list
+ */
+export function apiGetExtensionFeatures(identifier: string): Promise<ExtensionFeatureItem[]> {
+    return useConsoleGet(`/extensions/features/${identifier}`);
+}
+
+/**
+ * Update feature membership levels
+ * @param featureId Feature ID
+ * @param levelIds Membership level IDs
+ * @returns Promise with updated feature
+ */
+export function apiUpdateFeatureLevels(
+    featureId: string,
+    levelIds: string[],
+): Promise<ExtensionFeatureItem> {
+    return useConsolePatch(`/extensions/features/${featureId}/levels`, { levelIds });
 }

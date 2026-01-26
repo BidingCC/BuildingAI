@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { apiUploadFile } from "@buildingai/service/common";
+import { uploadFileAdaptive } from "@buildingai/upload";
 import { Color } from "@tiptap/extension-color";
 import Highlight from "@tiptap/extension-highlight";
 import Image from "@tiptap/extension-image";
@@ -192,7 +192,7 @@ async function handlePickAndInsertImage() {
             files.map(
                 (file) =>
                     new Promise<{ url: string }>((resolve, reject) => {
-                        apiUploadFile({ file, description: "editor" })
+                        uploadFileAdaptive({ file, description: "editor" })
                             .then((res: { url: string }) => resolve(res))
                             .catch((err: Error) => reject(err));
                     }),

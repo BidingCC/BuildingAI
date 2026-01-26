@@ -1,4 +1,4 @@
-import { McpToolCall } from "@buildingai/db/entities/ai-chat-message.entity";
+import { McpToolCall } from "@buildingai/db/entities";
 import { PaginationDto } from "@buildingai/dto/pagination.dto";
 import type {
     Attachment as AttachmentType,
@@ -314,7 +314,7 @@ export class CreateMessageDto {
     /**
      * 消息内容
      */
-    @IsNotEmpty({ message: "消息内容不能为空" })
+    @IsOptional()
     content: MessageContent;
 
     /**

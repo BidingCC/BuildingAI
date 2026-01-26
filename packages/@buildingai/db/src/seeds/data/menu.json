@@ -9,8 +9,7 @@
         "sort": 0,
         "isHidden": 0,
         "type": 2,
-        "sourceType": 1,
-        "pluginPackName": null
+        "sourceType": 1
     },
     {
         "name": "console-menu.workspace",
@@ -18,12 +17,10 @@
         "path": "",
         "icon": "",
         "component": "",
-        "permissionCode": null,
         "sort": 1,
         "isHidden": 0,
         "type": 0,
         "sourceType": 1,
-        "pluginPackName": "",
         "children": [
             {
                 "name": "console-menu.agent.title",
@@ -36,7 +33,6 @@
                 "isHidden": 0,
                 "type": 2,
                 "sourceType": 1,
-                "pluginPackName": "",
                 "children": [
                     {
                         "name": "console-menu.agent.configuration",
@@ -49,7 +45,6 @@
                         "isHidden": 1,
                         "type": 2,
                         "sourceType": 1,
-                        "pluginPackName": null,
                         "children": [
                             {
                                 "name": "console-menu.common.actions.update",
@@ -61,8 +56,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             }
                         ]
                     },
@@ -76,8 +70,7 @@
                         "sort": 0,
                         "isHidden": 1,
                         "type": 2,
-                        "sourceType": 1,
-                        "pluginPackName": null
+                        "sourceType": 1
                     },
                     {
                         "name": "console-menu.agent.logs",
@@ -90,7 +83,6 @@
                         "isHidden": 1,
                         "type": 2,
                         "sourceType": 1,
-                        "pluginPackName": null,
                         "children": [
                             {
                                 "name": "console-menu.agent.annotations.create",
@@ -102,8 +94,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             },
                             {
                                 "name": "console-menu.agent.annotations.update",
@@ -115,8 +106,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             },
                             {
                                 "name": "console-menu.agent.annotations.delete",
@@ -128,8 +118,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             },
                             {
                                 "name": "console-menu.agent.annotations.review",
@@ -141,8 +130,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             }
                         ]
                     },
@@ -156,8 +144,7 @@
                         "sort": 0,
                         "isHidden": 1,
                         "type": 2,
-                        "sourceType": 1,
-                        "pluginPackName": null
+                        "sourceType": 1
                     }
                 ]
             },
@@ -172,7 +159,6 @@
                 "isHidden": 0,
                 "type": 2,
                 "sourceType": 1,
-                "pluginPackName": "",
                 "children": [
                     {
                         "name": "console-menu.datasets.documents.title",
@@ -185,7 +171,6 @@
                         "isHidden": 1,
                         "type": 2,
                         "sourceType": 1,
-                        "pluginPackName": null,
                         "children": [
                             {
                                 "name": "console-menu.common.actions.delete",
@@ -197,8 +182,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             },
                             {
                                 "name": "console-menu.common.actions.retry",
@@ -210,8 +194,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             },
                             {
                                 "name": "console-menu.common.actions.status",
@@ -223,8 +206,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             },
                             {
                                 "name": "console-menu.common.actions.rename",
@@ -236,8 +218,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             }
                         ]
                     },
@@ -251,8 +232,7 @@
                         "sort": 0,
                         "isHidden": 1,
                         "type": 2,
-                        "sourceType": 1,
-                        "pluginPackName": null
+                        "sourceType": 1
                     },
                     {
                         "name": "console-menu.datasets.test",
@@ -264,8 +244,7 @@
                         "sort": 0,
                         "isHidden": 1,
                         "type": 2,
-                        "sourceType": 1,
-                        "pluginPackName": null
+                        "sourceType": 1
                     },
                     {
                         "name": "console-menu.datasets.members",
@@ -277,8 +256,7 @@
                         "sort": 0,
                         "isHidden": 1,
                         "type": 2,
-                        "sourceType": 1,
-                        "pluginPackName": null
+                        "sourceType": 1
                     },
                     {
                         "name": "console-menu.datasets.settings",
@@ -290,8 +268,7 @@
                         "sort": 0,
                         "isHidden": 1,
                         "type": 2,
-                        "sourceType": 1,
-                        "pluginPackName": null
+                        "sourceType": 1
                     },
                     {
                         "name": "console-menu.datasets.documents.create",
@@ -303,8 +280,7 @@
                         "sort": 0,
                         "isHidden": 1,
                         "type": 2,
-                        "sourceType": 1,
-                        "pluginPackName": null
+                        "sourceType": 1
                     },
                     {
                         "name": "console-menu.datasets.documents.segments",
@@ -316,8 +292,7 @@
                         "sort": 0,
                         "isHidden": 1,
                         "type": 2,
-                        "sourceType": 1,
-                        "pluginPackName": null
+                        "sourceType": 1
                     },
                     {
                         "name": "console-menu.datasets.delete",
@@ -329,8 +304,7 @@
                         "sort": 0,
                         "isHidden": 0,
                         "type": 3,
-                        "sourceType": 1,
-                        "pluginPackName": null
+                        "sourceType": 1
                     },
                     {
                         "name": "console-menu.datasets.retry",
@@ -342,8 +316,7 @@
                         "sort": 0,
                         "isHidden": 0,
                         "type": 3,
-                        "sourceType": 1,
-                        "pluginPackName": null
+                        "sourceType": 1
                     }
                 ]
             },
@@ -358,7 +331,6 @@
                 "isHidden": 0,
                 "type": 2,
                 "sourceType": 1,
-                "pluginPackName": "",
                 "children": [
                     {
                         "name": "console-common.add",
@@ -370,8 +342,7 @@
                         "sort": 10,
                         "isHidden": 0,
                         "type": 3,
-                        "sourceType": 1,
-                        "pluginPackName": null
+                        "sourceType": 1
                     },
                     {
                         "name": "console-common.edit",
@@ -383,8 +354,7 @@
                         "sort": 10,
                         "isHidden": 0,
                         "type": 3,
-                        "sourceType": 1,
-                        "pluginPackName": null
+                        "sourceType": 1
                     },
                     {
                         "name": "console-common.delete",
@@ -396,8 +366,7 @@
                         "sort": 10,
                         "isHidden": 0,
                         "type": 3,
-                        "sourceType": 1,
-                        "pluginPackName": null
+                        "sourceType": 1
                     }
                 ]
             },
@@ -412,7 +381,6 @@
                 "isHidden": 0,
                 "type": 2,
                 "sourceType": 1,
-                "pluginPackName": "",
                 "children": [
                     {
                         "name": "console-common.add",
@@ -424,8 +392,7 @@
                         "sort": 10,
                         "isHidden": 0,
                         "type": 3,
-                        "sourceType": 1,
-                        "pluginPackName": null
+                        "sourceType": 1
                     },
                     {
                         "name": "console-common.edit",
@@ -437,8 +404,7 @@
                         "sort": 10,
                         "isHidden": 0,
                         "type": 3,
-                        "sourceType": 1,
-                        "pluginPackName": null
+                        "sourceType": 1
                     },
                     {
                         "name": "console-common.delete",
@@ -450,10 +416,21 @@
                         "sort": 10,
                         "isHidden": 0,
                         "type": 3,
-                        "sourceType": 1,
-                        "pluginPackName": null
+                        "sourceType": 1
                     }
                 ]
+            },
+            {
+                "name": "console-menu.pluginManage",
+                "path": "manage",
+                "icon": "i-lucide-store",
+                "component": "/console/plugins/manage/list",
+                "permissionCode": "extensions:list",
+                "sort": 500,
+                "isHidden": 0,
+                "type": 2,
+                "sourceType": 1,
+                "code": "plugin-my-plugins"
             },
             {
                 "name": "console-menu.apiKeyManage.title",
@@ -461,12 +438,10 @@
                 "path": "api-key-manage",
                 "icon": "i-lucide-key-round",
                 "component": "",
-                "permissionCode": null,
-                "sort": 500,
+                "sort": 550,
                 "isHidden": 0,
                 "type": 1,
                 "sourceType": 1,
-                "pluginPackName": "",
                 "children": [
                     {
                         "name": "console-menu.apiKeyManage.apiKeyTemplate",
@@ -479,7 +454,6 @@
                         "isHidden": 0,
                         "type": 2,
                         "sourceType": 1,
-                        "pluginPackName": null,
                         "children": [
                             {
                                 "name": "console-common.create",
@@ -491,8 +465,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             },
                             {
                                 "name": "console-common.update",
@@ -504,8 +477,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             },
                             {
                                 "name": "console-common.delete",
@@ -517,8 +489,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             },
                             {
                                 "name": "console-common.batchDelete",
@@ -530,8 +501,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             },
                             {
                                 "name": "console-common.import",
@@ -543,8 +513,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             },
                             {
                                 "name": "console-common.toggleStatus",
@@ -556,8 +525,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             },
                             {
                                 "name": "console-common.check",
@@ -569,8 +537,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             }
                         ]
                     },
@@ -585,7 +552,6 @@
                         "isHidden": 0,
                         "type": 2,
                         "sourceType": 1,
-                        "pluginPackName": null,
                         "children": [
                             {
                                 "name": "console-common.create",
@@ -597,8 +563,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             },
                             {
                                 "name": "console-common.update",
@@ -610,8 +575,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             },
                             {
                                 "name": "console-common.delete",
@@ -623,8 +587,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             },
                             {
                                 "name": "console-common.batchDelete",
@@ -636,8 +599,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             },
                             {
                                 "name": "console-common.check",
@@ -649,8 +611,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             },
                             {
                                 "name": "console-common.manage",
@@ -662,8 +623,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             },
                             {
                                 "name": "console-common.updateStatus",
@@ -675,45 +635,9 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             }
                         ]
-                    }
-                ]
-            },
-            {
-                "name": "console-menu.plugin",
-                "path": "plugins",
-                "icon": "i-lucide-store",
-                "component": "",
-                "permissionCode": null,
-                "sort": 550,
-                "isHidden": 0,
-                "type": 1,
-                "code": "plugin-manage",
-                "children": [
-                    {
-                        "name": "console-menu.pluginManage",
-                        "path": "manage",
-                        "icon": "",
-                        "component": "/console/plugins/manage/list",
-                        "permissionCode": "extensions:list",
-                        "sort": 0,
-                        "isHidden": 0,
-                        "type": 2,
-                        "code": "plugin-my-plugins"
-                    },
-                    {
-                        "name": "console-menu.pluginProfiles",
-                        "path": "secret",
-                        "icon": "",
-                        "component": "/console/plugins/profiles/index",
-                        "permissionCode": "extensions:get-platform-secret",
-                        "sort": 5,
-                        "isHidden": 0,
-                        "type": 2,
-                        "code": "plugin-profiles"
                     }
                 ]
             }
@@ -725,12 +649,10 @@
         "path": "",
         "icon": "",
         "component": "",
-        "permissionCode": null,
         "sort": 2,
         "isHidden": 0,
         "type": 0,
         "sourceType": 1,
-        "pluginPackName": "",
         "children": [
             {
                 "name": "console-menu.aiConversation.title",
@@ -738,12 +660,10 @@
                 "path": "conversation",
                 "icon": "i-lucide-message-square-diff",
                 "component": "",
-                "permissionCode": null,
                 "sort": 500,
                 "isHidden": 0,
                 "type": 1,
                 "sourceType": 1,
-                "pluginPackName": "",
                 "children": [
                     {
                         "name": "console-menu.aiConversation.aiChat",
@@ -756,7 +676,6 @@
                         "isHidden": 0,
                         "type": 2,
                         "sourceType": 1,
-                        "pluginPackName": null,
                         "children": [
                             {
                                 "name": "console-common.delete",
@@ -768,8 +687,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             },
                             {
                                 "name": "console-common.check",
@@ -781,8 +699,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             }
                         ]
                     },
@@ -797,7 +714,6 @@
                         "isHidden": 0,
                         "type": 2,
                         "sourceType": 1,
-                        "pluginPackName": null,
                         "children": [
                             {
                                 "name": "console-common.save",
@@ -809,8 +725,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             }
                         ]
                     }
@@ -822,12 +737,10 @@
                 "path": "user",
                 "icon": "i-lucide-users",
                 "component": "",
-                "permissionCode": null,
                 "sort": 600,
                 "isHidden": 0,
                 "type": 1,
                 "sourceType": 1,
-                "pluginPackName": "",
                 "children": [
                     {
                         "name": "console-menu.userManagement.userList",
@@ -840,7 +753,6 @@
                         "isHidden": 0,
                         "type": 2,
                         "sourceType": 1,
-                        "pluginPackName": null,
                         "children": [
                             {
                                 "name": "console-common.create",
@@ -852,8 +764,7 @@
                                 "sort": 0,
                                 "isHidden": 1,
                                 "type": 2,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             },
                             {
                                 "name": "console-common.edit",
@@ -865,8 +776,7 @@
                                 "sort": 0,
                                 "isHidden": 1,
                                 "type": 2,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             },
                             {
                                 "name": "console-common.delete",
@@ -878,8 +788,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             }
                         ]
                     },
@@ -894,7 +803,6 @@
                         "isHidden": 0,
                         "type": 2,
                         "sourceType": 1,
-                        "pluginPackName": null,
                         "children": [
                             {
                                 "name": "console-common.save",
@@ -906,8 +814,96 @@
                                 "sort": 0,
                                 "isHidden": 1,
                                 "type": 2,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "console-menu.membershipManagement.title",
+                "code": "membership",
+                "path": "membership",
+                "icon": "i-lucide-crown",
+                "component": "",
+                "sort": 650,
+                "isHidden": 0,
+                "type": 1,
+                "sourceType": 1,
+                "children": [
+                    {
+                        "name": "console-menu.membershipManagement.levelsList",
+                        "code": "levels-list",
+                        "path": "levels",
+                        "icon": "",
+                        "component": "/console/membership/levels/list",
+                        "permissionCode": "levels:list",
+                        "sort": 0,
+                        "isHidden": 0,
+                        "type": 2,
+                        "sourceType": 1,
+                        "children": [
+                            {
+                                "name": "console-common.edit",
+                                "code": "levels-list-update",
+                                "path": "levels/edit",
+                                "icon": "",
+                                "component": "/console/membership/levels/edit",
+                                "permissionCode": "levels:update",
+                                "sort": 0,
+                                "isHidden": 1,
+                                "type": 2,
+                                "sourceType": 1
+                            },
+                            {
+                                "name": "console-common.add",
+                                "code": "levels-list-add",
+                                "path": "levels/add",
+                                "icon": "",
+                                "component": "/console/membership/levels/add",
+                                "permissionCode": "levels:create",
+                                "sort": 0,
+                                "isHidden": 1,
+                                "type": 2,
+                                "sourceType": 1
+                            }
+                        ]
+                    },
+                    {
+                        "name": "console-menu.membershipManagement.plansList",
+                        "code": "plans-list",
+                        "path": "plans",
+                        "icon": "",
+                        "component": "/console/membership/plans/list",
+                        "permissionCode": "plans:list",
+                        "sort": 1,
+                        "isHidden": 0,
+                        "type": 2,
+                        "sourceType": 1,
+                        "children": [
+                            {
+                                "name": "console-common.edit",
+                                "code": "plans-list-update",
+                                "path": "plans/edit",
+                                "icon": "",
+                                "component": "/console/membership/plans/edit",
+                                "permissionCode": "plans:update",
+                                "sort": 0,
+                                "isHidden": 1,
+                                "type": 2,
+                                "sourceType": 1
+                            },
+                            {
+                                "name": "console-common.add",
+                                "code": "plans-list-add",
+                                "path": "plans/add",
+                                "icon": "",
+                                "component": "/console/membership/plans/add",
+                                "permissionCode": "plans:create",
+                                "sort": 0,
+                                "isHidden": 1,
+                                "type": 2,
+                                "sourceType": 1
                             }
                         ]
                     }
@@ -919,12 +915,10 @@
                 "path": "order",
                 "icon": "i-lucide-clipboard-list",
                 "component": "",
-                "permissionCode": null,
                 "sort": 700,
                 "isHidden": 0,
                 "type": 1,
                 "sourceType": 1,
-                "pluginPackName": "",
                 "children": [
                     {
                         "name": "console-menu.financial.orderList",
@@ -936,8 +930,19 @@
                         "sort": 0,
                         "isHidden": 0,
                         "type": 2,
-                        "sourceType": 1,
-                        "pluginPackName": null
+                        "sourceType": 1
+                    },
+                    {
+                        "name": "console-menu.financial.orderMembership",
+                        "code": "membership-order",
+                        "path": "order-membership",
+                        "icon": "",
+                        "component": "/console/order/order-membership",
+                        "permissionCode": "membership-order:list",
+                        "sort": 0,
+                        "isHidden": 0,
+                        "type": 2,
+                        "sourceType": 1
                     }
                 ]
             },
@@ -947,12 +952,10 @@
                 "path": "decorate",
                 "icon": "i-lucide-paint-roller",
                 "component": "",
-                "permissionCode": null,
                 "sort": 400,
                 "isHidden": 0,
                 "type": 1,
                 "sourceType": 1,
-                "pluginPackName": "",
                 "children": [
                     {
                         "name": "console-menu.diyCenter.microPage",
@@ -965,7 +968,6 @@
                         "isHidden": 0,
                         "type": 2,
                         "sourceType": 1,
-                        "pluginPackName": null,
                         "children": [
                             {
                                 "name": "console-common.check",
@@ -977,8 +979,18 @@
                                 "sort": 0,
                                 "isHidden": 1,
                                 "type": 2,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
+                            },
+                            {
+                                "name": "console-common.check",
+                                "code": "diy-design-view",
+                                "path": "preview",
+                                "icon": "",
+                                "component": "/console/decorate/design/view",
+                                "sort": 0,
+                                "isHidden": 1,
+                                "type": 2,
+                                "sourceType": 1
                             },
                             {
                                 "name": "console-common.add",
@@ -990,8 +1002,7 @@
                                 "sort": 0,
                                 "isHidden": 1,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             },
                             {
                                 "name": "console-common.edit",
@@ -1003,8 +1014,7 @@
                                 "sort": 0,
                                 "isHidden": 1,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             },
                             {
                                 "name": "console-common.delete",
@@ -1016,8 +1026,7 @@
                                 "sort": 0,
                                 "isHidden": 1,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             }
                         ]
                     },
@@ -1031,8 +1040,19 @@
                         "sort": 1,
                         "isHidden": 0,
                         "type": 2,
-                        "sourceType": 1,
-                        "pluginPackName": null
+                        "sourceType": 1
+                    },
+                    {
+                        "name": "console-menu.diyCenter.appCenter",
+                        "code": "apps-center",
+                        "path": "apps",
+                        "icon": "",
+                        "component": "/console/decorate/apps/list",
+                        "permissionCode": "extensions:list",
+                        "sort": 2,
+                        "isHidden": 0,
+                        "type": 2,
+                        "sourceType": 1
                     }
                 ]
             },
@@ -1042,12 +1062,10 @@
                 "path": "channel",
                 "icon": "i-lucide-network",
                 "component": "",
-                "permissionCode": null,
                 "sort": 900,
                 "isHidden": 0,
                 "type": 1,
                 "sourceType": 1,
-                "pluginPackName": "",
                 "children": [
                     {
                         "name": "console-menu.systemSettings.wechatOaConfig",
@@ -1060,7 +1078,6 @@
                         "isHidden": 0,
                         "type": 2,
                         "sourceType": 1,
-                        "pluginPackName": null,
                         "children": [
                             {
                                 "name": "console-common.update",
@@ -1072,8 +1089,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             }
                         ]
                     },
@@ -1113,12 +1129,10 @@
                 "path": "financial",
                 "icon": "i-lucide-circle-dollar-sign",
                 "component": "",
-                "permissionCode": null,
                 "sort": 1000,
                 "isHidden": 0,
                 "type": 1,
                 "sourceType": 1,
-                "pluginPackName": "",
                 "children": [
                     {
                         "name": "console-menu.financial.financialCenter",
@@ -1130,8 +1144,7 @@
                         "sort": 0,
                         "isHidden": 0,
                         "type": 2,
-                        "sourceType": 1,
-                        "pluginPackName": null
+                        "sourceType": 1
                     },
                     {
                         "name": "console-menu.financial.accountBalance",
@@ -1143,8 +1156,7 @@
                         "sort": 10,
                         "isHidden": 0,
                         "type": 2,
-                        "sourceType": 1,
-                        "pluginPackName": null
+                        "sourceType": 1
                     }
                 ]
             },
@@ -1154,12 +1166,10 @@
                 "path": "system-perms",
                 "icon": "i-lucide-user-lock",
                 "component": "",
-                "permissionCode": null,
                 "sort": 1100,
                 "isHidden": 0,
                 "type": 1,
                 "sourceType": 1,
-                "pluginPackName": "",
                 "children": [
                     {
                         "name": "console-menu.permission.permissionList",
@@ -1172,7 +1182,6 @@
                         "isHidden": 0,
                         "type": 2,
                         "sourceType": 1,
-                        "pluginPackName": null,
                         "children": [
                             {
                                 "name": "system-perms.permission.sync",
@@ -1184,8 +1193,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             },
                             {
                                 "name": "system-perms.permission.cleanup",
@@ -1197,8 +1205,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             },
                             {
                                 "name": "console-common.check",
@@ -1210,8 +1217,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             }
                         ]
                     },
@@ -1226,7 +1232,6 @@
                         "isHidden": 0,
                         "type": 2,
                         "sourceType": 1,
-                        "pluginPackName": null,
                         "children": [
                             {
                                 "name": "console-common.add",
@@ -1238,8 +1243,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             },
                             {
                                 "name": "console-common.edit",
@@ -1251,8 +1255,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             },
                             {
                                 "name": "console-common.delete",
@@ -1264,8 +1267,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             },
                             {
                                 "name": "system-perms.role.permissions",
@@ -1277,8 +1279,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             }
                         ]
                     },
@@ -1293,7 +1294,6 @@
                         "isHidden": 0,
                         "type": 2,
                         "sourceType": 1,
-                        "pluginPackName": null,
                         "children": [
                             {
                                 "name": "console-common.edit",
@@ -1305,8 +1305,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             },
                             {
                                 "name": "console-common.add",
@@ -1318,8 +1317,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             },
                             {
                                 "name": "console-common.batchDelete",
@@ -1331,8 +1329,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             },
                             {
                                 "name": "console-common.delete",
@@ -1344,8 +1341,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             }
                         ]
                     }
@@ -1357,13 +1353,23 @@
                 "path": "system",
                 "icon": "i-lucide-settings-2",
                 "component": "",
-                "permissionCode": null,
                 "sort": 1200,
                 "isHidden": 0,
                 "type": 1,
                 "sourceType": 1,
-                "pluginPackName": "",
                 "children": [
+                    {
+                        "name": "console-menu.systemSettings.storageConfig",
+                        "code": "system-storage-config",
+                        "path": "storage-config",
+                        "icon": "",
+                        "component": "/console/system-setting/storage-config/index",
+                        "permissionCode": "system-storage-config:list",
+                        "sort": 0,
+                        "isHidden": 0,
+                        "type": 2,
+                        "sourceType": 1
+                    },
                     {
                         "name": "console-menu.systemSettings.PayConfig",
                         "code": "system-payConfig-update",
@@ -1374,8 +1380,7 @@
                         "sort": 0,
                         "isHidden": 1,
                         "type": 2,
-                        "sourceType": 1,
-                        "pluginPackName": null
+                        "sourceType": 1
                     },
                     {
                         "name": "console-menu.systemSettings.PayConfig",
@@ -1387,8 +1392,7 @@
                         "sort": 0,
                         "isHidden": 0,
                         "type": 2,
-                        "sourceType": 1,
-                        "pluginPackName": null
+                        "sourceType": 1
                     },
                     {
                         "name": "console-menu.systemSettings.siteInfo",
@@ -1401,7 +1405,6 @@
                         "isHidden": 0,
                         "type": 2,
                         "sourceType": 1,
-                        "pluginPackName": null,
                         "children": [
                             {
                                 "name": "console-system.website.actions.save",
@@ -1413,8 +1416,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             }
                         ]
                     },
@@ -1429,7 +1431,6 @@
                         "isHidden": 0,
                         "type": 2,
                         "sourceType": 1,
-                        "pluginPackName": "",
                         "children": [
                             {
                                 "name": "console-system.website.actions.save",
@@ -1441,8 +1442,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             }
                         ]
                     },
@@ -1457,7 +1457,6 @@
                         "isHidden": 0,
                         "type": 2,
                         "sourceType": 1,
-                        "pluginPackName": "",
                         "children": [
                             {
                                 "name": "console-system.website.actions.save",
@@ -1469,8 +1468,7 @@
                                 "sort": 0,
                                 "isHidden": 0,
                                 "type": 3,
-                                "sourceType": 1,
-                                "pluginPackName": null
+                                "sourceType": 1
                             }
                         ]
                     }

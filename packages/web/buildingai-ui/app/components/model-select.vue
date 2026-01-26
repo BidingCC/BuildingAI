@@ -5,6 +5,9 @@ import {
     apiGetAiProviders,
     apiGetDefaultAiModel,
 } from "@buildingai/service/webapi/ai-conversation";
+import type { MembershipLevel } from "@buildingai/service/webapi/member-center";
+import { apiGetMembershipLevels } from "@buildingai/service/webapi/member-center";
+import { useUserStore } from "@buildingai/stores/user";
 import { useDebounceFn } from "@vueuse/core";
 
 import type { ButtonProps } from "#ui/types";
@@ -38,6 +41,7 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const userStore = useUserStore();
 
 const loading = shallowRef(false);
 const isOpen = shallowRef(false);
@@ -48,6 +52,12 @@ const scrollAreaRef = useTemplateRef("scrollAreaRef");
 
 const expandedProviders = ref<Record<string, boolean>>({});
 const isScrolling = ref(false);
+
+/** 会员等级列表 */
+const membershipLevels = shallowRef<MembershipLevel[]>([]);
+
+/** 用户当前最高会员等级ID */
+const userMembershipLevelId = computed(() => userStore.userInfo?.membershipLevelId ?? null);
 
 const allModels = computed(() => providers.value.flatMap((p) => p.models ?? []));
 const filteredProviders = computed(() => {
@@ -63,7 +73,72 @@ const filteredProviders = computed(() => {
         .filter((p) => p.models?.length);
 });
 
+/**
+ * 检查模型是否需要会员权限
+ *
+ * @param model 模型
+ * @returns 是否需要会员权限
+ */
+function requiresMembership(model: AiModel): boolean {
+    return (model.membershipLevel?.length ?? 0) > 0;
+}
+
+/**
+ * 检查用户是否有权限访问模型
+ *
+ * @param model 模型
+ * @returns 是否有权限访问
+ */
+function hasModelAccess(model: AiModel): boolean {
+    if (props.console) return true;
+
+    // 如果模型不需要会员权限，则所有人都可以访问
+    if (!requiresMembership(model)) return true;
+
+    // 检查用户的最高会员等级是否在模型所需等级列表中
+    return (
+        userMembershipLevelId.value !== null &&
+        (model.membershipLevel?.includes(userMembershipLevelId.value) ?? false)
+    );
+}
+
+/**
+ * 检查模型是否可选择（有访问权限）
+ *
+ * @param model 模型
+ * @returns 是否可选择
+ */
+function isModelSelectable(model: AiModel): boolean {
+    return hasModelAccess(model);
+}
+
+/**
+ * 获取模型所需会员等级的图标
+ * 返回第一个匹配的会员等级图标
+ *
+ * @param model 模型
+ * @returns 会员等级图标，如果没有则返回 undefined
+ */
+function getModelMembershipIcon(model: AiModel): string | undefined {
+    if (!model.membershipLevel?.length) return undefined;
+
+    // 查找第一个匹配的会员等级
+    for (const levelId of model.membershipLevel) {
+        const level = membershipLevels.value.find((l) => l.id === levelId);
+        if (level?.icon) {
+            return level.icon;
+        }
+    }
+
+    return undefined;
+}
+
 function select(model: AiModel | null) {
+    // 如果模型需要会员权限且用户没有权限，则不允许选择
+    if (!props.console && model && !isModelSelectable(model)) {
+        return;
+    }
+
     selected.value = model;
     if (props.openLocalStorage) {
         localStorage.setItem("modelId", model?.id || "");
@@ -100,9 +175,15 @@ async function loadModels() {
     if (loading.value) return;
     loading.value = true;
     try {
-        providers.value = await apiGetAiProviders({
-            supportedModelTypes: props.supportedModelTypes,
-        });
+        // 并行加载模型列表、会员等级列表和默认模型
+        const [providersData, levelsData, defaultModel] = await Promise.all([
+            apiGetAiProviders({ supportedModelTypes: props.supportedModelTypes }),
+            apiGetMembershipLevels().catch(() => []),
+            apiGetDefaultAiModel().catch(() => null),
+        ]);
+
+        providers.value = providersData;
+        membershipLevels.value = levelsData;
 
         // Initialize all providers to collapsed state
         providers.value.forEach((provider) => {
@@ -120,12 +201,18 @@ async function loadModels() {
             return;
         }
 
+        const accessibleModels = props.console
+            ? allModels.value
+            : allModels.value.filter(isModelSelectable);
+
         selected.value =
-            (props.openLocalStorage ? findModel(localStorage.getItem("modelId") || "") : null) ??
-            findModel(props.modelValue) ??
-            findModel((await apiGetDefaultAiModel().catch(() => null))?.id) ??
-            allModels.value.find((m) => m.isDefault) ??
-            allModels.value[0] ??
+            (props.openLocalStorage
+                ? accessibleModels.find((m) => m.id === localStorage.getItem("modelId"))
+                : null) ??
+            accessibleModels.find((m) => m.id === props.modelValue) ??
+            accessibleModels.find((m) => m.id === defaultModel?.id) ??
+            accessibleModels.find((m) => m.isDefault) ??
+            accessibleModels[0] ??
             null;
 
         if (selected.value) {
@@ -346,26 +433,86 @@ onMounted(loadModels);
                                     >
                                         <li
                                             :data-model-id="model.id"
-                                            class="group flex cursor-pointer items-center justify-between gap-2 rounded-md px-2 py-1.5 ring-1 ring-transparent transition-colors"
+                                            class="group flex items-center justify-between gap-2 rounded-md px-2 py-1.5 ring-1 ring-transparent transition-colors"
                                             :class="[
+                                                !isModelSelectable(model)
+                                                    ? 'cursor-not-allowed opacity-50'
+                                                    : 'cursor-pointer',
                                                 selected?.id === model.id
                                                     ? 'bg-primary/10 dark:bg-primary/20 hover:bg-primary/15 dark:hover:bg-primary/25'
-                                                    : 'hover:bg-muted',
+                                                    : isModelSelectable(model)
+                                                      ? 'hover:bg-muted'
+                                                      : '',
                                             ]"
                                             @click="select(model)"
                                         >
                                             <div class="w-full overflow-hidden">
                                                 <div class="flex items-start justify-between gap-2">
-                                                    <p
-                                                        class="max-w-54 text-sm font-medium break-all whitespace-normal"
-                                                        :class="
-                                                            selected?.id === model.id
-                                                                ? 'text-primary'
-                                                                : 'text-secondary-foreground'
-                                                        "
-                                                    >
-                                                        {{ model.name }}
-                                                    </p>
+                                                    <div class="flex items-center gap-1.5">
+                                                        <p
+                                                            class="max-w-54 text-sm font-medium break-all whitespace-normal"
+                                                            :class="
+                                                                selected?.id === model.id
+                                                                    ? 'text-primary'
+                                                                    : 'text-secondary-foreground'
+                                                            "
+                                                        >
+                                                            {{ model.name }}
+                                                        </p>
+                                                        <!-- 会员专属图标 -->
+                                                        <UTooltip
+                                                            v-if="requiresMembership(model)"
+                                                            :text="
+                                                                hasModelAccess(model)
+                                                                    ? t(
+                                                                          'common.membership.hasAccess',
+                                                                      )
+                                                                    : t(
+                                                                          'common.membership.required',
+                                                                      )
+                                                            "
+                                                        >
+                                                            <UIcon
+                                                                v-if="
+                                                                    getModelMembershipIcon(
+                                                                        model,
+                                                                    )?.startsWith('i-')
+                                                                "
+                                                                :name="
+                                                                    getModelMembershipIcon(model) ??
+                                                                    'i-lucide-crown'
+                                                                "
+                                                                class="h-3.5 w-3.5 shrink-0"
+                                                                :class="
+                                                                    hasModelAccess(model)
+                                                                        ? 'text-amber-500'
+                                                                        : 'text-muted-foreground'
+                                                                "
+                                                            />
+                                                            <img
+                                                                v-else-if="
+                                                                    getModelMembershipIcon(model)
+                                                                "
+                                                                :src="getModelMembershipIcon(model)"
+                                                                class="h-3.5 w-3.5 shrink-0"
+                                                                :class="
+                                                                    hasModelAccess(model)
+                                                                        ? ''
+                                                                        : 'opacity-50 grayscale'
+                                                                "
+                                                            />
+                                                            <UIcon
+                                                                v-else
+                                                                name="i-lucide-crown"
+                                                                class="h-3.5 w-3.5 shrink-0"
+                                                                :class="
+                                                                    hasModelAccess(model)
+                                                                        ? 'text-amber-500'
+                                                                        : 'text-muted-foreground'
+                                                                "
+                                                            />
+                                                        </UTooltip>
+                                                    </div>
                                                     <div v-if="props.showBillingRule">
                                                         <UBadge
                                                             v-if="model.billingRule.power === 0"

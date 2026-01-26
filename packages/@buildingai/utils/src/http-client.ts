@@ -79,16 +79,33 @@ const formatErrorLog = (error: AxiosError): string => {
     const { config, response, message } = error;
     const method = config?.method?.toUpperCase() || "UNKNOWN";
     const url = config?.url || "UNKNOWN";
+    const baseURL = config?.baseURL || "";
+    const fullUrl = baseURL ? `${baseURL}${url}` : url;
+
+    // 记录所有请求头（不脱敏）
+    const allHeaders: Record<string, string> = {};
+    if (config?.headers) {
+        Object.entries(config.headers).forEach(([key, value]) => {
+            allHeaders[key] = String(value);
+        });
+    }
 
     const logParts = [
         `[HTTP Error]`,
-        `${method} ${url}`,
-        response ? `Status: ${response.status} ${response.statusText}` : "",
-        `Message: ${message}`,
-        response?.data ? `Response: ${JSON.stringify(response.data)}` : "",
-    ];
+        `  Method: ${method}`,
+        `  URL: ${fullUrl}`,
+        response
+            ? `  Status: ${response.status} ${response.statusText || ""}`
+            : `  Error: ${message}`,
+        `  Headers: ${JSON.stringify(allHeaders, null, 2)}`,
+        config?.params ? `  Params: ${JSON.stringify(config.params, null, 2)}` : "  Params: {}",
+        config?.data ? `  Data: ${JSON.stringify(config.data, null, 2)}` : "  Data: {}",
+        response?.data ? `  Response: ${JSON.stringify(response.data, null, 2)}` : "  Response: {}",
+        config?.timeout ? `  Timeout: ${config.timeout}ms` : "",
+        `  Timestamp: ${new Date().toISOString()}`,
+    ].filter(Boolean);
 
-    return logParts.filter(Boolean).join(" ");
+    return logParts.join("\n");
 };
 
 /**

@@ -1,6 +1,6 @@
 import { TypeOrmModule } from "@buildingai/db/@nestjs/typeorm";
-import { AccountLog } from "@buildingai/db/entities/account-log.entity";
-import { User } from "@buildingai/db/entities/user.entity";
+import { User } from "@buildingai/db/entities";
+import { AccountLog } from "@buildingai/db/entities";
 import { Global, Module } from "@nestjs/common";
 
 import { AppBillingService } from "./app-billing.service";
@@ -17,18 +17,6 @@ import { BaseBillingService } from "./base-billing.service";
  * - BaseBillingService: Core billing functionality
  * - AppBillingService: Application-level billing
  * - BillingService: Legacy service (deprecated, use AppBillingService instead)
- *
- * @example
- * ```ts
- * // In your module
- * import { BillingModule } from '@buildingai/core/services/billing';
- *
- * @Module({
- *   imports: [BillingModule],
- *   // ...
- * })
- * export class YourModule {}
- * ```
  */
 @Global()
 @Module({

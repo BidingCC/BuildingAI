@@ -62,8 +62,6 @@ useSeoMeta({
     ogSiteName: appStore.siteConfig?.webinfo?.name,
 });
 
-console.log("app.vue", useRouter().getRoutes());
-
 async function recordPageVisit(path: string) {
     try {
         await apiRecordAnalyse({

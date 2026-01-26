@@ -1,8 +1,8 @@
 import { BaseService } from "@buildingai/base";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { Permission } from "@buildingai/db/entities/permission.entity";
-import { Role } from "@buildingai/db/entities/role.entity";
-import { User } from "@buildingai/db/entities/user.entity";
+import { User } from "@buildingai/db/entities";
+import { Permission } from "@buildingai/db/entities";
+import { Role } from "@buildingai/db/entities";
 import { In, Repository } from "@buildingai/db/typeorm";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { isEnabled } from "@buildingai/utils";

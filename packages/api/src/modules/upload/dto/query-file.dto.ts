@@ -1,4 +1,4 @@
-import { FileType } from "@buildingai/db/entities/file.entity";
+import { FileType } from "@buildingai/db/entities";
 import { PaginationDto } from "@buildingai/dto/pagination.dto";
 import { Transform } from "class-transformer";
 import { IsEnum, IsOptional, IsString } from "class-validator";

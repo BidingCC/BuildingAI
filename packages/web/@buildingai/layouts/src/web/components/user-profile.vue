@@ -24,7 +24,6 @@ const props = withDefaults(
 
 const { t } = useI18n();
 const userStore = useUserStore();
-const { smartNavigate } = useSmartNavigate();
 
 const isOpen = ref<boolean>(false);
 
@@ -34,13 +33,13 @@ const quickActions = ref<MenuItem[]>([
         id: 1,
         icon: "i-lucide-settings",
         title: "layouts.menu.system",
-        click: () => smartNavigate(`/profile/${userStore.userInfo?.id}/general-settings`),
+        click: () => navigateTo(`/profile/${userStore.userInfo?.id}/general-settings`),
     },
     {
         id: 2,
         title: "layouts.powerDetail",
         icon: "i-lucide-database-zap",
-        click: () => smartNavigate(`/profile/${userStore.userInfo?.id}/power-detail`),
+        click: () => navigateTo(`/profile/${userStore.userInfo?.id}/power-detail`),
     },
     {
         id: 3,
@@ -67,9 +66,9 @@ const handleMenuClick = (item: MenuItem) => {
         item.click();
     } else if (item.path) {
         if (item.target === "_blank") {
-            smartNavigate(item.path, { newTab: true });
+            navigateTo(item.path, { external: true });
         } else {
-            smartNavigate(item.path);
+            navigateTo(item.path);
         }
     }
     isOpen.value = false;
@@ -94,15 +93,13 @@ const handleMenuClick = (item: MenuItem) => {
                     v-ripple
                 >
                     <div class="flex flex-1 items-center justify-center gap-2">
-                        <UChip color="success" inset>
-                            <UAvatar
-                                :src="userStore.userInfo?.avatar"
-                                :alt="userStore.userInfo?.nickname"
-                                :icon="userStore.userInfo?.nickname ? 'tabler:user' : undefined"
-                                :size="props.size"
-                                :ui="{ root: 'rounded-lg' }"
-                            />
-                        </UChip>
+                        <UAvatar
+                            :src="userStore.userInfo?.avatar"
+                            :alt="userStore.userInfo?.nickname"
+                            :icon="userStore.userInfo?.nickname ? 'tabler:user' : undefined"
+                            :size="props.size"
+                            :ui="{ root: 'rounded-lg' }"
+                        />
                         <div v-if="!props.collapsed" class="flex w-[100px] flex-col">
                             <span class="truncate text-sm font-medium">
                                 {{ userStore.userInfo?.nickname }}
@@ -129,7 +126,7 @@ const handleMenuClick = (item: MenuItem) => {
                     <!-- 用户信息区域 -->
                     <div
                         class="hover:bg-muted flex cursor-pointer items-center gap-4 rounded-lg p-3"
-                        @click="smartNavigate(`/profile/${userStore.userInfo?.id}`)"
+                        @click="navigateTo(`/profile/${userStore.userInfo?.id}`)"
                     >
                         <UAvatar
                             :src="userStore.userInfo?.avatar"
@@ -162,12 +159,12 @@ const handleMenuClick = (item: MenuItem) => {
                         <UButton
                             size="xs"
                             @click="
-                                smartNavigate(
-                                    `/profile/${userStore.userInfo?.id}/personal-rights/recharge-center`,
+                                navigateTo(
+                                    `/profile/${userStore.userInfo?.id}/personal-rights/member-center`,
                                 )
                             "
                         >
-                            {{ t("layouts.recharge") }}
+                            {{ t("layouts.memberSubscription") }}
                         </UButton>
                     </div>
 
@@ -213,7 +210,7 @@ const handleMenuClick = (item: MenuItem) => {
                 </div>
             </template>
         </UPopover>
-        <div v-else class="flex items-center gap-1 rounded-lg" @click="smartNavigate('/login')">
+        <div v-else class="flex items-center gap-1 rounded-lg" @click="navigateTo('/login')">
             <UAvatar
                 icon="i-lucide-user"
                 alt="未登录"

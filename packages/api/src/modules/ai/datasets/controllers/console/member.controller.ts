@@ -1,5 +1,5 @@
-import { DatasetMember } from "@buildingai/db/entities/datasets-member.entity";
-import { type UserPlayground } from "@buildingai/db/interfaces/context.interface";
+import { type UserPlayground } from "@buildingai/db";
+import { DatasetMember } from "@buildingai/db/entities";
 import { BuildFileUrl } from "@buildingai/decorators/file-url.decorator";
 import { Playground } from "@buildingai/decorators/playground.decorator";
 import { ConsoleController } from "@common/decorators/controller.decorator";

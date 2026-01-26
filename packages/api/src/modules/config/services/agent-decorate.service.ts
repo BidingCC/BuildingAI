@@ -3,6 +3,7 @@ import { Injectable } from "@nestjs/common";
 
 const GROUP = "agent-decorate";
 const KEY = "config";
+const FILE_URL_FIELDS = ["heroImageUrl", "overlayIconUrl"];
 
 export interface AgentDecorateLinkItem {
     type?: string;
@@ -42,6 +43,7 @@ export class AgentDecorateService {
             KEY,
             undefined,
             GROUP,
+            { restoreFileUrlFields: FILE_URL_FIELDS },
         );
         return { ...DEFAULT_CONFIG, ...(stored || {}) } as AgentDecorateConfig;
     }
@@ -50,6 +52,7 @@ export class AgentDecorateService {
         await this.dictService.set(KEY, payload, {
             group: GROUP,
             description: "agent-decorate 配置",
+            normalizeFileUrlFields: FILE_URL_FIELDS,
         });
         return this.getConfig();
     }

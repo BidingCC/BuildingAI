@@ -1,4 +1,3 @@
-import { MCPTool } from "@buildingai/ai-sdk";
 import type {
     AIRawResponse,
     MessageMetadata,
@@ -10,30 +9,9 @@ import { AppEntity } from "../decorators/app-entity.decorator";
 import { Column, Index, JoinColumn, ManyToOne, type Relation } from "../typeorm";
 import { Agent } from "./ai-agent.entity";
 import { AgentChatRecord } from "./ai-agent-chat-record.entity";
-import { AiMcpServer } from "./ai-mcp-server.entity";
+import { McpToolCall } from "./ai-chat-message.entity";
 import { BaseEntity } from "./base";
 import { User } from "./user.entity";
-
-/**
- * MCP tool call record interface
- */
-export interface McpToolCall {
-    id?: string;
-    mcpServer?: AiMcpServer;
-    tool?: MCPTool;
-    /** Tool input parameters */
-    input?: Record<string, any>;
-    /** Tool output result */
-    output?: Record<string, any>;
-    /** Call timestamp */
-    timestamp?: number;
-    /** Execution status */
-    status?: "success" | "error";
-    /** Error message (if any) */
-    error?: string;
-    /** Execution duration (milliseconds) */
-    duration?: number;
-}
 
 /**
  * 智能体对话消息实体

@@ -1,8 +1,8 @@
 import { ChatCompletionStream, McpServerSSE, type MCPTool } from "@buildingai/ai-sdk";
-import { Agent } from "@buildingai/db/entities/ai-agent.entity";
-import { AgentChatRecord } from "@buildingai/db/entities/ai-agent-chat-record.entity";
-import { AiMcpServer } from "@buildingai/db/entities/ai-mcp-server.entity";
-import { type UserPlayground } from "@buildingai/db/interfaces/context.interface";
+import { type UserPlayground } from "@buildingai/db";
+import { Agent } from "@buildingai/db/entities";
+import { AgentChatRecord } from "@buildingai/db/entities";
+import { AiMcpServer } from "@buildingai/db/entities";
 import {
     AIRawResponse,
     ChatMessage,
@@ -73,6 +73,7 @@ export class ResponseHandler implements IResponseHandler {
                 { server: AiMcpServer; tool: MCPTool; mcpServer: McpServerSSE }
             >;
             mcpServers?: McpServerSSE[];
+            abortSignal?: AbortSignal;
         },
     ): Promise<void> {
         const {
@@ -89,6 +90,7 @@ export class ResponseHandler implements IResponseHandler {
             billingResult,
             tools = [],
             toolToServerMap,
+            abortSignal,
         } = context;
 
         // 发送引用信息（如果需要）
@@ -141,6 +143,12 @@ export class ResponseHandler implements IResponseHandler {
         try {
             // Tool call loop for MCP support
             do {
+                // Check if user cancelled
+                if (abortSignal?.aborted) {
+                    this.logger.debug("🚫 User cancelled the request, ending silently");
+                    return;
+                }
+
                 hasToolCalls = false;
 
                 const chatParams: ChatCompletionCreateParams = {
@@ -160,6 +168,13 @@ export class ResponseHandler implements IResponseHandler {
 
                 // 处理流式数据
                 for await (const chunk of stream) {
+                    // Check if user cancelled during streaming
+                    if (abortSignal?.aborted) {
+                        this.logger.debug("🚫 User cancelled the request, ending silently");
+                        stream.cancel();
+                        return;
+                    }
+
                     if (chunk.choices[0].delta.content) {
                         const content = chunk.choices[0].delta.content;
                         fullResponse += content;
@@ -210,11 +225,8 @@ export class ResponseHandler implements IResponseHandler {
                     hasToolCalls = true;
 
                     // Add AI response to messages
-                    const cleanAssistantMessage = {
-                        ...assistantMessage,
-                        reasoning_content: undefined,
-                    };
-                    currentMessages.push(cleanAssistantMessage);
+                    // Keep reasoning_content for DeepSeek thinking mode multi-turn tool calls
+                    currentMessages.push(assistantMessage);
 
                     // Execute tool calls
                     const { results } = await this.toolCallHandler.executeToolCalls(
@@ -236,13 +248,30 @@ export class ResponseHandler implements IResponseHandler {
 
                         if (result.mcpToolCall) {
                             mcpToolCalls.push(result.mcpToolCall);
-                            // Send tool result to client
-                            res.write(
-                                `data: ${JSON.stringify({
-                                    type: "mcp_tool_result",
-                                    data: result.mcpToolCall,
-                                })}\n\n`,
-                            );
+
+                            if (result.mcpToolCall.status === "success") {
+                                // Send tool result to client
+                                res.write(
+                                    `data: ${JSON.stringify({
+                                        type: "mcp_tool_result",
+                                        data: result.mcpToolCall,
+                                    })}\n\n`,
+                                );
+                            } else {
+                                // Send tool error and end conversation
+                                res.write(
+                                    `data: ${JSON.stringify({
+                                        type: "mcp_tool_error",
+                                        data: result.mcpToolCall,
+                                    })}\n\n`,
+                                );
+
+                                // MCP tool error - end conversation immediately
+                                this.logger.error(
+                                    `❌ MCP tool call failed, ending conversation: ${result.mcpToolCall.tool?.name || "unknown"}`,
+                                );
+                                return;
+                            }
                         }
                     }
 
@@ -439,11 +468,8 @@ export class ResponseHandler implements IResponseHandler {
                     hasToolCalls = true;
 
                     // Add AI response to messages
-                    const cleanAssistantMessage = {
-                        ...assistantMessage,
-                        reasoning_content: undefined,
-                    };
-                    currentMessages.push(cleanAssistantMessage as any);
+                    // Keep reasoning_content for DeepSeek thinking mode multi-turn tool calls
+                    currentMessages.push(assistantMessage as any);
 
                     // Execute tool calls
                     const { results } = await this.toolCallHandler.executeToolCalls(

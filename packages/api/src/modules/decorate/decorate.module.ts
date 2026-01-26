@@ -1,6 +1,5 @@
 import { TypeOrmModule } from "@buildingai/db/@nestjs/typeorm";
-import { DecorateMicropageEntity } from "@buildingai/db/entities/decorate-micropage.entity";
-import { DecoratePageEntity } from "@buildingai/db/entities/decorate-page.entity";
+import { DecorateMicropageEntity, DecoratePageEntity } from "@buildingai/db/entities";
 import { MicroPageConsoleController } from "@modules/decorate/controllers/console/micropage.controller";
 import { PageConsoleController } from "@modules/decorate/controllers/console/page.controller";
 import { PageWebController } from "@modules/decorate/controllers/web/page.controller";

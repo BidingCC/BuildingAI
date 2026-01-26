@@ -178,6 +178,33 @@ const userStore = defineStore("auth", () => {
      * Clear token
      * @description Clear all authentication tokens and related data
      */
+    /**
+     * Clear all public agent session cookies
+     * @description Remove cookies created by public agent chat to prevent history restore after logout
+     */
+    const clearPublicAgentCookies = () => {
+        if (!import.meta.client) return;
+
+        const cookieNames = document.cookie
+            .split(";")
+            .map((c) => c.trim())
+            .filter(Boolean)
+            .map((c) => c.split("=")[0] || "")
+            .filter(Boolean);
+
+        cookieNames.forEach((name) => {
+            if (
+                name.startsWith("public_agent_token_") ||
+                name.startsWith("public_agent_conversation_")
+            ) {
+                useCookie(name, { maxAge: -1 }).value = null;
+                useCookie(name, { maxAge: -1, path: "/" }).value = null;
+                useCookie(name, { maxAge: -1, path: "/public" }).value = null;
+                useCookie(name, { maxAge: -1, path: "/public/agent" }).value = null;
+            }
+        });
+    };
+
     const clearToken = () => {
         token.value = null;
         loginTimeStamp.value = 0;
@@ -186,6 +213,8 @@ const userStore = defineStore("auth", () => {
         useCookie(STORAGE_KEYS.USER_TOKEN, { maxAge: -1 }).value = null;
         useCookie(STORAGE_KEYS.USER_TEMPORARY_TOKEN, { maxAge: -1 }).value = null;
         useCookie(STORAGE_KEYS.LOGIN_TIME_STAMP, { maxAge: -1 }).value = null;
+
+        clearPublicAgentCookies();
     };
 
     /**

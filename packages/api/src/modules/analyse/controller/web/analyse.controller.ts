@@ -1,5 +1,5 @@
 import { BaseController } from "@buildingai/base";
-import { AnalyseActionType } from "@buildingai/db/entities/analyse.entity";
+import { AnalyseActionType } from "@buildingai/db/entities";
 import { Public } from "@buildingai/decorators/public.decorator";
 import { WebController } from "@common/decorators/controller.decorator";
 import { Body, Post, Req } from "@nestjs/common";

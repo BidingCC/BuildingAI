@@ -2,9 +2,9 @@ import { BaseService } from "@buildingai/base";
 import { RedisService } from "@buildingai/cache";
 import { CacheService } from "@buildingai/cache";
 import { type UserTerminalType } from "@buildingai/constants/shared/status-codes.constant";
+import { LoginUserPlayground } from "@buildingai/db";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { UserToken } from "@buildingai/db/entities/user-token.entity";
-import { LoginUserPlayground } from "@buildingai/db/interfaces/context.interface";
+import { UserToken } from "@buildingai/db/entities";
 import { LessThan, Repository } from "@buildingai/db/typeorm";
 import { DictService } from "@buildingai/dict";
 import { Injectable } from "@nestjs/common";
@@ -32,6 +32,31 @@ export class UserTokenService extends BaseService<UserToken> {
      * 默认5分钟，避免频繁查询数据库
      */
     private readonly TOKEN_CACHE_TTL = 300;
+
+    /**
+     * Token refresh threshold ratio (refresh when remaining time < total * ratio)
+     */
+    private readonly REFRESH_THRESHOLD_RATIO = 0.2;
+
+    /**
+     * Minimum refresh threshold in seconds (5 minutes)
+     */
+    private readonly MIN_REFRESH_THRESHOLD = 300;
+
+    /**
+     * Grace period for old token after refresh (30 seconds)
+     */
+    private readonly OLD_TOKEN_GRACE_PERIOD = 30;
+
+    /**
+     * Refresh lock TTL to prevent concurrent refresh (5 seconds)
+     */
+    private readonly REFRESH_LOCK_TTL = 5;
+
+    /**
+     * Cache prefix for refresh lock
+     */
+    private readonly REFRESH_LOCK_PREFIX = "auth:refresh_lock:";
 
     constructor(
         @InjectRepository(UserToken)
@@ -109,9 +134,14 @@ export class UserTokenService extends BaseService<UserToken> {
      */
     async validateToken(
         token: string,
-    ): Promise<{ isValid: boolean; payload?: any; error?: string }> {
+    ): Promise<{ isValid: boolean; payload?: any; error?: string; tokenRecord?: UserToken }> {
         try {
             const cacheKey = `${this.TOKEN_CACHE_PREFIX}${token}`;
+
+            // Always fetch tokenRecord for sliding refresh support
+            const tokenRecord = await this.findOne({
+                where: { token },
+            });
 
             const cachedResult = await this.cacheService.get<{
                 isValid: boolean;
@@ -119,7 +149,11 @@ export class UserTokenService extends BaseService<UserToken> {
                 error?: string;
             }>(cacheKey);
             if (cachedResult) {
-                return cachedResult;
+                // Return cached result with tokenRecord for refresh logic
+                return {
+                    ...cachedResult,
+                    tokenRecord: cachedResult.isValid ? tokenRecord : undefined,
+                };
             }
 
             const redisResult = await this.redisService.get<string>(cacheKey);
@@ -129,12 +163,12 @@ export class UserTokenService extends BaseService<UserToken> {
                 // 同时更新内存缓存
                 await this.cacheService.set(cacheKey, parsedResult, this.TOKEN_CACHE_TTL);
 
-                return parsedResult;
+                // Return cached result with tokenRecord for refresh logic
+                return {
+                    ...parsedResult,
+                    tokenRecord: parsedResult.isValid ? tokenRecord : undefined,
+                };
             }
-
-            const tokenRecord = await this.findOne({
-                where: { token },
-            });
 
             // 如果令牌不存在
             if (!tokenRecord) {
@@ -171,7 +205,7 @@ export class UserTokenService extends BaseService<UserToken> {
             const result = { isValid: true, payload };
             await this.cacheTokenResult(cacheKey, result);
 
-            return result;
+            return { ...result, tokenRecord };
         } catch (error) {
             this.logger.warn(`令牌验证失败: ${error.message}`);
             return { isValid: false, error: error.message };
@@ -411,5 +445,132 @@ export class UserTokenService extends BaseService<UserToken> {
             this.logger.warn(`获取登录设置配置失败，使用默认配置: ${error.message}`);
             return { allowMultipleLogin: false }; // 默认不允许多处登录
         }
+    }
+
+    /**
+     * Sliding refresh: generate new token if current token is near expiration.
+     * Uses distributed lock to prevent concurrent refresh and delays old token revocation.
+     *
+     * @param oldToken Current JWT token
+     * @param tokenRecord Token record from database
+     * @param payload Decoded JWT payload
+     * @returns New token info if refreshed, undefined otherwise
+     */
+    async refreshTokenIfNeeded(
+        oldToken: string,
+        tokenRecord: UserToken,
+        payload: LoginUserPlayground,
+    ): Promise<{ newToken: string; expiresAt: Date } | undefined> {
+        try {
+            const now = new Date();
+            const expiresAt = new Date(tokenRecord.expiresAt);
+            const remainingSeconds = Math.floor((expiresAt.getTime() - now.getTime()) / 1000);
+
+            // Get token config to calculate threshold
+            const tokenConfig = await this.getTokenConfig();
+            const thresholdSeconds = Math.min(
+                tokenConfig.expiresIn * this.REFRESH_THRESHOLD_RATIO,
+                this.MIN_REFRESH_THRESHOLD,
+            );
+
+            // Check if within refresh window
+            if (remainingSeconds > thresholdSeconds) {
+                return undefined;
+            }
+
+            // Try to acquire distributed lock to prevent concurrent refresh
+            const lockKey = `${this.REFRESH_LOCK_PREFIX}${oldToken}`;
+            const lockAcquired = await this.redisService.setnx(lockKey, "1", this.REFRESH_LOCK_TTL);
+
+            if (!lockAcquired) {
+                // Another request is refreshing, check if new token is already cached
+                const cachedNewToken = await this.redisService.get<string>(
+                    `${this.REFRESH_LOCK_PREFIX}new:${oldToken}`,
+                );
+                if (cachedNewToken) {
+                    const parsed = JSON.parse(cachedNewToken);
+                    return { newToken: parsed.token, expiresAt: new Date(parsed.expiresAt) };
+                }
+                return undefined;
+            }
+
+            // Generate new token (skip revoking other terminal tokens since this is a refresh)
+            const newTokenResult = await this.createTokenWithoutRevoke(
+                tokenRecord.userId,
+                payload,
+                tokenRecord.terminal,
+                tokenRecord.ipAddress,
+                tokenRecord.userAgent,
+            );
+
+            // Cache the new token for concurrent requests
+            await this.redisService.set(
+                `${this.REFRESH_LOCK_PREFIX}new:${oldToken}`,
+                JSON.stringify({
+                    token: newTokenResult.token,
+                    expiresAt: newTokenResult.expiresAt,
+                }),
+                this.OLD_TOKEN_GRACE_PERIOD,
+            );
+
+            // Schedule delayed revocation of old token
+            this.scheduleTokenRevocation(oldToken, this.OLD_TOKEN_GRACE_PERIOD);
+
+            this.logger.log(
+                `Token refreshed for user ${tokenRecord.userId}, old token will expire in ${this.OLD_TOKEN_GRACE_PERIOD}s`,
+            );
+
+            return { newToken: newTokenResult.token, expiresAt: newTokenResult.expiresAt };
+        } catch (error) {
+            this.logger.warn(`Token refresh failed: ${error.message}`);
+            return undefined;
+        }
+    }
+
+    /**
+     * Create token without revoking existing tokens (used for refresh)
+     */
+    private async createTokenWithoutRevoke(
+        userId: string,
+        payload: LoginUserPlayground,
+        terminal: UserTerminalType,
+        ipAddress?: string,
+        userAgent?: string,
+    ): Promise<{ token: string; expiresAt: Date }> {
+        const tokenConfig = await this.getTokenConfig();
+
+        const token = this.jwtService.sign(payload, {
+            expiresIn: tokenConfig.expiresIn,
+        });
+
+        const expiresAt = new Date();
+        expiresAt.setSeconds(expiresAt.getSeconds() + tokenConfig.expiresIn);
+
+        await this.create({
+            userId,
+            token,
+            expiresAt,
+            terminal,
+            ipAddress,
+            userAgent,
+            lastActiveAt: new Date(),
+            isRevoked: false,
+        });
+
+        return { token, expiresAt };
+    }
+
+    /**
+     * Schedule delayed token revocation
+     */
+    private scheduleTokenRevocation(token: string, delaySeconds: number): void {
+        setTimeout(async () => {
+            try {
+                await this.revokeToken(token);
+                this.logger.log(`Old token revoked after grace period`);
+            } catch (error) {
+                this.logger.warn(`Failed to revoke old token: ${error.message}`);
+            }
+        }, delaySeconds * 1000);
     }
 }

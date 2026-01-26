@@ -1,14 +1,10 @@
 import { BaseController } from "@buildingai/base";
 import { type BooleanNumberType } from "@buildingai/constants";
-import { SecretService } from "@buildingai/core/modules/secret/services/secret.service";
+import { SecretService } from "@buildingai/core/modules";
+import { CreateSecretDto, QuerySecretDto, UpdateSecretDto } from "@buildingai/core/modules";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { ConsoleController } from "@common/decorators/controller.decorator";
 import { Permissions } from "@common/decorators/permissions.decorator";
-import {
-    CreateSecretDto,
-    QuerySecretDto,
-    UpdateSecretDto,
-} from "@modules/ai/secret/dto/secret.dto";
 import { Body, Delete, Get, Param, Patch, Post, Query } from "@nestjs/common";
 
 /**

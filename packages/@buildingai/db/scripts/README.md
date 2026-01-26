@@ -21,6 +21,7 @@ pnpm --filter @buildingai/db migration:create:extension <identifier> <version> <
 ```
 
 **示例:**
+
 ```bash
 pnpm --filter @buildingai/db migration:generate:extension buildingai-simple-blog 0.0.3 add-tags
 ```

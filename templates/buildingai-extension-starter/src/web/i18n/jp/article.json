@@ -1,0 +1,138 @@
+{
+    "list": {
+        "empty": "記事がありません",
+        "comments": "コメントなし",
+        "commentsWithCount": "件のコメント",
+        "views": "回閲覧",
+        "categories": {
+            "title": "カテゴリ",
+            "all": "すべて"
+        },
+        "search": {
+            "searchPlaceholder": "記事タイトルを検索...",
+            "statusAll": "すべてのステータス",
+            "statusDraft": "下書き",
+            "statusPublished": "公開済み",
+            "statusPlaceholder": "ステータスを選択",
+            "categoryAll": "すべてのカテゴリ",
+            "categoryPlaceholder": "カテゴリを選択"
+        },
+        "table": {
+            "columns": {
+                "select": "選択",
+                "title": "タイトル",
+                "author": "著者",
+                "status": "ステータス",
+                "views": "閲覧数",
+                "publishedAt": "公開日時",
+                "createdAt": "作成日時",
+                "actions": "操作"
+            },
+            "status": {
+                "published": "公開済み",
+                "draft": "下書き"
+            },
+            "unknownAuthor": "不明な著者",
+            "actions": {
+                "editLabel": "編集",
+                "publish": "公開",
+                "setDraft": "下書きに設定",
+                "copyLabel": "コピー",
+                "delete": "削除",
+                "batchDelete": "一括削除",
+                "createLabel": "記事を作成",
+                "selected": "選択済み",
+                "showColumns": "列を表示"
+            }
+        },
+        "messages": {
+            "warmTip": "ご注意",
+            "deleteConfirm": "この記事を削除してもよろしいですか？",
+            "batchDeleteConfirm": "選択した記事を削除してもよろしいですか？",
+            "deleteSuccess": "削除に成功しました",
+            "deleteFailed": "削除に失敗しました",
+            "statusUpdateSuccess": "ステータスの更新に成功しました",
+            "statusUpdateFailed": "ステータスの更新に失敗しました",
+            "copySuccess": "コピーに成功しました",
+            "copyFailed": "コピーに失敗しました"
+        }
+    },
+    "add": {
+        "title": "記事を作成",
+        "navigation": {
+            "back": "戻る"
+        },
+        "messages": {
+            "createSuccess": "作成に成功しました",
+            "createFailed": "作成に失敗しました"
+        }
+    },
+    "edit": {
+        "title": "記事を編集",
+        "navigation": {
+            "back": "戻る"
+        },
+        "messages": {
+            "fetchDetailFailed": "記事の詳細を取得できませんでした",
+            "updateSuccess": "更新に成功しました",
+            "updateFailed": "更新に失敗しました"
+        }
+    },
+    "form": {
+        "sections": {
+            "articleSettings": "記事設定",
+            "publishSettings": "公開設定",
+            "category": "カテゴリ",
+            "coverImage": "カバー画像"
+        },
+        "title": {
+            "label": "タイトル",
+            "placeholder": "記事のタイトルを入力してください",
+            "required": "タイトルは必須です"
+        },
+        "summary": {
+            "label": "要約",
+            "placeholder": "記事の要約を入力してください（任意）",
+            "help": "記事の要約は記事一覧に表示されます。150文字以内を推奨します"
+        },
+        "content": {
+            "label": "内容",
+            "placeholder": "記事の内容を入力してください",
+            "required": "内容は必須です",
+            "help": "Markdown形式をサポートしています。画像やリンクを挿入できます"
+        },
+        "status": {
+            "label": "ステータス",
+            "placeholder": "ステータスを選択してください",
+            "draft": "下書き",
+            "published": "公開済み"
+        },
+        "sort": {
+            "label": "並び順",
+            "placeholder": "並び順の値を入力してください（数値が大きいほど先に表示されます）"
+        },
+        "categoryId": {
+            "label": "カテゴリ",
+            "placeholder": "カテゴリを選択してください（任意）"
+        },
+        "coverImage": {
+            "label": "カバー画像",
+            "upload": "カバーをアップロード",
+            "help": "JPG、PNG、JPEG、WEBP形式をサポートしています。推奨サイズは1200x600です"
+        }
+    },
+    "buttons": {
+        "create": "作成",
+        "update": "更新",
+        "reset": "リセット",
+        "cancel": "キャンセル"
+    },
+    "messages": {
+        "fetchCategoriesFailed": "カテゴリリストの取得に失敗しました",
+        "resetSuccess": "フォームがリセットされました",
+        "validationFailed": "フォームの検証に失敗しました。入力内容を確認してください"
+    },
+    "detail": {
+        "notFound": "記事が見つかりません"
+    }
+}

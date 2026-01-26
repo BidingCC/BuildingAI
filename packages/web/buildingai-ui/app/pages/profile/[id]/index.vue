@@ -50,7 +50,7 @@ definePageMeta({
 </script>
 
 <template>
-    <div class="mx-auto md:w-[600px] lg:w-[750px] xl:w-[850px]">
+    <div class="flex h-full flex-col space-y-4 p-2 pb-5">
         <section>
             <h2 class="mt-8 mb-6 text-lg font-medium">
                 {{ t("user.frontend.profile.myAccount") }}

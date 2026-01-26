@@ -1,6 +1,6 @@
 'use strict';
 
-var extensionEntity_decorator = require('@buildingai/core/decorators/extension-entity.decorator');
+var decorators = require('@buildingai/core/decorators');
 var typeorm = require('typeorm');
 var article_entity = require('./article.entity');
 
@@ -130,7 +130,7 @@ _ts_decorate([
   _ts_metadata("design:type", Array)
 ], Category.prototype, "articles", void 0);
 Category = _ts_decorate([
-  extensionEntity_decorator.ExtensionEntity()
+  decorators.ExtensionEntity()
 ], Category);
 
 exports.Category = Category;

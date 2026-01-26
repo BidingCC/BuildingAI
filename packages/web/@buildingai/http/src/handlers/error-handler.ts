@@ -34,7 +34,7 @@ export class ErrorHandler {
 
         switch (status) {
             case 400:
-                useMessage().error(`Bad Request: ${errorMessage}`, {
+                useMessage().error(errorMessage, {
                     title: t("common.request.400"),
                 });
                 throw new Error(`Bad Request: ${errorMessage}${errorPath}`);

@@ -114,7 +114,9 @@
             "enabled": "有効",
             "disabled": "無効",
             "tools": "ツール一覧",
-            "noDescription": "説明なし"
+            "noDescription": "説明なし",
+            "custom": "カスタム",
+            "system": "システム"
         },
         "setMcp": "MCP ツール設定",
         "tool": "ツール",

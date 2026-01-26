@@ -93,7 +93,16 @@ const resetForm = () => {
     message.info(t("extensions.develop.messages.formReset"));
 };
 
-const checkIdentifierUniqueness = async (identifier: string) => {
+/**
+ * Check if the extension identifier is unique
+ * Debounced to avoid excessive API calls during user input
+ */
+const checkIdentifierUniqueness = useDebounceFn(async (identifier: string) => {
+    if (!identifier) {
+        packNameError.value = false;
+        return true;
+    }
+
     try {
         const { exists } = await apiCheckExtensionIdentifier(
             identifier,
@@ -111,7 +120,7 @@ const checkIdentifierUniqueness = async (identifier: string) => {
         message.error(t("extensions.develop.messages.checkIdentifierError"));
         return false;
     }
-};
+}, 500);
 
 const { isLock, lockFn: submitForm } = useLockFn(async () => {
     try {
@@ -199,13 +208,27 @@ const { isLock, lockFn: submitForm } = useLockFn(async () => {
                 :error="packNameError"
             >
                 <UInput
+                    v-if="props.isEdit"
                     v-model="formData.packName"
                     :placeholder="t('extensions.develop.form.packNameInput')"
                     size="lg"
-                    :ui="{ root: 'w-full' }"
                     :disabled="props.isEdit"
+                    :ui="{ root: 'w-full' }"
+                >
+                </UInput>
+                <UInput
+                    v-else
+                    v-model="formData.packName"
+                    :placeholder="t('extensions.develop.form.packNameInput')"
+                    size="lg"
+                    :disabled="props.isEdit"
+                    :ui="{ root: 'w-full', base: 'pl-22' }"
                     @update:model-value="checkIdentifierUniqueness(formData.packName)"
-                />
+                >
+                    <template #leading>
+                        <span class="text-muted-foreground pl-1 text-sm"> buildingai- </span>
+                    </template>
+                </UInput>
                 <template #help>
                     <span class="text-xs">{{ t("extensions.develop.form.packNameHelp") }}</span>
                 </template>

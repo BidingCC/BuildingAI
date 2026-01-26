@@ -1,13 +1,11 @@
-import {
-    BaseService,
-    ExcludeFieldsResult,
-    FieldPath,
-} from "@buildingai/base/services/base.service";
+import { BaseService, ExcludeFieldsResult, FieldPath } from "@buildingai/base";
 import { BusinessCode } from "@buildingai/constants/shared/business-code.constant";
+import { FileUrlService } from "@buildingai/db";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { Dict } from "@buildingai/db/entities/dict.entity";
+import { Dict } from "@buildingai/db/entities";
 import { Repository } from "@buildingai/db/typeorm";
 import { HttpErrorFactory } from "@buildingai/errors";
+import { FileUrlProcessorUtil } from "@buildingai/utils";
 import { Injectable } from "@nestjs/common";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 
@@ -31,6 +29,7 @@ export class DictService extends BaseService<Dict> {
         @InjectRepository(Dict)
         private readonly dictRepository: Repository<Dict>,
         private readonly eventEmitter: EventEmitter2,
+        private readonly fileUrlService: FileUrlService,
     ) {
         super(dictRepository);
     }
@@ -95,9 +94,26 @@ export class DictService extends BaseService<Dict> {
      * @param key Configuration key
      * @param defaultValue Default value (returned if configuration doesn't exist or is disabled)
      * @param group Configuration group, defaults to 'default'
+     * @param options Optional parameters for processing
      * @returns Configuration value (automatically converted to appropriate type)
+     *
+     * @example
+     * ```typescript
+     * // With file URL restoration using wildcard patterns
+     * const config = await dictService.get('config', undefined, 'app', {
+     *     restoreFileUrlFields: ['heroImageUrl', '**.iconUrl'],
+     * });
+     * ```
      */
-    async get<T = any>(key: string, defaultValue?: T, group: string = "default"): Promise<T> {
+    async get<T = any>(
+        key: string,
+        defaultValue?: T,
+        group: string = "default",
+        options?: {
+            /** Field patterns to restore file URLs (supports wildcards: *, **) */
+            restoreFileUrlFields?: string[];
+        },
+    ): Promise<T> {
         try {
             const dict = await super.findOne({
                 where: { key, group, isEnabled: true },
@@ -107,7 +123,14 @@ export class DictService extends BaseService<Dict> {
                 return defaultValue as T;
             }
 
-            return this.parseValue<T>(dict.value);
+            let result = this.parseValue<T>(dict.value);
+
+            // Restore file URL fields if specified
+            if (options?.restoreFileUrlFields?.length && result && typeof result === "object") {
+                result = await this.restoreFileUrlFields(result, options.restoreFileUrlFields);
+            }
+
+            return result;
         } catch (error) {
             this.logger.error(`get dict failed: ${key}@${group}`, error);
             return defaultValue as T;
@@ -118,8 +141,21 @@ export class DictService extends BaseService<Dict> {
      * Simplified method to set configuration
      * @param key Configuration key
      * @param value Configuration value (will be automatically converted to JSON string)
-     * @param options Optional parameters (group, description, etc.)
+     * @param options Optional parameters (group, description, normalizeFileUrlFields, etc.)
      * @returns Configuration entity
+     *
+     * @example
+     * ```typescript
+     * // With file URL normalization using wildcard patterns
+     * await dictService.set('config', payload, {
+     *     group: 'app',
+     *     normalizeFileUrlFields: [
+     *         'heroImageUrl',        // exact field
+     *         '**.iconUrl',          // any depth with field name 'iconUrl'
+     *         'items.*.avatar',      // array items avatar field
+     *     ],
+     * });
+     * ```
      */
     async set<T = any>(
         key: string,
@@ -129,9 +165,25 @@ export class DictService extends BaseService<Dict> {
             description?: string;
             sort?: number;
             isEnabled?: boolean;
+            /** Field patterns to normalize file URLs (supports wildcards: *, **) */
+            normalizeFileUrlFields?: string[];
         },
     ): Promise<Partial<Dict>> {
         const group = options?.group || "default";
+
+        // Process file URL fields if specified
+        let processedValue = value;
+        if (options?.normalizeFileUrlFields?.length && value) {
+            // Handle string value directly (e.g., single URL field)
+            if (typeof value === "string") {
+                processedValue = (await this.fileUrlService.set(value)) as T;
+            } else if (typeof value === "object") {
+                processedValue = await this.normalizeFileUrlFields(
+                    value,
+                    options.normalizeFileUrlFields,
+                );
+            }
+        }
 
         // Check if configuration already exists (check both key and group)
         const existDict = await super.findOne({
@@ -139,7 +191,7 @@ export class DictService extends BaseService<Dict> {
         });
 
         // Convert value to string
-        const stringValue = this.stringifyValue(value);
+        const stringValue = this.stringifyValue(processedValue);
 
         if (existDict) {
             // Update existing configuration, preserve original group
@@ -168,6 +220,46 @@ export class DictService extends BaseService<Dict> {
 
             return super.create(createData);
         }
+    }
+
+    /**
+     * Normalize file URL fields in an object (remove domain prefix)
+     * @param data Data object to process
+     * @param fieldPatterns Field patterns (supports *, ** wildcards)
+     * @returns Processed data with normalized file URLs
+     */
+    private async normalizeFileUrlFields<T>(data: T, fieldPatterns: string[]): Promise<T> {
+        // Deep clone to avoid mutating original data
+        const clonedData = JSON.parse(JSON.stringify(data));
+
+        // Clear cache before processing to avoid conflicts between get/set operations
+        FileUrlProcessorUtil.clearCache();
+
+        return FileUrlProcessorUtil.processFieldsEfficiently(
+            clonedData,
+            fieldPatterns,
+            async (url: string) => this.fileUrlService.set(url),
+        );
+    }
+
+    /**
+     * Restore file URL fields in an object (add domain prefix)
+     * @param data Data object to process
+     * @param fieldPatterns Field patterns (supports *, ** wildcards)
+     * @returns Processed data with restored file URLs
+     */
+    private async restoreFileUrlFields<T>(data: T, fieldPatterns: string[]): Promise<T> {
+        // Deep clone to avoid mutating original data
+        const clonedData = JSON.parse(JSON.stringify(data));
+
+        // Clear cache before processing to avoid conflicts between get/set operations
+        FileUrlProcessorUtil.clearCache();
+
+        return FileUrlProcessorUtil.processFieldsEfficiently(
+            clonedData,
+            fieldPatterns,
+            async (path: string) => this.fileUrlService.get(path),
+        );
     }
 
     /**

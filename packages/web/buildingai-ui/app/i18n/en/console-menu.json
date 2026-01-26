@@ -68,6 +68,12 @@
         "userInfo": "User Info",
         "userRecharge": "Recharge"
     },
+    "membershipManagement": {
+        "title": "Subscribe to Membership",
+        "levelsList": "Membership Level",
+        "plansList": "Subscription Plan",
+        "membershipOrder": "Member Order"
+    },
     "diyCenter": {
         "mobile": "Mobile Settings",
         "title": "DIY Center",
@@ -80,7 +86,8 @@
         "accountBalance": "Balance",
         "financialCenter": "Finance Center",
         "orderManagement": "Orders",
-        "orderList": "Recharge Orders"
+        "orderList": "Recharge Orders",
+        "orderMembership": "Member Order"
     },
     "permission": {
         "title": "Permissions",
@@ -96,7 +103,8 @@
         "channelManagement": "Channels",
         "wechatOaConfig": "WeChat OA Config",
         "wechatMpConfig": "WeChat MP Config",
-        "loginConfig": "Login Settings"
+        "loginConfig": "Login Settings",
+        "storageConfig": "Storage Configuration"
     },
     "plugin": "App Management",
     "pluginManage": "My Apps",

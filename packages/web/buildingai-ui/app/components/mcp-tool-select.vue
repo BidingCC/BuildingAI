@@ -5,7 +5,7 @@ import {
     type SystemMcpServerInfo,
 } from "@buildingai/service/webapi/mcp-server";
 import { apiGetAllMcpServerList } from "@buildingai/service/webapi/mcp-server";
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 
 interface Props {
@@ -17,6 +17,7 @@ interface Props {
     capability?: string;
     modelId?: string;
     mcpIds?: string[];
+    useCache?: boolean;
 }
 
 const { t } = useI18n();
@@ -28,6 +29,7 @@ const props = withDefaults(defineProps<Props>(), {
     defaultSelected: true,
     console: false,
     modelId: "",
+    useCache: true,
 });
 
 const emit = defineEmits<{
@@ -76,13 +78,24 @@ const handleTabChange = (value: McpServerType) => {
  */
 const getAllList = async () => {
     if (loading.value) return;
-    // Restore selection from local storage, ensure it's an array type
-    try {
-        const raw = JSON.parse(localStorage.getItem("mcpIds") || "[]");
-        selectedIds.value = Array.isArray(raw) ? raw : [];
-    } catch {
-        selectedIds.value = [];
+    loading.value = true;
+
+    if (props.useCache) {
+        // Restore selection from local storage, ensure it's an array type
+        try {
+            const raw = JSON.parse(localStorage.getItem("mcpIds") || "[]");
+            selectedIds.value = Array.isArray(raw) ? raw : [];
+        } catch {
+            selectedIds.value = [];
+        }
+    } else {
+        if (props.modelValue && Array.isArray(props.modelValue)) {
+            selectedIds.value = [...props.modelValue];
+        } else {
+            selectedIds.value = [];
+        }
     }
+
     try {
         const data: McpServerInfo[] | SystemMcpServerInfo[] = await apiGetAllMcpServerList();
         allMcpList.value = data;
@@ -95,8 +108,23 @@ const getAllList = async () => {
         }
     } catch (e) {
         console.error("Failed to load MCP", e);
+    } finally {
+        loading.value = false;
     }
 };
+
+watch(
+    () => props.modelValue,
+    (newValue: string[] | undefined) => {
+        if (!props.useCache && newValue && Array.isArray(newValue)) {
+            const newIds = newValue.filter((id) => typeof id === "string");
+            if (JSON.stringify(newIds.sort()) !== JSON.stringify(selectedIds.value.sort())) {
+                selectedIds.value = newIds;
+            }
+        }
+    },
+    { immediate: true, deep: true },
+);
 
 onMounted(() => {
     if (userStore.isLogin) {
@@ -123,7 +151,10 @@ function select(mcp: SystemMcpServerInfo | McpServerInfo) {
         selectedIds.value.push(mcp.id);
     }
 
-    localStorage.setItem("mcpIds", JSON.stringify(selectedIds.value));
+    // 只有在启用缓存时才写入 localStorage
+    if (props.useCache) {
+        localStorage.setItem("mcpIds", JSON.stringify(selectedIds.value));
+    }
 
     emit("update:modelValue", [...selectedIds.value]);
     emit("change", selectedIds.value);
@@ -138,7 +169,10 @@ function clearSelection() {
     emit("change", []);
     isOpen.value = false;
     search.value = "";
-    localStorage.removeItem("mcpIds");
+    // 只有在启用缓存时才清除 localStorage
+    if (props.useCache) {
+        localStorage.removeItem("mcpIds");
+    }
 }
 
 const findMcpById = (id: string) => allMcpList.value.find((m) => m.id === id);
@@ -488,7 +522,7 @@ async function handlePopoverUpdate(value: boolean) {
                                 </UPopover>
                             </li>
                         </ul>
-                        <div class="sticky bottom-0">
+                        <div class="bg-muted sticky bottom-0">
                             <UButton
                                 color="primary"
                                 variant="subtle"

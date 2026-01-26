@@ -14,10 +14,23 @@ const emits = defineEmits<{
 
 const router = useRouter();
 
+const { t } = useI18n();
+
 const tags = shallowRef<string[]>([]);
 const handleViewDetail = () => {
     router.push(useRoutePath("ai-agent:detail", { id: props.agent.id }));
 };
+
+// 智能体创建类型
+const agentType = computed(() => {
+    if (props.agent.createMode === "coze") {
+        return t("ai-agent.backend.create.modes.coze");
+    }
+    if (props.agent.createMode === "dify") {
+        return t("ai-agent.backend.create.modes.dify");
+    }
+    return t("ai-agent.backend.create.modes.direct");
+});
 
 onMounted(() => {
     tags.value = props.agent.tags.map((tag) => tag.id);
@@ -30,9 +43,19 @@ onMounted(() => {
         @click="handleViewDetail"
     >
         <div
-            class="absolute right-3 bottom-3.5 z-10 flex gap-1 opacity-100 transition-opacity duration-200 group-hover:opacity-0"
+            class="absolute bottom-3 left-3.5 z-10 flex gap-1 opacity-100 transition-opacity duration-200 group-hover:opacity-0"
+        >
+            <div v-if="agent.creator" class="flex items-center justify-center gap-1 text-xs">
+                <UAvatar :src="agent.creator?.avatar" alt="avatar" size="2xs" />
+                <div class="text-muted-foreground truncate">{{ agent.creator?.nickname }}</div>
+            </div>
+        </div>
+
+        <div
+            class="absolute right-3 bottom-3 z-10 flex gap-1 opacity-100 transition-opacity duration-200 group-hover:opacity-0"
             @click.stop
         >
+            <UBadge color="neutral" variant="soft" size="sm">{{ agentType }}</UBadge>
             <UBadge :color="agent.isPublic ? 'success' : 'neutral'" variant="soft" size="sm">
                 <UIcon
                     :name="agent.isPublic ? 'i-lucide-globe' : 'i-lucide-globe-lock'"
@@ -130,7 +153,8 @@ onMounted(() => {
                                 variant="outline"
                             >
                                 <UIcon name="i-lucide-tag" class="size-2" />
-                                <span>{{ tag.name }}</span>
+                                <span>{{ tag.name }}</span
+                                >1
                             </UBadge>
                         </div>
                     </div>

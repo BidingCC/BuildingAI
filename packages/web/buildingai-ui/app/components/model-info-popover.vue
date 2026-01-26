@@ -69,7 +69,7 @@ const formatContextSize = (size: number): string => {
             <div class="text-muted-foreground text-xs font-medium">
                 {{ $t("common.ai.multimodalCapabilities") }}
             </div>
-            <div class="flex flex-wrap gap-2">
+            <div class="flex flex-wrap gap-1">
                 <UBadge
                     v-if="model.features?.includes('vision')"
                     variant="soft"

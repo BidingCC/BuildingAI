@@ -383,7 +383,7 @@ onMounted(() => getLists());
                 <template #user-cell="{ row }">
                     <UAvatar v-if="row.original.user?.avatar" :src="row.original.user?.avatar" />
                     <UAvatar v-else icon="i-heroicons-user" :name="row.original.user?.username" />
-                    {{ row.original.user?.username }}
+                    {{ row.original.user?.nickname }}
                 </template>
                 <template #paymentStatus-cell="{ row }">
                     <div class="flex flex-col items-start">

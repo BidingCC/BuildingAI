@@ -62,7 +62,7 @@ export class WechatPayService {
             notify_url:
                 this.config.domain + process.env.VITE_APP_WEB_API_PREFIX + "/pay/notifyWxPay",
             amount: {
-                total: Number(params.amount.total * 100),
+                total: Math.round(params.amount.total * 100),
                 currency: params.amount.currency,
             },
             attach: params.attach,
@@ -74,7 +74,7 @@ export class WechatPayService {
             notify_url:
                 this.config.domain + process.env.VITE_APP_WEB_API_PREFIX + "/pay/notifyWxPay",
             amount: {
-                total: Number(params.amount.total * 100),
+                total: Math.round(params.amount.total * 100),
                 currency: params.amount.currency,
             },
             attach: params.attach,
@@ -182,7 +182,7 @@ export class WechatPayService {
                 "/pay/notifyRefundWxPay",
             amount: {
                 //退款金额，币种的最小单位，只能为整数，不能超过原订单支付金额
-                total: Number(params.amount.total * 100),
+                total: Math.round(params.amount.total * 100),
                 //原支付交易的订单总金额，币种的最小单位，只能为整数
                 refund: Number(params.amount.refund * 100),
                 currency: "CNY",

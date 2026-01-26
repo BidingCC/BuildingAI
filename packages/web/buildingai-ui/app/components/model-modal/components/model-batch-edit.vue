@@ -23,7 +23,6 @@ const columns = [
     { accessorKey: "model", header: t("ai-provider.backend.model.batchEdit.model") },
     { accessorKey: "maxContext", header: t("ai-provider.backend.model.batchEdit.maxContext") },
     { accessorKey: "isActive", header: t("ai-provider.backend.model.batchEdit.isActive") },
-    { accessorKey: "billingRule", header: t("ai-provider.backend.model.batchEdit.billingRule") },
 ];
 
 const models = computed(() => {
@@ -47,7 +46,6 @@ const { lockFn: handleSubmit, isLock } = useLockFn(async () => {
         emits("close", true);
     } catch (error) {
         console.error("批量编辑失败:", error);
-        toast.error(t("console-common.batchEditFailed"));
     }
 });
 </script>
@@ -116,49 +114,6 @@ const { lockFn: handleSubmit, isLock } = useLockFn(async () => {
                     <UFormField :name="`rows.${row.index}.isActive`">
                         <USwitch v-model="row.original.isActive" />
                     </UFormField>
-                </template>
-                <template #billingRule-cell="{ row }">
-                    <div class="flex w-full items-center gap-2">
-                        <UFormField :name="`rows.${row.index}.billingRule.power`" class="flex-1">
-                            <UInput
-                                v-model.number="row.original.billingRule.power"
-                                type="number"
-                                placeholder=""
-                                :min="0"
-                                :ui="{ base: 'pr-15 width120' }"
-                                @blur="
-                                    if (row.original.billingRule.power < 0)
-                                        row.original.billingRule.power = 0;
-                                "
-                            >
-                                <template #trailing>
-                                    <span class="text-muted-foreground text-sm">
-                                        {{ t("ai-provider.backend.model.form.power") }}
-                                    </span>
-                                </template>
-                            </UInput>
-                        </UFormField>
-                        <span class="shrink-0">/</span>
-                        <UFormField :name="`rows.${row.index}.billingRule.tokens`" class="flex-1">
-                            <UInput
-                                v-model.number="row.original.billingRule.tokens"
-                                type="number"
-                                placeholder=""
-                                :min="1"
-                                class="w-full"
-                                :disabled="true"
-                                :ui="{ base: 'pr-15 width120' }"
-                                @blur="
-                                    if (row.original.billingRule.tokens < 1)
-                                        row.original.billingRule.tokens = 1;
-                                "
-                            >
-                                <template #trailing>
-                                    <span class="text-muted-foreground text-sm"> Tokens </span>
-                                </template>
-                            </UInput>
-                        </UFormField>
-                    </div>
                 </template>
             </UTable>
             <div class="flex w-full justify-end gap-2 pt-3.5">

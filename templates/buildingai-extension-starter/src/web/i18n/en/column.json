@@ -1,0 +1,70 @@
+{
+    "list": {
+        "search": {
+            "placeholder": "Search column name..."
+        },
+        "table": {
+            "columns": {
+                "select": "Select",
+                "name": "Name",
+                "sort": "Sort",
+                "articleCount": "Article Count",
+                "createdAt": "Created At",
+                "actions": "Actions"
+            },
+            "actions": {
+                "edit": "Edit",
+                "delete": "Delete",
+                "batchDelete": "Batch Delete",
+                "create": "Create Column",
+                "selected": "Selected",
+                "showColumns": "Show Columns"
+            }
+        },
+        "messages": {
+            "fetchFailed": "Failed to fetch column list",
+            "warmTip": "Friendly Reminder",
+            "deleteConfirm": "Are you sure you want to delete this column?",
+            "batchDeleteConfirm": "Are you sure you want to delete the selected columns?",
+            "deleteSuccess": "Delete successful",
+            "deleteFailed": "Delete failed"
+        }
+    },
+    "edit": {
+        "title": {
+            "create": "Create Column",
+            "edit": "Edit Column"
+        },
+        "description": {
+            "create": "Create a new article column",
+            "edit": "Edit article column information"
+        },
+        "form": {
+            "name": {
+                "label": "Name",
+                "placeholder": "Enter column name",
+                "required": "Name is required"
+            },
+            "description": {
+                "label": "Description",
+                "placeholder": "Enter column description (optional)"
+            },
+            "sort": {
+                "label": "Sort",
+                "placeholder": "Enter sort value (higher number appears first)"
+            }
+        },
+        "buttons": {
+            "save": "Save",
+            "saving": "Saving...",
+            "cancel": "Cancel"
+        },
+        "messages": {
+            "fetchDetailFailed": "Failed to fetch column details",
+            "createSuccess": "Create successful",
+            "createFailed": "Create failed",
+            "updateSuccess": "Update successful",
+            "updateFailed": "Update failed"
+        }
+    }
+}

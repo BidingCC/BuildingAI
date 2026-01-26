@@ -1,7 +1,7 @@
 import { BaseService } from "@buildingai/base";
 import { TagType, TagTypeType } from "@buildingai/constants";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { Tag } from "@buildingai/db/entities/tag.entity";
+import { Tag } from "@buildingai/db/entities";
 import type { FindOptionsWhere } from "@buildingai/db/typeorm";
 import { In, Like, Repository } from "@buildingai/db/typeorm";
 import { HttpErrorFactory } from "@buildingai/errors";

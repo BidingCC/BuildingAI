@@ -1,12 +1,10 @@
 import { BaseController } from "@buildingai/base";
 import { BusinessCode } from "@buildingai/constants/shared/business-code.constant";
 import { UserTerminal } from "@buildingai/constants/shared/status-codes.constant";
-import { type UserPlayground } from "@buildingai/db/interfaces/context.interface";
+import { type UserPlayground } from "@buildingai/db";
 import { BuildFileUrl } from "@buildingai/decorators/file-url.decorator";
 import { Playground } from "@buildingai/decorators/playground.decorator";
 import { Public } from "@buildingai/decorators/public.decorator";
-import { HttpErrorFactory } from "@buildingai/errors";
-import { isEnabled } from "@buildingai/utils";
 import { WebController } from "@common/decorators";
 import { ChangePasswordDto } from "@common/modules/auth/dto/change-password.dto";
 import { LoginDto } from "@common/modules/auth/dto/login.dto";

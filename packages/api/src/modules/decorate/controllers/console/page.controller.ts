@@ -92,8 +92,7 @@ export class PageConsoleController {
     @Get("plugin-links")
     @Permissions({
         code: "get-plugin-links",
-        name: "Get Plugin Links List",
-        description: "Get all plugin links list",
+        name: "获取插件链接",
     })
     async getPluginLinks() {
         try {

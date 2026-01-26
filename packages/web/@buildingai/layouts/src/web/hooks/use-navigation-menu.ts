@@ -6,23 +6,24 @@ import type { NavigationConfig } from "../../../../../buildingai-ui/app/componen
 
 export function useNavigationMenu(navigationConfig?: Ref<NavigationConfig>) {
     const { t } = useI18n();
-    const { toAbsolutePath } = useSmartNavigate();
 
     const navigationItems = computed((): NavigationMenuItem[][] => {
         if (!navigationConfig?.value) return [[]];
         const items = navigationConfig.value.items.map((item) => ({
             label: item.title,
             icon: item.icon,
-            to: toAbsolutePath(item.link?.path || "/"),
+            // to: toAbsolutePath(item.link?.path || "/"),
+            to: item.link?.path || "/",
             active:
                 item.link?.path === useRoute().path ||
                 item.link?.path === useRoute().meta.activePath,
-            target: item.link?.path?.startsWith("http") ? "_blank" : undefined,
+            // target: item.link?.path?.startsWith("http") ? "_blank" : undefined,
             children: item.children?.map((child) => ({
                 label: child.title,
                 icon: child.icon,
-                to: toAbsolutePath(child.link?.path || "/"),
-                target: child.link?.path?.startsWith("http") ? "_blank" : undefined,
+                // to: toAbsolutePath(child.link?.path || "/"),
+                to: child.link?.path || "/",
+                // target: child.link?.path?.startsWith("http") ? "_blank" : undefined,
             })),
         }));
 
@@ -42,7 +43,8 @@ export function useNavigationMenu(navigationConfig?: Ref<NavigationConfig>) {
             label: t("layouts.menu.workspace"),
             icon: "i-lucide-layout-dashboard",
             target: "_self",
-            to: toAbsolutePath(ROUTES.CONSOLE),
+            // to: toAbsolutePath(ROUTES.CONSOLE),
+            to: ROUTES.CONSOLE,
         },
     ]);
 

@@ -106,7 +106,8 @@
             "stopGeneration": "生成を停止",
             "enterQuestion": "質問を入力",
             "sendMessage": "メッセージを送信",
-            "inputPlaceholder": "Hi~アシスタントに質問があります"
+            "inputPlaceholder": "Hi~アシスタントに質問があります",
+            "aiDisclaimer": "上記の内容はAIモデルによって生成されたもので、参考情報です"
         },
         "reasoning": {
             "thinking": "思考中...",

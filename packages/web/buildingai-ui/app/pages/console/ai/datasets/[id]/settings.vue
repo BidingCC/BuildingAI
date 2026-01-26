@@ -126,6 +126,7 @@ definePageMeta({ layout: "full-screen" });
                     <div class="space-y-3">
                         <ModelSelect
                             :modelValue="formData.embeddingModelId"
+                            console
                             :button-ui="{
                                 variant: 'outline',
                                 color: 'neutral',

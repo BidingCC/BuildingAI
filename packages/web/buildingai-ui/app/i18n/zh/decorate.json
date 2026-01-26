@@ -1,4 +1,21 @@
 {
+    "apps": {
+        "modalTitle": "应用中心广告",
+        "heroImage": "广告图",
+        "extensionCard": {
+            "statusEnabled": "启用",
+            "statusDisabled": "禁用",
+            "aliasVisible": "显示",
+            "aliasHidden": "隐藏",
+            "editAction": "DIY装修"
+        },
+        "extensionEdit": {
+            "displayName": "显示名称",
+            "displayNamePlaceholder": "请输入显示名称",
+            "aliasShowLabel": "是否显示",
+            "aliasShowDescription": "是否显示在前台的应用中心页面"
+        }
+    },
     "micropage": {
         "title": "微页面管理",
         "list": {

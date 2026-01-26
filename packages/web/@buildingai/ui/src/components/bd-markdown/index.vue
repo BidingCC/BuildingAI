@@ -13,6 +13,7 @@ import { computed, provide } from "vue";
 import MarkdownRender, { setCustomComponents } from "markstream-vue";
 
 import CodeBlock from "./components/code-block.vue";
+import LinkBlock from "./components/link-block.vue";
 import MermaidBlock from "./components/mermaid-block.vue";
 import type { BdMarkdownProps } from "./types";
 
@@ -29,6 +30,7 @@ provide("bdMarkdownConfig", {
 setCustomComponents({
     code_block: CodeBlock,
     mermaid: MermaidBlock,
+    link: LinkBlock,
 });
 </script>
 

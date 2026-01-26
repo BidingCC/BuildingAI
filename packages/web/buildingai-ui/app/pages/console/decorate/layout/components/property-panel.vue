@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import Draggable from "vuedraggable";
+
 import { layoutStyles } from "../data/layouts";
 import { useLayoutStore } from "../stores/layout";
 import type { MenuItem } from "../types";
@@ -36,6 +38,7 @@ function addNewMenuItem(): void {
             path: "/",
             query: {},
         },
+        isHidden: false,
         icon: "i-heroicons-home",
     };
 
@@ -47,36 +50,20 @@ function removeMenuItem(index: number): void {
     layoutStore.updateMenus(newMenus);
 }
 
-/**
- * 上移菜单项
- * @param index 菜单项索引
- */
-function moveItemUp(index: number): void {
-    if (index <= 0) return;
-
+function toggleMenuItemHidden(index: number): void {
     const newMenus = [...menuItems.value];
-    const prevItem = newMenus[index - 1];
-    const currentItem = newMenus[index];
-
-    if (prevItem && currentItem) {
-        newMenus[index - 1] = currentItem;
-        newMenus[index] = prevItem;
+    const item = newMenus[index];
+    if (item) {
+        item.isHidden = !item.isHidden;
         layoutStore.updateMenus(newMenus);
     }
 }
 
-function moveItemDown(index: number): void {
-    if (index >= menuItems.value.length - 1) return;
-
-    const newMenus = [...menuItems.value];
-    const currentItem = newMenus[index];
-    const nextItem = newMenus[index + 1];
-
-    if (currentItem && nextItem) {
-        newMenus[index] = nextItem;
-        newMenus[index + 1] = currentItem;
-        layoutStore.updateMenus(newMenus);
-    }
+/**
+ * 拖拽结束时更新菜单顺序
+ */
+function handleDragEnd(): void {
+    layoutStore.updateMenus(menuItems.value);
 }
 </script>
 
@@ -115,82 +102,92 @@ function moveItemDown(index: number): void {
 
             <!-- 菜单项列表 -->
             <BdScrollArea class="table h-full pr-6" type="hover" :scroll-hide-delay="0">
-                <div
-                    v-for="(item, index) in menuItems"
-                    :key="item.id"
-                    class="bg-muted mb-3 space-y-3 rounded-lg p-4"
+                <Draggable
+                    v-model="menuItems"
+                    class="draggable"
+                    :animation="200"
+                    handle=".drag-handle"
+                    item-key="id"
+                    @end="handleDragEnd"
                 >
-                    <!-- 操作栏 -->
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <span class="text-accent-foreground text-sm font-medium">
-                                {{
-                                    t("decorate.layout.property.menuNumber", {
-                                        number: index + 1,
-                                    })
-                                }}
-                            </span>
+                    <template #item="{ element: item, index }">
+                        <div class="bg-muted mb-3 space-y-3 rounded-lg p-4">
+                            <!-- 操作栏 -->
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <UIcon
+                                        name="i-heroicons-bars-3"
+                                        class="drag-handle text-muted-foreground hover:text-foreground cursor-move"
+                                    />
+                                    <span class="text-accent-foreground text-sm font-medium">
+                                        {{
+                                            t("decorate.layout.property.menuNumber", {
+                                                number: index + 1,
+                                            })
+                                        }}
+                                    </span>
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <UButton
+                                        variant="ghost"
+                                        size="xs"
+                                        :icon="
+                                            item.isHidden
+                                                ? 'i-heroicons-eye-slash'
+                                                : 'i-heroicons-eye'
+                                        "
+                                        color="neutral"
+                                        @click="toggleMenuItemHidden(index)"
+                                    />
+                                    <UButton
+                                        variant="ghost"
+                                        size="xs"
+                                        icon="i-heroicons-trash"
+                                        color="error"
+                                        :disabled="menuItems.length <= 1"
+                                        @click="removeMenuItem(index)"
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- 标题编辑 -->
+                            <UFormField
+                                :label="t('decorate.layout.property.menuTitle')"
+                                size="xs"
+                                class="flex w-full justify-between"
+                                :ui="{ wrapper: 'flex', container: 'w-[120px]' }"
+                            >
+                                <UInput
+                                    v-model="item.title"
+                                    :placeholder="
+                                        t('decorate.layout.property.menuTitlePlaceholder')
+                                    "
+                                    size="md"
+                                />
+                            </UFormField>
+
+                            <!-- 链接编辑 -->
+                            <UFormField
+                                :label="t('decorate.layout.property.menuLink')"
+                                size="xs"
+                                class="flex w-full justify-between"
+                                :ui="{ wrapper: 'flex', container: 'w-[120px]' }"
+                            >
+                                <LinkPicker v-model="item.link" />
+                            </UFormField>
+
+                            <!-- 图标选择 -->
+                            <UFormField
+                                :label="t('decorate.layout.property.menuIcon')"
+                                size="xs"
+                                class="flex w-full justify-between"
+                                :ui="{ wrapper: 'flex', container: 'w-[120px]' }"
+                            >
+                                <IconPicker v-model="item.icon" />
+                            </UFormField>
                         </div>
-                        <div class="flex items-center gap-1">
-                            <UButton
-                                variant="ghost"
-                                size="xs"
-                                icon="i-heroicons-arrow-up"
-                                :disabled="index === 0"
-                                @click="moveItemUp(index)"
-                            />
-                            <UButton
-                                variant="ghost"
-                                size="xs"
-                                icon="i-heroicons-arrow-down"
-                                :disabled="index === menuItems.length - 1"
-                                @click="moveItemDown(index)"
-                            />
-                            <UButton
-                                variant="ghost"
-                                size="xs"
-                                icon="i-heroicons-trash"
-                                color="error"
-                                :disabled="menuItems.length <= 1"
-                                @click="removeMenuItem(index)"
-                            />
-                        </div>
-                    </div>
-
-                    <!-- 标题编辑 -->
-                    <UFormField
-                        :label="t('decorate.layout.property.menuTitle')"
-                        size="xs"
-                        class="flex w-full justify-between"
-                        :ui="{ wrapper: 'flex', container: 'w-[120px]' }"
-                    >
-                        <UInput
-                            v-model="item.title"
-                            :placeholder="t('decorate.layout.property.menuTitlePlaceholder')"
-                            size="md"
-                        />
-                    </UFormField>
-
-                    <!-- 链接编辑 -->
-                    <UFormField
-                        :label="t('decorate.layout.property.menuLink')"
-                        size="xs"
-                        class="flex w-full justify-between"
-                        :ui="{ wrapper: 'flex', container: 'w-[120px]' }"
-                    >
-                        <LinkPicker v-model="item.link" />
-                    </UFormField>
-
-                    <!-- 图标选择 -->
-                    <UFormField
-                        :label="t('decorate.layout.property.menuIcon')"
-                        size="xs"
-                        class="flex w-full justify-between"
-                        :ui="{ wrapper: 'flex', container: 'w-[120px]' }"
-                    >
-                        <IconPicker v-model="item.icon" />
-                    </UFormField>
-                </div>
+                    </template>
+                </Draggable>
             </BdScrollArea>
         </div>
     </div>

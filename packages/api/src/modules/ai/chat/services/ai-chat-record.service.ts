@@ -1,7 +1,6 @@
 import { BaseService } from "@buildingai/base";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { AiChatMessage } from "@buildingai/db/entities/ai-chat-message.entity";
-import { AiChatRecord } from "@buildingai/db/entities/ai-chat-record.entity";
+import { AiChatMessage, AiChatRecord } from "@buildingai/db/entities";
 import { Like, Repository } from "@buildingai/db/typeorm";
 import { PaginationDto } from "@buildingai/dto/pagination.dto";
 import { HttpErrorFactory } from "@buildingai/errors";
@@ -69,7 +68,7 @@ export class AiChatRecordService extends BaseService<AiChatRecord> {
         try {
             // 构建基础查询条件
             const where = buildWhere<AiChatRecord>({
-                isDeleted: false,
+                isDeleted: userId && userId.trim() !== "" ? false : undefined,
                 userId: userId && userId.trim() !== "" ? userId : undefined,
                 status: queryDto?.status,
                 isPinned: queryDto?.isPinned,
@@ -89,13 +88,15 @@ export class AiChatRecordService extends BaseService<AiChatRecord> {
             const excludeFields = includeUserInfo ? ["user.password", "user.openid"] : [];
 
             // 构建查询选项
+            // 前端需要置顶优先；后台不需要置顶优先（仅按更新时间排序）
+            const order = includeUserInfo
+                ? { updatedAt: "DESC" as const }
+                : { isPinned: "DESC" as const, updatedAt: "DESC" as const };
+
             const queryOptions = {
                 where: whereConditions,
                 relations,
-                order: {
-                    isPinned: "DESC" as const,
-                    updatedAt: "DESC" as const,
-                },
+                order,
                 excludeFields,
             };
 
@@ -118,7 +119,6 @@ export class AiChatRecordService extends BaseService<AiChatRecord> {
     ): Promise<Partial<AiChatRecord> | null> {
         try {
             const where = buildWhere<AiChatRecord>({
-                isDeleted: false,
                 userId,
             });
             const result = await this.findOneById(conversationId, {
@@ -218,25 +218,36 @@ export class AiChatRecordService extends BaseService<AiChatRecord> {
     }
 
     /**
-     * 软删除对话
+     * 删除对话
      * @param conversationId 对话ID
-     * @param userId 用户ID
+     * @param userId 用户ID，空字符串表示管理员操作（硬删除），有值表示普通用户操作（软删除）
      */
     async deleteConversation(conversationId: string, userId: string): Promise<void> {
         try {
-            const queryBuilder = this.repository
-                .createQueryBuilder()
-                .update(AiChatRecord)
-                .set({ isDeleted: true })
-                .where("id = :conversationId", { conversationId })
-                .andWhere("isDeleted = :isDeleted", { isDeleted: false });
+            const isAdmin = !userId || userId.trim() === "";
 
-            // 如果不是管理员操作，需要验证用户权限
-            if (userId && userId.trim() !== "") {
-                queryBuilder.andWhere("userId = :userId", { userId });
+            if (isAdmin) {
+                // 管理员操作：硬删除（直接从数据库删除）
+                const deleteResult = await this.repository.delete(conversationId);
+                if (deleteResult.affected === 0) {
+                    throw HttpErrorFactory.notFound("对话不存在或已被删除");
+                }
+            } else {
+                // 普通用户操作：软删除（设置 isDeleted = true）
+                const queryBuilder = this.repository
+                    .createQueryBuilder()
+                    .update(AiChatRecord)
+                    .set({ isDeleted: true })
+                    .where("id = :conversationId", { conversationId })
+                    .andWhere("isDeleted = :isDeleted", { isDeleted: false })
+                    .andWhere("userId = :userId", { userId });
+
+                const updateResult = await queryBuilder.execute();
+                if (updateResult.affected === 0) {
+                    throw HttpErrorFactory.notFound("对话不存在、已被删除或无权限删除");
+                }
             }
-
-            await queryBuilder.execute();
+            return;
         } catch (error) {
             this.logger.error(`删除对话失败: ${error.message}`, error.stack);
             throw HttpErrorFactory.badRequest("Failed to delete conversation.");
@@ -246,23 +257,28 @@ export class AiChatRecordService extends BaseService<AiChatRecord> {
     /**
      * 批量删除对话
      * @param ids 对话ID数组
-     * @param userId 用户ID
+     * @param userId 用户ID，空字符串表示管理员操作（硬删除），有值表示普通用户操作（软删除）
      */
     async batchDeleteConversations(ids: string[], userId: string = ""): Promise<void> {
         try {
-            const queryBuilder = this.repository
-                .createQueryBuilder()
-                .update(AiChatRecord)
-                .set({ isDeleted: true })
-                .where("id IN (:...ids)", { ids })
-                .andWhere("isDeleted = :isDeleted", { isDeleted: false });
+            const isAdmin = !userId || userId.trim() === "";
 
-            // 如果不是管理员操作，需要验证用户权限
-            if (userId && userId.trim() !== "") {
-                queryBuilder.andWhere("userId = :userId", { userId });
+            if (isAdmin) {
+                // 管理员操作：硬删除（直接从数据库删除）
+                await this.repository.delete(ids);
+            } else {
+                // 普通用户操作：软删除（设置 isDeleted = true）
+                const queryBuilder = this.repository
+                    .createQueryBuilder()
+                    .update(AiChatRecord)
+                    .set({ isDeleted: true })
+                    .where("id IN (:...ids)", { ids })
+                    .andWhere("isDeleted = :isDeleted", { isDeleted: false })
+                    .andWhere("userId = :userId", { userId });
+
+                await queryBuilder.execute();
             }
-
-            await queryBuilder.execute();
+            return;
         } catch (error) {
             this.logger.error(`批量删除对话失败: ${error.message}`, error.stack);
             throw HttpErrorFactory.badRequest("Failed to batch delete conversations.");

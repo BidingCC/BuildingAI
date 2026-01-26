@@ -1,8 +1,8 @@
 import { PROCESSING_STATUS } from "@buildingai/constants/shared/datasets.constants";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { Datasets } from "@buildingai/db/entities/datasets.entity";
-import { DatasetsDocument } from "@buildingai/db/entities/datasets-document.entity";
-import { DatasetsSegments } from "@buildingai/db/entities/datasets-segments.entity";
+import { DatasetsSegments } from "@buildingai/db/entities";
+import { DatasetsDocument } from "@buildingai/db/entities";
+import { Datasets } from "@buildingai/db/entities";
 import { DataSource, In, Repository } from "@buildingai/db/typeorm";
 import { Injectable, Logger } from "@nestjs/common";
 

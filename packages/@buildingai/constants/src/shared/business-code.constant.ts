@@ -61,6 +61,8 @@ export const BusinessCode = {
     OPERATION_NOT_ALLOWED: 40601, // 操作不允许
     BUSINESS_ERROR: 40602, // 业务错误
     VALIDATION_FAILED: 40603, // 验证失败
+    MEMBERSHIP_REQUIRED: 40604, // 需要会员权限
+    MEMBERSHIP_LEVEL_INSUFFICIENT: 40605, // 会员等级不足
 
     // 请求限制错误 (407xx)
     TOO_MANY_REQUESTS: 40700, // 请求过于频繁

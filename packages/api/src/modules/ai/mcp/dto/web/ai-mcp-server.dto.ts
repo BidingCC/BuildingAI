@@ -1,4 +1,4 @@
-import { McpCommunicationType, McpServerType } from "@buildingai/db/entities/ai-mcp-server.entity";
+import { McpCommunicationType, McpServerType } from "@buildingai/db/entities";
 import { PaginationDto } from "@buildingai/dto/pagination.dto";
 import { isEnabled } from "@buildingai/utils";
 import { PartialType } from "@nestjs/mapped-types";

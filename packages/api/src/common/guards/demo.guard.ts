@@ -46,7 +46,7 @@ export class DemoGuard implements CanActivate {
         const request = context.switchToHttp().getRequest<Request>();
 
         // Only intercept POST requests
-        if (request.method !== "POST") {
+        if (request.method === "GET") {
             return true;
         }
 

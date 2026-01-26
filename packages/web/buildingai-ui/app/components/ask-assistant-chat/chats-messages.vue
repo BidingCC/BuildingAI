@@ -133,7 +133,16 @@ const getErrorMessage = (error: Error | undefined, message: AiMessage): string =
         return getMessageTextContent(message.content) || t("common.chat.messages.sendFailed");
     if (typeof error === "string") return error || t("common.chat.messages.sendFailed");
     if (typeof error === "object") {
+        let errorMessage = "";
+        try {
+            const errorData = JSON.parse(error.message);
+            errorMessage = errorData.message;
+        } catch {
+            // If parsing fails, use the original error message
+        }
+
         return (
+            errorMessage ||
             error.message ||
             (error as Error & { content?: string }).content ||
             getMessageTextContent(message.content) ||
@@ -322,8 +331,10 @@ const getErrorMessage = (error: Error | undefined, message: AiMessage): string =
                                     />
                                 </UTooltip>
                             </template>
+                            <span v-if="message.status !== 'failed'" class="text-muted text-xs">
+                                {{ t("ai-chat.frontend.messages.aiDisclaimer") }}
+                            </span>
                         </div>
-
                         <TimeDisplay
                             v-if="message.createdAt"
                             :datetime="message.createdAt"
@@ -331,6 +342,8 @@ const getErrorMessage = (error: Error | undefined, message: AiMessage): string =
                             class="text-muted-foreground text-xs"
                         />
                     </div>
+
+                    <slot name="after-tools" :message="message" :index="index" />
                 </ChatsBubble>
 
                 <div v-if="message.role === 'user'" class="mt-1 flex items-center gap-2">

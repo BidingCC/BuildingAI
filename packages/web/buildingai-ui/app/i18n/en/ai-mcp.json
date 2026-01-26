@@ -114,7 +114,9 @@
             "enabled": "Enabled",
             "disabled": "Disabled",
             "tools": "Tools",
-            "noDescription": "No description"
+            "noDescription": "No description",
+            "custom": "Custom",
+            "system": "System"
         },
         "setMcp": "Set MCP Tools",
         "tool": "Tool",

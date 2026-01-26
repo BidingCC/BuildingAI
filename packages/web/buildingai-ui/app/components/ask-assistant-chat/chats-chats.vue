@@ -4,6 +4,7 @@ import {
     apiDeleteAiConversation,
     apiGetAiConversationList,
     apiUpdateAiConversation,
+    apiUpdateAiConversationPin,
 } from "@buildingai/service/webapi/ai-conversation";
 import { h, markRaw, ref, shallowRef, watch } from "vue";
 
@@ -168,6 +169,11 @@ async function handleDeleteCategory(category: AiConversation): Promise<void> {
     }
 }
 
+async function handlePinConversation(category: AiConversation): Promise<void> {
+    await apiUpdateAiConversationPin(category.id, !category.isPinned);
+    await refreshNuxtData("chats");
+}
+
 /**
  * Handle category selection
  */
@@ -209,6 +215,12 @@ function handleKeyDown(event: KeyboardEvent, category: AiConversation): void {
  * Build dropdown menu items
  */
 const getDropdownItems = (category: AiConversation): DropdownMenuItem[] => [
+    {
+        label: category.isPinned ? t("common.chat.unpin") : t("common.chat.pin"),
+        color: "primary",
+        icon: category.isPinned ? "i-lucide-pin-off" : "i-lucide-pin",
+        onSelect: () => handlePinConversation(category),
+    },
     {
         label: t("common.edit"),
         color: "primary",
@@ -290,6 +302,7 @@ defineShortcuts({
                                 >
                                     <!-- Group title -->
                                     <div
+                                        v-if="group.label"
                                         class="text-muted-foreground px-2 py-1 text-xs font-medium"
                                     >
                                         {{ group.label }}
@@ -325,6 +338,18 @@ defineShortcuts({
                                                     {{ category.title || t("common.chat.newChat") }}
                                                 </span>
                                             </UButton>
+
+                                            <UIcon
+                                                v-if="category.isPinned"
+                                                name="i-lucide-pin"
+                                                :size="16"
+                                                class="bg-primary/50 absolute top-1/2 right-3 z-10 -translate-y-1/2 cursor-pointer px-2.5 py-1.5 transition-opacity group-hover:opacity-0"
+                                                :class="{
+                                                    'opacity-0': category.id === currentChatId,
+                                                    'opacity-100': category.id !== currentChatId,
+                                                }"
+                                                @click.stop
+                                            />
 
                                             <!-- Action menu -->
                                             <UDropdownMenu

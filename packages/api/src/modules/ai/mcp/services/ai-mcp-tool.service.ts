@@ -1,6 +1,6 @@
 import { BaseService } from "@buildingai/base";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { AiMcpTool } from "@buildingai/db/entities/ai-mcp-tool.entity";
+import { AiMcpTool } from "@buildingai/db/entities";
 import { Repository } from "@buildingai/db/typeorm";
 import { Injectable } from "@nestjs/common";
 

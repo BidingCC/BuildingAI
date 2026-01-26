@@ -183,7 +183,6 @@ definePageMeta({
                         <div
                             v-if="agentDecorate?.enabled"
                             class="flex flex-col items-center justify-between gap-4 px-4 pb-8 lg:flex-row"
-                            @click="agentDecorate?.link && navigateToWeb(agentDecorate.link)"
                         >
                             <div class="flex flex-col gap-6">
                                 <div class="flex flex-col gap-2 pr-10">
@@ -202,6 +201,9 @@ definePageMeta({
                                         variant="solid"
                                         size="xl"
                                         class="rounded-full px-6"
+                                        @click="
+                                            agentDecorate?.link && navigateToWeb(agentDecorate.link)
+                                        "
                                     >
                                         {{ $t("ai-agent.frontend.square.ctaLabel") }}
                                     </UButton>
@@ -210,6 +212,7 @@ definePageMeta({
                             <div
                                 class="relative flex-none overflow-hidden rounded-lg"
                                 style="width: 520px; height: 280px"
+                                @click="agentDecorate?.link && navigateToWeb(agentDecorate.link)"
                             >
                                 <NuxtImg
                                     :src="agentDecorate?.heroImageUrl"

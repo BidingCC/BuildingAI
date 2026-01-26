@@ -182,7 +182,7 @@ function handleDownload() {
                     size="sm"
                     :defaultText="$t('common.copy')"
                     :copiedText="$t('common.message.copySuccess')"
-                    content=""
+                    :content="code"
                     variant="ghost"
                 >
                     <template #default="{ copied }">

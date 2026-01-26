@@ -1,4 +1,4 @@
-import { FileType } from "@buildingai/db/entities/file.entity";
+import { FileType } from "@buildingai/db/entities";
 
 /**
  * File type detector utility

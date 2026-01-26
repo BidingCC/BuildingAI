@@ -1,9 +1,9 @@
 import { BaseService } from "@buildingai/base";
 import { TEAM_ROLE, TEAM_ROLE_PERMISSIONS } from "@buildingai/constants/shared/team-role.constants";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { Datasets } from "@buildingai/db/entities/datasets.entity";
-import { DatasetMember } from "@buildingai/db/entities/datasets-member.entity";
-import { User } from "@buildingai/db/entities/user.entity";
+import { User } from "@buildingai/db/entities";
+import { Datasets } from "@buildingai/db/entities";
+import { DatasetMember } from "@buildingai/db/entities";
 import { In, Repository } from "@buildingai/db/typeorm";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { Injectable, Logger } from "@nestjs/common";

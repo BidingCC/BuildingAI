@@ -7,6 +7,8 @@
     "noSearchResults": "一致する結果が見つかりません",
     "tryOtherKeywords": "他のキーワードを試してください",
     "noAvailableKeyPool": "利用可能なキープールがありません",
+    "noAvailableLevels": "利用可能な会員レベルがありません",
+    "givePower": "ボーナスポイント",
     "updateAt": "更新時間",
     "goHome": "フロントに戻る",
     "goHomeText": "ホームに戻る",
@@ -51,7 +53,9 @@
         "colorSelect": "色を選択",
         "dateSelect": "日付を選択",
         "dateRange": "日付範囲を選択",
-        "timeSelect": "時間を選択"
+        "timeSelect": "時間を選択",
+        "levelSelect": "会員レベルを選択",
+        "searchLevel": "レベルを検索..."
     },
     "tab": {
         "system": "システム",
@@ -67,9 +71,11 @@
         "personalRights": "個人権益"
     },
     "personalRights": {
-        "rechargeCenter": "チャージセンター"
+        "rechargeCenter": "チャージセンター",
+        "memberCenter": "会員センター"
     },
     "dateGroup": {
+        "pinned": "ピン留め",
         "today": "今日",
         "yesterday": "昨日",
         "week": "7日以内",
@@ -166,9 +172,15 @@
         "provider": "供給者",
         "model": "模型",
         "multimodalCapabilities": "マルチモーダル能力",
-        "video": "ビデオ",
+        "agentThought": "思考チェーン",
         "audio": "オーディオ",
-        "vision": "視覚"
+        "document": "ドキュメント",
+        "multiToolCall": "マルチツール呼び出し",
+        "streamToolCall": "ストリームツール呼び出し",
+        "structuredOutput": "構造化出力",
+        "toolCall": "ツール呼び出し",
+        "video": "ビデオ",
+        "vision": "ビジョン"
     },
     "theme": {
         "dark": "ダーク",
@@ -242,11 +254,11 @@
         "callDetails": "呼び出し詳細"
     },
     "request": {
-        "400": "不正なリクエスト400",
-        "401": "未認証401",
-        "403": "アクセス拒否403",
-        "404": "見つかりません404",
-        "500": "サーバーエラー500"
+        "400": "不正なリクエスト",
+        "401": "未認証",
+        "403": "アクセス拒否",
+        "404": "見つかりません",
+        "500": "サーバーエラー"
     },
     "chat": {
         "newChat": "新しい会話を開始",
@@ -256,6 +268,8 @@
         "confirmDelete": "会話を完全に削除",
         "confirmDeleteMessage": "削除後、この会話は復元できません。削除しますか？",
         "confirmDeleteAction": "削除する",
+        "pin": "ピン留め",
+        "unpin": "ピン留め解除",
         "editChatTitle": "会話タイトルを編集",
         "chatTitleLabel": "会話タイトル",
         "chatTitlePlaceholder": "会話タイトルを入力してください",
@@ -346,5 +360,9 @@
         "undo": "元に戻す",
         "redo": "やり直し",
         "purple": "紫"
+    },
+    "membership": {
+        "required": "会員権限が必要",
+        "hasAccess": "会員限定"
     }
 }

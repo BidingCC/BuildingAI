@@ -1,9 +1,8 @@
 import { BooleanNumber, type BooleanNumberType } from "@buildingai/constants";
-import { NestContainer } from "@buildingai/di";
 
 import { AppEntity } from "../decorators/app-entity.decorator";
-import { BeforeInsert, BeforeUpdate, Column, OneToMany, type Relation } from "../typeorm";
-import { FileUrlService } from "./../utils/file-url.service";
+import { NormalizeFileUrl } from "../decorators/file-url.decorator";
+import { Column, OneToMany, type Relation } from "../typeorm";
 import { BaseEntity } from "./base";
 import { Secret } from "./secret.entity";
 
@@ -53,6 +52,7 @@ export class SecretTemplate extends BaseEntity {
      * 模板图标
      */
     @Column({ length: 200, nullable: true, comment: "模板图标" })
+    @NormalizeFileUrl()
     icon?: string;
 
     /**
@@ -85,17 +85,4 @@ export class SecretTemplate extends BaseEntity {
      */
     @OneToMany(() => Secret, (Secret) => Secret.template)
     Secrets: Relation<Secret[]>;
-
-    @BeforeInsert()
-    @BeforeUpdate()
-    private async setIcon() {
-        if (this.icon) {
-            try {
-                const fileService = NestContainer.get(FileUrlService);
-                this.icon = await fileService.set(this.icon);
-            } catch (error) {
-                console.warn("获取FileService失败:", error);
-            }
-        }
-    }
 }

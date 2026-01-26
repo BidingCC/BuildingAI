@@ -1,5 +1,5 @@
 import { TypeOrmModule } from "@buildingai/db/@nestjs/typeorm";
-import { Tag } from "@buildingai/db/entities/tag.entity";
+import { Tag } from "@buildingai/db/entities";
 import { Module } from "@nestjs/common";
 
 import { TagController } from "./controllers/console/tag.controller";

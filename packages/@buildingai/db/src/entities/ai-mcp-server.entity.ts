@@ -1,16 +1,6 @@
-import { NestContainer } from "@buildingai/di";
-
 import { AppEntity } from "../decorators/app-entity.decorator";
-import {
-    BeforeInsert,
-    BeforeUpdate,
-    Column,
-    JoinColumn,
-    ManyToOne,
-    OneToMany,
-    type Relation,
-} from "../typeorm";
-import { FileUrlService } from "./../utils/file-url.service";
+import { NormalizeFileUrl } from "../decorators/file-url.decorator";
+import { Column, JoinColumn, ManyToOne, OneToMany, type Relation } from "../typeorm";
 import { AiMcpTool } from "./ai-mcp-tool.entity";
 import { AiUserMcpServer } from "./ai-user-mcp-server.entity";
 import { BaseEntity } from "./base";
@@ -93,6 +83,7 @@ export class AiMcpServer extends BaseEntity {
         comment: "图标",
         nullable: true,
     })
+    @NormalizeFileUrl()
     icon?: string;
 
     /**
@@ -252,17 +243,4 @@ export class AiMcpServer extends BaseEntity {
         comment: "创建者用户ID",
     })
     creatorId: string;
-
-    @BeforeInsert()
-    @BeforeUpdate()
-    private async setIcon() {
-        if (this.icon) {
-            try {
-                const fileService = NestContainer.get(FileUrlService);
-                this.icon = await fileService.set(this.icon);
-            } catch (error) {
-                console.warn("获取FileService失败:", error);
-            }
-        }
-    }
 }

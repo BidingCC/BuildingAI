@@ -1,0 +1,1 @@
+import{aF as o,aJ as s}from"#entry";function i(){return o("/system-storage-config")}function r(t){const{id:e,...a}=t;return s(`/system-storage-config/${e}`,a)}function g(t){return o(`/system-storage-config/${t}`)}export{g as a,r as b,i as c};

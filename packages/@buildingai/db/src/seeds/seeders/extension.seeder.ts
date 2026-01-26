@@ -1,9 +1,9 @@
 import { ExtensionStatus, ExtensionType } from "@buildingai/constants/shared/extension.constant";
-import { Extension } from "@buildingai/db/entities/extension.entity";
 import fse from "fs-extra";
 import * as path from "path";
 
 import { DataSource } from "../../typeorm";
+import { Extension } from "./../../entities/extension.entity";
 import { BaseSeeder } from "./base.seeder";
 
 /**

@@ -8,6 +8,7 @@ import type {
 } from "@buildingai/types/ai/agent-config.interface";
 
 import { AppEntity } from "../decorators/app-entity.decorator";
+import { NormalizeFileUrl } from "../decorators/file-url.decorator";
 import { Column, JoinTable, ManyToMany } from "../typeorm";
 import { BaseEntity } from "./base";
 import { Tag } from "./tag.entity";
@@ -39,6 +40,7 @@ export class Agent extends BaseEntity {
      * 智能体头像
      */
     @Column({ type: "text", nullable: true, comment: "智能体头像" })
+    @NormalizeFileUrl()
     avatar?: string;
 
     /**

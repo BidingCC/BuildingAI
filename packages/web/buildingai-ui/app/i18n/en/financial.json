@@ -12,6 +12,8 @@
         "agentConversation": "Agent chat",
         "sharedAgentConversation": "Shared agent chat",
         "pluginConsumption": "Plugin usage",
+        "membershipGift": "Subscription points",
+        "membershipGiftExpire": "Subscription points expired",
         "table": {
             "userNo": "User ID",
             "nickname": "Nickname",

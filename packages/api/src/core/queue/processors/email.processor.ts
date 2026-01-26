@@ -1,4 +1,4 @@
-import { JobType } from "@buildingai/core/modules/queue/types/job-types";
+import { JobType } from "@buildingai/core/modules";
 import { OnWorkerEvent, Processor, WorkerHost } from "@nestjs/bullmq";
 import { Logger } from "@nestjs/common";
 import { Job } from "bullmq";

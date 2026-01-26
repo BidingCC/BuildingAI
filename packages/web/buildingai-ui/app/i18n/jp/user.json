@@ -14,6 +14,7 @@
         "neverLogin": "未ログイン",
         "editProfile": "プロフィール編集",
         "adjustBalance": "残高調整",
+        "expired": "期限切れ",
         "deleteUser": "ユーザー削除",
         "status": {
             "active": "正常",
@@ -27,6 +28,68 @@
             "email": "メール登録",
             "username": "アカウント登録",
             "unknown": "不明なソース"
+        },
+        "list": {
+            "nickname": "ユーザー情報",
+            "username": "ユーザーアカウント",
+            "userNo": "ユーザー番号",
+            "status": "状態",
+            "source": "出典",
+            "createdAt": "作成時間",
+            "registerTime": "登録時間",
+            "lastLoginAt": "最終ログイン時間",
+            "actions": "操作",
+            "level": "会員ランク",
+            "endTime": "会員有効期限"
+        },
+        "subscriptionRecords": {
+            "title": "会員サブスクリプション記録",
+            "loading": "読み込み中...",
+            "empty": "サブスクリプション記録なし",
+            "level": "会員ランク",
+            "duration": "サブスクリプション期間",
+            "validity": "会員有効期限",
+            "source": "購入元",
+            "recordTime": "記録時間",
+            "refundStatus": "返金ステータス",
+            "refunded": "返金済み",
+            "notRefunded": "未返金",
+            "loadFailed": "サブスクリプション記録の読み込みに失敗"
+        },
+        "membership": {
+            "level": "会員ランク",
+            "validity": "有効期間",
+            "normalUser": "一般ユーザー",
+            "adjustMembership": "会員調整",
+            "adjust": {
+                "title": "会員ランクを調整",
+                "levelLabel": "会員ランク",
+                "levelPlaceholder": "会員ランクを選択してください",
+                "durationLabel": "サブスクリプション期間",
+                "durationOptions": {
+                    "oneMonth": "1ヶ月",
+                    "threeMonths": "3ヶ月",
+                    "oneYear": "1年",
+                    "forever": "永久",
+                    "custom": "カスタム期間"
+                },
+                "customUnit": {
+                    "day": "日",
+                    "month": "ヶ月",
+                    "year": "年"
+                },
+                "noLevel": "ランクなし",
+                "validation": {
+                    "customDurationRequired": "カスタム期間を入力してください",
+                    "customDurationMin": "期間は0より大きい必要があります"
+                },
+                "messages": {
+                    "getLevelListFailed": "会員ランクリストの取得に失敗",
+                    "userIdMissing": "ユーザーIDが存在しません",
+                    "adjustSuccess": "会員調整成功",
+                    "adjustFailed": "会員調整失敗"
+                }
+            }
         },
         "form": {
             "username": "アカウント",

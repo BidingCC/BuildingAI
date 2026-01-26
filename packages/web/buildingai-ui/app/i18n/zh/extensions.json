@@ -45,7 +45,8 @@
             "nameRequired": "应用名称不能为空",
             "icon": "应用图标",
             "addIcon": "添加",
-            "iconRecommendation": "建议图片尺寸：200*200像素；图片格式：jpg、png、jpeg、gif",
+            "iconRecommendation": "建议图片尺寸：200 * 200像素；图片格式：jpg、png、jpeg、gif",
+            "bannerRecommendation": "建议图片尺寸：1488 * 170像素；图片格式：jpg、png、jpeg、gif",
             "key": "应用Key",
             "packName": "应用标识符",
             "packNameInput": "请输入应用标识符",
@@ -112,14 +113,28 @@
             "allCategories": "全部分类",
             "allTypes": "全部类型"
         },
-        "manage": "应用管理",
+        "add": "创建应用",
+        "myApps": "我的应用",
+        "installApp": "安装应用",
+        "developApp": "开发应用",
+        "store": "市场安装",
+        "selectType": "请选择应用类型",
+        "noDescription": "暂无描述",
+        "unknownAuthor": "未知作者",
+        "loadingText": "加载中...",
+        "noMoreText": "没有更多数据",
+        "unknown": "未知",
+        "manage": "管理",
         "more": "更多",
         "install": "安装",
+        "incompatible": "版本不兼容",
         "enable": "启用",
         "disable": "禁用",
-        "uninstall": "卸载",
+        "upgrade": "更新",
         "detail": "详情",
         "logs": "日志",
+        "syncMemberFeatures": "同步功能",
+        "featureConfig": "功能配置",
         "official": "官方",
         "version": "版本",
         "size": "大小",
@@ -134,6 +149,29 @@
             "uninstallSuccess": "应用 \"{name}\" 已卸载",
             "uninstallError": "卸载应用失败"
         },
+        "uninstall": {
+            "title": "卸载应用",
+            "btn": "卸载",
+            "description": "卸载应用，会清除当前应用已有数据，此操作不可逆，",
+            "descriptionWarning": "请备份系统后谨慎操作！"
+        },
+        "installActivation": {
+            "title": "安装应用",
+            "activationCodeRequired": "请输入兑换码",
+            "activationCodeInvalid": "兑换码无效，未找到对应的应用，请检查兑换码是否正确",
+            "queryFailed": "查询应用失败",
+            "installSuccess": "安装成功",
+            "installFailed": "安装应用失败",
+            "activationCodeLabel": "兑换码",
+            "activationCodeDescription": "请前往应用市场【个人中心】->【",
+            "activationCodeDescriptionLink": "应用管理",
+            "activationCodeDescriptionSuffix": "】复制兑换码",
+            "activationCodePlaceholder": "请输入",
+            "cancel": "取消",
+            "query": "查询",
+            "confirmInstall": "确认安装",
+            "installing": "安装中..."
+        },
         "empty": {
             "title": "暂无已安装应用",
             "description": "您还没有安装任何应用，去应用市场看看吧",
@@ -147,10 +185,12 @@
         "description": "描述",
         "updateTime": "更新时间",
         "changelog": "更新日志",
-        "noVersionInfo": "暂无版本信息"
+        "noVersionInfo": "暂无版本信息",
+        "platformVersion": "平台版本"
     },
     "modal": {
         "addExtension": "添加应用",
+        "editExtension": "编辑应用",
         "addExtensionDescription": "本地应用，仅供本地开发使用",
         "extensionTypes": {
             "application": "应用插件",
@@ -163,5 +203,24 @@
             "mp": "小程序",
             "api": "API端"
         }
+    },
+    "featureConfig": {
+        "title": "功能配置",
+        "empty": "暂无功能配置",
+        "emptyTip": "请先同步功能后再进行配置",
+        "levelPlaceholder": "选择允许访问的会员等级",
+        "levelTip": "不选择任何等级表示所有用户都可以访问"
+    },
+    "upgradePreview": {
+        "title": "版本更新提示",
+        "newVersion": "新版本号",
+        "notice": "注意事项",
+        "features": "新增功能",
+        "optimizes": "优化",
+        "fixes": "修复",
+        "noContent": "暂无更新内容",
+        "fetchError": "获取更新内容失败",
+        "upgradeError": "更新失败",
+        "confirmUpgrade": "确认更新"
     }
 }

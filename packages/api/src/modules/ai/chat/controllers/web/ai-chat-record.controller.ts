@@ -1,5 +1,5 @@
 import { BaseController } from "@buildingai/base";
-import { type UserPlayground } from "@buildingai/db/interfaces/context.interface";
+import { type UserPlayground } from "@buildingai/db";
 import { Playground } from "@buildingai/decorators/playground.decorator";
 import { PaginationDto } from "@buildingai/dto/pagination.dto";
 import { WebController } from "@common/decorators/controller.decorator";

@@ -6,7 +6,9 @@
         "search": {
             "placeholder": "エージェント名・説明・IDで検索",
             "allStatus": "全ステータス",
-            "filterByStatus": "ステータスで絞り込み"
+            "filterByStatus": "ステータスで絞り込み",
+            "allMode": "すべて",
+            "filterByMode": "作成モードで絞り込み"
         },
         "create": {
             "title": "エージェント作成",
@@ -27,7 +29,15 @@
             "descriptionPlaceholder": "説明を入力",
             "mode": "作成モード",
             "modes": {
-                "direct": "直接作成"
+                "direct": "直接作成",
+                "coze": "Coze",
+                "dify": "Dify"
+            },
+            "modesDesc": {
+                "direct": "エージェント情報を手動で設定",
+                "coze": "Coze プラットフォームのエージェントと連携",
+                "dify": "Dify プラットフォームのエージェントと連携",
+                "plugin": "プラグインで拡張されたエージェントタイプ"
             }
         },
         "menu": {
@@ -58,8 +68,9 @@
             "formVariable": "フォーム変数",
             "formVariableDesc": "変数はフォーム形式でユーザーが事前入力",
             "formVariableDesc2": "入力内容はロール設定の変数を自動置換",
-            "formVariableNameEmpty": "フィールド名必須",
-            "formVariableLabelEmpty": "フィールドラベル必須",
+            "formVariableNameEmpty": "変数名は必須です",
+            "formVariableNameInvalid": "変数名は英字、数字、アンダースコアのみ設定可能です",
+            "formVariableLabelEmpty": "表示名は必須です",
             "formVariableTypeEmpty": "フィールドタイプ必須",
             "formVariableNameExists": "フィールド名が重複",
             "formVariableEditTitle": "フォーム変数編集",
@@ -70,8 +81,8 @@
             "formVariableTypeTextarea": "複数行テキスト",
             "formVariableTypeSelect": "ドロップダウン",
             "formVariableName": "変数名",
-            "formVariableNamePlaceholder": "変数名を入力",
-            "formVariableLabel": "フィールドラベル",
+            "formVariableNamePlaceholder": "変数名を入力してください。英字、数字、アンダースコアのみ設定可能です",
+            "formVariableLabel": "表示名",
             "formVariableLabelPlaceholder": "フィールドラベルを入力",
             "formVariableOptions": "オプションリスト",
             "formVariableOptionsPlaceholder": "オプションを入力",
@@ -97,9 +108,9 @@
             "tagsDesc": "エージェントにタグを追加して、分類と管理を簡単に",
             "feedback": "QA注釈",
             "feedbackDesc": "管理者とユーザーによる質問と回答の注釈をサポート",
-            "public": "公開エージェント",
-            "publicDesc": "エージェント広場で表示、他のユーザーが発見・利用可能（公開状態時のみ有効）",
-            "private": "非公開エージェント",
+            "public": "公開",
+            "publicDesc": "エージェント広場で表示されます。公開済み状態で有効。",
+            "private": "非公開",
             "prologue": "オープニング",
             "prologueDesc": "エディターツールが隠れた場合は左右にドラッグ",
             "problem": "オープニング質問",
@@ -140,6 +151,31 @@
             "mcp": {
                 "title": "MCP ツールサーバー",
                 "description": "エージェントが使用可能なMCPツールサーバーを設定"
+            },
+            "thirdParty": {
+                "baseURL": "API エンドポイント",
+                "apiKey": "API キー",
+                "dify": {
+                    "title": "Dify プラットフォーム設定",
+                    "baseURLPlaceholder": "Dify API エンドポイントを入力（デフォルト：https://api.dify.ai/v1）",
+                    "baseURLHint": "Dify アプリの API エンドポイント",
+                    "apiKeyPlaceholder": "Dify アプリの API キーを入力",
+                    "apiKeyHint": "Dify アプリ設定で API キーを取得",
+                    "helpTitle": "設定説明",
+                    "helpDesc": "Dify でアプリを作成後、アプリ設定で API キーとエンドポイントを取得してください。"
+                },
+                "coze": {
+                    "title": "Coze プラットフォーム設定",
+                    "baseURLPlaceholder": "Coze API エンドポイントを入力",
+                    "baseURLHint": "Coze アプリの API エンドポイント（デフォルト：https://api.coze.cn）",
+                    "botId": "Bot ID",
+                    "botIdPlaceholder": "Coze Bot ID を入力",
+                    "botIdHint": "Coze の Bot 詳細ページ URL から取得、例：7342xxxxx",
+                    "apiKeyPlaceholder": "Coze アプリの API キーを入力",
+                    "apiKeyHint": "Coze オープンプラットフォームで個人アクセストークン（PAT）を作成",
+                    "helpTitle": "設定説明",
+                    "helpDesc": "Coze で Bot を作成し API サービスとして公開後、Bot ID と個人アクセストークンを取得してください。"
+                }
             }
         },
         "publish": {
@@ -289,6 +325,9 @@
                 "urlRequired": "URLを入力してください"
             },
             "success": "DSL ファイルのインポートが成功しました！",
+            "batchSuccess": "{count} 個のファイルを正常にインポートしました",
+            "partialSuccess": "{total} 個中 {success} 個のファイルを正常にインポートしました",
+            "batchFailed": "すべてのファイルのインポートに失敗しました。ファイル形式を確認してください",
             "form": {
                 "urlLabel": "URL",
                 "urlPlaceholder": "DSLファイルのURLを入力"

@@ -7,6 +7,8 @@
     "noSearchResults": "No matching results found",
     "tryOtherKeywords": "Try other keywords",
     "noAvailableKeyPool": "No available key pool",
+    "noAvailableLevels": "No available membership levels",
+    "givePower": "Bonus points",
     "updateAt": "Updated at",
     "goHome": "Return to the front desk",
     "goHomeText": "Go Home",
@@ -51,7 +53,9 @@
         "colorSelect": "Select color",
         "dateSelect": "Select date",
         "dateRange": "Select date range",
-        "timeSelect": "Select time"
+        "timeSelect": "Select time",
+        "levelSelect": "Select membership level",
+        "searchLevel": "Search levels..."
     },
     "tab": {
         "system": "System",
@@ -67,9 +71,11 @@
         "personalRights": "Benefits"
     },
     "personalRights": {
-        "rechargeCenter": "Top-up"
+        "rechargeCenter": "Top-up",
+        "memberCenter": "Member Center"
     },
     "dateGroup": {
+        "pinned": "Pinned",
         "today": "Today",
         "yesterday": "Yesterday",
         "week": "7 days",
@@ -166,9 +172,15 @@
         "provider": "vendor",
         "model": "model",
         "multimodalCapabilities": "Multimodal capability",
-        "video": "video",
+        "agentThought": "Agent Thought",
         "audio": "Audio",
-        "vision": "Visual"
+        "document": "Document",
+        "multiToolCall": "Multi Tool Call",
+        "streamToolCall": "Stream Tool Call",
+        "structuredOutput": "Structured Output",
+        "toolCall": "Tool Call",
+        "video": "Video",
+        "vision": "Vision"
     },
     "theme": {
         "dark": "Dark",
@@ -242,11 +254,11 @@
         "callDetails": "Call Details"
     },
     "request": {
-        "400": "Bad Request 400",
-        "401": "Unauthorized 401",
-        "403": "Forbidden 403",
-        "404": "Not Found 404",
-        "500": "Server Error 500"
+        "400": "Bad Request",
+        "401": "Unauthorized",
+        "403": "Forbidden",
+        "404": "Not Found",
+        "500": "Server Error"
     },
     "chat": {
         "newChat": "New chat",
@@ -256,6 +268,8 @@
         "confirmDelete": "Delete chat",
         "confirmDeleteMessage": "This cannot be undone. Confirm?",
         "confirmDeleteAction": "Delete",
+        "pin": "Pin",
+        "unpin": "Unpin",
         "editChatTitle": "Rename chat",
         "chatTitleLabel": "Chat name",
         "chatTitlePlaceholder": "Enter chat name",
@@ -346,5 +360,9 @@
         "undo": "Undo",
         "redo": "Redo",
         "purple": "Purple"
+    },
+    "membership": {
+        "required": "Membership Required",
+        "hasAccess": "Member Exclusive"
     }
 }

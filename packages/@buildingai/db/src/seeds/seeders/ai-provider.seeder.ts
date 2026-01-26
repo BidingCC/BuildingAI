@@ -1,7 +1,7 @@
 import { ModelType } from "@buildingai/ai-sdk";
-import { AiProvider } from "@buildingai/db/entities/ai-provider.entity";
 
 import { DataSource } from "../../typeorm";
+import { AiProvider } from "./../../entities/ai-provider.entity";
 import { BaseSeeder } from "./base.seeder";
 
 /**

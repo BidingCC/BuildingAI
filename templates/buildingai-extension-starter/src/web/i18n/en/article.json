@@ -1,0 +1,138 @@
+{
+    "list": {
+        "empty": "No articles",
+        "comments": "No comments",
+        "commentsWithCount": "comments",
+        "views": "views",
+        "categories": {
+            "title": "Categories",
+            "all": "All"
+        },
+        "search": {
+            "searchPlaceholder": "Search article title...",
+            "statusAll": "All Status",
+            "statusDraft": "Draft",
+            "statusPublished": "Published",
+            "statusPlaceholder": "Select Status",
+            "categoryAll": "All Categories",
+            "categoryPlaceholder": "Select Category"
+        },
+        "table": {
+            "columns": {
+                "select": "Select",
+                "title": "Title",
+                "author": "Author",
+                "status": "Status",
+                "views": "Views",
+                "publishedAt": "Published At",
+                "createdAt": "Created At",
+                "actions": "Actions"
+            },
+            "status": {
+                "published": "Published",
+                "draft": "Draft"
+            },
+            "unknownAuthor": "Unknown Author",
+            "actions": {
+                "editLabel": "Edit",
+                "publish": "Publish",
+                "setDraft": "Set as Draft",
+                "copyLabel": "Copy",
+                "delete": "Delete",
+                "batchDelete": "Batch Delete",
+                "createLabel": "Create Article",
+                "selected": "Selected",
+                "showColumns": "Show Columns"
+            }
+        },
+        "messages": {
+            "warmTip": "Friendly Reminder",
+            "deleteConfirm": "Are you sure you want to delete this article?",
+            "batchDeleteConfirm": "Are you sure you want to delete the selected articles?",
+            "deleteSuccess": "Delete successful",
+            "deleteFailed": "Delete failed",
+            "statusUpdateSuccess": "Status updated successfully",
+            "statusUpdateFailed": "Status update failed",
+            "copySuccess": "Copy successful",
+            "copyFailed": "Copy failed"
+        }
+    },
+    "add": {
+        "title": "Create Article",
+        "navigation": {
+            "back": "Back"
+        },
+        "messages": {
+            "createSuccess": "Create successful",
+            "createFailed": "Create failed"
+        }
+    },
+    "edit": {
+        "title": "Edit Article",
+        "navigation": {
+            "back": "Back"
+        },
+        "messages": {
+            "fetchDetailFailed": "Failed to fetch article details",
+            "updateSuccess": "Update successful",
+            "updateFailed": "Update failed"
+        }
+    },
+    "form": {
+        "sections": {
+            "articleSettings": "Article Settings",
+            "publishSettings": "Publish Settings",
+            "category": "Category",
+            "coverImage": "Cover Image"
+        },
+        "title": {
+            "label": "Title",
+            "placeholder": "Enter article title",
+            "required": "Title is required"
+        },
+        "summary": {
+            "label": "Summary",
+            "placeholder": "Enter article summary (optional)",
+            "help": "Article summary will be displayed in the article list, recommended within 150 characters"
+        },
+        "content": {
+            "label": "Content",
+            "placeholder": "Enter article content",
+            "required": "Content is required",
+            "help": "Supports Markdown format, can insert images, links, etc."
+        },
+        "status": {
+            "label": "Status",
+            "placeholder": "Select status",
+            "draft": "Draft",
+            "published": "Published"
+        },
+        "sort": {
+            "label": "Sort",
+            "placeholder": "Enter sort value (higher number appears first)"
+        },
+        "categoryId": {
+            "label": "Category",
+            "placeholder": "Select category (optional)"
+        },
+        "coverImage": {
+            "label": "Cover Image",
+            "upload": "Upload Cover",
+            "help": "Supports JPG, PNG, JPEG, WEBP formats, recommended size 1200x600"
+        }
+    },
+    "buttons": {
+        "create": "Create",
+        "update": "Update",
+        "reset": "Reset",
+        "cancel": "Cancel"
+    },
+    "messages": {
+        "fetchCategoriesFailed": "Failed to fetch category list",
+        "resetSuccess": "Form has been reset",
+        "validationFailed": "Form validation failed, please check your input"
+    },
+    "detail": {
+        "notFound": "Article not found"
+    }
+}

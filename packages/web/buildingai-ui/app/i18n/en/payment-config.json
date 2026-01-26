@@ -24,6 +24,7 @@
         "avatarFormats": "JPG, PNG, recommended: 200x200",
         "enable": "Enabled",
         "enableHelp": "Enable WeChat Pay for users",
+        "alipayEnableHelp": "Once enabled, users can make payments using Alipay.",
         "isDefault": "Default",
         "isDefaultHelp": "Set as default payment method (only one allowed)",
         "payway": "Payment Method",
@@ -60,8 +61,23 @@
         "updateSuccess": "Payment config updated",
         "updateFailed": "Update failed",
         "appId": "APPID",
-        "appIdHelp": "App ID from WeChat Developer Platform",
-        "appIdInput": "Enter APPID"
+        "appIdHelp": "Development platform application ID information",
+        "appIdInput": "Enter APPID",
+        "gateway": "Gateway Address",
+        "gatewayInput": "https://openapi.alipay.com/gateway.do",
+        "gatewayHelp": "Alipay Open Platform Gateway Address",
+        "privateKey": "Apply private key",
+        "privateKeyInput": "Please enter the application private key",
+        "privateKeyHelp": "应用私钥内容(PKCS8格式)",
+        "appCert": "Apply Public Key Certificate",
+        "appCertInput": "Please enter the application public key certificate content",
+        "appCertHelp": "应用公钥证书内容(appCertPublicKey)",
+        "alipayPublicCert": "Alipay Public Key Certificate",
+        "alipayPublicCertInput": "Please enter the Alipay public key certificate content",
+        "alipayPublicCertHelp": "支付宝公钥证书内容(alipayCertPublicKey)",
+        "alipayRootCert": "Alipay Root Certificate",
+        "alipayRootCertInput": "Please enter the Alipay root certificate content",
+        "alipayRootCertHelp": "支付宝根证书内容(alipayRootCert)"
     },
     "validation": {
         "nameRequired": "Enter display name",
@@ -72,6 +88,12 @@
         "paySignKeyRequired": "Enter payment key",
         "certRequired": "Upload certificate",
         "sortRequired": "Enter sort order",
-        "appIdRequired": "Enter APPID"
+        "appIdRequired": "Enter APPID",
+        "gatewayRequired": "Please enter the gateway address",
+        "gatewayUrl": "Please enter a valid gateway URL",
+        "privateKeyRequired": "Please enter the application private key",
+        "appCertRequired": "请输入应用公钥证书",
+        "alipayPublicCertRequired": "Please enter the Alipay public key certificate",
+        "alipayRootCertRequired": "Please enter the Alipay root certificate"
     }
 }

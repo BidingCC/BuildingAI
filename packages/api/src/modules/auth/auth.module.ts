@@ -1,16 +1,23 @@
 import { TypeOrmModule } from "@buildingai/db/@nestjs/typeorm";
-import { Permission } from "@buildingai/db/entities/permission.entity";
-import { Role } from "@buildingai/db/entities/role.entity";
-import { User } from "@buildingai/db/entities/user.entity";
-import { UserToken } from "@buildingai/db/entities/user-token.entity";
+import {
+    Extension,
+    ExtensionFeature,
+    MembershipLevels,
+    Permission,
+    Role,
+    User,
+    UserSubscription,
+    UserToken,
+} from "@buildingai/db/entities";
 import { AuthService } from "@common/modules/auth/services/auth.service";
+import { ExtensionFeatureService } from "@common/modules/auth/services/extension-feature.service";
+import { ExtensionFeatureScanService } from "@common/modules/auth/services/extension-feature-scan.service";
 import { RolePermissionService } from "@common/modules/auth/services/role-permission.service";
 import { UserTokenService } from "@common/modules/auth/services/user-token.service";
 import { WechatModule } from "@common/modules/wechat/wechat.module";
 import { ChannelModule } from "@modules/channel/channel.module";
 import { forwardRef, Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
-import { DiscoveryModule } from "@nestjs/core";
 import { JwtModule } from "@nestjs/jwt";
 import type { StringValue } from "ms";
 
@@ -23,7 +30,16 @@ import { AuthWebController } from "./controller/web/auth.controller";
  */
 @Module({
     imports: [
-        TypeOrmModule.forFeature([User, Role, Permission, UserToken]),
+        TypeOrmModule.forFeature([
+            User,
+            Role,
+            Permission,
+            UserToken,
+            Extension,
+            ExtensionFeature,
+            MembershipLevels,
+            UserSubscription,
+        ]),
         ChannelModule,
         forwardRef(() => WechatModule),
         DiscoveryModule,
@@ -39,7 +55,21 @@ import { AuthWebController } from "./controller/web/auth.controller";
         }),
     ],
     controllers: [AuthWebController],
-    providers: [AuthService, RolePermissionService, UserTokenService],
-    exports: [AuthService, JwtModule, RolePermissionService, UserTokenService],
+    providers: [
+        AuthService,
+        ExtensionFeatureScanService,
+        ExtensionFeatureService,
+        RolePermissionService,
+        UserTokenService,
+        WechatOaService,
+    ],
+    exports: [
+        AuthService,
+        ExtensionFeatureScanService,
+        ExtensionFeatureService,
+        JwtModule,
+        RolePermissionService,
+        UserTokenService,
+    ],
 })
 export class AuthModule {}

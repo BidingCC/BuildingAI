@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { PayConfigPayType, type PayConfigType } from "@buildingai/constants/shared";
 import type { RechargeRule } from "@buildingai/service/webapi/recharge-center";
 import type { OrderInfo, PrepaidInfo } from "@buildingai/service/webapi/recharge-center";
 import {
@@ -14,7 +15,7 @@ const RechargeSuccessModal = defineAsyncComponent(
 );
 
 interface PaymentMethod {
-    value: number;
+    value: PayConfigType;
     label: string;
     icon: string;
 }
@@ -32,7 +33,7 @@ const state = reactive({
     rechargeOptions: [] as RechargeRule[],
     paymentMethods: [] as PaymentMethod[],
     selectedOptionIndex: 0,
-    selectedPaymentMethod: 1,
+    selectedPaymentMethod: PayConfigPayType.WECHAT as PayConfigType,
     rechargeInstructions: undefined as string | undefined,
     rechargeSuccess: false,
     isQrCodeExpired: false,
@@ -82,6 +83,11 @@ const { data: rechargeCenterInfo } = await useAsyncData(
                 label: item.name,
                 icon: item.logo,
             }));
+            const defaultMethod = data.payWayList.find((item) => item.isDefault);
+            if (defaultMethod) {
+                state.selectedPaymentMethod = defaultMethod.payType;
+            }
+
             state.rechargeInstructions = data.rechargeExplain;
             state.rechargeOptions = data.rechargeRule;
             return data;

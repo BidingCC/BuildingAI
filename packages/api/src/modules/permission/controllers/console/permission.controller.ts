@@ -1,5 +1,5 @@
 import { BaseController } from "@buildingai/base";
-import { Permission, PermissionType } from "@buildingai/db/entities/permission.entity";
+import { Permission, PermissionType } from "@buildingai/db/entities";
 import { FindOptionsWhere, ILike } from "@buildingai/db/typeorm";
 import { isEnabled } from "@buildingai/utils";
 import { ConsoleController } from "@common/decorators";

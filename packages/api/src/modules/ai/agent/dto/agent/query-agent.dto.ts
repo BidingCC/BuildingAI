@@ -30,6 +30,13 @@ export class QueryAgentDto extends PaginationDto {
     isPublic?: boolean;
 
     /**
+     * 创建模式筛选
+     */
+    @IsOptional()
+    @IsString({ message: "创建模式必须是字符串" })
+    createMode?: "direct" | "coze" | "dify";
+
+    /**
      * 标签筛选（多个标签ID，逗号分隔或数组）
      * 示例：tagIds=uuid1,uuid2
      */

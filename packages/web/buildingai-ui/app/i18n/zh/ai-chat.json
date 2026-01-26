@@ -106,7 +106,8 @@
             "stopGeneration": "停止生成",
             "enterQuestion": "请输入你的问题",
             "sendMessage": "发送消息",
-            "inputPlaceholder": "Hi~有什么想问小助手的"
+            "inputPlaceholder": "Hi~有什么想问小助手的",
+            "aiDisclaimer": "以上内容均由AI大模型生成，仅供参考"
         },
         "reasoning": {
             "thinking": "思考中...",

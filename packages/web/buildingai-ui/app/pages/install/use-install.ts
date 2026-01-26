@@ -93,11 +93,14 @@ export function useInstall() {
             // Report installation statistics
             const version = appStore.siteConfig?.webinfo?.version;
             if (version) {
-                fetch(`${useRuntimeConfig().public.EXTENSION_API_URL}/building-ai/${version}`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ version, installedAt: Date.now() }),
-                });
+                fetch(
+                    `${useRuntimeConfig().public.EXTENSION_API_URL || "https://cloud.buildingai.cc/api"}/building-ai/${version}`,
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ version, installedAt: Date.now() }),
+                    },
+                );
             }
         }
     }

@@ -4,7 +4,7 @@ import { apiGetExtensionDetailByIdentifier } from "@buildingai/service/consoleap
 import type { NavigationMenuItem } from "@nuxt/ui";
 import type { ComputedRef } from "vue";
 
-import type { NavigationItem } from "./menu";
+import type { PluginMenuItem } from "./menu";
 
 interface PluginManifest {
     identifier: string;
@@ -39,12 +39,14 @@ const collapsed = computed(() => props.collapsed);
 
 /**
  * Get navigation items from parent PluginLayout
- * Items are transformed from PluginMenuItem[] to NavigationItem[] with active states
+ * Items are transformed from PluginMenuItem[] to PluginMenuItem[] with active states
  */
-const navigationItems = inject<ComputedRef<NavigationItem[]>>(
+const navigationItems = inject<ComputedRef<PluginMenuItem[]>>(
     "pluginConsoleMenu",
     computed(() => []),
 );
+
+console.log("navigationItems", navigationItems.value);
 
 /**
  * Menu groups for UNavigationMenu component
@@ -63,7 +65,7 @@ const handleBack = () => {
     if (import.meta.dev) {
         router.push("/");
     } else {
-        window.location.href = "/console/plugins/manage";
+        window.location.href = "/console/manage";
     }
 };
 

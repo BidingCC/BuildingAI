@@ -1,6 +1,7 @@
 {
     "home": "ホーム",
     "rechargeCenter": "チャージセンター",
+    "memberCenter": "会員センター",
     "profile": "マイページ",
     "general": "一般設定",
     "mcpServerSetting": "MCPサービス設定",
@@ -8,5 +9,6 @@
     "powerDetail": "ポイント明細",
     "agent": "エージェント",
     "agentSquare": "エージェント広場",
+    "apps": "アプリセンター",
     "chat": "会話"
 }

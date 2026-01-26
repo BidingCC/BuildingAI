@@ -1,4 +1,4 @@
-import { QueueService } from "@buildingai/core/modules/queue/queue.service";
+import { QueueService } from "@buildingai/core/modules";
 import { Body, Delete, Get, Param, Post } from "@nestjs/common";
 
 import { ConsoleController } from "../../common/decorators/controller.decorator";

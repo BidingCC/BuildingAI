@@ -1,4 +1,4 @@
-import { type UserPlayground } from "@buildingai/db/interfaces/context.interface";
+import { type UserPlayground } from "@buildingai/db";
 import { Playground } from "@buildingai/decorators/playground.decorator";
 import { ConsoleController } from "@common/decorators/controller.decorator";
 import { Permissions } from "@common/decorators/permissions.decorator";

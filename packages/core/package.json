@@ -6,39 +6,21 @@
     "main": "./dist/index.js",
     "module": "./dist/index.js",
     "types": "./dist/index.d.ts",
-    "files": [
-        "dist/**/*"
-    ],
     "exports": {
         ".": {
             "require": "./dist/index.js",
             "import": "./dist/index.js",
             "types": "./dist/index.d.ts"
         },
-        "./*": {
-            "types": "./dist/*.d.ts",
-            "import": "./dist/*.js",
-            "require": "./dist/*.js"
-        },
-        "./@nestjs": {
-            "import": "./dist/@nestjs/index.js",
-            "require": "./dist/@nestjs/index.js",
-            "types": "./dist/@nestjs/index.d.ts"
-        },
-        "./controllers": {
-            "import": "./dist/controllers/index.js",
-            "require": "./dist/controllers/index.js",
-            "types": "./dist/controllers/index.d.ts"
+        "./@nestjs/schedule": {
+            "import": "./dist/@nestjs/schedule.js",
+            "require": "./dist/@nestjs/schedule.js",
+            "types": "./dist/@nestjs/schedule.d.ts"
         },
         "./decorators": {
             "import": "./dist/decorators/index.js",
             "require": "./dist/decorators/index.js",
             "types": "./dist/decorators/index.d.ts"
-        },
-        "./entities": {
-            "import": "./dist/entities/index.js",
-            "require": "./dist/entities/index.js",
-            "types": "./dist/entities/index.d.ts"
         },
         "./interfaces": {
             "import": "./dist/interfaces/index.js",
@@ -49,20 +31,10 @@
             "import": "./dist/modules/index.js",
             "require": "./dist/modules/index.js",
             "types": "./dist/modules/index.d.ts"
-        },
-        "./plugins": {
-            "import": "./dist/plugins/index.js",
-            "require": "./dist/plugins/index.js",
-            "types": "./dist/plugins/index.d.ts"
-        },
-        "./services": {
-            "import": "./dist/services/index.js",
-            "require": "./dist/services/index.js",
-            "types": "./dist/services/index.d.ts"
         }
     },
     "scripts": {
-        "clean": "rimraf dist .turbo tsconfig.tsbuildinfo",
+        "clean": "rimraf dist .turbo dist/build.tsbuildinfo",
         "check-types": "tsc --noEmit",
         "build": "tsc -p tsconfig.build.json",
         "dev": "tsc -p tsconfig.build.json --watch",
@@ -75,19 +47,22 @@
         "test:dev": "jest --watch"
     },
     "dependencies": {
-        "@buildingai/constants": "workspace:*",
-        "@buildingai/logger": "workspace:*",
+        "@buildingai/base": "workspace:*",
+        "@buildingai/cache": "workspace:*",
         "@buildingai/config": "workspace:*",
-        "@buildingai/utils": "workspace:*",
+        "@buildingai/constants": "workspace:*",
         "@buildingai/db": "workspace:*",
         "@buildingai/dto": "workspace:*",
-        "@nestjs/common": "catalog:api",
         "@buildingai/errors": "workspace:*",
-        "@buildingai/base": "workspace:*",
+        "@buildingai/logger": "workspace:*",
+        "@buildingai/utils": "workspace:*",
+        "@nestjs/common": "catalog:api",
+        "@types/ali-oss": "catalog:",
+        "ali-oss": "catalog:",
         "cli-table3": "catalog:"
     },
     "devDependencies": {
-        "@buildingai/typescript-config": "workspace:*",
-        "@buildingai/eslint-config": "workspace:*"
+        "@buildingai/eslint-config": "workspace:*",
+        "@buildingai/typescript-config": "workspace:*"
     }
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { apiUploadFile, apiUploadFiles } from "@buildingai/service/common";
+import { uploadFileAdaptive, uploadFilesAdaptive } from "@buildingai/upload";
 import { computed, nextTick, ref, useTemplateRef, watch } from "vue";
 import type { Composer } from "vue-i18n";
 
@@ -14,6 +14,9 @@ const props = withDefaults(defineProps<BdUploaderProps>(), {
 });
 
 const emit = defineEmits<BdUploaderEmits>();
+
+// 获取 FormField 上下文，用于触发表单校验
+const formField = useFormField();
 
 const { $i18n } = useNuxtApp();
 const { t } = $i18n as Composer;
@@ -56,6 +59,7 @@ function initFileList() {
                 status: UPLOAD_STATUS.SUCCESS,
                 extension,
                 isImage: isImageByExtension(extension),
+                isVideo: isVideoByExtension(extension),
             },
         ];
     } else if (Array.isArray(props.modelValue)) {
@@ -72,6 +76,7 @@ function initFileList() {
                 status: UPLOAD_STATUS.SUCCESS,
                 extension,
                 isImage: isImageByExtension(extension),
+                isVideo: isVideoByExtension(extension),
             };
         });
     }
@@ -119,10 +124,11 @@ async function handleMultipleFilesUpload(files: FileList) {
     globalProgress.value = 0;
 
     try {
-        const uploadFn = props.uploadApi || apiUploadFiles;
+        const uploadFn = props.uploadApi || uploadFilesAdaptive;
         const response = await uploadFn(
             {
                 files: validFiles,
+                ...(props.extensionId && { extensionId: props.extensionId }),
             },
             {
                 onProgress: (progress: number) => {
@@ -143,6 +149,7 @@ async function handleMultipleFilesUpload(files: FileList) {
                     status: UPLOAD_STATUS.SUCCESS,
                     extension: fileResponse.extension,
                     isImage: isImageByExtension(fileResponse.extension),
+                    isVideo: isVideoByExtension(fileResponse.extension),
                 };
 
                 fileList.value.push(uploadItem);
@@ -172,10 +179,11 @@ async function uploadAndProcessFile(uploadItem: UploadItem) {
     globalProgress.value = 0;
 
     try {
-        const uploadFn = props.uploadApi || apiUploadFile;
+        const uploadFn = props.uploadApi || uploadFileAdaptive;
         const response = await uploadFn(
             {
                 file: uploadItem.file,
+                ...(props.extensionId && { extensionId: props.extensionId }),
             },
             {
                 onProgress: (progress: number) => {
@@ -225,6 +233,8 @@ async function uploadAndProcessFile(uploadItem: UploadItem) {
 
 function createUploadItem(file: File): UploadItem {
     const extension = getFileExtension(file.name);
+    const isImage = file.type.startsWith("image/") || isImageByExtension(extension);
+    const isVideo = file.type.startsWith("video/") || isVideoByExtension(extension);
     return {
         id: generateUniqueId(),
         name: file.name,
@@ -235,7 +245,8 @@ function createUploadItem(file: File): UploadItem {
         status: UPLOAD_STATUS.UPLOADING,
         file,
         extension,
-        isImage: file.type.startsWith("image/"),
+        isImage,
+        isVideo,
     };
 }
 
@@ -279,6 +290,12 @@ function previewFile(item: UploadItem, index: number) {
               : [];
 
         useImagePreview(imageUrls, index);
+    } else if (item.isVideo) {
+        // 视频预览使用弹窗
+        const overlay = useOverlay();
+        const VideoPreviewModal = defineAsyncComponent(() => import("./video-preview-modal.vue"));
+        const modal = overlay.create(VideoPreviewModal);
+        modal.open({ videoUrl: item.url, title: item.name });
     } else {
         window.open(item.url, "_blank");
     }
@@ -319,6 +336,8 @@ function updateModelValue() {
 
     const value: string | string[] = props.single ? urls[0] || "" : urls;
     emit("update:modelValue", value);
+    // 触发表单校验，让 UForm 能够感知到值的变化
+    formField?.emitFormChange();
 }
 
 function validateFile(file: File): boolean {
@@ -381,6 +400,11 @@ function isImageByExtension(extension: string): boolean {
     return imageExtensions.includes(extension.toLowerCase());
 }
 
+function isVideoByExtension(extension: string): boolean {
+    const videoExtensions = ["mp4", "webm", "ogg", "mov", "avi", "m4v", "mkv"];
+    return videoExtensions.includes(extension.toLowerCase());
+}
+
 function getFileTypeFromExtension(extension: string): string {
     if (isImageByExtension(extension)) return "image";
 
@@ -426,6 +450,26 @@ function formatFileSize(size: number): string {
                                 class="size-full rounded-md object-contain"
                                 alt=""
                             />
+
+                            <div
+                                v-else-if="item.isVideo"
+                                class="relative size-full rounded-md bg-black"
+                            >
+                                <video
+                                    :src="item.url"
+                                    class="size-full rounded-md object-cover"
+                                    preload="metadata"
+                                    muted
+                                />
+                                <div
+                                    class="absolute inset-0 flex items-center justify-center rounded-md bg-black/20"
+                                >
+                                    <UIcon
+                                        name="i-lucide-play-circle"
+                                        class="size-10 text-white opacity-80"
+                                    />
+                                </div>
+                            </div>
 
                             <div v-else class="flex size-full flex-col items-center justify-center">
                                 <NuxtImg

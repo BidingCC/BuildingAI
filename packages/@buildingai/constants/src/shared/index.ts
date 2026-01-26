@@ -6,6 +6,7 @@ export * from "./dict.constant";
 export * from "./extension.constant";
 export * from "./payconfig.constant";
 export * from "./status-codes.constant";
+export * from "./storage-config.constant";
 export * from "./tag.constant";
 export * from "./team-role.constants";
 export * from "./terminal.constants";

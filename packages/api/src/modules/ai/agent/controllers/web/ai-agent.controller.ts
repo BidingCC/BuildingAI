@@ -1,8 +1,9 @@
 import { BaseController } from "@buildingai/base";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { Agent } from "@buildingai/db/entities/ai-agent.entity";
-import { AgentChatRecord } from "@buildingai/db/entities/ai-agent-chat-record.entity";
-import { AiModel } from "@buildingai/db/entities/ai-model.entity";
+import { AiModel } from "@buildingai/db/entities";
+import { Agent } from "@buildingai/db/entities";
+import { AgentChatRecord } from "@buildingai/db/entities";
+import { MembershipLevels } from "@buildingai/db/entities";
 import { In, Repository } from "@buildingai/db/typeorm";
 import { BuildFileUrl } from "@buildingai/decorators/file-url.decorator";
 import { Public } from "@buildingai/decorators/public.decorator";
@@ -27,6 +28,8 @@ export class AiAgentWebController extends BaseController {
         private readonly chatRecordRepository: Repository<AgentChatRecord>,
         @InjectRepository(AiModel)
         private readonly aiModelRepository: Repository<AiModel>,
+        @InjectRepository(MembershipLevels)
+        private readonly membershipLevelsRepository: Repository<MembershipLevels>,
     ) {
         super();
     }
@@ -37,7 +40,12 @@ export class AiAgentWebController extends BaseController {
      */
     @Get()
     @Public()
-    @BuildFileUrl(["**.avatar", "**.chatAvatar", "**.provider.iconUrl"])
+    @BuildFileUrl([
+        "**.avatar",
+        "**.chatAvatar",
+        "**.provider.iconUrl",
+        "**.requiredMembershipLevel.icon",
+    ])
     async getPublicAgents(@Query() queryDto: QueryPublicAgentDto) {
         try {
             const queryBuilder = this.agentRepository.createQueryBuilder("agent");
@@ -143,6 +151,15 @@ export class AiAgentWebController extends BaseController {
 
             // 批量获取模型和供应商信息
             const providerMap = new Map<string, { name: string; iconUrl?: string }>();
+            const modelRequiredMembershipLevelMap = new Map<
+                string,
+                {
+                    id: string;
+                    name: string;
+                    level: number;
+                    icon: string;
+                }
+            >();
 
             if (modelIds.length > 0) {
                 const models = await this.aiModelRepository.find({
@@ -150,6 +167,7 @@ export class AiAgentWebController extends BaseController {
                     relations: ["provider"],
                     select: {
                         id: true,
+                        membershipLevel: true,
                         provider: {
                             id: true,
                             name: true,
@@ -157,6 +175,49 @@ export class AiAgentWebController extends BaseController {
                         },
                     },
                 });
+
+                // 计算每个模型所需的最高会员等级信息（若该模型配置了会员等级限制）
+                const requiredLevelIdSet = new Set<string>();
+                models.forEach((model) => {
+                    const requiredLevelIds = (model as AiModel & { membershipLevel?: string[] })
+                        .membershipLevel;
+                    if (!requiredLevelIds || requiredLevelIds.length === 0) return;
+                    requiredLevelIds.forEach((levelId) => requiredLevelIdSet.add(levelId));
+                });
+
+                const requiredLevelIds = Array.from(requiredLevelIdSet);
+                if (requiredLevelIds.length > 0) {
+                    const levels = await this.membershipLevelsRepository.find({
+                        where: { id: In(requiredLevelIds) },
+                        select: ["id", "name", "level", "icon"],
+                    });
+
+                    const levelMap = new Map(levels.map((l) => [l.id, l] as const));
+
+                    models.forEach((model) => {
+                        const required = (model as AiModel & { membershipLevel?: string[] })
+                            .membershipLevel;
+                        if (!required || required.length === 0) return;
+
+                        let maxRequiredLevel: MembershipLevels | undefined;
+                        required.forEach((levelId) => {
+                            const level = levelMap.get(levelId);
+                            if (!level) return;
+                            if (!maxRequiredLevel || level.level > maxRequiredLevel.level) {
+                                maxRequiredLevel = level;
+                            }
+                        });
+
+                        if (maxRequiredLevel) {
+                            modelRequiredMembershipLevelMap.set(model.id, {
+                                id: maxRequiredLevel.id,
+                                name: maxRequiredLevel.name,
+                                level: maxRequiredLevel.level,
+                                icon: maxRequiredLevel.icon,
+                            });
+                        }
+                    });
+                }
 
                 models.forEach((model) => {
                     if (model.provider) {
@@ -172,6 +233,9 @@ export class AiAgentWebController extends BaseController {
             result.items = result.items.map((agent) => {
                 const modelId = agentModelMap.get(agent.id);
                 const provider = modelId ? providerMap.get(modelId) : undefined;
+                const requiredMembershipLevel = modelId
+                    ? modelRequiredMembershipLevelMap.get(modelId)
+                    : undefined;
 
                 return {
                     ...agent,
@@ -182,11 +246,18 @@ export class AiAgentWebController extends BaseController {
                               iconUrl: provider.iconUrl,
                           }
                         : undefined,
+                    requiredMembershipLevel,
                     // 移除 modelConfig（私密信息）
                     modelConfig: undefined,
                 } as Agent & {
                     conversationCount: number;
                     provider?: { name: string; iconUrl?: string };
+                    requiredMembershipLevel?: {
+                        id: string;
+                        name: string;
+                        level: number;
+                        icon: string;
+                    };
                 };
             });
 

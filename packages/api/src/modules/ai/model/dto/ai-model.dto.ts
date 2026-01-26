@@ -105,6 +105,15 @@ export class CreateAiModelDto {
     billingRule: BillingRuleDto;
 
     /**
+     * 会员等级
+     */
+    @IsArray({ message: "会员等级必须是数组" })
+    @IsOptional()
+    @Type(() => String)
+    @IsString({ each: true, message: "会员等级必须是字符串数组" })
+    membershipLevel?: string[];
+
+    /**
      * 是否启用该模型
      */
     @IsBoolean({ message: "启用状态必须是布尔值" })
@@ -216,4 +225,19 @@ export class BatchUpdateAiModelDto {
     @IsOptional()
     @IsBoolean({ message: "skipErrors必须是布尔值" })
     skipErrors?: boolean = false;
+}
+
+/**
+ * 批量排序AI模型DTO
+ */
+export class BatchSortAiModelDto {
+    /**
+     * 排序后的模型ID数组
+     * 数组顺序即为排序后的顺序，第一个元素排在最前面
+     */
+    @IsArray({ message: "模型ID列表必须是数组" })
+    @ArrayMinSize(1, { message: "模型ID列表至少需要包含一个ID" })
+    @IsString({ each: true, message: "模型ID必须是字符串" })
+    @IsNotEmpty({ each: true, message: "模型ID不能为空" })
+    sort: string[];
 }

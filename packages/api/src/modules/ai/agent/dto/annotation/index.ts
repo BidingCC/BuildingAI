@@ -1,4 +1,4 @@
-import { AnnotationReviewStatus } from "@buildingai/db/entities/ai-agent-annotation.entity";
+import { AnnotationReviewStatus } from "@buildingai/db/entities";
 import { PaginationDto } from "@buildingai/dto/pagination.dto";
 import {
     IsBoolean,
@@ -36,11 +36,7 @@ export class CreateAnnotationDto extends AnnotationBaseDto {
     createBy?: string;
 }
 
-export class UpdateAnnotationDto extends AnnotationBaseDto {
-    @IsNotEmpty({ message: "标注ID不能为空" })
-    @IsUUID(4, { message: "标注ID必须是有效的UUID" })
-    id: string;
-}
+export class UpdateAnnotationDto extends AnnotationBaseDto {}
 
 export class QueryAnnotationDto extends PaginationDto {
     @IsOptional()

@@ -1,4 +1,4 @@
-import { QueueService } from "@buildingai/core/modules/queue/queue.service";
+import { QueueService } from "@buildingai/core/modules";
 import { Injectable, Logger } from "@nestjs/common";
 import { Job } from "bullmq";
 

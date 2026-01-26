@@ -1,6 +1,6 @@
-import type { ExtensionInfo } from "@buildingai/core/modules/extension/interfaces/extension.interface";
-import { SeedRunner } from "@buildingai/db/seeds/seed-runner";
-import { BaseSeeder } from "@buildingai/db/seeds/seeders/base.seeder";
+import type { ExtensionInfo } from "@buildingai/core/modules";
+import { BaseSeeder } from "@buildingai/db";
+import { SeedRunner } from "@buildingai/db/seeds";
 import { DataSource } from "@buildingai/db/typeorm";
 import { TerminalLogger } from "@buildingai/utils";
 import { Injectable, Logger } from "@nestjs/common";

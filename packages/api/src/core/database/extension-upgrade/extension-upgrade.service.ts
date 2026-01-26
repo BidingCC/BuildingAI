@@ -46,6 +46,9 @@ export class ExtensionUpgradeService {
             TerminalLogger.log(
                 "Extension Upgrade",
                 `[${this.extensionIdentifier}] Executing for version ${version}`,
+                {
+                    icon: "⬆",
+                },
             );
 
             // Dynamically import upgrade module
@@ -62,6 +65,9 @@ export class ExtensionUpgradeService {
                     TerminalLogger.success(
                         "Extension Upgrade",
                         `[${this.extensionIdentifier}] Completed for version ${version}`,
+                        {
+                            icon: "⬆",
+                        },
                     );
                 } else {
                     this.logger.warn(
@@ -80,6 +86,9 @@ export class ExtensionUpgradeService {
             TerminalLogger.error(
                 "Extension Upgrade",
                 `[${this.extensionIdentifier}] Failed for version ${version}: ${error.message}`,
+                {
+                    icon: "⬆",
+                },
             );
             throw error;
         }
@@ -95,6 +104,9 @@ export class ExtensionUpgradeService {
         TerminalLogger.log(
             "Extension Upgrade",
             `[${this.extensionIdentifier}] Processing versions: ${versions.join(", ")}`,
+            {
+                icon: "⬆",
+            },
         );
 
         for (const version of versions) {
@@ -105,6 +117,9 @@ export class ExtensionUpgradeService {
         TerminalLogger.success(
             "Extension Upgrade",
             `[${this.extensionIdentifier}] All scripts completed`,
+            {
+                icon: "⬆",
+            },
         );
     }
 }

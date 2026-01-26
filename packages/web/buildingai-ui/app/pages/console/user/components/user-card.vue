@@ -5,6 +5,7 @@ const emit = defineEmits<{
     (e: "select", user: UserInfo, selected: boolean | "indeterminate"): void;
     (e: "delete", user: UserInfo): void;
     (e: "edit-power", user: UserInfo): void;
+    (e: "adjust-membership", user: UserInfo): void;
 }>();
 
 const props = withDefaults(
@@ -107,6 +108,11 @@ const dropdownActions = computed(() => {
             label: t("user.backend.adjustBalance"),
             icon: "i-lucide-edit",
             onSelect: () => emit("edit-power", props.user),
+        });
+        items.push({
+            label: t("user.backend.membership.adjustMembership"),
+            icon: "i-lucide-edit",
+            onSelect: () => emit("adjust-membership", props.user),
         });
     }
 

@@ -15,14 +15,29 @@
             "import": "./dist/index.js",
             "types": "./dist/index.d.ts"
         },
-        "./*": {
-            "types": "./dist/*.d.ts",
-            "import": "./dist/*.js",
-            "require": "./dist/*.js"
+        "./entities": {
+            "types": "./dist/entities/index.d.ts",
+            "import": "./dist/entities/index.js",
+            "require": "./dist/entities/index.js"
+        },
+        "./seeds": {
+            "types": "./dist/seeds/index.d.ts",
+            "import": "./dist/seeds/index.js",
+            "require": "./dist/seeds/index.js"
+        },
+        "./@nestjs/typeorm": {
+            "types": "./dist/@nestjs/typeorm.d.ts",
+            "import": "./dist/@nestjs/typeorm.js",
+            "require": "./dist/@nestjs/typeorm.js"
+        },
+        "./typeorm": {
+            "types": "./dist/typeorm.d.ts",
+            "import": "./dist/typeorm.js",
+            "require": "./dist/typeorm.js"
         }
     },
     "scripts": {
-        "clean": "rimraf dist .turbo tsconfig.tsbuildinfo",
+        "clean": "rimraf dist .turbo dist/build.tsbuildinfo",
         "check-types": "tsc --noEmit",
         "build": "rimraf dist && tsc -p tsconfig.build.json && pnpm run copy:data",
         "copy:data": "cpy 'src/seeds/data/**' dist/seeds/data",
@@ -47,7 +62,7 @@
         "@buildingai/di": "workspace:*",
         "@buildingai/dto": "workspace:*",
         "@buildingai/logger": "workspace:*",
-        "pg": "^8.16.3",
+        "pg": "catalog:api",
         "pg-connection-string": "^2.9.1"
     },
     "devDependencies": {

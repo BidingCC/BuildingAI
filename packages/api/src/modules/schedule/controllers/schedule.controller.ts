@@ -1,4 +1,4 @@
-import { ScheduleService } from "@buildingai/core/services/schedule.service";
+import { ScheduleService } from "@buildingai/core";
 import { ConsoleController } from "@common/decorators/controller.decorator";
 import { Body, Delete, Get, Param, Post } from "@nestjs/common";
 

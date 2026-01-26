@@ -1,7 +1,7 @@
 import { type PayConfigType } from "@buildingai/constants/shared/payconfig.constant";
-import { AppEntity } from "@buildingai/db/decorators/app-entity.decorator";
 
 import { Column, Index } from "../typeorm";
+import { AppEntity } from "./../decorators/app-entity.decorator";
 import { BaseEntity } from "./base";
 
 @AppEntity({ name: "refund_log", comment: "退款日志" })

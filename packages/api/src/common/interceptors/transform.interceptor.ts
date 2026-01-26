@@ -1,6 +1,6 @@
 import { BusinessCode } from "@buildingai/constants/shared/business-code.constant";
-import { Response } from "@buildingai/core/interfaces/response.interface";
-import { FileUrlService } from "@buildingai/db/utils/file-url.service";
+import { Response } from "@buildingai/core/interfaces";
+import { FileUrlService } from "@buildingai/db";
 import {
     FILE_URL_METADATA_KEY,
     FileUrlConfig,
@@ -170,15 +170,29 @@ export class TransformInterceptor<T> implements NestInterceptor<T, Response<T>> 
                 protocol = protocol.split(",")[0].trim();
             }
 
-            // 确保协议是 http 或 https
-            protocol = protocol === "https" ? "https" : "http";
-
             // 获取主机名(包含端口),优先使用代理头(X-Forwarded-Host)
-            let host =
+            let host: string | string[] | undefined =
                 request.get("x-forwarded-host") ||
                 request.headers?.["x-forwarded-host"] ||
                 request.get("host") ||
                 request.headers?.host;
+
+            // 如果是生产环境的域名（非 localhost/IP），默认使用 https
+            const hostStr = Array.isArray(host) ? host[0] : host || "";
+            const isProductionDomain =
+                typeof hostStr === "string" &&
+                !hostStr.includes("localhost") &&
+                !hostStr.includes("127.0.0.1") &&
+                !hostStr.match(/^\d+\.\d+\.\d+\.\d+/) &&
+                !hostStr.includes(":"); // 没有端口号的域名通常是生产环境
+
+            // 生产域名且协议检测为 http 时，强制使用 https
+            if (isProductionDomain && protocol !== "https") {
+                protocol = "https";
+            } else {
+                // 确保协议是 http 或 https
+                protocol = protocol === "https" ? "https" : "http";
+            }
 
             if (!host) {
                 return undefined;
@@ -202,7 +216,6 @@ export class TransformInterceptor<T> implements NestInterceptor<T, Response<T>> 
             // 先检查端口,根据端口修正协议
             if (host.includes(":443")) {
                 protocol = "https";
-                this.logger.debug(`检测到 :443 端口,修正协议为 https`);
             } else if (host.includes(":80")) {
                 protocol = "http";
             }
@@ -232,11 +245,6 @@ export class TransformInterceptor<T> implements NestInterceptor<T, Response<T>> 
             protocol === "https"
                 ? host.replace(/:443$/, "") // 移除 https 的 :443
                 : host.replace(/:80$/, ""); // 移除 http 的 :80
-
-        // 调试日志
-        if (normalizedHost !== host) {
-            this.logger.debug(`端口标准化: ${host} -> ${normalizedHost}`);
-        }
 
         return normalizedHost;
     }

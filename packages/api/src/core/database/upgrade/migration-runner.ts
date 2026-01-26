@@ -35,12 +35,14 @@ interface MigrationConstructor {
 export class MigrationRunner {
     private readonly logger = new Logger(MigrationRunner.name);
     private readonly migrationsDir: string;
+    private readonly versionsDir: string;
 
     constructor(private readonly dataSource: DataSource) {
         // Get migrations directory from @buildingai/db package
         const dbPackagePath = require.resolve("@buildingai/db");
         const dbDistPath = path.dirname(dbPackagePath);
         this.migrationsDir = path.join(dbDistPath, "migrations");
+        this.versionsDir = path.join(process.cwd(), "data", "versions");
     }
 
     /**
@@ -132,6 +134,28 @@ export class MigrationRunner {
     }
 
     /**
+     * Get existing versions from data/versions directory
+     */
+    private async getExistingVersions(): Promise<Set<string>> {
+        try {
+            await fse.ensureDir(this.versionsDir);
+            const versionFiles = await fse.readdir(this.versionsDir);
+
+            const existingVersions = new Set<string>();
+            versionFiles.forEach((file) => {
+                if (semver.valid(file)) {
+                    existingVersions.add(file);
+                }
+            });
+
+            return existingVersions;
+        } catch (error) {
+            this.logger.error(`Failed to get existing versions: ${error.message}`);
+            return new Set();
+        }
+    }
+
+    /**
      * Get migrations that need to be executed
      *
      * @param fromVersion Starting version (exclusive)
@@ -147,14 +171,22 @@ export class MigrationRunner {
             return [];
         }
 
-        // If no starting version, run all migrations up to target version
+        // Get existing versions to exclude
+        const existingVersions = await this.getExistingVersions();
+
+        // If no starting version, run all migrations up to target version, excluding existing versions
         if (!fromVersion) {
-            return allMigrations.filter((m) => semver.lte(m.version, toVersion));
+            return allMigrations.filter(
+                (m) => semver.lte(m.version, toVersion) && !existingVersions.has(m.version),
+            );
         }
 
-        // Filter migrations between versions
+        // Filter migrations between versions, excluding existing versions
         return allMigrations.filter(
-            (m) => semver.gt(m.version, fromVersion) && semver.lte(m.version, toVersion),
+            (m) =>
+                semver.gt(m.version, fromVersion) &&
+                semver.lte(m.version, toVersion) &&
+                !existingVersions.has(m.version), // 排除已存在的版本
         );
     }
 

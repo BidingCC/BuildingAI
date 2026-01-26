@@ -1,7 +1,7 @@
 import { BaseService } from "@buildingai/base";
 import { PayConfigPayType } from "@buildingai/constants/shared/payconfig.constant";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { RefundLog } from "@buildingai/db/entities/refund-log.entity";
+import { RefundLog } from "@buildingai/db/entities";
 import { EntityManager, Repository } from "@buildingai/db/typeorm";
 import { generateNo } from "@buildingai/utils";
 import { OrderRefundParams } from "@common/interfaces/refund.interface";

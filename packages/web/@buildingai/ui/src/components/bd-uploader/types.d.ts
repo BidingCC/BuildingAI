@@ -26,6 +26,8 @@ export interface UploadItem {
     extension?: string;
     /** Whether the file is an image */
     isImage?: boolean;
+    /** Whether the file is a video */
+    isVideo?: boolean;
 }
 
 export interface BdUploaderProps {
@@ -66,6 +68,8 @@ export interface BdUploaderProps {
     showRemoveButton?: boolean;
     /** Custom add button class */
     addButtonClassName?: string;
+    /** Extension ID for file storage isolation */
+    extensionId?: string;
 }
 
 export interface BdUploaderEmits {

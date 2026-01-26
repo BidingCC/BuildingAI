@@ -1,1 +1,11 @@
+export * from "./dto/create-extension.dto";
+export * from "./dto/query-extension.dto";
+export * from "./dto/update-extension.dto";
+export * from "./interfaces/extension.interface";
+export * from "./interfaces/extension-market.interface";
+export * from "./interfaces/platform.interface";
+export { ExtensionsService } from "./services/extension.service";
+export { ExtensionConfigService } from "./services/extension-config.service";
+export { ExtensionSchemaService } from "./services/extension-schema.service";
 export * from "./utils/extension.utils";
+export { getPackageJson, getPackageJsonSync } from "./utils/get-package-json";

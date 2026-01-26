@@ -30,6 +30,7 @@
     "dependencies": {
         "@buildingai/service": "workspace:*",
         "@buildingai/utils": "workspace:*",
+        "@buildingai/upload": "workspace:*",
         "@internationalized/date": "catalog:web",
         "@tiptap/extension-color": "catalog:web",
         "@tiptap/extension-highlight": "catalog:web",

@@ -36,7 +36,15 @@ defineOptions({ inheritAttrs: false });
         <template #content>
             <div :id="contentId" class="relative flex flex-col gap-4 p-4 sm:p-6">
                 <!-- Modal header -->
-                <div class="pr- flex items-center justify-between">
+                <div v-if="!!props.header" class="pr-">
+                    <div
+                        v-if="typeof props.header === 'string'"
+                        class="text-base"
+                        v-html="header"
+                    />
+                    <component v-else :is="header" />
+                </div>
+                <div v-else class="pr- flex items-center gap-4">
                     <div>
                         <h2 class="text-lg font-medium md:text-xl">
                             {{ title }}
@@ -45,16 +53,16 @@ defineOptions({ inheritAttrs: false });
                             {{ description }}
                         </p>
                     </div>
-                    <UButton
-                        class="absolute top-4 right-4"
-                        icon="tabler:x"
-                        color="neutral"
-                        size="sm"
-                        variant="ghost"
-                        aria-label="Close modal"
-                        @click="emit('close', false)"
-                    />
                 </div>
+                <UButton
+                    class="absolute top-4 right-4"
+                    icon="tabler:x"
+                    color="neutral"
+                    size="sm"
+                    variant="ghost"
+                    aria-label="Close modal"
+                    @click="emit('close', false)"
+                />
                 <div class="flex flex-col gap-5">
                     <!-- Content -->
                     <div v-if="typeof content === 'string'" class="text-base" v-html="content" />

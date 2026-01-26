@@ -15,6 +15,11 @@ import { RequestCache } from "../utils/request-cache";
 import { InterceptorManager } from "./interceptor-manager";
 
 /**
+ * Custom response header for new token after sliding refresh
+ */
+const NEW_TOKEN_HEADER = "x-new-token";
+
+/**
  * Request executor
  * Responsible for executing HTTP request core logic
  */
@@ -124,6 +129,14 @@ export class RequestExecutor {
         const requestPromise = ofetch
             .raw<T>(url, config as FetchOptions<"json">)
             .then(async (response) => {
+                // Handle sliding token refresh: check for new token in response headers
+                const newToken = response.headers.get(NEW_TOKEN_HEADER);
+                if (newToken) {
+                    const userStore = useUserStore();
+                    userStore.setToken(newToken);
+                    console.log("[Token Refresh] Token has been automatically refreshed");
+                }
+
                 // Execute response interceptors
                 const processedResponse = await this.interceptorManager.runResponseInterceptors(
                     response._data as ResponseSchema,

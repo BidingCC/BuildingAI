@@ -2,7 +2,7 @@ import {
     type BooleanNumberType,
     type UserTerminalType,
 } from "@buildingai/constants/shared/status-codes.constant";
-import { Role } from "@buildingai/db/entities/role.entity";
+import { Role } from "@buildingai/db/entities";
 
 export interface LoginUserPlayground {
     id: string;

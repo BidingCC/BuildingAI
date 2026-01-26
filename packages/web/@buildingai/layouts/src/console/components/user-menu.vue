@@ -11,6 +11,8 @@ import { useColorMode } from "@vueuse/core";
 
 import type { DropdownMenuItem } from "#ui/types";
 
+const SystemInfoModal = defineAsyncComponent(() => import("./system-info-modal.vue"));
+
 const props = defineProps<{
     /** 显示模式：'sidebar' 或 'mixture' */
     mode: "sidebar" | "mixture";
@@ -39,6 +41,12 @@ const userStore = useUserStore();
 
 const languageCookie = useCookie<LanguageCode>("nuxt-ui-language");
 const open = shallowRef<boolean>(false);
+const overlay = useOverlay();
+
+const openSystemInfo = async () => {
+    const modal = overlay.create(SystemInfoModal);
+    await modal.open();
+};
 
 const currentThemeMode = computed(() => {
     if (store.value === "auto")
@@ -55,9 +63,6 @@ const menuItems = computed<DropdownMenuItem[][]>(() => [
     [
         {
             label: "profile",
-            onSelect: () => {
-                smartNavigate(`/profile/${userStore.userInfo?.id}`);
-            },
         },
     ],
     [
@@ -223,6 +228,14 @@ const menuItems = computed<DropdownMenuItem[][]>(() => [
     ],
     [
         {
+            label: t("layouts.systemInfo.title"),
+            icon: "i-tabler-info-circle",
+            onSelect(e: MouseEvent) {
+                e.preventDefault();
+                void openSystemInfo();
+            },
+        },
+        {
             label: t("layouts.officeLink"),
             icon: "i-lucide-external-link",
             onSelect() {
@@ -308,10 +321,10 @@ defineShortcuts({
                     {{ (item as DropdownMenuItem).icon }}
                 </template>
                 <template #item="{ item }">
-                    <RouterLink
+                    <div
                         v-if="item?.label === 'profile'"
                         class="flex px-1 pt-1.5"
-                        to="/profile"
+                        @click="smartNavigate(`/profile/${userStore.userInfo?.id}`)"
                     >
                         <UAvatar
                             :src="userStore.userInfo?.avatar"
@@ -328,7 +341,7 @@ defineShortcuts({
                                 {{ userStore.userInfo?.username }}
                             </span>
                         </div>
-                    </RouterLink>
+                    </div>
                     <div
                         v-else
                         class="text-foreground flex h-full w-full cursor-pointer items-center gap-2 px-1 py-1"
@@ -355,15 +368,13 @@ defineShortcuts({
                     :class="{ 'flex-col': value }"
                 >
                     <div class="flex flex-1 items-center gap-2">
-                        <UChip color="success" inset>
-                            <UAvatar
-                                :src="userStore.userInfo?.avatar"
-                                :alt="userStore.userInfo?.nickname"
-                                :icon="userStore.userInfo?.nickname ? 'tabler:user' : undefined"
-                                size="lg"
-                                :ui="{ root: 'rounded-lg' }"
-                            />
-                        </UChip>
+                        <UAvatar
+                            :src="userStore.userInfo?.avatar"
+                            :alt="userStore.userInfo?.nickname"
+                            :icon="userStore.userInfo?.nickname ? 'tabler:user' : undefined"
+                            size="lg"
+                            :ui="{ root: 'rounded-lg' }"
+                        />
                         <div v-if="!value" class="flex w-[100px] flex-col">
                             <span class="truncate text-sm font-medium">
                                 {{ userStore.userInfo?.nickname }}
@@ -374,26 +385,19 @@ defineShortcuts({
                         </div>
                     </div>
                     <div v-if="!value" class="flex items-center">
-                        <!-- <UButton
-                            icon="i-lucide-chevrons-up-down"
-                            color="neutral"
-                            variant="link"
-                            :ui="{ leadingIcon: 'size-4' }"
-                        /> -->
                         <Icon name="i-lucide-chevrons-up-down" class="text-muted" />
                     </div>
                 </div>
 
                 <!-- Mixed模式的触发器 -->
-                <UChip inset v-else-if="mode === 'mixture'">
-                    <UAvatar
-                        :src="userStore.userInfo?.avatar"
-                        :alt="userStore.userInfo?.nickname"
-                        :icon="userStore.userInfo?.nickname ? 'tabler:user' : undefined"
-                        size="lg"
-                        :ui="{ root: 'rounded-lg' }"
-                    />
-                </UChip>
+                <UAvatar
+                    v-else-if="mode === 'mixture'"
+                    :src="userStore.userInfo?.avatar"
+                    :alt="userStore.userInfo?.nickname"
+                    :icon="userStore.userInfo?.nickname ? 'tabler:user' : undefined"
+                    size="lg"
+                    :ui="{ root: 'rounded-lg' }"
+                />
             </UDropdownMenu>
         </div>
     </div>

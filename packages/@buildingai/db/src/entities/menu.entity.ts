@@ -122,13 +122,6 @@ export class Menu extends BaseEntity {
     sourceType: MenuSourceType;
 
     /**
-     * 插件标识
-     * 当 sourceType 为 PLUGIN 时，此字段必填
-     */
-    @Column({ name: "pluginPackName", nullable: true, length: 50 })
-    pluginPackName: string;
-
-    /**
      * 父级菜单
      */
     @ManyToOne(() => Menu, (menu) => menu.children, {

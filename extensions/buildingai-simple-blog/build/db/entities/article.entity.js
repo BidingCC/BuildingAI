@@ -1,7 +1,7 @@
 'use strict';
 
-var extensionEntity_decorator = require('@buildingai/core/decorators/extension-entity.decorator');
-var user_entity = require('@buildingai/db/entities/user.entity');
+var decorators = require('@buildingai/core/decorators');
+var entities = require('@buildingai/db/entities');
 var typeorm = require('typeorm');
 var category_entity = require('./category.entity');
 
@@ -218,16 +218,16 @@ _ts_decorate([
   _ts_metadata("design:type", typeof category_entity.Category === "undefined" ? Object : category_entity.Category)
 ], Article.prototype, "category", void 0);
 _ts_decorate([
-  typeorm.ManyToOne(() => user_entity.User, {
+  typeorm.ManyToOne(() => entities.User, {
     nullable: true
   }),
   typeorm.JoinColumn({
     name: "authorId"
   }),
-  _ts_metadata("design:type", typeof user_entity.User === "undefined" ? Object : user_entity.User)
+  _ts_metadata("design:type", typeof entities.User === "undefined" ? Object : entities.User)
 ], Article.prototype, "author", void 0);
 Article = _ts_decorate([
-  extensionEntity_decorator.ExtensionEntity()
+  decorators.ExtensionEntity()
 ], Article);
 
 exports.Article = Article;

@@ -71,7 +71,14 @@ const handleClick = () => {
                 </div>
             </div>
 
-            <div>
+            <div class="flex items-center gap-1">
+                <UTooltip
+                    v-if="agent.requiredMembershipLevel"
+                    :text="agent.requiredMembershipLevel.name"
+                    :delay-duration="0"
+                >
+                    <UAvatar :src="agent.requiredMembershipLevel.icon" class="size-4" />
+                </UTooltip>
                 <UTooltip :text="agent.provider?.name" :delay-duration="0">
                     <UAvatar :src="agent.provider?.iconUrl" class="size-4" />
                 </UTooltip>

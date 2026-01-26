@@ -1,4 +1,4 @@
-import type { FileType } from "@buildingai/db/entities/file.entity";
+import type { FileType } from "@buildingai/db/entities";
 
 /**
  * File storage path result

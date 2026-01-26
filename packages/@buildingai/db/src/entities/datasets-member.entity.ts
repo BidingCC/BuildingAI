@@ -1,9 +1,9 @@
 import { TEAM_ROLE, type TeamRoleType } from "@buildingai/constants/shared/team-role.constants";
-import { Datasets } from "@buildingai/db/entities/datasets.entity";
 
 import { AppEntity } from "../decorators/app-entity.decorator";
 import { Column, Index, JoinColumn, ManyToOne, type Relation } from "../typeorm";
 import { BaseEntity } from "./base";
+import { Datasets } from "./datasets.entity";
 import { User } from "./user.entity";
 
 /**

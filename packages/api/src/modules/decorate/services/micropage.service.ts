@@ -1,7 +1,7 @@
 import { BaseService } from "@buildingai/base";
 import { TERMINAL_TYPES } from "@buildingai/constants/shared/terminal.constants";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { DecorateMicropageEntity } from "@buildingai/db/entities/decorate-micropage.entity";
+import { DecorateMicropageEntity } from "@buildingai/db/entities";
 import { Repository } from "@buildingai/db/typeorm";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { CreateMicropageDto } from "@modules/decorate/dto/create-micropage.dto";

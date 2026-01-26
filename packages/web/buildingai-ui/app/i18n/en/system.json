@@ -62,7 +62,7 @@
             "title": "Copyright & Filing",
             "description": "Manage copyright and filing information",
             "displayName": {
-                "label": "Filing Display Name",
+                "label": "Filing Info",
                 "placeholder": "e.g.: Jing ICP Bei No.030173",
                 "required": "Filing name required"
             },
@@ -75,6 +75,21 @@
                 "label": "Filing Link",
                 "placeholder": "e.g.: https://beian.miit.gov.cn/",
                 "required": "Filing link required"
+            },
+            "sections": {
+                "filing": "Filing Info",
+                "copyright": "Copyright Info"
+            },
+            "copyrightInfo": {
+                "label": "Copyright Info",
+                "textPlaceholder": "Powered by",
+                "brandPlaceholder": "Site AI Name",
+                "required": "Please complete copyright info"
+            },
+            "copyrightUrl": {
+                "label": "Link",
+                "placeholder": "Set copyright link, e.g. https://beian.miit.gov.cn/",
+                "required": "Link required"
             }
         },
         "loginConfig": {

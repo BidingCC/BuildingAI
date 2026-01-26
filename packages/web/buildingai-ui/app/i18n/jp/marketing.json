@@ -53,6 +53,10 @@
                 "consumeSourceDesc": "ソース",
                 "remark": "備考"
             },
+            "noOptionSelected": "チャージプランを選択してください",
+            "orderNotFound": "注文が存在しません",
+            "continueRecharge": "続けてチャージ",
+            "viewRecords": "記録を表示",
             "powerBalance": "ポイント残高",
             "selectRechargePackage": "チャージプランを選択",
             "paymentMethod": "支払い方法",
@@ -87,8 +91,14 @@
             "qrCodeExpired": "QRコードが無効です。更新してください",
             "refreshQrCode": "QRコードを更新",
             "systemTip": "システム通知",
-            "continueRecharge": "続けてチャージ",
-            "viewRecords": "記録を表示"
+            "alipayTips": {
+                "tip1": "支付宝の支払いページに移動しています…",
+                "tip2": "新しく開いたページでお支払いを完了してください",
+                "stepTitle": "お支払い手順：",
+                "step1": "1. 新しいページでQRコードをスキャンするか、Alipayにログインしてください",
+                "step2": "2. 支払金額を確認して支払いを完了する",
+                "step3": "3. 支払いが成功すると自動的に戻ります"
+            }
         }
     }
 }

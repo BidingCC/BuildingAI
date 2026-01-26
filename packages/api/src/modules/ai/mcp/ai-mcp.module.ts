@@ -1,8 +1,5 @@
 import { TypeOrmModule } from "@buildingai/db/@nestjs/typeorm";
-import { AiMcpServer } from "@buildingai/db/entities/ai-mcp-server.entity";
-import { AiMcpTool } from "@buildingai/db/entities/ai-mcp-tool.entity";
-import { AiUserMcpServer } from "@buildingai/db/entities/ai-user-mcp-server.entity";
-import { Dict } from "@buildingai/db/entities/dict.entity";
+import { AiMcpServer, AiMcpTool, AiUserMcpServer, Dict } from "@buildingai/db/entities";
 import { Module } from "@nestjs/common";
 
 import { AiMcpServerConsoleController } from "./controllers/console/ai-mcp-server.controller";

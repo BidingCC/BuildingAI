@@ -94,14 +94,18 @@ export class ExtensionUpgradeOrchestratorService {
      */
     async checkAndUpgradeAll(): Promise<void> {
         this.logger.log("🔌 Starting extension upgrade check...");
-        TerminalLogger.log("Extension Upgrade", "Starting extension upgrade check...");
+        TerminalLogger.log("Extension Upgrade", "Starting extension upgrade check...", {
+            icon: "⬆",
+        });
 
         try {
             const enabledExtensions = await this.getEnabledExtensions();
 
             if (enabledExtensions.length === 0) {
                 this.logger.log("ℹ  No enabled extensions found");
-                TerminalLogger.log("Extension Upgrade", "No enabled extensions found");
+                TerminalLogger.log("Extension Upgrade", "No enabled extensions found", {
+                    icon: "⬆",
+                });
                 return;
             }
 
@@ -124,6 +128,9 @@ export class ExtensionUpgradeOrchestratorService {
                         TerminalLogger.log(
                             "Extension Upgrade",
                             `[${extension.identifier}] Build not found, skipping...`,
+                            {
+                                icon: "⬆",
+                            },
                         );
                         skippedCount++;
                         continue;
@@ -143,6 +150,9 @@ export class ExtensionUpgradeOrchestratorService {
                     TerminalLogger.error(
                         "Extension Upgrade",
                         `[${extension.identifier}] Failed: ${error.message}`,
+                        {
+                            icon: "⬆",
+                        },
                     );
                     failedCount++;
                     // Don't throw - continue upgrading other extensions
@@ -155,10 +165,15 @@ export class ExtensionUpgradeOrchestratorService {
             TerminalLogger.success(
                 "Extension Upgrade",
                 `Check completed. Upgraded: ${upgradedCount}, Skipped: ${skippedCount}, Failed: ${failedCount}`,
+                {
+                    icon: "⬆",
+                },
             );
         } catch (error) {
             this.logger.error(`Extension upgrade orchestrator failed: ${error.message}`);
-            TerminalLogger.error("Extension Upgrade", `Orchestrator failed: ${error.message}`);
+            TerminalLogger.error("Extension Upgrade", `Orchestrator failed: ${error.message}`, {
+                icon: "⬆",
+            });
             throw error;
         }
     }

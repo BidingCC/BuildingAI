@@ -1,5 +1,5 @@
-import { Datasets } from "@buildingai/db/entities/datasets.entity";
-import { type UserPlayground } from "@buildingai/db/interfaces/context.interface";
+import { type UserPlayground } from "@buildingai/db";
+import { Datasets } from "@buildingai/db/entities";
 import { Playground } from "@buildingai/decorators/playground.decorator";
 import {
     IndexingSegmentsDto,

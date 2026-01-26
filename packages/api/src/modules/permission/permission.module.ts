@@ -1,5 +1,5 @@
 import { TypeOrmModule } from "@buildingai/db/@nestjs/typeorm";
-import { Permission } from "@buildingai/db/entities/permission.entity";
+import { Permission } from "@buildingai/db/entities";
 import { PermissionConsoleController } from "@modules/permission/controllers/console/permission.controller";
 import { PermissionService } from "@modules/permission/services/permission.service";
 import { Module } from "@nestjs/common";

@@ -1,9 +1,9 @@
 import { BaseService } from "@buildingai/base";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { Menu, MenuSourceType, MenuType } from "@buildingai/db/entities/menu.entity";
-import { Permission, PermissionType } from "@buildingai/db/entities/permission.entity";
-import { Role } from "@buildingai/db/entities/role.entity";
-import { User } from "@buildingai/db/entities/user.entity";
+import { User } from "@buildingai/db/entities";
+import { Menu, MenuSourceType, MenuType } from "@buildingai/db/entities";
+import { Permission, PermissionType } from "@buildingai/db/entities";
+import { Role } from "@buildingai/db/entities";
 import { Like, Repository } from "@buildingai/db/typeorm";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { CreateMenuDto, QueryMenuDto, UpdateMenuDto } from "@modules/menu/dto";

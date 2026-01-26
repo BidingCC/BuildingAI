@@ -1,7 +1,7 @@
 import { BaseService } from "@buildingai/base";
 import { DECORATOR_KEYS } from "@buildingai/constants";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { Permission, PermissionType } from "@buildingai/db/entities/permission.entity";
+import { Permission, PermissionType } from "@buildingai/db/entities";
 import { Repository } from "@buildingai/db/typeorm";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { PermissionOptions } from "@common/decorators/permissions.decorator";

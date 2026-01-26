@@ -1,0 +1,70 @@
+{
+    "list": {
+        "search": {
+            "placeholder": "搜索栏目名称..."
+        },
+        "table": {
+            "columns": {
+                "select": "选择",
+                "name": "名称",
+                "sort": "排序",
+                "articleCount": "文章数",
+                "createdAt": "创建时间",
+                "actions": "操作"
+            },
+            "actions": {
+                "edit": "编辑",
+                "delete": "删除",
+                "batchDelete": "批量删除",
+                "create": "新建栏目",
+                "selected": "已选择",
+                "showColumns": "显示字段"
+            }
+        },
+        "messages": {
+            "fetchFailed": "获取栏目列表失败",
+            "warmTip": "温馨提示",
+            "deleteConfirm": "确定要删除这个栏目吗？",
+            "batchDeleteConfirm": "确定要删除选中的栏目吗？",
+            "deleteSuccess": "删除成功",
+            "deleteFailed": "删除失败"
+        }
+    },
+    "edit": {
+        "title": {
+            "create": "新建栏目",
+            "edit": "编辑栏目"
+        },
+        "description": {
+            "create": "创建一个新的文章栏目",
+            "edit": "编辑文章栏目的信息"
+        },
+        "form": {
+            "name": {
+                "label": "名称",
+                "placeholder": "请输入栏目名称",
+                "required": "名称不能为空"
+            },
+            "description": {
+                "label": "描述",
+                "placeholder": "请输入栏目描述（可选）"
+            },
+            "sort": {
+                "label": "排序",
+                "placeholder": "请输入排序值（数字越大越靠前）"
+            }
+        },
+        "buttons": {
+            "save": "保存",
+            "saving": "保存中...",
+            "cancel": "取消"
+        },
+        "messages": {
+            "fetchDetailFailed": "获取详情失败",
+            "createSuccess": "创建成功",
+            "createFailed": "创建失败",
+            "updateSuccess": "更新成功",
+            "updateFailed": "更新失败"
+        }
+    }
+}

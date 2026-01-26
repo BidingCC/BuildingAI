@@ -1,3 +1,101 @@
+import * as semver from "semver";
+
+/**
+ * Engine compatibility configuration for extensions
+ */
+export interface ExtensionEngine {
+    buildingai?: string;
+}
+
+/**
+ * Result of version compatibility check
+ */
+export interface VersionCompatibilityResult {
+    compatible: boolean;
+    reason?: string;
+}
+
+/**
+ * Normalize custom version range syntax to semver-compatible format.
+ * Converts Unicode operators (≥, ≤) to standard operators (>=, <=).
+ *
+ * @param range - Version range string with possible custom syntax
+ * @returns Normalized semver-compatible range string
+ */
+function normalizeVersionRange(range: string): string {
+    return range.replace(/≥/g, ">=").replace(/≤/g, "<=");
+}
+
+/**
+ * Check if a platform version satisfies the extension's engine requirement.
+ * Supports multiple version formats:
+ * - Single version: "25.1.0"
+ * - Multiple versions: "25.1.0 || 25.1.1"
+ * - Version range: ">=25.1.0 <25.2.0" or "≥25.1.0 <25.2.0"
+ * - Multiple ranges: ">=25.1.0 <25.2.0 || >=25.4.0 <25.5.0"
+ * - Mixed: "25.0.4 || >=25.1.0 <25.2.0"
+ *
+ * @param platformVersion - Current platform version (e.g., "25.1.0")
+ * @param engine - Extension engine configuration
+ * @returns Compatibility result with reason if incompatible
+ */
+export function checkVersionCompatibility(
+    platformVersion: string,
+    engine?: ExtensionEngine,
+): VersionCompatibilityResult {
+    // If no engine config, assume compatible
+    if (!engine || !engine.buildingai) {
+        return { compatible: true };
+    }
+
+    const requiredRange = engine.buildingai;
+
+    // Validate platform version
+    if (!semver.valid(platformVersion)) {
+        return {
+            compatible: false,
+            reason: `Invalid platform version format: "${platformVersion}"`,
+        };
+    }
+
+    // Normalize the range (convert ≥ to >= etc.)
+    const normalizedRange = normalizeVersionRange(requiredRange);
+
+    // Validate the range syntax
+    if (!semver.validRange(normalizedRange)) {
+        return {
+            compatible: false,
+            reason: `Invalid version range syntax: "${requiredRange}"`,
+        };
+    }
+
+    // Check if platform version satisfies the range
+    const satisfies = semver.satisfies(platformVersion, normalizedRange);
+
+    if (satisfies) {
+        return { compatible: true };
+    }
+
+    return {
+        compatible: false,
+        reason: `Platform version "${platformVersion}" does not satisfy required range "${requiredRange}"`,
+    };
+}
+
+/**
+ * Validate if a version range string is syntactically correct.
+ *
+ * @param range - Version range string to validate
+ * @returns True if the range is valid
+ */
+export function isValidVersionRange(range: string): boolean {
+    if (!range || typeof range !== "string") {
+        return false;
+    }
+    const normalizedRange = normalizeVersionRange(range);
+    return semver.validRange(normalizedRange) !== null;
+}
+
 /**
  * Building AI version utility.
  * @property validate - Validate whether a version string is compliant.

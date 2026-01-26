@@ -1,16 +1,11 @@
-import { getProvider } from "@buildingai/ai-sdk";
+import { Adapter, getProvider } from "@buildingai/ai-sdk";
+import { ClientOptions } from "@buildingai/ai-sdk/openai";
 import { BaseService } from "@buildingai/base";
-import { PowerDeductionOptions } from "@buildingai/core/modules/billing/types";
-import { SecretService } from "@buildingai/core/modules/secret/services/secret.service";
+import { SecretService } from "@buildingai/core/modules";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { AiModel } from "@buildingai/db/entities/ai-model.entity";
-import { Secret } from "@buildingai/db/entities/secret.entity";
+import { AiModel, Secret } from "@buildingai/db/entities";
 import { Repository } from "@buildingai/db/typeorm";
-import { getProviderSecret } from "@buildingai/utils";
 import { Injectable, Logger } from "@nestjs/common";
-
-export interface ExtensionPowerDeductionOptions
-    extends Omit<PowerDeductionOptions, "source" | "accountType"> {}
 
 /**
  * Public AI Model Service
@@ -67,18 +62,9 @@ export class PublicAiModelService {
      * @param configKeys Config keys
      * @returns Provider
      */
-    async getProvider(modelId: string, configKeys: string[]) {
-        const secretConfig = await this.getProviderConfig(modelId);
+    async getProviderAdapter(modelId: string, config: ClientOptions = {}): Promise<Adapter> {
         const model = await this.getModelInfo(modelId);
-
-        const config: Record<string, string> = {};
-
-        configKeys.forEach((key) => {
-            config[key] = getProviderSecret(key, secretConfig);
-        });
-
         const provider = getProvider(model.provider.provider, config);
-
         return provider;
     }
 }

@@ -34,7 +34,7 @@ const tabs = [
     { value: 2, icon: "i-tabler-layout-grid" },
 ];
 
-const selectedChat = shallowRef<Set<string>>(new Set());
+const selectedChat = ref<Set<string>>(new Set());
 
 const { paging, getLists } = usePaging({
     fetchFun: apiGetConversationList,

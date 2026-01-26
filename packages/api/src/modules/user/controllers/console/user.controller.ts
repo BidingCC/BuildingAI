@@ -1,8 +1,10 @@
 import { BaseController } from "@buildingai/base";
 import { type BooleanNumberType } from "@buildingai/constants";
 import { LOGIN_TYPE } from "@buildingai/constants";
-import { type UserPlayground } from "@buildingai/db/interfaces/context.interface";
-import { In } from "@buildingai/db/typeorm";
+import { type UserPlayground } from "@buildingai/db";
+import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
+import { MembershipLevels, UserSubscription } from "@buildingai/db/entities";
+import { In, MoreThan, Repository } from "@buildingai/db/typeorm";
 import { BuildFileUrl } from "@buildingai/decorators/file-url.decorator";
 import { Playground } from "@buildingai/decorators/playground.decorator";
 import { DictService } from "@buildingai/dict";
@@ -12,6 +14,7 @@ import { isEnabled } from "@buildingai/utils";
 import { ConsoleController } from "@common/decorators/controller.decorator";
 import { Permissions } from "@common/decorators/permissions.decorator";
 import { RolePermissionService } from "@common/modules/auth/services/role-permission.service";
+import { MembershipOrderService } from "@modules/membership/services/order.service";
 import { MenuService } from "@modules/menu/services/menu.service";
 import { RoleService } from "@modules/role/services/role.service";
 import { BatchUpdateUserDto } from "@modules/user/dto/batch-update-user.dto";
@@ -44,6 +47,12 @@ export class UserConsoleController extends BaseController {
         private readonly rolePermissionService: RolePermissionService,
         private readonly roleService: RoleService,
         private readonly dictService: DictService,
+        @Inject(MembershipOrderService)
+        private readonly membershipOrderService: MembershipOrderService,
+        @InjectRepository(UserSubscription)
+        private readonly userSubscriptionRepository: Repository<UserSubscription>,
+        @InjectRepository(MembershipLevels)
+        private readonly membershipLevelsRepository: Repository<MembershipLevels>,
     ) {
         super();
     }
@@ -74,16 +83,54 @@ export class UserConsoleController extends BaseController {
         const menuTree = await this.menuService.getMenuTreeByPermissions(
             userInfo.isRoot ? [] : permissionCodes,
         );
+
+        // 获取用户当前最高会员等级ID
+        const membershipLevelId = await this.getUserHighestMembershipLevelId(user.id);
         const { password, ...restUserInfo } = userInfo;
         return {
             user: {
                 ...restUserInfo,
                 hasPassword: !!password,
                 permissions: userInfo.isRoot || permissionCodes.length > 0 ? 1 : 0,
+                membershipLevelId,
             },
             permissions: permissionCodes,
             menus: menuTree,
         };
+    }
+
+    /**
+     * 获取用户当前最高会员等级ID
+     *
+     * @param userId 用户ID
+     * @returns 最高会员等级ID，无有效会员则返回 null
+     */
+    private async getUserHighestMembershipLevelId(userId: string): Promise<string | null> {
+        const now = new Date();
+
+        // 查询用户所有有效订阅的等级ID
+        const subscriptions = await this.userSubscriptionRepository.find({
+            where: {
+                userId,
+                endTime: MoreThan(now),
+            },
+            select: ["levelId"],
+        });
+
+        const levelIds = subscriptions.filter((sub) => sub.levelId).map((sub) => sub.levelId!);
+
+        if (levelIds.length === 0) {
+            return null;
+        }
+
+        // 查询这些等级中 level 值最高的
+        const highestLevel = await this.membershipLevelsRepository.findOne({
+            where: { id: In(levelIds) },
+            order: { level: "DESC" },
+            select: ["id"],
+        });
+
+        return highestLevel?.id ?? null;
     }
 
     /**
@@ -422,7 +469,44 @@ export class UserConsoleController extends BaseController {
         if (!result) {
             throw HttpErrorFactory.notFound("用户不存在");
         }
-        return result;
+
+        // 获取用户会员等级信息（查找系统来源的订阅记录）
+        const systemSubscription = await this.userSubscriptionRepository.findOne({
+            where: {
+                userId: id,
+            },
+            relations: ["level"],
+            order: { createdAt: "DESC" },
+        });
+
+        return {
+            ...result,
+            level: systemSubscription?.levelId || null,
+            levelEndTime: systemSubscription?.endTime
+                ? systemSubscription.endTime.toISOString()
+                : null,
+        };
+    }
+
+    /**
+     * 获取用户订阅记录列表
+     *
+     * @param id 用户ID
+     * @param query 分页参数
+     * @returns 用户订阅记录列表（已付款且未退款的订单）
+     */
+    @Get(":id/subscriptions")
+    @Permissions({
+        code: "detail",
+        name: "查看用户订阅记录",
+        description: "查看指定用户的会员订阅记录",
+    })
+    @BuildFileUrl(["***.icon"])
+    async getUserSubscriptions(
+        @Param("id", UUIDValidationPipe) id: string,
+        @Query() query: { page?: number; pageSize?: number },
+    ) {
+        return await this.membershipOrderService.getUserPaidOrders(id, query);
     }
 
     /**

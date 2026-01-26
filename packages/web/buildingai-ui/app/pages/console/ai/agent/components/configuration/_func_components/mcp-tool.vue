@@ -22,6 +22,6 @@ const mcpServers = useVModel(props, "modelValue", emit);
                 {{ t("ai-agent.backend.configuration.mcp.description") }}
             </span>
         </div>
-        <McpToolSelect v-model="mcpServers" capability="agent" :console="true" />
+        <McpToolSelect v-model="mcpServers" capability="agent" :console="true" :use-cache="false" />
     </div>
 </template>

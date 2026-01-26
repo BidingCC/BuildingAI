@@ -14,6 +14,7 @@
         "neverLogin": "从未登录",
         "editProfile": "编辑资料",
         "adjustBalance": "调整余额",
+        "expired": "已过期",
         "deleteUser": "删除用户",
         "status": {
             "active": "正常",
@@ -27,6 +28,68 @@
             "email": "邮箱注册",
             "username": "账号注册",
             "unknown": "未知来源"
+        },
+        "list": {
+            "nickname": "用户信息",
+            "username": "用户账号",
+            "userNo": "用户编号",
+            "status": "状态",
+            "source": "来源",
+            "createdAt": "创建时间",
+            "registerTime": "注册时间",
+            "lastLoginAt": "最后登录时间",
+            "actions": "操作",
+            "level": "会员等级",
+            "endTime": "会员有效期"
+        },
+        "subscriptionRecords": {
+            "title": "会员订阅记录",
+            "loading": "加载中...",
+            "empty": "暂无订阅记录",
+            "level": "会员等级",
+            "duration": "订阅时长",
+            "validity": "会员有效期",
+            "source": "购买来源",
+            "recordTime": "记录时间",
+            "refundStatus": "退款状态",
+            "refunded": "已退款",
+            "notRefunded": "未退款",
+            "loadFailed": "加载订阅记录失败"
+        },
+        "membership": {
+            "level": "会员等级",
+            "validity": "有效期",
+            "normalUser": "普通用户",
+            "adjustMembership": "调整会员",
+            "adjust": {
+                "title": "调整会员等级",
+                "levelLabel": "会员等级",
+                "levelPlaceholder": "请选择会员等级",
+                "durationLabel": "订阅时长",
+                "durationOptions": {
+                    "oneMonth": "1个月",
+                    "threeMonths": "3个月",
+                    "oneYear": "1年",
+                    "forever": "永久",
+                    "custom": "自定义时长"
+                },
+                "customUnit": {
+                    "day": "天",
+                    "month": "个月",
+                    "year": "年"
+                },
+                "noLevel": "无等级",
+                "validation": {
+                    "customDurationRequired": "请输入自定义时长",
+                    "customDurationMin": "时长必须大于0"
+                },
+                "messages": {
+                    "getLevelListFailed": "获取会员等级列表失败",
+                    "userIdMissing": "用户ID不存在",
+                    "adjustSuccess": "调整会员成功",
+                    "adjustFailed": "调整会员失败"
+                }
+            }
         },
         "form": {
             "username": "账号",

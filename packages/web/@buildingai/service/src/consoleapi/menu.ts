@@ -38,8 +38,6 @@ export interface MenuFormData extends BaseEntity {
     parentId: string | number | null;
     /** Permission code */
     permissionCode?: string;
-    /** Plugin pack name */
-    pluginPackName?: string;
     /** Source type: 1-system, 2-plugin */
     sourceType: number;
     /** Sort order */

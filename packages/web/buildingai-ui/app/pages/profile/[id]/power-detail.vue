@@ -78,12 +78,24 @@ definePageMeta({
     <div class="flex h-full flex-col space-y-4 p-2 pb-5">
         <div class="h-fit">
             <UCard>
-                <div class="grid grid-cols-2 items-center text-center">
+                <div class="grid grid-cols-4 items-center gap-4 text-center">
                     <div class="flex flex-col justify-between gap-2">
                         <div class="text-muted-foreground text-sm">
                             {{ t("marketing.frontend.recharge.detail.remainingPower") }}
                         </div>
                         <div class="text-lg font-medium">{{ userStore.userInfo?.power }}</div>
+                    </div>
+                    <div class="flex flex-col justify-between gap-2">
+                        <div class="text-muted-foreground text-sm">订阅积分</div>
+                        <div class="text-lg font-medium">
+                            {{ paging.extend?.membershipGiftPower }}
+                        </div>
+                    </div>
+                    <div class="flex flex-col justify-between gap-2">
+                        <div class="text-muted-foreground text-sm">充值积分</div>
+                        <div class="text-lg font-medium">
+                            {{ paging.extend?.rechargePower }}
+                        </div>
                     </div>
                     <div class="flex flex-col items-center gap-2">
                         <div

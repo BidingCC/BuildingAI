@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import type { FileUploadConfig } from "@buildingai/service/consoleapi/ai-agent";
 import type { FilesList } from "@buildingai/service/models/message";
 import { apiOptimizeText } from "@buildingai/service/webapi/ai-conversation";
 import { useFocus } from "@vueuse/core";
@@ -17,6 +18,12 @@ const emits = defineEmits<{
     (e: "stop"): void;
 }>();
 
+interface ModelConfigInput {
+    /** 模型配置：包含模型 ID 及参数、特性等信息 */
+    id?: string;
+    options?: Record<string, unknown>;
+}
+
 const props = withDefaults(
     defineProps<{
         modelValue: string;
@@ -26,6 +33,22 @@ const props = withDefaults(
         rows?: number;
         needAuth?: boolean;
         attachmentSizeLimit?: number;
+        /** 智能体专属模型配置，包含模型 ID 与参数 */
+        modelConfig?: ModelConfigInput;
+        /**
+         * 直接传入模型特性列表（优先级高于 modelConfig）
+         * 用于前台智能体场景，后端直接返回模型特性而不暴露模型配置
+         */
+        modelFeatures?: string[];
+        /**
+         * 智能体创建模式：'direct' | 'coze' | 'dify' 等
+         * 用于针对不同第三方平台设置不同的文件类型支持
+         */
+        agentCreateMode?: string;
+        /**
+         * 第三方平台的文件上传配置（如 Dify 的 allowed_file_extensions）
+         */
+        fileUploadConfig?: FileUploadConfig;
     }>(),
     {
         modelValue: "",
@@ -66,6 +89,8 @@ const {
     clearFiles,
 } = usePromptFiles();
 
+const canSubmit = computed(() => inputValue.value.trim().length > 0 || files.value.length > 0);
+
 function handleFocus() {
     uTextareaRefs.value?.textareaRef?.focus();
     if (!userStore.isAgreed && props.needAuth) {
@@ -81,11 +106,16 @@ function handleKeydown(event: KeyboardEvent) {
     if (event.key === "Enter" && !event.shiftKey) {
         event.preventDefault();
 
+        // 当 isLoading 存在时，禁止回车触发
         if (props.isLoading) {
-            emits("stop");
-        } else {
-            emits("submit", inputValue.value);
+            return;
         }
+
+        if (!canSubmit.value) {
+            return;
+        }
+
+        emits("submit", inputValue.value);
     }
 }
 
@@ -93,11 +123,8 @@ function handleSubmit() {
     if (props.isLoading) {
         emits("stop");
     } else {
-        if (!inputValue.value.trim() && files.value.length === 0) return;
+        if (!canSubmit.value) return;
         emits("submit", inputValue.value);
-        // Clear file list after submission
-        clearFiles();
-        filesList.value = [];
     }
 }
 
@@ -282,6 +309,10 @@ onMounted(() =>
                     <PromptFileUpload
                         :disabled="isUploading"
                         :maxSize="attachmentSizeLimit"
+                        :model-config="modelConfig"
+                        :model-features="modelFeatures"
+                        :agent-create-mode="agentCreateMode"
+                        :file-upload-config="fileUploadConfig"
                         @file-select="handleFileSelect"
                         @url-submit="handleUrlSubmit"
                     />
@@ -291,19 +322,19 @@ onMounted(() =>
                         :text="
                             isLoading
                                 ? t('common.chat.messages.stopGeneration')
-                                : !inputValue?.length
+                                : !canSubmit
                                   ? t('common.chat.messages.enterQuestion')
                                   : t('common.chat.messages.sendMessage')
                         "
                         :delay-duration="0"
                         :arrow="true"
-                        :disabled="isLoading || !!inputValue?.length"
+                        :disabled="isLoading || canSubmit"
                     >
                         <UButton
                             :icon="isLoading ? 'i-lucide-square' : 'i-lucide-arrow-up'"
                             class="rounded-full font-bold"
                             size="lg"
-                            :disabled="!isLoading && !inputValue?.length"
+                            :disabled="!isLoading && !canSubmit"
                             :color="isLoading ? 'error' : 'primary'"
                             @click.stop="handleSubmit"
                         />

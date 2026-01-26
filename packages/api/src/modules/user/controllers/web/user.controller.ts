@@ -1,15 +1,23 @@
 import { BaseService } from "@buildingai/base";
 import { BaseController } from "@buildingai/base";
-import { LOGIN_TYPE } from "@buildingai/constants";
+import { ACCOUNT_LOG_TYPE, LOGIN_TYPE } from "@buildingai/constants";
 import {
     ACCOUNT_LOG_SOURCE,
     ACCOUNT_LOG_TYPE_DESCRIPTION,
 } from "@buildingai/constants/shared/account-log.constants";
+import { type UserPlayground } from "@buildingai/db";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { AccountLog } from "@buildingai/db/entities/account-log.entity";
-import { Agent } from "@buildingai/db/entities/ai-agent.entity";
-import { type UserPlayground } from "@buildingai/db/interfaces/context.interface";
-import { In, IsNull, Like, Not, Repository } from "@buildingai/db/typeorm";
+import { Agent, MembershipLevels, UserSubscription } from "@buildingai/db/entities";
+import { AccountLog } from "@buildingai/db/entities";
+import {
+    In,
+    IsNull,
+    Like,
+    MoreThan,
+    MoreThanOrEqual,
+    Not,
+    Repository,
+} from "@buildingai/db/typeorm";
 import { BuildFileUrl } from "@buildingai/decorators/file-url.decorator";
 import { Playground } from "@buildingai/decorators/playground.decorator";
 import { Public } from "@buildingai/decorators/public.decorator";
@@ -51,6 +59,10 @@ export class UserWebController extends BaseController {
         private readonly agentRepository: Repository<Agent>,
         @InjectRepository(AccountLog)
         private readonly accountLogRepository: Repository<AccountLog>,
+        @InjectRepository(UserSubscription)
+        private readonly userSubscriptionRepository: Repository<UserSubscription>,
+        @InjectRepository(MembershipLevels)
+        private readonly membershipLevelsRepository: Repository<MembershipLevels>,
     ) {
         super();
         this.accountLogService = new BaseService(accountLogRepository);
@@ -80,6 +92,9 @@ export class UserWebController extends BaseController {
 
         // 判断用户是否有权限：有权限就是1，没有权限就是0
         const hasPermissions = user.isRoot === 1 || permissionCodes.length > 0 ? 1 : 0;
+
+        // 获取用户当前最高会员等级ID
+        const membershipLevelId = await this.getUserHighestMembershipLevelId(user.id);
         const { mpOpenid, password, openid, unionid, ...restUserInfo } = userInfo;
         return {
             ...restUserInfo,
@@ -87,7 +102,42 @@ export class UserWebController extends BaseController {
             bindWechatOa: !!openid,
             hasPassword: !!password,
             permissions: hasPermissions,
+            membershipLevelId,
         };
+    }
+
+    /**
+     * 获取用户当前最高会员等级ID
+     *
+     * @param userId 用户ID
+     * @returns 最高会员等级ID，无有效会员则返回 null
+     */
+    private async getUserHighestMembershipLevelId(userId: string): Promise<string | null> {
+        const now = new Date();
+
+        // 查询用户所有有效订阅的等级ID
+        const subscriptions = await this.userSubscriptionRepository.find({
+            where: {
+                userId,
+                endTime: MoreThan(now),
+            },
+            select: ["levelId"],
+        });
+
+        const levelIds = subscriptions.filter((sub) => sub.levelId).map((sub) => sub.levelId!);
+
+        if (levelIds.length === 0) {
+            return null;
+        }
+
+        // 查询这些等级中 level 值最高的
+        const highestLevel = await this.membershipLevelsRepository.findOne({
+            where: { id: In(levelIds) },
+            order: { level: "DESC" },
+            select: ["id"],
+        });
+
+        return highestLevel?.id ?? null;
     }
 
     /**
@@ -246,6 +296,21 @@ export class UserWebController extends BaseController {
             select: ["power"],
         });
 
+        // 获取订阅积分（所有未过期记录的 availableAmount 总和）
+        const now = new Date();
+        const membershipGiftLogs = await this.accountLogService.findAll({
+            where: {
+                userId: user.id,
+                accountType: ACCOUNT_LOG_TYPE.MEMBERSHIP_GIFT_INC,
+                expireAt: MoreThanOrEqual(now),
+                availableAmount: MoreThan(0),
+            } as any,
+        });
+        const membershipGiftPower = membershipGiftLogs.reduce(
+            (sum, log) => sum + ((log as any).availableAmount || 0),
+            0,
+        );
+
         // 使用 paginate 方法进行分页查询
         const lists = await this.accountLogService.paginate(accountLogDto, {
             where,
@@ -313,7 +378,14 @@ export class UserWebController extends BaseController {
             return { ...accountLog, accountTypeDesc, consumeSourceDesc };
         });
 
-        return { ...lists, userInfo };
+        return {
+            ...lists,
+            extend: {
+                ...userInfo,
+                membershipGiftPower,
+                rechargePower: userInfo.power - membershipGiftPower,
+            },
+        };
     }
 
     /**

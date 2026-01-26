@@ -1,11 +1,8 @@
 import { BaseService } from "@buildingai/base";
+import type { UserPlayground } from "@buildingai/db";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import {
-    AgentAnnotation,
-    AnnotationReviewStatus,
-} from "@buildingai/db/entities/ai-agent-annotation.entity";
-import { AgentChatMessage } from "@buildingai/db/entities/ai-agent-chat-message.entity";
-import type { UserPlayground } from "@buildingai/db/interfaces/context.interface";
+import { AgentAnnotation, AnnotationReviewStatus } from "@buildingai/db/entities";
+import { AgentChatMessage } from "@buildingai/db/entities";
 import { DataSource, Repository } from "@buildingai/db/typeorm";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { Injectable, Logger } from "@nestjs/common";

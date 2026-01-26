@@ -104,6 +104,36 @@ export class RedisService implements OnModuleDestroy {
     }
 
     /**
+     * Get hash value
+     * @param key Key
+     * @param field object[field]
+     * @returns Value
+     */
+    async getHash<T>(key: string, field?: string): Promise<T | null> {
+        if (field) {
+            return (await this.redisClient.hGet(key, field)) as unknown as Promise<T | null>;
+        } else {
+            const data = await this.redisClient.hGetAll(key);
+            return Object.keys(data).length > 0 ? (data as unknown as Promise<T | null>) : null;
+        }
+    }
+
+    /**
+     * Set hash value
+     * @param key Key
+     * @param value Value
+     * @param ttl Time to live in seconds, optional
+     */
+    async setHash(key: string, value: Record<string, string>, ttl?: number): Promise<void> {
+        if (ttl) {
+            await this.redisClient.hSet(key, value);
+            await this.redisClient.expire(key, ttl);
+        } else {
+            await this.redisClient.hSet(key, value);
+        }
+    }
+
+    /**
      * Delete key
      * @param key Key
      */
@@ -296,6 +326,21 @@ export class RedisService implements OnModuleDestroy {
             return this.redisClient.decr(key);
         }
         return this.redisClient.decrBy(key, delta);
+    }
+
+    /**
+     * Set value only if key does not exist (distributed lock)
+     * @param key Key
+     * @param value Value
+     * @param ttl Time to live in seconds
+     * @returns True if key was set, false if key already exists
+     */
+    async setnx(key: string, value: string, ttl?: number): Promise<boolean> {
+        const result = await this.redisClient.setNX(key, value);
+        if (result && ttl) {
+            await this.redisClient.expire(key, ttl);
+        }
+        return result;
     }
 
     /**

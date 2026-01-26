@@ -1,7 +1,7 @@
 import { AppConfig } from "@buildingai/config/app.config";
 import { BooleanNumber, UserCreateSource, UserTerminal } from "@buildingai/constants";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { User } from "@buildingai/db/entities/user.entity";
+import { User } from "@buildingai/db/entities";
 import { Repository } from "@buildingai/db/typeorm";
 import { DictService } from "@buildingai/dict";
 import { HttpErrorFactory } from "@buildingai/errors";
@@ -12,6 +12,7 @@ import { RolePermissionService } from "@common/modules/auth/services/role-permis
 import { UserService } from "@modules/user/services/user.service";
 import { Injectable, Logger } from "@nestjs/common";
 import { exec } from "child_process";
+import { machineIdSync } from "node-machine-id";
 import { promisify } from "util";
 
 import { initializeDto } from "../dto/system.dto";
@@ -44,6 +45,17 @@ export class SystemService {
         return {
             isInitialized,
             version: AppConfig.version,
+        };
+    }
+
+    /**
+     * 获取运行时系统信息（用于控制台展示）
+     */
+    async getRuntimeInfo(): Promise<{ version: string; systemId: string }> {
+        const systemId = await machineIdSync(true);
+        return {
+            version: AppConfig.version,
+            systemId,
         };
     }
 
@@ -85,10 +97,16 @@ export class SystemService {
                 });
             }
             if (dto.websiteLogo) {
-                await this.dictService.set("logo", dto.websiteLogo, { group: "webinfo" });
+                await this.dictService.set("logo", dto.websiteLogo, {
+                    group: "webinfo",
+                    normalizeFileUrlFields: ["**"],
+                });
             }
             if (dto.websiteIcon) {
-                await this.dictService.set("icon", dto.websiteIcon, { group: "webinfo" });
+                await this.dictService.set("icon", dto.websiteIcon, {
+                    group: "webinfo",
+                    normalizeFileUrlFields: ["**"],
+                });
             }
 
             // 标记系统已初始化

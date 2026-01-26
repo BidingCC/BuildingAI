@@ -17,9 +17,11 @@
         "predeploy": "cross-env NODE_ENV=production node ./bin/predeploy.js"
     },
     "dependencies": {
-        "@buildingai/api": "workspace:*",
-        "fs-extra": "^11.3.2",
-        "commander": "^12.0.0"
+        "@buildingai/db": "workspace:*",
+        "adm-zip": "catalog:api",
+        "commander": "^12.0.0",
+        "dotenv": "catalog:",
+        "pg": "catalog:api"
     },
     "devDependencies": {
         "@buildingai/eslint-config": "workspace:*",

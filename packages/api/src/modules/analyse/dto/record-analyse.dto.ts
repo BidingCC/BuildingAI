@@ -1,4 +1,4 @@
-import { AnalyseActionType } from "@buildingai/db/entities/analyse.entity";
+import { AnalyseActionType } from "@buildingai/db/entities";
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 /**

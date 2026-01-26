@@ -1,4 +1,4 @@
-import { MenuSourceType, MenuType } from "@buildingai/db/entities/menu.entity";
+import { MenuSourceType, MenuType } from "@buildingai/db/entities";
 import { PaginationDto } from "@buildingai/dto/pagination.dto";
 import { IsEnum, IsOptional, IsString } from "class-validator";
 

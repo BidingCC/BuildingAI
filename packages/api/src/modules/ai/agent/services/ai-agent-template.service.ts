@@ -1,12 +1,17 @@
+import type { UserPlayground } from "@buildingai/db";
+import { FileUrlService } from "@buildingai/db";
 import { HttpErrorFactory } from "@buildingai/errors";
+import { HttpService } from "@nestjs/axios";
 import { Injectable, Logger } from "@nestjs/common";
-import { readFileSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import * as yaml from "js-yaml";
 import { join } from "path";
+import { firstValueFrom } from "rxjs";
 
 // 不再需要 ImportAgentDto，使用通用的对象类型
 import {
     AgentTemplateDto,
+    BatchImportAgentDslDto,
     CreateAgentFromTemplateDto,
     ImportAgentDslDto,
     QueryTemplateDto,
@@ -18,7 +23,11 @@ export class AiAgentTemplateService {
     private readonly logger = new Logger(AiAgentTemplateService.name);
     private readonly templates: AgentTemplateDto[] = [];
 
-    constructor(private readonly aiAgentService: AiAgentService) {
+    constructor(
+        private readonly aiAgentService: AiAgentService,
+        private readonly httpService: HttpService,
+        private readonly fileUrlService: FileUrlService,
+    ) {
         this.loadTemplates();
     }
 
@@ -166,12 +175,18 @@ export class AiAgentTemplateService {
             // 获取智能体详情
             const agent = await this.aiAgentService.getAgentDetail(agentId);
 
+            // 拼接头像的完整 URL（包含域名或 OSS 地址）
+            const avatar = agent.avatar ? await this.fileUrlService.get(agent.avatar) : undefined;
+            const chatAvatar = agent.chatAvatar
+                ? await this.fileUrlService.get(agent.chatAvatar)
+                : undefined;
+
             // 构建 DSL 配置对象
             const dslConfig = {
                 name: agent.name,
                 description: agent.description,
-                avatar: agent.avatar,
-                chatAvatar: agent.chatAvatar,
+                avatar,
+                chatAvatar,
                 rolePrompt: agent.rolePrompt,
                 openingStatement: agent.openingStatement,
                 openingQuestions: agent.openingQuestions,
@@ -218,6 +233,7 @@ export class AiAgentTemplateService {
         try {
             // 处理 content，如果是 URL 则读取文件内容
             let content = dto.content;
+            console.log("content", content);
 
             // 检测是否为 URL
             if (content.startsWith("http://") || content.startsWith("https://")) {
@@ -237,7 +253,6 @@ export class AiAgentTemplateService {
             if (!agentData || typeof agentData !== "object") {
                 throw new Error("DSL 配置格式错误");
             }
-
             // 构建导入数据对象，允许通过参数覆盖 DSL 中的值
             let agentName = dto.name || agentData.name;
 
@@ -251,13 +266,19 @@ export class AiAgentTemplateService {
                 chatAvatar: agentData.chatAvatar,
                 rolePrompt: agentData.rolePrompt,
                 openingStatement: agentData.openingStatement,
-                openingQuestions: agentData.openingQuestions,
+                openingQuestions: agentData.openingQuestions || [],
                 showContext: agentData.showContext,
                 showReference: agentData.showReference,
                 enableFeedback: agentData.enableFeedback,
                 enableWebSearch: agentData.enableWebSearch,
                 createMode: agentData.createMode,
                 thirdPartyIntegration: agentData.thirdPartyIntegration,
+                // 快捷指令、自动问题、表单字段
+                quickCommands: agentData.quickCommands || [],
+                autoQuestions: agentData.autoQuestions || [],
+                formFields: agentData.formFields || [],
+                // 计费配置
+                billingConfig: agentData.billingConfig || null,
                 // 导入时清空这些关联配置
                 datasetIds: [],
                 mcpServerIds: [],
@@ -281,6 +302,65 @@ export class AiAgentTemplateService {
     }
 
     /**
+     * 批量导入智能体 DSL 配置
+     * 从多个 DSL 格式文件批量导入智能体配置
+     *
+     * @param dto 批量导入 DSL 配置DTO
+     * @param user 当前用户信息
+     * @returns 批量导入结果
+     */
+    async batchImportAgentDsl(dto: BatchImportAgentDslDto, user: UserPlayground) {
+        const results = {
+            total: dto.contents.length,
+            success: 0,
+            failed: 0,
+            agents: [] as any[],
+            errors: [] as Array<{ file: string; error: string }>,
+        };
+
+        for (const content of dto.contents) {
+            try {
+                const importDto: ImportAgentDslDto = {
+                    content,
+                    format: dto.format,
+                    createBy: dto.createBy || user.id,
+                };
+
+                const importData = await this.importAgentDsl(importDto);
+
+                // 创建智能体
+                const agent = await this.aiAgentService.createAgentFromTemplate(importData, user);
+
+                // 自动发布智能体
+                await this.aiAgentService.publishAgent(agent.id, {
+                    publishConfig: {
+                        allowOrigins: [],
+                        rateLimitPerMinute: 60,
+                        showBranding: true,
+                        allowDownloadHistory: false,
+                    },
+                });
+
+                results.success++;
+                results.agents.push(agent);
+            } catch (error) {
+                results.failed++;
+                results.errors.push({
+                    file: content,
+                    error: error.message || "未知错误",
+                });
+                this.logger.error(`批量导入 DSL 失败 [${content}]: ${error.message}`, error.stack);
+            }
+        }
+
+        this.logger.log(
+            `批量导入 DSL 完成: 总计 ${results.total}，成功 ${results.success}，失败 ${results.failed}`,
+        );
+
+        return results;
+    }
+
+    /**
      * 检测 DSL 文件格式
      * @param content DSL 内容
      * @returns 格式类型
@@ -297,17 +377,47 @@ export class AiAgentTemplateService {
 
     /**
      * 从 URL 读取文件内容
-     * 如果 URL 指向服务器上的文件，则读取本地文件内容
+     * 支持本地文件系统和外部 URL（OSS、CDN 等）
      *
      * @param url 文件 URL
      * @returns 文件内容
      */
     private async readFileFromUrl(url: string): Promise<string> {
         try {
-            // 尝试从 URL 中提取文件路径
+            const urlObj = new URL(url);
+            const hostname = urlObj.hostname;
+
+            // 判断是否是外部 URL（OSS、CDN 等）
+            const isExternalUrl =
+                hostname.includes("oss") ||
+                hostname.includes("aliyuncs.com") ||
+                hostname.includes("qcloud.com") ||
+                hostname.includes("qiniucdn.com") ||
+                hostname.includes("amazonaws.com") ||
+                (!hostname.includes("localhost") &&
+                    !hostname.includes("127.0.0.1") &&
+                    !hostname.match(/^\d+\.\d+\.\d+\.\d+$/));
+
+            // 如果是外部 URL，使用 HTTP 请求下载
+            if (isExternalUrl) {
+                this.logger.log(`从外部 URL 下载 DSL: ${url}`);
+                try {
+                    const response = await firstValueFrom(
+                        this.httpService.get(url, {
+                            responseType: "text",
+                            timeout: 30000,
+                        }),
+                    );
+                    return response.data;
+                } catch (httpError: any) {
+                    this.logger.error(`从外部 URL 下载文件失败: ${url}`, httpError);
+                    throw new Error(`无法从外部 URL 下载文件: ${httpError.message}`);
+                }
+            }
+
+            // 尝试从本地文件系统读取
             // 例如: http://localhost:4090/uploads/other/2025/10/xxx.yaml
             // 转换为: ../../storage/uploads/other/2025/10/xxx.yaml
-            const urlObj = new URL(url);
             let filePath = urlObj.pathname;
 
             if (filePath.startsWith("/uploads/")) {
@@ -323,9 +433,26 @@ export class AiAgentTemplateService {
 
             this.logger.log(`从文件路径读取 DSL: ${fullPath}`);
 
+            // 检查文件是否存在
+            if (!existsSync(fullPath)) {
+                // 如果本地文件不存在，尝试使用 HTTP 请求作为兜底方案
+                this.logger.warn(`本地文件不存在，尝试从 URL 下载: ${url}`);
+                try {
+                    const response = await firstValueFrom(
+                        this.httpService.get(url, {
+                            responseType: "text",
+                            timeout: 30000,
+                        }),
+                    );
+                    return response.data;
+                } catch (httpError: any) {
+                    this.logger.error(`从 URL 下载文件失败: ${url}`, httpError);
+                    throw new Error(`无法读取文件: 本地文件不存在且无法从 URL 下载`);
+                }
+            }
+
             // 读取文件内容
             const content = readFileSync(fullPath, "utf-8");
-
             return content;
         } catch (error) {
             this.logger.error(`从 URL 读取文件失败: ${url}`, error);

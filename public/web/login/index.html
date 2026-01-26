@@ -1,16 +1,40 @@
 <!DOCTYPE html><html><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<script type="importmap">{"imports":{"#entry":"/_nuxt/IZm275qp.js"}}</script>
-<link rel="stylesheet" href="/_nuxt/style.UIfQFwd9.css" crossorigin>
+<script type="importmap">{"imports":{"#entry":"/_nuxt/Cgyg1gJC.js"}}</script>
+<link rel="stylesheet" href="/_nuxt/style.DGJ_znLO.css" crossorigin>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#222222">
-<script type="module" src="/_nuxt/IZm275qp.js" crossorigin></script><script>"use strict";(()=>{const t=window,e=document.documentElement,c=["dark","light"],n=getStorageValue("localStorage","nuxt-color-mode")||"system";let i=n==="system"?u():n;const r=e.getAttribute("data-color-mode-forced");r&&(i=r),l(i),t["__NUXT_COLOR_MODE__"]={preference:n,value:i,getColorScheme:u,addColorScheme:l,removeColorScheme:d};function l(o){const s=""+o+"",a="";e.classList?e.classList.add(s):e.className+=" "+s,a&&e.setAttribute("data-"+a,o)}function d(o){const s=""+o+"",a="";e.classList?e.classList.remove(s):e.className=e.className.replace(new RegExp(s,"g"),""),a&&e.removeAttribute("data-"+a)}function f(o){return t.matchMedia("(prefers-color-scheme"+o+")")}function u(){if(t.matchMedia&&f("").media!=="not all"){for(const o of c)if(f(":"+o).matches)return o}return"light"}})();function getStorageValue(t,e){switch(t){case"localStorage":return window.localStorage.getItem(e);case"sessionStorage":return window.sessionStorage.getItem(e);case"cookie":return getCookie(e);default:return null}}function getCookie(t){const c=("; "+window.document.cookie).split("; "+t+"=");if(c.length===2)return c.pop()?.split(";").shift()}</script></head><body><div id="nuxt-app" data-vaul-drawer-wrapper="true" class="isolate"></div><div id="__nuxt-loader"><!doctype html>
+<script type="module" src="/_nuxt/Cgyg1gJC.js" crossorigin></script><script>"use strict";(()=>{const t=window,e=document.documentElement,c=["dark","light"],n=getStorageValue("localStorage","nuxt-color-mode")||"system";let i=n==="system"?u():n;const r=e.getAttribute("data-color-mode-forced");r&&(i=r),l(i),t["__NUXT_COLOR_MODE__"]={preference:n,value:i,getColorScheme:u,addColorScheme:l,removeColorScheme:d};function l(o){const s=""+o+"",a="";e.classList?e.classList.add(s):e.className+=" "+s,a&&e.setAttribute("data-"+a,o)}function d(o){const s=""+o+"",a="";e.classList?e.classList.remove(s):e.className=e.className.replace(new RegExp(s,"g"),""),a&&e.removeAttribute("data-"+a)}function f(o){return t.matchMedia("(prefers-color-scheme"+o+")")}function u(){if(t.matchMedia&&f("").media!=="not all"){for(const o of c)if(f(":"+o).matches)return o}return"light"}})();function getStorageValue(t,e){switch(t){case"localStorage":return window.localStorage.getItem(e);case"sessionStorage":return window.sessionStorage.getItem(e);case"cookie":return getCookie(e);default:return null}}function getCookie(t){const c=("; "+window.document.cookie).split("; "+t+"=");if(c.length===2)return c.pop()?.split(";").shift()}</script></head><body><div id="nuxt-app" data-vaul-drawer-wrapper="true" class="isolate"></div><div id="__nuxt-loader"><!doctype html>
 <html lang="zh-CN">
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>Loading…</title>
+        <script>
+            // Apply theme immediately to prevent flash
+            (function () {
+                try {
+                    // Priority 1: Read from localStorage (vueuse-color-scheme)
+                    const storedTheme = localStorage.getItem("vueuse-color-scheme");
+                    if (storedTheme === "light" || storedTheme === "dark") {
+                        document.documentElement.className = storedTheme;
+                        return;
+                    }
+
+                    // Priority 2: Check html class (if already set)
+                    const htmlClass = document.documentElement.className;
+                    if (htmlClass.includes("light") || htmlClass.includes("dark")) {
+                        return;
+                    }
+
+                    // Priority 3: System theme (handled by CSS media query)
+                    // No action needed, CSS will handle it
+                } catch (error) {
+                    console.error("Failed to apply theme:", error);
+                }
+            })();
+        </script>
         <style>
             html,
             body {
@@ -31,14 +55,30 @@
                 z-index: 999999;
             }
 
+            /* System theme preference (lower priority) */
             @media (prefers-color-scheme: dark) {
-                #nuxt-spa-loading {
+                html:not(.light) #nuxt-spa-loading {
                     color: #ddd;
                     background-color: #121212;
                 }
-                code {
+                html:not(.light) code {
                     background-color: #333;
                 }
+            }
+
+            /* Class-based theme (higher priority) */
+            html.dark #nuxt-spa-loading {
+                color: #ddd;
+                background-color: #121212;
+            }
+
+            html.dark code {
+                background-color: #333;
+            }
+
+            html.light #nuxt-spa-loading {
+                background: #f8f9fa;
+                color: inherit;
             }
 
             .loader-box {
@@ -70,16 +110,26 @@
                 }
             }
 
-            /* 辅助动画：发光效果 */
+            /* Glow effect animation */
             .logo svg {
                 filter: drop-shadow(0 0 12px rgba(81, 10, 252, 0.2));
                 transition: filter 0.3s ease;
             }
 
+            /* System theme preference (lower priority) */
             @media (prefers-color-scheme: dark) {
-                .logo svg {
+                html:not(.light) .logo svg {
                     filter: drop-shadow(0 0 12px rgba(81, 10, 252, 0.35));
                 }
+            }
+
+            /* Class-based theme (higher priority) */
+            html.dark .logo svg {
+                filter: drop-shadow(0 0 12px rgba(81, 10, 252, 0.35));
+            }
+
+            html.light .logo svg {
+                filter: drop-shadow(0 0 12px rgba(81, 10, 252, 0.2));
             }
 
             @media (prefers-reduced-motion: reduce) {
@@ -93,9 +143,13 @@
         <div id="nuxt-spa-loading">
             <div class="loader-box">
                 <div class="logo">
-                    <img style="height: 48px" src="/spa-loading.svg" />
+                    <img
+                        style="height: 48px"
+                        src="/spa-loading.png"
+                        onerror="this.onerror=null;this.src='/spa-loading-source.png';"
+                    />
                 </div>
             </div>
         </div>
     </body>
-</html></div><div id="teleports"></div><script>window.__NUXT__=(function(a,b,c,d){return {prerenderedAt:1763113081218,serverRendered:b,config:{public:{isPlugin:b,EXTENSION_API_URL:"https:\u002F\u002Ffbai-server.yixiangonline.com\u002Fapi",extensions:["buildingai-simple-blog"],i18n:{baseUrl:a,defaultLocale:d,rootRedirect:a,redirectStatusCode:302,skipSettingLocaleOnNavigate:b,locales:[{code:"zh",language:a},{code:d,language:a},{code:"jp",language:a}],detectBrowserLanguage:{alwaysRedirect:b,cookieCrossOrigin:b,cookieDomain:a,cookieKey:"nuxt-ui-language",cookieSecure:b,fallbackLocale:a,redirectOn:"root",useCookie:c},experimental:{localeDetector:a,typedPages:c,typedOptionsAndMessages:b,alternateLinkCanonicalQueries:c,devCache:b,cacheLifetime:a,stripMessagesPayload:b,preload:b,strictSeo:b,nitroContextDetection:c,httpCacheDuration:10},domainLocales:{zh:{domain:a},en:{domain:a},jp:{domain:a}}}},app:{baseURL:"\u002F",buildId:"ec285c58-f771-449b-87ba-69b66e978c06",buildAssetsDir:"\u002F_nuxt\u002F",cdnURL:a}}}}("",false,true,"en"))</script></body></html>
+</html></div><div id="teleports"></div><script>window.__NUXT__=(function(a,b,c,d){return {prerenderedAt:1769399745586,serverRendered:b,config:{public:{isPlugin:b,EXTENSION_API_URL:"https:\u002F\u002Fcloud.buildingai.cc\u002Fapi",i18n:{baseUrl:a,defaultLocale:d,rootRedirect:a,redirectStatusCode:302,skipSettingLocaleOnNavigate:b,locales:[{code:"zh",language:a},{code:d,language:a},{code:"jp",language:a}],detectBrowserLanguage:{alwaysRedirect:b,cookieCrossOrigin:b,cookieDomain:a,cookieKey:"nuxt-ui-language",cookieSecure:b,fallbackLocale:a,redirectOn:"root",useCookie:c},experimental:{localeDetector:a,typedPages:c,typedOptionsAndMessages:b,alternateLinkCanonicalQueries:c,devCache:b,cacheLifetime:a,stripMessagesPayload:b,preload:b,strictSeo:b,nitroContextDetection:c,httpCacheDuration:10},domainLocales:{zh:{domain:a},en:{domain:a},jp:{domain:a}}}},app:{baseURL:"\u002F",buildId:"7caf1748-90f9-4a57-ac55-8c7f86f62c9d",buildAssetsDir:"\u002F_nuxt\u002F",cdnURL:a}}}}("",false,true,"en"))</script></body></html>

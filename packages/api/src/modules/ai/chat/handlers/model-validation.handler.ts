@@ -1,4 +1,4 @@
-import { AiModel } from "@buildingai/db/entities/ai-model.entity";
+import { AiModel } from "@buildingai/db/entities";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { AiModelService } from "@modules/ai/model/services/ai-model.service";
 import { Injectable } from "@nestjs/common";

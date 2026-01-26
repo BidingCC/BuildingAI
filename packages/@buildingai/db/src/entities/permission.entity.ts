@@ -92,14 +92,6 @@ export class Permission extends BaseEntity {
     type: PermissionType;
 
     /**
-     * 插件包名
-     *
-     * 当权限类型为插件时，记录所属的插件包名
-     */
-    @Column({ nullable: true })
-    pluginPackName: string;
-
-    /**
      * 是否废弃
      *
      * 标记权限是否已经废弃，废弃的权限将不再在前端显示

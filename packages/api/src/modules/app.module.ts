@@ -1,20 +1,21 @@
 import { CacheModule, RedisModule } from "@buildingai/cache";
 import { createDataSourceConfig } from "@buildingai/config/db.config";
-import { BillingModule } from "@buildingai/core/modules/billing/billing.module";
+import { getEnabledExtensionsFromConfig, initExtensionCache } from "@buildingai/core/modules";
+import { getExtensionSchemaName } from "@buildingai/core/modules";
 import {
-    getEnabledExtensionsFromConfig,
-    initExtensionCache,
-} from "@buildingai/core/modules/extension/utils/extension.utils";
-import { getExtensionSchemaName } from "@buildingai/core/modules/extension/utils/extension.utils";
-import { SecretModule } from "@buildingai/core/modules/secret/secret.module";
-import { UploadModule as CoreUploadModule } from "@buildingai/core/modules/upload/upload.module";
-import { FileUrlModule } from "@buildingai/db/file-url.module";
+    BillingModule,
+    CloudStorageModule,
+    SecretModule,
+    UploadModule as CoreUploadModule,
+} from "@buildingai/core/modules";
+import { FileUrlModule } from "@buildingai/db";
 import { DataSource } from "@buildingai/db/typeorm";
 import { DictModule } from "@buildingai/dict";
 import { TerminalLogger } from "@buildingai/logger";
 import { AuthGuard } from "@common/guards/auth.guard";
 import { DemoGuard } from "@common/guards/demo.guard";
 import { ExtensionGuard } from "@common/guards/extension.guard";
+import { MemberOnlyGuard } from "@common/guards/member-only.guard";
 import { PermissionsGuard } from "@common/guards/permissions.guard";
 import { SuperAdminGuard } from "@common/guards/super-admin.guard";
 import { DatabaseModule } from "@core/database/database.module";
@@ -23,6 +24,7 @@ import { AuthModule } from "@modules/auth/auth.module";
 import { ChannelModule } from "@modules/channel/channel.module";
 import { ExtensionCoreModule } from "@modules/extension/extension.module";
 import { HealthModule } from "@modules/health/health.module";
+import { MembershipModule } from "@modules/membership/membership.module";
 import { DynamicModule, Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { APP_GUARD } from "@nestjs/core";
@@ -40,6 +42,7 @@ import { PermissionModule } from "./permission/permission.module";
 import { Pm2Module } from "./pm2/pm2.module";
 import { RechargeModule } from "./recharge/recharge.module";
 import { RoleModule } from "./role/role.module";
+import { ScheduleModule } from "./schedule/schedule.module";
 import { SystemModule } from "./system/system.module";
 import { TagModule } from "./tag/tag.module";
 import { UploadModule } from "./upload/upload.module";
@@ -70,6 +73,7 @@ export class AppModule {
                 ServeStaticModule.forRoot({
                     rootPath,
                     exclude: [
+                        ...extensionsList.map((extension) => `/extensions/${extension.identifier}`),
                         ...extensionsList.map((extension) => `/${extension.name}`),
                         process.env.VITE_APP_WEB_API_PREFIX,
                         process.env.VITE_APP_CONSOLE_API_PREFIX,
@@ -95,6 +99,7 @@ export class AppModule {
                 MenuModule,
                 PayModule,
                 PermissionModule,
+                MembershipModule,
                 Pm2Module,
                 RechargeModule,
                 RoleModule,
@@ -105,6 +110,8 @@ export class AppModule {
                 AnalyseModule,
                 SecretModule,
                 UserModule,
+                CloudStorageModule,
+                ScheduleModule,
                 await ExtensionCoreModule.register(),
             ],
             controllers: [],
@@ -128,6 +135,10 @@ export class AppModule {
                 {
                     provide: APP_GUARD,
                     useClass: SuperAdminGuard,
+                },
+                {
+                    provide: APP_GUARD,
+                    useClass: MemberOnlyGuard,
                 },
             ],
         };

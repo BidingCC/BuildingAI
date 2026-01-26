@@ -1,4 +1,4 @@
-import { McpCommunicationType, McpServerType } from "@buildingai/db/entities/ai-mcp-server.entity";
+import { McpCommunicationType, McpServerType } from "@buildingai/db/entities";
 import { PaginationDto } from "@buildingai/dto/pagination.dto";
 import { isEnabled } from "@buildingai/utils";
 import { PartialType } from "@nestjs/mapped-types";
@@ -184,6 +184,13 @@ export class McpServerUrlConfig {
     @IsNotEmpty({ message: "服务URL不能为空" })
     @IsString({ message: "服务URL必须是字符串" })
     url: string;
+
+    /**
+     * 通信类型
+     */
+    @IsNotEmpty({ message: "通信传输方式不能为空" })
+    @IsEnum(McpCommunicationType, { message: "通信传输方式必须是sse或者streamable-http" })
+    type: McpCommunicationType;
 
     /**
      * 自定义请求头

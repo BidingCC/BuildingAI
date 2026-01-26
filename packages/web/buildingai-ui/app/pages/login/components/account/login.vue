@@ -4,12 +4,19 @@ import type { LoginResponse } from "@buildingai/service/webapi/user";
 import { apiAuthLogin } from "@buildingai/service/webapi/user";
 import { object, string } from "yup";
 
+import { useAgreementModal } from "../../hooks/use-agreement-modal";
+
 const PrivacyTerms = defineAsyncComponent(() => import("../privacy-terms.vue"));
 
 const emits = defineEmits<{
     (e: "switchComponent", component: string): void;
     (e: "success", v: LoginResponse): void;
 }>();
+
+const { ensureAgreementAccepted } = useAgreementModal(
+    { width: "!w-[420px]" },
+    resolveComponent("UIcon") as unknown as Component,
+);
 
 const appStore = useAppStore();
 const userStore = useUserStore();
@@ -39,22 +46,16 @@ const loginState = shallowReactive({
 });
 
 const { lockFn: onLoginSubmit, isLock } = useLockFn(async () => {
-    if (
-        !userStore.isAgreed &&
-        !!appStore.loginWay.loginAgreement &&
-        appStore.loginSettings?.showPolicyAgreement
-    ) {
-        toast.warning(t("login.messages.agreementRequired"), {
-            title: t("login.messages.agreementTitle"),
-            duration: 3000,
-        });
+    const canProceed = await ensureAgreementAccepted();
+    if (!canProceed) {
         return;
     }
     try {
         const data = await apiAuthLogin(loginState);
         emits("success", data);
     } catch (error: unknown) {
-        console.log(t("login.messages.loginFailed"), error);
+        toast.error(t("login.messages.loginFailed"));
+        console.error(t("login.messages.loginFailed"), error);
     }
 });
 
@@ -205,11 +206,6 @@ const passwordTextClass = computed(() => {
                 size="lg"
                 :ui="{ base: 'flex-1 justify-center p-3' }"
                 :loading="isLock"
-                :disabled="
-                    !userStore.isAgreed &&
-                    !!appStore.loginWay.loginAgreement &&
-                    appStore.loginSettings?.showPolicyAgreement
-                "
             >
                 {{ $t("login.loginNow") }}
             </UButton>

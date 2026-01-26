@@ -4,7 +4,7 @@ import type {
     CreateAiModelRequest,
     UpdateAiModelRequest,
 } from "@buildingai/service/consoleapi/ai-provider";
-import { boolean, number, object, string } from "yup";
+import { array, boolean, number, object, string } from "yup";
 
 interface ModelConfigItemType {
     /** 参数字段名 */
@@ -38,7 +38,6 @@ const emit = defineEmits<{
 }>();
 
 const { query: URLQueryParams } = useRoute();
-const message = useMessage();
 const { t } = useI18n();
 
 const getDefaultmodelConfig = (): ModelConfigItemType[] => [
@@ -110,9 +109,11 @@ const formData = reactive({
     modelConfig: getDefaultmodelConfig(),
     isActive: true,
     isDefault: false,
+    features: [],
     description: "",
     sortOrder: 0,
     modelType: undefined,
+    membershipLevel: [] as string[],
     billingRule: {
         power: 0,
         tokens: 1000,
@@ -129,6 +130,7 @@ const schema = object({
         .max(100, t("ai-provider.backend.model.validation.modelMaxLength")),
     maxTokens: number().min(1, t("ai-provider.backend.model.validation.maxTokensMin")).nullable(),
     maxContext: number().min(1, t("ai-provider.backend.model.validation.maxContextMin")).nullable(),
+    features: array(),
     description: string()
         .max(500, t("ai-provider.backend.model.validation.descriptionMaxLength"))
         .nullable(),
@@ -157,10 +159,12 @@ watch(
                 maxTokens: newData.maxTokens,
                 modelConfig: newData.modelConfig,
                 isActive: newData.isActive ?? true,
+                features: newData.features || [],
                 isDefault: newData.isDefault ?? false,
                 description: newData.description || "",
                 sortOrder: newData.sortOrder || 0,
                 modelType: newData.modelType || "",
+                membershipLevel: (newData.membershipLevel as string[]) || [],
                 billingRule: {
                     power: ((newData.billingRule as Record<string, unknown>)?.power as number) || 0,
                     tokens:
@@ -179,7 +183,6 @@ const { isLock: isSubmitting, lockFn: submitForm } = useLockFn(async () => {
         emit("submit-success", submitData as CreateAiModelRequest | UpdateAiModelRequest);
     } catch (error) {
         console.error("Form validation failed:", error);
-        message.error(t("console-common.formValidationFailed"));
     }
 });
 
@@ -210,12 +213,26 @@ const addCustomParameter = () => {
     formData.modelConfig?.push(newParam);
 };
 
-onMounted(() => getParentModelTypeLimit());
+const featureOptions = computed(() => [
+    { label: t("common.ai.audio"), value: "audio" },
+    { label: t("common.ai.video"), value: "video" },
+    { label: t("common.ai.vision"), value: "vision" },
+    { label: t("common.ai.agentThought"), value: "agent-thought", disabled: true },
+    { label: t("common.ai.document"), value: "document", disabled: true },
+    { label: t("common.ai.multiToolCall"), value: "multi-tool-call", disabled: true },
+    { label: t("common.ai.streamToolCall"), value: "stream-tool-call", disabled: true },
+    { label: t("common.ai.structuredOutput"), value: "structured-output", disabled: true },
+    { label: t("common.ai.toolCall"), value: "tool-call", disabled: true },
+]);
+
+onMounted(() => {
+    getParentModelTypeLimit();
+});
 </script>
 
 <template>
     <UForm ref="formRef" :state="formData" :schema="schema" class="space-y-8" @submit="submitForm">
-        <BdScrollArea class="h-120" :shadow="false">
+        <BdScrollArea :shadow="false">
             <div class="space-y-4 rounded-lg lg:col-span-2">
                 <!-- 默认模型 -->
                 <div class="flex items-center justify-between">
@@ -234,52 +251,6 @@ onMounted(() => getParentModelTypeLimit());
                         color="warning"
                     />
                 </div>
-
-                <!-- 计费规则 -->
-                <UFormField :label="t('ai-provider.backend.model.form.billing')" name="billing">
-                    <div class="flex w-full items-center gap-2">
-                        <UInput
-                            v-model.number="formData.billingRule.power"
-                            type="number"
-                            placeholder=""
-                            :min="0"
-                            class="flex-1"
-                            :ui="{ base: 'pr-15' }"
-                            @blur="
-                                if (formData.billingRule.power < 0) formData.billingRule.power = 0;
-                            "
-                        >
-                            <template #trailing>
-                                <span class="text-muted-foreground text-sm">
-                                    {{ t("ai-provider.backend.model.form.power") }}
-                                </span>
-                            </template>
-                        </UInput>
-                        <span>/</span>
-                        <UInput
-                            v-model.number="formData.billingRule.tokens"
-                            type="number"
-                            placeholder=""
-                            :min="1"
-                            class="flex-1"
-                            :ui="{ base: 'pr-15' }"
-                            :disabled="true"
-                            @blur="
-                                if (formData.billingRule.tokens < 1)
-                                    formData.billingRule.tokens = 1;
-                            "
-                        >
-                            <template #trailing>
-                                <span class="text-muted-foreground text-sm"> Tokens </span>
-                            </template>
-                        </UInput>
-                    </div>
-                    <template #hint>
-                        <span class="text-muted-foreground text-xs">
-                            {{ t("ai-provider.backend.model.form.billingHelp") }}
-                        </span>
-                    </template>
-                </UFormField>
 
                 <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <!-- 模型名称 -->
@@ -315,6 +286,7 @@ onMounted(() => getParentModelTypeLimit());
                         />
                     </UFormField>
                 </div>
+
                 <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <UFormField
                         :label="t('ai-provider.backend.model.form.maxContext')"
@@ -354,6 +326,18 @@ onMounted(() => getParentModelTypeLimit());
                     </UFormField>
                 </div>
 
+                <UFormField :label="t('ai-provider.backend.model.form.multimodal')" name="features">
+                    <USelectMenu
+                        v-model="formData.features"
+                        open-on-click
+                        multiple
+                        :items="featureOptions"
+                        value-key="value"
+                        :placeholder="t('ai-provider.backend.model.form.multimodalPlaceholder')"
+                        class="w-full"
+                    />
+                </UFormField>
+
                 <!-- 模型描述 -->
                 <UFormField
                     :label="t('ai-provider.backend.model.form.description')"
@@ -368,12 +352,87 @@ onMounted(() => getParentModelTypeLimit());
                     />
                 </UFormField>
 
+                <div>
+                    <h1 class="pb-3 text-[16px] font-bold">
+                        {{ t("ai-provider.backend.model.form.billing") }}
+                    </h1>
+                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <!-- 计费规则 -->
+                        <UFormField
+                            :label="t('ai-provider.backend.model.form.billing')"
+                            name="billing"
+                        >
+                            <div class="flex w-full items-center gap-2">
+                                <UInput
+                                    v-model.number="formData.billingRule.power"
+                                    type="number"
+                                    placeholder=""
+                                    :min="0"
+                                    :ui="{ base: 'pr-30' }"
+                                    @blur="
+                                        if (formData.billingRule.power < 0)
+                                            formData.billingRule.power = 0;
+                                    "
+                                    class="w-full"
+                                >
+                                    <template #trailing>
+                                        <span class="text-muted-foreground text-sm">
+                                            {{ t("ai-provider.backend.model.form.power") }}/ 1K
+                                            Tokens
+                                        </span>
+                                    </template>
+                                </UInput>
+                            </div>
+                            <template #hint>
+                                <span class="text-muted-foreground text-xs">
+                                    {{ t("ai-provider.backend.model.form.billingHelp") }}
+                                </span>
+                            </template>
+                        </UFormField>
+                        <UFormField name="membershipLevel" class="flex-1">
+                            <template #label>
+                                <div class="flex items-center gap-1">
+                                    <span>{{
+                                        t("ai-provider.backend.model.batchEdit.membershipLevel")
+                                    }}</span>
+                                    <UPopover mode="hover" :content="{ side: 'top' }">
+                                        <UIcon
+                                            name="i-lucide-circle-help"
+                                            class="text-muted-foreground size-4 cursor-pointer"
+                                        />
+                                        <template #content>
+                                            <p class="w-64 px-4 py-2 text-sm">
+                                                {{
+                                                    t(
+                                                        "ai-provider.backend.model.batchEdit.membershipLevelTip",
+                                                    )
+                                                }}
+                                            </p>
+                                        </template>
+                                    </UPopover>
+                                </div>
+                            </template>
+                            <MembershipLevelSelect
+                                v-model="formData.membershipLevel"
+                                :multiple="true"
+                                :placeholder="
+                                    t('ai-provider.backend.model.batchEdit.membershipLevelAll')
+                                "
+                                :button-ui="{
+                                    variant: 'outline',
+                                    class: 'w-full',
+                                }"
+                            />
+                        </UFormField>
+                    </div>
+                </div>
+
                 <div class="space-y-4">
                     <UAccordion
                         :items="[{}]"
                         :ui="{
                             header: 'px-0 ',
-                            label: 'text-lg font-semibold',
+                            label: 'text-[16px] font-semibold',
                             content: 'px-0',
                             body: 'flex flex-col gap-2',
                             trigger: ' !shadow-none',
@@ -514,7 +573,7 @@ onMounted(() => getParentModelTypeLimit());
         </BdScrollArea>
 
         <!-- 底部操作按钮 -->
-        <div class="flex justify-end gap-4">
+        <div class="bg-background sticky bottom-0 z-10 flex justify-end gap-4 py-3">
             <UButton color="neutral" variant="outline" @click="handleCancel" class="px-8">
                 {{ t("console-common.cancel") }}
             </UButton>

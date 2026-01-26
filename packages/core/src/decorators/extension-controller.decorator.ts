@@ -24,7 +24,7 @@ export interface ExtensionControllerOptions {
  * Extension API controller decorator
  *
  * Used to mark a controller as a plugin frontend API controller, automatically adds route prefix
- * Route format: /{pluginPackName}/web/{controllerPath}
+ * Route format: /{extensionIdentifier}/web/{controllerPath}
  */
 export function ExtensionWebController(
     optionsOrPath?: ExtensionControllerOptions | string,
@@ -32,7 +32,7 @@ export function ExtensionWebController(
     const options: ExtensionControllerOptions =
         typeof optionsOrPath === "string" ? { path: optionsOrPath } : optionsOrPath || {};
 
-    const pluginPackName = getExtensionPackNameFromControllerSync();
+    const extensionIdentifier = getExtensionPackNameFromControllerSync();
     const pathSegment = options.path || "";
 
     if (pathSegment) {
@@ -44,12 +44,12 @@ export function ExtensionWebController(
     const apiPrefix = process.env.VITE_APP_WEB_API_PREFIX;
 
     const routePath = apiPrefix
-        ? joinRouterPaths(pluginPackName, apiPrefix, pathSegment)
-        : joinRouterPaths(pluginPackName, "api", pathSegment);
+        ? joinRouterPaths(extensionIdentifier, apiPrefix, pathSegment)
+        : joinRouterPaths(extensionIdentifier, "api", pathSegment);
 
     const decorators = [
         Controller(routePath),
-        SetMetadata(DECORATOR_KEYS.PLUGIN_PACK_NAME_KEY, pluginPackName),
+        SetMetadata(DECORATOR_KEYS.PLUGIN_PACK_NAME_KEY, extensionIdentifier),
         SetMetadata(DECORATOR_KEYS.PLUGIN_WEB_CONTROLLER_KEY, true),
     ];
 
@@ -64,7 +64,7 @@ export function ExtensionWebController(
  * Extension console controller decorator
  *
  * Used to mark a controller as a plugin backend console controller, automatically adds route prefix
- * Route format: /{pluginPackName}/console/{controllerPath}
+ * Route format: /{extensionIdentifier}/console/{controllerPath}
  * Supports setting permission group information, uses controller path as permission group code, and groupName as group name
  */
 export function ExtensionConsoleController(
@@ -74,7 +74,7 @@ export function ExtensionConsoleController(
     const options: ExtensionControllerOptions =
         typeof optionsOrPath === "string" ? { path: optionsOrPath } : optionsOrPath || {};
 
-    const pluginPackName = getExtensionPackNameFromControllerSync();
+    const extensionIdentifier = getExtensionPackNameFromControllerSync();
     const pathSegment = options.path || "";
 
     if (pathSegment) {
@@ -86,12 +86,12 @@ export function ExtensionConsoleController(
     const apiPrefix = process.env.VITE_APP_CONSOLE_API_PREFIX;
 
     const routePath = apiPrefix
-        ? joinRouterPaths(pluginPackName, apiPrefix, pathSegment)
-        : joinRouterPaths(pluginPackName, "consoleapi", pathSegment);
+        ? joinRouterPaths(extensionIdentifier, apiPrefix, pathSegment)
+        : joinRouterPaths(extensionIdentifier, "consoleapi", pathSegment);
 
     const decorators = [
         Controller(routePath),
-        SetMetadata(DECORATOR_KEYS.PLUGIN_PACK_NAME_KEY, pluginPackName),
+        SetMetadata(DECORATOR_KEYS.PLUGIN_PACK_NAME_KEY, extensionIdentifier),
         SetMetadata(DECORATOR_KEYS.PLUGIN_CONSOLE_CONTROLLER_KEY, true),
     ];
 
@@ -100,7 +100,7 @@ export function ExtensionConsoleController(
     }
     decorators.push(
         SetMetadata(DECORATOR_KEYS.PERMISSION_GROUP_KEY, {
-            code: `${pluginPackName}@${pathSegment}`,
+            code: `${extensionIdentifier}@${pathSegment}`,
             name: groupName,
         }),
     );

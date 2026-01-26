@@ -15,6 +15,8 @@ export type _LinkType = (typeof LinkType)[keyof typeof LinkType];
 export interface LinkItem {
     /** Link type */
     type?: _LinkType;
+    /** Plugin name (for plugin links) */
+    pluginName?: string;
     /** Display name */
     name?: string;
     /** Link path */

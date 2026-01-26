@@ -1,7 +1,7 @@
-import { Agent } from "@buildingai/db/entities/ai-agent.entity";
-import { AgentChatRecord } from "@buildingai/db/entities/ai-agent-chat-record.entity";
-import { User } from "@buildingai/db/entities/user.entity";
-import { type UserPlayground } from "@buildingai/db/interfaces/context.interface";
+import { type UserPlayground } from "@buildingai/db";
+import { User } from "@buildingai/db/entities";
+import { Agent } from "@buildingai/db/entities";
+import { AgentChatRecord } from "@buildingai/db/entities";
 import {
     AgentReferenceSources,
     AIRawResponse,
@@ -229,14 +229,19 @@ export interface IThirdPartyIntegrationHandler {
 
     /**
      * 处理第三方集成聊天
+     * @param agent 智能体配置
+     * @param dto 聊天请求DTO
+     * @param user 用户信息
+     * @param options 响应处理选项
+     * @param conversationRecord 对话记录
      */
-    // handleThirdPartyIntegrationChat(
-    //     agent: Agent,
-    //     dto: AgentChatDto,
-    //     user: UserPlayground,
-    //     options: ResponseHandlerOptions,
-    //     conversationRecord?: AgentChatRecord | null,
-    // ): Promise<AgentChatResponse | void>;
+    handleThirdPartyIntegrationChat(
+        agent: Agent,
+        dto: AgentChatDto,
+        user: UserPlayground,
+        options: ResponseHandlerOptions,
+        conversationRecord?: AgentChatRecord | null,
+    ): Promise<AgentChatResponse | void>;
 }
 
 /**

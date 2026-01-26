@@ -136,6 +136,15 @@ export const getSecretTemplateListAll = (): Promise<SecretTemplateRequest[]> => 
 };
 
 /**
+ * Get all secret templates (including enabled and disabled)
+ * @description Retrieves all secret templates without pagination, including both enabled and disabled ones
+ * @returns Promise with all templates
+ */
+export const getAllSecretTemplates = (): Promise<SecretTemplateRequest[]> => {
+    return useConsoleGet("/secret-templates/all");
+};
+
+/**
  * Get secret template details
  * @description Retrieves detailed information for a specific template
  * @param id Template ID

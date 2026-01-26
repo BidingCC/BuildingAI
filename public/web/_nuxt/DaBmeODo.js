@@ -1,1 +1,0 @@
-import{d as o,c as t,o as n,l as s,a_ as l,z as c}from"#entry";const _=o({__name:"main-page",props:{layout:{}},setup(e){return(m,p)=>{const a=l;return n(),t("main",{class:c(["w-full flex-1 overflow-auto px-4 lg:px-6",e.layout==="sidebar"?"pt-0":"my-4 lg:my-6"])},[s(a)],2)}}});export{_ as default};

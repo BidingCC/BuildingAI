@@ -1,6 +1,6 @@
 import { getProvider, TextGenerator } from "@buildingai/ai-sdk";
-import { SecretService } from "@buildingai/core/modules/secret/services/secret.service";
-import { Agent } from "@buildingai/db/entities/ai-agent.entity";
+import { SecretService } from "@buildingai/core/modules";
+import { Agent } from "@buildingai/db/entities";
 import { AgentReferenceSources } from "@buildingai/types/ai/agent-config.interface";
 import { RetrievalChunk, RetrievalConfig } from "@buildingai/types/ai/retrieval-config.interface";
 import { getProviderSecret } from "@buildingai/utils";

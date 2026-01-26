@@ -1,3 +1,5 @@
+import type { Component } from "vue";
+
 /**
  * Modal use component types
  * @description Type definitions for BdModalUse component
@@ -11,7 +13,7 @@ export interface BdModalUseProps {
     /** Modal description */
     description: string;
     /** Modal content - can be a string or component */
-    content: string | any;
+    content: string | Component;
     /** Whether to show confirm button */
     showConfirm?: boolean;
     /** Whether to show cancel button */
@@ -26,6 +28,8 @@ export interface BdModalUseProps {
     contentId?: string;
     /** Custom UI classes */
     ui?: Record<string, string>;
+    /** Custom header content */
+    header?: string | Component;
     /** Confirm callback function */
     confirm: () => void;
     /** Cancel callback function */

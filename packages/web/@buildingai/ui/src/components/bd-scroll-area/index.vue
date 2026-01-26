@@ -74,7 +74,7 @@ const debouncedScroll = useDebounceFn(async (event: Event) => {
  * @param {Event} event - The triggered scroll event
  */
 function handleScroll(event: Event) {
-    props.shadow && debouncedScroll(event);
+    if (props.shadow) debouncedScroll(event);
     emits("scroll", event);
 }
 

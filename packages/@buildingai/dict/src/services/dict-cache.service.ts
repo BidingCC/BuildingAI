@@ -1,6 +1,6 @@
 import { CacheService } from "@buildingai/cache";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { Dict } from "@buildingai/db/entities/dict.entity";
+import { Dict } from "@buildingai/db/entities";
 import { Repository } from "@buildingai/db/typeorm";
 import { Injectable, Logger } from "@nestjs/common";
 import { OnEvent } from "@nestjs/event-emitter";

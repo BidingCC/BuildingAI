@@ -35,16 +35,19 @@ const currentComponent = computed(() => {
 </script>
 
 <template>
-    <div class="system-website">
+    <div class="system-website flex h-full flex-col">
         <div class="inline-block w-auto">
             <UTabs
                 v-model="activeTab"
                 size="md"
                 :content="false"
                 :items="tabs.map((tab) => ({ label: tab.label }))"
+                class="w-fit"
             />
         </div>
 
-        <component :is="currentComponent" class="lg:max-w-2xl xl:max-w-4xl" />
+        <div class="flex-1 overflow-y-auto">
+            <component :is="currentComponent" class="lg:max-w-2xl xl:max-w-4xl" />
+        </div>
     </div>
 </template>

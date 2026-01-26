@@ -1,8 +1,8 @@
 'use strict';
 
 var typeorm = require('@buildingai/db/@nestjs/typeorm');
-var user_entity = require('@buildingai/db/entities/user.entity');
-var user_service = require('@buildingai/extension-sdk/services/user.service');
+var entities = require('@buildingai/db/entities');
+var extensionSdk = require('@buildingai/extension-sdk');
 var common = require('@nestjs/common');
 var article_entity = require('../../db/entities/article.entity');
 var category_module = require('../category/category.module');
@@ -29,7 +29,8 @@ ArticleModule = _ts_decorate([
     imports: [
       typeorm.TypeOrmModule.forFeature([
         article_entity.Article,
-        user_entity.User
+        entities.User,
+        entities.UserSubscription
       ]),
       category_module.CategoryModule
     ],
@@ -39,7 +40,7 @@ ArticleModule = _ts_decorate([
     ],
     providers: [
       article_service.ArticleService,
-      user_service.PublicUserService
+      extensionSdk.PublicUserService
     ],
     exports: [
       article_service.ArticleService

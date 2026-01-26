@@ -80,11 +80,18 @@ export class ExtensionVersionManagerService {
             TerminalLogger.log(
                 "Extension Upgrade",
                 `[${this.extensionIdentifier}] Starting upgrade process...`,
+                {
+                    icon: "⬆",
+                },
             );
+
+            // Track the previous version for migration range calculation
+            let previousVersion = versionInfo.installed;
 
             // Execute upgrade for each version sequentially
             for (const version of versionInfo.upgradeVersions) {
-                await this.executeVersionUpgrade(version);
+                await this.executeVersionUpgrade(version, previousVersion);
+                previousVersion = version;
             }
 
             this.logger.log(
@@ -93,12 +100,18 @@ export class ExtensionVersionManagerService {
             TerminalLogger.success(
                 "Extension Upgrade",
                 `[${this.extensionIdentifier}] Completed: ${versionInfo.current}`,
+                {
+                    icon: "⬆",
+                },
             );
         } catch (error) {
             this.logger.error(`[${this.extensionIdentifier}] Upgrade failed: ${error.message}`);
             TerminalLogger.error(
                 "Extension Upgrade",
                 `[${this.extensionIdentifier}] Failed: ${error.message}`,
+                {
+                    icon: "⬆",
+                },
             );
             throw error;
         }
@@ -106,12 +119,21 @@ export class ExtensionVersionManagerService {
 
     /**
      * Execute upgrade for a single version
+     *
+     * @param version Target version to upgrade to
+     * @param fromVersion Previous version (null for initial installation)
      */
-    private async executeVersionUpgrade(version: string): Promise<void> {
+    private async executeVersionUpgrade(
+        version: string,
+        fromVersion: string | null,
+    ): Promise<void> {
         this.logger.log(`[${this.extensionIdentifier}] Upgrading to ${version}...`);
         TerminalLogger.log(
             "Extension Upgrade",
             `[${this.extensionIdentifier}] Upgrading to ${version}...`,
+            {
+                icon: "⬆",
+            },
         );
 
         try {
@@ -120,7 +142,7 @@ export class ExtensionVersionManagerService {
                 this.dataSource,
                 this.extensionIdentifier,
             );
-            await migrationRunner.runCrossVersionMigrations([version]);
+            await migrationRunner.runVersionMigrations(fromVersion, version);
 
             // Step 2: Run upgrade script
             const upgradeService = new ExtensionUpgradeService(
@@ -136,6 +158,9 @@ export class ExtensionVersionManagerService {
             TerminalLogger.success(
                 "Extension Upgrade",
                 `[${this.extensionIdentifier}] ${version} completed`,
+                {
+                    icon: "⬆",
+                },
             );
         } catch (error) {
             this.logger.error(
@@ -144,6 +169,9 @@ export class ExtensionVersionManagerService {
             TerminalLogger.error(
                 "Extension Upgrade",
                 `[${this.extensionIdentifier}] ${version} failed: ${error.message}`,
+                {
+                    icon: "⬆",
+                },
             );
             throw error;
         }

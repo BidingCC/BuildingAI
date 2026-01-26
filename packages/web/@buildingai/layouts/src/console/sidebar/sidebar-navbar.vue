@@ -5,6 +5,7 @@ import { useMediaQuery } from "@vueuse/core";
 import type { BreadcrumbItem } from "#ui/types";
 
 import { buildBreadcrumbs } from "../../menu-helper";
+import type { NavigationItem } from "../plugins/menu";
 
 const SidebarTrigger = defineAsyncComponent(() => import("./sidebar-trigger.vue"));
 const ReloadButton = defineAsyncComponent(() => import("../components/button-reload.vue"));
@@ -13,6 +14,8 @@ const GoHomeButton = defineAsyncComponent(() => import("../components/button-go-
 const props = defineProps<{
     /** 是否折叠侧边栏 */
     collapsed?: boolean;
+    /** 导航菜单项（用于插件控制台） */
+    navigationItems?: NavigationItem[];
 }>();
 
 const emit = defineEmits<{
@@ -36,9 +39,54 @@ function toggleSidebar() {
     }
 }
 
+/**
+ * Build breadcrumbs from NavigationItem array
+ * Recursively finds the active path and builds breadcrumb trail
+ */
+function buildBreadcrumbsFromNavigation(
+    items: NavigationItem[],
+    currentPath: string,
+    trail: BreadcrumbItem[] = [],
+): BreadcrumbItem[] {
+    for (const item of items) {
+        const isActive = item.to === currentPath;
+        const hasActiveChild =
+            item.children?.some(
+                (child) =>
+                    child.to === currentPath ||
+                    child.active ||
+                    currentPath.startsWith(child.to + "/"),
+            ) ?? false;
+
+        if (isActive || hasActiveChild || item.active) {
+            trail.push({
+                label: item.label,
+                to: item.to,
+                active: isActive && !item.children?.length,
+            });
+
+            if (item.children?.length) {
+                return buildBreadcrumbsFromNavigation(item.children, currentPath, trail);
+            }
+            return trail;
+        }
+    }
+    return trail;
+}
+
 /** 面包屑导航数据 */
 const breadcrumbs = computed<BreadcrumbItem[]>(() => {
-    return buildBreadcrumbs(useRoute().path, ROUTES.CONSOLE, t("layouts.admin"));
+    const currentPath = useRoute().path;
+
+    // If navigationItems is provided, use it to build breadcrumbs
+    if (props.navigationItems?.length) {
+        const homeItem: BreadcrumbItem = { label: t("layouts.admin"), to: ROUTES.CONSOLE };
+        const navBreadcrumbs = buildBreadcrumbsFromNavigation(props.navigationItems, currentPath);
+        return [homeItem, ...navBreadcrumbs];
+    }
+
+    // Fallback to default breadcrumb building
+    return buildBreadcrumbs(currentPath, ROUTES.CONSOLE, t("layouts.admin"));
 });
 </script>
 

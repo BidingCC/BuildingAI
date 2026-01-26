@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 /**
  * BdThemeToggle Component Types
  */

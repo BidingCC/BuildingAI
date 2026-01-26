@@ -39,6 +39,17 @@ const showVariableInput = shallowRef(true);
 const enableAutoSave = useCookie<boolean>("agent-config-auto-save", {
     default: () => true,
 });
+const DEFAULT_OPENING_STATEMENT = "你好，我是智能体默认开场白，你可以在界面配置中修改我";
+const DEFAULT_OPENING_QUESTIONS = [
+    "我打算去北京旅游，有什么推荐的路线吗？",
+    "预算大约2万，能帮我规划一下行程吗？",
+    "我对历史文化很感兴趣，有合适的目的地推荐吗？",
+];
+const THIRD_PARTY_OPENING_STATEMENTS: Record<string, string> = {
+    coze: "开场白和问题预设请前往Coze平台设置，发布为 API 服务后即可生效",
+    dify: "开场白和问题预设请前往Dify平台设置",
+};
+
 const state = reactive<UpdateAgentConfigParams>({
     name: "",
     description: "",
@@ -59,12 +70,8 @@ const state = reactive<UpdateAgentConfigParams>({
     },
     datasetIds: [],
     mcpServerIds: [],
-    openingStatement: "你好，我是智能体默认开场白，你可以在界面配置中修改我",
-    openingQuestions: [
-        "我打算去北京旅游，有什么推荐的路线吗？",
-        "预算大约2万，能帮我规划一下行程吗？",
-        "我对历史文化很感兴趣，有合适的目的地推荐吗？",
-    ],
+    openingStatement: DEFAULT_OPENING_STATEMENT,
+    openingQuestions: [...DEFAULT_OPENING_QUESTIONS],
     isPublic: false,
     quickCommands: [],
     autoQuestions: {
@@ -90,16 +97,53 @@ const { lockFn: handleUpdate, isLock } = useLockFn(async (flag = true) => {
     await apiUpdateAgentConfig(agentId as string, state);
     if (flag) {
         useMessage().success(t("common.message.updateSuccess"));
+        setTimeout(() => {
+            useRouter().push(useRoutePath("ai-agent:list"));
+        }, 1000);
     }
     refreshNuxtData(`agent-detail-${agentId as string}`);
 });
 
 const handleAutoSave = useDebounceFn(() => handleUpdate(false), 1000);
 
+// 第三方模式下禁用自动保存
+const isThirdPartyMode = computed(() => state.createMode !== "direct");
+
+watch(
+    () => state.createMode,
+    (mode) => {
+        const isThirdParty = mode === "coze" || mode === "dify";
+        const isDefaultStatement = state.openingStatement === DEFAULT_OPENING_STATEMENT;
+        const isDefaultQuestions =
+            state.openingQuestions.length === DEFAULT_OPENING_QUESTIONS.length &&
+            state.openingQuestions.every(
+                (q: string, idx: number) => q === DEFAULT_OPENING_QUESTIONS[idx],
+            );
+
+        if (isThirdParty) {
+            if (isDefaultStatement) {
+                state.openingStatement = THIRD_PARTY_OPENING_STATEMENTS[mode];
+            }
+            if (isDefaultQuestions) {
+                state.openingQuestions = [];
+            }
+        } else {
+            if (!state.openingStatement) {
+                state.openingStatement = DEFAULT_OPENING_STATEMENT;
+            }
+            if (state.openingQuestions.length === 0) {
+                state.openingQuestions = [...DEFAULT_OPENING_QUESTIONS];
+            }
+        }
+    },
+    { immediate: true },
+);
+
 watch(
     () => state,
     () => {
-        if (!isInitialized.value || !enableAutoSave.value) {
+        // 第三方模式下不触发自动保存
+        if (!isInitialized.value || !enableAutoSave.value || isThirdPartyMode.value) {
             return;
         }
         handleAutoSave();
@@ -107,7 +151,10 @@ watch(
     { deep: true },
 );
 
-onMounted(() => {
+/**
+ * 同步 agents 数据到 state
+ */
+function syncAgentsToState() {
     (Reflect.ownKeys({ ...state, tags: [] }) as Array<keyof UpdateAgentConfigParams>).forEach(
         (key) => {
             if (
@@ -122,10 +169,34 @@ onMounted(() => {
             }
         },
     );
+}
+
+onMounted(() => {
+    syncAgentsToState();
     setTimeout(() => {
         isInitialized.value = true;
     }, 1500);
 });
+
+// 监听 agents 变化，当数据刷新后自动同步到 state（用于第三方平台自动同步配置后刷新页面数据）
+watch(
+    () => agents,
+    () => {
+        if (isInitialized.value && unref(agents)) {
+            // 暂时禁用自动保存，避免同步数据时触发保存
+            const prevAutoSave = enableAutoSave.value;
+            enableAutoSave.value = false;
+
+            syncAgentsToState();
+
+            // 恢复自动保存设置
+            nextTick(() => {
+                enableAutoSave.value = prevAutoSave;
+            });
+        }
+    },
+    { deep: true },
+);
 </script>
 
 <template>
@@ -145,7 +216,9 @@ onMounted(() => {
             <div class="flex h-full min-h-0 w-1/2 flex-none flex-col">
                 <!-- 模型参数配置 -->
                 <div class="mb-4 flex items-center justify-end gap-3 p-0.5">
+                    <!-- 第三方模式下隐藏自动保存选项 -->
                     <UCheckbox
+                        v-if="!isThirdPartyMode"
                         v-model="enableAutoSave"
                         :label="t('ai-agent.backend.configuration.enableAutoSave')"
                         class="flex-none"
@@ -163,6 +236,7 @@ onMounted(() => {
                             size="lg"
                             class="flex-none gap-1 px-4"
                             :disabled="isLock"
+                            :loading="isLock"
                             @click="handleUpdate"
                         >
                             {{ $t("ai-agent.backend.configuration.saveConfig") }}

@@ -1,5 +1,5 @@
 import { embeddingGenerator, getProvider } from "@buildingai/ai-sdk";
-import { SecretService } from "@buildingai/core/modules/secret/services/secret.service";
+import { SecretService } from "@buildingai/core/modules";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { getProviderSecret } from "@buildingai/utils";
 import { AiModelService } from "@modules/ai/model/services/ai-model.service";

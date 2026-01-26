@@ -143,6 +143,12 @@ export interface AiModel extends BaseEntity {
         power: number;
         tokens: number;
     };
+    /** 模型需要的会员等级ID列表 */
+    membershipLevel?: string[];
+    /** 是否需要会员权限 */
+    requiresMembership?: boolean;
+    /** 当前用户是否有权限访问 */
+    hasAccess?: boolean;
 }
 
 /**
@@ -377,6 +383,17 @@ export function apiUpdateAiConversation(
     data: UpdateConversationParams,
 ): Promise<AiConversation> {
     return useWebPatch(`/ai-conversations/${id}`, data);
+}
+
+/**
+ * update conversation pin status
+ * @description Updates the pin status of an AI conversation
+ * @param id Conversation ID
+ * @param isPinned Whether to pin the conversation
+ * @returns Promise with update result
+ */
+export function apiUpdateAiConversationPin(id: string, isPinned: boolean): Promise<void> {
+    return useWebPatch(`/ai-conversations/${id}/pin`, { isPinned });
 }
 
 /**

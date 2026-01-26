@@ -27,6 +27,12 @@ const SHARED_PAGES: SharedPageConfig[] = [
         meta: { layout: "full-screen", auth: false },
     },
     {
+        name: "403",
+        path: "/403",
+        file: "403.vue",
+        meta: { layout: "full-screen", auth: false },
+    },
+    {
         name: "buildingai-middleware",
         path: "/buildingai-middleware",
         file: "middleware.vue",

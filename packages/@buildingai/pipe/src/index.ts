@@ -1,1 +1,1 @@
-export * from "./param-validate.pipe";
+export { UUIDValidationPipe } from "./param-validate.pipe";

@@ -40,7 +40,7 @@ const groupedPages = computed(() => {
     const groups: Record<string, LinkItem[]> = {};
 
     for (const page of filteredPages.value) {
-        const pluginName = extractPluginName(page.path as string);
+        const pluginName = page.pluginName || extractPluginName(page.path ?? "");
         if (!groups[pluginName]) {
             groups[pluginName] = [];
         }
@@ -77,6 +77,7 @@ const getPluginPages = async () => {
 
         const pages: LinkItem[] = response.data.map((link: PluginLinkInfo) => ({
             type: LinkType.PLUGIN,
+            pluginName: link.pluginName,
             name: link.linkName,
             path: link.linkPath,
             query: {},

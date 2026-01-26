@@ -38,14 +38,16 @@ packages/**/dist
 /public/package.json
 !/public/web/extensions/buildingai-simple-blog
 /public/web/extensions/*
+/public/web/spa-loading.png
 /public/*
 !/public/web/
 !/public/index.html
 *.tsbuildinfo
 _temp_get_languages.*
 build.tsbuildinfo
-tsconfig.tsbuildinfo
 
+# IDE
+.idea
 
 # Debug
 npm-debug.log*
@@ -66,3 +68,4 @@ extensions/*
 !extensions/buildingai-simple-blog/build
 !extensions/buildingai-simple-blog/.output
 extensions/buildingai-simple-blog/dist
+releases

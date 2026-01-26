@@ -13,7 +13,6 @@ interface MenuItem {
     path?: string;
     icon?: string;
     permissionCode?: string | null;
-    pluginPackName?: string | null;
     children?: MenuItem[];
     [key: string]: any;
 }
@@ -131,11 +130,6 @@ export class MenuSeeder {
                     );
                     menuData.permissionCode = null;
                 }
-            }
-
-            // Handle plugin identifier: convert empty string to null
-            if (menuData.pluginPackName === "" || menuData.pluginPackName === undefined) {
-                menuData.pluginPackName = null;
             }
 
             // Save current menu item

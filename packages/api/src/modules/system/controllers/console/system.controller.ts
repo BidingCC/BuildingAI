@@ -26,6 +26,15 @@ export class SystemConsoleController {
         return this.systemService.getSystemInfo();
     }
 
+    /**
+     * 系统运行信息（版本号 & 系统ID）
+     * 用于控制台“系统信息”弹窗展示
+     */
+    @Get("runtime")
+    async getRuntimeInfo() {
+        return this.systemService.getRuntimeInfo();
+    }
+
     @Public()
     @Post("initialize")
     @BuildFileUrl(["user.avatar"])

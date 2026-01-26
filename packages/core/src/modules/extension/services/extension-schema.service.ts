@@ -1,5 +1,5 @@
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { Extension } from "@buildingai/db/entities/extension.entity";
+import { Extension } from "@buildingai/db/entities";
 import { Repository } from "@buildingai/db/typeorm";
 import { Injectable } from "@nestjs/common";
 

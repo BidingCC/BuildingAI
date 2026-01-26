@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import type { LoginResponse } from "@buildingai/service/webapi/user";
 import { apiAuthRegister } from "@buildingai/service/webapi/user";
-import { computed, reactive } from "vue";
+import { computed, reactive, resolveComponent } from "vue";
 import { useI18n } from "vue-i18n";
 import { object, ref as yupRef, string } from "yup";
+
+import { useAgreementModal } from "../../hooks/use-agreement-modal";
 
 const PrivacyTerms = defineAsyncComponent(() => import("../privacy-terms.vue"));
 
@@ -13,9 +15,13 @@ const emits = defineEmits<{
 }>();
 
 const appStore = useAppStore();
-const toast = useMessage();
 const userStore = useUserStore();
 const { t } = useI18n();
+
+const { ensureAgreementAccepted } = useAgreementModal(
+    { width: "!w-[420px]" },
+    resolveComponent("UIcon") as unknown as Component,
+);
 
 // 表单验证架构
 const registerSchema = object({
@@ -48,15 +54,8 @@ const registerState = reactive({
 });
 
 const { lockFn: onRegisterSubmit, isLock } = useLockFn(async () => {
-    if (
-        !userStore.isAgreed &&
-        !!appStore.loginWay.loginAgreement &&
-        appStore.loginSettings?.showPolicyAgreement
-    ) {
-        toast.warning(t("login.messages.agreementRequired"), {
-            title: t("login.messages.agreementTitle"),
-            duration: 3000,
-        });
+    const canProceed = await ensureAgreementAccepted();
+    if (!canProceed) {
         return;
     }
     try {
@@ -234,11 +233,6 @@ const passwordTextClass = computed(() => {
                 size="lg"
                 :loading="isLock"
                 :ui="{ base: 'flex-1 justify-center p-3' }"
-                :disabled="
-                    !userStore.isAgreed &&
-                    !!appStore.loginWay.loginAgreement &&
-                    appStore.loginSettings?.showPolicyAgreement
-                "
             >
                 {{ $t("login.registerNow") }}
             </UButton>

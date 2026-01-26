@@ -12,7 +12,7 @@
         "menu": {
             "documents": "Documents",
             "retrieval": "Retrieval Test",
-            "members": "Team Members",
+            "members": "Collaborators",
             "settings": "Settings",
             "segments": "Segments",
             "relatedApplications": "Related Apps"
@@ -176,8 +176,8 @@
             "keywordWeight": "Keyword Weight"
         },
         "members": {
-            "title": "Team Management",
-            "description": "Manage team members and permissions",
+            "title": "Collaborator Management",
+            "description": "Manage collaborators and permissions",
             "searchPlaceholder": "Search users...",
             "table": {
                 "user": "Member",
@@ -209,16 +209,16 @@
             "removeSuccess": "Removed",
             "removeFailed": "Remove failed",
             "confirmExitContent": "Exit this KB? You will lose access.",
-            "confirmRemoveContent": "Remove this member? They will lose access.",
+            "confirmRemoveContent": "Remove this collaborator? They will lose access.",
             "confirmTransferContent": "Transfer ownership to ",
             "confirmTransferSuccess": "Ownership transferred",
             "confirmTransferFailed": "Transfer failed",
             "confirmTransferContent2": "You will lose owner permissions.",
-            "addMember": "Add Member",
+            "addMember": "Add Collaborator",
             "confirmTransfer": "Transfer Ownership",
             "addModal": {
-                "title": "Add Team Member",
-                "description": "Search and select users to add",
+                "title": "Add Collaborator",
+                "description": "Search and select users to add as collaborators",
                 "searchPlaceholder": "Search users...",
                 "emptyState": "No users",
                 "userMatch": "User Match",
@@ -228,7 +228,7 @@
                 "addMemberFailedLog": "Add failed:",
                 "addButton": "Add",
                 "noteInputPlaceholder": "Note (optional)",
-                "addSuccess": "Added {count} members"
+                "addSuccess": "Added {count} collaborators"
             }
         },
         "test": {

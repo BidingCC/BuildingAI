@@ -8,6 +8,8 @@ packages:
   - packages/mobile/@buildingai/*
 
 catalog:
+  '@types/ali-oss': 6.16.13
+  ali-oss: 6.23.0
   axios: ^1.13.2
   callsites: ^4.2.0
   chokidar: ^4.0.3
@@ -44,6 +46,8 @@ catalogs:
     express: ^5.1.0
     typeorm: 0.3.27
     typeorm-naming-strategies: ^4.1.0
+    adm-zip: ^0.5.16
+    pg: ^8.16.3
   dev:
     '@tsconfig/node22': ^22.0.2
     '@types/node': ^24.10.0

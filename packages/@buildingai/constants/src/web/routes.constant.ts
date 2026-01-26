@@ -14,10 +14,13 @@ export const ROUTES = {
     HOME: "/",
     /** Login page path */
     LOGIN: "/login",
+    /** Forbidden page path */
+    FORBIDDEN: "/403",
     /** Console/Admin page path */
     CONSOLE: "/console",
     /** Extension page path */
-    EXTENSIONS: "/extensions",
+    EXTENSION: "/extension",
+    APP: "/app",
     /** BuildingAI middleware page path */
     BUILDINGAI_MIDDLEWARE: "/buildingai-middleware",
 } as const;

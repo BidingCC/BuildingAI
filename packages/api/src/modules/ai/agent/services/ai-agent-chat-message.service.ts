@@ -1,7 +1,7 @@
 import { BaseService } from "@buildingai/base";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { AgentChatMessage } from "@buildingai/db/entities/ai-agent-chat-message.entity";
-import { AgentChatRecord } from "@buildingai/db/entities/ai-agent-chat-record.entity";
+import { AgentChatMessage } from "@buildingai/db/entities";
+import { AgentChatRecord } from "@buildingai/db/entities";
 import { Repository } from "@buildingai/db/typeorm";
 import { PaginationDto } from "@buildingai/dto/pagination.dto";
 import { HttpErrorFactory } from "@buildingai/errors";

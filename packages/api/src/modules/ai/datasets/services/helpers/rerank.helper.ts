@@ -1,5 +1,5 @@
 import { getProvider, rerankGenerator, type RerankParams } from "@buildingai/ai-sdk";
-import { SecretService } from "@buildingai/core/modules/secret/services/secret.service";
+import { SecretService } from "@buildingai/core/modules";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { RetrievalChunk } from "@buildingai/types/ai/retrieval-config.interface";
 import { getProviderSecret } from "@buildingai/utils";

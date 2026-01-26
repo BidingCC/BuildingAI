@@ -212,14 +212,13 @@ export async function restartApi() {
         const exists = await checkProcessExists(PM2_APP_NAME);
 
         if (exists) {
-            Logger.info("Restart Service", "Process exists, deleting first...");
-            await executePm2Command(["delete", PM2_APP_NAME]);
+            await executePm2Command(["restart", PM2_APP_NAME, "--update-env"]);
+            Logger.success("Restart Service", "API service restarted.");
+        } else {
+            Logger.info("Restart Service", "Process not running, starting...");
+            await startApi(true);
+            Logger.success("Restart Service", "API service started.");
         }
-
-        // Start the service (skip exist check since we already handled it)
-        await startApi(true);
-
-        Logger.success("Restart Service", "API service restarted.");
     } catch (error) {
         Logger.error(
             "Restart Service",

@@ -56,7 +56,7 @@ const { lockFn: getUserDetail, isLock } = useLockFn(async () => {
 const handleSubmit = async (formData: UserUpdateRequest | UserCreateRequest) => {
     try {
         // 移除更新时不需要的字段
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
         const { username, password, isRoot, totalRechargeAmount, ...submitData } =
             formData as UserInfo;
 

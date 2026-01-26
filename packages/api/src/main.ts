@@ -3,8 +3,8 @@ import "@buildingai/config/utils/env";
 const setupTime = Date.now();
 
 import { AppConfig } from "@buildingai/config/app.config";
-import { setStackFinderFn } from "@buildingai/core/modules/extension/utils/extension.utils";
-import { FileUrlService } from "@buildingai/db/utils/file-url.service";
+import { setStackFinderFn } from "@buildingai/core/modules";
+import { FileUrlService } from "@buildingai/db";
 import { NestContainer } from "@buildingai/di";
 import { findStackTargetFile, isDevelopment, printBrandLogo } from "@buildingai/utils";
 import { setAssetsDir, tryListen } from "@common/utils/system";
@@ -49,6 +49,7 @@ async function bootstrap() {
     );
 
     app.use(cookieParser());
+    app.set("trust proxy", true);
 
     const corsEnabled = process.env.SERVER_CORS_ENABLED === "true";
     if (corsEnabled) {

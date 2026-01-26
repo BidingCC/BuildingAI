@@ -140,6 +140,7 @@ defineShortcuts({ o: () => (open.value = !open.value) });
             <ModelSelect
                 v-if="!open"
                 :model-value="modelId"
+                console
                 :disabled="props.disabled"
                 :button-ui="{
                     variant: 'soft',
@@ -161,6 +162,7 @@ defineShortcuts({ o: () => (open.value = !open.value) });
                     </h3>
                     <ModelSelect
                         :model-value="modelId"
+                        console
                         :disabled="props.disabled"
                         :button-ui="{
                             variant: 'outline',

@@ -1,4 +1,4 @@
-import { DatasetsSegments } from "@buildingai/db/entities/datasets-segments.entity";
+import { DatasetsSegments } from "@buildingai/db/entities";
 import { UUIDValidationPipe } from "@buildingai/pipe/param-validate.pipe";
 import { ConsoleController } from "@common/decorators/controller.decorator";
 import { Permissions } from "@common/decorators/permissions.decorator";

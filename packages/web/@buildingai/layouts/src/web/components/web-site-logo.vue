@@ -11,14 +11,12 @@ const props = defineProps<{
 }>();
 
 const appStore = useAppStore();
-const { smartNavigate } = useSmartNavigate();
 
 /**
  * Navigate back to home page
- * Uses smart navigation to handle both main app and plugin contexts
  */
 function backToHome() {
-    smartNavigate(ROUTES.HOME);
+    navigateTo(ROUTES.HOME);
 }
 
 defineOptions({ inheritAttrs: false });

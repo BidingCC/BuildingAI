@@ -1,6 +1,7 @@
 {
     "home": "首页",
     "rechargeCenter": "充值中心",
+    "memberCenter": "会员中心",
     "profile": "个人中心",
     "general": "通用设置",
     "mcpServerSetting": "MCP服务设置",
@@ -8,5 +9,6 @@
     "powerDetail": "积分明细",
     "agent": "智能体",
     "agentSquare": "智能体广场",
+    "apps": "应用中心",
     "chat": "对话"
 }

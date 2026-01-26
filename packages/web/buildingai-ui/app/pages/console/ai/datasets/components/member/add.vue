@@ -143,6 +143,26 @@ watch(
         immediate: false,
     },
 );
+
+watch(
+    selectedUsers,
+    (users) => {
+        const ids = users.map((user) => user.id);
+
+        ids.forEach((id) => {
+            if (!userRoles.value[id]) {
+                userRoles.value[id] = "viewer";
+            }
+        });
+
+        Object.keys(userRoles.value).forEach((id) => {
+            if (!ids.includes(id)) {
+                delete userRoles.value[id];
+            }
+        });
+    },
+    { deep: true },
+);
 </script>
 
 <template>
@@ -169,7 +189,7 @@ watch(
                         :items="roleOptions"
                         label-key="label"
                         value-key="value"
-                        :placeholder="'viewer'"
+                        :placeholder="t('ai-datasets.backend.members.role.viewer')"
                         @click.stop
                     />
                     <UInput

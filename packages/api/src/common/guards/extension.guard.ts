@@ -1,4 +1,4 @@
-import { getCachedExtensionList } from "@buildingai/core/modules/extension/utils/extension.utils";
+import { getCachedExtensionList } from "@buildingai/core/modules";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { CanActivate, ExecutionContext, Injectable, Logger } from "@nestjs/common";
 import type { Request } from "express";
@@ -36,6 +36,10 @@ export class ExtensionGuard implements CanActivate {
             request.path.startsWith(process.env.VITE_APP_CONSOLE_API_PREFIX || "/console") ||
             request.path.startsWith(process.env.VITE_APP_WEB_API_PREFIX || "/web")
         ) {
+            return true;
+        }
+
+        if (request.path.startsWith("/extensions/")) {
             return true;
         }
 

@@ -201,7 +201,7 @@ onMounted(() => getChatConfig());
             </div>
 
             <!-- 操作按钮 -->
-            <div class="flex gap-3 pt-4">
+            <div class="bg-background sticky bottom-0 flex gap-3 py-4">
                 <AccessControl :codes="['ai-conversations:update-config']">
                     <UButton
                         color="primary"

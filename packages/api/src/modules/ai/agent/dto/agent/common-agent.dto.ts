@@ -90,6 +90,14 @@ export class FormFieldConfigDto {
     required?: boolean;
 
     /**
+     * 字段最大长度
+     */
+    @IsOptional()
+    @IsInt({ message: "字段最大长度必须是整数" })
+    @Min(0, { message: "字段最大长度不能小于0" })
+    maxLength?: number;
+
+    /**
      * 选项列表（仅当type为select时使用）
      */
     @IsOptional()
@@ -152,7 +160,7 @@ export class AgentChatMessageDto {
      * 消息内容
      * 支持字符串或数组格式（包含文本、图片、音频、视频等）
      */
-    @IsNotEmpty({ message: "消息内容不能为空" })
+    @IsOptional()
     content: MessageContent;
 
     /**

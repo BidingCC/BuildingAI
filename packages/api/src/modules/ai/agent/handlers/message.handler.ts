@@ -1,5 +1,5 @@
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { AgentChatMessage } from "@buildingai/db/entities/ai-agent-chat-message.entity";
+import { AgentChatMessage } from "@buildingai/db/entities";
 import { Repository } from "@buildingai/db/typeorm";
 import {
     AIRawResponse,

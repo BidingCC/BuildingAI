@@ -1,6 +1,5 @@
 import { TypeOrmModule } from "@buildingai/db/@nestjs/typeorm";
-import { AiModel } from "@buildingai/db/entities/ai-model.entity";
-import { AiProvider } from "@buildingai/db/entities/ai-provider.entity";
+import { AiModel, AiProvider } from "@buildingai/db/entities";
 import { Module } from "@nestjs/common";
 
 import { PublicAiModelService } from "./services/ai-model.service";

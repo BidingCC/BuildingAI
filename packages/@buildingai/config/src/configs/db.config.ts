@@ -27,6 +27,10 @@ export const createDataSourceConfig = (
         namingStrategy: new SnakeNamingStrategy(),
         migrations: opts?.migrations || [],
         migrationsTableName: "migrations_history",
+        extra: {
+            idleTimeoutMillis: 0,
+            connectionTimeoutMillis: 0,
+        },
     };
 };
 

@@ -36,6 +36,13 @@ export class QueryExtensionDto extends PaginationDto {
     /**
      * Extension status
      */
+    @Transform(({ value }) => {
+        if (value === undefined || value === null || value === "") {
+            return undefined;
+        }
+        const numericValue = Number(value);
+        return Number.isNaN(numericValue) ? value : numericValue;
+    })
     @IsEnum(ExtensionStatus, { message: "Extension status must be a valid enum value" })
     @IsOptional()
     status?: ExtensionStatusType;

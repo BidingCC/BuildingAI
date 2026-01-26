@@ -32,25 +32,32 @@ const { paging, getLists } = usePaging({
 const handleMcpServerSelect = (provider: McpServerDetail, selected: boolean | "indeterminate") => {
     if (typeof selected === "boolean") {
         const providerId = provider.id as string;
+        const next = new Set(selectMcpServer.value);
         if (selected) {
-            selectMcpServer.value.add(providerId);
+            next.add(providerId);
         } else {
-            selectMcpServer.value.delete(providerId);
+            next.delete(providerId);
         }
+
+        selectMcpServer.value = next;
     }
 };
 
 const handleSelectAll = (value: boolean | "indeterminate") => {
     const isSelected = value === true;
+    const next = new Set(selectMcpServer.value);
+
     if (isSelected) {
         paging.items.forEach((provider: AiProviderInfo) => {
             if (provider.id) {
-                selectMcpServer.value.add(provider.id as string);
+                next.add(provider.id as string);
             }
         });
     } else {
-        selectMcpServer.value.clear();
+        next.clear();
     }
+
+    selectMcpServer.value = next;
 };
 
 const handleDelete = async (id: string | string[]) => {

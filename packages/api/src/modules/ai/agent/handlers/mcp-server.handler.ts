@@ -1,5 +1,5 @@
 import { convertMCPToolsToOpenAI, McpServerSSE, type MCPTool } from "@buildingai/ai-sdk";
-import { AiMcpServer } from "@buildingai/db/entities/ai-mcp-server.entity";
+import { AiMcpServer } from "@buildingai/db/entities";
 import { AiMcpServerService } from "@modules/ai/mcp/services/ai-mcp-server.service";
 import { Injectable, Logger } from "@nestjs/common";
 import type { ChatCompletionFunctionTool } from "openai/resources/index";

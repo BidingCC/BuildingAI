@@ -22,13 +22,13 @@
         "./*": "./*"
     },
     "scripts": {
-        "clean": "rimraf build .output tsconfig.tsbuildinfo",
-        "dev:web": "cross-env NUXT_BUILD_SSR=false NUXT_BUILD_ENV=development nuxt dev --no-clear --dotenv ../../.env",
+        "build:clean": "rimraf build .nuxt .output .temp",
+        "dev:web": "rimraf .nuxt && cross-env NUXT_BUILD_SSR=false NUXT_BUILD_ENV=development nuxt dev --no-clear --dotenv ../../.env",
         "dev:api": "cross-env NODE_ENV=development tsup --watch src/api",
-        "dev": "pnpm run \"/^dev:.*/\"",
+        "dev": "concurrently -n web,api -c cyan,magenta \"pnpm dev:web\" \"pnpm dev:api\"",
         "build:api": "cross-env NODE_ENV=production tsup",
         "build:web": "cross-env NODE_OPTIONS=--max-old-space-size=4096 NUXT_BUILD_SSR=false NUXT_BUILD_ENV=production nuxt generate --dotenv ../../.env",
-        "build:publish": "pnpm clean && pnpm run build:web && pnpm run build:api && node ../../scripts/copy-extension-build.mjs",
+        "build:publish": "pnpm build:clean && pnpm run build:web && pnpm run build:api",
         "format": "prettier --write src",
         "lint": "eslint src --quiet",
         "lint:fix": "eslint src --fix",
@@ -58,5 +58,8 @@
         "@buildingai/typescript-config": "workspace:*",
         "@buildingai/nuxt": "workspace:*",
         "@buildingai/i18n-config": "workspace:*"
+    },
+    "engine": {
+        "buildingai": ">=25.1.0"
     }
 }

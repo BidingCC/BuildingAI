@@ -1,10 +1,10 @@
 import { BaseService } from "@buildingai/base";
+import { type UserPlayground } from "@buildingai/db";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { Agent } from "@buildingai/db/entities/ai-agent.entity";
-import { AgentChatMessage } from "@buildingai/db/entities/ai-agent-chat-message.entity";
-import { AgentChatRecord } from "@buildingai/db/entities/ai-agent-chat-record.entity";
-import { User } from "@buildingai/db/entities/user.entity";
-import { type UserPlayground } from "@buildingai/db/interfaces/context.interface";
+import { User } from "@buildingai/db/entities";
+import { Agent } from "@buildingai/db/entities";
+import { AgentChatMessage } from "@buildingai/db/entities";
+import { AgentChatRecord } from "@buildingai/db/entities";
 import { Repository } from "@buildingai/db/typeorm";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { ChatMessage } from "@buildingai/types/ai/agent-config.interface";
@@ -84,6 +84,21 @@ export class AiAgentChatService extends BaseService<AgentChatRecord> {
         // 设置流式响应头
         if (responseMode === "streaming") {
             this.setupStreamingHeaders(res!);
+        }
+
+        // Create AbortController for cancellation (streaming mode only)
+        const abortController = responseMode === "streaming" ? new AbortController() : null;
+        let isClientDisconnected = false;
+
+        // Listen for client disconnect (streaming mode only)
+        if (responseMode === "streaming" && res) {
+            res.on("close", () => {
+                if (!res.writableEnded) {
+                    isClientDisconnected = true;
+                    this.logger.debug("🔌 Client disconnected, cancelling request");
+                    abortController?.abort();
+                }
+            });
         }
 
         // 获取智能体信息
@@ -168,35 +183,35 @@ export class AiAgentChatService extends BaseService<AgentChatRecord> {
             );
         }
 
-        // // 检查第三方集成
-        // if (this.thirdPartyIntegrationHandler.isThirdPartyIntegrationEnabled(finalConfig, dto)) {
-        //     this.logger.log(
-        //         `[ThirdParty] Using third party platform: ${finalConfig.createMode} for agent ${agentId}`,
-        //     );
+        // 检查第三方集成
+        if (this.thirdPartyIntegrationHandler.isThirdPartyIntegrationEnabled(finalConfig, dto)) {
+            this.logger.log(
+                `[ThirdParty] Using third party platform: ${finalConfig.createMode} for agent ${agentId}`,
+            );
 
-        //     this.thirdPartyIntegrationHandler.validateThirdPartyConfig(finalConfig, dto);
+            this.thirdPartyIntegrationHandler.validateThirdPartyConfig(finalConfig, dto);
 
-        //     // 获取积分策略结果
-        //     const billingResult = await billingStrategy.determineBillTo(
-        //         agentInfo as Agent,
-        //         user,
-        //         this.userRepository,
-        //     );
+            // 获取积分策略结果
+            const billingResult = await billingStrategy.determineBillTo(
+                agentInfo as Agent,
+                user,
+                this.userRepository,
+            );
 
-        //     return await this.thirdPartyIntegrationHandler.handleThirdPartyIntegrationChat(
-        //         finalConfig,
-        //         modifiedDto,
-        //         user,
-        //         {
-        //             responseMode,
-        //             res,
-        //             billingResult,
-        //             billingStrategy,
-        //             billingHandler: this.billingHandler,
-        //         },
-        //         conversationRecord,
-        //     );
-        // }
+            return await this.thirdPartyIntegrationHandler.handleThirdPartyIntegrationChat(
+                finalConfig,
+                modifiedDto,
+                user,
+                {
+                    responseMode,
+                    res,
+                    billingResult,
+                    billingStrategy,
+                    billingHandler: this.billingHandler,
+                },
+                conversationRecord,
+            );
+        }
 
         // 传统聊天处理
         return await this.handleTraditionalChat(
@@ -210,6 +225,8 @@ export class AiAgentChatService extends BaseService<AgentChatRecord> {
             updatedLastUserMessage,
             startTime,
             res,
+            abortController,
+            () => isClientDisconnected,
         );
     }
 
@@ -227,6 +244,8 @@ export class AiAgentChatService extends BaseService<AgentChatRecord> {
         lastUserMessage: ChatMessage | string | undefined,
         startTime: number,
         res?: Response,
+        abortController?: AbortController | null,
+        getIsClientDisconnected?: () => boolean,
     ): Promise<AgentChatResponse | void> {
         // 检查模型配置
         if (!finalConfig.modelConfig?.id) {
@@ -293,6 +312,7 @@ export class AiAgentChatService extends BaseService<AgentChatRecord> {
             tools,
             toolToServerMap,
             mcpServers,
+            abortSignal: abortController?.signal,
         };
 
         try {
@@ -328,6 +348,12 @@ export class AiAgentChatService extends BaseService<AgentChatRecord> {
 
             return result;
         } catch (error) {
+            // Handle user cancellation silently
+            if (getIsClientDisconnected?.()) {
+                this.logger.debug("🚫 User cancelled the request, ending silently");
+                return;
+            }
+
             this.logger.error(`智能体对话失败: ${error.message}`);
 
             if (responseMode === "streaming") {
@@ -463,6 +489,7 @@ export class AiAgentChatService extends BaseService<AgentChatRecord> {
         res.setHeader("Connection", "keep-alive");
         res.setHeader("Access-Control-Allow-Origin", "*");
         res.setHeader("Access-Control-Allow-Headers", "Cache-Control");
+        res.flushHeaders(); // 立即发送响应头
     }
 
     /**

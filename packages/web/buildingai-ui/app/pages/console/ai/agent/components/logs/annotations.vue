@@ -319,6 +319,7 @@ const mountAnnotationModal = async (annotationId: string | null = null) => {
     const instance = modal.open({
         agentId: props.agentId,
         annotationId: annotationId,
+        hiddenStatus: true,
     });
     const shouldRefresh = await instance.result;
     if (shouldRefresh) {

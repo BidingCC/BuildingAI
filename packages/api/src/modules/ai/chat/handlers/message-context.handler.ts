@@ -11,6 +11,24 @@ export class MessageContextCommandHandler {
     private readonly logger = new Logger(MessageContextCommandHandler.name);
 
     /**
+     * Clear reasoning_content from history messages.
+     * For DeepSeek Thinking Mode: when a new question starts, reasoning_content
+     * from previous questions should be removed to save bandwidth.
+     *
+     * @param messages - Messages array to process
+     * @returns Processed messages with reasoning_content cleared
+     */
+    clearReasoningContent(messages: ChatCompletionMessageParam[]): ChatCompletionMessageParam[] {
+        return messages.map((message) => {
+            if (message.role === "assistant" && "reasoning_content" in message) {
+                const { _reasoning_content, ...rest } = message as any;
+                return rest;
+            }
+            return message;
+        });
+    }
+
+    /**
      * Limit messages based on model's maxContext setting
      * Preserves system message if exists and keeps most recent messages
      *
@@ -22,11 +40,14 @@ export class MessageContextCommandHandler {
         messages: ChatCompletionMessageParam[],
         maxContext?: number,
     ): ChatCompletionMessageParam[] {
-        if (!maxContext || maxContext <= 0 || messages.length <= maxContext) {
-            return [...messages];
+        // Clear reasoning_content from history messages for DeepSeek Thinking Mode compatibility
+        let processedMessages = this.clearReasoningContent(messages);
+
+        if (!maxContext || maxContext <= 0 || processedMessages.length <= maxContext) {
+            return processedMessages;
         }
 
-        let limitedMessages = [...messages];
+        let limitedMessages = [...processedMessages];
 
         // Find system message
         const systemMessageIndex = limitedMessages.findIndex((msg) => msg.role === "system");

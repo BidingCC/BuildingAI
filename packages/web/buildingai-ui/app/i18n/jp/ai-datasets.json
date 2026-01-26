@@ -12,7 +12,7 @@
         "menu": {
             "documents": "ドキュメント",
             "retrieval": "検索テスト",
-            "members": "チームメンバー",
+            "members": "協力メンバー",
             "settings": "設定",
             "segments": "セグメント",
             "relatedApplications": "関連アプリ"
@@ -176,8 +176,8 @@
             "keywordWeight": "キーワード重み"
         },
         "members": {
-            "title": "チームメンバー管理",
-            "description": "ナレッジベースのチームメンバーを管理、役割権限を割り当て、アクセス範囲を制御",
+            "title": "協力メンバー管理",
+            "description": "ナレッジベースの協力メンバーを管理し、役割権限を割り当ててアクセス範囲を制御",
             "searchPlaceholder": "ユーザー名を検索...",
             "table": {
                 "user": "メンバー",
@@ -209,15 +209,15 @@
             "removeSuccess": "削除成功",
             "removeFailed": "削除失敗",
             "confirmExitContent": "このナレッジベースから退出しますか？退出後はアクセスできなくなります。",
-            "confirmRemoveContent": "このチームメンバーを削除しますか？削除後はこのナレッジベースにアクセスできなくなります。",
+            "confirmRemoveContent": "この協力メンバーを削除しますか？削除後はこのナレッジベースにアクセスできなくなります。",
             "confirmTransferContent": "ナレッジベースの所有権を ",
             "confirmTransferSuccess": "所有権移譲成功",
             "confirmTransferFailed": "所有権移譲失敗",
             "confirmTransferContent2": "に移譲しますか？移譲後は所有者権限を失います。",
-            "addMember": "メンバーを追加",
+            "addMember": "協力メンバーを追加",
             "confirmTransfer": "所有権を移譲",
             "addModal": {
-                "title": "チームメンバーを追加",
+                "title": "協力メンバーを追加",
                 "description": "追加するメンバーを検索して選択、役割と備考を設定",
                 "searchPlaceholder": "ユーザーを検索して選択...",
                 "emptyState": "ユーザーなし",

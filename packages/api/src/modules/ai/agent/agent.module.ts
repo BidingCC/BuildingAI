@@ -1,12 +1,18 @@
 import { TypeOrmModule } from "@buildingai/db/@nestjs/typeorm";
-import { Agent } from "@buildingai/db/entities/ai-agent.entity";
-import { AgentAnnotation } from "@buildingai/db/entities/ai-agent-annotation.entity";
-import { AgentChatMessage } from "@buildingai/db/entities/ai-agent-chat-message.entity";
-import { AgentChatRecord } from "@buildingai/db/entities/ai-agent-chat-record.entity";
-import { AiModel } from "@buildingai/db/entities/ai-model.entity";
-import { AiProvider } from "@buildingai/db/entities/ai-provider.entity";
-import { Tag } from "@buildingai/db/entities/tag.entity";
-import { User } from "@buildingai/db/entities/user.entity";
+import {
+    Agent,
+    AgentAnnotation,
+    AgentChatMessage,
+    AgentChatRecord,
+    AiModel,
+    AiProvider,
+    MembershipLevels,
+    Tag,
+    User,
+    UserSubscription,
+} from "@buildingai/db/entities";
+import { MembershipValidationCommandHandler } from "@modules/ai/chat/handlers";
+import { HttpModule } from "@nestjs/axios";
 import { Module } from "@nestjs/common";
 
 import { AiAgentConsoleController } from "./controllers/console/ai-agent.controller";
@@ -40,7 +46,10 @@ import { AiAgentPublicChatService } from "./services/ai-agent-v1-chat.service";
             Tag,
             AiModel,
             AiProvider,
+            UserSubscription,
+            MembershipLevels,
         ]),
+        HttpModule,
         ChatHandlersModule, // 导入聊天处理器模块（已包含其他依赖模块）
     ],
     controllers: [
@@ -60,6 +69,7 @@ import { AiAgentPublicChatService } from "./services/ai-agent-v1-chat.service";
         AiAgentChatsMessageService,
         AiAgentPublicChatService,
         AiAgentTemplateService,
+        MembershipValidationCommandHandler,
     ],
     exports: [
         AiAgentService,

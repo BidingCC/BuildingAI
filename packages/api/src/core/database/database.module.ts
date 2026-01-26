@@ -1,15 +1,18 @@
 import { createDataSourceConfig } from "@buildingai/config/db.config";
 import { table3BorderStyle } from "@buildingai/config/table.config";
-import type { ExtensionInfo } from "@buildingai/core/modules/extension/interfaces/extension.interface";
-import { getCachedExtensionList } from "@buildingai/core/modules/extension/utils/extension.utils";
+import type { ExtensionInfo } from "@buildingai/core/modules";
+import { getCachedExtensionList } from "@buildingai/core/modules";
+import { NormalizeFileUrlSubscriber } from "@buildingai/db";
 import { TypeOrmModule } from "@buildingai/db/@nestjs/typeorm";
-import { AiModel } from "@buildingai/db/entities/ai-model.entity";
-import { AiProvider } from "@buildingai/db/entities/ai-provider.entity";
-import { Dict } from "@buildingai/db/entities/dict.entity";
-import { Menu } from "@buildingai/db/entities/menu.entity";
-import { Payconfig } from "@buildingai/db/entities/payconfig.entity";
-import { SecretTemplate } from "@buildingai/db/entities/secret-template.entity";
-import { User } from "@buildingai/db/entities/user.entity";
+import {
+    AiModel,
+    AiProvider,
+    Dict,
+    Menu,
+    Payconfig,
+    SecretTemplate,
+    User,
+} from "@buildingai/db/entities";
 import { DataSource, EntityMetadata, Logger as TypeOrmLogger } from "@buildingai/db/typeorm";
 import { TerminalLogger } from "@buildingai/logger";
 import { DecorateModule } from "@modules/decorate/decorate.module";
@@ -259,6 +262,7 @@ async function logDatabaseInfo(
                     ...databaseOptions,
                     logger: new CustomLogger(),
                     entities: entityPaths,
+                    subscribers: [NormalizeFileUrlSubscriber],
                 };
             },
             dataSourceFactory: async (options: PostgresConnectionOptions) => {

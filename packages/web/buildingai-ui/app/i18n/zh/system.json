@@ -62,7 +62,7 @@
             "title": "版权备案信息设置",
             "description": "管理网站的版权和备案信息",
             "displayName": {
-                "label": "备案显示名称",
+                "label": "备案信息",
                 "placeholder": "请输入备案显示名称，如：京ICP证030173号",
                 "required": "请输入备案显示名称"
             },
@@ -75,6 +75,21 @@
                 "label": "备案跳转链接",
                 "placeholder": "请输入备案跳转链接，如：https://beian.miit.gov.cn/",
                 "required": "请输入备案跳转链接"
+            },
+            "sections": {
+                "filing": "备案信息",
+                "copyright": "版权信息"
+            },
+            "copyrightInfo": {
+                "label": "版权信息",
+                "textPlaceholder": "Powered by",
+                "brandPlaceholder": "站点AI名称",
+                "required": "请完整填写版权信息"
+            },
+            "copyrightUrl": {
+                "label": "跳转链接",
+                "placeholder": "请设置版权跳转链接，如 https://beian.miit.gov.cn/",
+                "required": "请输入跳转链接"
             }
         },
         "loginConfig": {

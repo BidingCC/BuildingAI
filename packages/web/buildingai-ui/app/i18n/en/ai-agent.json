@@ -6,7 +6,9 @@
         "search": {
             "placeholder": "Search agent name, description, or ID",
             "allStatus": "All Status",
-            "filterByStatus": "Filter by Status"
+            "filterByStatus": "Filter by Status",
+            "allMode": "All",
+            "filterByMode": "Filter by Creation Mode"
         },
         "create": {
             "title": "Create Agent",
@@ -27,7 +29,15 @@
             "descriptionPlaceholder": "Enter description",
             "mode": "Creation Mode",
             "modes": {
-                "direct": "Direct Create"
+                "direct": "Direct Create",
+                "coze": "Coze",
+                "dify": "Dify"
+            },
+            "modesDesc": {
+                "direct": "Manually configure agent info",
+                "coze": "Integrate with Coze platform agent",
+                "dify": "Integrate with Dify platform agent",
+                "plugin": "Agent type extended via plugin"
             }
         },
         "menu": {
@@ -58,8 +68,9 @@
             "formVariable": "Form Variable",
             "formVariableDesc": "Variables will be filled via form before chat",
             "formVariableDesc2": "Form inputs replace variables in role prompt.",
-            "formVariableNameEmpty": "Field name required",
-            "formVariableLabelEmpty": "Field label required",
+            "formVariableNameEmpty": "Variable name cannot be empty",
+            "formVariableNameInvalid": "Variable name can only contain English letters, numbers, and underscores",
+            "formVariableLabelEmpty": "Display name cannot be empty",
             "formVariableTypeEmpty": "Field type required",
             "formVariableNameExists": "Name exists, use another",
             "formVariableEditTitle": "Edit Form Variable",
@@ -70,8 +81,8 @@
             "formVariableTypeTextarea": "Textarea",
             "formVariableTypeSelect": "Select",
             "formVariableName": "Variable Name",
-            "formVariableNamePlaceholder": "Enter variable name",
-            "formVariableLabel": "Field Label",
+            "formVariableNamePlaceholder": "Enter variable name, only English letters, numbers, and underscores are allowed",
+            "formVariableLabel": "Display Name",
             "formVariableLabelPlaceholder": "Enter field label",
             "formVariableOptions": "Options",
             "formVariableOptionsPlaceholder": "Enter options",
@@ -97,9 +108,9 @@
             "tagsDesc": "Add tags to agents for better categorization and management",
             "feedback": "Q&A Annotation",
             "feedbackDesc": "Support admin/user Q&A annotation",
-            "public": "Public Agent",
+            "public": "Public",
             "publicDesc": "Visible in Agent Square. Requires published status.",
-            "private": "Private Agent",
+            "private": "Private",
             "prologue": "Prologue",
             "prologueDesc": "Drag left/right if tools are obscured",
             "problem": "Opening Question",
@@ -140,6 +151,31 @@
             "mcp": {
                 "title": "MCP Tool Server",
                 "description": "Configure MCP tool servers for agent"
+            },
+            "thirdParty": {
+                "baseURL": "API Endpoint",
+                "apiKey": "API Key",
+                "dify": {
+                    "title": "Dify Platform Configuration",
+                    "baseURLPlaceholder": "Enter the Dify API endpoint, default: https://api.dify.ai/v1",
+                    "baseURLHint": "API endpoint for the Dify app",
+                    "apiKeyPlaceholder": "Enter the Dify app API key",
+                    "apiKeyHint": "Get the API key in Dify app settings",
+                    "helpTitle": "Configuration Notes",
+                    "helpDesc": "After creating an app on Dify, get the API key and endpoint in the app settings."
+                },
+                "coze": {
+                    "title": "Coze Platform Configuration",
+                    "baseURLPlaceholder": "Enter the Coze API endpoint",
+                    "baseURLHint": "API endpoint for the Coze app, default: https://api.coze.cn",
+                    "botId": "Bot ID",
+                    "botIdPlaceholder": "Enter the Coze Bot ID",
+                    "botIdHint": "Get from the Bot detail page URL on Coze, e.g., 7342xxxxx",
+                    "apiKeyPlaceholder": "Enter the Coze app API key",
+                    "apiKeyHint": "Create a Personal Access Token (PAT) on Coze Open Platform",
+                    "helpTitle": "Configuration Notes",
+                    "helpDesc": "Create a Bot on Coze and publish it as an API service, then get the Bot ID and Personal Access Token."
+                }
             }
         },
         "publish": {
@@ -289,6 +325,9 @@
                 "urlRequired": "Please enter a URL first"
             },
             "success": "DSL file imported successfully!",
+            "batchSuccess": "Successfully imported {count} file(s)",
+            "partialSuccess": "Successfully imported {success} of {total} file(s)",
+            "batchFailed": "All files failed to import, please check the file format",
             "form": {
                 "urlLabel": "URL",
                 "urlPlaceholder": "Enter the DSL file URL"

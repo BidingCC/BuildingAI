@@ -78,6 +78,11 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
         const messageWithId = {
             id: generateUuid(),
             ...message,
+            // 只为非用户消息设置 createdAt（用户消息不需要显示时间）
+            ...(message.role !== "user" &&
+                !message.createdAt && {
+                    createdAt: new Date().toISOString(),
+                }),
         };
 
         messages.value.push(messageWithId);
@@ -100,6 +105,7 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
             status: "loading",
             mcpToolCalls: [],
             avatar: reactiveChatConfig.value.avatar,
+            createdAt: new Date().toISOString(),
         };
 
         messages.value.push(aiMessage);
@@ -209,6 +215,10 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
                 onFinish(message) {
                     aiMessage.status = "completed";
                     aiMessage.content = message.content || aiMessage.content;
+                    // 如果后端返回了 createdAt，使用后端的值（更准确）
+                    if ((message as any).createdAt) {
+                        aiMessage.createdAt = (message as any).createdAt;
+                    }
                     updateReasoningEndTime();
 
                     messages.value = [...messages.value];
@@ -325,12 +335,16 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
         if (streamController.value) {
             streamController.value.abort();
             streamController.value = null;
-            status.value = "completed";
+            status.value = "idle";
 
             const lastMessage = messages.value[messages.value.length - 1];
             if (lastMessage?.role === "assistant") {
                 lastMessage.status = "completed";
                 messages.value = [...messages.value];
+
+                // 调用 onFinish 回调，确保消息被保存到数据库
+                // 即使流被中止，也要保存已生成的内容
+                onFinish?.(lastMessage);
             }
         }
     };

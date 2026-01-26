@@ -1,5 +1,5 @@
 import { BusinessCode } from "@buildingai/constants/shared/business-code.constant";
-import { type UserPlayground } from "@buildingai/db/interfaces/context.interface";
+import { type UserPlayground } from "@buildingai/db";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { checkForbiddenDecorators } from "@buildingai/utils";
 import { createParamDecorator, ExecutionContext } from "@nestjs/common";

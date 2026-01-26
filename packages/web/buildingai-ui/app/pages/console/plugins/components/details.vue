@@ -124,6 +124,39 @@ onMounted(() => {
                         <!-- 插件描述 -->
                         <div>
                             <h4 class="text-secondary-foreground mb-2 font-medium">
+                                {{ $t("extensions.develop.form.version") }}
+                            </h4>
+                            <p class="text-accent-foreground dark:text-gray-400">
+                                {{ extension.version }}
+                            </p>
+                        </div>
+
+                        <div>
+                            <h4 class="text-secondary-foreground mb-2 font-medium">
+                                {{ $t("extensions.market.platformVersion") }}
+                            </h4>
+                            <div class="flex items-center gap-2">
+                                <span class="text-accent-foreground dark:text-gray-400">
+                                    {{ extension.engine }}
+                                </span>
+                                <div
+                                    v-if="!extension.isCompatible"
+                                    class="text-error flex items-center gap-1"
+                                >
+                                    <UIcon
+                                        name="i-lucide-circle-alert"
+                                        class="size-3.5 cursor-pointer"
+                                    />
+                                    <span class="text-xs leading-none">
+                                        {{ $t("extensions.manage.incompatible") }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 插件描述 -->
+                        <div>
+                            <h4 class="text-secondary-foreground mb-2 font-medium">
                                 {{ $t("extensions.market.description") }}
                             </h4>
                             <p class="text-accent-foreground dark:text-gray-400">
@@ -137,7 +170,11 @@ onMounted(() => {
                                 {{ $t("extensions.market.updateTime") }}
                             </h4>
                             <p class="text-accent-foreground dark:text-gray-400">
-                                {{ extension.updatedAt || extension.createdAt }}
+                                <TimeDisplay
+                                    v-if="extension.updatedAt"
+                                    :datetime="extension.updatedAt || extension.createdAt"
+                                    mode="datetime"
+                                />
                             </p>
                         </div>
 

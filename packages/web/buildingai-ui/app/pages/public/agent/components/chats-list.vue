@@ -34,6 +34,7 @@ const isMobile = useMediaQuery("(max-width: 768px)");
 
 const sidebarExpanded = shallowRef(false);
 const open = shallowRef(false);
+const appStore = useAppStore();
 
 onMounted(() => {
     nextTick(() => {
@@ -411,13 +412,13 @@ defineShortcuts({
                         <div
                             class="text-muted-foreground flex items-center justify-center gap-1 text-xs"
                         >
-                            <span>Powered by</span>
+                            <span>{{ appStore.siteConfig?.copyright.copyrightText }}</span>
                             <a
-                                href="https://buildingai.cc"
+                                class="text-primary font-bold"
+                                :href="appStore.siteConfig?.copyright.copyrightUrl"
                                 target="_blank"
-                                class="text-primary font-medium hover:underline"
                             >
-                                BuildingAI
+                                {{ appStore.siteConfig?.copyright.copyrightBrand }}
                             </a>
                         </div>
                     </div>

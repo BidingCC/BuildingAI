@@ -1,7 +1,7 @@
 /**
  * @fileoverview Web API service functions for purchase record management
  * @description This file contains API functions for purchase record queries,
- * order history management, and related type definitions for the web interface.
+ * order history management, subscription records, and related type definitions for the web interface.
  *
  * @author BuildingAI Teams
  */
@@ -57,4 +57,55 @@ export type PurchaseRecordQueryParams = BaseQueryParams;
  */
 export function apiPurchaseRecord(params: PurchaseRecordQueryParams): Promise<PurchaseRecord> {
     return useWebGet("/recharge/lists", params);
+}
+
+// ==================== Subscription Record Type Definitions ====================
+
+/**
+ * Subscription record interface
+ * @description Interface for subscription record response data
+ */
+export type SubscriptionRecord = PaginationResult<SubscriptionRecordItem>;
+
+/**
+ * Subscription record item interface
+ * @description Interface for individual subscription record item
+ */
+export interface SubscriptionRecordItem extends BaseEntity {
+    /** 订单编号 */
+    orderNo?: string;
+    /** 订阅计划名称 */
+    planName?: string;
+    /** 会员等级名称 */
+    levelName?: string;
+    /** 订阅时长 */
+    duration?: string;
+    /** 实付金额 */
+    orderAmount?: string;
+    /** 支付方式: 1-微信, 2-支付宝 */
+    payType?: number;
+    /** 支付方式描述 */
+    payTypeDesc?: string;
+    /** 退款状态: 0-未退款, 1-已退款 */
+    refundStatus?: number;
+}
+
+/**
+ * Subscription record query parameters interface
+ * @description Parameters for querying subscription record list
+ */
+export type SubscriptionRecordQueryParams = BaseQueryParams;
+
+// ==================== Subscription Record Related APIs ====================
+
+/**
+ * Get subscription record list
+ * @description Get paginated list of subscription records
+ * @param params Query parameters
+ * @returns Promise with subscription record data
+ */
+export function apiSubscriptionRecord(
+    params: SubscriptionRecordQueryParams,
+): Promise<SubscriptionRecord> {
+    return useWebGet("/membership/order/lists", params);
 }

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { apiUploadRemoteFile } from "@buildingai/service/common";
-import { apiImportAgentDsl } from "@buildingai/service/consoleapi/ai-agent";
+import { apiBatchImportAgentDsl, apiImportAgentDsl } from "@buildingai/service/consoleapi/ai-agent";
+import { uploadRemoteFileAdaptive } from "@buildingai/upload";
 
 const emits = defineEmits<{
     (e: "close", refresh?: boolean): void;
@@ -9,13 +9,13 @@ const emits = defineEmits<{
 const toast = useMessage();
 
 const activeTab = shallowRef("file");
-const dslFileURL = shallowRef("");
+const dslFileURL = shallowRef<string[]>([]);
 const url = shallowRef("");
 
 const { t } = useI18n();
 
 const { lockFn: submitImport, isLock } = useLockFn(async () => {
-    if (activeTab.value === "file" && !dslFileURL.value) {
+    if (activeTab.value === "file" && (!dslFileURL.value || dslFileURL.value.length === 0)) {
         toast.error(t("ai-agent.backend.dslImport.errors.fileRequired"));
         return;
     }
@@ -25,7 +25,7 @@ const { lockFn: submitImport, isLock } = useLockFn(async () => {
 
         return;
     } else if (activeTab.value === "url" && url.value) {
-        const result = await apiUploadRemoteFile({
+        const result = await uploadRemoteFileAdaptive({
             url: url.value,
             description: `Remote file: ${url.value}`,
         });
@@ -33,14 +33,51 @@ const { lockFn: submitImport, isLock } = useLockFn(async () => {
         url.value = result.url;
     }
 
-    await apiImportAgentDsl({
-        content: activeTab.value === "file" ? dslFileURL.value : url.value,
-        format: "yaml",
-    });
+    try {
+        if (activeTab.value === "file") {
+            // 批量导入多个文件 - 由后端处理
+            const result = await apiBatchImportAgentDsl({
+                contents: dslFileURL.value,
+                format: "yaml",
+            });
 
-    toast.success(t("ai-agent.backend.dslImport.success"));
-    emits("close", true);
+            if (result.success > 0) {
+                if (result.failed > 0) {
+                    toast.warning(
+                        t("ai-agent.backend.dslImport.partialSuccess", {
+                            success: result.success,
+                            total: result.total,
+                        }),
+                    );
+                } else {
+                    toast.success(
+                        t("ai-agent.backend.dslImport.batchSuccess", {
+                            count: result.success,
+                        }),
+                    );
+                }
+            } else {
+                return;
+            }
+        } else {
+            // URL 导入单个文件
+            await apiImportAgentDsl({
+                content: url.value,
+                format: "yaml",
+            });
+
+            toast.success(t("ai-agent.backend.dslImport.success"));
+        }
+
+        emits("close", true);
+    } catch (error) {
+        console.error("DSL import error:", error);
+    }
 });
+
+const removeFile = (index: number) => {
+    dslFileURL.value = dslFileURL.value.filter((_, i) => i !== index);
+};
 </script>
 
 <template>
@@ -67,15 +104,14 @@ const { lockFn: submitImport, isLock } = useLockFn(async () => {
                 v-if="activeTab === 'file'"
                 v-model="dslFileURL"
                 accept=".yaml,.yml"
-                :multiple="false"
-                :maxCount="1"
-                :single="true"
+                :multiple="true"
+                :single="false"
                 icon="i-lucide-cloud-upload"
                 :showPreviewButton="false"
                 addButtonClassName="flex-row"
                 class="bg-muted h-14 w-full border-none! shadow-none! ring-0!"
             >
-                <template #file-item="{ item }">
+                <template #file-item="{ item, index }">
                     <div
                         class="hover:bg-accent border-muted group flex h-full w-full items-center gap-2 rounded-md border"
                     >
@@ -97,7 +133,7 @@ const { lockFn: submitImport, isLock } = useLockFn(async () => {
                                 variant="soft"
                                 size="sm"
                                 icon="i-lucide-trash"
-                                @click="dslFileURL = ''"
+                                @click="removeFile(index)"
                             >
                             </UButton>
                         </div>

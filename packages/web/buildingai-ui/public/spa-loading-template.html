@@ -4,6 +4,30 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>Loading…</title>
+        <script>
+            // Apply theme immediately to prevent flash
+            (function () {
+                try {
+                    // Priority 1: Read from localStorage (vueuse-color-scheme)
+                    const storedTheme = localStorage.getItem("vueuse-color-scheme");
+                    if (storedTheme === "light" || storedTheme === "dark") {
+                        document.documentElement.className = storedTheme;
+                        return;
+                    }
+
+                    // Priority 2: Check html class (if already set)
+                    const htmlClass = document.documentElement.className;
+                    if (htmlClass.includes("light") || htmlClass.includes("dark")) {
+                        return;
+                    }
+
+                    // Priority 3: System theme (handled by CSS media query)
+                    // No action needed, CSS will handle it
+                } catch (error) {
+                    console.error("Failed to apply theme:", error);
+                }
+            })();
+        </script>
         <style>
             html,
             body {
@@ -24,14 +48,30 @@
                 z-index: 999999;
             }
 
+            /* System theme preference (lower priority) */
             @media (prefers-color-scheme: dark) {
-                #nuxt-spa-loading {
+                html:not(.light) #nuxt-spa-loading {
                     color: #ddd;
                     background-color: #121212;
                 }
-                code {
+                html:not(.light) code {
                     background-color: #333;
                 }
+            }
+
+            /* Class-based theme (higher priority) */
+            html.dark #nuxt-spa-loading {
+                color: #ddd;
+                background-color: #121212;
+            }
+
+            html.dark code {
+                background-color: #333;
+            }
+
+            html.light #nuxt-spa-loading {
+                background: #f8f9fa;
+                color: inherit;
             }
 
             .loader-box {
@@ -63,16 +103,26 @@
                 }
             }
 
-            /* 辅助动画：发光效果 */
+            /* Glow effect animation */
             .logo svg {
                 filter: drop-shadow(0 0 12px rgba(81, 10, 252, 0.2));
                 transition: filter 0.3s ease;
             }
 
+            /* System theme preference (lower priority) */
             @media (prefers-color-scheme: dark) {
-                .logo svg {
+                html:not(.light) .logo svg {
                     filter: drop-shadow(0 0 12px rgba(81, 10, 252, 0.35));
                 }
+            }
+
+            /* Class-based theme (higher priority) */
+            html.dark .logo svg {
+                filter: drop-shadow(0 0 12px rgba(81, 10, 252, 0.35));
+            }
+
+            html.light .logo svg {
+                filter: drop-shadow(0 0 12px rgba(81, 10, 252, 0.2));
             }
 
             @media (prefers-reduced-motion: reduce) {
@@ -86,7 +136,11 @@
         <div id="nuxt-spa-loading">
             <div class="loader-box">
                 <div class="logo">
-                    <img style="height: 48px" src="/spa-loading.svg" />
+                    <img
+                        style="height: 48px"
+                        src="/spa-loading.png"
+                        onerror="this.onerror=null;this.src='/spa-loading-source.png';"
+                    />
                 </div>
             </div>
         </div>

@@ -5,12 +5,12 @@ import {
     PROCESSING_STATUS,
     RETRIEVAL_MODE,
 } from "@buildingai/constants/shared/datasets.constants";
+import { type UserPlayground } from "@buildingai/db";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { Agent } from "@buildingai/db/entities/ai-agent.entity";
-import { Datasets } from "@buildingai/db/entities/datasets.entity";
-import { DatasetsDocument } from "@buildingai/db/entities/datasets-document.entity";
-import { DatasetsSegments } from "@buildingai/db/entities/datasets-segments.entity";
-import { type UserPlayground } from "@buildingai/db/interfaces/context.interface";
+import { Agent } from "@buildingai/db/entities";
+import { DatasetsSegments } from "@buildingai/db/entities";
+import { DatasetsDocument } from "@buildingai/db/entities";
+import { Datasets } from "@buildingai/db/entities";
 import { In, Repository } from "@buildingai/db/typeorm";
 import { FileSegmentResultDto, IndexingSegmentsDto } from "@buildingai/dto/indexing-segments.dto";
 import { HttpErrorFactory } from "@buildingai/errors";

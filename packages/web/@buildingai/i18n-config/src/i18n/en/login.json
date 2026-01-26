@@ -55,6 +55,13 @@
     "messages": {
         "agreementRequired": "Please agree to terms",
         "agreementTitle": "Reminder",
+        "agreementModal": {
+            "title": "Terms & Privacy",
+            "prefix": "Signing up or logging in means you agree to {{appName}}'s ",
+            "confirm": "Agree",
+            "cancel": "Disagree",
+            "appNameFallback": "this service"
+        },
         "registerFailed": "Sign up failed",
         "loginFailed": "Login failed"
     },
@@ -62,5 +69,40 @@
         "enterAccount": "Enter account",
         "enterPassword": "Enter password",
         "enterPasswordAgain": "Re-enter password"
+    },
+    "forget": {
+        "title": "Forgot Password",
+        "subtitle": "Set a new password to continue using your account",
+        "mobile": "Phone Number",
+        "mobilePlaceholder": "Enter phone number",
+        "code": "Verification Code",
+        "codePlaceholder": "Enter verification code",
+        "newPassword": "New Password",
+        "newPasswordPlaceholder": "Enter new password",
+        "confirmPassword": "Confirm Password",
+        "confirmPasswordPlaceholder": "Re-enter new password",
+        "passwordHint": "Password must be 6-25 characters with letters + numbers/symbols",
+        "getCode": "Get Code",
+        "sending": "Sending...",
+        "resend": "Resend",
+        "backToLogin": "Back to Login",
+        "confirmChange": "Confirm Change",
+        "validation": {
+            "mobileRequired": "Phone number required",
+            "mobileInvalid": "Invalid phone number",
+            "codeRequired": "Verification code required",
+            "passwordRequired": "New password required",
+            "passwordMinLength": "Minimum 6 characters",
+            "passwordMaxLength": "Maximum 25 characters",
+            "passwordFormat": "Letters + numbers/symbols required",
+            "confirmPasswordRequired": "Confirm password required",
+            "passwordMismatch": "Passwords don't match"
+        },
+        "messages": {
+            "sendSuccess": "Verification code sent, please check your phone",
+            "sendSuccessTitle": "Sent Successfully",
+            "sendFailed": "Failed to send code, please try again",
+            "sendFailedTitle": "Send Failed"
+        }
     }
 }

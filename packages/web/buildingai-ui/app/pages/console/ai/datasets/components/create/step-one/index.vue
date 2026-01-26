@@ -129,6 +129,7 @@ const selectSource = (source: (typeof DATA_SOURCES)[number]) => {
                 >
                     <ModelSelect
                         :model-value="embeddingModelId"
+                        console
                         :button-ui="{
                             variant: 'outline',
                             color: 'neutral',

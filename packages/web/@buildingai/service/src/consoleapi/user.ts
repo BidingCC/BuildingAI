@@ -162,3 +162,41 @@ export function apiUpdateUserAmount(
 ): Promise<UserInfo> {
     return useConsolePost(`/users/change-balance/${id}`, { amount, action });
 }
+
+// ==================== User Subscription Related APIs ====================
+
+/**
+ * Get user subscription records
+ * @description Get paginated subscription records for a specific user
+ * @param id User ID
+ * @param params Pagination parameters
+ * @returns Promise with user subscription records
+ */
+export function apiGetUserSubscriptionRecords(
+    id: string,
+    params?: { page?: number; pageSize?: number },
+): Promise<{
+    items: Array<{
+        id: string;
+        level: {
+            id: string;
+            name: string;
+            icon: string;
+            level: number;
+        } | null;
+        startTime: string;
+        endTime: string;
+        source: number;
+        sourceDesc: string;
+        duration: string | null;
+        refundStatus: number;
+        isExpired: boolean;
+        isActive: boolean;
+        createdAt: string;
+    }>;
+    total: number;
+    page: number;
+    pageSize: number;
+}> {
+    return useConsoleGet(`/users/${id}/subscriptions`, params);
+}

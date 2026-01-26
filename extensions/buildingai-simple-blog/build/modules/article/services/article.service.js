@@ -4,7 +4,7 @@ var base = require('@buildingai/base');
 var typeorm$1 = require('@buildingai/db/@nestjs/typeorm');
 var typeorm = require('@buildingai/db/typeorm');
 var errors = require('@buildingai/errors');
-var user_service = require('@buildingai/extension-sdk/services/user.service');
+var extensionSdk = require('@buildingai/extension-sdk');
 var utils = require('@buildingai/utils');
 var common = require('@nestjs/common');
 var article_entity = require('../../../db/entities/article.entity');
@@ -352,7 +352,7 @@ ArticleService = _ts_decorate([
   _ts_metadata("design:paramtypes", [
     typeof typeorm.Repository === "undefined" ? Object : typeorm.Repository,
     typeof category_service.CategoryService === "undefined" ? Object : category_service.CategoryService,
-    typeof user_service.PublicUserService === "undefined" ? Object : user_service.PublicUserService
+    typeof extensionSdk.PublicUserService === "undefined" ? Object : extensionSdk.PublicUserService
   ])
 ], ArticleService);
 

@@ -8,3 +8,4 @@ build
 .nuxt
 .storybook
 node_modules
+templates/buildingai-extension-starter

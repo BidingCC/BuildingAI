@@ -10,7 +10,7 @@ import LoginBind from "./components/login-bind.vue";
 // import PhoneLogin from "@/co/components/phone/index.vue";
 import WechatLogin from "./components/wechat/wechat.vue";
 
-definePageMeta({ layout: "full-screen", auth: false });
+definePageMeta({ layout: "full-screen", auth: false, guest: true });
 
 const appStore = useAppStore();
 const userStore = useUserStore();

@@ -128,7 +128,6 @@ onMounted(() => getWebsiteConfig());
                     name="privacyContent"
                     :label="t('system.website.agreement.contentLabel')"
                     class="mt-4"
-                    required
                 >
                     <BdEditor v-model="state.privacyContent" />
                 </UFormField>
@@ -147,7 +146,6 @@ onMounted(() => getWebsiteConfig());
                     name="serviceContent"
                     :label="t('system.website.agreement.contentLabel')"
                     class="mt-4"
-                    required
                 >
                     <BdEditor v-model="state.serviceContent" />
                 </UFormField>
@@ -166,7 +164,6 @@ onMounted(() => getWebsiteConfig());
                     name="paymentContent"
                     :label="t('system.website.agreement.contentLabel')"
                     class="mt-4"
-                    required
                 >
                     <BdEditor v-model="state.paymentContent" />
                 </UFormField>

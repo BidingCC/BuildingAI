@@ -1,13 +1,15 @@
-import { QueueModule } from "@buildingai/core/modules/queue/queue.module";
+import { QueueModule } from "@buildingai/core/modules";
 import { TypeOrmModule } from "@buildingai/db/@nestjs/typeorm";
-import { Agent } from "@buildingai/db/entities/ai-agent.entity";
-import { AiModel } from "@buildingai/db/entities/ai-model.entity";
-import { Datasets } from "@buildingai/db/entities/datasets.entity";
-import { DatasetsDocument } from "@buildingai/db/entities/datasets-document.entity";
-import { DatasetMember } from "@buildingai/db/entities/datasets-member.entity";
-import { DatasetsSegments } from "@buildingai/db/entities/datasets-segments.entity";
-import { Dict } from "@buildingai/db/entities/dict.entity";
-import { User } from "@buildingai/db/entities/user.entity";
+import { User } from "@buildingai/db/entities";
+import { AiModel } from "@buildingai/db/entities";
+import { Dict } from "@buildingai/db/entities";
+import { Agent } from "@buildingai/db/entities";
+import {
+    DatasetMember,
+    Datasets,
+    DatasetsDocument,
+    DatasetsSegments,
+} from "@buildingai/db/entities";
 import { DictService } from "@buildingai/dict";
 import { SecretManagerModule } from "@modules/ai/secret/secret.module";
 import { UploadModule } from "@modules/upload/upload.module";

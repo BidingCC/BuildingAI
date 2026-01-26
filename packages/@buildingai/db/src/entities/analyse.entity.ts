@@ -1,8 +1,8 @@
-import { User } from "@buildingai/db/entities/user.entity";
 import { Column, Index, JoinColumn, ManyToOne } from "typeorm";
 
 import { AppEntity } from "../decorators/app-entity.decorator";
 import { BaseEntity } from "./base";
+import { User } from "./user.entity";
 
 /**
  * 行为类型枚举

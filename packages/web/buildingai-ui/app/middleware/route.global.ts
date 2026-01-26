@@ -19,27 +19,45 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     const isConsoleMenuMatched = (path: string) =>
         router.resolve(path).matched.some((r) => r.path.startsWith(ROUTES.CONSOLE));
 
-    if (to.path.startsWith(`${ROUTES.EXTENSIONS}/`)) {
-        // Extract extension name from path
-        const pathParts = to.path.split("/").filter(Boolean);
-        if (pathParts.length >= 2 && pathParts[0] === ROUTES.EXTENSIONS.replace("/", "")) {
-            const extensionName = pathParts[1];
-            const config = useRuntimeConfig();
-            const availableExtensions = (config.public.extensions as string[]) || [];
+    /**
+     * Check if the path is a login page (main app or extension)
+     * @param path - The path to check
+     * @returns true if the path is a login page
+     */
+    const isLoginPage = (path: string | undefined): boolean => {
+        if (!path) return false;
+        // Remove query string and hash for comparison
+        const cleanPath = path.split("?")[0]?.split("#")[0];
+        if (!cleanPath) return false;
 
-            // Check if extension exists
-            if (extensionName && availableExtensions.includes(extensionName)) {
-                // Extension exists, let Nuxt handle the route normally
-                // Don't use navigateTo with external: true as it causes infinite refresh
-                return;
-            }
+        // Main app login page: /login
+        if (cleanPath === ROUTES.LOGIN || cleanPath === `${ROUTES.LOGIN}/`) {
+            return true;
         }
+        // Extension login page: /extension/{identifier}/login
+        if (cleanPath.startsWith(`${ROUTES.APP}/`)) {
+            const pathParts = cleanPath.replace(`${ROUTES.APP}/`, "").split("/").filter(Boolean);
+            // Check if the path ends with /login
+            return pathParts.length >= 2 && pathParts[pathParts.length - 1] === "login";
+        }
+        return false;
+    };
 
-        // Extension not found, return 404
-        throw createError({
-            statusCode: 404,
-            statusMessage: "Extension not found",
-        });
+    // Handle extension routes
+    if (to.path.startsWith(`${ROUTES.APP}/`)) {
+        // Extract extension identifier from path
+        // Format: /extensions/{identifier} or /extensions/{identifier}/console/...
+        const pathParts = to.path.replace(`${ROUTES.APP}/`, "").split("/");
+
+        // If accessing extension console routes (extensions/xxx/console/...)
+        if (pathParts[1] === "console") {
+            // Set extension layout for extension console pages
+            setPageLayout("extension");
+            to.meta.auth = true;
+        } else {
+            // For extensions/xxx routes, use default layout and route to extensions/[id].vue
+            // No need to set layout explicitly, will use default
+        }
     }
 
     /**
@@ -51,6 +69,15 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
      * @returns string | undefined
      */
     const handleAuth = async () => {
+        // Check if accessing login page (main app or extension) - must be checked first
+        const isGuestPage = to.meta.guest === true || isLoginPage(to.path);
+        if (userStore.isLogin && isGuestPage) {
+            // If coming from a non-login page, redirect back to that page
+            // Otherwise redirect to home
+            const fromIsGuestPage = from.meta.guest === true || isLoginPage(from.path);
+            return !fromIsGuestPage && from.path !== to.path ? from.fullPath : ROUTES.HOME;
+        }
+
         // All console pages must use console layout and require authentication
         if (to.fullPath.startsWith(ROUTES.CONSOLE)) {
             setPageLayout(to.meta.layout || "console");
@@ -62,13 +89,9 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
             await userStore.getUser();
         }
         // Not logged in and target page requires auth → redirect to login
-        else if (!userStore.isLogin && to.meta.auth !== false && to.path !== ROUTES.LOGIN) {
+        else if (!userStore.isLogin && to.meta.auth !== false && !isGuestPage) {
             setPageLayout("full-screen");
             return `${ROUTES.LOGIN}?redirect=${to.fullPath}`;
-        }
-        // Logged in but accessing login page → redirect to source page or home
-        else if (userStore.isLogin && to.path === ROUTES.LOGIN) {
-            return from.path !== ROUTES.LOGIN ? from.fullPath : ROUTES.HOME;
         }
         // Logged in accessing other pages → refresh token
         else if (userStore.isLogin) {
@@ -118,7 +141,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
         // Non-admin with no permissions → 403
         if (userStore.userInfo?.isRoot === 0 && permissionStore.permissions.length === 0) {
-            return "/403";
+            return ROUTES.FORBIDDEN;
         }
 
         // Build and register console routes
@@ -142,7 +165,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
             to.meta.permissionCode &&
             !permissionStore.hasPermission(to.meta.permissionCode as string)
         ) {
-            return "/403";
+            return ROUTES.FORBIDDEN;
         }
 
         // Console home → redirect to first accessible route

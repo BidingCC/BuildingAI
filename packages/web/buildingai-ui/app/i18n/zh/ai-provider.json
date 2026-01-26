@@ -42,7 +42,8 @@
 
         "messages": {
             "enableSuccess": "供应商已启用",
-            "disableSuccess": "供应商已禁用"
+            "disableSuccess": "供应商已禁用",
+            "selectModel": "请选择一个模型"
         },
 
         "empty": {
@@ -69,6 +70,7 @@
             "noModelsDescription": "该供应商下还没有配置任何模型",
             "searchPlaceholder": "搜索模型",
             "batchOperation": "批量操作 ({count})",
+            "billingSetting": "计费设置",
             "form": {
                 "name": "模型名称",
                 "namePlaceholder": "请输入模型名称",
@@ -85,16 +87,23 @@
                 "setAsDefault": "设置为系统默认模型",
                 "modelType": "模型类型",
                 "modelTypePlaceholder": "请输入模型类型",
+                "multimodal": "多模态配置",
+                "multimodalPlaceholder": "请输入多模态配置",
                 "billing": "计费规则",
                 "power": "积分",
-                "billingHelp": "每多少 tokens 消耗多少积分"
+                "billingHelp": "每1K Tokens 消耗多少积分"
             },
             "batchEdit": {
                 "name": "名称",
                 "model": "模型标识",
                 "maxContext": "最大上下文",
                 "isActive": "是否启用",
-                "billingRule": "对话消耗"
+                "billingRule": "对话消耗",
+                "membershipLevel": "指定会员可用",
+                "membershipLevelTip": "指定某个会员等级可以使用该模型进行对话，不设置即表示全部用户都可使用",
+                "membershipLevelAll": "全部用户",
+                "dialogTitle": "批量设置计费",
+                "dialogDescription": "此配置仅在对话模式下生效"
             },
             "validation": {
                 "nameRequired": "请输入模型名称",
@@ -111,6 +120,10 @@
                 "isActiveDisabled": "模型已禁用",
                 "deleteTitle": "删除模型",
                 "deleteMsg": "确定要删除选中的模型吗？此操作不可恢复。"
+            },
+            "modelTypeFilter": "筛选模型类型",
+            "modelTypes": {
+                "all": "全部"
             }
         },
 

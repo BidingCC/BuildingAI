@@ -1,5 +1,5 @@
 import { BaseController } from "@buildingai/base";
-import { AiProvider } from "@buildingai/db/entities/ai-provider.entity";
+import { AiProvider } from "@buildingai/db/entities";
 import { Like } from "@buildingai/db/typeorm";
 import { BuildFileUrl } from "@buildingai/decorators/file-url.decorator";
 import { Public } from "@buildingai/decorators/public.decorator";
@@ -46,6 +46,13 @@ export class AiProviderWebController extends BaseController {
                 order: { sortOrder: "DESC", createdAt: "DESC" },
                 excludeFields: ["apiKey"],
             });
+
+            providers.forEach((p) =>
+                p.models?.sort(
+                    (a, b) =>
+                        b.sortOrder - a.sortOrder || b.createdAt.getTime() - a.createdAt.getTime(),
+                ),
+            );
 
             // 先过滤掉没有模型的供应商
             const validProviders = providers.filter(
@@ -113,6 +120,11 @@ export class AiProviderWebController extends BaseController {
                 throw new Error(`供应商 ${id} 不存在`);
             }
 
+            provider.models?.sort(
+                (a, b) =>
+                    b.sortOrder - a.sortOrder || b.createdAt.getTime() - a.createdAt.getTime(),
+            );
+
             return provider;
         } catch (error) {
             this.logger.error(`获取供应商信息失败: ${error.message}`, error.stack);
@@ -136,6 +148,11 @@ export class AiProviderWebController extends BaseController {
             if (!result) {
                 throw new Error(`供应商 ${provider} 不存在`);
             }
+
+            result.models?.sort(
+                (a, b) =>
+                    b.sortOrder - a.sortOrder || b.createdAt.getTime() - a.createdAt.getTime(),
+            );
 
             return result;
         } catch (error) {

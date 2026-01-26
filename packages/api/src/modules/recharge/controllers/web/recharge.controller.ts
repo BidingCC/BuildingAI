@@ -1,6 +1,6 @@
 import { BaseController } from "@buildingai/base";
 import { type PayConfigType } from "@buildingai/constants/shared/payconfig.constant";
-import { type UserPlayground } from "@buildingai/db/interfaces/context.interface";
+import { type UserPlayground } from "@buildingai/db";
 import { BuildFileUrl } from "@buildingai/decorators/file-url.decorator";
 import { Playground } from "@buildingai/decorators/playground.decorator";
 import { PaginationDto } from "@buildingai/dto/pagination.dto";

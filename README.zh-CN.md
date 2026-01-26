@@ -20,7 +20,9 @@
   <a href="https://nuxt.com/"><img src="https://img.shields.io/badge/NuxtJS-4.x-00b95f" alt="NuxtJS" /></a>
 </p>
 
-BuildingAI 是一款面向AI开发者、AI创业者和先进组织打造的企业级开源智能体搭建平台。通过可视化配置界面（Do It Yourself）零代码搭建具备智能体、MCP、RAG管道、知识库、大模型聚合、上下文工程等原生AI能力，以及用户注册、会员订阅、算力计费等商业闭环能力的原生企业智能体应用。
+BuildingAI 是一款面向AI开发者、AI创业者和先进组织打造的企业级开源智能体搭建平台。通过可视化配置界面（Do
+It
+Yourself）零代码搭建具备智能体、MCP、RAG管道、知识库、大模型聚合、上下文工程等原生AI能力，以及用户注册、会员订阅、算力计费等商业闭环能力的原生企业智能体应用。
 
 ## 快速入门
 
@@ -63,14 +65,15 @@ docker compose up -d
 
 ## 截图展示
 
-![image](./assets/screenshots/1.png)
-![image](./assets/screenshots/2.png)
-![image](./assets/screenshots/3.png)
-![image](./assets/screenshots/4.png)
+![image](./assets/screenshots/1.png) ![image](./assets/screenshots/2.png)
+![image](./assets/screenshots/3.png) ![image](./assets/screenshots/4.png)
 ![image](./assets/screenshots/5.png)
 
 ## 贡献
-如果您想贡献代码，可以在Github上 [提交 Issue](https://github.com/BidingCC/BuildingAI/issues/new/choose) 或者 [提交 PR](https://github.com/BidingCC/BuildingAI/pulls)。
+
+如果您想贡献代码，可以在Github上
+[提交 Issue](https://github.com/BidingCC/BuildingAI/issues/new/choose) 或者
+[提交 PR](https://github.com/BidingCC/BuildingAI/pulls)。
 
 也可以通过[社群](https://buildingai.cc/docs/introduction/community)、[问答社区](https://buildingai.cc/question)等方式联系我们。
 
@@ -80,7 +83,8 @@ docker compose up -d
 
 ## 隐私政策
 
-本项目**仅在获得您同意后**才会收集匿名使用统计数据。详情请参阅 [PRIVACY_NOTICE.md](./PRIVACY_NOTICE.md) 文件。
+本项目**仅在获得您同意后**才会收集匿名使用统计数据。详情请参阅
+[PRIVACY_NOTICE.md](./PRIVACY_NOTICE.md) 文件。
 
 ## 许可证
 

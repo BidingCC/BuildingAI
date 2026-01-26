@@ -1,4 +1,4 @@
-import { MenuSourceType, MenuType } from "@buildingai/db/entities/menu.entity";
+import { MenuSourceType, MenuType } from "@buildingai/db/entities";
 import { Transform } from "class-transformer";
 import { IsEnum, IsNumber, IsOptional, IsString, Length, Max, Min } from "class-validator";
 

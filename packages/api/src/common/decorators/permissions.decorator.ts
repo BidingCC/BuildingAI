@@ -1,4 +1,4 @@
-import { PermissionType } from "@buildingai/db/entities/permission.entity";
+import { PermissionType } from "@buildingai/db/entities";
 import { applyDecorators, SetMetadata } from "@nestjs/common";
 
 import { DECORATOR_KEYS } from "../constants/decorators-key.constant";

@@ -1,7 +1,7 @@
 import { AI_MCP_IS_QUICK_MENU } from "@buildingai/constants";
-import { McpCommunicationType, McpServerType } from "@buildingai/db/entities/ai-mcp-server.entity";
-import { AiMcpServer } from "@buildingai/db/entities/ai-mcp-server.entity";
-import { type UserPlayground } from "@buildingai/db/interfaces/context.interface";
+import { type UserPlayground } from "@buildingai/db";
+import { McpCommunicationType, McpServerType } from "@buildingai/db/entities";
+import { AiMcpServer } from "@buildingai/db/entities";
 import { Like } from "@buildingai/db/typeorm";
 import { BuildFileUrl } from "@buildingai/decorators/file-url.decorator";
 import { Playground } from "@buildingai/decorators/playground.decorator";
@@ -269,16 +269,23 @@ export class WebAiMcpServerWebController {
                 type: "object",
                 properties: {
                     url: { type: "string", minLength: 1 },
-                    customHeaders: {
+                    type: {
+                        type: "string",
+                        enum: Object.values(McpCommunicationType),
+                    },
+                    headers: {
                         type: "object",
                         patternProperties: {
                             "^.*$": { type: "string" },
                         },
                         additionalProperties: false,
                     },
-                    type: {
-                        type: "string",
-                        enum: Object.values(McpCommunicationType),
+                    customHeaders: {
+                        type: "object",
+                        patternProperties: {
+                            "^.*$": { type: "string" },
+                        },
+                        additionalProperties: false,
                     },
                 },
                 required: ["url", "type"],
@@ -309,6 +316,16 @@ export class WebAiMcpServerWebController {
             let parsedData;
             try {
                 parsedData = JSON.parse(importJsonDto.jsonString);
+                // 将 headers 转换为 customHeaders
+                if (parsedData.mcpServers) {
+                    for (const key in parsedData.mcpServers) {
+                        const server = parsedData.mcpServers[key];
+                        if (server.headers) {
+                            server.customHeaders = server.headers;
+                            delete server.headers;
+                        }
+                    }
+                }
             } catch (parseError) {
                 throw HttpErrorFactory.badRequest(
                     "JSON格式不正确，无法解析：" + parseError.message,

@@ -1,4 +1,4 @@
-import { DatasetsDocument } from "@buildingai/db/entities/datasets-document.entity";
+import { DatasetsDocument } from "@buildingai/db/entities";
 import { UploadService } from "@modules/upload/services/upload.service";
 
 /**

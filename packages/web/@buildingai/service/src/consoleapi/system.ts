@@ -15,6 +15,19 @@
 export interface SystemInfo {
     /** Whether the system is initialized */
     isInitialized: boolean;
+    /** Current system version */
+    version?: string;
+}
+
+/**
+ * Runtime system information response interface
+ * @description Interface for runtime system information (version & systemId)
+ */
+export interface SystemRuntimeInfo {
+    /** Current system version */
+    version: string;
+    /** Unique system ID */
+    systemId: string;
 }
 
 /**
@@ -78,6 +91,15 @@ export interface SystemInitializeResponse {
  */
 export function apiGetSystemInfo(): Promise<SystemInfo> {
     return useConsoleGet("/system/initialize", {}, { requireAuth: false });
+}
+
+/**
+ * Get runtime system information
+ * @description Get current runtime system information for console display
+ * @returns Promise with runtime system information
+ */
+export function apiGetSystemRuntimeInfo(): Promise<SystemRuntimeInfo> {
+    return useConsoleGet("/system/runtime");
 }
 
 /**

@@ -1,0 +1,62 @@
+BuildingAI 插件授权协议（LICENSE）
+Copyright © BuildingAI Teams
+
+本插件（以下简称“软件”）由 BuildingAI Teams 独立开发并拥有全部知识产权。  
+软件的分发与授权由 **BuildingAI 官方平台（www.buildingai.cc）** 统一管理。
+
+一、授权范围
+1. 本软件仅限通过 BuildingAI 官方渠道购买并经授权的用户使用。
+2. 授权方式为 **按域名绑定授权**，即软件仅能在授权域名及其关联系统中使用。
+3. 未经 BuildingAI 或插件作者的书面许可，任何个人或组织不得：
+   - 复制、分发、转售、出租或再授权本软件；
+   - 以任何方式修改、反编译、逆向工程、提取代码或衍生制作；
+   - 将本软件用于未经授权的域名或系统。
+
+二、知识产权
+1. 本软件及其全部源代码、文档、图标、名称、结构、接口设计均属于 BuildingAI Teams 所有。
+2. BuildingAI 作为授权与分发平台，仅在授权范围内授予终端用户使用权，不转移版权。
+3. 任何侵权行为（包括但不限于未经授权使用、修改、分发）将依法追究法律责任。
+
+三、免责声明
+1. 本软件按“现状”提供，BuildingAI 与 BuildingAI Teams 不对软件的适用性或特定用途适用性作出保证。
+2. 因用户不当使用、修改或未经授权部署造成的任何损失，BuildingAI 与 BuildingAI Teams 不承担责任。
+
+四、终止条款
+1. 若用户违反本协议任何条款，授权将自动终止，且无须另行通知。
+2. 授权终止后，用户必须立即停止使用本软件并删除所有相关文件。
+
+----------------------------------------------------------
+
+BuildingAI Plugin License Agreement (English Version)
+Copyright © BuildingAI Teams
+
+This plugin (“Software”) is developed and owned by BuildingAI Teams.  
+Distribution and authorization are managed by **BuildingAI official platform (www.buildingai.cc)**.
+
+1. License Scope
+   - The Software is licensed only to users who have purchased and obtained authorization via BuildingAI.
+   - The license is **domain-bound**, meaning the Software may only be used on the domain(s) explicitly authorized by BuildingAI.
+   - Without prior written permission from BuildingAI or the author, you may not:
+     • Copy, distribute, resell, rent, or re-license the Software;  
+     • Modify, decompile, reverse engineer, or derive source code;  
+     • Use the Software on unauthorized domains or systems.
+
+2. Intellectual Property
+   - All intellectual property rights of the Software, including but not limited to source code, documentation, icons, and design, belong to BuildingAI Teams.
+   - BuildingAI acts as a distribution and licensing platform only, and does not transfer ownership.
+   - Any infringement (including unauthorized use, modification, or distribution) will be prosecuted to the fullest extent of the law.
+
+3. Disclaimer
+   - The Software is provided “as is” without any warranty of any kind.
+   - BuildingAI and BuildingAI Teams shall not be liable for any damages resulting from misuse or unauthorized modification.
+
+4. Termination
+   - Any violation of this agreement will result in immediate termination of the license without prior notice.
+   - Upon termination, you must cease all use of the Software and delete all related copies.
+
+----------------------------------------------------------
+
+插件名称：[PLUGIN_NAME]  
+作者：BuildingAI Teams  
+联系方式：[AUTHOR_CONTACT]（可选）  
+授权与分发平台：BuildingAI（www.buildingai.cc）

@@ -1,6 +1,6 @@
 import { McpServerSSE, type MCPTool } from "@buildingai/ai-sdk";
-import { McpToolCall } from "@buildingai/db/entities/ai-agent-chat-message.entity";
-import { AiMcpServer } from "@buildingai/db/entities/ai-mcp-server.entity";
+import { McpToolCall } from "@buildingai/db/entities";
+import { AiMcpServer } from "@buildingai/db/entities";
 import { Injectable, Logger } from "@nestjs/common";
 import type { ChatCompletionMessageToolCall } from "openai/resources/index";
 

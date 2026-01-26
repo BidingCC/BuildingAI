@@ -1,7 +1,7 @@
 /**
  * 日期分组类型
  */
-export type DateGroup = "today" | "yesterday" | "week" | "month" | "older";
+export type DateGroup = "pinned" | "today" | "yesterday" | "week" | "month" | "older";
 
 /**
  * 分组后的对话数据结构
@@ -52,6 +52,8 @@ export function getGroupLabel(groupKey: DateGroup | string, t?: (key: string) =>
     // 如果没有传入国际化函数，使用默认中文
     if (!t) {
         switch (groupKey) {
+            case "pinned":
+                return "置顶";
             case "today":
                 return "今天";
             case "yesterday":
@@ -91,6 +93,8 @@ export function getGroupLabel(groupKey: DateGroup | string, t?: (key: string) =>
 
     // 使用国际化函数
     switch (groupKey) {
+        case "pinned":
+            return "";
         case "today":
             return t("common.dateGroup.today");
         case "yesterday":
@@ -139,6 +143,8 @@ export function getGroupLabel(groupKey: DateGroup | string, t?: (key: string) =>
  */
 export function getGroupWeight(groupKey: DateGroup | string): number {
     switch (groupKey) {
+        case "pinned":
+            return 0; // 置顶组权重最小，排在最前面
         case "today":
             return 1;
         case "yesterday":
@@ -169,10 +175,23 @@ export function groupConversationsByDate<T>(
     dateField: keyof T = "updatedAt" as keyof T,
     t?: (key: string) => string,
 ): GroupedConversations<T>[] {
-    // 先按日期分组
-    const groups = new Map<string, T[]>();
+    // 分离置顶和未置顶的对话
+    const pinnedItems: T[] = [];
+    const unpinnedItems: T[] = [];
 
     conversations.forEach((item) => {
+        const isPinned = (item as { isPinned?: boolean }).isPinned ?? false;
+        if (isPinned) {
+            pinnedItems.push(item);
+        } else {
+            unpinnedItems.push(item);
+        }
+    });
+
+    // 对未置顶的对话按日期分组
+    const groups = new Map<string, T[]>();
+
+    unpinnedItems.forEach((item) => {
         const groupKey = getDateGroup(item[dateField] as string | Date);
         if (!groups.has(groupKey)) {
             groups.set(groupKey, []);
@@ -183,8 +202,26 @@ export function groupConversationsByDate<T>(
         }
     });
 
-    // 转换为数组并排序
-    const result: GroupedConversations<T>[] = Array.from(groups.entries())
+    // 构建结果数组
+    const result: GroupedConversations<T>[] = [];
+
+    // 如果有置顶的对话，添加置顶组
+    if (pinnedItems.length > 0) {
+        result.push({
+            label: getGroupLabel("pinned", t),
+            key: "pinned",
+            items: pinnedItems.sort((a, b) => {
+                // 置顶组内按更新时间倒序
+                return (
+                    new Date(b[dateField] as string | Date).getTime() -
+                    new Date(a[dateField] as string | Date).getTime()
+                );
+            }),
+        });
+    }
+
+    // 添加按日期分组的对话
+    const dateGroups = Array.from(groups.entries())
         .map(([key, items]) => ({
             label: getGroupLabel(key, t),
             key,
@@ -200,6 +237,8 @@ export function groupConversationsByDate<T>(
             // 组间按权重排序
             return getGroupWeight(a.key) - getGroupWeight(b.key);
         });
+
+    result.push(...dateGroups);
 
     return result;
 }

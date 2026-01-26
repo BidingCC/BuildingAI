@@ -12,7 +12,7 @@
         "menu": {
             "documents": "文档",
             "retrieval": "召回测试",
-            "members": "团队成员",
+            "members": "协作成员",
             "settings": "设置",
             "segments": "分段",
             "relatedApplications": "关联应用"
@@ -176,8 +176,8 @@
             "keywordWeight": "关键词权重"
         },
         "members": {
-            "title": "团队成员管理",
-            "description": "管理知识库的团队成员，分配角色权限，控制访问范围。",
+            "title": "协作成员管理",
+            "description": "管理知识库的协作成员，分配角色权限，控制访问范围。",
             "searchPlaceholder": "搜索用户名...",
             "table": {
                 "user": "成员",
@@ -209,7 +209,7 @@
             "removeSuccess": "移除成功",
             "removeFailed": "移除失败",
             "confirmExitContent": "确定要退出这个知识库吗？退出后您将无法访问此知识库。",
-            "confirmRemoveContent": "确定要移除这个团队成员吗？移除后该用户将无法访问此知识库。",
+            "confirmRemoveContent": "确定要移除这个协作成员吗？移除后该用户将无法访问此知识库。",
             "confirmTransferContent": "确定要将知识库所有权转移给 ",
             "confirmTransferSuccess": "所有权转移成功",
             "confirmTransferFailed": "所有权转移失败",
@@ -217,8 +217,8 @@
             "addMember": "添加成员",
             "confirmTransfer": "转移所有权",
             "addModal": {
-                "title": "添加团队成员",
-                "description": "搜索并选择要添加的团队成员，设置角色和备注信息",
+                "title": "添加协作成员",
+                "description": "搜索并选择要添加的协作成员，设置角色和备注信息",
                 "searchPlaceholder": "搜索并选择用户...",
                 "emptyState": "暂无用户",
                 "userMatch": "用户匹配",

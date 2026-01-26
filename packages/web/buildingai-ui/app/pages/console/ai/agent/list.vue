@@ -24,6 +24,7 @@ const searchForm = reactive<QueryAgentParams>({
     pageSize: 15,
     tagIds: [],
     isPublic: undefined,
+    createMode: undefined,
 });
 
 const loading = shallowRef(false);
@@ -219,7 +220,21 @@ onMounted(() => getLists());
                     :placeholder="$t('ai-agent.backend.search.filterByStatus')"
                     label-key="label"
                     value-key="value"
-                    class="w-48"
+                    class="w-38"
+                    @change="getLists"
+                />
+                <USelect
+                    v-model="searchForm.createMode"
+                    :items="[
+                        { label: $t('ai-agent.backend.search.allMode'), value: undefined },
+                        { label: $t('ai-agent.backend.create.modes.direct'), value: 'direct' },
+                        { label: $t('ai-agent.backend.create.modes.coze'), value: 'coze' },
+                        { label: $t('ai-agent.backend.create.modes.dify'), value: 'dify' },
+                    ]"
+                    :placeholder="$t('ai-agent.backend.search.filterByMode')"
+                    label-key="label"
+                    value-key="value"
+                    class="w-38"
                     @change="getLists"
                 />
             </div>

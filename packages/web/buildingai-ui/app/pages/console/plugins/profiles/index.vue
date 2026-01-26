@@ -68,7 +68,6 @@ const { isLock: isSavingSecret, lockFn: saveSecret } = useLockFn(async () => {
         await saveSecretValue(editingSecretValue.value);
     } catch (error) {
         console.error("Failed to save secret:", error);
-        message.error(t("extensions.profiles.setSecretError"));
     }
 });
 
@@ -77,7 +76,10 @@ onMounted(() => getPlatformInfo());
 
 <template>
     <div class="extension-profiles-container pb-8">
-        <template v-if="hasValidPlatformInfo">
+        <div v-if="detailLoading" class="flex h-60 items-center justify-center">
+            <UIcon name="i-ph-spinner-gap-bold" class="text-primary size-8 animate-spin" />
+        </div>
+        <template v-else-if="hasValidPlatformInfo">
             <div class="space-y-4">
                 <h3 class="text-lg font-semibold">
                     {{ t("extensions.profiles.platformInfo") }}

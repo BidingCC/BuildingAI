@@ -3,12 +3,8 @@ import { McpServerSSE } from "@buildingai/ai-sdk";
 import { BaseService, PaginationResult } from "@buildingai/base";
 import { AI_MCP_IS_QUICK_MENU } from "@buildingai/constants";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import {
-    AiMcpServer,
-    McpCommunicationType,
-    McpServerType,
-} from "@buildingai/db/entities/ai-mcp-server.entity";
-import { AiUserMcpServer } from "@buildingai/db/entities/ai-user-mcp-server.entity";
+import { AiMcpServer, McpCommunicationType, McpServerType } from "@buildingai/db/entities";
+import { AiUserMcpServer } from "@buildingai/db/entities";
 import { Like, Not, Repository } from "@buildingai/db/typeorm";
 import { DictService } from "@buildingai/dict";
 import { HttpErrorFactory } from "@buildingai/errors";
@@ -164,6 +160,9 @@ export class AiMcpServerService extends BaseService<AiMcpServer> {
                 // Use the full URL directly
                 const url = config.url;
 
+                // Communication type
+                const communicationType = config.type;
+
                 // Check if a server with the same name already exists
                 const existServer = await this.findOne({
                     where: { name },
@@ -179,6 +178,7 @@ export class AiMcpServerService extends BaseService<AiMcpServer> {
                     // If not exists, create new server
                     const created = await this.create({
                         name,
+                        communicationType,
                         type: McpServerType.SYSTEM,
                         url,
                         creatorId,

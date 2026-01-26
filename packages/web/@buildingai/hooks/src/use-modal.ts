@@ -24,6 +24,12 @@ interface ModalOptions {
     ui?: Record<string, string>;
     /** 内容区域的 ID，用于无障碍访问 */
     contentId?: string;
+    /** 自定义头部内容 */
+    header?: string | Component;
+    /** 是否展示右上角关闭按钮 */
+    showClose?: boolean;
+    /** 默认头部左侧图标 */
+    headerIcon?: string;
 }
 
 interface ModalResult {
@@ -51,15 +57,17 @@ export function useModal(options: ModalOptions = {}) {
         dismissible: false,
         ui: { content: "!w-sm" },
         contentId: "",
+        header: "",
+        showClose: true,
+        headerIcon: "",
     };
 
     // 合并选项
     const mergedOptions = { ...defaultOptions, ...options };
-    console.log(mergedOptions);
     // 创建一个 overlay 实例
     const overlay = useOverlay();
-    let resolveConfirm: (value: boolean) => void;
-    let resolveCancel: (value: boolean) => void;
+    let resolvePromise: (value: ModalResult) => void;
+    let rejectPromise: (reason?: unknown) => void;
 
     const BdModalUse = defineAsyncComponent(() => import("@buildingai/ui/bd-modal-use"));
 
@@ -67,19 +75,19 @@ export function useModal(options: ModalOptions = {}) {
         props: {
             ...mergedOptions,
             confirm: () => {
-                resolveConfirm(true);
+                resolvePromise?.({ confirm: true, cancel: false });
             },
             cancel: () => {
-                resolveCancel(true);
+                rejectPromise?.({ confirm: false, cancel: true });
             },
         },
     });
 
     modal.open();
 
-    return new Promise<ModalResult>((resolve) => {
-        resolveConfirm = (value: boolean) => resolve({ confirm: value, cancel: false });
-        resolveCancel = () => Promise.reject("点击取消");
+    return new Promise<ModalResult>((resolve, reject) => {
+        resolvePromise = resolve;
+        rejectPromise = reject;
     });
 }
 

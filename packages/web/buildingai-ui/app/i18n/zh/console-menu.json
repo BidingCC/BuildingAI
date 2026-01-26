@@ -68,6 +68,12 @@
         "userInfo": "用户信息",
         "userRecharge": "充值管理"
     },
+    "membershipManagement": {
+        "title": "订阅会员",
+        "levelsList": "会员等级",
+        "plansList": "订阅计划",
+        "membershipOrder": "会员订单"
+    },
     "diyCenter": {
         "mobile": "移动端",
         "title": "DIY 中心",
@@ -80,7 +86,8 @@
         "accountBalance": "余额明细",
         "financialCenter": "财务中心",
         "orderManagement": "订单管理",
-        "orderList": "充值订单"
+        "orderList": "充值订单",
+        "orderMembership": "会员订单"
     },
     "permission": {
         "title": "权限管理",
@@ -96,7 +103,8 @@
         "channelManagement": "渠道管理",
         "wechatOaConfig": "公众号配置",
         "wechatMpConfig": "小程序管理",
-        "loginConfig": "登录设置"
+        "loginConfig": "登录设置",
+        "storageConfig": "存储配置"
     },
     "plugin": "应用管理",
     "pluginManage": "我的应用",

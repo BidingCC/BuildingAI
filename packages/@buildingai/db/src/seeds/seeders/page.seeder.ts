@@ -1,6 +1,5 @@
-import { DecoratePageEntity } from "@buildingai/db/entities/decorate-page.entity";
-
 import { DataSource } from "../../typeorm";
+import { DecoratePageEntity } from "./../../entities/decorate-page.entity";
 import { BaseSeeder } from "./base.seeder";
 
 /**
@@ -50,6 +49,17 @@ export class PageSeeder extends BaseSeeder {
                             query: {},
                         },
                         title: "智能体",
+                    },
+                    {
+                        id: "menu_1764936950052-28ca0576-854a-4272-8e26-7c1dc1159ca1",
+                        icon: "i-tabler-apps",
+                        link: {
+                            name: "menu.apps",
+                            path: "/apps",
+                            type: "system",
+                            query: {},
+                        },
+                        title: "应用中心",
                     },
                 ],
                 layout: "layout-5",

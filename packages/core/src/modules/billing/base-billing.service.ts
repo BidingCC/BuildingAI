@@ -1,7 +1,7 @@
 import { ACTION } from "@buildingai/constants/shared/account-log.constants";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { AccountLog } from "@buildingai/db/entities/account-log.entity";
-import { User } from "@buildingai/db/entities/user.entity";
+import { User } from "@buildingai/db/entities";
+import { AccountLog } from "@buildingai/db/entities";
 import { Repository } from "@buildingai/db/typeorm";
 import { generateNo } from "@buildingai/utils";
 import { BadRequestException, Injectable, Logger, NotFoundException } from "@nestjs/common";
@@ -97,6 +97,36 @@ export class BaseBillingService {
                     );
                 }
 
+                // 优先扣除会员赠送的临时积分(未过期且有剩余的)
+                let remainingToDeduct = amount;
+                const now = new Date();
+
+                // 查询用户所有未过期且有剩余可用数量的会员赠送积分记录
+                // 按过期时间升序排列,优先使用即将过期的积分
+                const giftPowerLogs = await manager
+                    .createQueryBuilder(AccountLog, "log")
+                    .where("log.userId = :userId", { userId })
+                    .andWhere("log.availableAmount > 0")
+                    .andWhere("log.expireAt IS NOT NULL")
+                    .andWhere("log.expireAt > :now", { now })
+                    .orderBy("log.expireAt", "ASC")
+                    .getMany();
+
+                // 依次扣除会员赠送积分
+                for (const log of giftPowerLogs) {
+                    if (remainingToDeduct <= 0) break;
+
+                    const deductFromThis = Math.min(log.availableAmount, remainingToDeduct);
+                    await manager.update(AccountLog, { id: log.id }, {
+                        availableAmount: log.availableAmount - deductFromThis,
+                    } as any);
+                    remainingToDeduct -= deductFromThis;
+
+                    this.logger.debug(
+                        `从会员赠送积分记录 ${log.id} 扣除 ${deductFromThis}, 剩余 ${log.availableAmount - deductFromThis}`,
+                    );
+                }
+
                 // Calculate new power
                 const newPower = user.power - amount;
 
@@ -175,6 +205,7 @@ export class BaseBillingService {
             remark = "",
             associationNo = "",
             associationUserId,
+            expireAt,
         } = options;
 
         if (amount <= 0) {
@@ -200,6 +231,7 @@ export class BaseBillingService {
                 await manager.increment(User, { id: userId }, "power", amount);
 
                 // Record power change log
+                // 如果有过期时间,设置 availableAmount 用于追踪剩余可用数量
                 await manager.insert(AccountLog, {
                     userId,
                     accountNo: await generateNo(this.accountLogRepository, "accountNo"),
@@ -211,7 +243,9 @@ export class BaseBillingService {
                     associationUserId,
                     remark: remark || `增加 ${amount} 积分`,
                     sourceInfo: source,
-                });
+                    expireAt: expireAt || null,
+                    availableAmount: expireAt ? amount : 0,
+                } as any);
 
                 this.logger.debug(
                     `User ${userId} power added: ${amount}, new balance: ${newPower}`,

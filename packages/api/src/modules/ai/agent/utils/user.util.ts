@@ -1,4 +1,4 @@
-import type { UserPlayground } from "@buildingai/db/interfaces/context.interface";
+import type { UserPlayground } from "@buildingai/db";
 
 /**
  * User utility functions for AI Agent module

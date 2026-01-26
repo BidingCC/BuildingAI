@@ -1,16 +1,16 @@
 import { BaseController } from "@buildingai/base";
 import { type BooleanNumberType } from "@buildingai/constants";
-import { SecretTemplateService } from "@buildingai/core/modules/secret/services/secret-template.service";
-import { BuildFileUrl } from "@buildingai/decorators/file-url.decorator";
-import { HttpErrorFactory } from "@buildingai/errors";
-import { ConsoleController } from "@common/decorators/controller.decorator";
-import { Permissions } from "@common/decorators/permissions.decorator";
+import { SecretTemplateService } from "@buildingai/core/modules";
 import {
     CreateSecretTemplateDto,
     ImportSecretTemplateJsonDto,
     QuerySecretTemplateDto,
     UpdateSecretTemplateDto,
-} from "@modules/ai/secret/dto/secret-template.dto";
+} from "@buildingai/core/modules";
+import { BuildFileUrl } from "@buildingai/decorators/file-url.decorator";
+import { HttpErrorFactory } from "@buildingai/errors";
+import { ConsoleController } from "@common/decorators/controller.decorator";
+import { Permissions } from "@common/decorators/permissions.decorator";
 import { Body, Delete, Get, Param, Patch, Post, Query } from "@nestjs/common";
 
 /**
@@ -72,6 +72,19 @@ export class SecretTemplateWebController extends BaseController {
     })
     async getEnabledTemplates() {
         return await this.SecretTemplateService.getEnabledTemplates();
+    }
+
+    /**
+     * 获取全部模板（不分页，包括启用和禁用的）
+     */
+    @Get("all")
+    @BuildFileUrl(["**.icon"])
+    @Permissions({
+        code: "all",
+        name: "查看密钥模板",
+    })
+    async getAllTemplates() {
+        return await this.SecretTemplateService.getAllTemplates();
     }
 
     /**

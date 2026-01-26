@@ -22,7 +22,7 @@ const { t } = useI18n();
 const toast = useMessage();
 const router = useRouter();
 
-const formData = shallowRef<UpdateAgentConfigParams>({
+const formData = ref<UpdateAgentConfigParams>({
     name: "",
     description: "",
     avatar: "",
@@ -35,13 +35,27 @@ const createModes = computed(() => {
         {
             value: "direct",
             label: t("ai-agent.backend.create.modes.direct"),
-            icon: "i-lucide-zap",
+            description: t("ai-agent.backend.create.modesDesc.direct"),
+            icon: "i-lucide-bot",
+        },
+        {
+            value: "coze",
+            label: t("ai-agent.backend.create.modes.coze"),
+            description: t("ai-agent.backend.create.modesDesc.coze"),
+            icon: "/images/coze.png",
+        },
+        {
+            value: "dify",
+            label: t("ai-agent.backend.create.modes.dify"),
+            description: t("ai-agent.backend.create.modesDesc.dify"),
+            icon: "/images/dify.png",
         },
     ];
 
     const pluginModes = usePluginSlots("agent:create:modes").value.map((slot) => ({
         value: slot.meta?.value,
         label: t(slot.meta?.label as string),
+        description: slot.meta?.description || t("ai-agent.backend.create.modesDesc.plugin"),
         icon: slot.meta?.icon,
     }));
 
@@ -111,69 +125,95 @@ onMounted(async () => {
         :description="
             props.id ? $t('ai-agent.backend.create.editDesc') : $t('ai-agent.backend.create.desc')
         "
-        :ui="{ content: 'max-w-lg' }"
+        :ui="{ content: 'max-w-3xl' }"
         @close="emits('close', false)"
     >
         <div v-if="detailLoading" class="flex items-center justify-center" style="height: 420px">
             <UIcon name="i-lucide-loader-2" class="size-8 animate-spin" />
         </div>
 
-        <UForm v-else :schema="schema" :state="formData" class="space-y-4" @submit="submitForm">
-            <div class="flex flex-col gap-4">
+        <UForm
+            v-else
+            :schema="schema"
+            :state="formData"
+            class="space-y-6 px-1"
+            @submit="submitForm"
+        >
+            <div class="flex flex-col gap-5">
                 <UFormField
                     v-if="!props.id && createModes.length != 1"
                     :label="$t('ai-agent.backend.create.mode')"
                     name="createMode"
+                    class="space-y-2"
                 >
-                    <div class="grid grid-cols-3 gap-4">
+                    <div class="grid grid-cols-3 gap-5">
                         <div
                             v-for="mode in createModes"
                             :key="mode.value as string"
-                            class="group hover:border-primary/50 relative cursor-pointer rounded-lg border-2 px-4 py-3 text-center transition-colors"
-                            :class="{
-                                'border-primary bg-primary/5': formData.createMode === mode.value,
-                                'border-gray-200 bg-white': formData.createMode !== mode.value,
-                            }"
+                            class="group relative flex h-full cursor-pointer flex-col rounded-xl border p-5 transition-all duration-300 ease-out"
+                            :class="[
+                                formData.createMode === mode.value
+                                    ? 'border-primary ring-primary bg-primary/5 -translate-y-1 shadow-md ring-1'
+                                    : 'hover:border-primary/30 border-gray-100 bg-white hover:-translate-y-1 hover:shadow-xl',
+                            ]"
                             @click="formData.createMode = mode.value as string"
                         >
-                            <div
-                                v-if="formData.createMode === mode.value"
-                                class="bg-primary absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full text-white"
-                            >
-                                <UIcon name="i-lucide-check" class="h-3 w-3" />
-                            </div>
-
-                            <div class="mb-2 flex justify-center">
+                            <!-- Header: Icon & Check -->
+                            <div class="mb-4 flex items-start justify-between">
                                 <div
-                                    class="flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg"
-                                    :class="{
-                                        'bg-primary text-white': formData.createMode === mode.value,
-                                        'bg-gray-100 text-gray-600':
-                                            formData.createMode !== mode.value,
-                                    }"
+                                    v-if="
+                                        mode.icon &&
+                                        typeof mode.icon === 'string' &&
+                                        !mode.icon.includes('.')
+                                    "
+                                    class="flex size-11 items-center justify-center rounded-lg shadow-sm transition-colors duration-200"
+                                    :class="[
+                                        formData.createMode === mode.value
+                                            ? 'bg-primary text-white'
+                                            : 'group-hover:text-primary group-hover:ring-primary/20 bg-white text-gray-600 ring-1 ring-gray-100',
+                                    ]"
                                 >
-                                    <UIcon
-                                        v-if="
-                                            mode.icon &&
-                                            typeof mode.icon === 'string' &&
-                                            !mode.icon.includes('.')
-                                        "
-                                        :name="mode.icon"
-                                        class="h-6 w-6"
-                                    />
-                                    <component
-                                        v-else-if="mode.icon"
-                                        :is="mode.icon"
-                                        :src="mode.icon as string"
-                                        :alt="mode.label"
-                                        filled
-                                        :fontControlled="false"
-                                        class="size-8 object-contain"
-                                    />
+                                    <UIcon :name="mode.icon" class="size-6" />
+                                </div>
+                                <img
+                                    v-else-if="mode.icon"
+                                    :src="mode.icon as string"
+                                    :alt="mode.label"
+                                    class="size-11 object-contain"
+                                />
+
+                                <div
+                                    class="transition-all duration-200"
+                                    :class="[
+                                        formData.createMode === mode.value
+                                            ? 'scale-100 opacity-100'
+                                            : 'scale-75 opacity-0',
+                                    ]"
+                                >
+                                    <div
+                                        class="bg-primary flex size-6 items-center justify-center rounded-full text-white shadow-sm"
+                                    >
+                                        <UIcon name="i-lucide-check" class="size-3.5" />
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="text-foreground font-medium">{{ mode.label }}</div>
+                            <!-- Content -->
+                            <div class="flex flex-1 flex-col gap-2">
+                                <div
+                                    class="text-base font-bold transition-colors duration-200"
+                                    :class="[
+                                        formData.createMode === mode.value
+                                            ? 'text-primary'
+                                            : 'group-hover:text-primary text-gray-900',
+                                    ]"
+                                >
+                                    {{ mode.label }}
+                                </div>
+                                <div class="text-xs leading-relaxed font-medium text-gray-500">
+                                    {{ (mode as any).description }}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </UFormField>
@@ -214,7 +254,7 @@ onMounted(async () => {
                 </UFormField>
             </div>
 
-            <div class="mt-6 flex justify-end gap-2">
+            <div class="bg-background sticky bottom-0 z-10 flex justify-end gap-4 py-3">
                 <UButton color="neutral" variant="soft" size="lg" @click="emits('close', false)">
                     {{ $t("console-common.cancel") }}
                 </UButton>

@@ -24,8 +24,12 @@ export function usePaging<T = any>(options: Options) {
         needPolling: false,
     });
     // 请求分页接口
-    const getLists = () => {
+    const getLists = (...args: any[]) => {
         paging.loading = true;
+        const options = args[0];
+        const isAppend =
+            options && typeof options === "object" && "append" in options && options.append;
+
         return fetchFun({
             page: paging.page,
             pageSize: paging.pageSize,
@@ -33,7 +37,12 @@ export function usePaging<T = any>(options: Options) {
         })
             .then((res: any) => {
                 paging.total = res?.total;
-                paging.items = res?.items;
+                if (isAppend) {
+                    // eslint-disable-next-line no-unsafe-optional-chaining
+                    paging.items = [...paging.items, ...res?.items];
+                } else {
+                    paging.items = res?.items;
+                }
                 paging.extend = res?.extend;
                 paging.needPolling = res?.needPolling || false;
                 return Promise.resolve(res);

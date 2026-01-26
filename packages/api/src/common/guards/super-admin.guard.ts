@@ -1,4 +1,4 @@
-import { getContextPlayground } from "@buildingai/db/utils/context";
+import { getContextPlayground } from "@buildingai/db";
 import { SUPER_ADMIN_ONLY_KEY } from "@buildingai/decorators/super-admin-only.decorator";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { getOverrideMetadata, isEnabled } from "@buildingai/utils";

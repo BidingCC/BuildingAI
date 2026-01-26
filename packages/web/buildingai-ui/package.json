@@ -22,35 +22,39 @@
     },
     "dependencies": {
         "@buildingai/constants": "workspace:*",
+        "@buildingai/designer": "workspace:*",
         "@buildingai/hooks": "workspace:*",
+        "@buildingai/http": "workspace:*",
         "@buildingai/i18n-config": "workspace:*",
+        "@buildingai/layouts": "workspace:*",
         "@buildingai/service": "workspace:*",
         "@buildingai/stores": "workspace:*",
         "@buildingai/storybook": "workspace:*",
         "@buildingai/ui": "workspace:*",
-        "@buildingai/designer": "workspace:*",
-        "@buildingai/layouts": "workspace:*",
-        "@buildingai/http": "workspace:*",
+        "@buildingai/upload": "workspace:*",
         "@buildingai/utils": "workspace:*",
         "@storybook-vue/nuxt": "^9.0.1",
         "@tanstack/table-core": "^8.21.3",
-        "vue-i18n": "catalog:web",
-        "nuxt-svgo": "catalog:web",
-        "reka-ui": "catalog:web",
         "echarts": "catalog:web",
-        "vuedraggable": "catalog:web",
+        "libphonenumber-js": "^1.12.18",
+        "nuxt-svgo": "catalog:web",
         "qrcode.vue": "^3.6.0",
+        "reka-ui": "catalog:web",
         "vue-drag-resize": "^2.0.3",
-        "libphonenumber-js": "^1.12.18"
+        "vue-i18n": "catalog:web",
+        "vuedraggable": "catalog:web"
     },
     "devDependencies": {
-        "@chromatic-com/storybook": "^4.1.1",
         "@buildingai/eslint-config": "workspace:*",
         "@buildingai/nuxt": "workspace:*",
-        "@buildingai/web-config": "workspace:*",
         "@buildingai/types": "workspace:*",
+        "@buildingai/web-config": "workspace:*",
+        "@chromatic-com/storybook": "^4.1.1",
         "@storybook/addon-docs": "^9.1.8",
         "eslint-plugin-storybook": "^9.1.8",
         "storybook": "^9.1.8"
+    },
+    "engines": {
+        "node": ">=22.20.x <23"
     }
 }

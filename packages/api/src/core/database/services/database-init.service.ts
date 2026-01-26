@@ -1,15 +1,23 @@
 import { AppConfig } from "@buildingai/config/app.config";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { Menu } from "@buildingai/db/entities/menu.entity";
-import { MenuSeeder } from "@buildingai/db/seeds/runtime-seeders/menu.seeder";
-import { PermissionSeeder } from "@buildingai/db/seeds/runtime-seeders/permission.seeder";
-import { SeedRunner } from "@buildingai/db/seeds/seed-runner";
-import { AiModelSeeder } from "@buildingai/db/seeds/seeders/ai-model.seeder";
-import { AiProviderSeeder } from "@buildingai/db/seeds/seeders/ai-provider.seeder";
-import { ExtensionSeeder } from "@buildingai/db/seeds/seeders/extension.seeder";
-import { PageSeeder } from "@buildingai/db/seeds/seeders/page.seeder";
-import { PayConfigSeeder } from "@buildingai/db/seeds/seeders/payconfig.seeder";
-import { SecretTemplateSeeder } from "@buildingai/db/seeds/seeders/secret-template.seeder";
+import { Menu } from "@buildingai/db/entities";
+import {
+    AgentSquareSeeder,
+    AiModelSeeder,
+    AiProviderSeeder,
+    ExtensionSeeder,
+    MembershipLevelsSeeder,
+    MembershipPlansSeeder,
+    MenuSeeder,
+    PageSeeder,
+    PayConfigSeeder,
+    PermissionSeeder,
+    RechargeCenterSeeder,
+    SecretTemplateSeeder,
+    SeedRunner,
+    StorageConfigSeeder,
+    WebsiteSeeder,
+} from "@buildingai/db/seeds";
 import { DataSource, Repository } from "@buildingai/db/typeorm";
 import { DictService } from "@buildingai/dict";
 import { TerminalLogger } from "@buildingai/logger";
@@ -18,6 +26,7 @@ import { SYSTEM_CONFIG } from "@common/constants";
 import { PermissionService } from "@modules/permission/services/permission.service";
 import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import fse from "fs-extra";
+import { machineId } from "node-machine-id";
 import * as path from "path";
 
 import { ExtensionUpgradeOrchestratorService } from "../extension-upgrade/extension-upgrade-orchestrator.service";
@@ -94,6 +103,8 @@ export class DatabaseInitService implements OnModuleInit {
         // 2. Run runtime seeders (NestJS dependencies)
         await this.runRuntimeSeeds();
 
+        await this.initializeSpaLoadingIcon();
+
         // 3. Mark system as installed
         await this.markSystemAsInstalled();
 
@@ -118,6 +129,12 @@ export class DatabaseInitService implements OnModuleInit {
             new AiProviderSeeder(), // AI providers
             new AiModelSeeder(), // AI models
             new SecretTemplateSeeder(), // Secret templates
+            new MembershipLevelsSeeder(), // Membership levels
+            new MembershipPlansSeeder(), // Membership plans
+            new RechargeCenterSeeder(), // Recharge center configuration
+            new AgentSquareSeeder(), // Agent square configuration
+            new StorageConfigSeeder(), // OSS storage
+            new WebsiteSeeder(), // Website default configuration
         ]);
     }
 
@@ -132,6 +149,26 @@ export class DatabaseInitService implements OnModuleInit {
         // 2. Initialize menus (depends on permission data)
         const menuSeeder = new MenuSeeder(this.menuRepository, this.permissionService);
         await menuSeeder.run();
+    }
+
+    /**
+     * Initialize SPA loading icon from source
+     */
+    private async initializeSpaLoadingIcon(): Promise<void> {
+        try {
+            const rootDir = path.join(process.cwd(), "..", "..");
+            const sourcePath = path.join(rootDir, "public/web/spa-loading-source.png");
+            const targetPath = path.join(rootDir, "public/web/spa-loading.png");
+
+            if (await fse.pathExists(sourcePath)) {
+                await fse.copy(sourcePath, targetPath, { overwrite: true });
+                this.logger.log("✅ Initialized SPA loading icon");
+            } else {
+                this.logger.warn("⚠️ SPA loading source icon not found, skipping initialization");
+            }
+        } catch (e) {
+            this.logger.error(`❌ Failed to initialize SPA loading icon: ${e.message}`);
+        }
     }
 
     /**

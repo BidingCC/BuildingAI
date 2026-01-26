@@ -82,14 +82,27 @@ export function uuid() {
  * formatFileSize(1048576) // => "1.00 MB"
  * formatFileSize(1073741824) // => "1.00 GB"
  */
-export function formatFileSize(bytes: number, precision = 2): string {
-    if (bytes === 0) return "0 Bytes";
+export function formatFileSize(bytes: number | string | null | undefined, precision = 2): string {
+    // 处理 null、undefined 或空值
+    if (bytes === null || bytes === undefined || bytes === "") {
+        return "0 Bytes";
+    }
+
+    // 转换为数字
+    const numBytes = typeof bytes === "string" ? parseFloat(bytes) : Number(bytes);
+
+    // 检查是否为有效数字
+    if (isNaN(numBytes) || numBytes < 0) {
+        return "0 Bytes";
+    }
+
+    if (numBytes === 0) return "0 Bytes";
 
     const units = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
     const threshold = 1024;
 
     let index = 0;
-    let size = bytes;
+    let size = numBytes;
 
     while (size >= threshold && index < units.length - 1) {
         size /= threshold;

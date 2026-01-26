@@ -9,8 +9,11 @@ import { SYSTEM_CONFIG } from "@common/constants";
 import { WebController } from "@common/decorators/controller.decorator";
 import { QueryFileDto } from "@modules/upload/dto/query-file.dto";
 import { RemoteUploadDto } from "@modules/upload/dto/remote-upload.dto";
-import { UploadFileDto } from "@modules/upload/dto/upload-file.dto";
-import { UploadService } from "@modules/upload/services/upload.service";
+import {
+    SaveOSSFileDto,
+    SignatureRequestDto,
+    UploadFileDto,
+} from "@modules/upload/dto/upload-file.dto";
 import {
     Body,
     Delete,
@@ -28,12 +31,14 @@ import { FileInterceptor, FilesInterceptor } from "@nestjs/platform-express";
 import type { Request, Response } from "express";
 import * as fse from "fs-extra";
 
+import { UploadService } from "../../services/upload.service";
+
 /**
  * 文件上传控制器
  *
  * 处理文件上传、查询和下载等请求
  */
-@WebController("upload")
+@WebController({ path: "upload" })
 export class UploadController extends BaseController {
     /**
      * 构造函数
@@ -46,6 +51,11 @@ export class UploadController extends BaseController {
         private readonly dictService: DictService,
     ) {
         super();
+    }
+
+    @Post("signature")
+    async getUploadSignature(@Body() dto: SignatureRequestDto) {
+        return this.uploadService.getUploadSignatureInfo(dto);
     }
 
     /**
@@ -127,6 +137,8 @@ export class UploadController extends BaseController {
      *
      * @param query 查询参数
      * @returns 分页的文件列表
+     *
+     * @deprecated
      */
     @Get()
     @BuildFileUrl(["**.url"])
@@ -158,6 +170,8 @@ export class UploadController extends BaseController {
      *
      * @param id 文件ID
      * @returns 文件详情
+     *
+     * @deprecated
      */
     @Get(":id")
     @BuildFileUrl(["**.url"])
@@ -170,6 +184,8 @@ export class UploadController extends BaseController {
      *
      * @param id 文件ID
      * @param res 响应对象
+     *
+     * @deprecated
      */
     @Get("download/:id")
     async downloadFile(@Param("id", UUIDValidationPipe) id: string, @Res() res: Response) {
@@ -203,6 +219,7 @@ export class UploadController extends BaseController {
      * @returns 上传结果
      */
     @Post("remote")
+    @Public()
     @BuildFileUrl(["**.url"])
     async uploadRemoteFile(@Body() remoteUploadDto: RemoteUploadDto, @Req() req: Request) {
         // User info will be extracted from request in core service
@@ -210,10 +227,26 @@ export class UploadController extends BaseController {
     }
 
     /**
+     * 保存 OSS 文件记录到数据库
+     *
+     * @param saveOSSFileDto OSS 文件信息
+     * @param req 请求对象
+     * @returns 上传结果（包含文件ID）
+     */
+    @Post("oss-file")
+    @BuildFileUrl(["**.url"])
+    async saveOSSFileRecord(@Body() saveOSSFileDto: SaveOSSFileDto, @Req() req: Request) {
+        // User info will be extracted from request in core service
+        return this.uploadService.saveOSSFileRecord(saveOSSFileDto, req);
+    }
+
+    /**
      * 删除文件
      *
      * @param id 文件ID
      * @returns 删除结果
+     *
+     * @deprecated
      */
     @Delete(":id")
     async deleteFile(@Param("id", UUIDValidationPipe) id: string) {

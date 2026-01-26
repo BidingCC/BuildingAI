@@ -52,6 +52,9 @@ const ThirdPartyIntegration = computed(() => {
             <!-- 角色设定知识库修改区域 -->
             <Datasets v-model="state.datasetIds as string[]" />
 
+            <!-- MCP工具 -->
+            <McpTool v-model="state.mcpServerIds as string[]" />
+
             <!-- 对话上下文 -->
             <Context v-model="state.showContext as boolean" />
 
@@ -69,9 +72,6 @@ const ThirdPartyIntegration = computed(() => {
 
         <!-- 公开设置 -->
         <Public v-model="state.isPublic as boolean" />
-
-        <!-- MCP工具 -->
-        <McpTool v-model="state.mcpServerIds as string[]" />
 
         <!-- 标签 -->
         <Tags v-model="state.tagIds as string[]" />

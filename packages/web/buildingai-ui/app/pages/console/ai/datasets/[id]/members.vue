@@ -21,6 +21,8 @@ const UBadge = resolveComponent("UBadge");
 const UDropdownMenu = resolveComponent("UDropdownMenu");
 const UInput = resolveComponent("UInput");
 const UAvatar = resolveComponent("UAvatar");
+const UPopover = resolveComponent("UPopover");
+const UIcon = resolveComponent("UIcon");
 
 const { params: URLQueryParams } = useRoute();
 const router = useRouter();
@@ -107,7 +109,88 @@ const columns: TableColumn<TeamMember>[] = [
     },
     {
         accessorKey: "role",
-        header: () => h("p", { class: "" }, `${columnLabels.value.role}`),
+        header: () => {
+            return h("div", { class: "flex items-center gap-2" }, [
+                h("p", { class: "" }, `${columnLabels.value.role}`),
+                h(
+                    UPopover,
+                    {
+                        mode: "hover",
+                        openDelay: 200,
+                        content: {
+                            align: "start",
+                            side: "bottom",
+                            sideOffset: 8,
+                        },
+                    },
+                    {
+                        default: () =>
+                            h(UIcon, {
+                                name: "i-lucide-info",
+                                class: "text-muted-foreground size-4 cursor-help",
+                            }),
+                        content: () =>
+                            h("div", { class: "w-80 space-y-3 p-4" }, [
+                                h(
+                                    "h3",
+                                    { class: "text-sm font-semibold mb-3" },
+                                    t("ai-datasets.backend.members.rolePermissionDescription"),
+                                ),
+                                h("ul", { class: "space-y-2.5 text-sm" }, [
+                                    h("li", { class: "flex flex-col gap-1" }, [
+                                        h(
+                                            "span",
+                                            { class: "font-medium" },
+                                            `${t("ai-datasets.backend.members.role.owner")}:`,
+                                        ),
+                                        h(
+                                            "span",
+                                            { class: "text-muted-foreground" },
+                                            t("ai-datasets.backend.members.roleOwnerDescription"),
+                                        ),
+                                    ]),
+                                    h("li", { class: "flex flex-col gap-1" }, [
+                                        h(
+                                            "span",
+                                            { class: "font-medium" },
+                                            `${t("ai-datasets.backend.members.role.manager")}:`,
+                                        ),
+                                        h(
+                                            "span",
+                                            { class: "text-muted-foreground" },
+                                            t("ai-datasets.backend.members.roleManagerDescription"),
+                                        ),
+                                    ]),
+                                    h("li", { class: "flex flex-col gap-1" }, [
+                                        h(
+                                            "span",
+                                            { class: "font-medium" },
+                                            `${t("ai-datasets.backend.members.role.editor")}:`,
+                                        ),
+                                        h(
+                                            "span",
+                                            { class: "text-muted-foreground" },
+                                            t("ai-datasets.backend.members.roleEditorDescription"),
+                                        ),
+                                    ]),
+                                    h("li", { class: "flex flex-col gap-1" }, [
+                                        h(
+                                            "span",
+                                            { class: "font-medium" },
+                                            `${t("ai-datasets.backend.members.role.viewer")}:`,
+                                        ),
+                                        h(
+                                            "span",
+                                            { class: "text-muted-foreground" },
+                                            t("ai-datasets.backend.members.roleViewerDescription"),
+                                        ),
+                                    ]),
+                                ]),
+                            ]),
+                    },
+                ),
+            ]);
+        },
         cell: ({ row }) => {
             const role = row.getValue("role") as keyof typeof roleMap;
             const roleInfo = roleMap[role];

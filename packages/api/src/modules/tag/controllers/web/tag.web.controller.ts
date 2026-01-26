@@ -1,5 +1,5 @@
 import { BaseController } from "@buildingai/base";
-import { Tag } from "@buildingai/db/entities/tag.entity";
+import { Tag } from "@buildingai/db/entities";
 import { Public } from "@buildingai/decorators/public.decorator";
 import { WebController } from "@common/decorators/controller.decorator";
 import { QueryTagDto } from "@modules/tag/dto";

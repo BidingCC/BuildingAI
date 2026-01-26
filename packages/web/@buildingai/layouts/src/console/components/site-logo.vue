@@ -50,9 +50,18 @@ defineOptions({ inheritAttrs: false });
             :class="{ hidden: props.collapsed }"
         >
             <span class="text-sm font-bold">{{ appStore.siteConfig?.webinfo.name }}</span>
-            <span v-if="!props.isWeb" class="text-muted-foreground truncate text-xs">
-                {{ $t("layouts.admin") }}
-            </span>
+            <div class="flex items-center gap-1">
+                <span v-if="!props.isWeb" class="text-muted-foreground truncate text-xs">
+                    {{ $t("layouts.admin") }}
+                </span>
+                <UBadge
+                    v-if="!props.isWeb && appStore.siteConfig?.webinfo?.version"
+                    variant="soft"
+                    class="text-xs"
+                >
+                    v{{ appStore.siteConfig.webinfo.version }}
+                </UBadge>
+            </div>
         </div>
     </h1>
     <h1 v-if="props.layout === 'mixture'" class="flex items-center truncate" @click="backToHome">

@@ -27,13 +27,15 @@ const defaultState: FormFieldConfig = {
     options: [],
 };
 
-const state = shallowRef<FormFieldConfig & { maxLength?: string }>({
+const state = ref<FormFieldConfig & { maxLength?: string }>({
     ...defaultState,
     maxLength: undefined,
 });
 
 const formSchema = object({
-    name: string().required(t("ai-agent.backend.configuration.formVariableNameEmpty")),
+    name: string()
+        .required(t("ai-agent.backend.configuration.formVariableNameEmpty"))
+        .matches(/^[a-zA-Z0-9_]+$/, t("ai-agent.backend.configuration.formVariableNameInvalid")),
     label: string().required(t("ai-agent.backend.configuration.formVariableLabelEmpty")),
     type: string()
         .required(t("ai-agent.backend.configuration.formVariableTypeEmpty"))
@@ -163,41 +165,62 @@ const removeVariable = (index: number) => {
             </div>
 
             <div class="space-y-3">
-                <div
-                    v-for="(item, index) in variable"
-                    :key="item.name"
-                    class="group bg-background mt-2 flex items-center gap-2 rounded-lg px-3 py-2"
+                <Draggable
+                    v-model="variable"
+                    class="draggable"
+                    animation="300"
+                    handle=".drag-handle"
+                    itemKey="name"
                 >
-                    <div class="flex flex-1 items-center gap-2">
-                        <span class="text-foreground text-sm font-medium">{{ item.label }}</span>
-                        <span class="text-muted-foreground font-mono text-xs">{{ item.name }}</span>
-                    </div>
+                    <template #item="{ element: item, index }">
+                        <div
+                            class="group bg-background mt-2 flex items-center gap-2 rounded-lg px-3 py-2"
+                        >
+                            <UIcon
+                                name="i-lucide-grip-vertical"
+                                class="drag-handle text-muted-foreground cursor-move"
+                            />
+                            <div class="flex flex-1 items-center gap-2">
+                                <span class="text-foreground text-sm font-medium">{{
+                                    item.label
+                                }}</span>
+                                <span class="text-muted-foreground font-mono text-xs">{{
+                                    item.name
+                                }}</span>
+                            </div>
 
-                    <div class="block group-hover:hidden">
-                        <UBadge v-if="item.required" color="error" variant="outline" size="sm">
-                            {{ $t("ai-agent.backend.configuration.required") }}
-                        </UBadge>
-                        <UBadge color="neutral" variant="outline" size="sm" class="ml-1">
-                            {{ item.type }}
-                        </UBadge>
-                    </div>
-                    <div class="hidden items-center group-hover:flex">
-                        <UButton
-                            size="xs"
-                            color="primary"
-                            variant="ghost"
-                            icon="i-lucide-edit"
-                            @click="openEditModal(index)"
-                        />
-                        <UButton
-                            size="xs"
-                            color="error"
-                            variant="ghost"
-                            icon="i-lucide-trash"
-                            @click="removeVariable(index)"
-                        />
-                    </div>
-                </div>
+                            <div class="block group-hover:hidden">
+                                <UBadge
+                                    v-if="item.required"
+                                    color="error"
+                                    variant="outline"
+                                    size="sm"
+                                >
+                                    {{ $t("ai-agent.backend.configuration.required") }}
+                                </UBadge>
+                                <UBadge color="neutral" variant="outline" size="sm" class="ml-1">
+                                    {{ item.type }}
+                                </UBadge>
+                            </div>
+                            <div class="hidden items-center group-hover:flex">
+                                <UButton
+                                    size="xs"
+                                    color="primary"
+                                    variant="ghost"
+                                    icon="i-lucide-edit"
+                                    @click="openEditModal(index)"
+                                />
+                                <UButton
+                                    size="xs"
+                                    color="error"
+                                    variant="ghost"
+                                    icon="i-lucide-trash"
+                                    @click="removeVariable(index)"
+                                />
+                            </div>
+                        </div>
+                    </template>
+                </Draggable>
             </div>
         </div>
 

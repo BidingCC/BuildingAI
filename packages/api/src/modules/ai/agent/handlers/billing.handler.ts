@@ -2,12 +2,12 @@ import {
     ACCOUNT_LOG_SOURCE,
     ACCOUNT_LOG_TYPE,
 } from "@buildingai/constants/shared/account-log.constants";
-import { AppBillingService } from "@buildingai/core/modules/billing/app-billing.service";
+import { AppBillingService } from "@buildingai/core/modules";
+import { type UserPlayground } from "@buildingai/db";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { Agent } from "@buildingai/db/entities/ai-agent.entity";
-import { AgentChatRecord } from "@buildingai/db/entities/ai-agent-chat-record.entity";
-import { User } from "@buildingai/db/entities/user.entity";
-import { type UserPlayground } from "@buildingai/db/interfaces/context.interface";
+import { User } from "@buildingai/db/entities";
+import { Agent } from "@buildingai/db/entities";
+import { AgentChatRecord } from "@buildingai/db/entities";
 import { Repository } from "@buildingai/db/typeorm";
 import { Injectable, Logger } from "@nestjs/common";
 

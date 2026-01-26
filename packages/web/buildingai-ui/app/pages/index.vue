@@ -171,7 +171,7 @@ definePageMeta({
 <template>
     <div class="ai-chat dark:bg-muted/50 flex h-full min-h-0 items-center justify-center pl-0">
         <div
-            class="border-border/50 h-full flex-none border-r pl-0 sm:pl-2"
+            class="border-border/50 h-full flex-none border-r pl-0"
             :class="{ 'border-none': !controlsStore.chatSidebarVisible }"
         >
             <ChatsChats />
@@ -278,19 +278,21 @@ definePageMeta({
                         </a>
                         <span
                             v-if="
-                                appStore.siteConfig?.copyright.displayName ||
-                                appStore.siteConfig?.copyright.iconUrl
+                                (appStore.siteConfig?.copyright.displayName ||
+                                    appStore.siteConfig?.copyright.iconUrl) &&
+                                (appStore.siteConfig?.copyright.copyrightText ||
+                                    appStore.siteConfig?.copyright.copyrightBrand)
                             "
                             >|</span
                         >
                         <span class="space-x-1">
-                            <span>Powered by</span>
+                            <span>{{ appStore.siteConfig?.copyright.copyrightText }}</span>
                             <a
                                 class="text-primary font-bold"
-                                href="https://www.buildingai.cc"
+                                :href="appStore.siteConfig?.copyright.copyrightUrl"
                                 target="_blank"
                             >
-                                BuildingAI
+                                {{ appStore.siteConfig?.copyright.copyrightBrand }}
                             </a>
                         </span>
                     </div>

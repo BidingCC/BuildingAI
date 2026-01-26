@@ -105,14 +105,23 @@ export class UpgradeService {
 
             this.logger.log(`Loading upgrade script for ${version} (${scriptFormat} format)`);
 
-            // Dynamic import upgrade script
-            const scriptModule = await import(versionScriptPath);
+            // Use require for CommonJS modules to avoid import() issues
+
+            const scriptModule = require(versionScriptPath);
 
             // Check if script exports default or named export
             const UpgradeClass = scriptModule.default || scriptModule.Upgrade;
 
             if (!UpgradeClass) {
                 this.logger.warn(`No upgrade class found in ${versionScriptPath}`);
+                return null;
+            }
+
+            // Verify it's a constructor function
+            if (typeof UpgradeClass !== "function") {
+                this.logger.warn(
+                    `Upgrade class is not a constructor in ${versionScriptPath}, type: ${typeof UpgradeClass}`,
+                );
                 return null;
             }
 

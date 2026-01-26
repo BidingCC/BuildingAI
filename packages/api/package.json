@@ -27,6 +27,7 @@
     },
     "dependencies": {
         "@buildingai/ai-sdk": "workspace:*",
+        "@buildingai/alipay-sdk": "workspace:*",
         "@buildingai/base": "workspace:*",
         "@buildingai/cache": "workspace:*",
         "@buildingai/config": "workspace:*",
@@ -40,6 +41,7 @@
         "@buildingai/errors": "workspace:*",
         "@buildingai/logger": "workspace:*",
         "@buildingai/pipe": "workspace:*",
+        "@buildingai/upgrade": "workspace:*",
         "@buildingai/upgrade": "workspace:*",
         "@buildingai/utils": "workspace:*",
         "@buildingai/wechat-sdk": "workspace:*",
@@ -57,7 +59,8 @@
         "@node-rs/jieba": "^2.0.1",
         "@types/fs-extra": "^11.0.4",
         "@types/js-yaml": "^4.0.9",
-        "adm-zip": "^0.5.16",
+        "@types/pdf-parse": "^1.1.5",
+        "adm-zip": "catalog:api",
         "ajv": "^8.17.1",
         "bcryptjs": "^3.0.2",
         "body-parser-xml": "^2.0.5",
@@ -70,19 +73,19 @@
         "glob": "7.1.2",
         "js-yaml": "^4.1.0",
         "mammoth": "^1.10.0",
+        "node-machine-id": "^1.1.12",
         "miniprogram-ci": "^2.1.26",
         "node-segment": "^0.0.2",
-        "openai": "^5.13.1",
-        "pg": "^8.16.3",
+        "pdf-parse": "^1.1.4",
+        "pg": "catalog:api",
         "pg-connection-string": "^2.9.1",
         "radash": "^12.1.1",
         "reflect-metadata": "^0.2.2",
         "rimraf": "^6.0.1",
         "rxjs": "^7.8.2",
-        "semver": "^7.7.3",
         "stack-trace": "1.0.0-pre2",
-        "tiktoken": "^1.0.22",
-        "typeorm-naming-strategies": "^4.1.0"
+        "typeorm-naming-strategies": "^4.1.0",
+        "xlsx": "^0.18.5"
     },
     "devDependencies": {
         "@buildingai/eslint-config": "workspace:*",
@@ -132,5 +135,8 @@
         ],
         "coverageDirectory": "../coverage",
         "testEnvironment": "node"
+    },
+    "engines": {
+        "node": ">=22.20.x <23"
     }
 }

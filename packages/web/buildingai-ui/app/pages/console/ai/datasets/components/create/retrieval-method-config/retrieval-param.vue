@@ -48,6 +48,7 @@ function handleKeywordChange(val: number) {
             <ModelSelect
                 v-if="retrievalConfig.rerankConfig!.enabled"
                 :modelValue="retrievalConfig.rerankConfig!.modelId"
+                console
                 :button-ui="{
                     variant: 'outline',
                     color: 'neutral',
@@ -112,6 +113,7 @@ function handleKeywordChange(val: number) {
             <ModelSelect
                 v-if="retrievalConfig.rerankConfig!.enabled"
                 :modelValue="retrievalConfig.rerankConfig!.modelId"
+                console
                 :button-ui="{
                     variant: 'outline',
                     color: 'neutral',
@@ -270,6 +272,7 @@ function handleKeywordChange(val: number) {
                 <ModelSelect
                     v-if="retrievalConfig.strategy === 'rerank'"
                     :modelValue="retrievalConfig.rerankConfig!.modelId"
+                    console
                     :button-ui="{
                         variant: 'outline',
                         color: 'neutral',

@@ -4,11 +4,11 @@ import {
     ACCOUNT_LOG_TYPE_DESCRIPTION,
 } from "@buildingai/constants/shared/account-log.constants";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { AccountLog } from "@buildingai/db/entities/account-log.entity";
-import { Agent } from "@buildingai/db/entities/ai-agent.entity";
-import { AiChatMessage } from "@buildingai/db/entities/ai-chat-message.entity";
-import { RechargeOrder } from "@buildingai/db/entities/recharge-order.entity";
-import { User } from "@buildingai/db/entities/user.entity";
+import { User } from "@buildingai/db/entities";
+import { Agent } from "@buildingai/db/entities";
+import { AiChatMessage } from "@buildingai/db/entities";
+import { AccountLog } from "@buildingai/db/entities";
+import { RechargeOrder } from "@buildingai/db/entities";
 import { In, Repository } from "@buildingai/db/typeorm";
 import { QueryAccountLogDto } from "@modules/finance/dto/query-account-log.dto";
 import { Injectable } from "@nestjs/common";
@@ -173,6 +173,7 @@ export class FinanceService extends BaseService<AccountLog> {
             "user.username",
             "user.userNo",
             "user.avatar",
+            "user.nickname",
         ]);
 
         // 设置排序规则

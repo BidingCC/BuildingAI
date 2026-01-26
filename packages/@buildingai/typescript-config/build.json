@@ -4,7 +4,7 @@
         "noUnusedLocals": false,
         "noUnusedParameters": false,
         "declaration": true,
-        "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.tsbuildinfo"
+        "tsBuildInfoFile": "dist/build.tsbuildinfo"
     },
     "tsc-alias": {
         "replacers": {

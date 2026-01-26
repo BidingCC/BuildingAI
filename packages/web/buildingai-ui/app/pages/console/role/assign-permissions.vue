@@ -15,7 +15,7 @@ const { t } = useI18n();
 const toast = useMessage();
 
 const permissionGroups = shallowRef<PermissionGroup[]>([]);
-const selectedPermissionIds = shallowRef<string[]>([]);
+const selectedPermissionIds = ref<string[]>([]);
 
 const allPermissionIds = computed(() =>
     permissionGroups.value.flatMap(
@@ -140,7 +140,7 @@ onMounted(async () => {
     <BdModal
         :title="t('system-perms.role.assignPermissions')"
         :description="t('system-perms.role.assignPermissionsDesc')"
-        :ui="{ container: 'max-w-5xl' }"
+        :ui="{ content: 'max-w-3xl' }"
         @close="emit('close', false)"
     >
         <div
@@ -194,7 +194,9 @@ onMounted(async () => {
                     </div>
 
                     <!-- 权限列表 -->
-                    <div class="ml-6 grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
+                    <div
+                        class="ml-6 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+                    >
                         <div
                             v-for="permission in group.permissions"
                             :key="permission.id"

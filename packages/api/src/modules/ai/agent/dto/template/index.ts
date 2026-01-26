@@ -397,3 +397,30 @@ export class ImportAgentDslDto {
     @IsUUID(4, { message: "创建者ID必须是有效的UUID" })
     createBy?: string;
 }
+
+/**
+ * 批量导入智能体 DSL 配置 DTO
+ */
+export class BatchImportAgentDslDto {
+    /**
+     * DSL 文件 URL 列表
+     */
+    @IsNotEmpty({ message: "DSL 文件列表不能为空" })
+    @IsArray({ message: "DSL 文件列表必须是数组" })
+    @IsString({ each: true, message: "每个文件URL必须是字符串" })
+    contents: string[];
+
+    /**
+     * DSL 格式（支持 yaml 和 json）
+     */
+    @IsOptional()
+    @IsString({ message: "DSL 格式必须是字符串" })
+    format?: "yaml" | "json";
+
+    /**
+     * 创建者ID
+     */
+    @IsOptional()
+    @IsUUID(4, { message: "创建者ID必须是有效的UUID" })
+    createBy?: string;
+}

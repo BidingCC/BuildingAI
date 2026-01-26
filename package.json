@@ -1,7 +1,7 @@
 {
     "name": "buildingai-monorepo",
     "title": "BuildingAI",
-    "version": "25.1.1",
+    "version": "25.3.2",
     "description": "BuildingAI Monorepo",
     "author": {
         "name": "BuildingAI Teams",
@@ -37,10 +37,9 @@
     ],
     "scripts": {
         "build": "cross-env NODE_OPTIONS=--max-old-space-size=5120 turbo run build",
-        "build:web": "cd packages/web/buildingai-ui && pnpm run generate",
         "dev": "turbo run dev",
-        "start": "pnpm i && cd packages/cli && pnpm run start",
-        "predeploy": "pnpm i && cd packages/cli && pnpm run predeploy",
+        "start": "pnpm i && pnpm sync-env && cd packages/cli && pnpm run start",
+        "predeploy": "pnpm i && pnpm sync-env && cd packages/cli && pnpm run predeploy",
         "stop": "node packages/cli/bin/cli.js pm2:stop",
         "restart": "node packages/cli/bin/cli.js pm2:restart",
         "delete": "node packages/cli/bin/cli.js pm2:delete",
@@ -62,7 +61,16 @@
         "bd:update": "node packages/cli/bin/cli.js update",
         "bd:update-git": "node packages/cli/bin/cli.js update-git",
         "docker:up": "docker compose up -d",
-        "docker:down": "docker compose down"
+        "docker:down": "docker compose down",
+        "dev:desktop": "cd packages/desktop && pnpm run dev",
+        "dev:api": "cd packages/api && pnpm run dev",
+        "dev:web": "cd packages/web/buildingai-ui && pnpm run dev",
+        "dev:main": "cd packages/web/buildingai-ui && pnpm run dev && cd ../../api && pnpm run dev",
+        "build:desktop": "cd packages/desktop && pnpm run build:desktop",
+        "build:api": "cd packages/api && pnpm run build",
+        "build:web": "cd packages/web/buildingai-ui && pnpm run generate",
+        "extension:create": "node packages/cli/bin/cli.js extension:create",
+        "extension:release": "node packages/cli/bin/cli.js extension:release"
     },
     "dependencies": {
         "@iconify-json/heroicons": "^1.2.3",
@@ -125,6 +133,7 @@
         "multer": "^2.0.2",
         "nuxt": "catalog:web",
         "nuxt-svgo": "catalog:web",
+        "openai": "^5.23.2",
         "panzoom": "catalog:web",
         "pinia": "catalog:web",
         "pm2": "^6.0.13",
@@ -132,6 +141,7 @@
         "reka-ui": "catalog:web",
         "rimraf": "^6.1.0",
         "sass": "catalog:web",
+        "semver": "^7.7.3",
         "tailwind-merge": "catalog:web",
         "tailwindcss": "catalog:web",
         "tailwindcss-animate": "catalog:web",
@@ -160,10 +170,12 @@
         "@types/express": "catalog:api",
         "@types/multer": "^1.4.13",
         "@types/node": "catalog:dev",
+        "@types/semver": "^7.7.1",
         "@uni-helper/uni-types": "catalog:mobile",
         "@intlify/core-base": "11.2.1",
         "body-parser": "2.2.0",
         "clsx": "catalog:web",
+        "concurrently": "^9.2.1",
         "cross-env": "^10.1.0",
         "eslint": "catalog:dev",
         "eslint-plugin-format": "catalog:dev",
@@ -182,13 +194,14 @@
         "vue-tsc": "catalog:dev"
     },
     "overrides": {
-        "cron": "catalog:api",
         "mime-types": "3.0.1",
         "body-parser": "2.2.0"
     },
     "packageManager": "pnpm@10.20.0",
     "pnpm": {
         "overrides": {
+            "cron": "catalog:api",
+            "vite": "catalog:dev",
             "@nuxt/kit": "catalog:web",
             "buildingai": "link:packages/cli",
             "glob": "^11.0.3",
@@ -270,6 +283,6 @@
         }
     },
     "engines": {
-        "node": ">=22"
+        "node": ">=22.20.x <23"
     }
 }

@@ -314,6 +314,7 @@ export const configPresets: ExtendedNuxtConfig = {
                     "@buildingai/api/types": ["../../api/src/types/index.ts"],
                 },
             },
+            exclude: ["src/api/**/*"],
         },
     },
     nitro: {
@@ -375,7 +376,10 @@ export function defineBuildingAIConfig(config: Partial<ExtendedNuxtConfig> = {})
             public: {
                 ...mergedConfig.runtimeConfig?.public,
                 isPlugin: false,
-                EXTENSION_API_URL: process.env.EXTENSION_API_URL,
+                EXTENSION_API_URL:
+                    process.env.NODE_ENV === "development"
+                        ? process.env.EXTENSION_API_URL || "https://cloud.buildingai.cc/api"
+                        : "https://cloud.buildingai.cc/api",
             },
         },
     });
@@ -416,7 +420,7 @@ export function defineBuildingAIExtensionConfig(
         srcDir: "src/web/",
         app: {
             ...mergedConfig.app,
-            baseURL: `/extensions/${extension}`,
+            baseURL: `/extension/${extension}`,
         },
         runtimeConfig: {
             ...mergedConfig.runtimeConfig,

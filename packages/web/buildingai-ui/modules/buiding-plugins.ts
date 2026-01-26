@@ -8,6 +8,11 @@ export default defineNuxtModule({
         name: "buildingai-extensions-loader",
     },
     setup(options, nuxt) {
+        // Only execute in development or production environment
+        if (process.env.NODE_ENV === "production") {
+            return;
+        }
+
         const extensionsDir = resolve(process.cwd(), "../../../extensions");
 
         const extensionsDirs = readdirSync(extensionsDir, { withFileTypes: true })

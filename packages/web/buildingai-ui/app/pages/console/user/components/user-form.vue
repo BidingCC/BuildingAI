@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { apiGetLevelListAll } from "@buildingai/service/consoleapi/membership-level";
 import { apiGetUserRolesList } from "@buildingai/service/consoleapi/user";
 import type { UserCreateRequest } from "@buildingai/service/webapi/user";
 import {
@@ -10,6 +11,9 @@ import { number, object, string } from "yup";
 
 const EditPassword = defineAsyncComponent(() => import("./edit-password.vue"));
 const EditPower = defineAsyncComponent(() => import("./edit-power.vue"));
+const UserSubscriptionRecordsModal = defineAsyncComponent(
+    () => import("./user-subscription-records-modal.vue"),
+);
 
 const props = withDefaults(
     defineProps<{
@@ -53,10 +57,13 @@ const formData = shallowReactive<UserCreateRequest>({
     roleId: undefined,
     status: 1,
     source: 0,
+    level: "",
+    levelEndTime: "",
     ...filteredInitialData,
 });
 
 const roleOptions = shallowRef<{ label: string; value: string }[]>([]);
+const levelOptions = shallowRef<{ label: string; value: string | null }[]>([]);
 
 // 区号选项 - 使用公共配置
 const areaCodeOptions = computed(() => {
@@ -121,6 +128,24 @@ const getRoleList = async () => {
     }
 };
 
+const getLevelList = async () => {
+    try {
+        const response = await apiGetLevelListAll();
+        levelOptions.value = [
+            { label: "普通用户", value: null }, // 添加普通用户选项，使用 null 作为值
+            ...response
+                .filter((level) => level.status) // 只显示启用状态的等级
+                .map((level) => ({
+                    label: level.name,
+                    value: level.id,
+                })),
+        ];
+    } catch (error) {
+        console.error("Get level list failed:", error);
+        message.error("获取会员等级列表失败");
+    }
+};
+
 const resetForm = () => {
     Object.keys(formData).forEach((key) => {
         const typedKey = key as keyof UserCreateRequest;
@@ -170,6 +195,11 @@ const { isLock, lockFn: submitForm } = useLockFn(async () => {
         if (formData.roleId === "null") {
             formData.roleId = undefined;
         }
+        // // 处理会员等级：如果为 null 或空字符串，则设置为 undefined
+        // if (formData.level === null || formData.level === "") {
+        //     formData.level = undefined;
+        //     formData.levelEndTime = undefined;
+        // }
         // 发送事件，由父组件处理提交逻辑
         emit("submit-success", { ...formData });
     } catch (error) {
@@ -178,7 +208,16 @@ const { isLock, lockFn: submitForm } = useLockFn(async () => {
     }
 });
 
-onMounted(() => getRoleList());
+const handleOpenSubscriptionRecords = () => {
+    if (!props.id) return;
+    const modal = overlay.create(UserSubscriptionRecordsModal);
+    modal.open({ userId: props.id });
+};
+
+onMounted(() => {
+    getRoleList();
+    getLevelList();
+});
 </script>
 
 <template>
@@ -406,6 +445,37 @@ onMounted(() => getRoleList());
                         </UFormField>
                     </div>
 
+                    <div class="grid grid-cols-2 gap-6">
+                        <!-- 会员等级 -->
+                        <UFormField :label="t('user.backend.membership.level')" name="level">
+                            <USelect
+                                v-model="formData.level"
+                                :items="levelOptions"
+                                label-key="label"
+                                value-key="value"
+                                :placeholder="t('user.backend.membership.normalUser')"
+                                size="xl"
+                                class="w-full"
+                                :disabled="true"
+                            />
+                        </UFormField>
+
+                        <!-- 有效期 -->
+                        <UFormField
+                            :label="t('user.backend.membership.validity')"
+                            name="levelEndTime"
+                        >
+                            <BdDatePicker
+                                v-model="formData.levelEndTime"
+                                show-time
+                                size="xl"
+                                class="w-full"
+                                :ui="{ root: 'w-full' }"
+                                :disabled="true"
+                            />
+                        </UFormField>
+                    </div>
+
                     <!-- 底部操作按钮 -->
                     <div class="flex justify-end gap-4">
                         <UButton
@@ -416,6 +486,16 @@ onMounted(() => getRoleList());
                             class="px-8"
                         >
                             {{ t("console-common.cancel") }}
+                        </UButton>
+                        <UButton
+                            v-if="props.id"
+                            color="neutral"
+                            variant="outline"
+                            size="lg"
+                            @click="handleOpenSubscriptionRecords"
+                            class="px-8"
+                        >
+                            {{ t("user.backend.subscriptionRecords.title") }}
                         </UButton>
                         <UButton
                             v-if="props.id"

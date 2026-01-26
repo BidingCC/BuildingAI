@@ -55,7 +55,8 @@
         "REDIS_RECONNECT_DELAY",
         "NODE_APP_INSTANCE",
         "pm_id",
-        "APP_DOMAIN"
+        "APP_DOMAIN",
+        "EXTENSION_IDENTIFIER"
     ],
     "tasks": {
         "build": {

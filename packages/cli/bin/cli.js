@@ -5,6 +5,7 @@ import { Command } from "commander";
 import path from "path";
 import { fileURLToPath } from "url";
 
+import { createExtension, releaseExtension } from "../src/commands/extension.js";
 import {
     deleteApi,
     flushLogs,
@@ -87,5 +88,17 @@ program
     .command("update-git")
     .description("Update project with automatic git pull")
     .action(updateProjectWithGit);
+
+// ==================== Extension Commands ====================
+
+program
+    .command("extension:create")
+    .description("Create a new extension from template")
+    .action(createExtension);
+
+program
+    .command("extension:release")
+    .description("Release an extension to releases directory")
+    .action(releaseExtension);
 
 program.parse();

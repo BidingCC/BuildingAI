@@ -24,6 +24,7 @@
         "avatarFormats": "JPG、PNG形式対応、推奨サイズ200x200",
         "enable": "有効化",
         "enableHelp": "有効化後、ユーザーがWeChat Payを利用可能",
+        "alipayEnableHelp": "有効にすると、ユーザーはアリペイで支払いができるようになります",
         "isDefault": "デフォルト設定",
         "isDefaultHelp": "デフォルト支払い方法に設定（1つのみ設定可能）",
         "payway": "支払い方法",
@@ -60,8 +61,23 @@
         "updateSuccess": "支払い設定を更新しました",
         "updateFailed": "支払い設定の更新に失敗",
         "appId": "APPID",
-        "appIdHelp": "WeChat開発プラットフォームで申請したアプリケーションIDを入力",
-        "appIdInput": "APPIDを入力"
+        "appIdHelp": "開発プラットフォームが申請したアプリケーションID情報です",
+        "appIdInput": "APPIDを入力",
+        "gateway": "ゲートウェイアドレス",
+        "gatewayInput": "https://openapi.alipay.com/gateway.do",
+        "gatewayHelp": "支付宝オープンプラットフォームゲートウェイのアドレス",
+        "privateKey": "秘密鍵を使用する",
+        "privateKeyInput": "アプリケーションの秘密鍵を入力してください",
+        "privateKeyHelp": "应用私钥内容(PKCS8格式)",
+        "appCert": "公開鍵証明書を適用する",
+        "appCertInput": "アプリケーションの公開鍵証明書の内容を入力してください",
+        "appCertHelp": "应用公钥证书内容(appCertPublicKey)",
+        "alipayPublicCert": "支付宝の公開鍵証明書",
+        "alipayPublicCertInput": "Alipayの公開鍵証明書の内容を入力してください",
+        "alipayPublicCertHelp": "支付宝公钥证书内容(alipayCertPublicKey)",
+        "alipayRootCert": "支付宝ルート証明書",
+        "alipayRootCertInput": "支付宝のルート証明書の内容を入力してください",
+        "alipayRootCertHelp": "支付宝根证书内容(alipayRootCert)"
     },
     "validation": {
         "nameRequired": "カスタム表示名を入力してください",
@@ -72,6 +88,12 @@
         "paySignKeyRequired": "WeChat Pay秘密鍵を入力してください",
         "certRequired": "WeChat Pay証明書をアップロードしてください",
         "sortRequired": "順序を入力してください",
-        "appIdRequired": "APPIDを入力してください"
+        "appIdRequired": "APPIDを入力してください",
+        "gatewayRequired": "ゲートウェイのアドレスを入力してください",
+        "gatewayUrl": "有効なゲートウェイのURLを入力してください",
+        "privateKeyRequired": "アプリケーションの秘密鍵を入力してください",
+        "appCertRequired": "アプリケーションの公開鍵証明書を入力してください",
+        "alipayPublicCertRequired": "支付宝の公開鍵証明書を入力してください",
+        "alipayRootCertRequired": "支付宝のルート証明書を入力してください"
     }
 }

@@ -1,7 +1,7 @@
 import { BaseService } from "@buildingai/base";
 import { AppConfig } from "@buildingai/config/app.config";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { Dict } from "@buildingai/db/entities/dict.entity";
+import { Dict } from "@buildingai/db/entities";
 import { Repository } from "@buildingai/db/typeorm";
 import { DictService } from "@buildingai/dict";
 import { Injectable } from "@nestjs/common";
@@ -49,6 +49,9 @@ export class WebsiteService extends BaseService<Dict> {
                 displayName: "",
                 iconUrl: "",
                 url: "",
+                copyrightText: "",
+                copyrightBrand: "",
+                copyrightUrl: "",
             },
         ]);
         const statistics = await this.getGroupConfig("statistics", {
@@ -167,7 +170,8 @@ export class WebsiteService extends BaseService<Dict> {
 
             // 获取项目根目录路径
             const rootDir = path.resolve(process.cwd());
-            const targetDir = path.join(rootDir, "..", "..", "public/web");
+            const projectRoot = path.join(rootDir, "..", "..");
+            const targetDir = path.join(projectRoot, "public/web");
             const targetPath = path.join(targetDir, "spa-loading.png");
 
             let sourcePath: string;
@@ -178,8 +182,12 @@ export class WebsiteService extends BaseService<Dict> {
                 try {
                     const url = new URL(iconPath);
                     // 假设URL路径对应的本地路径在项目根目录下
-                    // 例如: http://localhost:4090/uploads/image/xxx.png -> rootDir/uploads/image/xxx.png
-                    sourcePath = path.join(rootDir, "storage", url.pathname);
+                    // 例如: http://localhost:4090/uploads/image/xxx.png -> projectRoot/storage/uploads/image/xxx.png
+                    sourcePath = path.join(
+                        projectRoot,
+                        "storage",
+                        decodeURIComponent(url.pathname),
+                    );
                     this.logger.debug(`源文件路径: ${sourcePath}`);
                 } catch (urlError) {
                     console.error(urlError);
@@ -187,8 +195,8 @@ export class WebsiteService extends BaseService<Dict> {
                     return;
                 }
             } else {
-                // 如果是相对路径，直接拼接到根目录
-                sourcePath = path.join(rootDir, iconPath);
+                // 如果是相对路径，直接拼接到项目根目录
+                sourcePath = path.join(projectRoot, iconPath);
             }
 
             // 检查源文件是否存在
@@ -277,11 +285,15 @@ export class WebsiteService extends BaseService<Dict> {
             // 读取模板文件内容
             const templateContent = await promisify(fs.readFile)(templatePath, "utf8");
 
+            // 生成带时间戳的图片路径
+            const timestamp = new Date().getTime();
+            const imagePath = `/spa-loading.png?v=${timestamp}`;
+
             // 使用正则表达式替换img标签的src属性
-            // 匹配 <img ... src="任意路径" ... /> 并替换为 src="/spa-loading.png"
+            // 匹配 <img ... src="任意路径" ... /> 并替换为 src="/spa-loading.png?v=timestamp"
             const updatedContent = templateContent.replace(
                 /(<img[^>]*\s+src=")[^"]*(")/gi,
-                "$1/spa-loading.png$2",
+                `$1${imagePath}$2`,
             );
 
             // 写回文件
@@ -293,6 +305,14 @@ export class WebsiteService extends BaseService<Dict> {
         }
     }
 
+    /**
+     * File URL fields that need normalization for each config group
+     */
+    private readonly FILE_URL_FIELDS_MAP: Record<string, string[]> = {
+        webinfo: ["icon", "logo", "spaLoadingIcon"],
+        copyright: ["**.iconUrl"],
+    };
+
     private async updateGroupConfig(group: string, data: Record<string, any>) {
         if (!data) return;
 
@@ -302,14 +322,27 @@ export class WebsiteService extends BaseService<Dict> {
                 data.updateAt = new Date().toISOString();
             }
 
+            // Get file URL fields for this group
+            const fileUrlFields = this.FILE_URL_FIELDS_MAP[group];
+
             // 遍历对象的每个属性
             for (const [key, value] of Object.entries(data)) {
+                // Check if this key needs file URL normalization
+                const needsNormalization = fileUrlFields?.some(
+                    (field) => field === key || field.startsWith("**."),
+                );
+
                 // 使用 dictService 的 set 方法更新或创建配置
                 await this.dictService.set(key, value, {
                     group,
                     description: `网站${group}配置 - ${key}`,
                     sort: 0,
                     isEnabled: true,
+                    ...(needsNormalization && {
+                        normalizeFileUrlFields: fileUrlFields.includes(key)
+                            ? ["**"]
+                            : fileUrlFields,
+                    }),
                 });
             }
         } catch (error) {

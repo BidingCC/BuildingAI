@@ -221,6 +221,51 @@ export function apiGetPluginLinks(): Promise<PluginLinksResponse> {
     return useConsoleGet("/decorate-page/plugin-links");
 }
 
+// ==================== Apps Decorate Config APIs ====================
+
+/**
+ * 应用中心装饰链接项接口
+ */
+export interface AppsDecorateLinkItem {
+    type?: string;
+    name?: string;
+    path?: string;
+    query?: Record<string, unknown>;
+}
+
+/**
+ * 应用中心装饰配置接口
+ */
+export interface AppsDecorateConfig {
+    /** 是否启用 */
+    enabled: boolean;
+    /** 标题 */
+    title: string;
+    /** 链接配置 */
+    link: AppsDecorateLinkItem;
+    /** 广告图 URL */
+    heroImageUrl: string;
+}
+
+/**
+ * Get apps decorate config (console)
+ * @description 后台获取应用中心运营位配置
+ * @returns Promise with apps decorate config
+ */
+export function apiConsoleGetAppsDecorate(): Promise<AppsDecorateConfig> {
+    return useConsoleGet("/apps-decorate");
+}
+
+/**
+ * Set apps decorate config (console)
+ * @description 后台设置应用中心运营位配置
+ * @param data 配置数据
+ * @returns Promise with updated config
+ */
+export function apiConsoleSetAppsDecorate(data: AppsDecorateConfig): Promise<AppsDecorateConfig> {
+    return useConsolePost("/apps-decorate", data);
+}
+
 // ==================== Pages Configuration Related APIs ====================
 
 /**

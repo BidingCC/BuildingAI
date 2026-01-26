@@ -46,6 +46,7 @@
             "icon": "App Icon",
             "addIcon": "Add",
             "iconRecommendation": "Size: 200 * 200px; Format: jpg, png, jpeg, gif",
+            "bannerRecommendation": "Size: 1488 * 170px; Format: jpg, png, jpeg, gif",
             "key": "App Key",
             "packName": "App Identifier",
             "packNameInput": "Enter app identifier",
@@ -112,14 +113,29 @@
             "allCategories": "All Categories",
             "allTypes": "All Types"
         },
-        "manage": "App Management",
+        "add": "Create Extension",
+        "myApps": "My Apps",
+        "installApp": "Install App",
+        "developApp": "Develop App",
+        "store": "Market Install",
+        "selectType": "Select plugin type",
+        "noDescription": "No description available",
+        "unknownAuthor": "Unknown author",
+        "loadingText": "Loading...",
+        "noMoreText": "No more data",
+        "unknown": "Unknown",
+        "manage": "Management",
         "more": "More",
         "install": "Install",
+        "incompatible": "Version incompatible",
         "enable": "Enable",
         "disable": "Disable",
         "uninstall": "Uninstall",
+        "upgrade": "Upgrade",
         "detail": "Details",
         "logs": "Logs",
+        "syncMemberFeatures": "Sync Features",
+        "featureConfig": "Feature Config",
         "official": "Official",
         "version": "Version",
         "size": "Size",
@@ -134,8 +150,33 @@
             "uninstallSuccess": "App \"{name}\" uninstalled",
             "uninstallError": "Uninstall failed"
         },
+        "uninstall": {
+            "title": "Uninstall App",
+            "btn": "Uninstall",
+            "description": "Uninstalling the app will clear all existing data. This operation is irreversible. ",
+            "descriptionWarning": "Please back up the system before proceeding!",
+            "confirmText": "Don't Keep",
+            "cancelText": "Keep"
+        },
+        "installActivation": {
+            "title": "Install App",
+            "activationCodeRequired": "Please enter redemption code",
+            "activationCodeInvalid": "Invalid redemption code. No corresponding app found. Please check if the redemption code is correct",
+            "queryFailed": "Failed to query app",
+            "installSuccess": "Installation successful",
+            "installFailed": "Failed to install app",
+            "activationCodeLabel": "Redemption Code",
+            "activationCodeDescription": "Please go to App Market [Personal Center] -> [",
+            "activationCodeDescriptionLink": "App Management",
+            "activationCodeDescriptionSuffix": "] to copy the redemption code",
+            "activationCodePlaceholder": "Please enter",
+            "cancel": "Cancel",
+            "query": "Query",
+            "confirmInstall": "Confirm Install",
+            "installing": "Installing..."
+        },
         "empty": {
-            "title": "No installed apps",
+            "title": "No apps",
             "description": "No apps installed, check app market",
             "action": "Go to App Market"
         }
@@ -147,10 +188,12 @@
         "description": "Description",
         "updateTime": "Updated",
         "changelog": "Changelog",
-        "noVersionInfo": "No version info"
+        "noVersionInfo": "No version info",
+        "platformVersion": "Platform Version"
     },
     "modal": {
         "addExtension": "Add App",
+        "editExtension": "Edit App",
         "addExtensionDescription": "Local app, for development only",
         "extensionTypes": {
             "application": "App Plugin",
@@ -163,5 +206,24 @@
             "mp": "Mini Program",
             "api": "API"
         }
+    },
+    "featureConfig": {
+        "title": "Feature Config",
+        "empty": "No features configured",
+        "emptyTip": "Please sync features first",
+        "levelPlaceholder": "Select membership levels",
+        "levelTip": "No selection means all users can access"
+    },
+    "upgradePreview": {
+        "title": "Version Update",
+        "newVersion": "New Version",
+        "notice": "Notice",
+        "features": "New Features",
+        "optimizes": "Optimizations",
+        "fixes": "Bug Fixes",
+        "noContent": "No update content",
+        "fetchError": "Failed to get update content",
+        "upgradeError": "Upgrade failed",
+        "confirmUpgrade": "Confirm Upgrade"
     }
 }

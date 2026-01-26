@@ -1,7 +1,7 @@
 import { TypeOrmModule } from "@buildingai/db/@nestjs/typeorm";
-import { AiProvider } from "@buildingai/db/entities/ai-provider.entity";
-import { Secret } from "@buildingai/db/entities/secret.entity";
-import { SecretTemplate } from "@buildingai/db/entities/secret-template.entity";
+import { AiProvider } from "@buildingai/db/entities";
+import { SecretTemplate } from "@buildingai/db/entities";
+import { Secret } from "@buildingai/db/entities";
 import { Global, Module } from "@nestjs/common";
 
 import { SecretService } from "./services/secret.service";

@@ -68,6 +68,12 @@
         "userInfo": "ユーザー情報",
         "userRecharge": "チャージ管理"
     },
+    "membershipManagement": {
+        "title": "会員登録",
+        "levelsList": "会員ランク",
+        "plansList": "サブスクリプションプラン",
+        "membershipOrder": "会員注文"
+    },
     "diyCenter": {
         "mobile": "移動端設定",
         "title": "DIY センター",
@@ -80,7 +86,8 @@
         "accountBalance": "残高明細",
         "financialCenter": "財務センター",
         "orderManagement": "注文管理",
-        "orderList": "チャージ注文"
+        "orderList": "チャージ注文",
+        "orderMembership": "会員注文"
     },
     "permission": {
         "title": "権限管理",
@@ -96,7 +103,8 @@
         "channelManagement": "チャネル管理",
         "wechatOaConfig": "公式アカウント設定",
         "wechatMpConfig": "ウィジェット管理です",
-        "loginConfig": "ログイン設定"
+        "loginConfig": "ログイン設定",
+        "storageConfig": "ストレージ設定"
     },
     "plugin": "アプリ管理",
     "pluginManage": "マイアプリ",

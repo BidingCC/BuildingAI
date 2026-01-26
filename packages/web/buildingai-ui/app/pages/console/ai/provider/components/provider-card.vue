@@ -180,7 +180,7 @@ const handleToggleActive = async () => {
                     {{ `${t("common.unit.general.item")}${t("common.ai.model")}` }}
                     <UIcon name="i-lucide-chevron-right" />
                 </UBadge>
-                <AccessControl :codes="['ai-provider.backends:update']">
+                <AccessControl :codes="['ai-providers:update']">
                     <USwitch
                         v-model="localIsActive"
                         @click.stop

@@ -6,8 +6,12 @@
     "description": "A simple blog application",
     "homepage": "",
     "author": {
+        "avatar": "/static/avatars/buildingai.png",
         "name": "BuildingAI Teams",
         "homepage": ""
     },
-    "changelog": []
+    "changelog": [],
+    "engine": {
+        "buildingai": ">=25.1.0"
+    }
 }

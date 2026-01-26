@@ -46,7 +46,7 @@ const items = computed<NavigationMenuItem[][]>(() => {
             <SiteLogo layout="side" :collapsed="collapsed" />
 
             <!-- 菜单区域 -->
-            <BdScrollArea class="flex-1">
+            <BdScrollArea class="flex-1" :shadow="false">
                 <div class="flex flex-grow flex-col overflow-hidden px-1 py-2">
                     <!-- 搜索按钮 -->
                     <ButtonSearch v-if="!collapsed" class="mt-1 mb-3 overflow-hidden" />

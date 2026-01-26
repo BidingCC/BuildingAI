@@ -14,6 +14,7 @@
         "neverLogin": "Never logged in",
         "editProfile": "Edit Profile",
         "adjustBalance": "Adjust Balance",
+        "expired": "Expired",
         "deleteUser": "Delete User",
         "status": {
             "active": "Active",
@@ -27,6 +28,68 @@
             "email": "Email Register",
             "username": "Account Register",
             "unknown": "Unknown"
+        },
+        "list": {
+            "nickname": "User Information",
+            "username": "User Account",
+            "userNo": "User ID",
+            "status": "Status",
+            "source": "Source",
+            "createdAt": "Creation Time",
+            "registerTime": "Registration Time",
+            "lastLoginAt": "Last login time",
+            "actions": "Operation",
+            "level": "Membership Level",
+            "endTime": "Membership validity period"
+        },
+        "subscriptionRecords": {
+            "title": "Membership Subscription Records",
+            "loading": "Loading...",
+            "empty": "No subscription records",
+            "level": "Membership Level",
+            "duration": "Subscription Duration",
+            "validity": "Membership Validity",
+            "source": "Purchase Source",
+            "recordTime": "Record Time",
+            "refundStatus": "Refund Status",
+            "refunded": "Refunded",
+            "notRefunded": "Not Refunded",
+            "loadFailed": "Failed to load subscription records"
+        },
+        "membership": {
+            "level": "Membership Level",
+            "validity": "Validity Period",
+            "normalUser": "Normal User",
+            "adjustMembership": "Adjust Membership",
+            "adjust": {
+                "title": "Adjust Membership Level",
+                "levelLabel": "Membership Level",
+                "levelPlaceholder": "Please select membership level",
+                "durationLabel": "Subscription Duration",
+                "durationOptions": {
+                    "oneMonth": "1 Month",
+                    "threeMonths": "3 Months",
+                    "oneYear": "1 Year",
+                    "forever": "Forever",
+                    "custom": "Custom Duration"
+                },
+                "customUnit": {
+                    "day": "Day",
+                    "month": "Month",
+                    "year": "Year"
+                },
+                "noLevel": "No Level",
+                "validation": {
+                    "customDurationRequired": "Please enter custom duration",
+                    "customDurationMin": "Duration must be greater than 0"
+                },
+                "messages": {
+                    "getLevelListFailed": "Failed to get membership level list",
+                    "userIdMissing": "User ID does not exist",
+                    "adjustSuccess": "Membership adjusted successfully",
+                    "adjustFailed": "Failed to adjust membership"
+                }
+            }
         },
         "form": {
             "username": "Username",

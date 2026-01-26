@@ -1,10 +1,10 @@
 import { TEAM_ROLE } from "@buildingai/constants/shared/team-role.constants";
 import { TEAM_ROLE_PERMISSIONS } from "@buildingai/constants/shared/team-role.constants";
+import { getContextPlayground } from "@buildingai/db";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { DatasetsDocument } from "@buildingai/db/entities/datasets-document.entity";
-import { DatasetsSegments } from "@buildingai/db/entities/datasets-segments.entity";
+import { DatasetsSegments } from "@buildingai/db/entities";
+import { DatasetsDocument } from "@buildingai/db/entities";
 import { Repository } from "@buildingai/db/typeorm";
-import { getContextPlayground } from "@buildingai/db/utils/context";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { isEnabled } from "@buildingai/utils";
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
@@ -172,7 +172,8 @@ export class DatasetPermissionGuard implements CanActivate {
      * 从请求中获取资源ID
      */
     private getResourceIdFromRequest(request: Request): string | undefined {
-        return request.params?.id;
+        const id = request.params?.id;
+        return Array.isArray(id) ? id[0] : id;
     }
 
     /**

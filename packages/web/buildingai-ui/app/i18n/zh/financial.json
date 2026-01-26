@@ -11,7 +11,9 @@
         "basicConversation": "基本对话",
         "agentConversation": "智能体对话",
         "sharedAgentConversation": "链接分享智能体对话",
-        "pluginConsumption": "插件消耗",
+        "pluginConsumption": "应用消耗",
+        "membershipGift": "订阅积分",
+        "membershipGiftExpire": "订阅积分到期",
         "table": {
             "userNo": "用户编号",
             "nickname": "用户昵称",

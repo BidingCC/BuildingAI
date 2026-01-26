@@ -1,7 +1,7 @@
 'use strict';
 
 var base = require('@buildingai/base');
-var extensionController_decorator = require('@buildingai/core/decorators/extension-controller.decorator');
+var decorators = require('@buildingai/core/decorators');
 var paramValidate_pipe = require('@buildingai/pipe/param-validate.pipe');
 var common = require('@nestjs/common');
 var dto = require('../../dto');
@@ -77,7 +77,7 @@ _ts_decorate([
   _ts_metadata("design:returntype", Promise)
 ], CategoryWebController.prototype, "findOne", null);
 CategoryWebController = _ts_decorate([
-  extensionController_decorator.ExtensionWebController("category"),
+  decorators.ExtensionWebController("category"),
   _ts_metadata("design:type", Function),
   _ts_metadata("design:paramtypes", [
     typeof category_service.CategoryService === "undefined" ? Object : category_service.CategoryService

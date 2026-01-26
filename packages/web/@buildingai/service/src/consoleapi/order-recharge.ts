@@ -94,6 +94,8 @@ export interface User {
     avatar: string;
     /** Username */
     username: string;
+    /** User nickname */
+    nickname: string;
 }
 
 /**

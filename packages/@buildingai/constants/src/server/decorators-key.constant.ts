@@ -61,6 +61,11 @@ export const DECORATOR_KEYS = {
      * 插件包名key
      */
     PLUGIN_PACK_NAME_KEY: "decorator:plugin-pack-name",
+
+    /**
+     * 会员专属功能元数据键
+     */
+    MEMBER_ONLY_KEY: "decorator:member-only",
 } as const;
 
 /**

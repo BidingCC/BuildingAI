@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import type {
+    FileUploadConfig,
     FormFieldConfig,
     UpdateAgentConfigParams,
 } from "@buildingai/service/consoleapi/ai-agent";
-import { apiAgentChat, apiCreateAgentAnnotation } from "@buildingai/service/consoleapi/ai-agent";
+import {
+    apiAgentChat,
+    apiCreateAgentAnnotation,
+    apiGetAgentFileUploadConfig,
+} from "@buildingai/service/consoleapi/ai-agent";
 import type { AiMessage } from "@buildingai/service/models/message";
 
 const AgentAnnotationModal = defineAsyncComponent(() => import("./logs/annotation-modal.vue"));
@@ -36,9 +41,32 @@ const conversationId = shallowRef<string | null>(null);
 
 const initialMessages: AiMessage[] = [];
 
+// 文件上传配置（用于 Dify 等第三方平台）
+const fileUploadConfig = shallowRef<FileUploadConfig | null>(null);
+
+// 获取文件上传配置
+const fetchFileUploadConfig = async () => {
+    if (agents.value.createMode === "dify" && agentId.value) {
+        try {
+            fileUploadConfig.value = await apiGetAgentFileUploadConfig(agentId.value);
+        } catch {
+            fileUploadConfig.value = null;
+        }
+    } else {
+        fileUploadConfig.value = null;
+    }
+};
+
+// 监听 createMode 变化，重新获取文件上传配置
+watch(
+    () => agents.value.createMode,
+    () => fetchFileUploadConfig(),
+    { immediate: true },
+);
+
 const currentContext = shallowRef<AiMessage[]>([]);
 
-const { messages, input, handleSubmit, reload, stop, status, error } = useChat({
+const { messages, input, files, handleSubmit, reload, stop, status, error } = useChat({
     api: apiAgentChat,
     initialMessages: initialMessages,
     chatConfig: {
@@ -172,6 +200,7 @@ const openAnnotationModal = (annotationId: string, messageId: string | null = nu
         agentId: agentId.value as string,
         annotationId: annotationId,
         messageId: messageId,
+        hiddenStatus: true,
     });
 };
 
@@ -313,7 +342,7 @@ defineExpose({
                     <template #content="{ message }">
                         <BdMarkdown :content="message.content.toString()" class="mb-2" />
 
-                        <div class="flex flex-col gap-2">
+                        <div v-if="agent.openingQuestions.length > 0" class="flex flex-col gap-2">
                             <div class="text-muted-foreground text-sm">
                                 {{ t("ai-agent.backend.configuration.youCanAskMe") }}
                             </div>
@@ -376,7 +405,7 @@ defineExpose({
                     }"
                     :spacing-offset="160"
                 >
-                    <template #content="{ message, index }">
+                    <template #content="{ message }">
                         <BdMarkdown
                             v-if="
                                 message.content.length ||
@@ -440,13 +469,17 @@ defineExpose({
                                 </div>
                             </template>
                         </BdMarkdown>
-                        <!-- 提问建议 -->
+                    </template>
+                    <template #after-tools="{ message: slotMessage, index: slotIndex }">
                         <div
-                            v-if="message.metadata?.suggestions && messages.length - 1 === index"
-                            class="mb-2 space-y-2"
+                            v-if="
+                                slotMessage.metadata?.suggestions &&
+                                messages.length - 1 === slotIndex
+                            "
+                            class="m-2 space-y-2"
                         >
                             <div
-                                v-for="suggestion in message.metadata.suggestions"
+                                v-for="suggestion in slotMessage.metadata.suggestions"
                                 :key="suggestion"
                             >
                                 <UButton
@@ -465,11 +498,7 @@ defineExpose({
         <div class="px-4 pb-4">
             <div class="flex gap-2 pb-4">
                 <div v-for="item in agent.quickCommands" :key="item.name">
-                    <UButton
-                        color="neutral"
-                        variant="soft"
-                        @click="handleSubmitMessage(item.content)"
-                    >
+                    <UButton color="neutral" variant="soft" @click="handleSubmitMessage(item.name)">
                         <NuxtImg v-if="item.avatar" :src="item.avatar" class="h-4 w-4" />
                         <span>{{ item.name }}</span>
                     </UButton>
@@ -477,7 +506,11 @@ defineExpose({
             </div>
             <ChatsPrompt
                 v-model="input"
+                v-model:file-list="files"
                 :is-loading="isLoading"
+                :model-config="agent.modelConfig"
+                :agent-create-mode="agent.createMode"
+                :file-upload-config="fileUploadConfig ?? undefined"
                 class="sticky bottom-0 z-10 [view-transition-name:chat-prompt]"
                 @stop="stop"
                 @submit="handleSubmitMessage"

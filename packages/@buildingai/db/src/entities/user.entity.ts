@@ -4,20 +4,11 @@ import {
     UserCreateSource,
     type UserCreateSourceType,
 } from "@buildingai/constants/shared/status-codes.constant";
-import { NestContainer } from "@buildingai/di";
 
 import { AppEntity } from "../decorators/app-entity.decorator";
+import { NormalizeFileUrl } from "../decorators/file-url.decorator";
 import { Role } from "../entities/role.entity";
-import {
-    BeforeInsert,
-    BeforeUpdate,
-    Column,
-    JoinColumn,
-    JoinTable,
-    ManyToMany,
-    ManyToOne,
-} from "../typeorm";
-import { FileUrlService } from "./../utils/file-url.service";
+import { Column, JoinColumn, JoinTable, ManyToMany, ManyToOne } from "../typeorm";
 import { SoftDeleteBaseEntity } from "./base";
 import { Permission } from "./permission.entity";
 
@@ -74,6 +65,7 @@ export class User extends SoftDeleteBaseEntity {
      * 用户头像
      */
     @Column({ nullable: true })
+    @NormalizeFileUrl()
     avatar: string;
 
     /**
@@ -175,17 +167,4 @@ export class User extends SoftDeleteBaseEntity {
      */
     @Column({ nullable: true, unique: true, comment: "用户unionid" })
     unionid: string;
-
-    @BeforeInsert()
-    @BeforeUpdate()
-    private async setAvatar() {
-        if (this.avatar) {
-            try {
-                const fileService = NestContainer.get(FileUrlService);
-                this.avatar = await fileService.set(this.avatar);
-            } catch (error) {
-                console.warn("获取FileService失败:", error);
-            }
-        }
-    }
 }

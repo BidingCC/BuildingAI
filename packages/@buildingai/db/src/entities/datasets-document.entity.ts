@@ -1,8 +1,7 @@
-import { Datasets } from "@buildingai/db/entities/datasets.entity";
-
 import { AppEntity } from "../decorators/app-entity.decorator";
 import { Column, JoinColumn, ManyToOne, OneToMany, type Relation } from "../typeorm";
 import { BaseEntity } from "./base";
+import { Datasets } from "./datasets.entity";
 import { DatasetsSegments } from "./datasets-segments.entity";
 
 /**

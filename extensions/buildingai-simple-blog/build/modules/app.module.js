@@ -3,7 +3,6 @@
 var common = require('@nestjs/common');
 var article_module = require('./article/article.module');
 var category_module = require('./category/category.module');
-var example_module = require('./example/example.module');
 
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
@@ -22,12 +21,10 @@ class AppModule {
 AppModule = _ts_decorate([
   common.Module({
     imports: [
-      example_module.ExampleModule,
       category_module.CategoryModule,
       article_module.ArticleModule
     ],
     exports: [
-      example_module.ExampleModule,
       category_module.CategoryModule,
       article_module.ArticleModule
     ]

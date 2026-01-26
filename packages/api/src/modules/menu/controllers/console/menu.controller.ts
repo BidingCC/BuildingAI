@@ -1,6 +1,6 @@
 import { BaseController } from "@buildingai/base";
-import { Menu } from "@buildingai/db/entities/menu.entity";
-import { MenuSourceType } from "@buildingai/db/entities/menu.entity";
+import { Menu } from "@buildingai/db/entities";
+import { MenuSourceType } from "@buildingai/db/entities";
 import { UUIDValidationPipe } from "@buildingai/pipe/param-validate.pipe";
 import { ConsoleController } from "@common/decorators";
 import { Permissions } from "@common/decorators/permissions.decorator";

@@ -190,7 +190,6 @@ try {
     execSync(command, {
         cwd: dbPackageDir,
         stdio: "inherit",
-        reload,
     });
 
     // Find the generated file (TypeORM adds timestamp prefix)

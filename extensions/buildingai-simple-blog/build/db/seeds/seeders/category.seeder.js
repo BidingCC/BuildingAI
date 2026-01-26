@@ -1,6 +1,6 @@
 'use strict';
 
-var base_seeder = require('@buildingai/db/seeds/seeders/base.seeder');
+var db = require('@buildingai/db');
 var path = require('path');
 var category_entity = require('../../entities/category.entity');
 
@@ -26,7 +26,7 @@ var path__namespace = /*#__PURE__*/_interopNamespace(path);
 
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
-class CategorySeeder extends base_seeder.BaseSeeder {
+class CategorySeeder extends db.BaseSeeder {
   static {
     __name(this, "CategorySeeder");
   }

@@ -1,5 +1,5 @@
-import { ExtensionInfo } from "@buildingai/core/modules/extension/interfaces/extension.interface";
-import { getExtensionSchemaName } from "@buildingai/core/modules/extension/utils/extension.utils";
+import { getExtensionSchemaName } from "@buildingai/core/modules";
+import { ExtensionInfo } from "@buildingai/core/modules";
 import { DataSource } from "@buildingai/db/typeorm";
 import { TerminalLogger } from "@buildingai/logger";
 import { Injectable } from "@nestjs/common";

@@ -4,8 +4,8 @@ import {
     type RetrievalModeType,
 } from "@buildingai/constants/shared/datasets.constants";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { Datasets } from "@buildingai/db/entities/datasets.entity";
-import { DatasetsSegments } from "@buildingai/db/entities/datasets-segments.entity";
+import { DatasetsSegments } from "@buildingai/db/entities";
+import { Datasets } from "@buildingai/db/entities";
 import { Repository } from "@buildingai/db/typeorm";
 import { HttpErrorFactory } from "@buildingai/errors";
 import {

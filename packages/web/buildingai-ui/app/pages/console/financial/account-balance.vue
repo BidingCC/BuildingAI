@@ -22,6 +22,8 @@ const ACCOUNT_TYPE_OPTIONS = [
     { label: "financial.accountBalance.agentConversation", value: "400" },
     { label: "financial.accountBalance.sharedAgentConversation", value: "401" },
     { label: "financial.accountBalance.pluginConsumption", value: "500" },
+    { label: "financial.accountBalance.membershipGift", value: "600" },
+    { label: "financial.accountBalance.membershipGiftExpire", value: "602" },
 ] as const;
 
 const searchForm = shallowReactive({
@@ -148,9 +150,9 @@ onMounted(() => {
                         <UAvatar
                             v-else
                             icon="i-heroicons-user"
-                            :name="row.original.user?.username"
+                            :name="row.original.user?.nickname"
                         />
-                        {{ row.original.user?.username }}
+                        {{ row.original.user?.nickname }}
                     </template>
                     <template #changeAmount-cell="{ row }">
                         <span v-if="row.original.action === 1" class="text-green-500">

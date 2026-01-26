@@ -1,5 +1,5 @@
 import { TypeOrmModule } from "@buildingai/db/@nestjs/typeorm";
-import { RefundLog } from "@buildingai/db/entities/refund-log.entity";
+import { RefundLog } from "@buildingai/db/entities";
 import { Module } from "@nestjs/common";
 
 import { RefundService } from "./services/refund.service";

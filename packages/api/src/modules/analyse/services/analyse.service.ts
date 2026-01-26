@@ -1,6 +1,6 @@
 import { BaseService } from "@buildingai/base";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { Analyse, AnalyseActionType } from "@buildingai/db/entities/analyse.entity";
+import { Analyse, AnalyseActionType } from "@buildingai/db/entities";
 import { MoreThanOrEqual, Repository } from "@buildingai/db/typeorm";
 import { Injectable } from "@nestjs/common";
 

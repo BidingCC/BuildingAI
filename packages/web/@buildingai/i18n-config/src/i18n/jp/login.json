@@ -55,6 +55,13 @@
     "messages": {
         "agreementRequired": "利用規約とプライバシーポリシーに同意してください",
         "agreementTitle": "ご注意",
+        "agreementModal": {
+            "title": "利用規約とプライバシー保護",
+            "prefix": "登録またはログインすると、{{appName}}の",
+            "confirm": "同意する",
+            "cancel": "同意しない",
+            "appNameFallback": "本サービス"
+        },
         "registerFailed": "登録に失敗しました",
         "loginFailed": "ログインに失敗しました"
     },
@@ -62,5 +69,40 @@
         "enterAccount": "アカウントを入力",
         "enterPassword": "パスワードを入力",
         "enterPasswordAgain": "パスワードを再入力"
+    },
+    "forget": {
+        "title": "パスワードをお忘れですか？",
+        "subtitle": "アカウントを継続して使用するために新しいパスワードを設定してください",
+        "mobile": "電話番号",
+        "mobilePlaceholder": "電話番号を入力",
+        "code": "認証コード",
+        "codePlaceholder": "認証コードを入力",
+        "newPassword": "新しいパスワード",
+        "newPasswordPlaceholder": "新しいパスワードを入力",
+        "confirmPassword": "パスワード確認",
+        "confirmPasswordPlaceholder": "新しいパスワードを再入力",
+        "passwordHint": "パスワードは6-25文字の英数字+記号の組み合わせが必要です",
+        "getCode": "コードを取得",
+        "sending": "送信中...",
+        "resend": "再送信",
+        "backToLogin": "ログインに戻る",
+        "confirmChange": "変更を確認",
+        "validation": {
+            "mobileRequired": "電話番号を入力してください",
+            "mobileInvalid": "正しい電話番号を入力してください",
+            "codeRequired": "認証コードを入力してください",
+            "passwordRequired": "新しいパスワードを入力してください",
+            "passwordMinLength": "パスワードは6文字以上必要です",
+            "passwordMaxLength": "パスワードは25文字以内で入力してください",
+            "passwordFormat": "パスワードは英数字と記号の組み合わせにしてください",
+            "confirmPasswordRequired": "パスワード確認を入力してください",
+            "passwordMismatch": "パスワードが一致しません"
+        },
+        "messages": {
+            "sendSuccess": "認証コードを送信しました。電話を確認してください",
+            "sendSuccessTitle": "送信成功",
+            "sendFailed": "コードの送信に失敗しました。再度お試しください",
+            "sendFailedTitle": "送信失敗"
+        }
     }
 }

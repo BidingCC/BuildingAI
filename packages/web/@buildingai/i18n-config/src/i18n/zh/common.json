@@ -7,6 +7,8 @@
     "noSearchResults": "没有找到匹配的结果",
     "tryOtherKeywords": "请尝试其他关键词",
     "noAvailableKeyPool": "暂无可用的密钥池",
+    "noAvailableLevels": "暂无可用的会员等级",
+    "givePower": "赠送积分",
     "updateAt": "更新时间",
     "goHome": "返回前台",
     "goHomeText": "返回首页",
@@ -51,7 +53,9 @@
         "colorSelect": "请选择颜色",
         "dateSelect": "请选择日期",
         "dateRange": "请选择日期范围",
-        "timeSelect": "请选择时间"
+        "timeSelect": "请选择时间",
+        "levelSelect": "请选择会员等级",
+        "searchLevel": "搜索会员等级..."
     },
     "tab": {
         "system": "系统",
@@ -67,9 +71,11 @@
         "personalRights": "个人权益"
     },
     "personalRights": {
-        "rechargeCenter": "充值中心"
+        "rechargeCenter": "充值中心",
+        "memberCenter": "会员中心"
     },
     "dateGroup": {
+        "pinned": "置顶",
         "today": "今天",
         "yesterday": "昨天",
         "week": "7天内",
@@ -166,8 +172,14 @@
         "provider": "供应商",
         "model": "模型",
         "multimodalCapabilities": "多模态能力",
-        "video": "视频",
+        "agentThought": "思维链",
         "audio": "音频",
+        "document": "文档",
+        "multiToolCall": "多工具调用",
+        "streamToolCall": "流式工具调用",
+        "structuredOutput": "结构化输出",
+        "toolCall": "工具调用",
+        "video": "视频",
         "vision": "视觉"
     },
     "theme": {
@@ -242,11 +254,11 @@
         "callDetails": "调用详情"
     },
     "request": {
-        "400": "错误请求400",
-        "401": "未授权401",
-        "403": "禁止访问403",
-        "404": "未找到404",
-        "500": "服务器错误500"
+        "400": "错误请求",
+        "401": "未授权",
+        "403": "禁止访问",
+        "404": "未找到",
+        "500": "服务器错误"
     },
     "chat": {
         "newChat": "开启新的对话",
@@ -256,6 +268,8 @@
         "confirmDelete": "永久删除对话",
         "confirmDeleteMessage": "删除后，该对话将不可恢复。确认删除吗？",
         "confirmDeleteAction": "确认删除",
+        "pin": "置顶",
+        "unpin": "取消置顶",
         "editChatTitle": "编辑对话名称",
         "chatTitleLabel": "对话名称",
         "chatTitlePlaceholder": "请输入对话名称",
@@ -346,5 +360,9 @@
         "undo": "撤销",
         "redo": "重做",
         "purple": "紫色"
+    },
+    "membership": {
+        "required": "需要会员权限",
+        "hasAccess": "会员专属"
     }
 }

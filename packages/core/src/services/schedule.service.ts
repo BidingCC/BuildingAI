@@ -1,7 +1,8 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { CronJob } from "cron";
 
-import { Cron, CronExpression, Interval, SchedulerRegistry, Timeout } from "../@nestjs/schedule";
+import { SchedulerRegistry } from "../@nestjs/schedule";
+// import { Cron, CronExpression, Interval, SchedulerRegistry, Timeout } from "../@nestjs/schedule";
 
 /**
  * 定时任务服务
@@ -20,28 +21,28 @@ export class ScheduleService {
      * 示例：每10秒执行一次的定时任务
      * 使用 @Cron 装饰器，支持 cron 表达式
      */
-    @Cron(CronExpression.EVERY_10_SECONDS)
-    handleCronJob() {
-        this.logger.debug("每10秒执行一次的定时任务");
-    }
+    // @Cron(CronExpression.EVERY_10_SECONDS)
+    // handleCronJob() {
+    //     this.logger.debug("每10秒执行一次的定时任务");
+    // }
 
     /**
      * 示例：每5秒执行一次的定时任务
      * 使用 @Interval 装饰器，指定间隔时间（毫秒）
      */
-    @Interval(5000)
-    handleIntervalJob() {
-        this.logger.debug("每5秒执行一次的定时任务");
-    }
+    // @Interval(5000)
+    // handleIntervalJob() {
+    //     this.logger.debug("每5秒执行一次的定时任务");
+    // }
 
     /**
      * 示例：应用启动后延迟3秒执行的一次性任务
      * 使用 @Timeout 装饰器，指定延迟时间（毫秒）
      */
-    @Timeout(3000)
-    handleTimeoutJob() {
-        this.logger.debug("应用启动后延迟3秒执行的一次性任务");
-    }
+    // @Timeout(3000)
+    // handleTimeoutJob() {
+    //     this.logger.debug("应用启动后延迟3秒执行的一次性任务");
+    // }
 
     /**
      * 动态创建一个 Cron 任务

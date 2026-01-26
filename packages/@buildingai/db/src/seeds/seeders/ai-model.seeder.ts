@@ -1,8 +1,8 @@
 import { ModelFeatureType, ModelType } from "@buildingai/ai-sdk";
-import { AiModel } from "@buildingai/db/entities/ai-model.entity";
-import { AiProvider } from "@buildingai/db/entities/ai-provider.entity";
 
 import { DataSource } from "../../typeorm";
+import { AiModel } from "./../../entities/ai-model.entity";
+import { AiProvider } from "./../../entities/ai-provider.entity";
 import { BaseSeeder } from "./base.seeder";
 
 /**
@@ -109,11 +109,6 @@ export class AiModelSeeder extends BaseSeeder {
                         sortOrder: 0,
                         modelConfig: transformedModelConfig as any,
                     };
-
-                    // Map context_size to maxContext field (separate column)
-                    if (modelConfig.model_properties?.context_size) {
-                        modelData.maxContext = modelConfig.model_properties.context_size;
-                    }
 
                     // Create a new model when none exists
                     if (!model) {

@@ -1,0 +1,26 @@
+[
+    {
+        "name": "技术分享",
+        "description": "技术相关的文章分享",
+        "sort": 1,
+        "articleCount": 0
+    },
+    {
+        "name": "生活随笔",
+        "description": "生活感悟和随笔",
+        "sort": 2,
+        "articleCount": 0
+    },
+    {
+        "name": "产品思考",
+        "description": "产品设计和思考",
+        "sort": 3,
+        "articleCount": 0
+    },
+    {
+        "name": "开发日志",
+        "description": "开发过程中的记录",
+        "sort": 4,
+        "articleCount": 0
+    }
+]

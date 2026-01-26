@@ -1,9 +1,8 @@
 import type { ModelType } from "@buildingai/ai-sdk";
-import { NestContainer } from "@buildingai/di";
 
 import { AppEntity } from "../decorators/app-entity.decorator";
-import { BeforeInsert, BeforeUpdate, Column, Index, OneToMany, type Relation } from "../typeorm";
-import { FileUrlService } from "./../utils/file-url.service";
+import { NormalizeFileUrl } from "../decorators/file-url.decorator";
+import { Column, Index, OneToMany, type Relation } from "../typeorm";
 import { AiModel } from "./ai-model.entity";
 import { BaseEntity } from "./base";
 
@@ -69,6 +68,7 @@ export class AiProvider extends BaseEntity {
         nullable: true,
         comment: "供应商图标URL",
     })
+    @NormalizeFileUrl()
     iconUrl?: string;
 
     /**
@@ -128,17 +128,4 @@ export class AiProvider extends BaseEntity {
      */
     @OneToMany(() => AiModel, (model) => model.provider)
     models: Relation<AiModel[]>;
-
-    @BeforeInsert()
-    @BeforeUpdate()
-    private async setIconUrl() {
-        if (this.iconUrl) {
-            try {
-                const fileService = NestContainer.get(FileUrlService);
-                this.iconUrl = await fileService.set(this.iconUrl);
-            } catch (error) {
-                console.warn("获取FileService失败:", error);
-            }
-        }
-    }
 }

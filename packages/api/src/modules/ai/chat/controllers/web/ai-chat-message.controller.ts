@@ -1,5 +1,6 @@
 import { BaseController } from "@buildingai/base";
-import { type UserPlayground } from "@buildingai/db/interfaces/context.interface";
+import { type UserPlayground } from "@buildingai/db";
+import { AiModel } from "@buildingai/db/entities";
 import { Playground } from "@buildingai/decorators/playground.decorator";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { validateArrayItems } from "@buildingai/utils";
@@ -12,10 +13,13 @@ import {
     ChatCompletionCommandHandler,
     ConversationCommandHandler,
     McpServerCommandHandler,
+    McpToolError,
+    MembershipValidationCommandHandler,
     MessageContextCommandHandler,
     ModelValidationCommandHandler,
     PowerDeductionCommandHandler,
     TitleGenerationCommandHandler,
+    UserCancelledError,
     UserPowerValidationCommandHandler,
 } from "@modules/ai/chat/handlers";
 import { Body, Post, Res } from "@nestjs/common";
@@ -32,6 +36,7 @@ export class AiChatMessageWebController extends BaseController {
     constructor(
         private readonly conversationHandler: ConversationCommandHandler,
         private readonly modelValidationHandler: ModelValidationCommandHandler,
+        private readonly membershipValidationHandler: MembershipValidationCommandHandler,
         private readonly userPowerValidationHandler: UserPowerValidationCommandHandler,
         private readonly mcpServerHandler: McpServerCommandHandler,
         private readonly messageContextHandler: MessageContextCommandHandler,
@@ -70,6 +75,9 @@ export class AiChatMessageWebController extends BaseController {
 
             // 2. 获取并验证模型
             const model = await this.modelValidationHandler.getAndValidateModel(dto.modelId);
+
+            // 2.1 验证用户会员等级权限
+            await this.membershipValidationHandler.validateModelAccessOrThrow(user.id, model);
 
             // 3. 获取并验证用户积分
             const userInfo = await this.userPowerValidationHandler.getAndValidateUserPower(
@@ -208,11 +216,30 @@ export class AiChatMessageWebController extends BaseController {
         let conversationId = dto.conversationId;
         let mcpServers: any[] = [];
         const mcpToolCalls: any[] = [];
+        let model: AiModel | null = null;
+        let userInfo: any = null;
+
+        // Create AbortController for cancellation
+        const abortController = new AbortController();
+        let isClientDisconnected = false;
+
+        // Listen for client disconnect
+        res.on("close", () => {
+            if (!res.writableEnded) {
+                isClientDisconnected = true;
+                this.logger.debug("🔌 客户端断开连接，取消请求");
+                abortController.abort();
+            }
+        });
 
         try {
             // 1. 获取并验证用户积分（提前验证）
-            const model = await this.modelValidationHandler.getAndValidateModel(dto.modelId);
-            const userInfo = await this.userPowerValidationHandler.getAndValidateUserPower(
+            model = await this.modelValidationHandler.getAndValidateModel(dto.modelId);
+
+            // 1.1 验证用户会员等级权限
+            await this.membershipValidationHandler.validateModelAccessOrThrow(user.id, model);
+
+            userInfo = await this.userPowerValidationHandler.getAndValidateUserPower(
                 user.id,
                 model,
             );
@@ -287,6 +314,7 @@ export class AiChatMessageWebController extends BaseController {
                     toolToServerMap,
                 },
                 res,
+                abortController.signal,
             );
 
             mcpToolCalls.push(...toolCalls);
@@ -357,12 +385,141 @@ export class AiChatMessageWebController extends BaseController {
             res.write("data: [DONE]\n\n");
             res.end();
         } catch (error) {
-            this.logger.error(`流式聊天对话失败: ${error.message}`, error.stack);
-
-            // 清理MCP连接
+            // Clean up MCP connections
             await this.mcpServerHandler.cleanupMcpServers(mcpServers);
 
-            // 保存错误消息
+            // Handle user cancellation - save partial content if available
+            if (error instanceof UserCancelledError || isClientDisconnected) {
+                this.logger.debug("🚫 User cancelled the request, ending silently");
+
+                // 如果有部分内容，保存到数据库
+                if (error instanceof UserCancelledError && error.partialResponse?.fullResponse) {
+                    const partialData = error.partialResponse;
+                    this.logger.debug(
+                        `💾 保存用户取消时的部分内容: ${partialData.fullResponse.substring(0, 50)}...`,
+                    );
+
+                    // 确保 model 和 userInfo 已初始化（如果 abort 发生在初始化之前，则重新获取）
+                    if (!model) {
+                        model = await this.modelValidationHandler.getAndValidateModel(dto.modelId);
+                    }
+                    if (!userInfo && model) {
+                        userInfo = await this.userPowerValidationHandler.getAndValidateUserPower(
+                            user.id,
+                            model,
+                        );
+                    }
+
+                    // 计算消耗的积分（如果有token使用信息）
+                    const userConsumedPower =
+                        model && partialData.finalChatCompletion?.usage?.total_tokens
+                            ? this.powerDeductionHandler.calculateConsumedPower(
+                                  partialData.finalChatCompletion.usage.total_tokens,
+                                  model.billingRule,
+                              )
+                            : 0;
+
+                    // 准备 metadata
+                    const metadata: Record<string, any> = {};
+                    if (
+                        partialData.reasoningContent &&
+                        partialData.reasoningStartTime &&
+                        partialData.reasoningEndTime
+                    ) {
+                        metadata.reasoning = {
+                            content: partialData.reasoningContent,
+                            startTime: partialData.reasoningStartTime,
+                            endTime: partialData.reasoningEndTime,
+                            duration: partialData.reasoningEndTime - partialData.reasoningStartTime,
+                        };
+                    }
+
+                    // 保存部分内容
+                    if (dto.saveConversation !== false && conversationId) {
+                        await this.conversationHandler.saveAssistantMessage({
+                            conversationId,
+                            modelId: dto.modelId,
+                            content: partialData.fullResponse,
+                            userConsumedPower,
+                            tokens: {
+                                prompt_tokens:
+                                    partialData.finalChatCompletion?.usage?.prompt_tokens || 0,
+                                completion_tokens:
+                                    partialData.finalChatCompletion?.usage?.completion_tokens || 0,
+                                total_tokens:
+                                    partialData.finalChatCompletion?.usage?.total_tokens || 0,
+                            },
+                            rawResponse: partialData.finalChatCompletion,
+                            mcpToolCalls: partialData.mcpToolCalls,
+                            metadata,
+                        });
+
+                        // 扣除用户积分（如果有token使用）
+                        if (
+                            model &&
+                            userInfo &&
+                            partialData.finalChatCompletion?.usage?.total_tokens &&
+                            model.billingRule
+                        ) {
+                            await this.powerDeductionHandler.deductUserPower(
+                                user.id,
+                                userInfo,
+                                model,
+                                userConsumedPower,
+                                partialData.finalChatCompletion.usage.total_tokens,
+                            );
+                        }
+                    }
+                }
+
+                if (!res.writableEnded) {
+                    try {
+                        res.end();
+                    } catch {
+                        // Ignore write errors on closed connection
+                    }
+                }
+                return;
+            }
+
+            // Handle MCP tool error
+            if (error instanceof McpToolError) {
+                this.logger.error(`MCP 工具调用失败: ${error.toolName} - ${error.message}`);
+
+                // Save error message if conversation exists
+                if (conversationId) {
+                    await this.conversationHandler.saveAssistantMessage({
+                        conversationId,
+                        modelId: dto.modelId,
+                        content: "",
+                        userConsumedPower: 0,
+                        tokens: {
+                            prompt_tokens: 0,
+                            completion_tokens: 0,
+                            total_tokens: 0,
+                        },
+                        rawResponse: error.mcpToolCall,
+                        mcpToolCalls,
+                        errorMessage: error.message,
+                    });
+                }
+
+                // Send done signal (error already sent via mcp_tool_error event)
+                try {
+                    if (!res.writableEnded) {
+                        res.write("data: [DONE]\n\n");
+                        res.end();
+                    }
+                } catch {
+                    // Ignore write errors
+                }
+                return;
+            }
+
+            // Handle other errors
+            this.logger.error(`流式聊天对话失败: ${error.message}`, error.stack);
+
+            // Save error message
             if (conversationId) {
                 await this.conversationHandler.saveAssistantMessage({
                     conversationId,
@@ -380,19 +537,21 @@ export class AiChatMessageWebController extends BaseController {
                 });
             }
 
-            // 通过SSE流发送错误信息
+            // Send error via SSE
             try {
-                res.write(
-                    `data: ${JSON.stringify({
-                        type: "error",
-                        data: {
-                            message: error.message,
-                            code: error.code || "INTERNAL_ERROR",
-                        },
-                    })}\n\n`,
-                );
-                res.write("data: [DONE]\n\n");
-                res.end();
+                if (!res.writableEnded) {
+                    res.write(
+                        `data: ${JSON.stringify({
+                            type: "error",
+                            data: {
+                                message: error.message,
+                                code: error.code || "INTERNAL_ERROR",
+                            },
+                        })}\n\n`,
+                    );
+                    res.write("data: [DONE]\n\n");
+                    res.end();
+                }
             } catch (writeError) {
                 this.logger.error("发送错误信息失败:", writeError);
                 throw HttpErrorFactory.badRequest(error.message);
@@ -412,6 +571,9 @@ export class AiChatMessageWebController extends BaseController {
         try {
             // 1. 获取并验证模型
             const model = await this.modelValidationHandler.getAndValidateModel(dto.modelId);
+
+            // 1.1 验证用户会员等级权限
+            await this.membershipValidationHandler.validateModelAccessOrThrow(user.id, model);
 
             // 2. 获取并验证用户积分
             const userInfo = await this.userPowerValidationHandler.getAndValidateUserPower(

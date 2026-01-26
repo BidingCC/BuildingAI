@@ -7,11 +7,11 @@ import {
     UserTerminal,
     UserTerminalType,
 } from "@buildingai/constants/shared/status-codes.constant";
+import { checkUserLoginPlayground } from "@buildingai/db";
+import { LoginUserPlayground, UserPlayground } from "@buildingai/db";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { User } from "@buildingai/db/entities/user.entity";
-import { LoginUserPlayground, UserPlayground } from "@buildingai/db/interfaces/context.interface";
+import { User, UserToken } from "@buildingai/db/entities";
 import { Repository } from "@buildingai/db/typeorm";
-import { checkUserLoginPlayground } from "@buildingai/db/utils/context";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { generateNo } from "@buildingai/utils";
 import { isDisabled } from "@buildingai/utils";
@@ -47,6 +47,7 @@ export class AuthService extends BaseService<User> {
     async validateToken(token: string | undefined): Promise<{
         isValid: boolean;
         user: UserPlayground | undefined;
+        tokenRecord?: UserToken;
         error?: string;
         errorType?: string;
         originalError?: any;
@@ -102,6 +103,7 @@ export class AuthService extends BaseService<User> {
             return {
                 isValid: true,
                 user: updatedPayload,
+                tokenRecord: result.tokenRecord,
             };
         } catch (error) {
             return {

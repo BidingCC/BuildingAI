@@ -1,4 +1,4 @@
-import { SecretService } from "@buildingai/core/modules/secret/services/secret.service";
+import { SecretService } from "@buildingai/core/modules";
 import { getProviderSecret } from "@buildingai/utils";
 import { Injectable, Logger } from "@nestjs/common";
 

@@ -66,6 +66,7 @@ provide<ComputedRef<NavigationItem[]>>("pluginConsoleMenu", navigationItems);
             <SidebarNavbar
                 :collapsed="collapsed"
                 :mobile-menu="mobileMenu"
+                :navigation-items="navigationItems"
                 @toggle="toggleSidebar"
                 @open-mobile-menu="openMobileMenu"
             />

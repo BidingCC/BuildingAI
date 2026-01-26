@@ -3,6 +3,7 @@
     "admin": "ワークスペース",
     "power": "ポイント",
     "recharge": "チャージ",
+    "memberSubscription": "会員登録",
     "logout": "ログアウト",
     "search": "検索",
     "sidebar": "サイドバーモード",
@@ -24,4 +25,11 @@
     "powerDetail": "使用履歴",
     "userAgreement": "利用規約",
     "privacyPolicy": "プライバシーポリシー"
+    ,
+    "systemInfo": {
+        "title": "システム情報",
+        "description": "現在のバージョンとシステムIDを表示",
+        "version": "現在のバージョン",
+        "systemId": "システム ID"
+    }
 }

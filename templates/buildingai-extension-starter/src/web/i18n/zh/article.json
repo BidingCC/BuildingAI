@@ -1,0 +1,138 @@
+{
+    "list": {
+        "empty": "暂无文章",
+        "comments": "暂无评论",
+        "commentsWithCount": "条评论",
+        "views": "次阅读",
+        "categories": {
+            "title": "分类",
+            "all": "全部"
+        },
+        "search": {
+            "searchPlaceholder": "搜索文章标题...",
+            "statusAll": "全部状态",
+            "statusDraft": "草稿",
+            "statusPublished": "已发布",
+            "statusPlaceholder": "选择状态",
+            "categoryAll": "全部分类",
+            "categoryPlaceholder": "选择分类"
+        },
+        "table": {
+            "columns": {
+                "select": "选择",
+                "title": "标题",
+                "author": "作者",
+                "status": "状态",
+                "views": "浏览量",
+                "publishedAt": "发布时间",
+                "createdAt": "创建时间",
+                "actions": "操作"
+            },
+            "status": {
+                "published": "已发布",
+                "draft": "草稿"
+            },
+            "unknownAuthor": "未知作者",
+            "actions": {
+                "editLabel": "编辑",
+                "publish": "发布",
+                "setDraft": "设为草稿",
+                "copyLabel": "复制",
+                "delete": "删除",
+                "batchDelete": "批量删除",
+                "createLabel": "新建文章",
+                "selected": "已选择",
+                "showColumns": "显示字段"
+            }
+        },
+        "messages": {
+            "warmTip": "温馨提示",
+            "deleteConfirm": "确定要删除这篇文章吗？",
+            "batchDeleteConfirm": "确定要删除选中的文章吗？",
+            "deleteSuccess": "删除成功",
+            "deleteFailed": "删除失败",
+            "statusUpdateSuccess": "状态更新成功",
+            "statusUpdateFailed": "状态更新失败",
+            "copySuccess": "复制成功",
+            "copyFailed": "复制失败"
+        }
+    },
+    "add": {
+        "title": "新建文章",
+        "navigation": {
+            "back": "返回"
+        },
+        "messages": {
+            "createSuccess": "创建成功",
+            "createFailed": "创建失败"
+        }
+    },
+    "edit": {
+        "title": "编辑文章",
+        "navigation": {
+            "back": "返回"
+        },
+        "messages": {
+            "fetchDetailFailed": "获取详情失败",
+            "updateSuccess": "更新成功",
+            "updateFailed": "更新失败"
+        }
+    },
+    "form": {
+        "sections": {
+            "articleSettings": "文章设置",
+            "publishSettings": "发布设置",
+            "category": "分类",
+            "coverImage": "封面图片"
+        },
+        "title": {
+            "label": "标题",
+            "placeholder": "请输入文章标题",
+            "required": "标题不能为空"
+        },
+        "summary": {
+            "label": "摘要",
+            "placeholder": "请输入文章摘要（可选）",
+            "help": "文章摘要将显示在文章列表中，建议控制在150字以内"
+        },
+        "content": {
+            "label": "内容",
+            "placeholder": "请输入文章内容",
+            "required": "内容不能为空",
+            "help": "支持 Markdown 格式，可以插入图片、链接等"
+        },
+        "status": {
+            "label": "状态",
+            "placeholder": "请选择状态",
+            "draft": "草稿",
+            "published": "已发布"
+        },
+        "sort": {
+            "label": "排序",
+            "placeholder": "请输入排序值（数字越大越靠前）"
+        },
+        "categoryId": {
+            "label": "分类",
+            "placeholder": "请选择分类（可选）"
+        },
+        "coverImage": {
+            "label": "封面图片",
+            "upload": "上传封面",
+            "help": "支持 JPG、PNG、JPEG、WEBP 格式，建议尺寸 1200x600"
+        }
+    },
+    "buttons": {
+        "create": "创建",
+        "update": "更新",
+        "reset": "重置",
+        "cancel": "取消"
+    },
+    "messages": {
+        "fetchCategoriesFailed": "获取分类列表失败",
+        "resetSuccess": "表单已重置",
+        "validationFailed": "表单验证失败，请检查输入内容"
+    },
+    "detail": {
+        "notFound": "文章不存在"
+    }
+}

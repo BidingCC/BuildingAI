@@ -4,9 +4,10 @@
  */
 export const appConfigPresets = {
     toaster: {
-        position: "bottom-right" as const,
-        expand: true,
+        position: "top-center" as const,
+        expand: false,
         duration: 5000,
+        progress: false,
     },
     theme: {
         radius: 0.25,

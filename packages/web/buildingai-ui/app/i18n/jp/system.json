@@ -62,7 +62,7 @@
             "title": "著作権・登録情報設定",
             "description": "著作権と登録情報を管理",
             "displayName": {
-                "label": "登録表示名",
+                "label": "登録情報",
                 "placeholder": "登録表示名を入力（例：京ICP证030173号）",
                 "required": "登録表示名を入力してください"
             },
@@ -75,6 +75,21 @@
                 "label": "登録リンク",
                 "placeholder": "登録リンクを入力（例：https://beian.miit.gov.cn/）",
                 "required": "登録リンクを入力してください"
+            },
+            "sections": {
+                "filing": "登録情報",
+                "copyright": "著作権情報"
+            },
+            "copyrightInfo": {
+                "label": "著作権情報",
+                "textPlaceholder": "Powered by",
+                "brandPlaceholder": "サイトAI名称",
+                "required": "著作権情報を完全に入力してください"
+            },
+            "copyrightUrl": {
+                "label": "リンク",
+                "placeholder": "リンクを設定（例：https://beian.miit.gov.cn/）",
+                "required": "リンクを入力してください"
             }
         },
         "loginConfig": {

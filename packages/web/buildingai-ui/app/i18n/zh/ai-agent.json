@@ -6,7 +6,9 @@
         "search": {
             "placeholder": "搜索智能体名称、描述或标识符",
             "allStatus": "全部状态",
-            "filterByStatus": "按状态筛选"
+            "filterByStatus": "按状态筛选",
+            "allMode": "全部",
+            "filterByMode": "按创建模式筛选"
         },
         "create": {
             "title": "创建智能体",
@@ -27,7 +29,15 @@
             "descriptionPlaceholder": "请输入智能体描述",
             "mode": "创建模式",
             "modes": {
-                "direct": "直接创建"
+                "direct": "直接创建",
+                "coze": "Coze",
+                "dify": "Dify"
+            },
+            "modesDesc": {
+                "direct": "手动配置智能体信息",
+                "coze": "对接 Coze 平台智能体",
+                "dify": "对接 Dify 平台智能体",
+                "plugin": "通过插件扩展的智能体类型"
             }
         },
         "menu": {
@@ -58,8 +68,9 @@
             "formVariable": "表单变量",
             "formVariableDesc": "变量将以表单形式让用户在对话前填写",
             "formVariableDesc2": "用户填写的表单内容将自动替换角色设定中的变量。",
-            "formVariableNameEmpty": "字段名不能为空",
-            "formVariableLabelEmpty": "字段标签不能为空",
+            "formVariableNameEmpty": "变量名不能为空",
+            "formVariableNameInvalid": "变量名只可以设置为英文、数字下划线等",
+            "formVariableLabelEmpty": "显示名称不能为空",
             "formVariableTypeEmpty": "字段类型不能为空",
             "formVariableNameExists": "字段名已存在，请使用其他名称",
             "formVariableEditTitle": "编辑表单变量",
@@ -70,9 +81,9 @@
             "formVariableTypeTextarea": "多行文本",
             "formVariableTypeSelect": "下拉选择",
             "formVariableName": "变量名",
-            "formVariableNamePlaceholder": "请输入变量名",
-            "formVariableLabel": "字段标签",
-            "formVariableLabelPlaceholder": "请输入字段标签",
+            "formVariableNamePlaceholder": "请输入变量名，只可以设置为英文、数字下划线等",
+            "formVariableLabel": "显示名称",
+            "formVariableLabelPlaceholder": "请输入显示名称",
             "formVariableOptions": "选项列表",
             "formVariableOptionsPlaceholder": "请输入选项列表",
             "formVariableOptionsAdd": "添加选项",
@@ -97,9 +108,9 @@
             "tagsDesc": "为智能体添加标签，便于分类和管理",
             "feedback": "问答标注",
             "feedbackDesc": "支持管理员和用户标注问题和答案",
-            "public": "公开智能体",
+            "public": "公开",
             "publicDesc": "在智能体广场列表中可见，其他用户可发现并使用。智能体为已发布的状态下才生效,",
-            "private": "私有智能体",
+            "private": "私有",
             "prologue": "开场白",
             "prologueDesc": "编辑器工具如果被遮住则使用鼠标按住左右拖地即可查看剩余工具",
             "problem": "开场问题",
@@ -140,6 +151,31 @@
             "mcp": {
                 "title": "MCP 工具服务器",
                 "description": "配置智能体可使用的 MCP 工具服务器"
+            },
+            "thirdParty": {
+                "baseURL": "API 端点地址",
+                "apiKey": "API 密钥",
+                "dify": {
+                    "title": "Dify 平台配置",
+                    "baseURLPlaceholder": "请输入 Dify API 端点地址，默认：https://api.dify.ai/v1",
+                    "baseURLHint": "Dify 应用的 API 端点地址",
+                    "apiKeyPlaceholder": "请输入 Dify 应用的 API 密钥",
+                    "apiKeyHint": "在 Dify 应用设置中获取 API 密钥",
+                    "helpTitle": "配置说明",
+                    "helpDesc": "请在 Dify 平台创建应用后，在应用设置中获取 API 密钥和端点地址。"
+                },
+                "coze": {
+                    "title": "Coze 平台配置",
+                    "baseURLPlaceholder": "请输入 Coze API 端点地址",
+                    "baseURLHint": "Coze 应用的 API 端点地址，默认：https://api.coze.cn",
+                    "botId": "Bot ID",
+                    "botIdPlaceholder": "请输入 Coze Bot ID",
+                    "botIdHint": "在 Coze 平台的 Bot 详情页 URL 中获取，例如：7342xxxxx",
+                    "apiKeyPlaceholder": "请输入 Coze 应用的 API 密钥",
+                    "apiKeyHint": "在 Coze 开放平台创建个人访问令牌（PAT）获取",
+                    "helpTitle": "配置说明",
+                    "helpDesc": "请在 Coze 平台创建 Bot 并发布为 API 服务后，获取 Bot ID 和个人访问令牌。"
+                }
             }
         },
         "publish": {
@@ -289,6 +325,9 @@
                 "urlRequired": "请先输入URL"
             },
             "success": "DSL 文件导入成功！",
+            "batchSuccess": "成功导入 {count} 个文件",
+            "partialSuccess": "成功导入 {success}/{total} 个文件",
+            "batchFailed": "所有文件导入失败，请检查文件格式",
             "form": {
                 "urlLabel": "URL",
                 "urlPlaceholder": "请输入DSL文件的URL"

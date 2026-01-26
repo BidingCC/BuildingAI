@@ -1,6 +1,6 @@
-import { Agent } from "@buildingai/db/entities/ai-agent.entity";
-import { AgentChatRecord } from "@buildingai/db/entities/ai-agent-chat-record.entity";
-import { type UserPlayground } from "@buildingai/db/interfaces/context.interface";
+import { type UserPlayground } from "@buildingai/db";
+import { Agent } from "@buildingai/db/entities";
+import { AgentChatRecord } from "@buildingai/db/entities";
 import { StreamUtils } from "@buildingai/utils";
 import { Injectable, Logger } from "@nestjs/common";
 

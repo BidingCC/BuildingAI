@@ -1,8 +1,8 @@
 import { getProvider, McpServerHttp, TextGenerator } from "@buildingai/ai-sdk";
 import { McpServerSSE, type MCPTool } from "@buildingai/ai-sdk";
-import { SecretService } from "@buildingai/core/modules/secret/services/secret.service";
-import { AiMcpServer } from "@buildingai/db/entities/ai-mcp-server.entity";
-import { AiModel } from "@buildingai/db/entities/ai-model.entity";
+import { SecretService } from "@buildingai/core/modules";
+import { AiModel } from "@buildingai/db/entities";
+import { AiMcpServer } from "@buildingai/db/entities";
 import { getProviderSecret } from "@buildingai/utils";
 import { Injectable, Logger } from "@nestjs/common";
 import type { Response } from "express";
@@ -21,6 +21,40 @@ export interface ChatCompletionResult {
     response: any;
     mcpToolCalls: any[];
     usedTools: Set<string>;
+}
+
+/**
+ * Custom error for MCP tool call failures
+ */
+export class McpToolError extends Error {
+    constructor(
+        message: string,
+        public readonly toolName: string,
+        public readonly mcpToolCall: any,
+    ) {
+        super(message);
+        this.name = "McpToolError";
+    }
+}
+
+/**
+ * Custom error for user cancellation
+ * Carries partial response content when cancellation occurs during streaming
+ */
+export class UserCancelledError extends Error {
+    constructor(
+        public readonly partialResponse?: {
+            fullResponse: string;
+            finalChatCompletion: any;
+            mcpToolCalls: any[];
+            reasoningContent: string;
+            reasoningStartTime: number | null;
+            reasoningEndTime: number | null;
+        },
+    ) {
+        super("User cancelled the request");
+        this.name = "UserCancelledError";
+    }
 }
 
 /**
@@ -89,6 +123,7 @@ export class ChatCompletionCommandHandler {
                 hasToolCalls = true;
 
                 // Add AI response to messages
+                // For DeepSeek Thinking Mode: keep reasoning_content for multi-turn tool calls within same question
                 currentMessages.push(assistantMessage);
 
                 // Execute tool calls
@@ -147,6 +182,7 @@ export class ChatCompletionCommandHandler {
      *
      * @param params - Execution parameters
      * @param res - Express response object for SSE
+     * @param abortSignal - Optional AbortSignal for cancellation
      */
     async executeStreamCompletion(
         params: {
@@ -159,6 +195,7 @@ export class ChatCompletionCommandHandler {
             >;
         },
         res: Response,
+        abortSignal?: AbortSignal,
     ): Promise<{
         fullResponse: string;
         finalChatCompletion: any;
@@ -187,6 +224,23 @@ export class ChatCompletionCommandHandler {
 
         // Tool call loop
         do {
+            // Check if user cancelled
+            if (abortSignal?.aborted) {
+                this.logger.debug("🚫 User cancelled the request, ending silently");
+                // 如果有已生成的内容，携带在错误中以便保存
+                if (fullResponse) {
+                    throw new UserCancelledError({
+                        fullResponse,
+                        finalChatCompletion,
+                        mcpToolCalls,
+                        reasoningContent,
+                        reasoningStartTime,
+                        reasoningEndTime,
+                    });
+                }
+                throw new UserCancelledError();
+            }
+
             hasToolCalls = false;
             roundCount++;
             this.logger.debug(
@@ -209,6 +263,23 @@ export class ChatCompletionCommandHandler {
             let roundResponse = "";
             // Stream processing
             for await (const chunk of stream) {
+                // Check if user cancelled during streaming
+                if (abortSignal?.aborted) {
+                    this.logger.debug("🚫 User cancelled the request, ending silently");
+                    stream.cancel();
+                    // 如果有已生成的内容，携带在错误中以便保存
+                    if (fullResponse || roundResponse) {
+                        throw new UserCancelledError({
+                            fullResponse: fullResponse || roundResponse,
+                            finalChatCompletion,
+                            mcpToolCalls,
+                            reasoningContent,
+                            reasoningStartTime,
+                            reasoningEndTime,
+                        });
+                    }
+                    throw new UserCancelledError();
+                }
                 // Send content chunks
                 if (chunk.choices[0].delta.content) {
                     res.write(
@@ -282,12 +353,9 @@ export class ChatCompletionCommandHandler {
                     `🔧 第 ${roundCount} 轮检测到 ${assistantMessage.tool_calls.length} 个工具调用`,
                 );
 
-                // Add AI response to messages (remove reasoning_content to avoid sending in tool calls)
-                const cleanAssistantMessage = {
-                    ...assistantMessage,
-                    reasoning_content: undefined,
-                };
-                currentMessages.push(cleanAssistantMessage);
+                // Add AI response to messages
+                // For DeepSeek Thinking Mode: keep reasoning_content for multi-turn tool calls within same question
+                currentMessages.push(assistantMessage);
 
                 // Execute each tool call
                 for (const toolCall of assistantMessage.tool_calls) {
@@ -334,12 +402,22 @@ export class ChatCompletionCommandHandler {
                                 })}\n\n`,
                             );
                         } else {
-                            // Send tool error
+                            // Send tool error and throw to end conversation
                             res.write(
                                 `data: ${JSON.stringify({
                                     type: "mcp_tool_error",
                                     data: result.mcpToolCall,
                                 })}\n\n`,
+                            );
+
+                            // MCP tool error - end conversation immediately
+                            this.logger.error(
+                                `❌ MCP 工具调用失败，结束对话: ${toolCall.function.name}`,
+                            );
+                            throw new McpToolError(
+                                result.mcpToolCall.error || "MCP tool call failed",
+                                toolCall.function.name,
+                                result.mcpToolCall,
                             );
                         }
                     }

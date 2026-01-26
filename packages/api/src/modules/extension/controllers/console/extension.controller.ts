@@ -5,21 +5,22 @@ import {
     type ExtensionStatusType,
     type ExtensionTypeType,
 } from "@buildingai/constants/shared/extension.constant";
-import { CreateExtensionDto } from "@buildingai/core/modules/extension/dto/create-extension.dto";
-import { QueryExtensionDto } from "@buildingai/core/modules/extension/dto/query-extension.dto";
 import {
     BatchUpdateExtensionStatusDto,
+    CreateExtensionDto,
+    ExtensionConfigService,
+    ExtensionsService,
+    PlatformInfo,
+    QueryExtensionDto,
     UpdateExtensionDto,
-} from "@buildingai/core/modules/extension/dto/update-extension.dto";
-import { PlatformInfo } from "@buildingai/core/modules/extension/interfaces/platform.interface";
-import { ExtensionsService } from "@buildingai/core/modules/extension/services/extension.service";
-import { ExtensionConfigService } from "@buildingai/core/modules/extension/services/extension-config.service";
+} from "@buildingai/core/modules";
 import { BuildFileUrl } from "@buildingai/decorators/file-url.decorator";
 import { DictService } from "@buildingai/dict";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { maskSensitiveValue } from "@buildingai/utils";
 import { ConsoleController } from "@common/decorators/controller.decorator";
 import { Permissions } from "@common/decorators/permissions.decorator";
+import { ExtensionFeatureScanService } from "@common/modules/auth/services/extension-feature-scan.service";
 import {
     DownloadExtensionDto,
     SetPlatformSecretDto,
@@ -27,6 +28,8 @@ import {
 import { ExtensionMarketService } from "@modules/extension/services/extension-market.service";
 import { ExtensionOperationService } from "@modules/extension/services/extension-operation.service";
 import { Body, Delete, Get, Param, Patch, Post, Query } from "@nestjs/common";
+import * as fs from "fs-extra";
+import * as path from "path";
 
 /**
  * Extension Console Controller
@@ -39,6 +42,7 @@ export class ExtensionConsoleController extends BaseController {
         private readonly extensionOperationService: ExtensionOperationService,
         private readonly extensionConfigService: ExtensionConfigService,
         private readonly dictService: DictService,
+        private readonly extensionFeatureScanService: ExtensionFeatureScanService,
     ) {
         super();
     }
@@ -125,6 +129,54 @@ export class ExtensionConsoleController extends BaseController {
     }
 
     /**
+     * Install application by activation code
+     */
+    @Post("install-by-activation-code/:activationCode")
+    @Permissions({
+        code: "install-by-activation-code",
+        name: "通过兑换码安装应用",
+    })
+    async installByActivationCode(
+        @Param("activationCode") activationCode: string,
+        @Body() dto: DownloadExtensionDto,
+    ) {
+        return await this.extensionOperationService.installByActivationCode(
+            activationCode,
+            dto.identifier,
+            dto.version,
+            this.extensionMarketService,
+        );
+    }
+
+    /**
+     * upgrade content
+     */
+    @Get("upgrade-content/:identifier")
+    @Permissions({
+        code: "upgrade-content",
+        name: "更新应用内容",
+    })
+    async upgradeContent(@Param("identifier") identifier: string) {
+        return await this.extensionOperationService.upgradeContent(
+            identifier,
+            this.extensionMarketService,
+        );
+    }
+
+    /**
+     * Get application by activation code
+     */
+    @Get("get-by-activation-code/:activationCode")
+    @Permissions({
+        code: "get-by-activation-code",
+        name: "通过兑换码获取应用信息",
+    })
+    @BuildFileUrl(["**.icon"])
+    async getApplicationByActivationCode(@Param("activationCode") activationCode: string) {
+        return await this.extensionMarketService.getApplicationByActivationCode(activationCode);
+    }
+
+    /**
      * Upgrade extension
      */
     @Post("upgrade/:identifier")
@@ -189,30 +241,20 @@ export class ExtensionConsoleController extends BaseController {
         code: "list",
         name: "查看应用列表",
     })
-    @BuildFileUrl(["**.icon"])
+    @BuildFileUrl(["**.icon", "**.avatar", "**.aliasIcon"])
     async lists(@Query() query: QueryExtensionDto) {
-        // Check if platform secret is configured
-        const platformSecret = await this.dictService.get<string | null>(
-            DICT_KEYS.PLATFORM_SECRET,
-            null,
-            DICT_GROUP_KEYS.APPLICATION,
-        );
+        // Get extension list (handles platformSecret check internally)
+        const allExtensionsList = await this.extensionMarketService.getMixedApplicationList();
 
-        let extensionsList;
-
-        if (platformSecret) {
-            // If platform secret is configured, fetch mixed list (local + market)
-            extensionsList = await this.extensionMarketService.getMixedApplicationList();
-        } else {
-            // If no platform secret, only fetch local installed extensions
-            const installedExtensions = await this.extensionsService.findAll();
-            extensionsList = installedExtensions.map((ext) => ({
-                ...ext,
-                isInstalled: true,
-            }));
-        }
+        // 统计全部、已安装、未安装的数量（在筛选之前统计）
+        const statistics = {
+            total: allExtensionsList.length,
+            installed: allExtensionsList.filter((ext) => ext.isInstalled === true).length,
+            uninstalled: allExtensionsList.filter((ext) => ext.isInstalled === false).length,
+        };
 
         // Extension filter conditions
+        let extensionsList = allExtensionsList;
         if (query.name) {
             extensionsList = extensionsList.filter((ext) =>
                 ext.name.toLowerCase().includes(query.name.toLowerCase()),
@@ -241,7 +283,14 @@ export class ExtensionConsoleController extends BaseController {
             extensionsList = extensionsList.filter((ext) => ext.isInstalled === query.isInstalled);
         }
 
-        return this.paginationResult(extensionsList, extensionsList.length, query);
+        extensionsList = extensionsList.sort(
+            (a, b) =>
+                new Date(b.createdAt || b.updatedAt || 0).getTime() -
+                new Date(a.createdAt || a.updatedAt || 0).getTime(),
+        );
+
+        const result = this.paginationResult(extensionsList, extensionsList.length, query);
+        return { ...result, extend: { statistics } };
     }
 
     /**
@@ -319,7 +368,7 @@ export class ExtensionConsoleController extends BaseController {
      * @returns Extension details
      */
     @Get("detail/:identifier")
-    @BuildFileUrl(["**.icon"])
+    @BuildFileUrl(["**.aliasIcon", "**.icon"])
     @Permissions({
         code: "detail-by-identifier-from-db",
         name: "查看入库应用详情",
@@ -373,6 +422,48 @@ export class ExtensionConsoleController extends BaseController {
     }
 
     /**
+     * 获取插件功能列表
+     *
+     * @param identifier 插件标识符
+     * @returns 功能列表
+     */
+    @Get("features/:identifier")
+    @Permissions({
+        code: "get-features",
+        name: "获取插件功能列表",
+    })
+    async getFeatures(@Param("identifier") identifier: string) {
+        const extension = await this.extensionsService.findByIdentifier(identifier);
+        if (!extension) {
+            throw HttpErrorFactory.notFound("Extension does not exist");
+        }
+
+        return await this.extensionFeatureScanService.getExtensionFeatures(extension.id);
+    }
+
+    /**
+     * 更新功能的会员等级配置
+     *
+     * @param featureId 功能ID
+     * @param levelIds 会员等级ID列表
+     * @returns 更新后的功能
+     */
+    @Patch("features/:featureId/levels")
+    @Permissions({
+        code: "update-feature-levels",
+        name: "更新功能会员等级",
+    })
+    async updateFeatureLevels(
+        @Param("featureId") featureId: string,
+        @Body("levelIds") levelIds: string[],
+    ) {
+        return await this.extensionFeatureScanService.updateFeatureMembershipLevels(
+            featureId,
+            levelIds,
+        );
+    }
+
+    /**
      * Get single extension details
      *
      * @param id Extension ID
@@ -419,7 +510,7 @@ export class ExtensionConsoleController extends BaseController {
      * @returns Updated extension
      */
     @Patch(":id")
-    @BuildFileUrl(["**.icon", "**.author.avatar"])
+    @BuildFileUrl(["**.icon", "**.author.avatar", "++.aliasIcon"])
     @Permissions({
         code: "update",
         name: "更新应用",
@@ -468,7 +559,7 @@ export class ExtensionConsoleController extends BaseController {
         name: "启用应用",
     })
     async enable(@Param("id") id: string) {
-        return await this.extensionsService.enable(id);
+        return await this.extensionOperationService.enable(id);
     }
 
     /**
@@ -484,7 +575,7 @@ export class ExtensionConsoleController extends BaseController {
         name: "禁用应用",
     })
     async disable(@Param("id") id: string) {
-        return await this.extensionsService.disable(id);
+        return await this.extensionOperationService.disable(id);
     }
 
     /**
@@ -542,6 +633,122 @@ export class ExtensionConsoleController extends BaseController {
         return {
             message: `Successfully deleted ${deleted} extensions`,
             deleted,
+        };
+    }
+
+    /**
+     * 同步插件会员功能配置
+     *
+     * 扫描插件代码中的 @MemberOnly 装饰器，并将功能配置同步到数据库
+     *
+     * @param identifier 插件标识符
+     * @returns 同步结果
+     */
+    @Post("sync-member-features/:identifier")
+    @Permissions({
+        code: "sync-member-features",
+        name: "同步会员功能",
+    })
+    async syncMemberFeatures(@Param("identifier") identifier: string) {
+        const extension = await this.extensionsService.findByIdentifier(identifier);
+        if (!extension) {
+            throw HttpErrorFactory.notFound("Extension does not exist");
+        }
+
+        const result = await this.extensionFeatureScanService.scanAndSyncExtensionFeatures(
+            identifier,
+            extension.id,
+        );
+
+        return {
+            message: `同步完成: 新增 ${result.added} 个, 更新 ${result.updated} 个, 移除 ${result.removed} 个`,
+            ...result,
+        };
+    }
+
+    /**
+     * Get extension plugin layout configuration
+     * @description Returns router.options (consoleMenu) and manifest.json for plugin layout
+     * @param identifier Extension identifier
+     * @returns Plugin layout configuration
+     */
+    @Get(":identifier/plugin-layout")
+    @Permissions({
+        code: "get-plugin-layout",
+        name: "获取插件布局配置",
+    })
+    async getPluginLayout(@Param("identifier") identifier: string) {
+        const extension = await this.extensionsService.findByIdentifier(identifier);
+        if (!extension) {
+            throw HttpErrorFactory.notFound("Extension does not exist");
+        }
+
+        const rootDir = path.join(process.cwd(), "..", "..");
+        const extensionDir = path.join(rootDir, "extensions", identifier);
+
+        if (!(await fs.pathExists(extensionDir))) {
+            throw HttpErrorFactory.notFound("Extension directory does not exist");
+        }
+
+        // Read manifest.json - return as object directly
+        const manifestPath = path.join(extensionDir, "manifest.json");
+        let manifest = null;
+        if (await fs.pathExists(manifestPath)) {
+            manifest = await fs.readJson(manifestPath);
+        }
+
+        // Try to load consoleMenu from compiled router.options.js first
+        let consoleMenu = null;
+        const routerOptionsBuildPath = path.join(extensionDir, "build", "web", "router.options.js");
+        const routerOptionsSourcePath = path.join(extensionDir, "src", "web", "router.options.ts");
+
+        // Try to load from build output first (if exists)
+        if (await fs.pathExists(routerOptionsBuildPath)) {
+            try {
+                // Clear require cache to ensure fresh load
+                delete require.cache[require.resolve(routerOptionsBuildPath)];
+                const routerOptionsModule = require(routerOptionsBuildPath);
+                consoleMenu = routerOptionsModule.consoleMenu || null;
+            } catch (error) {
+                // If require fails, fall back to parsing source file
+                console.warn(`Failed to load router.options.js: ${error}`);
+            }
+        }
+
+        // If build file doesn't exist or load failed, parse source TypeScript file
+        if (!consoleMenu && (await fs.pathExists(routerOptionsSourcePath))) {
+            try {
+                const content = await fs.readFile(routerOptionsSourcePath, "utf-8");
+
+                // Extract consoleMenu array using regex
+                const match = content.match(
+                    /export\s+(?:const|let)\s+consoleMenu[^=]*=\s*(\[[\s\S]*?\]);/,
+                );
+
+                if (match && match[1]) {
+                    // Remove comments
+                    let arrayContent = match[1]
+                        .replace(/\/\*[\s\S]*?\*\//g, "")
+                        .replace(/\/\/.*$/gm, "");
+
+                    // Replace import() calls with null (we don't need component functions in backend)
+                    arrayContent = arrayContent.replace(/\(\)\s*=>\s*import\([^)]+\)/g, "null");
+
+                    // Parse the array
+                    try {
+                        consoleMenu = new Function(`return ${arrayContent}`)();
+                    } catch (parseError) {
+                        console.warn("Failed to parse consoleMenu:", parseError);
+                    }
+                }
+            } catch (error) {
+                console.warn(`Failed to read router.options.ts: ${error}`);
+            }
+        }
+
+        return {
+            manifest,
+            consoleMenu,
         };
     }
 }

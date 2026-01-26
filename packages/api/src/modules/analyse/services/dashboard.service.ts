@@ -1,17 +1,17 @@
 import { BaseService } from "@buildingai/base";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { AccountLog } from "@buildingai/db/entities/account-log.entity";
-import { Agent } from "@buildingai/db/entities/ai-agent.entity";
-import { AgentChatMessage } from "@buildingai/db/entities/ai-agent-chat-message.entity";
-import { AgentChatRecord } from "@buildingai/db/entities/ai-agent-chat-record.entity";
-import { AiChatMessage } from "@buildingai/db/entities/ai-chat-message.entity";
-import { AiChatRecord } from "@buildingai/db/entities/ai-chat-record.entity";
-import { AiModel } from "@buildingai/db/entities/ai-model.entity";
-import { AiProvider } from "@buildingai/db/entities/ai-provider.entity";
-import { Analyse, AnalyseActionType } from "@buildingai/db/entities/analyse.entity";
-import { Extension } from "@buildingai/db/entities/extension.entity";
-import { RechargeOrder } from "@buildingai/db/entities/recharge-order.entity";
-import { User } from "@buildingai/db/entities/user.entity";
+import { User } from "@buildingai/db/entities";
+import { AiModel } from "@buildingai/db/entities";
+import { AiProvider } from "@buildingai/db/entities";
+import { Agent } from "@buildingai/db/entities";
+import { AgentChatMessage } from "@buildingai/db/entities";
+import { AgentChatRecord } from "@buildingai/db/entities";
+import { AiChatMessage } from "@buildingai/db/entities";
+import { AiChatRecord } from "@buildingai/db/entities";
+import { AccountLog } from "@buildingai/db/entities";
+import { Analyse, AnalyseActionType } from "@buildingai/db/entities";
+import { Extension } from "@buildingai/db/entities";
+import { RechargeOrder } from "@buildingai/db/entities";
 import { MoreThanOrEqual, Repository } from "@buildingai/db/typeorm";
 import {
     ChatStats,
@@ -410,27 +410,27 @@ export class DashboardService extends BaseService<any> {
                 : 0;
 
         // 近N天图表数据（按天统计）
-        // 注册数据
+        // 注册数据（使用UTC时区提取日期，确保与图表数据生成逻辑一致）
+        // 使用TO_CHAR直接返回字符串格式的日期，避免Date对象转换时的时区问题
         const registerChartQuery = await this.userRepository
             .createQueryBuilder("user")
             .where("user.isRoot = :isRoot", { isRoot: 0 })
             .andWhere("user.createdAt >= :start", { start: lastDaysStart })
-            .select("DATE(user.createdAt)", "date")
+            .select(`TO_CHAR(user.createdAt AT TIME ZONE 'UTC', 'YYYY-MM-DD')`, "date")
             .addSelect("COUNT(DISTINCT user.id)", "register")
-            .groupBy("DATE(user.createdAt)")
+            .groupBy(`TO_CHAR(user.createdAt AT TIME ZONE 'UTC', 'YYYY-MM-DD')`)
             .orderBy("date", "ASC")
             .getRawMany();
-
-        // 访问数据（基于 analyse 表）
+        // 访问数据（基于 analyse 表，使用UTC时区提取日期）
         const visitChartQuery = await this.analyseRepository
             .createQueryBuilder("analyse")
             .where("analyse.actionType = :actionType", {
                 actionType: AnalyseActionType.PAGE_VISIT,
             })
             .andWhere("analyse.createdAt >= :start", { start: lastDaysStart })
-            .select("DATE(analyse.createdAt)", "date")
+            .select(`TO_CHAR(analyse.createdAt AT TIME ZONE 'UTC', 'YYYY-MM-DD')`, "date")
             .addSelect("COUNT(analyse.id)", "visit")
-            .groupBy("DATE(analyse.createdAt)")
+            .groupBy(`TO_CHAR(analyse.createdAt AT TIME ZONE 'UTC', 'YYYY-MM-DD')`)
             .orderBy("date", "ASC")
             .getRawMany();
 
@@ -440,19 +440,14 @@ export class DashboardService extends BaseService<any> {
         const registerMap = new Map<string, number>();
 
         // 将查询结果转换为 Map，便于查找
+        // 使用TO_CHAR后，PostgreSQL直接返回字符串格式的日期（YYYY-MM-DD），直接使用
         visitChartQuery.forEach((item: any) => {
-            const dateStr =
-                item.date instanceof Date
-                    ? item.date.toISOString().split("T")[0]
-                    : String(item.date || "").split("T")[0];
+            const dateStr = String(item.date || "").trim();
             visitMap.set(dateStr, Number(item.visit || 0));
         });
 
         registerChartQuery.forEach((item: any) => {
-            const dateStr =
-                item.date instanceof Date
-                    ? item.date.toISOString().split("T")[0]
-                    : String(item.date || "").split("T")[0];
+            const dateStr = String(item.date || "").trim();
             registerMap.set(dateStr, Number(item.register || 0));
         });
 
@@ -492,8 +487,9 @@ export class DashboardService extends BaseService<any> {
      * @returns 收入详细数据（今日收入、订单、近N天数据、图表）
      */
     private async getRevenueDetailData(days: number = 15): Promise<RevenueDetail> {
+        // 使用 UTC 时间，避免时区问题
         const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        today.setUTCHours(0, 0, 0, 0);
 
         // 今日收入（已支付订单）
         const todayRevenueQuery = await this.rechargeOrderRepository
@@ -512,10 +508,10 @@ export class DashboardService extends BaseService<any> {
             },
         });
 
-        // 近N天数据
+        // 近N天数据（使用 UTC 时间）
         const lastDaysStart = new Date();
-        lastDaysStart.setDate(lastDaysStart.getDate() - days);
-        lastDaysStart.setHours(0, 0, 0, 0);
+        lastDaysStart.setUTCDate(lastDaysStart.getUTCDate() - days);
+        lastDaysStart.setUTCHours(0, 0, 0, 0);
 
         // 近N天总收入
         const lastDaysRevenueQuery = await this.rechargeOrderRepository
@@ -534,9 +530,9 @@ export class DashboardService extends BaseService<any> {
             },
         });
 
-        // 同比过去N天（往前推N天）
+        // 同比过去N天（往前推N天，使用 UTC 时间）
         const compareStart = new Date(lastDaysStart);
-        compareStart.setDate(compareStart.getDate() - days);
+        compareStart.setUTCDate(compareStart.getUTCDate() - days);
         const compareEnd = new Date(lastDaysStart);
 
         // 同比过去15天收入
@@ -565,31 +561,43 @@ export class DashboardService extends BaseService<any> {
         const ordersChange =
             compareOrders > 0 ? ((lastDaysOrders - compareOrders) / compareOrders) * 100 : 0;
 
-        // 近N天图表数据（按天统计）
+        // 近N天图表数据（按天统计，使用UTC时区提取日期）
+        // 使用TO_CHAR直接返回字符串格式的日期，避免Date对象转换时的时区问题
         const chartDataQuery = await this.rechargeOrderRepository
             .createQueryBuilder("order")
             .where("order.createdAt >= :start", { start: lastDaysStart })
             .andWhere("order.payStatus = :payStatus", { payStatus: 1 })
-            .select("DATE(order.createdAt)", "date")
+            .select(`TO_CHAR(order.createdAt AT TIME ZONE 'UTC', 'YYYY-MM-DD')`, "date")
             .addSelect("COALESCE(SUM(order.orderAmount), 0)", "revenue")
             .addSelect("COUNT(order.id)", "orders")
-            .groupBy("DATE(order.createdAt)")
+            .groupBy(`TO_CHAR(order.createdAt AT TIME ZONE 'UTC', 'YYYY-MM-DD')`)
             .orderBy("date", "ASC")
             .getRawMany();
 
-        // 生成完整的N天图表数据
+        // 生成完整的N天图表数据（使用UTC时间）
         const chartData: RevenueDetail["chartData"] = [];
+        const revenueMap = new Map<string, { revenue: number; orders: number }>();
+
+        // 将查询结果转换为 Map，便于查找
+        chartDataQuery.forEach((item: any) => {
+            const dateStr = String(item.date || "").trim();
+            revenueMap.set(dateStr, {
+                revenue: Number(item.revenue || 0),
+                orders: Number(item.orders || 0),
+            });
+        });
+
         for (let i = days - 1; i >= 0; i--) {
             const date = new Date();
-            date.setDate(date.getDate() - i);
-            date.setHours(0, 0, 0, 0);
+            date.setUTCDate(date.getUTCDate() - i);
+            date.setUTCHours(0, 0, 0, 0);
             const dateStr = date.toISOString().split("T")[0];
 
-            const dayData = chartDataQuery.find((d) => d.date === dateStr);
+            const dayData = revenueMap.get(dateStr);
             chartData.push({
                 date: dateStr,
-                revenue: Number(dayData?.revenue || 0),
-                orders: Number(dayData?.orders || 0),
+                revenue: dayData?.revenue || 0,
+                orders: dayData?.orders || 0,
             });
         }
 

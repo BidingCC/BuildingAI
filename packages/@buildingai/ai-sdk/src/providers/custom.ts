@@ -11,11 +11,11 @@ export class CustomAdapter extends OpenAIAdapter implements Adapter {
 
     validator(): void {
         if (!this.client.apiKey) {
-            throw new Error("API key is required.");
+            throw new Error("apiKey is required");
         }
 
         if (!this.client.baseURL) {
-            throw new Error("base URL is required.");
+            throw new Error("baseURL is required");
         }
     }
 

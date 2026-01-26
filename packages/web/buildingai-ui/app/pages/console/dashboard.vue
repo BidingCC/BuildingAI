@@ -737,7 +737,7 @@ const revenueDetailChartOptions = computed(() => {
             </div>
 
             <!-- 图表展示区域 - 左 2 右 2 布局 -->
-            <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <div class="grid grid-cols-1 gap-4 pb-6 lg:grid-cols-3">
                 <!-- 左侧：两个图表垂直排列 -->
                 <div class="space-y-4 lg:col-span-2">
                     <!-- 用户访问与注册趋势 -->

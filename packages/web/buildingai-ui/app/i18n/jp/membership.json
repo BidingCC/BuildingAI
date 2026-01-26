@@ -1,0 +1,166 @@
+{
+    "frontend": {
+        "center": {
+            "pageTitle": "会員センター",
+            "myPower": "残りポイント",
+            "normalUser": "一般ユーザー",
+            "expireAt": "有効期限:{time}",
+            "expired": "期限切れ",
+            "active": "有効",
+            "recommended": "購入をおすすめします",
+            "select": "選択",
+            "selected": "選択済み",
+            "givePower": "{power}ポイントを獲得",
+            "givePowerTip": "約50本の動画クリップまたは500枚の画像を生成",
+            "paymentMethod": "支払い方法",
+            "agreement": "支払うことであなたは同意したことになります",
+            "paymentAgreement": "支払い契約",
+            "subscribe": "すぐに支払う",
+            "noOptionSelected": "会員プランを選択してください",
+            "orderNotFound": "注文が存在しません",
+            "cancelPay": "支払いがキャンセルされました",
+            "subscribeSuccess": "購読に成功しました",
+            "subscribeSuccessTip": "会員になられたことをおめでとうございます。さらに多くの特典をお楽しみください！",
+            "close": "閉じる",
+            "viewDetail": "詳細を見る",
+            "notOpen": "会員機能はまだ利用できません",
+            "notOpenTip": "会員機能は現在開発中です。どうぞご期待ください。",
+            "back": "前のページに戻る",
+            "noLevelsAvailable": "利用可能な会員ランクはありません",
+            "subscriptionManagement": "購読管理",
+            "noSubscription": "まだ購読記録がありません",
+            "expireTime": "会員有効期限",
+            "startTime": "会員登録日時",
+            "source": "開通元"
+        }
+    },
+    "console-membership": {
+        "level": {
+            "nameInput": "レベル名を入力してください",
+            "status": "レベルステータスを選択してください",
+            "add": "レベルを追加",
+            "delete": "レベルを削除",
+            "deleteTitle": "レベルを削除",
+            "deleteMsg": "このレベルを削除してもよろしいですか？",
+            "select": {
+                "all": "全部",
+                "active": "有効にする",
+                "inactive": "無効にする"
+            },
+            "table": {
+                "level": "レベル",
+                "icon": "レベルアイコン",
+                "name": "レベル名",
+                "description": "レベルの説明",
+                "givePower": "毎月ポイントをプレゼント",
+                "accountCount": "ユーザー数",
+                "status": "状態",
+                "actions": "操作",
+                "levelTip": "数値が大きいほどレベルが高くなります"
+            },
+            "edit": {
+                "title": "編集レベル",
+                "description": "レベル情報を編集",
+                "submitSuccess": "更新に成功しました",
+                "getDetailFailed": "レベル詳細の取得に失敗しました"
+            },
+            "create": {
+                "title": "レベルを追加",
+                "description": "レベル情報を追加",
+                "submitSuccess": "作成成功"
+            },
+            "form": {
+                "benefitAtLeastOne": "会員特典は少なくとも1つ必要です",
+                "nameRequired": "レベル名を空にすることはできません",
+                "levelRequired": "レベルは空にできません",
+                "iconRequired": "レベルアイコンを空にすることはできません",
+                "benefit": {
+                    "title": "会員特典",
+                    "icon": "アイコン",
+                    "content": "権利内容を入力してください",
+                    "iconRequired": "アイコンを空にすることはできません",
+                    "contentRequired": "権利内容は空にできません"
+                },
+                "labelName": "レベル名",
+                "labelNamePlaceholder": "レベル名を入力してください",
+                "labelLevel": "レベル",
+                "labelLevelPlaceholder": "レベルを入力してください",
+                "labelIcon": "レベルアイコン",
+                "labelGivePower": "毎月ポイントをプレゼント",
+                "labelGivePowerPlaceholder": "毎月のポイントプレゼントを入力してください",
+                "labelDescription": "レベルの説明",
+                "labelDescriptionPlaceholder": "レベルの説明を入力してください",
+                "labelBenefits": "会員特典",
+                "levelHint": "重みの数字が大きいほどランクが高くなり、ランクの重みは同じにできません",
+                "uploadIcon": "レベルアイコンをアップロード"
+            },
+            "deleteSuccess": "レベルの削除に成功しました",
+            "updateStatusSuccess": "ステータスの更新に成功しました"
+        },
+        "plan": {
+            "unit": {
+                "day": "天",
+                "month": "月",
+                "year": "年"
+            },
+            "status": {
+                "title": "機能状態",
+                "description": "会員機能を有効にしますか？有効にすると、ユーザーは会員関連の機能にアクセスできるようになります",
+                "updateSuccess": "更新に成功しました"
+            },
+            "list": {
+                "title": "サブスクリプションプラン",
+                "add": "新しい計画を追加",
+                "deleteTitle": "購読プランを解除する",
+                "deleteMsg": "このサブスクリプションプランを削除してもよろしいですか？",
+                "updateSortSuccess": "並べ替えの更新に成功しました",
+                "updateSortFailed": "並べ替えの更新に失敗しました",
+                "deleteFailed": "削除に失敗しました"
+            },
+            "table": {
+                "name": "計画名",
+                "durationConfig": "購読期間",
+                "levels": "会員ランク",
+                "status": "状態",
+                "sort": "並べ替え",
+                "actions": "操作"
+            },
+            "duration": {
+                "month": "1か月",
+                "quarter": "3か月",
+                "half": "6か月",
+                "year": "1年",
+                "forever": "永久",
+                "custom": "カスタム期間"
+            },
+            "form": {
+                "titleCreate": "新しいサブスクリプションプランを追加",
+                "titleEdit": "サブスクリプションプランを編集",
+                "labelName": "計画名",
+                "labelNamePlaceholder": "プラン名を入力してください",
+                "labelLabel": "タグ名",
+                "labelLabelPlaceholder": "ラベルを入力してください。例：割引10%",
+                "labelDurationConfig": "購読期間",
+                "labelBilling": "会員課金",
+                "addBilling": "新しいルールを追加",
+                "selectLevelPlaceholder": "選択してください",
+                "inputPlaceholder": "入力してください",
+                "priceSales": "販売価格／元",
+                "priceOriginal": "元の価格／元",
+                "labelTag": "ラベル",
+                "status": "状態",
+                "emptyBilling": "料金ルールはまだありません。「新しいルールを追加」をクリックしてください",
+                "durationValuePlaceholder": "整数を入力してください"
+            },
+            "edit": {
+                "title": "サブスクリプションプランを編集",
+                "submitSuccess": "更新に成功しました",
+                "getDetailFailed": "サブスクリプションプランの詳細の取得に失敗しました"
+            },
+            "create": {
+                "title": "新しいサブスクリプションプランを追加",
+                "submitSuccess": "作成成功"
+            }
+        }
+    }
+}

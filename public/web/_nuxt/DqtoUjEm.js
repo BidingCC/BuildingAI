@@ -1,1 +1,0 @@
-import{aB as n,aF as a,aC as t,aD as s}from"#entry";function r(e){return t("/menu/tree",{sourceType:e})}function i(e){return t(`/menu/${e}`)}function c(e){return n("/menu",e)}function l(e,u){return s(`/menu/${e}`,u)}function p(e){return a(`/menu/${e}`)}function f(e){return n("/menu/batch-delete",e)}export{f as a,p as b,r as c,i as d,l as e,c as f};

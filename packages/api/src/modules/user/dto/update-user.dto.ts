@@ -105,6 +105,21 @@ export class UpdateUserDto {
     @IsOptional()
     @IsInt({ message: "剩余积分必须是整数" })
     power?: number;
+
+    /**
+     * 会员等级ID
+     */
+    @IsOptional()
+    @ValidateIf((o) => o.level && o.level.trim() !== "")
+    @IsUUID(4, { message: "会员等级ID必须是有效的UUID格式" })
+    level?: string;
+
+    /**
+     * 会员等级到期时间
+     */
+    @IsOptional()
+    @IsString({ message: "会员等级到期时间必须是字符串" })
+    levelEndTime?: string;
 }
 
 export class UpdateUserBalanceDto {

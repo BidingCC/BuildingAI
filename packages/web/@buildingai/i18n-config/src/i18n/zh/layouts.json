@@ -3,6 +3,7 @@
     "admin": "工作台",
     "power": "积分",
     "recharge": "充值",
+    "memberSubscription": "会员订阅",
     "logout": "退出",
     "search": "搜索",
     "sidebar": "侧边栏模式",
@@ -24,4 +25,11 @@
     "powerDetail": "积分明细",
     "userAgreement": "用户协议",
     "privacyPolicy": "隐私政策"
+    ,
+    "systemInfo": {
+        "title": "系统信息",
+        "description": "查看当前系统版本和系统ID",
+        "version": "当前版本",
+        "systemId": "系统 ID"
+    }
 }

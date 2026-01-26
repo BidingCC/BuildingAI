@@ -1,6 +1,6 @@
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { AiModel } from "@buildingai/db/entities/ai-model.entity";
-import { User } from "@buildingai/db/entities/user.entity";
+import { User } from "@buildingai/db/entities";
+import { AiModel } from "@buildingai/db/entities";
 import { Repository } from "@buildingai/db/typeorm";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { Injectable } from "@nestjs/common";

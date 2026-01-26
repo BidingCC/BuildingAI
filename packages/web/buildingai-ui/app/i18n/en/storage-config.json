@@ -1,0 +1,61 @@
+{
+    "alter": {
+        "title": "Friendly reminder:",
+        "content": "1. To use object storage, you need to transfer the resource files under the storage directory to the object storage space with the original directory path. Check the migration document for details. \r\n2. Do not switch the storage method at will, it may lead to images and other resources can not be viewed. \r\n3. Domain cross-domain needs to be set in the object store background, otherwise the resource may not be viewable after uploading to OSS."
+    },
+    "table": {
+        "storageType": "Storage method",
+        "storageLocation": "Storage location",
+        "status": "Status",
+        "action": "Operation",
+        "setting": "Settings",
+        "enabled": "Enabled",
+        "disabled": "Disabled"
+    },
+    "form": {
+        "storageType": {
+            "label": "Storage method",
+            "desc": "After switching to Alibaba Cloud OSS, the asset library needs to be re-uploaded to Alibaba Cloud OSS."
+        },
+        "status": "Status",
+        "spaceName": {
+            "label": "Storage Space Name",
+            "placeholder": "Please enter a bucket name"
+        },
+        "accessKey": {
+            "placeholder": "Please enter ACCESS_KEY(AK)"
+        },
+        "secretKey": {
+            "placeholder": "Please enter SECRET_KEY(SK)"
+        },
+        "spaceDomain": {
+            "label": "Spatial Domain",
+            "desc": "Please complete with http:// or https://, for example https://static.cloud.com",
+            "placeholder": "Please enter a domain name"
+        },
+        "region": {
+            "placeholder": "Please enter the region"
+        },
+        "arn": {
+            "placeholder": "Please enter role_arn"
+        }
+    },
+    "storage": {
+        "local": "Local Storage",
+        "kodo": "Qiniu Cloud Storage",
+        "oss": "Alibaba Cloud OSS",
+        "cos": "Tencent Cloud COS"
+    },
+    "location": {
+        "local": "Stored on the local server",
+        "kodo": "Stored on Qiniu Cloud, please go to Qiniu Cloud to activate the storage service.",
+        "oss": "Stored on Alibaba Cloud, please go to Alibaba Cloud to activate the storage service.",
+        "cos": "Stored on Tencent Cloud, please go to Tencent Cloud to enable the storage service"
+    },
+    "aliCloud": {
+        "paramDesc": "Alibaba Cloud Direct File Upload Parameters"
+    },
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "noSupport": "In planning"
+}

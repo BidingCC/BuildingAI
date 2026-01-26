@@ -148,6 +148,16 @@ export function apiBatchDeleteAiModel(ids: string[]): Promise<void> {
     return useConsoleDelete("/ai-models", { ids });
 }
 
+/**
+ * Batch sort AI models
+ * @description Batch sort AI models by providing sorted model ID array
+ * @param sort Sorted array of model IDs (first element will be at the top)
+ * @returns Promise with operation result
+ */
+export function apiBatchSortAiModel(sort: string[]): Promise<void> {
+    return useConsolePatch("/ai-models/batch/sort", { sort });
+}
+
 // ==================== AI Model Operations Related APIs ====================
 
 /**

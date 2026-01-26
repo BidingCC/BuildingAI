@@ -1,6 +1,4 @@
-export * from "./cache/cache.module";
-export * from "./cache/cache.service";
-export * from "./constants/cache.constants";
-export * from "./redis/redis.module";
-export * from "./redis/redis.service";
-export * from "./types/cache.types";
+export { CacheModule } from "./cache/cache.module";
+export { CacheService } from "./cache/cache.service";
+export { RedisModule } from "./redis/redis.module";
+export { RedisService } from "./redis/redis.service";

@@ -16,15 +16,12 @@ const state = shallowReactive<WebsiteCopyright>({
     displayName: "",
     iconUrl: "",
     url: "",
+    copyrightText: "",
+    copyrightBrand: "",
+    copyrightUrl: "",
 });
 
 const websiteConfig = shallowRef<WebsiteConfig | null>(null);
-
-const schema = object({
-    displayName: string().required(t("system.website.copyright.displayName.required")),
-    iconUrl: string().required(t("system.website.copyright.icon.required")),
-    url: string().required(t("system.website.copyright.url.required")),
-});
 
 const { lockFn: getWebsiteConfig, isLock: isLoadingConfig } = useLockFn(async () => {
     try {
@@ -34,7 +31,6 @@ const { lockFn: getWebsiteConfig, isLock: isLoadingConfig } = useLockFn(async ()
         useFormData(state, config.copyright);
     } catch (error) {
         console.error("Get website config failed:", error);
-        message.error(t("system.website.messages.loadFailed"));
     }
 });
 
@@ -46,6 +42,9 @@ const { lockFn: onSubmit, isLock } = useLockFn(async () => {
                 displayName: state.displayName,
                 iconUrl: state.iconUrl,
                 url: state.url,
+                copyrightText: state.copyrightText,
+                copyrightBrand: state.copyrightBrand,
+                copyrightUrl: state.copyrightUrl,
             },
         };
 
@@ -56,7 +55,6 @@ const { lockFn: onSubmit, isLock } = useLockFn(async () => {
         await getWebsiteConfig();
     } catch (error) {
         console.error("Save failed:", error);
-        message.error(t("system.website.messages.saveFailed"));
     }
 });
 
@@ -65,11 +63,17 @@ const resetForm = () => {
         state.displayName = websiteConfig.value.copyright.displayName || "";
         state.iconUrl = websiteConfig.value.copyright.iconUrl || "";
         state.url = websiteConfig.value.copyright.url || "";
+        state.copyrightText = websiteConfig.value.copyright.copyrightText || "";
+        state.copyrightBrand = websiteConfig.value.copyright.copyrightBrand || "";
+        state.copyrightUrl = websiteConfig.value.copyright.copyrightUrl || "";
         message.info(t("system.website.messages.resetSuccess"));
     } else {
         state.displayName = "";
         state.iconUrl = "";
         state.url = "";
+        state.copyrightText = "";
+        state.copyrightBrand = "";
+        state.copyrightUrl = "";
         message.info(t("system.website.messages.resetEmpty"));
     }
 };
@@ -80,12 +84,11 @@ onMounted(() => getWebsiteConfig());
 <template>
     <div class="copyright-container mt-8">
         <!-- 表单 -->
-        <UForm :schema="schema" :state="state" class="space-y-6" @submit="onSubmit">
-            <UFormField
-                name="displayName"
-                :label="t('system.website.copyright.displayName.label')"
-                required
-            >
+        <UForm :state="state" class="space-y-6" @submit="onSubmit">
+            <h4 class="mb-2 text-lg font-bold">
+                {{ t("system.website.copyright.sections.filing") }}
+            </h4>
+            <UFormField name="displayName" :label="t('system.website.copyright.displayName.label')">
                 <UInput
                     v-model="state.displayName"
                     size="lg"
@@ -94,7 +97,7 @@ onMounted(() => getWebsiteConfig());
                 />
             </UFormField>
 
-            <UFormField name="iconUrl" :label="t('system.website.copyright.icon.label')" required>
+            <UFormField name="iconUrl" :label="t('system.website.copyright.icon.label')">
                 <div class="flex items-start gap-4">
                     <BdUploader
                         v-model="state.iconUrl"
@@ -108,7 +111,7 @@ onMounted(() => getWebsiteConfig());
                 </div>
             </UFormField>
 
-            <UFormField name="url" :label="t('system.website.copyright.url.label')" required>
+            <UFormField name="url" :label="t('system.website.copyright.url.label')">
                 <UInput
                     v-model="state.url"
                     size="lg"
@@ -117,7 +120,43 @@ onMounted(() => getWebsiteConfig());
                 />
             </UFormField>
 
-            <div class="flex space-x-3 pt-4">
+            <h4 class="mb-2 text-lg font-bold">
+                {{ t("system.website.copyright.sections.copyright") }}
+            </h4>
+
+            <UFormField
+                name="copyrightText"
+                :label="t('system.website.copyright.copyrightInfo.label')"
+            >
+                <div class="flex w-full gap-4">
+                    <UInput
+                        v-model="state.copyrightText"
+                        size="lg"
+                        class="flex-1"
+                        :placeholder="t('system.website.copyright.copyrightInfo.textPlaceholder')"
+                    />
+                    <UInput
+                        v-model="state.copyrightBrand"
+                        size="lg"
+                        class="flex-1"
+                        :placeholder="t('system.website.copyright.copyrightInfo.brandPlaceholder')"
+                    />
+                </div>
+            </UFormField>
+
+            <UFormField
+                name="copyrightUrl"
+                :label="t('system.website.copyright.copyrightUrl.label')"
+            >
+                <UInput
+                    v-model="state.copyrightUrl"
+                    size="lg"
+                    :ui="{ root: 'w-full' }"
+                    :placeholder="t('system.website.copyright.copyrightUrl.placeholder')"
+                />
+            </UFormField>
+
+            <div class="bg-background sticky bottom-0 flex space-x-3 py-4">
                 <AccessControl :codes="['system-website:setConfig']">
                     <UButton
                         type="submit"

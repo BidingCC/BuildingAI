@@ -45,14 +45,23 @@ class AgreementDto {
 }
 
 class CopyrightDto {
-    @IsNotEmpty({ message: "版权名称不能为空" })
-    displayName: string;
+    @IsOptional()
+    displayName?: string;
 
-    @IsNotEmpty({ message: "图标URL不能为空" })
-    iconUrl: string;
+    @IsOptional()
+    iconUrl?: string;
 
-    @IsNotEmpty({ message: "链接URL不能为空" })
-    url: string;
+    @IsOptional()
+    url?: string;
+
+    @IsOptional()
+    copyrightText?: string;
+
+    @IsOptional()
+    copyrightBrand?: string;
+
+    @IsOptional()
+    copyrightUrl?: string;
 }
 
 class StatisticsDto {

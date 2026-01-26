@@ -1,7 +1,7 @@
 'use strict';
 
-var user_entity = require('@buildingai/db/entities/user.entity');
-var base_seeder = require('@buildingai/db/seeds/seeders/base.seeder');
+var db = require('@buildingai/db');
+var entities = require('@buildingai/db/entities');
 var path = require('path');
 var article_entity = require('../../entities/article.entity');
 var category_entity = require('../../entities/category.entity');
@@ -28,7 +28,7 @@ var path__namespace = /*#__PURE__*/_interopNamespace(path);
 
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
-class ArticleSeeder extends base_seeder.BaseSeeder {
+class ArticleSeeder extends db.BaseSeeder {
   static {
     __name(this, "ArticleSeeder");
   }
@@ -54,7 +54,7 @@ class ArticleSeeder extends base_seeder.BaseSeeder {
   async run(dataSource) {
     const articleRepository = dataSource.getRepository(article_entity.Article);
     const categoryRepository = dataSource.getRepository(category_entity.Category);
-    const userRepository = dataSource.getRepository(user_entity.User);
+    const userRepository = dataSource.getRepository(entities.User);
     const users = await userRepository.find({
       order: {
         createdAt: "ASC"

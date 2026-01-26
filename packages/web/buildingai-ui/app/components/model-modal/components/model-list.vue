@@ -2,14 +2,18 @@
 import {
     apiBatchDeleteAiModel,
     apiBatchSetAiModelIsActive,
+    apiBatchSortAiModel,
     apiGetAiModelList,
     apiSetAiModelIsActive,
 } from "@buildingai/service/consoleapi/ai-model";
-import type { AiModelInfo } from "@buildingai/service/consoleapi/ai-provider";
+import type { AiModelInfo, ModelType } from "@buildingai/service/consoleapi/ai-provider";
+import { apiGetAiProviderModelTypes } from "@buildingai/service/consoleapi/ai-provider";
 import type { AiModel, AiProvider } from "@buildingai/service/webapi/ai-conversation";
+import Draggable from "vuedraggable";
 
 const ModelModal = defineAsyncComponent(() => import("./model-form-modal.vue"));
 const ModelBatchEdit = defineAsyncComponent(() => import("./model-batch-edit.vue"));
+const ModelBillingSetting = defineAsyncComponent(() => import("./model-billing-setting.vue"));
 
 const props = defineProps<{
     provider?: {
@@ -25,9 +29,33 @@ const overlay = useOverlay();
 const { hasAccessByCodes } = useAccessControl();
 
 const models = shallowRef<AiModelInfo[]>([]);
-const search = shallowRef("");
+const searchForm = reactive({
+    modelType: "all",
+    search: "",
+});
 const selectedModels = ref<Set<string>>(new Set());
 const selectedModelsData = ref<Set<AiModelInfo>>(new Set());
+
+const modelTypeOptions = shallowRef<{ label: string; value: string }[]>([]);
+
+const getModelTypes = async () => {
+    try {
+        const data = await apiGetAiProviderModelTypes();
+        modelTypeOptions.value = [
+            { label: t("ai-provider.backend.model.modelTypes.all"), value: "all" },
+            ...data.map((type: ModelType) => ({
+                label: type.label,
+                value: type.value,
+            })),
+        ];
+    } catch (error) {
+        console.error("获取模型类型列表失败:", error);
+    }
+};
+
+onMounted(() => {
+    getModelTypes();
+});
 
 const { lockFn: getLists, isLock: loading } = useLockFn(async () => {
     if (!props.provider?.id) return;
@@ -36,7 +64,8 @@ const { lockFn: getLists, isLock: loading } = useLockFn(async () => {
         const result = await apiGetAiModelList({
             providerId: props.provider.id,
             isActive: undefined,
-            keyword: search.value?.trim() || undefined,
+            keyword: searchForm.search?.trim() || undefined,
+            modelType: searchForm.modelType === "all" ? undefined : searchForm.modelType,
         });
         models.value = result || [];
     } catch (error) {
@@ -48,7 +77,7 @@ const { lockFn: handleToggleActive } = useLockFn(async (modelId: string, isActiv
     try {
         await apiSetAiModelIsActive(modelId, isActive);
 
-        const model = models.value.find((m) => m.id === modelId);
+        const model = models.value.find((m: AiModelInfo) => m.id === modelId);
         if (model) {
             model.isActive = isActive;
         }
@@ -99,9 +128,29 @@ const handleBatchEdit = async () => {
     selectedModelsData.value.clear();
 };
 
+const handleBillingSetting = async () => {
+    if (selectedModels.value.size === 0) {
+        toast.warning(t("ai-provider.backend.messages.selectModel"));
+        return;
+    }
+
+    const modal = overlay.create(ModelBillingSetting);
+    const instance = modal.open({
+        models: selectedModelsData.value,
+        provider: props.provider,
+    });
+
+    const shouldRefresh = await instance.result;
+    if (shouldRefresh) {
+        getLists();
+    }
+    selectedModels.value.clear();
+    selectedModelsData.value.clear();
+};
+
 const { lockFn: handleBatchIsActiveChange } = useLockFn(async (isActive: boolean) => {
     if (selectedModels.value.size === 0) return;
-    const selectedIds = Array.from(selectedModels.value);
+    const selectedIds = Array.from(selectedModels.value) as string[];
     try {
         await apiBatchSetAiModelIsActive(selectedIds, isActive);
         toast.success(
@@ -119,7 +168,7 @@ const { lockFn: handleBatchIsActiveChange } = useLockFn(async (isActive: boolean
 
 const { lockFn: handleBatchDelete } = useLockFn(async () => {
     if (selectedModels.value.size === 0) return;
-    const selectedIds = Array.from(selectedModels.value);
+    const selectedIds = Array.from(selectedModels.value) as string[];
 
     try {
         await useModal({
@@ -137,6 +186,32 @@ const { lockFn: handleBatchDelete } = useLockFn(async () => {
         console.error("批量删除失败:", error);
         toast.error(t("console-common.batchDeleteFailed"));
     }
+});
+
+const { lockFn: handleDragEnd, isLock: isDragging } = useLockFn(async () => {
+    if (models.value.length === 0) return;
+
+    try {
+        // 提取排序后的模型ID数组
+        const sortedIds = models.value.map((model) => model.id as string);
+
+        await apiBatchSortAiModel(sortedIds);
+        // 刷新列表以获取最新的排序
+        await getLists();
+    } catch (error) {
+        console.error("更新排序失败:", error);
+        // 如果更新失败，重新加载列表恢复原顺序
+        await getLists();
+    }
+});
+
+const draggableModels = computed({
+    get: () => models.value,
+    set: (newOrder: AiModelInfo[]) => {
+        models.value = newOrder;
+        // 拖拽结束后更新排序
+        handleDragEnd();
+    },
 });
 
 const getBatchItems = () => {
@@ -199,7 +274,7 @@ const toggleSelectAll = () => {
         const newSelectedModels = new Set<string>();
         const newSelectedModelsData = new Set<AiModelInfo>();
 
-        models.value.forEach((model) => {
+        models.value.forEach((model: AiModelInfo) => {
             if (model.id) {
                 newSelectedModels.add(model.id as string);
                 newSelectedModelsData.add(model);
@@ -239,19 +314,20 @@ const triggerSearch = useDebounceFn(() => {
 }, 300);
 
 watch(
-    () => search.value,
+    () => searchForm,
     () => triggerSearch(),
 );
 </script>
 
 <template>
-    <div class="w-full space-y-2 px-5">
+    <div class="w-full space-y-2 px-5 pb-6">
         <div class="mb-4 pl-2">
             <UInput
-                v-model="search"
+                v-model="searchForm.search"
                 variant="soft"
                 :placeholder="t('ai-provider.backend.model.searchPlaceholder')"
                 :ui="{ root: 'w-full', base: 'bg-accent' }"
+                @change="getLists()"
             />
         </div>
         <div class="mb-4 flex items-center justify-between pl-2">
@@ -271,6 +347,18 @@ watch(
                 </h3>
             </div>
             <div class="flex items-center gap-2">
+                <USelect
+                    v-model="searchForm.modelType"
+                    :items="modelTypeOptions"
+                    label-key="label"
+                    value-key="value"
+                    :placeholder="t('ai-provider.backend.model.modelTypeFilter')"
+                    size="sm"
+                    class="w-30"
+                    @change="getLists"
+                >
+                </USelect>
+
                 <UDropdownMenu
                     v-if="
                         hasAccessByCodes(['ai-models:delete']) ||
@@ -296,6 +384,16 @@ watch(
                         "
                     />
                 </UDropdownMenu>
+                <AccessControl :codes="['ai-models:update']">
+                    <UButton
+                        color="primary"
+                        variant="soft"
+                        size="sm"
+                        @click="() => handleBillingSetting()"
+                    >
+                        {{ t("ai-provider.backend.model.billingSetting") }}
+                    </UButton>
+                </AccessControl>
                 <AccessControl :codes="['ai-models:create']">
                     <UButton
                         color="primary"
@@ -310,7 +408,10 @@ watch(
             </div>
         </div>
 
-        <div v-if="loading && search.trim() === '' && models.length === 0" class="space-y-3">
+        <div
+            v-if="loading && searchForm.search.trim() === '' && models.length === 0"
+            class="space-y-3"
+        >
             <div
                 v-for="i in 10"
                 :key="i"
@@ -318,103 +419,159 @@ watch(
             ></div>
         </div>
         <template v-if="models.length > 0">
-            <div
-                v-for="model in models"
-                :key="model.id"
-                class="group hover:bg-muted flex items-center gap-3 rounded-lg p-2 transition-colors"
-                :class="{ 'bg-primary/5': selectedModels.has(model.id as string) }"
+            <Draggable
+                v-model="draggableModels"
+                :disabled="isDragging"
+                handle=".drag-handle"
+                item-key="id"
+                animation="200"
+                class="space-y-0"
             >
-                <div
-                    class="flex-none opacity-0 group-hover:opacity-100"
-                    :class="{ 'opacity-100': selectedModels.has(model.id as string) }"
-                >
-                    <UCheckbox
-                        :model-value="selectedModels.has(model.id as string)"
-                        @update:model-value="toggleModelSelection(model)"
-                    />
-                </div>
+                <template #item="{ element: model }">
+                    <div
+                        class="group hover:bg-muted flex items-center gap-3 rounded-lg p-2 transition-colors"
+                        :class="{ 'bg-primary/5': selectedModels.has(model.id as string) }"
+                    >
+                        <div
+                            class="flex-none opacity-0 group-hover:opacity-100"
+                            :class="{ 'opacity-100': selectedModels.has(model.id as string) }"
+                        >
+                            <UCheckbox
+                                :model-value="selectedModels.has(model.id as string)"
+                                @update:model-value="toggleModelSelection(model)"
+                            />
+                        </div>
 
-                <div class="flex-none">
-                    <UAvatar
-                        :src="props.provider?.iconUrl"
-                        :alt="props.provider?.name"
-                        :ui="{
-                            root: 'rounded bg-transparent size-8',
-                            fallback: 'text-inverted',
-                        }"
-                        :class="[props.provider?.iconUrl ? '' : 'bg-primary']"
-                    />
-                </div>
-                <UPopover
-                    mode="hover"
-                    :content="{
-                        align: 'center',
-                        side: 'left',
-                        sideOffset: 10,
-                    }"
-                >
-                    <div class="min-w-0 flex-1">
-                        <div class="mb-1 flex items-center gap-2">
-                            <h4
-                                class="hover:text-primary cursor-pointer truncate text-sm font-medium text-gray-900 transition-colors dark:text-gray-100"
-                            >
-                                {{ model.name }}
-                            </h4>
+                        <div class="flex-none">
+                            <UAvatar
+                                :src="props.provider?.iconUrl"
+                                :alt="props.provider?.name"
+                                :ui="{
+                                    root: 'rounded bg-transparent size-8',
+                                    fallback: 'text-inverted',
+                                }"
+                                :class="[props.provider?.iconUrl ? '' : 'bg-primary']"
+                            />
+                        </div>
+                        <UPopover
+                            mode="hover"
+                            :content="{
+                                align: 'center',
+                                side: 'left',
+                                sideOffset: 10,
+                            }"
+                        >
+                            <div class="min-w-0 flex-1">
+                                <div class="mb-1 flex items-center gap-2">
+                                    <h4
+                                        class="hover:text-primary cursor-pointer truncate text-sm font-medium text-gray-900 transition-colors dark:text-gray-100"
+                                    >
+                                        {{ model.name }}
+                                    </h4>
 
-                            <div class="flex gap-1">
-                                <UBadge
-                                    variant="soft"
-                                    color="neutral"
-                                    v-for="tag in getModelTypeTags(model.modelType)"
-                                    :key="tag"
-                                    size="xs"
+                                    <div class="flex gap-1">
+                                        <UBadge
+                                            variant="soft"
+                                            color="neutral"
+                                            v-for="tag in getModelTypeTags(model.modelType)"
+                                            :key="tag"
+                                            size="xs"
+                                        >
+                                            {{ tag }}
+                                        </UBadge>
+
+                                        <UBadge
+                                            v-if="model.features?.includes('vision')"
+                                            variant="soft"
+                                            color="info"
+                                            size="xs"
+                                        >
+                                            <UIcon name="i-lucide-image-play" size="xs" />
+                                            {{ $t("common.ai.vision") }}
+                                        </UBadge>
+                                        <UBadge
+                                            v-if="model.features?.includes('video')"
+                                            variant="soft"
+                                            color="warning"
+                                            size="xs"
+                                        >
+                                            <UIcon name="i-lucide-video" class="mr-1" size="xs" />
+                                            {{ $t("common.ai.video") }}
+                                        </UBadge>
+                                        <UBadge
+                                            v-if="model.features?.includes('audio')"
+                                            variant="soft"
+                                            color="success"
+                                            size="xs"
+                                        >
+                                            <UIcon
+                                                name="i-lucide-audio-lines"
+                                                class="mr-1"
+                                                size="xs"
+                                            />
+                                            {{ $t("common.ai.audio") }}
+                                        </UBadge>
+                                    </div>
+                                    <UIcon
+                                        v-if="model.membershipLevel.length > 0"
+                                        name="i-lucide-crown"
+                                        class="text-warning size-4"
+                                    />
+                                </div>
+                                <div
+                                    v-if="model.billingRule.power > 0"
+                                    class="text-muted-foreground flex items-center gap-2 text-xs"
                                 >
-                                    {{ tag }}
+                                    <span
+                                        >{{ model.billingRule?.power || 0 }}
+                                        {{ t("ai-provider.backend.model.points") }}</span
+                                    >
+                                    <span>•</span>
+                                    <span
+                                        >{{ model.billingRule?.tokens || 0 }}
+                                        {{ t("ai-provider.backend.model.tokens") }}</span
+                                    >
+                                </div>
+                                <UBadge v-else variant="soft" color="primary" size="sm">
+                                    Free
                                 </UBadge>
                             </div>
-                        </div>
-                        <div
-                            v-if="model.billingRule.power > 0"
-                            class="text-muted-foreground flex items-center gap-2 text-xs"
-                        >
-                            <span
-                                >{{ model.billingRule?.power || 0 }}
-                                {{ t("ai-provider.backend.model.points") }}</span
-                            >
-                            <span>•</span>
-                            <span
-                                >{{ model.billingRule?.tokens || 0 }}
-                                {{ t("ai-provider.backend.model.tokens") }}</span
-                            >
-                        </div>
-                        <UBadge v-else variant="soft" color="primary" size="sm"> Free </UBadge>
-                    </div>
-                    <template #content>
-                        <ModelInfoPopover
-                            :model="model as never as unknown as AiModel"
-                            :provider="props.provider as AiProvider"
-                            :show-billing-rule="true"
-                        />
-                    </template>
-                </UPopover>
+                            <template #content>
+                                <ModelInfoPopover
+                                    :model="model as never as unknown as AiModel"
+                                    :provider="props.provider as AiProvider"
+                                    :show-billing-rule="true"
+                                />
+                            </template>
+                        </UPopover>
 
-                <div class="flex flex-none items-center gap-3">
-                    <AccessControl :codes="['ai-models:update']">
-                        <UButton
-                            color="primary"
-                            variant="ghost"
-                            icon="i-lucide-edit"
-                            size="sm"
-                            @click="handleEditModel(model)"
-                        />
-                        <USwitch
-                            size="sm"
-                            :model-value="model.isActive"
-                            @update:model-value="handleToggleActive(model.id, $event)"
-                        />
-                    </AccessControl>
-                </div>
-            </div>
+                        <div class="flex flex-none items-center gap-3">
+                            <AccessControl :codes="['ai-models:update']">
+                                <UButton
+                                    color="primary"
+                                    variant="ghost"
+                                    icon="i-lucide-edit"
+                                    size="sm"
+                                    @click="handleEditModel(model)"
+                                />
+                                <USwitch
+                                    size="sm"
+                                    :model-value="model.isActive"
+                                    @update:model-value="handleToggleActive(model.id, $event)"
+                                />
+                                <UButton
+                                    class="drag-handle cursor-move"
+                                    color="neutral"
+                                    variant="ghost"
+                                    icon="i-lucide-grip-vertical"
+                                    size="sm"
+                                    :disabled="isDragging"
+                                />
+                            </AccessControl>
+                        </div>
+                    </div>
+                </template>
+            </Draggable>
         </template>
 
         <div v-else-if="!loading && models.length === 0" class="py-12 text-center">

@@ -51,10 +51,9 @@
         "provider": "供应商",
         "conversations": "对话",
         "noData": "暂无数据",
-        "extensionUsage": "插件使用排行",
-        "totalExtensions": "总插件数：",
+        "extensionUsage": "应用使用排行",
+        "totalExtensions": "总应用数：",
         "enabledExtensions": "已启用：",
         "usageCount": "使用次数"
     }
 }
-

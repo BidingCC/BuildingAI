@@ -8,6 +8,8 @@ import {
     updateSecret,
     updateSecretStatus,
 } from "@buildingai/service/consoleapi/secret-list";
+import type { SecretTemplateRequest } from "@buildingai/service/consoleapi/secret-template";
+import { getAllSecretTemplates } from "@buildingai/service/consoleapi/secret-template";
 import type { Row, Table } from "@tanstack/table-core";
 
 import type { DropdownMenuItem, TableColumn } from "#ui/types";
@@ -24,8 +26,10 @@ const TimeDisplay = resolveComponent("TimeDisplay");
 
 const searchForm = shallowReactive({
     name: "",
+    templateId: "all",
 });
 const selectedIds = shallowRef<string[]>([]);
+const templateList = shallowRef<SecretTemplateRequest[]>([]);
 
 const { paging, getLists } = usePaging({
     fetchFun: getSecretList,
@@ -186,13 +190,50 @@ const handleSubmit = async (data: SecretConfigRequest, id?: string) => {
     getLists();
 };
 
-onMounted(() => getLists());
+const getTemplateList = async () => {
+    try {
+        const templates = await getAllSecretTemplates();
+        templateList.value = templates;
+    } catch (error) {
+        console.error("加载模板列表失败:", error);
+    }
+};
+
+/**
+ * 处理模板筛选变化
+ */
+const handleTemplateChange = () => {
+    getLists();
+};
+
+onMounted(() => {
+    getTemplateList();
+    getLists();
+});
 </script>
 <template>
     <div class="flex h-full flex-col gap-4">
         <!-- 顶部控制区域 -->
-        <div class="flex items-center justify-between">
-            <UInput :placeholder="t('ai-secret.backend.list.placeholder')" />
+        <div class="flex items-center justify-between gap-4">
+            <div class="flex flex-1 items-center gap-2">
+                <UInput
+                    v-model="searchForm.name"
+                    :placeholder="t('ai-secret.backend.list.placeholder')"
+                    @keyup.enter="getLists"
+                />
+                <USelect
+                    v-model="searchForm.templateId"
+                    :items="[
+                        { label: t('console-common.all'), value: 'all' },
+                        ...templateList.map((t) => ({ label: t.name, value: t.id })),
+                    ]"
+                    label-key="label"
+                    value-key="value"
+                    :placeholder="t('ai-secret.backend.list.form.keyType')"
+                    class="w-48"
+                    @update:model-value="handleTemplateChange"
+                />
+            </div>
 
             <div class="flex items-center gap-2">
                 <UButton

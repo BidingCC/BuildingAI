@@ -130,6 +130,8 @@ const handlePublish = async () => {
             agent.value.publishConfig = publishConfig;
         }
 
+        await loadAgentDetail();
+
         toast.success("智能体发布成功！");
 
         activeTab.value = "status";
@@ -155,6 +157,8 @@ const handleUnpublish = async () => {
             agent.value.publishConfig = undefined;
         }
 
+        await loadAgentDetail();
+
         toast.success("已取消发布");
     } catch (error: unknown) {
         console.error("取消发布智能体失败:", error);
@@ -172,6 +176,8 @@ const handleRegenerateApiKey = async () => {
         if (agent.value) {
             agent.value.apiKey = result.apiKey;
         }
+
+        await loadAgentDetail();
 
         toast.success("API密钥重新生成成功");
     } catch (error: unknown) {
@@ -200,7 +206,6 @@ definePageMeta({ layout: "full-screen" });
                         {{ $t("ai-agent.backend.publish.desc") }}
                     </p>
                 </div>
-
                 <!-- 操作按钮 -->
                 <div class="flex gap-2">
                     <UButton v-if="!isPublished" :loading="publishing" @click="handlePublish">

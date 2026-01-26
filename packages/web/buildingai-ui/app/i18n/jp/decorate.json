@@ -1,4 +1,21 @@
 {
+    "apps": {
+        "modalTitle": "アプリセンター広告",
+        "heroImage": "広告画像",
+        "extensionCard": {
+            "statusEnabled": "有効",
+            "statusDisabled": "無効",
+            "aliasVisible": "表示",
+            "aliasHidden": "非表示",
+            "editAction": "DIY装飾"
+        },
+        "extensionEdit": {
+            "displayName": "表示名",
+            "displayNamePlaceholder": "表示名を入力",
+            "aliasShowLabel": "表示設定",
+            "aliasShowDescription": "アプリセンターページに表示するかどうか"
+        }
+    },
     "micropage": {
         "title": "マイクロページ管理",
         "list": {

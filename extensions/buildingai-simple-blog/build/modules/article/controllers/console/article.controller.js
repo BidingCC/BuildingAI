@@ -1,7 +1,7 @@
 'use strict';
 
 var base = require('@buildingai/base');
-var extensionController_decorator = require('@buildingai/core/decorators/extension-controller.decorator');
+var decorators = require('@buildingai/core/decorators');
 var playground_decorator = require('@buildingai/decorators/playground.decorator');
 var paramValidate_pipe = require('@buildingai/pipe/param-validate.pipe');
 var common = require('@nestjs/common');
@@ -235,7 +235,7 @@ _ts_decorate([
   _ts_metadata("design:returntype", Promise)
 ], ArticleController.prototype, "unpublish", null);
 ArticleController = _ts_decorate([
-  extensionController_decorator.ExtensionConsoleController("article", "Blog Article Management"),
+  decorators.ExtensionConsoleController("article", "Blog Article Management"),
   _ts_metadata("design:type", Function),
   _ts_metadata("design:paramtypes", [
     typeof article_service.ArticleService === "undefined" ? Object : article_service.ArticleService

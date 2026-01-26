@@ -7,7 +7,7 @@ import {
     createHttpClient,
     type HttpMethod,
     type RequestOptions,
-    type ResponseSchema,
+    // type ResponseSchema,
 } from "../index";
 
 // ==================== API Configuration Constants ====================
@@ -21,8 +21,8 @@ const BASE_API =
         ? import.meta.env.VITE_DEVELOP_APP_BASE_URL || ""
         : import.meta.env.VITE_PRODUCTION_APP_BASE_URL || "";
 
-const WEB_API_PREFIX = import.meta.env.VITE_APP_WEB_API_PREFIX || "/api/web";
-const CONSOLE_API_PREFIX = import.meta.env.VITE_APP_CONSOLE_API_PREFIX || "/api/console";
+const WEB_API_PREFIX = import.meta.env.VITE_APP_WEB_API_PREFIX || "/api";
+const CONSOLE_API_PREFIX = import.meta.env.VITE_APP_CONSOLE_API_PREFIX || "/consoleapi";
 
 // ==================== Type Definitions ====================
 
@@ -59,7 +59,7 @@ export interface RequestFactoryOptions {
 function createRequestFactory(options: RequestFactoryOptions) {
     const {
         apiPrefix,
-        enableStatusLog = false,
+        // enableStatusLog = false,
         filterEmptyParams = false,
         requireAuth = false,
         customParamsProcessor,
@@ -77,11 +77,11 @@ function createRequestFactory(options: RequestFactoryOptions) {
     http.setBaseURL(`${BASE_API}${apiPrefix}`);
 
     // Configure status code handling logic
-    http.setStatusHandler((status: number, response: ResponseSchema) => {
-        if (enableStatusLog && import.meta.client) {
-            console.log(`[HTTP ${status}]`, response);
-        }
-    });
+    // http.setStatusHandler((status: number, response: ResponseSchema) => {
+    //     if (enableStatusLog && import.meta.client) {
+    //         console.log(`[HTTP ${status}]`, response);
+    //     }
+    // });
 
     // Request interceptor - Handle authentication headers and runtime configuration
     http.interceptors.request(async (config) => {
@@ -382,8 +382,8 @@ function createPluginApiRequest(apiType: string = WEB_API_PREFIX) {
         try {
             if (typeof window !== "undefined" && window.location) {
                 const pathname = window.location.pathname;
-                // Match pattern: /extensions/{pluginKey}/
-                const match = pathname.match(/\/extensions\/([^/]+)/);
+                // Match pattern: /extension/{pluginKey}/
+                const match = pathname.match(/\/extension\/([^/]+)/);
                 if (match && match[1]) {
                     finalPluginKey = match[1];
                 }

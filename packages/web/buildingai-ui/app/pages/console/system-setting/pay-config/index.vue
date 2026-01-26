@@ -1,6 +1,9 @@
 <script lang="ts" setup>
-import type { PayconfigTableData } from "@buildingai/service/consoleapi/payconfig";
-import type { BooleanNumberType } from "@buildingai/service/consoleapi/payconfig";
+import { PayConfigPayType, type PayConfigType } from "@buildingai/constants/shared";
+import {
+    type BooleanNumberType,
+    type PayconfigTableData,
+} from "@buildingai/service/consoleapi/payconfig";
 import {
     apiGetPayconfigList,
     apiUpdatePayconfigStatus,
@@ -69,12 +72,10 @@ const getPayconfigList = async () => {
     }));
 };
 
-const edit = (id: string) => {
+const edit = (id: string, type: PayConfigType) => {
     router.push({
         path: useRoutePath("system-payconfig:update"),
-        query: {
-            id,
-        },
+        query: { id, type },
     });
 };
 
@@ -105,7 +106,7 @@ onMounted(() => getPayconfigList());
                 <UAvatar
                     :src="row.original.logo"
                     :alt="
-                        row.original.payType === 1
+                        row.original.payType === PayConfigPayType.WECHAT
                             ? t('payment-config.wxPay')
                             : t('payment-config.alipayPay')
                     "
@@ -115,7 +116,7 @@ onMounted(() => getPayconfigList());
             </template>
             <template #payType-cell="{ row }">
                 {{
-                    row.original.payType === 1
+                    row.original.payType === PayConfigPayType.WECHAT
                         ? t("payment-config.wxPay")
                         : t("payment-config.aliPay")
                 }}
@@ -141,7 +142,7 @@ onMounted(() => getPayconfigList());
                         size="md"
                         variant="ghost"
                         color="primary"
-                        @click="edit(row.original.id)"
+                        @click="edit(row.original.id, row.original.payType)"
                     >
                         {{ $t("console-common.edit") }}
                     </UButton>

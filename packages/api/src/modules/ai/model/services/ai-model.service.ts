@@ -1,12 +1,13 @@
 import { BaseService, FieldFilterOptions } from "@buildingai/base";
 import { AI_DEFAULT_MODEL } from "@buildingai/constants";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { AiModel } from "@buildingai/db/entities/ai-model.entity";
+import { AiModel } from "@buildingai/db/entities";
 import { FindOptionsWhere, In, Like, Repository } from "@buildingai/db/typeorm";
 import { DictService } from "@buildingai/dict";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { buildWhere } from "@buildingai/utils";
 import {
+    BatchSortAiModelDto,
     CreateAiModelDto,
     QueryAiModelDto,
     UpdateAiModelDto,
@@ -124,7 +125,7 @@ export class AiModelService extends BaseService<AiModel> {
             const models = await this.findAll({
                 where: { isActive: true },
                 order: {
-                    sortOrder: "ASC",
+                    sortOrder: "DESC",
                     createdAt: "DESC",
                 },
                 excludeFields,
@@ -187,6 +188,43 @@ export class AiModelService extends BaseService<AiModel> {
         } catch (error) {
             this.logger.error(`查询AI模型列表失败: ${error.message}`, error.stack);
             throw HttpErrorFactory.internal("查询AI模型列表失败");
+        }
+    }
+
+    /**
+     * 批量排序AI模型
+     * @description 根据提供的ID数组顺序更新模型的sortOrder字段
+     * @param dto 批量排序DTO，包含排序后的模型ID数组
+     * @returns 更新结果
+     */
+    async batchSortModels(dto: BatchSortAiModelDto): Promise<void> {
+        const { sort } = dto;
+
+        if (!sort || sort.length === 0) {
+            throw HttpErrorFactory.paramError("排序数组不能为空");
+        }
+
+        try {
+            // 验证所有模型ID是否存在
+            const models = await this.findAll({
+                where: { id: In(sort) },
+            });
+
+            if (models.length !== sort.length) {
+                throw HttpErrorFactory.business("部分模型ID不存在");
+            }
+
+            // 根据数组顺序计算 sortOrder（后端按 DESC 排序，所以第一个元素需要最大的 sortOrder）
+            // 第一个元素 sortOrder = length - 1，最后一个元素 sortOrder = 0
+            const updatePromises = sort.map((id, index) => {
+                const sortOrderValue = sort.length - 1 - index;
+                return this.updateById(id, { sortOrder: sortOrderValue } as UpdateAiModelDto);
+            });
+
+            await Promise.all(updatePromises);
+        } catch (error) {
+            this.logger.error(`批量排序AI模型失败: ${error.message}`, error.stack);
+            throw HttpErrorFactory.badRequest("批量排序AI模型失败");
         }
     }
 }

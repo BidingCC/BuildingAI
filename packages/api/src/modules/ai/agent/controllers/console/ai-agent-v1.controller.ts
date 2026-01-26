@@ -1,9 +1,13 @@
+import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
+import { AiModel } from "@buildingai/db/entities";
+import { Repository } from "@buildingai/db/typeorm";
 import { BuildFileUrl } from "@buildingai/decorators/file-url.decorator";
 import { Public } from "@buildingai/decorators/public.decorator";
 import { PaginationDto } from "@buildingai/dto/pagination.dto";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { ConsoleController } from "@common/decorators/controller.decorator";
 import { PublicAccessTokenGuard } from "@common/guards/public-access-token.guard";
+import { MembershipValidationCommandHandler } from "@modules/ai/chat/handlers";
 import { Body, Delete, Get, Param, Post, Put, Query, Req, Res, UseGuards } from "@nestjs/common";
 import type { Request, Response } from "express";
 
@@ -26,10 +30,13 @@ import { AiAgentPublicChatService } from "../../services/ai-agent-v1-chat.servic
 @ConsoleController("v1", "V1 API")
 export class AiAgentV1Controller {
     constructor(
+        @InjectRepository(AiModel)
+        private readonly aiModelRepository: Repository<AiModel>,
         private readonly AiAgentService: AiAgentService,
         private readonly AiAgentChatService: AiAgentChatService,
         private readonly AiAgentPublicChatService: AiAgentPublicChatService,
         private readonly annotationService: AiAgentAnnotationService,
+        private readonly membershipValidationHandler: MembershipValidationCommandHandler,
     ) {}
 
     /**
@@ -88,6 +95,30 @@ export class AiAgentV1Controller {
                 : dto.billingMode === "user"
                   ? new UserBillingStrategy()
                   : new SmartUserBillingStrategy();
+
+        // 第三方集成智能体不需要配置模型，跳过模型检查
+        const isThirdPartyAgent = agent.createMode && agent.createMode !== "direct";
+        if (!isThirdPartyAgent) {
+            const modelId = agentChatDto.modelConfig?.id;
+            if (!modelId) {
+                throw HttpErrorFactory.badRequest("智能体需要配置模型");
+            }
+
+            const model = await this.aiModelRepository.findOne({
+                where: { id: modelId },
+                relations: ["provider"],
+            });
+
+            if (!model) {
+                throw HttpErrorFactory.notFound("Model not found.");
+            }
+
+            const membershipUserId = (req.user as { id?: string } | undefined)?.id ?? "anonymous";
+            await this.membershipValidationHandler.validateModelAccessOrThrow(
+                membershipUserId,
+                model,
+            );
+        }
 
         try {
             if (dto.responseMode === "streaming") {

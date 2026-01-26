@@ -38,7 +38,8 @@
         },
         "messages": {
             "enableSuccess": "Provider enabled",
-            "disableSuccess": "Provider disabled"
+            "disableSuccess": "Provider disabled",
+            "selectModel": "Please select a model"
         },
         "empty": {
             "noProviders": "No providers",
@@ -62,6 +63,7 @@
             "noModelsDescription": "No models configured for this provider",
             "searchPlaceholder": "Search models",
             "batchOperation": "Batch Operation ({count})",
+            "billingSetting": "Billing Settings",
             "form": {
                 "name": "Model Name",
                 "namePlaceholder": "Enter model name",
@@ -78,6 +80,8 @@
                 "setAsDefault": "Set as system default",
                 "modelType": "Model Type",
                 "modelTypePlaceholder": "Enter model type",
+                "multimodal": "Multimodal",
+                "multimodalPlaceholder": "Enter multimodal configuration",
                 "billing": "Billing Rules",
                 "power": "Credits",
                 "billingHelp": "Credits per tokens"
@@ -87,7 +91,12 @@
                 "model": "Model ID",
                 "maxContext": "Max Context",
                 "isActive": "Enabled",
-                "billingRule": "Chat Cost"
+                "billingRule": "Chat Cost",
+                "membershipLevel": "Membership Level",
+                "membershipLevelTip": "Specify which membership levels can use this model. Leave empty to allow all users.",
+                "membershipLevelAll": "All Users",
+                "dialogTitle": "Batch Billing Settings",
+                "dialogDescription": "Applies only to conversation mode"
             },
             "validation": {
                 "nameRequired": "Model name required",
@@ -104,6 +113,10 @@
                 "isActiveDisabled": "Model disabled",
                 "deleteTitle": "Delete Model",
                 "deleteMsg": "Delete selected models? This cannot be undone."
+            },
+            "modelTypeFilter": "Filter by Model Type",
+            "modelTypes": {
+                "all": "All"
             }
         },
         "modelConfig": {

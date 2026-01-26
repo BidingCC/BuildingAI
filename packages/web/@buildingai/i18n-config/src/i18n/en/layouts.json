@@ -3,6 +3,7 @@
     "admin": "Workspace",
     "power": "Power",
     "recharge": "Recharge",
+    "memberSubscription": "Membership Subscription",
     "logout": "Logout",
     "search": "Search",
     "sidebar": "Sidebar Mode",
@@ -24,4 +25,11 @@
     "powerDetail": "Usage",
     "userAgreement": "User Agreement",
     "privacyPolicy": "Privacy Policy"
+    ,
+    "systemInfo": {
+        "title": "System Info",
+        "description": "View current version and system ID",
+        "version": "Current Version",
+        "systemId": "System ID"
+    }
 }

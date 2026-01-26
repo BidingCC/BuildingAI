@@ -1,5 +1,5 @@
 import { BaseController } from "@buildingai/base";
-import { Tag } from "@buildingai/db/entities/tag.entity";
+import { Tag } from "@buildingai/db/entities";
 import { UUIDValidationPipe } from "@buildingai/pipe/param-validate.pipe";
 import { ConsoleController } from "@common/decorators";
 import { Permissions } from "@common/decorators/permissions.decorator";

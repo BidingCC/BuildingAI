@@ -1,0 +1,70 @@
+{
+    "list": {
+        "search": {
+            "placeholder": "カラム名を検索..."
+        },
+        "table": {
+            "columns": {
+                "select": "選択",
+                "name": "名前",
+                "sort": "並び順",
+                "articleCount": "記事数",
+                "createdAt": "作成日時",
+                "actions": "操作"
+            },
+            "actions": {
+                "edit": "編集",
+                "delete": "削除",
+                "batchDelete": "一括削除",
+                "create": "カラムを作成",
+                "selected": "選択済み",
+                "showColumns": "列を表示"
+            }
+        },
+        "messages": {
+            "fetchFailed": "カラムリストの取得に失敗しました",
+            "warmTip": "ご注意",
+            "deleteConfirm": "このカラムを削除してもよろしいですか？",
+            "batchDeleteConfirm": "選択したカラムを削除してもよろしいですか？",
+            "deleteSuccess": "削除に成功しました",
+            "deleteFailed": "削除に失敗しました"
+        }
+    },
+    "edit": {
+        "title": {
+            "create": "カラムを作成",
+            "edit": "カラムを編集"
+        },
+        "description": {
+            "create": "新しい記事カラムを作成します",
+            "edit": "記事カラムの情報を編集します"
+        },
+        "form": {
+            "name": {
+                "label": "名前",
+                "placeholder": "カラム名を入力してください",
+                "required": "名前は必須です"
+            },
+            "description": {
+                "label": "説明",
+                "placeholder": "カラムの説明を入力してください（任意）"
+            },
+            "sort": {
+                "label": "並び順",
+                "placeholder": "並び順の値を入力してください（数値が大きいほど先に表示されます）"
+            }
+        },
+        "buttons": {
+            "save": "保存",
+            "saving": "保存中...",
+            "cancel": "キャンセル"
+        },
+        "messages": {
+            "fetchDetailFailed": "カラムの詳細を取得できませんでした",
+            "createSuccess": "作成に成功しました",
+            "createFailed": "作成に失敗しました",
+            "updateSuccess": "更新に成功しました",
+            "updateFailed": "更新に失敗しました"
+        }
+    }
+}

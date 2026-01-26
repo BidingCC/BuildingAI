@@ -74,9 +74,18 @@ export class PluginLinksService {
             );
 
             // Iterate through each plugin directory
-            for (const pluginName of pluginDirs) {
-                const pluginPath = join(this.extensionsDir, pluginName);
+            for (const pluginDir of pluginDirs) {
+                const pluginPath = join(this.extensionsDir, pluginDir);
+                const manifestPath = join(pluginPath, "manifest.json");
                 const webPagesPath = join(pluginPath, "src", "web", "pages");
+
+                // Read plugin identifier and name from manifest.json
+                const { identifier, name } = this.getPluginInfoFromManifest(
+                    manifestPath,
+                    pluginDir,
+                );
+                const pluginName = name; // Use name for display
+                const pluginIdentifier = identifier; // Use identifier for path
 
                 // Check if src/web/pages directory exists
                 if (!this.existsSync(webPagesPath)) {
@@ -91,6 +100,7 @@ export class PluginLinksService {
                 const pluginLinksForPlugin = this.scanVueFilesInDirectory(
                     webPagesPath,
                     pluginName,
+                    pluginIdentifier,
                     "",
                 );
                 pluginLinks.push(...pluginLinksForPlugin);
@@ -108,13 +118,15 @@ export class PluginLinksService {
     /**
      * Recursively scan Vue files in a directory
      * @param dirPath Directory path to scan
-     * @param pluginName Plugin name
+     * @param pluginName Plugin name (for display)
+     * @param pluginIdentifier Plugin identifier (for path)
      * @param relativePath Relative path within pages directory
      * @returns PluginLinkInfo[] Array of plugin link information
      */
     private scanVueFilesInDirectory(
         dirPath: string,
         pluginName: string,
+        pluginIdentifier: string,
         relativePath: string,
     ): PluginLinkInfo[] {
         const pluginLinks: PluginLinkInfo[] = [];
@@ -142,12 +154,18 @@ export class PluginLinksService {
                     const subDirLinks = this.scanVueFilesInDirectory(
                         entryPath,
                         pluginName,
+                        pluginIdentifier,
                         entryRelativePath,
                     );
                     pluginLinks.push(...subDirLinks);
                 } else if (entry.isFile() && entry.name.endsWith(".vue")) {
                     // Process Vue file
-                    const linkInfo = this.parseVueFile(entryPath, pluginName, entryRelativePath);
+                    const linkInfo = this.parseVueFile(
+                        entryPath,
+                        pluginName,
+                        pluginIdentifier,
+                        entryRelativePath,
+                    );
                     if (linkInfo) {
                         pluginLinks.push(linkInfo);
                     }
@@ -166,13 +184,15 @@ export class PluginLinksService {
     /**
      * Parse Vue file to extract link information
      * @param filePath Vue file path
-     * @param pluginName Plugin name
+     * @param pluginName Plugin name (for display)
+     * @param pluginIdentifier Plugin identifier (for path)
      * @param relativePath Relative path within pages directory
      * @returns PluginLinkInfo | null Parsed link information or null if not a link
      */
     private parseVueFile(
         filePath: string,
         pluginName: string,
+        pluginIdentifier: string,
         relativePath: string,
     ): PluginLinkInfo | null {
         try {
@@ -227,8 +247,8 @@ export class PluginLinksService {
             const nameMatch = metaContent.match(nameRegex);
             const linkName = nameMatch ? nameMatch[1] : this.generateLinkNameFromPath(relativePath);
 
-            // Generate link path
-            const linkPath = this.generateLinkPath(pluginName, relativePath);
+            // Generate link path using identifier (not name)
+            const linkPath = this.generateLinkPath(pluginIdentifier, relativePath);
 
             return {
                 pluginName,
@@ -265,18 +285,18 @@ export class PluginLinksService {
     }
 
     /**
-     * Generate link path from plugin name and relative path
-     * @param pluginName Plugin name
+     * Generate link path from plugin identifier and relative path
+     * @param pluginIdentifier Plugin identifier (from manifest.identifier)
      * @param relativePath Relative file path
      * @returns string Generated link path
      */
-    private generateLinkPath(pluginName: string, relativePath: string): string {
+    private generateLinkPath(pluginIdentifier: string, relativePath: string): string {
         const fileName = relativePath.replace(/\.vue$/, "");
-        const pathParts = fileName.split("/");
+        const pathParts = fileName.split("/").filter((part) => part !== "");
 
-        // If it's index.vue at root level, path is just plugin name
-        if (fileName === "index") {
-            return `/extensions/${pluginName}/`;
+        // If it's index.vue at root level, path is just plugin identifier
+        if (fileName === "index" || pathParts.length === 0) {
+            return `/app/${pluginIdentifier}`;
         }
 
         // If the last part is index, remove it from the path
@@ -286,12 +306,65 @@ export class PluginLinksService {
 
         // If no path parts left after removing index, return root path
         if (pathParts.length === 0) {
-            return `/extensions/${pluginName}/`;
+            return `/app/${pluginIdentifier}`;
         }
 
-        // Otherwise concatenate plugin name and remaining path parts
+        // Otherwise concatenate plugin identifier and remaining path parts
         const remainingPath = pathParts.join("/");
-        return `/extensions/${pluginName}/${remainingPath}/`;
+        return `/app/${pluginIdentifier}/${remainingPath}`;
+    }
+
+    /**
+     * Get plugin info (identifier and name) from manifest.json
+     * @param manifestPath Path to manifest.json
+     * @param fallbackName Fallback name if manifest.json is not found or invalid
+     * @returns Object with identifier and name
+     */
+    private getPluginInfoFromManifest(
+        manifestPath: string,
+        fallbackName: string,
+    ): { identifier: string; name: string } {
+        try {
+            if (!this.existsSync(manifestPath)) {
+                TerminalLogger.warn(
+                    "PluginLinks",
+                    `Manifest not found: ${manifestPath}, using fallback: ${fallbackName}`,
+                );
+                return {
+                    identifier: fallbackName,
+                    name: fallbackName,
+                };
+            }
+
+            const manifestContent = this.readFileSync(manifestPath, "utf-8");
+            const manifest = JSON.parse(manifestContent);
+
+            const identifier =
+                manifest.identifier && typeof manifest.identifier === "string"
+                    ? manifest.identifier
+                    : fallbackName;
+            const name =
+                manifest.name && typeof manifest.name === "string" ? manifest.name : fallbackName;
+
+            if (!manifest.identifier || !manifest.name) {
+                TerminalLogger.warn(
+                    "PluginLinks",
+                    `Missing identifier or name in manifest: ${manifestPath}, using fallback: ${fallbackName}`,
+                );
+            }
+
+            return { identifier, name };
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            TerminalLogger.warn(
+                "PluginLinks",
+                `Failed to read manifest: ${manifestPath}, error: ${errorMessage}, using fallback: ${fallbackName}`,
+            );
+            return {
+                identifier: fallbackName,
+                name: fallbackName,
+            };
+        }
     }
 
     /**

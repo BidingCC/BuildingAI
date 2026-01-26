@@ -350,6 +350,7 @@ onMounted(initDateValue);
                                 :number-of-months="numberOfMonths"
                                 color="primary"
                                 size="sm"
+                                :locale="locale"
                             />
 
                             <!-- Time selector (optional) -->

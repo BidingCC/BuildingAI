@@ -53,6 +53,10 @@
                 "consumeSourceDesc": "Source",
                 "remark": "Note"
             },
+            "noOptionSelected": "Please select a top-up plan",
+            "orderNotFound": "Order does not exist",
+            "continueRecharge": "Continue Recharge",
+            "viewRecords": "View Records",
             "powerBalance": "Credit Balance",
             "selectRechargePackage": "Select Package",
             "paymentMethod": "Payment Method",
@@ -87,8 +91,14 @@
             "qrCodeExpired": "QR code expired, refresh",
             "refreshQrCode": "Refresh QR",
             "systemTip": "System Message",
-            "continueRecharge": "Continue Recharge",
-            "viewRecords": "View Records"
+            "alipayTips": {
+                "tip1": "Redirecting to Alipay payment page...",
+                "tip2": "Please complete the payment on the newly opened page.",
+                "stepTitle": "Payment Steps:",
+                "step1": "1. Scan the QR code or log in to Alipay on the new page",
+                "step2": "2. Confirm the payment amount and complete the payment",
+                "step3": "3. Will automatically return after successful payment"
+            }
         }
     }
 }

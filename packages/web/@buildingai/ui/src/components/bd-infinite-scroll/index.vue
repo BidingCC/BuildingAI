@@ -141,10 +141,7 @@ onUnmounted(() => {
         <!-- Loading indicator -->
         <div ref="loadingRef" class="flex h-8 w-full items-center justify-center">
             <!-- Loading state -->
-            <div
-                v-if="props.loading && props.hasMore"
-                class="flex items-center justify-center gap-1"
-            >
+            <div v-if="props.loading" class="flex items-center justify-center gap-1">
                 <UIcon
                     name="i-ph-spinner-gap-bold"
                     size="16"

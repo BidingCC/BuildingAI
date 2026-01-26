@@ -7,6 +7,7 @@ export const ACCOUNT_LOG_SOURCE = {
     CHAT: 3,
     AGENT_CHAT: 4,
     PLUGIN: 5,
+    MEMBERSHIP_GIFT: 6,
 } as const;
 
 /**
@@ -42,6 +43,18 @@ export const ACCOUNT_LOG_TYPE = {
      * 插件增减积分
      */
     PLUGIN_DEC: Number(`${ACCOUNT_LOG_SOURCE.PLUGIN}00`),
+    /**
+     * 会员赠送积分
+     */
+    MEMBERSHIP_GIFT_INC: Number(`${ACCOUNT_LOG_SOURCE.MEMBERSHIP_GIFT}00`),
+    /**
+     * 会员退款扣除积分
+     */
+    MEMBERSHIP_GIFT_DEC: Number(`${ACCOUNT_LOG_SOURCE.MEMBERSHIP_GIFT}01`),
+    /**
+     * 会员赠送积分到期清零
+     */
+    MEMBERSHIP_GIFT_EXPIRED: Number(`${ACCOUNT_LOG_SOURCE.MEMBERSHIP_GIFT}02`),
 } as const;
 export type ACCOUNT_LOG_TYPE_VALUE = (typeof ACCOUNT_LOG_TYPE)[keyof typeof ACCOUNT_LOG_TYPE];
 export const ACTION = {
@@ -62,5 +75,8 @@ export const ACCOUNT_LOG_TYPE_DESCRIPTION = {
     [ACCOUNT_LOG_TYPE.CHAT_DEC]: "基本对话",
     [ACCOUNT_LOG_TYPE.AGENT_CHAT_DEC]: "智能体对话",
     [ACCOUNT_LOG_TYPE.AGENT_GUEST_CHAT_DEC]: "链接分享智能体对话",
-    [ACCOUNT_LOG_TYPE.PLUGIN_DEC]: "插件消耗",
+    [ACCOUNT_LOG_TYPE.PLUGIN_DEC]: "应用消耗",
+    [ACCOUNT_LOG_TYPE.MEMBERSHIP_GIFT_INC]: "订阅会员",
+    [ACCOUNT_LOG_TYPE.MEMBERSHIP_GIFT_DEC]: "会员退款",
+    [ACCOUNT_LOG_TYPE.MEMBERSHIP_GIFT_EXPIRED]: "订阅积分到期",
 } as const;

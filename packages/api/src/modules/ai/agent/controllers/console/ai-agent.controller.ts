@@ -1,4 +1,4 @@
-import { type UserPlayground } from "@buildingai/db/interfaces/context.interface";
+import { type UserPlayground } from "@buildingai/db";
 import { BuildFileUrl } from "@buildingai/decorators/file-url.decorator";
 import { Playground } from "@buildingai/decorators/playground.decorator";
 import { ConsoleController } from "@common/decorators/controller.decorator";
@@ -92,9 +92,23 @@ export class AiAgentConsoleController {
     })
     @BuildFileUrl(["**.avatar"])
     async detail(@Param("id") id: string) {
-        // 增加访问计数
-        await this.AiAgentService.incrementUserCount(id);
         return this.AiAgentService.getAgentDetail(id);
+    }
+
+    /**
+     * 获取智能体文件上传配置
+     * 对于 Dify 智能体，从 Dify 平台获取文件上传配置
+     *
+     * @param id 智能体ID
+     * @returns 文件上传配置
+     */
+    @Get(":id/file-upload-config")
+    @Permissions({
+        code: "detail",
+        name: "查看智能体详情",
+    })
+    async getFileUploadConfig(@Param("id") id: string) {
+        return this.AiAgentService.getAgentFileUploadConfig(id);
     }
 
     /**

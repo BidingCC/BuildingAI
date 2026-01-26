@@ -68,6 +68,28 @@ export interface UserInfo extends BaseEntity {
     realName?: string;
     /** Total recharge amount */
     totalRechargeAmount?: number;
+    /** 用户当前最高会员等级ID */
+    membershipLevelId?: string | null;
+    membershipLevel?: MembershipLevelInfo;
+    /** 用户当前会员等级 */
+    level?: string;
+    /** 用户当前会员等级结束时间 */
+    levelEndTime?: string;
+}
+
+export interface MembershipLevelInfo {
+    /** 等级ID */
+    id: string;
+    /** 等级名称 */
+    name: string;
+    /** 等级图标 */
+    icon: string;
+    /** 等级级别 */
+    level: number;
+    /** 订阅开始时间 */
+    startTime: Date;
+    /** 订阅到期时间 */
+    endTime: Date;
     /** Whether is bind wechat */
     bindWechat: boolean;
     /** Whether has password */
@@ -147,6 +169,8 @@ export type BaseUserInfo = Omit<
 export interface UserCreateRequest extends BaseUserInfo {
     /** Role ID */
     roleId?: string;
+    level?: string;
+    levelEndTime?: string;
 }
 
 /**

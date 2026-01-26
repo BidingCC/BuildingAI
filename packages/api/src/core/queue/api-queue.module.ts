@@ -1,4 +1,4 @@
-import { QueueModule } from "@buildingai/core/modules/queue/queue.module";
+import { QueueModule } from "@buildingai/core/modules";
 import { Module } from "@nestjs/common";
 
 import { DefaultProcessor } from "./processors/default.processor";

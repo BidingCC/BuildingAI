@@ -99,6 +99,8 @@ export interface User {
     username: string;
     /** User number */
     userNo: string;
+    /** User nickname */
+    nickname: string;
 }
 
 // ==================== Account Balance Related APIs ====================

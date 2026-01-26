@@ -44,7 +44,7 @@ onMounted(() => {
                 <!-- 抽屉头部 -->
                 <div class="flex items-center justify-between py-2">
                     <h3 class="text-secondary-foreground text-xl">
-                        {{ extension.name }} - {{ $t("extensions.market.changelog") }}
+                        {{ $t("extensions.market.changelog") }} - {{ extension.name }}
                     </h3>
                     <UButton
                         color="neutral"

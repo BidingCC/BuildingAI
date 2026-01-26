@@ -32,7 +32,7 @@ export class ConfigWebController extends BaseController {
      * @returns 网站基础配置信息
      */
     @Get()
-    @BuildFileUrl(["**.logo", "**.icon"])
+    @BuildFileUrl(["**.logo", "**.icon", "***.iconUrl", "***.copyrightUrl"])
     @Public()
     async getConfig() {
         return await this.websiteService.getConfig();
