@@ -17,7 +17,6 @@ import {
 import {
   Command,
   CommandDialog,
-  CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
@@ -26,12 +25,21 @@ import {
   CommandShortcut,
 } from "@buildingai/ui/components/ui/command";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@buildingai/ui/components/ui/dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@buildingai/ui/components/ui/dropdown-menu";
 import { Input } from "@buildingai/ui/components/ui/input";
+import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog";
 import {
   SidebarGroup,
   SidebarMenu,
@@ -239,6 +247,165 @@ function HistoryCommandItem({
 }
 
 /**
+ * Conversation sub-item with rename and delete functionality
+ */
+function ConversationSubItem({ subItem, isActive }: { subItem: NavSubItem; isActive: boolean }) {
+  const [renameDialogOpen, setRenameDialogOpen] = useState(false);
+  const [renameValue, setRenameValue] = useState(subItem.title);
+  const { confirm } = useAlertDialog();
+  const deleteMutation = useDeleteConversation();
+  const updateMutation = useUpdateConversation();
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+
+  // Extract conversation ID from path (format: /c/${conversationId})
+  const conversationId = subItem.path?.replace("/c/", "") || "";
+
+  useEffect(() => {
+    setRenameValue(subItem.title);
+  }, [subItem.title]);
+
+  const handleRename = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setRenameDialogOpen(true);
+  }, []);
+
+  const handleRenameConfirm = useCallback(() => {
+    if (!renameValue.trim() || renameValue.trim() === subItem.title) {
+      setRenameDialogOpen(false);
+      return;
+    }
+
+    updateMutation.mutate(
+      { id: conversationId, title: renameValue.trim() },
+      {
+        onSuccess: () => {
+          setRenameDialogOpen(false);
+        },
+      },
+    );
+  }, [conversationId, renameValue, subItem.title, updateMutation]);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleRenameConfirm();
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        setRenameDialogOpen(false);
+        setRenameValue(subItem.title);
+      }
+    },
+    [handleRenameConfirm, subItem.title],
+  );
+
+  const handleDialogOpenChange = useCallback(
+    (open: boolean) => {
+      setRenameDialogOpen(open);
+      if (!open) {
+        // Reset to original title when dialog closes
+        setRenameValue(subItem.title);
+      }
+    },
+    [subItem.title],
+  );
+
+  const handleDeleteWithNavigation = useCallback(
+    async (e: React.MouseEvent) => {
+      e.stopPropagation();
+      try {
+        await confirm({
+          title: "删除对话",
+          description: "确定要删除这条对话记录吗？此操作不可恢复。",
+          confirmVariant: "destructive",
+        });
+        deleteMutation.mutate(conversationId, {
+          onSuccess: () => {
+            // If the deleted conversation is currently active, navigate to home
+            if (pathname === subItem.path) {
+              navigate("/");
+            }
+          },
+        });
+      } catch {
+        // User cancelled
+      }
+    },
+    [conversationId, confirm, deleteMutation, pathname, subItem.path, navigate],
+  );
+
+  return (
+    <>
+      <SidebarMenuSubItem>
+        <SidebarMenuSubButton asChild isActive={isActive} className="h-9">
+          <Link to={subItem.path || ""} className="flex items-center justify-between">
+            <span
+              className={cn(
+                "line-clamp-1",
+                "group-focus-within/menu-sub-item:pr-4 group-hover/menu-sub-item:pr-4",
+                { "font-bold": isActive },
+              )}
+            >
+              {subItem.title}
+            </span>
+          </Link>
+        </SidebarMenuSubButton>
+        {subItem.path && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <SidebarMenuAction
+                showOnHover
+                className="group-hover/menu-sub-item:opacity-100! md:group-focus-within/menu-item:opacity-0 md:group-hover/menu-item:opacity-0"
+              >
+                <EllipsisVertical />
+                <span className="sr-only">More</span>
+              </SidebarMenuAction>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuItem onClick={handleRename}>
+                <PenLine />
+                重命名
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleDeleteWithNavigation}>
+                <Trash2 />
+                删除
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+      </SidebarMenuSubItem>
+
+      <Dialog open={renameDialogOpen} onOpenChange={handleDialogOpenChange}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>重命名对话</DialogTitle>
+            <DialogDescription>请输入新的对话名称</DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Input
+              value={renameValue}
+              onChange={(e) => setRenameValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="对话名称"
+              autoFocus
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRenameDialogOpen(false)}>
+              取消
+            </Button>
+            <Button onClick={handleRenameConfirm} disabled={!renameValue.trim()}>
+              确定
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
+/**
  * Chat history menu item with special behavior:
  * - Click button opens CommandDialog
  * - Click icon toggles collapsible
@@ -301,44 +468,11 @@ function ChatHistoryMenuItem({
         {isLogin() && !!item.items?.length && (
           <SidebarMenuSub className="mr-0 pr-0">
             {item.items?.map((subItem) => (
-              <SidebarMenuSubItem key={subItem.id}>
-                <SidebarMenuSubButton asChild isActive={isItemActive(subItem.path)} className="h-9">
-                  <Link to={subItem.path || ""} className="flex items-center justify-between">
-                    <span
-                      className={cn(
-                        "line-clamp-1",
-                        "group-focus-within/menu-sub-item:pr-4 group-hover/menu-sub-item:pr-4",
-                        { "font-bold": isItemActive(subItem.path) },
-                      )}
-                    >
-                      {subItem.title}
-                    </span>
-                  </Link>
-                </SidebarMenuSubButton>
-                {subItem.path && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <SidebarMenuAction
-                        showOnHover
-                        className="group-hover/menu-sub-item:opacity-100! md:group-focus-within/menu-item:opacity-0 md:group-hover/menu-item:opacity-0"
-                      >
-                        <EllipsisVertical />
-                        <span className="sr-only">More</span>
-                      </SidebarMenuAction>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start">
-                      <DropdownMenuItem>
-                        <PenLine />
-                        重命名
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Trash2 />
-                        删除
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
-              </SidebarMenuSubItem>
+              <ConversationSubItem
+                key={subItem.id}
+                subItem={subItem}
+                isActive={isItemActive(subItem.path)}
+              />
             ))}
             <SidebarMenuSubItem>
               <SidebarMenuSubButton onClick={onOpenDialog} className="h-9 cursor-pointer">
