@@ -47,7 +47,6 @@ export type AiProvider = {
     description?: string;
     bindSecretId?: string;
     iconUrl?: string;
-    websiteUrl?: string;
     supportedModelTypes: string[];
     isActive: boolean;
     isBuiltIn: boolean;

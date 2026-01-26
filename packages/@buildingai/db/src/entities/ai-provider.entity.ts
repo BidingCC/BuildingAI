@@ -72,17 +72,6 @@ export class AiProvider extends BaseEntity {
     iconUrl?: string;
 
     /**
-     * 供应商官网URL
-     */
-    @Column({
-        type: "varchar",
-        length: 500,
-        nullable: true,
-        comment: "供应商官网URL",
-    })
-    websiteUrl?: string;
-
-    /**
      * 支持的模型分类
      */
     @Column({

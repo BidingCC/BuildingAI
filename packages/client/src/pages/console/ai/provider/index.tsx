@@ -60,6 +60,9 @@ import { toast } from "sonner";
 
 import { ProviderIcon, providerIconsMap } from "@/components/provider-icons";
 
+import { AiModelFormDialog } from "./_components/model-form-dialog";
+import { AiProviderFormDialog } from "./_components/provider-form-dialog";
+
 /**
  * Feature icon mapping for model capabilities
  */
@@ -131,12 +134,47 @@ const AiProviderIndexPage = () => {
   const [queryParams, setQueryParams] = useState<QueryAiProviderDto>({});
   const [modelsDialogOpen, setModelsDialogOpen] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<AiProvider | null>(null);
+  const [formDialogOpen, setFormDialogOpen] = useState(false);
+  const [editingProvider, setEditingProvider] = useState<AiProvider | null>(null);
+  const [modelFormDialogOpen, setModelFormDialogOpen] = useState(false);
+  const [editingModel, setEditingModel] = useState<AiProviderModel | null>(null);
   const { data, refetch, isLoading } = useAiProvidersQuery(queryParams);
   const { confirm } = useAlertDialog();
 
   const handleManageModels = (provider: AiProvider) => {
     setSelectedProvider(provider);
     setModelsDialogOpen(true);
+  };
+
+  const handleOpenCreateDialog = () => {
+    setEditingProvider(null);
+    setFormDialogOpen(true);
+  };
+
+  const handleOpenEditDialog = (provider: AiProvider) => {
+    setEditingProvider(provider);
+    setFormDialogOpen(true);
+  };
+
+  const handleOpenAddModelDialog = () => {
+    setEditingModel(null);
+    setModelFormDialogOpen(true);
+  };
+
+  const handleOpenEditModelDialog = (model: AiProviderModel) => {
+    setEditingModel(model);
+    setModelFormDialogOpen(true);
+  };
+
+  const handleModelFormSuccess = () => {
+    refetch();
+    if (selectedProvider) {
+      // Refresh selectedProvider data after model update
+      const updatedProvider = data?.find((p) => p.id === selectedProvider.id);
+      if (updatedProvider) {
+        setSelectedProvider(updatedProvider);
+      }
+    }
   };
 
   const toggleModelActiveMutation = useToggleAiModelActiveMutation({
@@ -255,7 +293,7 @@ const AiProviderIndexPage = () => {
             <Button size="xs" className="flex-1" variant="outline">
               <FileJson2 /> 从配置文件导入
             </Button>
-            <Button size="xs" className="flex-1" variant="outline">
+            <Button size="xs" className="flex-1" variant="outline" onClick={handleOpenCreateDialog}>
               <Plus /> 手动创建
             </Button>
           </div>
@@ -318,7 +356,7 @@ const AiProviderIndexPage = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleOpenEditDialog(provider)}>
                       <Edit />
                       编辑
                     </DropdownMenuItem>
@@ -388,7 +426,7 @@ const AiProviderIndexPage = () => {
               <CommandInput className="w-full max-w-lg" placeholder="搜索模型名称..." />
             </div>
             <div className="p-1 pb-0">
-              <Button className="" size="sm" variant="ghost">
+              <Button className="" size="sm" variant="ghost" onClick={handleOpenAddModelDialog}>
                 <PlusCircle />
                 添加模型
               </Button>
@@ -427,6 +465,7 @@ const AiProviderIndexPage = () => {
                           size="xs"
                           variant="outline"
                           className="ml-auto group-hover/model-item:flex group-data-selected/model-item:flex! md:hidden"
+                          onClick={() => handleOpenEditModelDialog(model)}
                         >
                           <Settings2 />
                           配置
@@ -446,6 +485,23 @@ const AiProviderIndexPage = () => {
           </CommandList>
         </Command>
       </CommandDialog>
+
+      <AiProviderFormDialog
+        open={formDialogOpen}
+        onOpenChange={setFormDialogOpen}
+        provider={editingProvider}
+        onSuccess={refetch}
+      />
+
+      {selectedProvider && (
+        <AiModelFormDialog
+          open={modelFormDialogOpen}
+          onOpenChange={setModelFormDialogOpen}
+          providerId={selectedProvider.id}
+          model={editingModel}
+          onSuccess={handleModelFormSuccess}
+        />
+      )}
     </div>
   );
 };

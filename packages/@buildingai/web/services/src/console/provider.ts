@@ -12,7 +12,6 @@ export type CreateAiProviderDto = {
     bindSecretId: string;
     supportedModelTypes?: ModelType[];
     iconUrl?: string;
-    websiteUrl?: string;
     isActive?: boolean;
     sortOrder?: number;
 };
@@ -66,7 +65,6 @@ export type AiProvider = {
     description?: string;
     bindSecretId?: string;
     iconUrl?: string;
-    websiteUrl?: string;
     supportedModelTypes: ModelType[];
     isActive: boolean;
     isBuiltIn: boolean;
@@ -225,6 +223,65 @@ export function useToggleAiModelActiveMutation(
             consoleHttpClient.patch<AiProviderModel>(`/ai-models/${id}/toggle-active`, {
                 isActive,
             }),
+        ...options,
+    });
+}
+
+// ============================================================
+// AI Model CRUD Operations
+// ============================================================
+
+export type CreateAiModelDto = {
+    name: string;
+    providerId: string;
+    model: string;
+    maxContext?: number;
+    features?: string[];
+    modelType?: ModelType;
+    modelConfig?: ModelConfig[];
+    billingRule: BillingRule;
+    membershipLevel?: string[];
+    isActive?: boolean;
+    isDefault?: boolean;
+    description?: string;
+    sortOrder?: number;
+};
+
+export type UpdateAiModelDto = Partial<CreateAiModelDto>;
+
+/**
+ * Create AI model
+ */
+export function useCreateAiModelMutation(
+    options?: MutationOptionsUtil<AiProviderModel, CreateAiModelDto>,
+) {
+    return useMutation<AiProviderModel, Error, CreateAiModelDto>({
+        mutationFn: (dto) => consoleHttpClient.post<AiProviderModel>("/ai-models", dto),
+        ...options,
+    });
+}
+
+/**
+ * Update AI model
+ */
+export function useUpdateAiModelMutation(
+    options?: MutationOptionsUtil<AiProviderModel, { id: string; dto: UpdateAiModelDto }>,
+) {
+    return useMutation<AiProviderModel, Error, { id: string; dto: UpdateAiModelDto }>({
+        mutationFn: ({ id, dto }) =>
+            consoleHttpClient.patch<AiProviderModel>(`/ai-models/${id}`, dto),
+        ...options,
+    });
+}
+
+/**
+ * Delete AI model
+ */
+export function useDeleteAiModelMutation(
+    options?: MutationOptionsUtil<{ message: string }, string>,
+) {
+    return useMutation<{ message: string }, Error, string>({
+        mutationFn: (id) => consoleHttpClient.delete<{ message: string }>(`/ai-models/${id}`),
         ...options,
     });
 }
