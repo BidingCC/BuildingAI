@@ -35,7 +35,7 @@ export async function* createStreamFromBlocks(
         type: "progress",
         progress: {
             stage: "parsing",
-            message: `正在解析内容块 (0/${totalBlocks})`,
+            message: `正在解析内容 (0/${totalBlocks})`,
             progress: 10,
             current: 0,
             total: totalBlocks,
@@ -51,7 +51,7 @@ export async function* createStreamFromBlocks(
                 type: "progress",
                 progress: {
                     stage: "parsing",
-                    message: `正在解析内容块 (${i + 1}/${totalBlocks})`,
+                    message: `正在解析内容 (${i + 1}/${totalBlocks})`,
                     progress,
                     current: i + 1,
                     total: totalBlocks,

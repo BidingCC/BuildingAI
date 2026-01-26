@@ -191,15 +191,40 @@ const convertMessageRecordToUIMessage = (record: MessageRecord): UIMessage => {
   };
 };
 
-const convertMessageRecordToRawRecord = (record: MessageRecord): RawMessageRecord => {
-  return {
-    id: record.id,
-    parentId: record.parentId ?? null,
-    sequence: record.sequence,
-    message: convertMessageRecordToUIMessage(record),
-    createdAt: record.createdAt,
-  };
-};
+function buildRawRecordsFromMessageRecords(items: MessageRecord[]): RawMessageRecord[] {
+  const sorted = [...items].sort((a, b) => a.sequence - b.sequence);
+  const records: RawMessageRecord[] = [];
+  let lastAssistantId: string | null = null;
+  let lastUserId: string | null = null;
+
+  for (const record of sorted) {
+    const role = record.message.role === "tool" ? "assistant" : record.message.role;
+    let parentId: string | null = record.parentId ?? null;
+
+    if (parentId == null) {
+      if (role === "user") {
+        parentId = lastAssistantId;
+        lastUserId = record.id;
+      } else if (role === "assistant") {
+        parentId = lastUserId;
+        lastAssistantId = record.id;
+      }
+    } else {
+      if (role === "user") lastUserId = record.id;
+      else if (role === "assistant") lastAssistantId = record.id;
+    }
+
+    records.push({
+      id: record.id,
+      parentId,
+      sequence: record.sequence,
+      message: convertMessageRecordToUIMessage(record),
+      createdAt: record.createdAt,
+    });
+  }
+
+  return records;
+}
 
 interface ConversationMessagesDrawerProps {
   conversationId: string;
@@ -277,7 +302,7 @@ export const ConversationMessagesDrawer = memo(function ConversationMessagesDraw
       if (page === 1) {
         setAllMessages(data.items);
         if (data.items.length > 0) {
-          const rawRecords = data.items.map(convertMessageRecordToRawRecord);
+          const rawRecords = buildRawRecordsFromMessageRecords(data.items);
           importMessages(rawRecords, true);
         } else {
           clearRepository();
@@ -288,8 +313,8 @@ export const ConversationMessagesDrawer = memo(function ConversationMessagesDraw
           const newItems = data.items.filter((item) => !existingIds.has(item.id));
           if (newItems.length > 0) {
             const updated = [...newItems, ...prev];
-            const rawRecords = newItems.map(convertMessageRecordToRawRecord);
-            importIncremental(rawRecords, true);
+            const rawRecords = buildRawRecordsFromMessageRecords(newItems);
+            importIncremental(rawRecords, false);
             return updated;
           }
           return prev;
