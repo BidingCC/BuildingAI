@@ -13,11 +13,13 @@ import {
 } from "@buildingai/ai-sdk-new";
 import { SecretService } from "@buildingai/core/modules";
 import { HttpErrorFactory } from "@buildingai/errors";
+import { llmFileParser } from "@buildingai/llm-file-parser";
 import { getProviderSecret } from "@buildingai/utils";
 import { Injectable, Logger } from "@nestjs/common";
 import type { LanguageModel, Tool } from "ai";
 import {
     convertToModelMessages,
+    createIdGenerator,
     createUIMessageStream,
     generateText,
     pipeUIMessageStreamToResponse,
@@ -42,6 +44,21 @@ import { AiChatsMessageService } from "./ai-chat-message.service";
 import { AiChatRecordService } from "./ai-chat-record.service";
 
 type PartWithState = { type?: string; state?: string };
+type FilePart = { type: "file"; url: string; mediaType?: string; filename?: string };
+type DataWriter = { write: (part: { type: `data-${string}`; data: unknown }) => void };
+type ParseProgressPart = {
+    type: "data-file-parse-progress" | "data-file-parse-metadata";
+    data: unknown;
+};
+type ParseFileResult = {
+    content: string;
+    filename: string;
+    progressParts: ParseProgressPart[];
+};
+type ProcessFilesResult = {
+    messages: UIMessage[];
+    documentContents: Array<{ filename: string; content: string }>;
+};
 
 const VALID_PART_TYPES = new Set([
     "text",
@@ -66,14 +83,18 @@ export class ChatCompletionService {
         private readonly aiMcpServerService: AiMcpServerService,
     ) {}
 
+    private getErrorMsg(error: unknown): string {
+        return error instanceof Error ? error.message : String(error);
+    }
+
     async streamChat(params: ChatCompletionParams, response: ServerResponse): Promise<void> {
         let conversationId = params.conversationId;
         const { isToolApprovalFlow = false } = params;
-        const isNewConversation = !conversationId && params.saveConversation !== false;
-        const shouldGenerateTitle = isNewConversation && !params.title;
+        const isNew = !conversationId && params.saveConversation !== false;
+        const needTitle = isNew && !params.title;
 
         try {
-            if (isNewConversation) {
+            if (isNew) {
                 conversationId = (
                     await this.aiChatRecordService.createConversation(params.userId, {
                         title: params.title,
@@ -99,45 +120,26 @@ export class ChatCompletionService {
                 baseURL: getProviderSecret("baseUrl", providerSecret) || undefined,
             });
 
-            const allMessages = isToolApprovalFlow
-                ? await this.buildToolApprovalMessages(conversationId!, params.messages[0])
+            const messages = isToolApprovalFlow
+                ? await this.buildApprovalMessages(conversationId!, params.messages[0])
                 : params.messages;
 
-            const cleanedMessages = allMessages.map(({ id: _id, ...msg }) => ({
-                ...msg,
-                parts:
-                    msg.parts?.filter((part) => {
-                        const type = typeof part.type === "string" ? part.type : "";
-                        return (
-                            VALID_PART_TYPES.has(part.type) ||
-                            type.startsWith("tool-") ||
-                            type.startsWith("step-")
-                        );
-                    }) || [],
-            }));
+            const cleaned = this.clean(messages);
 
-            const modelMessages = await convertToModelMessages(cleanedMessages);
-            const messages = params.systemPrompt
-                ? [{ role: "system" as const, content: params.systemPrompt }, ...modelMessages]
-                : modelMessages;
-            const promptTextForUsage = formatMessagesForTokenCount(messages);
-
-            const { clients: mcpClients, tools: mcpTools } = await this.initializeMcpClients(
+            const { clients: mcpClients, tools: mcpTools } = await this.initMcpClients(
                 params.mcpServerIds,
             );
 
-            if (Object.keys(mcpTools).length > 0) {
-                this.logger.log(
-                    `MCP tools loaded: ${Object.keys(mcpTools).join(", ")} (${Object.keys(mcpTools).length} tools)`,
-                );
-            }
-
             const stream = createUIMessageStream({
-                originalMessages: isToolApprovalFlow ? allMessages : undefined,
+                originalMessages: isToolApprovalFlow ? messages : undefined,
                 execute: async ({ writer }) => {
                     if (conversationId) {
                         writer.write({ type: "data-conversation-id", data: conversationId });
                     }
+                    writer.write({
+                        type: "start",
+                        messageId: createIdGenerator() as unknown as string,
+                    });
 
                     if (params.abortSignal?.aborted) {
                         await closeMcpClients(mcpClients);
@@ -145,19 +147,23 @@ export class ChatCompletionService {
                     }
 
                     try {
-                        const supportsToolCall = model.features?.some((f) => f.includes("tool"));
+                        const { messages: processed, documentContents } = await this.processFiles(
+                            cleaned,
+                            writer,
+                        );
 
-                        const tools: Record<string, Tool> = {
-                            getWeather,
-                            ...mcpTools,
-                        };
+                        const systemPrompt = this.buildSystemPrompt(
+                            params.systemPrompt,
+                            documentContents,
+                        );
+                        const modelMsgs = await convertToModelMessages(processed);
+                        const finalMessages = systemPrompt
+                            ? [{ role: "system" as const, content: systemPrompt }, ...modelMsgs]
+                            : modelMsgs;
+                        const promptText = formatMessagesForTokenCount(finalMessages);
 
-                        if (model.provider.provider === "openai") {
-                            tools.dalle2ImageGeneration = createDalle2ImageGenerationTool(provider);
-                            tools.dalle3ImageGeneration = createDalle3ImageGenerationTool(provider);
-                            tools.gptImageGeneration = createGptImageGenerationTool(provider);
-                            tools.deepResearch = createDeepResearchTool(provider);
-                        }
+                        const hasTools = model.features?.some((f) => f.includes("tool"));
+                        const tools = this.buildTools(model.provider.provider, provider, mcpTools);
 
                         const agent = new ToolLoopAgent({
                             model: provider(model.model).model,
@@ -166,27 +172,23 @@ export class ChatCompletionService {
                                     thinking: params.feature?.thinking ?? false,
                                 }),
                             },
-                            ...(supportsToolCall && {
-                                tools,
-                            }),
-                            // 允许多步：tool call -> tool result -> 继续生成最终回复
-                            // 使用 stepCountIs 确保工具调用后继续生成最终回复
-                            // 设置为 10 步，允许多次工具调用和最终回复生成
+                            ...(hasTools && { tools }),
                             stopWhen: stepCountIs(10),
                         });
 
                         const result = await agent.stream({
-                            messages,
+                            messages: finalMessages,
                             abortSignal: params.abortSignal,
                         });
                         result.consumeStream();
 
                         const uiMessageStream = result.toUIMessageStream({
-                            originalMessages: allMessages,
+                            sendStart: false,
+                            originalMessages: processed,
                             onFinish: async ({
-                                messages: finishedMessages,
-                                responseMessage,
-                                isAborted,
+                                messages: finished,
+                                responseMessage: response,
+                                isAborted: aborted,
                             }) => {
                                 try {
                                     if (params.saveConversation === false || !conversationId) {
@@ -195,16 +197,15 @@ export class ChatCompletionService {
 
                                     const { textText, reasoningText, fullText } =
                                         extractTextFromParts(
-                                            (responseMessage?.parts ?? []) as Array<{
+                                            (response?.parts ?? []) as Array<{
                                                 type?: unknown;
                                                 text?: string;
                                             }>,
                                         );
 
-                                    console.log("fullText", JSON.stringify(result.totalUsage));
                                     const rawUsage = await withEstimatedUsage(result, {
                                         model: model.model,
-                                        inputText: promptTextForUsage,
+                                        inputText: promptText,
                                         outputTextPromise: Promise.resolve(fullText),
                                     }).usage;
 
@@ -218,29 +219,28 @@ export class ChatCompletionService {
                                     writer.write({ type: "data-usage", data: usage });
 
                                     if (isToolApprovalFlow) {
-                                        await this.saveToolApprovalMessages(
-                                            finishedMessages,
-                                            conversationId,
-                                        );
-                                    } else if (finishedMessages.length > 0) {
-                                        await this.saveNormalFlowMessages(
-                                            responseMessage,
+                                        await this.saveApprovalMessages(finished, conversationId);
+                                    } else if (finished.length > 0) {
+                                        console.log("finished", JSON.stringify(finished));
+                                        await this.saveMessages(
+                                            response,
+                                            finished,
                                             params,
                                             conversationId,
                                             usage,
-                                            isAborted,
+                                            aborted,
                                             writer,
                                         );
 
-                                        if (shouldGenerateTitle && conversationId) {
-                                            const firstUserMessage = allMessages.find(
+                                        if (needTitle && conversationId) {
+                                            const firstUserMsg = messages.find(
                                                 (m) => m.role === "user",
                                             );
-                                            if (firstUserMessage) {
-                                                await this.generateConversationTitle({
+                                            if (firstUserMsg) {
+                                                this.generateTitle({
                                                     conversationId,
                                                     userId: params.userId,
-                                                    message: firstUserMessage,
+                                                    message: firstUserMsg,
                                                     model: provider(model.model).model,
                                                     providerId: model.provider.provider,
                                                 }).catch(() => {});
@@ -249,7 +249,7 @@ export class ChatCompletionService {
                                     }
                                 } catch (error) {
                                     this.logger.error(
-                                        `Failed to save messages: ${error instanceof Error ? error.message : String(error)}`,
+                                        `Failed to save messages: ${this.getErrorMsg(error)}`,
                                         error instanceof Error ? error.stack : undefined,
                                     );
                                 } finally {
@@ -257,34 +257,30 @@ export class ChatCompletionService {
                                 }
                             },
                             onError: (error) => {
-                                const errorMessage =
-                                    error instanceof Error ? error.message : String(error);
+                                const errorMsg = this.getErrorMsg(error);
                                 const errorObj: Record<string, unknown> = {
                                     name: error instanceof Error ? error.name : "Error",
-                                    message: errorMessage,
+                                    message: errorMsg,
+                                    ...(error instanceof Error &&
+                                        error.cause && { cause: error.cause }),
                                 };
-                                if (error instanceof Error && "cause" in error && error.cause) {
-                                    errorObj.cause = error.cause;
-                                }
-                                const errorDetails = JSON.stringify(errorObj, null, 2);
 
                                 this.logger.error(
-                                    `Stream error: ${errorMessage}\nDetails: ${errorDetails}`,
+                                    `Stream error: ${errorMsg}\nDetails: ${JSON.stringify(errorObj, null, 2)}`,
                                     error instanceof Error ? error.stack : undefined,
                                 );
 
                                 closeMcpClients(mcpClients).catch((closeError) => {
                                     this.logger.warn(
-                                        `Failed to close MCP clients: ${closeError instanceof Error ? closeError.message : String(closeError)}`,
+                                        `Failed to close MCP clients: ${this.getErrorMsg(closeError)}`,
                                     );
                                 });
-                                return errorMessage;
+                                return errorMsg;
                             },
                         });
 
                         writer.merge(uiMessageStream);
                     } catch (error) {
-                        // 如果发生错误，立即关闭客户端
                         await closeMcpClients(mcpClients);
                         throw error;
                     }
@@ -293,15 +289,16 @@ export class ChatCompletionService {
 
             pipeUIMessageStreamToResponse({ stream, response });
         } catch (error) {
+            const errorMsg = this.getErrorMsg(error);
             this.logger.error(
-                `Stream chat error: ${error instanceof Error ? error.message : String(error)}`,
+                `Stream chat error: ${errorMsg}`,
                 error instanceof Error ? error.stack : undefined,
             );
             this.handleError(error, response);
         }
     }
 
-    private async initializeMcpClients(
+    private async initMcpClients(
         mcpServerIds?: string[],
     ): Promise<{ clients: McpClient[]; tools: Record<string, unknown> }> {
         if (!mcpServerIds?.length) {
@@ -321,10 +318,10 @@ export class ChatCompletionService {
                 .map((server) => ({
                     id: server.id,
                     name: server.name,
-                    description: server.description || undefined,
+                    description: server.description ?? undefined,
                     url: server.url,
                     communicationType: server.communicationType,
-                    customHeaders: server.customHeaders || undefined,
+                    customHeaders: server.customHeaders ?? undefined,
                 }));
 
             if (!serverConfigs.length) {
@@ -335,68 +332,59 @@ export class ChatCompletionService {
             const tools = await mergeMcpTools(clients);
             return { clients, tools };
         } catch (error) {
-            this.logger.warn(
-                `Failed to initialize MCP clients: ${error instanceof Error ? error.message : String(error)}`,
-            );
+            this.logger.warn(`Failed to initialize MCP clients: ${this.getErrorMsg(error)}`);
             return { clients: [], tools: {} };
         }
     }
 
-    private async buildToolApprovalMessages(
+    private needsApproval(msg: UIMessage): boolean {
+        return (
+            msg.role === "assistant" &&
+            msg.parts?.some((part) => (part as PartWithState).state === "approval-requested")
+        );
+    }
+
+    private async buildApprovalMessages(
         conversationId: string,
-        approvalMessage: UIMessage,
+        approvalMsg: UIMessage,
     ): Promise<UIMessage[]> {
-        const historyMessages = await this.aiChatsMessageService.findAll({
+        const history = await this.aiChatsMessageService.findAll({
             where: { conversationId },
             order: { sequence: "ASC" },
         });
 
-        return historyMessages.map((m) => {
+        return history.map((m) => {
             const msg = m.message as UIMessage;
-            const hasApprovalRequested =
-                msg.role === "assistant" &&
-                msg.parts?.some((part) => (part as PartWithState).state === "approval-requested");
-
-            if (hasApprovalRequested && approvalMessage?.role === "assistant") {
-                return approvalMessage;
-            }
-            return msg;
+            return this.needsApproval(msg) && approvalMsg?.role === "assistant" ? approvalMsg : msg;
         });
     }
 
-    private async saveToolApprovalMessages(
-        finishedMessages: UIMessage[],
+    private async saveApprovalMessages(
+        finished: UIMessage[],
         conversationId: string,
     ): Promise<void> {
-        const dbMessages = await this.aiChatsMessageService.findAll({
+        const dbMsgs = await this.aiChatsMessageService.findAll({
             where: { conversationId },
             order: { sequence: "DESC" },
         });
 
-        const approvalDbMsg = dbMessages.find((m) => {
-            const msg = m.message as UIMessage;
-            return (
-                msg.role === "assistant" &&
-                msg.parts?.some((part) => (part as PartWithState).state === "approval-requested")
-            );
-        });
+        const approvalMsg = dbMsgs.find((m) => this.needsApproval(m.message as UIMessage));
+        const lastAssistant = finished.findLast((m) => m.role === "assistant");
 
-        if (!approvalDbMsg) return;
+        if (!approvalMsg || !lastAssistant) return;
 
-        const lastAssistantMsg = finishedMessages.findLast((m) => m.role === "assistant");
-        if (!lastAssistantMsg) return;
-
-        const cleanedParts = lastAssistantMsg.parts?.filter(
+        const cleanedParts = lastAssistant.parts?.filter(
             (part) => !(part as PartWithState).type?.startsWith("data-"),
         );
 
-        await this.aiChatsMessageService.updateMessage(approvalDbMsg.id, {
-            message: { ...lastAssistantMsg, parts: cleanedParts },
+        await this.aiChatsMessageService.updateMessage(approvalMsg.id, {
+            message: { ...lastAssistant, parts: cleanedParts },
         });
     }
 
-    private async saveNormalFlowMessages(
-        responseMessage: UIMessage | undefined,
+    private async saveMessages(
+        response: UIMessage | undefined,
+        finished: UIMessage[],
         params: ChatCompletionParams,
         conversationId: string,
         usage:
@@ -407,72 +395,81 @@ export class ChatCompletionService {
                   cachedTokens?: number;
               }
             | undefined,
-        isAborted: boolean,
-        writer: { write: (part: { type: `data-${string}`; data: unknown }) => void },
+        aborted: boolean,
+        writer: DataWriter,
     ): Promise<void> {
-        const userMessageId = await this.ensureUserMessageSaved(params, conversationId, writer);
+        const userMsgId = await this.saveUserMessage(finished, params, conversationId, writer);
 
-        if (!responseMessage?.parts?.length) return;
+        if (!response?.parts?.length) return;
 
-        const savedAssistantMessage = await this.aiChatsMessageService.createMessage({
+        const userMsg = finished.findLast((m) => m.role === "user");
+        const fileParseParts = userMsg?.parts?.filter(
+            (part) => typeof part.type === "string" && part.type.startsWith("data-file-parse-"),
+        );
+
+        const messageToSave: UIMessage =
+            fileParseParts?.length && response.parts
+                ? { ...response, parts: [...fileParseParts, ...response.parts] }
+                : response;
+
+        const saved = await this.aiChatsMessageService.createMessage({
             conversationId,
             modelId: params.modelId,
-            message: responseMessage,
-            tokens: usage
-                ? {
-                      inputTokens: usage.inputTokens ?? 0,
-                      outputTokens: usage.outputTokens ?? 0,
-                      totalTokens: usage.totalTokens ?? 0,
-                  }
-                : undefined,
-            parentId: userMessageId,
+            message: messageToSave,
+            tokens: usage && {
+                inputTokens: usage.inputTokens ?? 0,
+                outputTokens: usage.outputTokens ?? 0,
+                totalTokens: usage.totalTokens ?? 0,
+            },
+            parentId: userMsgId,
         });
 
-        if (isAborted) {
-            await this.aiChatsMessageService.updateMessage(savedAssistantMessage.id, {
+        if (aborted) {
+            await this.aiChatsMessageService.updateMessage(saved.id, {
                 status: "failed",
             });
         }
 
-        writer.write({ type: "data-assistant-message-id", data: savedAssistantMessage.id });
+        writer.write({ type: "data-assistant-message-id", data: saved.id });
     }
 
-    private async ensureUserMessageSaved(
+    private async saveUserMessage(
+        finished: UIMessage[],
         params: ChatCompletionParams,
         conversationId: string,
-        writer: { write: (part: { type: `data-${string}`; data: unknown }) => void },
+        writer: DataWriter,
     ): Promise<string | undefined> {
         if (params.isRegenerate) return params.regenerateParentId;
 
-        const userMessage = [...params.messages].reverse().find((m) => m.role === "user");
-        if (!userMessage) return undefined;
+        const userMsg = finished.findLast((m) => m.role === "user");
+        if (!userMsg) return undefined;
 
-        if (isUUID(userMessage.id)) {
-            writer.write({ type: "data-user-message-id", data: userMessage.id });
-            return userMessage.id;
+        if (isUUID(userMsg.id)) {
+            writer.write({ type: "data-user-message-id", data: userMsg.id });
+            return userMsg.id;
         }
 
-        const existingMessage = await this.aiChatsMessageService.findByFrontendId(
+        const existing = await this.aiChatsMessageService.findByFrontendId(
             conversationId,
-            userMessage.id,
+            userMsg.id,
         );
-        if (existingMessage) {
-            writer.write({ type: "data-user-message-id", data: existingMessage.id });
-            return existingMessage.id;
+        if (existing) {
+            writer.write({ type: "data-user-message-id", data: existing.id });
+            return existing.id;
         }
 
-        const savedUserMessage = await this.aiChatsMessageService.createMessage({
+        const saved = await this.aiChatsMessageService.createMessage({
             conversationId,
             modelId: params.modelId,
-            message: userMessage,
+            message: userMsg,
             parentId: params.parentId,
         });
 
-        writer.write({ type: "data-user-message-id", data: savedUserMessage.id });
-        return savedUserMessage.id;
+        writer.write({ type: "data-user-message-id", data: saved.id });
+        return saved.id;
     }
 
-    private async generateConversationTitle(args: {
+    private async generateTitle(args: {
         conversationId: string;
         userId: string;
         message: UIMessage;
@@ -480,20 +477,17 @@ export class ChatCompletionService {
         providerId: string;
     }): Promise<void> {
         const { conversationId, userId, message, model, providerId } = args;
-
         const { fullText } = extractTextFromParts(
             (message.parts ?? []) as Array<{ type?: unknown; text?: string }>,
         );
         const input = fullText.trim().slice(0, 50);
         if (!input) return;
 
-        console.log("input 请求生成对话标题");
-
         const result = await generateText({
             model,
             prompt: `请为以下对话内容生成一个简洁的标题。要求：
 1. 标题要简洁明了，不超过10个字
-2. 准确概括对话的核心主题
+2. 标题要使用相关关键词，不要使用对话内容中的具体内容
 3. 使用与对话内容相同的语言
 4. 只输出标题，不要包含任何其他文字、标点或说明
 
@@ -501,27 +495,155 @@ export class ChatCompletionService {
 ${input}
 
 标题：`,
-            providerOptions: {
-                ...getReasoningOptions(providerId, {
-                    thinking: false,
-                }),
-            },
+            providerOptions: getReasoningOptions(providerId, { thinking: false }),
         });
+
         const title = result.text
             .trim()
             .replace(/^["'「」『』]|["'「」『』]$/g, "")
-            .slice(0, 200);
+            .slice(0, 20);
         if (!title) return;
 
         await this.aiChatRecordService.updateConversation(conversationId, userId, { title });
     }
 
+    private async parseFile(filePart: FilePart, writer: DataWriter): Promise<ParseFileResult> {
+        const filename = filePart.filename || "未命名文件";
+        const progressParts: ParseProgressPart[] = [];
+
+        try {
+            const { stream, result } = await llmFileParser.streamParseFromUrl(filePart.url);
+
+            const typeMap = {
+                progress: "data-file-parse-progress",
+                metadata: "data-file-parse-metadata",
+            } as const;
+
+            for await (const chunk of stream) {
+                const chunkType = chunk.type as keyof typeof typeMap;
+                if (typeMap[chunkType] && chunk[chunkType]) {
+                    const data = chunk[chunkType];
+                    const partType = typeMap[chunkType];
+                    writer.write({ type: partType, data });
+                    progressParts.push({ type: partType, data });
+                }
+            }
+
+            const content = llmFileParser.formatForLLM(await result);
+            this.logger.log(`文件解析完成: ${filename}, 内容长度: ${content.length} 字符`);
+
+            return {
+                content,
+                filename,
+                progressParts,
+            };
+        } catch (error) {
+            const errorMsg = this.getErrorMsg(error);
+            this.logger.error(`文件解析失败: ${filename}, 错误: ${errorMsg}`);
+
+            return {
+                content: `[无法解析文档: ${filename}。错误: ${errorMsg}]`,
+                filename,
+                progressParts,
+            };
+        }
+    }
+
+    private buildSystemPrompt(
+        basePrompt?: string,
+        documents?: Array<{ filename: string; content: string }>,
+    ): string {
+        if (!documents?.length) return basePrompt || "";
+
+        const docTexts = documents.map((d) => `[文档: ${d.filename}]\n\n${d.content}`);
+        const docsText = docTexts.join("\n\n");
+        return basePrompt ? `${basePrompt}\n\n${docsText}` : docsText;
+    }
+
+    private async processFiles(
+        messages: UIMessage[],
+        writer: DataWriter,
+    ): Promise<ProcessFilesResult> {
+        const isMedia = (type?: string) =>
+            type?.startsWith("image/") || type?.startsWith("video/") || type?.startsWith("audio/");
+
+        const documents: Array<{ filename: string; content: string }> = [];
+
+        const processed = await Promise.all(
+            messages.map(async (msg) => {
+                if (!msg.parts?.length) return msg;
+
+                const parts: UIMessage["parts"] = [];
+
+                for (const part of msg.parts) {
+                    if (part.type !== "file") {
+                        parts.push(part);
+                        continue;
+                    }
+
+                    const file = part as FilePart;
+                    if (isMedia(file.mediaType)) {
+                        parts.push(part);
+                    } else {
+                        const { content, filename, progressParts } = await this.parseFile(
+                            file,
+                            writer,
+                        );
+                        documents.push({ filename, content });
+                        parts.push(...progressParts, part);
+                    }
+                }
+
+                return { ...msg, parts };
+            }),
+        );
+
+        return { messages: processed, documentContents: documents };
+    }
+
     private handleError(error: unknown, response: ServerResponse): void {
-        const errorMessage = error instanceof Error ? error.message : "An error occurred.";
         if (response.headersSent) return;
 
         response.writeHead(500, { "Content-Type": "text/event-stream" });
-        response.write(`data: ${JSON.stringify({ type: "error", error: errorMessage })}\n\n`);
+        response.write(
+            `data: ${JSON.stringify({ type: "error", error: this.getErrorMsg(error) })}\n\n`,
+        );
         response.end();
+    }
+
+    private clean(messages: UIMessage[]): UIMessage[] {
+        return messages.map((msg) => ({
+            ...msg,
+            parts:
+                msg.parts?.filter((part) => {
+                    const type = String(part.type ?? "");
+                    return (
+                        VALID_PART_TYPES.has(type) ||
+                        type.startsWith("tool-") ||
+                        type.startsWith("step-") ||
+                        type.startsWith("data-file-parse-")
+                    );
+                }) ?? [],
+        }));
+    }
+
+    private buildTools(
+        providerId: string,
+        provider: ReturnType<typeof getProvider>,
+        mcpTools: Record<string, unknown>,
+    ): Record<string, Tool> {
+        const tools: Record<string, Tool> = {
+            getWeather,
+            ...mcpTools,
+        };
+
+        if (providerId === "openai") {
+            tools.dalle2ImageGeneration = createDalle2ImageGenerationTool(provider);
+            tools.dalle3ImageGeneration = createDalle3ImageGenerationTool(provider);
+            tools.gptImageGeneration = createGptImageGenerationTool(provider);
+            tools.deepResearch = createDeepResearchTool(provider);
+        }
+
+        return tools;
     }
 }

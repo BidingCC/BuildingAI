@@ -24,6 +24,7 @@ import { memo, type ReactNode, useState } from "react";
 
 import { useSmoothText } from "../../hooks/use-smooth-text";
 import { convertUIMessageToMessage } from "../../libs/message-converter";
+import { FileParseQueue } from "./file-parse-queue";
 import { MessageActions } from "./message-actions";
 import { MessageBranch } from "./message-branch";
 import { FeedbackCard, MessageFeedback } from "./message-feedback";
@@ -127,6 +128,9 @@ export const Message = memo(function Message({
       from={messageData.from}
       className={isEditingMessage && !isAssistant ? "max-w-full" : undefined}
     >
+      {isAssistant && (
+        <FileParseQueue messageId={message.id} parts={message.parts} isStreaming={isStreaming} />
+      )}
       {isAssistant &&
         message.parts
           ?.filter((part): part is ReasoningUIPart => part.type === "reasoning")

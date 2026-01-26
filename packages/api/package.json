@@ -40,6 +40,7 @@
         "@buildingai/dict": "workspace:*",
         "@buildingai/dto": "workspace:*",
         "@buildingai/errors": "workspace:*",
+        "@buildingai/llm-file-parser": "workspace:*",
         "@buildingai/logger": "workspace:*",
         "@buildingai/pipe": "workspace:*",
         "@buildingai/utils": "workspace:*",
