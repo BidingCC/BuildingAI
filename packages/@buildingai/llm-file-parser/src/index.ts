@@ -7,7 +7,13 @@
 import { StructuredFormatter } from "./formatters/structured.formatter";
 import { getParser } from "./parsers";
 import { UnstructuredParser } from "./parsers/unstructured.parser";
-import type { ParseOptions, ParseResult, ParseStream, ParseStreamWithResult, StructuredTextBlock } from "./types";
+import type {
+    ParseOptions,
+    ParseResult,
+    ParseStream,
+    ParseStreamWithResult,
+    StructuredTextBlock,
+} from "./types";
 import { downloadFile } from "./utils/file-downloader";
 import { createParseStream } from "./utils/stream-parser";
 
@@ -109,7 +115,10 @@ export class LLMFileParser {
      * @param options Parsing options
      * @returns Stream parse result with both stream and result promise
      */
-    async streamParseFromUrl(url: string, options: ParseOptions = {}): Promise<ParseStreamWithResult> {
+    async streamParseFromUrl(
+        url: string,
+        options: ParseOptions = {},
+    ): Promise<ParseStreamWithResult> {
         // Download file
         const file = await downloadFile(url, options);
 
@@ -117,7 +126,11 @@ export class LLMFileParser {
         if (options.useUnstructuredService && options.unstructuredApiUrl) {
             const unstructuredParser = new UnstructuredParser();
             if (unstructuredParser.streamParse) {
-                const stream = await unstructuredParser.streamParse(file.buffer, file.filename, options);
+                const stream = await unstructuredParser.streamParse(
+                    file.buffer,
+                    file.filename,
+                    options,
+                );
                 return {
                     stream,
                     result: stream.finalResult(),
@@ -274,7 +287,7 @@ export class LLMFileParser {
             type: "progress",
             progress: {
                 stage: "parsing",
-                message: `正在解析内容块 (0/${totalBlocks})`,
+                message: `正在解析内容 (0/${totalBlocks})`,
                 progress: 10,
                 current: 0,
                 total: totalBlocks,
@@ -290,7 +303,7 @@ export class LLMFileParser {
                     type: "progress",
                     progress: {
                         stage: "parsing",
-                        message: `正在解析内容块 (${i + 1}/${totalBlocks})`,
+                        message: `正在解析内容 (${i + 1}/${totalBlocks})`,
                         progress,
                         current: i + 1,
                         total: totalBlocks,

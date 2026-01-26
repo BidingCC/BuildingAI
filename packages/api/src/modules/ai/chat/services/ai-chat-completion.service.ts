@@ -507,7 +507,11 @@ ${input}
         await this.aiChatRecordService.updateConversation(conversationId, userId, { title });
     }
 
-    private async parseFile(filePart: FilePart, writer: DataWriter): Promise<ParseFileResult> {
+    private async parseFile(
+        filePart: FilePart,
+        writer: DataWriter,
+        shouldStream: boolean = true,
+    ): Promise<ParseFileResult> {
         const filename = filePart.filename || "未命名文件";
         const progressParts: ParseProgressPart[] = [];
 
@@ -524,7 +528,9 @@ ${input}
                 if (typeMap[chunkType] && chunk[chunkType]) {
                     const data = chunk[chunkType];
                     const partType = typeMap[chunkType];
-                    writer.write({ type: partType, data });
+                    if (shouldStream) {
+                        writer.write({ type: partType, data });
+                    }
                     progressParts.push({ type: partType, data });
                 }
             }
@@ -570,10 +576,15 @@ ${input}
         const documents: Array<{ filename: string; content: string }> = [];
 
         const processed = await Promise.all(
-            messages.map(async (msg) => {
+            messages.map(async (msg, index) => {
                 if (!msg.parts?.length) return msg;
 
                 const parts: UIMessage["parts"] = [];
+                const isLastMessage = index === messages.length - 1;
+                const hasFile = msg.parts.some(
+                    (part) => part.type === "file" && !isMedia((part as FilePart).mediaType),
+                );
+                const shouldStream = isLastMessage && msg.role === "user" && hasFile;
 
                 for (const part of msg.parts) {
                     if (part.type !== "file") {
@@ -588,9 +599,14 @@ ${input}
                         const { content, filename, progressParts } = await this.parseFile(
                             file,
                             writer,
+                            shouldStream,
                         );
                         documents.push({ filename, content });
-                        parts.push(...progressParts, part);
+                        if (shouldStream) {
+                            parts.push(...progressParts, part);
+                        } else {
+                            parts.push(part);
+                        }
                     }
                 }
 

@@ -106,7 +106,7 @@ export const FileParseQueue = ({ messageId, parts, isStreaming }: FileParseQueue
   };
 
   const progressPercentage = getProgressPercentage(latestProgress);
-  const title = progressPercentage !== undefined ? `文件解析 ${progressPercentage}%` : "文件解析";
+  const title = progressPercentage !== undefined ? `文件解析完成` : "文件解析中";
   const Icon = hasCompleted ? FileSearchCornerIcon : LoaderIcon;
 
   return (
