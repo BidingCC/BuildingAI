@@ -17,6 +17,7 @@ interface ModelConfig {
         context_size?: number;
         [key: string]: any;
     };
+    enabled?: boolean;
 }
 
 /**
@@ -104,7 +105,7 @@ export class AiModelSeeder extends BaseSeeder {
                         model: modelConfig.model,
                         modelType: modelConfig.model_type,
                         features: Array.isArray(modelConfig.features) ? modelConfig.features : [],
-                        isActive: true,
+                        isActive: modelConfig.enabled === true,
                         isBuiltIn: true,
                         sortOrder: 0,
                         modelConfig: transformedModelConfig as any,

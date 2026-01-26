@@ -6,36 +6,28 @@
             "provider": "spark",
             "label": "讯飞星火",
             "icon_url": "",
-            "supported_model_types": [
-                "llm"
-            ],
+            "supported_model_types": ["llm"],
             "models": []
         },
         {
             "provider": "ollama",
             "label": "Ollama",
             "icon_url": "",
-            "supported_model_types": [
-                "llm"
-            ],
+            "supported_model_types": ["llm"],
             "models": []
         },
         {
             "provider": "azure",
             "label": "Azure",
             "icon_url": "",
-            "supported_model_types": [
-                "llm"
-            ],
+            "supported_model_types": ["llm"],
             "models": []
         },
         {
             "provider": "openrouter",
             "label": "OpenRouter",
             "icon_url": "",
-            "supported_model_types": [
-                "llm"
-            ],
+            "supported_model_types": ["llm"],
             "models": [
                 {
                     "model": "openai/gpt-5.1",
@@ -61,11 +53,7 @@
                     "model": "openai/gpt-5.1-chat",
                     "label": "gpt-5.1-chat",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "vision",
-                        "document"
-                    ],
+                    "features": ["agent-thought", "vision", "document"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -98,11 +86,7 @@
                     "model": "openai/gpt-5-chat",
                     "label": "gpt-5-chat",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "vision",
-                        "document"
-                    ],
+                    "features": ["agent-thought", "vision", "document"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -190,9 +174,7 @@
                     "model": "openai/o3-mini",
                     "label": "o3-mini",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 200000,
                         "mode": "chat"
@@ -205,9 +187,7 @@
                     "model": "openai/o3-mini-2025-01-31",
                     "label": "o3-mini-2025-01-31",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 200000,
                         "mode": "chat"
@@ -220,9 +200,7 @@
                     "model": "openai/o1-preview",
                     "label": "o1-preview",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -235,9 +213,7 @@
                     "model": "openai/o1-mini",
                     "label": "o1-mini",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -342,12 +318,7 @@
                     "model": "openai/gpt-4o",
                     "label": "gpt-4o",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call",
-                        "vision"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call", "vision"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -360,12 +331,7 @@
                     "model": "openai/gpt-4o-mini",
                     "label": "gpt-4o-mini",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call",
-                        "vision"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call", "vision"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -378,11 +344,7 @@
                     "model": "openai/gpt-4",
                     "label": "gpt-4",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 8192,
                         "mode": "chat"
@@ -395,11 +357,7 @@
                     "model": "openai/gpt-4-32k",
                     "label": "gpt-4-32k",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -412,11 +370,7 @@
                     "model": "openai/gpt-3.5-turbo",
                     "label": "gpt-3.5-turbo",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 16385,
                         "mode": "chat"
@@ -507,12 +461,7 @@
                     "model": "anthropic/claude-sonnet-4",
                     "label": "claude-sonnet-4",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "vision",
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "vision", "tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 200000,
                         "mode": "chat"
@@ -525,12 +474,7 @@
                     "model": "anthropic/claude-3.7-sonnet:thinking",
                     "label": "claude-3.7-sonnet:thinking",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "vision",
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "vision", "tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 200000,
                         "mode": "chat"
@@ -562,12 +506,7 @@
                     "model": "anthropic/claude-3.5-sonnet",
                     "label": "claude-3.5-sonnet",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "vision",
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "vision", "tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 200000,
                         "mode": "chat"
@@ -598,12 +537,7 @@
                     "model": "anthropic/claude-3-haiku",
                     "label": "claude-3-haiku",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "vision",
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "vision", "tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 200000,
                         "mode": "chat"
@@ -616,12 +550,7 @@
                     "model": "anthropic/claude-3-opus",
                     "label": "claude-3-opus",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "vision",
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "vision", "tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 200000,
                         "mode": "chat"
@@ -634,12 +563,7 @@
                     "model": "anthropic/claude-3-sonnet",
                     "label": "claude-3-sonnet",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "vision",
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "vision", "tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 200000,
                         "mode": "chat"
@@ -734,10 +658,7 @@
                     "model": "google/gemini-2.5-flash-image-preview",
                     "label": "gemini-2.5-flash-image-preview",
                     "model_type": "llm",
-                    "features": [
-                        "vision",
-                        "document"
-                    ],
+                    "features": ["vision", "document"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -750,10 +671,7 @@
                     "model": "google/gemini-2.5-flash-image-preview:free",
                     "label": "gemini-2.5-flash-image-preview (free)",
                     "model_type": "llm",
-                    "features": [
-                        "vision",
-                        "document"
-                    ],
+                    "features": ["vision", "document"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -806,11 +724,7 @@
                     "model": "google/gemini-2.0-flash-lite-001",
                     "label": "gemini-2.0-flash-lite-001",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 1048576,
                         "mode": "chat"
@@ -823,12 +737,7 @@
                     "model": "google/gemini-pro-1.5",
                     "label": "gemini-pro-1.5",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "vision",
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "vision", "tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 1048576,
                         "mode": "chat"
@@ -841,11 +750,7 @@
                     "model": "google/gemini-pro",
                     "label": "gemini-pro",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 30720,
                         "mode": "chat"
@@ -858,12 +763,7 @@
                     "model": "google/gemma-3n-e2b-it:free",
                     "label": "gemma-3n-e2b-it (free)",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call",
-                        "vision"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call", "vision"],
                     "model_properties": {
                         "context_size": 8192,
                         "mode": "chat"
@@ -876,11 +776,7 @@
                     "model": "cohere/command-r-plus",
                     "label": "command-r-plus",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -893,11 +789,7 @@
                     "model": "cohere/command-r",
                     "label": "command-r",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -910,9 +802,7 @@
                     "model": "meta-llama/llama-3.2-1b-instruct",
                     "label": "llama-3.2-1b-instruct",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -925,9 +815,7 @@
                     "model": "meta-llama/llama-3.2-3b-instruct",
                     "label": "llama-3.2-3b-instruct",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -940,10 +828,7 @@
                     "model": "meta-llama/llama-3.2-11b-vision-instruct",
                     "label": "llama-3.2-11b-vision-instruct",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "vision"
-                    ],
+                    "features": ["agent-thought", "vision"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -956,10 +841,7 @@
                     "model": "meta-llama/llama-3.2-90b-vision-instruct",
                     "label": "llama-3.2-90b-vision-instruct",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "vision"
-                    ],
+                    "features": ["agent-thought", "vision"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -1037,9 +919,7 @@
                     "model": "mistralai/mixtral-8x22b-instruct",
                     "label": "mixtral-8x22b-instruct",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 64000,
                         "mode": "completion"
@@ -1052,9 +932,7 @@
                     "model": "mistralai/mixtral-8x7b-instruct",
                     "label": "mixtral-8x7b-instruct",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 32000,
                         "mode": "completion"
@@ -1067,9 +945,7 @@
                     "model": "mistralai/mistral-7b-instruct",
                     "label": "mistral-7b-instruct",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 8000,
                         "mode": "completion"
@@ -1082,9 +958,7 @@
                     "model": "qwen/qwen-2.5-72b-instruct",
                     "label": "qwen-2.5-72b-instruct",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -1097,9 +971,7 @@
                     "model": "qwen/qwen-2-72b-instruct",
                     "label": "qwen-2-72b-instruct",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "completion"
@@ -1130,11 +1002,7 @@
                     "model": "deepseek/deepseek-chat",
                     "label": "deepseek-chat (DeepSeek V3)",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "multi-tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "multi-tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 163840,
                         "mode": "chat"
@@ -1147,11 +1015,7 @@
                     "model": "deepseek/deepseek-chat-v3.1",
                     "label": "deepseek-chat-v3.1",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "multi-tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "multi-tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 163840,
                         "mode": "chat"
@@ -1164,11 +1028,7 @@
                     "model": "deepseek/deepseek-chat-v3-0324",
                     "label": "deepseek-chat-v3-0324",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "multi-tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "multi-tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 163840,
                         "mode": "chat"
@@ -1181,9 +1041,7 @@
                     "model": "deepseek/deepseek-coder",
                     "label": "deepseek-coder",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 32000,
                         "mode": "chat"
@@ -1196,9 +1054,7 @@
                     "model": "deepseek/deepseek-prover-v2",
                     "label": "deepseek-prover-v2",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 163840,
                         "mode": "chat"
@@ -1211,9 +1067,7 @@
                     "model": "deepseek/deepseek-r1",
                     "label": "deepseek-r1",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 163840,
                         "mode": "chat"
@@ -1226,9 +1080,7 @@
                     "model": "deepseek/deepseek-r1-0528",
                     "label": "deepseek-r1-0528",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 163840,
                         "mode": "chat"
@@ -1241,9 +1093,7 @@
                     "model": "deepseek/deepseek-r1-0528-qwen3-8b",
                     "label": "deepseek-r1-0528-qwen3-8b",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 32000,
                         "mode": "chat"
@@ -1256,9 +1106,7 @@
                     "model": "deepseek/deepseek-r1-distill-llama-70b",
                     "label": "deepseek-r1-distill-llama-70b",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -1271,9 +1119,7 @@
                     "model": "deepseek/deepseek-r1-distill-qwen-32b",
                     "label": "deepseek-r1-distill-qwen-32b",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -1286,9 +1132,7 @@
                     "model": "deepseek/deepseek-r1-distill-qwen-14b",
                     "label": "deepseek-r1-distill-qwen-14b",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 64000,
                         "mode": "chat"
@@ -1301,9 +1145,7 @@
                     "model": "deepseek/deepseek-r1-distill-llama-8b",
                     "label": "deepseek-r1-distill-llama-8b",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 32000,
                         "mode": "chat"
@@ -1316,9 +1158,7 @@
                     "model": "deepseek/deepseek-r1-distill-qwen-7b",
                     "label": "deepseek-r1-distill-qwen-7b",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -1331,9 +1171,7 @@
                     "model": "deepseek/deepseek-r1-distill-qwen-1.5b",
                     "label": "deepseek-r1-distill-qwen-1.5b",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -1346,9 +1184,7 @@
                     "model": "deepseek/deepseek-v3-base",
                     "label": "deepseek-v3-base",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 163840,
                         "mode": "chat"
@@ -1435,11 +1271,7 @@
                     "model": "x-ai/grok-3-beta",
                     "label": "grok-3-beta",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -1452,11 +1284,7 @@
                     "model": "x-ai/grok-3-mini-beta",
                     "label": "grok-3-mini-beta",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -1469,11 +1297,7 @@
                     "model": "anthropic/claude-3-5-haiku",
                     "label": "claude-3-5-haiku",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 200000,
                         "mode": "chat"
@@ -1486,12 +1310,7 @@
                     "model": "google/gst",
                     "label": "gemini-flash-1.5",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "vision",
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "vision", "tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 1048576,
                         "mode": "chat"
@@ -1504,12 +1323,7 @@
                     "model": "gpt-4o-2024-08-06",
                     "label": "gpt-4o-2024-08-06",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call",
-                        "vision"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call", "vision"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -1524,9 +1338,7 @@
             "provider": "volcengine",
             "label": "火山引擎",
             "icon_url": "",
-            "supported_model_types": [
-                "llm"
-            ],
+            "supported_model_types": ["llm"],
             "models": [
                 {
                     "model": "doubao-seed-code-preview-251028",
@@ -1692,9 +1504,7 @@
             "provider": "anthropic",
             "label": "Anthropic",
             "icon_url": "",
-            "supported_model_types": [
-                "llm"
-            ],
+            "supported_model_types": ["llm"],
             "models": [
                 {
                     "model": "claude-opus-4-5-20251101",
@@ -1713,7 +1523,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "claude-haiku-4-5-20251001",
@@ -1732,7 +1543,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "claude-sonnet-4-5",
@@ -1751,7 +1563,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "claude-sonnet-4-5-20250929",
@@ -1833,11 +1646,7 @@
                     "model": "claude-3-5-haiku-20241022",
                     "label": "claude-3-5-haiku-20241022",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 200000,
                         "mode": "chat"
@@ -1907,12 +1716,7 @@
                     "model": "claude-3-haiku-20240307",
                     "label": "claude-3-haiku-20240307",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "vision",
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "vision", "tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 200000,
                         "mode": "chat"
@@ -1925,12 +1729,7 @@
                     "model": "claude-3-opus-20240229",
                     "label": "claude-3-opus-20240229",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "vision",
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "vision", "tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 200000,
                         "mode": "chat"
@@ -1943,12 +1742,7 @@
                     "model": "claude-3-sonnet-20240229",
                     "label": "claude-3-sonnet-20240229",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "vision",
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "vision", "tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 200000,
                         "mode": "chat"
@@ -1963,21 +1757,13 @@
             "provider": "cohere",
             "label": "Cohere",
             "icon_url": "",
-            "supported_model_types": [
-                "llm",
-                "text-embedding",
-                "rerank"
-            ],
+            "supported_model_types": ["llm", "text-embedding", "rerank"],
             "models": [
                 {
                     "model": "command-r",
                     "label": "command-r",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -1990,11 +1776,7 @@
                     "model": "command-r-plus",
                     "label": "command-r-plus",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -2007,24 +1789,21 @@
                     "model": "command-chat",
                     "label": "command-chat",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 4096,
                         "mode": "chat"
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "command-light-chat",
                     "label": "command-light-chat",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 4096,
                         "mode": "chat"
@@ -2037,9 +1816,7 @@
                     "model": "command-nightly-chat",
                     "label": "command-nightly-chat",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 4096,
                         "mode": "chat"
@@ -2052,9 +1829,7 @@
                     "model": "command-light-nightly-chat",
                     "label": "command-light-nightly-chat",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 4096,
                         "mode": "chat"
@@ -2067,9 +1842,7 @@
                     "model": "command",
                     "label": "command",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 4096,
                         "mode": "completion"
@@ -2082,9 +1855,7 @@
                     "model": "command-light",
                     "label": "command-light",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 4096,
                         "mode": "completion"
@@ -2097,9 +1868,7 @@
                     "model": "command-nightly",
                     "label": "command-nightly",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 4096,
                         "mode": "completion"
@@ -2112,9 +1881,7 @@
                     "model": "command-light-nightly",
                     "label": "command-light-nightly",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 4096,
                         "mode": "completion"
@@ -2127,9 +1894,7 @@
                     "model": "c4ai-aya-expanse-32b",
                     "label": "c4ai-aya-expanse-32b",
                     "model_type": "llm",
-                    "features": [
-                        "stream-tool-call"
-                    ],
+                    "features": ["stream-tool-call"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -2142,9 +1907,7 @@
                     "model": "c4ai-aya-expanse-8b",
                     "label": "c4ai-aya-expanse-8b",
                     "model_type": "llm",
-                    "features": [
-                        "stream-tool-call"
-                    ],
+                    "features": ["stream-tool-call"],
                     "model_properties": {
                         "context_size": 8192,
                         "mode": "chat"
@@ -2157,11 +1920,7 @@
                     "model": "command-a-03-2025",
                     "label": "command-a-03-2025",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 256000,
                         "mode": "chat"
@@ -2174,11 +1933,7 @@
                     "model": "command-r-03-2024",
                     "label": "command-r-03-2024",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -2191,11 +1946,7 @@
                     "model": "command-r-08-2024",
                     "label": "command-r-08-2024",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -2208,11 +1959,7 @@
                     "model": "command-r-plus-04-2024",
                     "label": "command-r-plus-04-2024",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -2225,11 +1972,7 @@
                     "model": "command-r-plus-08-2024",
                     "label": "command-r-plus-08-2024",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -2242,11 +1985,7 @@
                     "model": "command-r7b-12-2024",
                     "label": "command-r7b-12-2024",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -2259,11 +1998,7 @@
                     "model": "command-r7b-arabic-02-2025",
                     "label": "command-r7b-arabic-02-2025",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -2319,7 +2054,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "embed-english-light-v3.0",
@@ -2332,7 +2068,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "embed-english-v2.0",
@@ -2345,7 +2082,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "embed-english-v3.0",
@@ -2358,7 +2096,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "embed-multilingual-light-v3.0",
@@ -2371,7 +2110,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "embed-multilingual-v2.0",
@@ -2384,7 +2124,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "embed-multilingual-v3.0",
@@ -2397,7 +2138,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 }
             ]
         },
@@ -2405,9 +2147,7 @@
             "provider": "deepseek",
             "label": "深度求索",
             "icon_url": "",
-            "supported_model_types": [
-                "llm"
-            ],
+            "supported_model_types": ["llm"],
             "models": [
                 {
                     "model": "deepseek-chat",
@@ -2425,7 +2165,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "deepseek-coder",
@@ -2443,7 +2184,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "deepseek-reasoner",
@@ -2461,7 +2203,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 }
             ]
         },
@@ -2469,10 +2212,7 @@
             "provider": "google",
             "label": "Gemini",
             "icon_url": "",
-            "supported_model_types": [
-                "llm",
-                "text-embedding"
-            ],
+            "supported_model_types": ["llm", "text-embedding"],
             "models": [
                 {
                     "model": "gemini-3-pro-preview",
@@ -2495,24 +2235,22 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "gemini-3-pro-image-preview",
                     "label": "Nano Banana Pro",
                     "model_type": "llm",
-                    "features": [
-                        "vision",
-                        "document",
-                        "structured-output"
-                    ],
+                    "features": ["vision", "document", "structured-output"],
                     "model_properties": {
                         "context_size": 65536,
                         "mode": "chat"
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "gemini-3-flash-preview",
@@ -2535,7 +2273,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "gemini-2.5-pro",
@@ -2558,7 +2297,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "gemini-2.5-flash",
@@ -2581,7 +2321,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "gemini-2.5-flash-lite",
@@ -2610,10 +2351,7 @@
                     "model": "gemini-2.5-flash-image",
                     "label": "Nano Banana",
                     "model_type": "llm",
-                    "features": [
-                        "vision",
-                        "document"
-                    ],
+                    "features": ["vision", "document"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -2790,7 +2528,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "gemini-embedding-001",
@@ -2803,7 +2542,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "text-embedding-004",
@@ -2816,7 +2556,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 }
             ]
         },
@@ -2824,21 +2565,13 @@
             "provider": "gitee_ai",
             "label": "模力方舟",
             "icon_url": "",
-            "supported_model_types": [
-                "llm",
-                "text-embedding",
-                "rerank",
-                "speech2text",
-                "tts"
-            ],
+            "supported_model_types": ["llm", "text-embedding", "rerank", "speech2text", "tts"],
             "models": [
                 {
                     "model": "Qwen3-235B-A22B-Instruct-2507",
                     "label": "Qwen3-235B-A22B-Instruct-2507",
                     "model_type": "llm",
-                    "features": [
-                        "tool-call"
-                    ],
+                    "features": ["tool-call"],
                     "model_properties": {
                         "context_size": 262144,
                         "mode": "chat"
@@ -2851,9 +2584,7 @@
                     "model": "qwen3-coder-480b-a35b-instruct",
                     "label": "Qwen3-Coder",
                     "model_type": "llm",
-                    "features": [
-                        "tool-call"
-                    ],
+                    "features": ["tool-call"],
                     "model_properties": {
                         "context_size": 262144,
                         "mode": "chat"
@@ -2866,10 +2597,7 @@
                     "model": "Qwen3-235B-A22B",
                     "label": "Qwen3-235B-A22B",
                     "model_type": "llm",
-                    "features": [
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -2895,10 +2623,7 @@
                     "model": "Qwen3-30B-A3B",
                     "label": "Qwen3-30B-A3B",
                     "model_type": "llm",
-                    "features": [
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -2911,10 +2636,7 @@
                     "model": "Qwen3-32B",
                     "label": "Qwen3-32B",
                     "model_type": "llm",
-                    "features": [
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -2927,10 +2649,7 @@
                     "model": "Qwen3-8B",
                     "label": "Qwen3-8B",
                     "model_type": "llm",
-                    "features": [
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -2943,10 +2662,7 @@
                     "model": "Qwen3-4B",
                     "label": "Qwen3-4B",
                     "model_type": "llm",
-                    "features": [
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -2959,10 +2675,7 @@
                     "model": "Qwen3-0.6B",
                     "label": "Qwen3-0.6B",
                     "model_type": "llm",
-                    "features": [
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -2975,10 +2688,7 @@
                     "model": "Qwen2.5-72B-Instruct",
                     "label": "Qwen2.5-72B-Instruct",
                     "model_type": "llm",
-                    "features": [
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 16384,
                         "mode": "chat"
@@ -2991,10 +2701,7 @@
                     "model": "Qwen2.5-14B-Instruct",
                     "label": "Qwen2.5-14B-Instruct",
                     "model_type": "llm",
-                    "features": [
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 24576,
                         "mode": "chat"
@@ -3007,10 +2714,7 @@
                     "model": "Qwen2-7B-Instruct",
                     "label": "Qwen2-7B-Instruct",
                     "model_type": "llm",
-                    "features": [
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 24576,
                         "mode": "chat"
@@ -3023,10 +2727,7 @@
                     "model": "Qwen2.5-32B-Instruct",
                     "label": "Qwen2.5-32B-Instruct",
                     "model_type": "llm",
-                    "features": [
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -3039,10 +2740,7 @@
                     "model": "Qwen2-72B-Instruct",
                     "label": "Qwen2-72B-Instruct",
                     "model_type": "llm",
-                    "features": [
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -3055,9 +2753,7 @@
                     "model": "Qwen2-VL-72B",
                     "label": "Qwen2-VL-72B",
                     "model_type": "llm",
-                    "features": [
-                        "vision"
-                    ],
+                    "features": ["vision"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -3070,9 +2766,7 @@
                     "model": "Qwen2.5-VL-32B-Instruct",
                     "label": "Qwen2.5-VL-32B-Instruct",
                     "model_type": "llm",
-                    "features": [
-                        "vision"
-                    ],
+                    "features": ["vision"],
                     "model_properties": {
                         "context_size": 24576,
                         "mode": "chat"
@@ -3085,9 +2779,7 @@
                     "model": "QwQ-32B",
                     "label": "QwQ-32B",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -3100,9 +2792,7 @@
                     "model": "Align-DS-V",
                     "label": "Align-DS-V",
                     "model_type": "llm",
-                    "features": [
-                        "vision"
-                    ],
+                    "features": ["vision"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -3115,9 +2805,7 @@
                     "model": "Yi-34B-Chat",
                     "label": "Yi-34B-Chat",
                     "model_type": "llm",
-                    "features": [
-                        "tool-call"
-                    ],
+                    "features": ["tool-call"],
                     "model_properties": {
                         "context_size": 4096,
                         "mode": "chat"
@@ -3130,9 +2818,7 @@
                     "model": "GLM-4_5",
                     "label": "GLM-4.5",
                     "model_type": "llm",
-                    "features": [
-                        "tool-call"
-                    ],
+                    "features": ["tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -3145,9 +2831,7 @@
                     "model": "GLM-4_5-Air",
                     "label": "GLM-4.5-Air",
                     "model_type": "llm",
-                    "features": [
-                        "tool-call"
-                    ],
+                    "features": ["tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -3160,9 +2844,7 @@
                     "model": "GLM-4_5V",
                     "label": "GLM-4.5V",
                     "model_type": "llm",
-                    "features": [
-                        "vision"
-                    ],
+                    "features": ["vision"],
                     "model_properties": {
                         "context_size": 65536,
                         "mode": "chat"
@@ -3175,9 +2857,7 @@
                     "model": "glm-4-9b-chat",
                     "label": "glm-4-9b-chat",
                     "model_type": "llm",
-                    "features": [
-                        "tool-call"
-                    ],
+                    "features": ["tool-call"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -3190,24 +2870,21 @@
                     "model": "deepseek-coder-33B-instruct",
                     "label": "deepseek-coder-33B-instruct",
                     "model_type": "llm",
-                    "features": [
-                        "tool-call"
-                    ],
+                    "features": ["tool-call"],
                     "model_properties": {
                         "context_size": 8192,
                         "mode": "chat"
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "codegeex4-all-9b",
                     "label": "codegeex4-all-9b",
                     "model_type": "llm",
-                    "features": [
-                        "tool-call"
-                    ],
+                    "features": ["tool-call"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -3220,9 +2897,7 @@
                     "model": "InternVL2-8B",
                     "label": "InternVL2-8B",
                     "model_type": "llm",
-                    "features": [
-                        "vision"
-                    ],
+                    "features": ["vision"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -3235,9 +2910,7 @@
                     "model": "InternVL2.5-26B",
                     "label": "InternVL2.5-26B",
                     "model_type": "llm",
-                    "features": [
-                        "vision"
-                    ],
+                    "features": ["vision"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -3250,9 +2923,7 @@
                     "model": "InternVL2.5-78B",
                     "label": "InternVL2.5-78B",
                     "model_type": "llm",
-                    "features": [
-                        "vision"
-                    ],
+                    "features": ["vision"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -3265,10 +2936,7 @@
                     "model": "step3",
                     "label": "阶跃星辰 Step3",
                     "model_type": "llm",
-                    "features": [
-                        "vision",
-                        "tool-call"
-                    ],
+                    "features": ["vision", "tool-call"],
                     "model_properties": {
                         "context_size": 65536,
                         "mode": "chat"
@@ -3281,9 +2949,7 @@
                     "model": "kimi-k2-instruct",
                     "label": "Kimi-K2-Instruct",
                     "model_type": "llm",
-                    "features": [
-                        "tool-call"
-                    ],
+                    "features": ["tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -3296,9 +2962,7 @@
                     "model": "gpt-oss-120b",
                     "label": "gpt-oss-120b",
                     "model_type": "llm",
-                    "features": [
-                        "tool-call"
-                    ],
+                    "features": ["tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -3311,9 +2975,7 @@
                     "model": "gpt-oss-20b",
                     "label": "gpt-oss-20b",
                     "model_type": "llm",
-                    "features": [
-                        "tool-call"
-                    ],
+                    "features": ["tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -3352,10 +3014,7 @@
                     "model": "DeepSeek-R1-Distill-Qwen-32B",
                     "label": "DeepSeek-R1-Distill-Qwen-32B",
                     "model_type": "llm",
-                    "features": [
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -3368,10 +3027,7 @@
                     "model": "DeepSeek-R1-Distill-Qwen-1.5B",
                     "label": "DeepSeek-R1-Distill-Qwen-1.5B",
                     "model_type": "llm",
-                    "features": [
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -3384,10 +3040,7 @@
                     "model": "DeepSeek-R1-Distill-Qwen-14B",
                     "label": "DeepSeek-R1-Distill-Qwen-14B",
                     "model_type": "llm",
-                    "features": [
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -3400,10 +3053,7 @@
                     "model": "DeepSeek-R1-Distill-Qwen-7B",
                     "label": "DeepSeek-R1-Distill-Qwen-7B",
                     "model_type": "llm",
-                    "features": [
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -3416,10 +3066,7 @@
                     "model": "DeepSeek-V3",
                     "label": "DeepSeek-V3",
                     "model_type": "llm",
-                    "features": [
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -3432,10 +3079,7 @@
                     "model": "DeepSeek-R1",
                     "label": "DeepSeek-R1",
                     "model_type": "llm",
-                    "features": [
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -3448,10 +3092,7 @@
                     "model": "gemma-3-27b-it",
                     "label": "gemma-3-27b-it",
                     "model_type": "llm",
-                    "features": [
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -3543,7 +3184,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "Qwen3-Embedding-4B",
@@ -3556,7 +3198,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "Qwen3-Embedding-8B",
@@ -3569,7 +3212,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "bce-embedding-base_v1",
@@ -3582,7 +3226,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "bge-large-zh-v1.5",
@@ -3595,7 +3240,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "bge-m3",
@@ -3608,7 +3254,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "bge-small-zh-v1.5",
@@ -3621,7 +3268,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 }
             ]
         },
@@ -3629,10 +3277,7 @@
             "provider": "hunyuan",
             "label": "腾讯混元",
             "icon_url": "",
-            "supported_model_types": [
-                "llm",
-                "text-embedding"
-            ],
+            "supported_model_types": ["llm", "text-embedding"],
             "models": [
                 {
                     "model": "hunyuan-lite",
@@ -3935,7 +3580,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 }
             ]
         },
@@ -3943,19 +3589,13 @@
             "provider": "minimax",
             "label": "Minimax",
             "icon_url": "",
-            "supported_model_types": [
-                "llm",
-                "text-embedding",
-                "tts"
-            ],
+            "supported_model_types": ["llm", "text-embedding", "tts"],
             "models": [
                 {
                     "model": "abab5-chat",
                     "label": "Abab5-Chat",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 6144,
                         "mode": "chat"
@@ -3968,11 +3608,7 @@
                     "model": "abab5.5-chat",
                     "label": "Abab5.5-Chat",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 16384,
                         "mode": "chat"
@@ -3985,9 +3621,7 @@
                     "model": "abab5.5s-chat",
                     "label": "Abab5.5s-Chat",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 8192,
                         "mode": "chat"
@@ -4000,11 +3634,7 @@
                     "model": "abab6-chat",
                     "label": "Abab6-Chat",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -4017,11 +3647,7 @@
                     "model": "abab6.5-chat",
                     "label": "Abab6.5-Chat",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 8192,
                         "mode": "chat"
@@ -4034,11 +3660,7 @@
                     "model": "abab6.5s-chat",
                     "label": "Abab6.5s-Chat",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 245760,
                         "mode": "chat"
@@ -4051,9 +3673,7 @@
                     "model": "abab6.5t-chat",
                     "label": "Abab6.5t-Chat",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 8192,
                         "mode": "chat"
@@ -4066,11 +3686,7 @@
                     "model": "abab7-chat-preview",
                     "label": "Abab7-chat-preview",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 245760,
                         "mode": "chat"
@@ -4083,11 +3699,7 @@
                     "model": "minimax-m1",
                     "label": "MiniMax-M1",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 1000000,
                         "mode": "chat"
@@ -4100,11 +3712,7 @@
                     "model": "minimax-m2.1-lightning",
                     "label": "MiniMax-M2.1-Lightning",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 204800,
                         "mode": "chat"
@@ -4117,28 +3725,21 @@
                     "model": "minimax-m2.1",
                     "label": "MiniMax-M2.1",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 204800,
                         "mode": "chat"
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "minimax-m2",
                     "label": "MiniMax-M2",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 204800,
                         "mode": "chat"
@@ -4151,11 +3752,7 @@
                     "model": "minimax-text-01",
                     "label": "Minimax-Text-01",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 1000192,
                         "mode": "chat"
@@ -4175,7 +3772,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 }
             ]
         },
@@ -4183,9 +3781,7 @@
             "provider": "moonshot",
             "label": "月之暗面",
             "icon_url": "",
-            "supported_model_types": [
-                "llm"
-            ],
+            "supported_model_types": ["llm"],
             "models": [
                 {
                     "model": "moonshot-v1-8k",
@@ -4311,7 +3907,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "kimi-k2-turbo-preview",
@@ -4329,7 +3926,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 }
             ]
         },
@@ -4337,29 +3935,21 @@
             "provider": "openai",
             "label": "OpenAI",
             "icon_url": "",
-            "supported_model_types": [
-                "llm",
-                "text-embedding",
-                "speech2text",
-                "moderation",
-                "tts"
-            ],
+            "supported_model_types": ["llm", "text-embedding", "speech2text", "moderation", "tts"],
             "models": [
                 {
                     "model": "gpt-5-chat-latest",
                     "label": "gpt-5-chat-latest",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "vision"
-                    ],
+                    "features": ["agent-thought", "vision"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "gpt-5.1",
@@ -4378,7 +3968,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "gpt-5.2",
@@ -4397,7 +3988,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "gpt-5",
@@ -4416,7 +4008,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "gpt-5-2025-08-07",
@@ -4530,7 +4123,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "gpt-4.1-2025-04-14",
@@ -4631,12 +4225,7 @@
                     "model": "chatgpt-4o-latest",
                     "label": "chatgpt-4o-latest",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call",
-                        "vision"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call", "vision"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -4668,12 +4257,7 @@
                     "model": "gpt-4o-2024-05-13",
                     "label": "gpt-4o-2024-05-13",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call",
-                        "vision"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call", "vision"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -4724,12 +4308,7 @@
                     "model": "gpt-4o-audio-preview",
                     "label": "gpt-4o-audio-preview",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call",
-                        "audio"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call", "audio"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -4742,12 +4321,7 @@
                     "model": "gpt-4o-audio-preview-2025-06-03",
                     "label": "gpt-4o-audio-preview-2025-06-03",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call",
-                        "audio"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call", "audio"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -4798,11 +4372,7 @@
                     "model": "gpt-4",
                     "label": "gpt-4",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 8192,
                         "mode": "chat"
@@ -4815,11 +4385,7 @@
                     "model": "gpt-4-0125-preview",
                     "label": "gpt-4-0125-preview",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -4832,11 +4398,7 @@
                     "model": "gpt-4-1106-preview",
                     "label": "gpt-4-1106-preview",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -4849,12 +4411,7 @@
                     "model": "gpt-4-turbo",
                     "label": "gpt-4-turbo",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call",
-                        "vision"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call", "vision"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -4867,12 +4424,7 @@
                     "model": "gpt-4-turbo-2024-04-09",
                     "label": "gpt-4-turbo-2024-04-09",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call",
-                        "vision"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call", "vision"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -4885,11 +4437,7 @@
                     "model": "gpt-4-turbo-preview",
                     "label": "gpt-4-turbo-preview",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -4902,11 +4450,7 @@
                     "model": "gpt-3.5-turbo",
                     "label": "gpt-3.5-turbo",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 16385,
                         "mode": "chat"
@@ -4919,11 +4463,7 @@
                     "model": "gpt-3.5-turbo-0125",
                     "label": "gpt-3.5-turbo-0125",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 16385,
                         "mode": "chat"
@@ -4936,11 +4476,7 @@
                     "model": "gpt-3.5-turbo-1106",
                     "label": "gpt-3.5-turbo-1106",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 16385,
                         "mode": "chat"
@@ -4953,11 +4489,7 @@
                     "model": "gpt-3.5-turbo-16k",
                     "label": "gpt-3.5-turbo-16k",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 16385,
                         "mode": "chat"
@@ -5095,12 +4627,7 @@
                     "model": "o3-pro",
                     "label": "o3-pro",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "tool-call",
-                        "vision",
-                        "structured-output"
-                    ],
+                    "features": ["agent-thought", "tool-call", "vision", "structured-output"],
                     "model_properties": {
                         "context_size": 200000,
                         "mode": "chat"
@@ -5113,12 +4640,7 @@
                     "model": "o3-pro-2025-06-10",
                     "label": "o3-pro-2025-06-10",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "tool-call",
-                        "vision",
-                        "structured-output"
-                    ],
+                    "features": ["agent-thought", "tool-call", "vision", "structured-output"],
                     "model_properties": {
                         "context_size": 200000,
                         "mode": "chat"
@@ -5170,7 +4692,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "text-embedding-3-small",
@@ -5183,7 +4706,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "text-embedding-ada-002",
@@ -5196,7 +4720,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 }
             ]
         },
@@ -5204,21 +4729,13 @@
             "provider": "siliconflow",
             "label": "硅基流动",
             "icon_url": "",
-            "supported_model_types": [
-                "llm",
-                "text-embedding",
-                "rerank",
-                "speech2text",
-                "tts"
-            ],
+            "supported_model_types": ["llm", "text-embedding", "rerank", "speech2text", "tts"],
             "models": [
                 {
                     "model": "Pro/moonshotai/Kimi-K2-Instruct",
                     "label": "Pro/moonshotai/Kimi-K2-Instruct",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -5231,9 +4748,7 @@
                     "model": "moonshotai/Kimi-K2-Instruct",
                     "label": "moonshotai/Kimi-K2-Instruct",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -5246,9 +4761,7 @@
                     "model": "Pro/deepseek-ai/DeepSeek-R1",
                     "label": "Pro/deepseek-ai/DeepSeek-R1",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 160000,
                         "mode": "chat"
@@ -5261,9 +4774,7 @@
                     "model": "Pro/deepseek-ai/DeepSeek-V3",
                     "label": "Pro/deepseek-ai/DeepSeek-V3",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -5276,11 +4787,7 @@
                     "model": "Pro/deepseek-ai/DeepSeek-V3.1",
                     "label": "Pro/deepseek-ai/DeepSeek-V3.1",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 163840,
                         "mode": "chat"
@@ -5293,11 +4800,7 @@
                     "model": "Pro/deepseek-ai/DeepSeek-V3.1-Terminus",
                     "label": "Pro/deepseek-ai/DeepSeek-V3.1-Terminus",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 163840,
                         "mode": "chat"
@@ -5310,11 +4813,7 @@
                     "model": "Pro/deepseek-ai/DeepSeek-V3.2",
                     "label": "Pro/deepseek-ai/DeepSeek-V3.2",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 163840,
                         "mode": "chat"
@@ -5327,11 +4826,7 @@
                     "model": "deepseek-ai/DeepSeek-V3.2",
                     "label": "deepseek-ai/DeepSeek-V3.2",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 163840,
                         "mode": "chat"
@@ -5344,10 +4839,7 @@
                     "model": "deepseek-ai/DeepSeek-OCR",
                     "label": "deepseek-ai/DeepSeek-OCR",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "vision"
-                    ],
+                    "features": ["agent-thought", "vision"],
                     "model_properties": {
                         "context_size": 8192,
                         "mode": "chat"
@@ -5360,9 +4852,7 @@
                     "model": "deepseek-ai/DeepSeek-R1",
                     "label": "deepseek-ai/DeepSeek-R1",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 160000,
                         "mode": "chat"
@@ -5375,9 +4865,7 @@
                     "model": "deepseek-ai/DeepSeek-V3",
                     "label": "deepseek-ai/DeepSeek-V3",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -5390,11 +4878,7 @@
                     "model": "deepseek-ai/DeepSeek-V3.1",
                     "label": "deepseek-ai/DeepSeek-V3.1",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 163840,
                         "mode": "chat"
@@ -5407,11 +4891,7 @@
                     "model": "deepseek-ai/DeepSeek-V3.1-Terminus",
                     "label": "deepseek-ai/DeepSeek-V3.1-Terminus",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 163840,
                         "mode": "chat"
@@ -5424,9 +4904,7 @@
                     "model": "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
                     "label": "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 32000,
                         "mode": "chat"
@@ -5439,9 +4917,7 @@
                     "model": "deepseek-ai/DeepSeek-R1-Distill-Qwen-14B",
                     "label": "deepseek-ai/DeepSeek-R1-Distill-Qwen-14B",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 32000,
                         "mode": "chat"
@@ -5454,9 +4930,7 @@
                     "model": "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
                     "label": "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 32000,
                         "mode": "chat"
@@ -5469,11 +4943,7 @@
                     "model": "Qwen/Qwen3-Next-80B-A3B-Instruct",
                     "label": "Qwen/Qwen3-Next-80B-A3B-Instruct",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "multi-tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "multi-tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 256000,
                         "mode": "chat"
@@ -5486,11 +4956,7 @@
                     "model": "Qwen/Qwen3-Next-80B-A3B-Thinking",
                     "label": "Qwen/Qwen3-Next-80B-A3B-Thinking",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "multi-tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "multi-tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 256000,
                         "mode": "chat"
@@ -5503,11 +4969,7 @@
                     "model": "Qwen/Qwen3-235B-A22B",
                     "label": "Qwen/Qwen3-235B-A22B",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "multi-tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "multi-tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -5520,11 +4982,7 @@
                     "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
                     "label": "Qwen/Qwen3-235B-A22B-Instruct-2507",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "multi-tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "multi-tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 256000,
                         "mode": "chat"
@@ -5537,11 +4995,7 @@
                     "model": "Qwen/Qwen3-235B-A22B-Thinking-2507",
                     "label": "Qwen/Qwen3-235B-A22B-Thinking-2507",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "multi-tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "multi-tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 256000,
                         "mode": "chat"
@@ -5554,11 +5008,7 @@
                     "model": "Qwen/Qwen3-30B-A3B-Instruct-2507",
                     "label": "Qwen/Qwen3-30B-A3B-Instruct-2507",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "multi-tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "multi-tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 256000,
                         "mode": "chat"
@@ -5571,11 +5021,7 @@
                     "model": "Qwen/Qwen3-32B",
                     "label": "Qwen/Qwen3-32B",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "multi-tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "multi-tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -5588,11 +5034,7 @@
                     "model": "Qwen/Qwen3-30B-A3B",
                     "label": "Qwen/Qwen3-30B-A3B",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "multi-tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "multi-tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -5605,11 +5047,7 @@
                     "model": "Qwen/Qwen3-14B",
                     "label": "Qwen/Qwen3-14B",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "multi-tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "multi-tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -5622,11 +5060,7 @@
                     "model": "Qwen/Qwen3-8B",
                     "label": "Qwen/Qwen3-8B",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "multi-tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "multi-tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -5639,9 +5073,7 @@
                     "model": "Qwen/Qwen2.5-72B-Instruct",
                     "label": "Qwen/Qwen2.5-72B-Instruct",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -5654,9 +5086,7 @@
                     "model": "Qwen/Qwen2.5-72B-Instruct-128K",
                     "label": "Qwen/Qwen2.5-72B-Instruct-128K",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -5669,9 +5099,7 @@
                     "model": "Qwen/Qwen2.5-32B-Instruct",
                     "label": "Qwen/Qwen2.5-32B-Instruct",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -5684,9 +5112,7 @@
                     "model": "Qwen/Qwen2.5-14B-Instruct",
                     "label": "Qwen/Qwen2.5-14B-Instruct",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -5699,9 +5125,7 @@
                     "model": "Qwen/Qwen2.5-7B-Instruct",
                     "label": "Qwen/Qwen2.5-7B-Instruct",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -5714,9 +5138,7 @@
                     "model": "Qwen/Qwen2.5-Coder-32B-Instruct",
                     "label": "Qwen/Qwen2.5-Coder-32B-Instruct",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -5729,9 +5151,7 @@
                     "model": "Qwen/Qwen2.5-Coder-7B-Instruct",
                     "label": "Qwen/Qwen2.5-Coder-7B-Instruct",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -5744,9 +5164,7 @@
                     "model": "Qwen/Qwen2.5-VL-72B-Instruct",
                     "label": "Qwen/Qwen2.5-VL-72B-Instruct",
                     "model_type": "llm",
-                    "features": [
-                        "vision"
-                    ],
+                    "features": ["vision"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -5759,9 +5177,7 @@
                     "model": "Qwen/Qwen2.5-VL-32B-Instruct",
                     "label": "Qwen/Qwen2.5-VL-32B-Instruct",
                     "model_type": "llm",
-                    "features": [
-                        "vision"
-                    ],
+                    "features": ["vision"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -5774,9 +5190,7 @@
                     "model": "Pro/Qwen/Qwen2.5-VL-7B-Instruct",
                     "label": "Pro/Qwen/Qwen2.5-VL-7B-Instruct",
                     "model_type": "llm",
-                    "features": [
-                        "vision"
-                    ],
+                    "features": ["vision"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -5789,9 +5203,7 @@
                     "model": "THUDM/GLM-4.1V-9B-Thinking",
                     "label": "THUDM/glm-41v-9b-thinking",
                     "model_type": "llm",
-                    "features": [
-                        "vision"
-                    ],
+                    "features": ["vision"],
                     "model_properties": {
                         "context_size": 16384,
                         "mode": "chat"
@@ -5804,9 +5216,7 @@
                     "model": "THUDM/glm-4-9b-chat",
                     "label": "THUDM/glm-4-9b-chat",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -5819,11 +5229,7 @@
                     "model": "zai-org/GLM-4.5",
                     "label": "zai-org/GLM-4.5",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "multi-tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "multi-tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -5836,11 +5242,7 @@
                     "model": "zai-org/GLM-4.5-Air",
                     "label": "zai-org/GLM-4.5-Air",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "multi-tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "multi-tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -5853,11 +5255,7 @@
                     "model": "zai-org/GLM-4.6",
                     "label": "zai-org/GLM-4.6",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "multi-tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "multi-tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 200000,
                         "mode": "chat"
@@ -5870,12 +5268,7 @@
                     "model": "zai-org/GLM-4.6V",
                     "label": "zai-org/GLM-4.6V",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "multi-tool-call",
-                        "stream-tool-call",
-                        "vision"
-                    ],
+                    "features": ["agent-thought", "multi-tool-call", "stream-tool-call", "vision"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -5888,11 +5281,7 @@
                     "model": "Pro/zai-org/GLM-4.7",
                     "label": "Pro/zai-org/GLM-4.7",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "multi-tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "multi-tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 200000,
                         "mode": "chat"
@@ -5905,11 +5294,7 @@
                     "model": "Pro/deepseek-ai/DeepSeek-V3.2-Exp",
                     "label": "Pro/deepseek-ai/DeepSeek-V3.2-Exp",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 163840,
                         "mode": "chat"
@@ -5922,11 +5307,7 @@
                     "model": "deepseek-ai/DeepSeek-V3.2-Exp",
                     "label": "deepseek-ai/DeepSeek-V3.2-Exp",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "tool-call",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "tool-call", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 163840,
                         "mode": "chat"
@@ -6006,7 +5387,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "BAAI/bge-large-en-v1.5",
@@ -6019,7 +5401,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "BAAI/bge-large-zh-v1.5",
@@ -6032,7 +5415,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "BAAI/bge-m3",
@@ -6045,7 +5429,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "Qwen/Qwen3-Embedding-0.6B",
@@ -6058,7 +5443,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "Qwen/Qwen3-Embedding-4B",
@@ -6071,7 +5457,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "Qwen/Qwen3-Embedding-8B",
@@ -6084,7 +5471,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 }
             ]
         },
@@ -6092,23 +5480,13 @@
             "provider": "tongyi",
             "label": "通义",
             "icon_url": "",
-            "supported_model_types": [
-                "llm",
-                "text-embedding",
-                "rerank",
-                "speech2text",
-                "tts"
-            ],
+            "supported_model_types": ["llm", "text-embedding", "rerank", "speech2text", "tts"],
             "models": [
                 {
                     "model": "qvq-max-latest",
                     "label": "qvq-max-latest",
                     "model_type": "llm",
-                    "features": [
-                        "vision",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["vision", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -6121,11 +5499,7 @@
                     "model": "qvq-max",
                     "label": "qvq-max",
                     "model_type": "llm",
-                    "features": [
-                        "vision",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["vision", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -6138,10 +5512,7 @@
                     "model": "qwq-plus-0305",
                     "label": "qwq-plus-0305",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -6154,10 +5525,7 @@
                     "model": "qwq-plus",
                     "label": "qwq-plus",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -6170,10 +5538,7 @@
                     "model": "qwq-32b",
                     "label": "qwq-32b",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -6186,9 +5551,7 @@
                     "model": "deepseek-r1",
                     "label": "DeepSeek-R1",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -6201,9 +5564,7 @@
                     "model": "deepseek-r1-distill-qwen-14b",
                     "label": "DeepSeek-R1-Distill-Qwen-14B",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 32000,
                         "mode": "chat"
@@ -6216,9 +5577,7 @@
                     "model": "deepseek-r1-distill-qwen-32b",
                     "label": "DeepSeek-R1-Distill-Qwen-32B",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 32000,
                         "mode": "chat"
@@ -6231,9 +5590,7 @@
                     "model": "deepseek-v3.2-exp",
                     "label": "DeepSeek-V3.2-exp",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -6246,9 +5603,7 @@
                     "model": "deepseek-v3.1",
                     "label": "DeepSeek-V3.1",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -6261,9 +5616,7 @@
                     "model": "deepseek-v3",
                     "label": "DeepSeek-V3",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 64000,
                         "mode": "chat"
@@ -6276,11 +5629,7 @@
                     "model": "qwen3-max",
                     "label": "qwen3-max",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 262144,
                         "mode": "chat"
@@ -6293,11 +5642,7 @@
                     "model": "qwen3-max-2025-09-23",
                     "label": "qwen3-max-2025-09-23",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 262144,
                         "mode": "chat"
@@ -6310,11 +5655,7 @@
                     "model": "qwen3-max-preview",
                     "label": "qwen3-max-preview",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 262144,
                         "mode": "chat"
@@ -6327,9 +5668,7 @@
                     "model": "qwen3-coder-plus",
                     "label": "qwen3-coder-plus",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 1000000,
                         "mode": "chat"
@@ -6342,9 +5681,7 @@
                     "model": "qwen3-coder-480b-a35b-instruct",
                     "label": "qwen3-coder-480b-a35b-instruct",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 262144,
                         "mode": "chat"
@@ -6357,9 +5694,7 @@
                     "model": "qwen3-coder-30b-a3b-instruct",
                     "label": "qwen3-coder-30b-a3b-instruct",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 262144,
                         "mode": "chat"
@@ -6372,11 +5707,7 @@
                     "model": "qwen3-next-80b-a3b-instruct",
                     "label": "qwen3-next-80b-a3b-instruct",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -6389,11 +5720,7 @@
                     "model": "qwen3-next-80b-a3b-thinking",
                     "label": "qwen3-next-80b-a3b-thinking",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -6406,11 +5733,7 @@
                     "model": "qwen3-235b-a22b-thinking-2507",
                     "label": "qwen3-235b-a22b-thinking-2507",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -6423,11 +5746,7 @@
                     "model": "qwen3-235b-a22b-instruct-2507",
                     "label": "qwen3-235b-a22b-instruct-2507",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -6440,11 +5759,7 @@
                     "model": "qwen3-235b-a22b",
                     "label": "qwen3-235b-a22b",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -6457,11 +5772,7 @@
                     "model": "qwen3-30b-a3b-instruct-2507",
                     "label": "qwen3-30b-a3b-instruct-2507",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -6474,11 +5785,7 @@
                     "model": "qwen3-30b-a3b",
                     "label": "qwen3-30b-a3b",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -6491,11 +5798,7 @@
                     "model": "qwen3-32b",
                     "label": "qwen3-32b",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -6508,11 +5811,7 @@
                     "model": "qwen3-14b",
                     "label": "qwen3-14b",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -6525,11 +5824,7 @@
                     "model": "qwen3-8b",
                     "label": "qwen3-8b",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -6542,11 +5837,7 @@
                     "model": "qwen3-4b",
                     "label": "qwen3-4b",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -6559,11 +5850,7 @@
                     "model": "qwen3-1.7b",
                     "label": "qwen3-1.7b",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -6576,11 +5863,7 @@
                     "model": "qwen3-0.6b",
                     "label": "qwen3-0.6b",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -6593,28 +5876,21 @@
                     "model": "qwen3-vl-plus",
                     "label": "qwen3-vl-plus",
                     "model_type": "llm",
-                    "features": [
-                        "vision",
-                        "agent-thought",
-                        "video"
-                    ],
+                    "features": ["vision", "agent-thought", "video"],
                     "model_properties": {
                         "context_size": 262144,
                         "mode": "chat"
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "qwen3-vl-plus-2025-09-23",
                     "label": "qwen3-vl-plus-2025-09-23",
                     "model_type": "llm",
-                    "features": [
-                        "vision",
-                        "agent-thought",
-                        "video"
-                    ],
+                    "features": ["vision", "agent-thought", "video"],
                     "model_properties": {
                         "context_size": 262144,
                         "mode": "chat"
@@ -6640,7 +5916,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "qwen3-vl-235b-a22b-thinking",
@@ -6703,11 +5980,7 @@
                     "model": "qwen-plus-latest",
                     "label": "qwen-plus-latest(Qwen3)",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 1000000,
                         "mode": "chat"
@@ -6720,11 +5993,7 @@
                     "model": "qwen-plus-2025-07-28",
                     "label": "qwen-plus-2025-07-28(Qwen3)",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 1000000,
                         "mode": "chat"
@@ -6737,11 +6006,7 @@
                     "model": "qwen-plus-2025-04-28",
                     "label": "qwen-plus-2025-04-28(Qwen3)",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -6754,11 +6019,7 @@
                     "model": "qwen-plus",
                     "label": "qwen-plus",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 1000000,
                         "mode": "chat"
@@ -6771,28 +6032,21 @@
                     "model": "qwen-max-latest",
                     "label": "qwen-max-latest",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "qwen-max",
                     "label": "qwen-max",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -6805,11 +6059,7 @@
                     "model": "qwen-vl-max-latest",
                     "label": "qwen-vl-max-latest",
                     "model_type": "llm",
-                    "features": [
-                        "vision",
-                        "agent-thought",
-                        "video"
-                    ],
+                    "features": ["vision", "agent-thought", "video"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -6822,11 +6072,7 @@
                     "model": "qwen-vl-max-2025-01-25",
                     "label": "qwen-vl-max-2025-01-25",
                     "model_type": "llm",
-                    "features": [
-                        "vision",
-                        "agent-thought",
-                        "video"
-                    ],
+                    "features": ["vision", "agent-thought", "video"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -6839,11 +6085,7 @@
                     "model": "qwen-vl-max",
                     "label": "qwen-vl-max",
                     "model_type": "llm",
-                    "features": [
-                        "vision",
-                        "agent-thought",
-                        "video"
-                    ],
+                    "features": ["vision", "agent-thought", "video"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -6856,11 +6098,7 @@
                     "model": "qwen-vl-plus-latest",
                     "label": "qwen-vl-plus-latest",
                     "model_type": "llm",
-                    "features": [
-                        "vision",
-                        "agent-thought",
-                        "video"
-                    ],
+                    "features": ["vision", "agent-thought", "video"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -6873,11 +6111,7 @@
                     "model": "qwen-vl-plus-2025-01-25",
                     "label": "qwen-vl-plus-2025-01-25",
                     "model_type": "llm",
-                    "features": [
-                        "vision",
-                        "agent-thought",
-                        "video"
-                    ],
+                    "features": ["vision", "agent-thought", "video"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -6890,11 +6124,7 @@
                     "model": "qwen-vl-plus-2025-01-02",
                     "label": "qwen-vl-plus-2025-01-02",
                     "model_type": "llm",
-                    "features": [
-                        "vision",
-                        "agent-thought",
-                        "video"
-                    ],
+                    "features": ["vision", "agent-thought", "video"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -6907,11 +6137,7 @@
                     "model": "qwen-vl-plus",
                     "label": "qwen-vl-plus",
                     "model_type": "llm",
-                    "features": [
-                        "vision",
-                        "agent-thought",
-                        "video"
-                    ],
+                    "features": ["vision", "agent-thought", "video"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -6924,11 +6150,7 @@
                     "model": "qwen2.5-72b-instruct",
                     "label": "qwen2.5-72b-instruct",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -6941,11 +6163,7 @@
                     "model": "qwen2.5-32b-instruct",
                     "label": "qwen2.5-32b-instruct",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -6958,11 +6176,7 @@
                     "model": "qwen2.5-14b-instruct-1m",
                     "label": "qwen2.5-14b-instruct-1m",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 1000000,
                         "mode": "chat"
@@ -6975,11 +6189,7 @@
                     "model": "qwen2.5-14b-instruct",
                     "label": "qwen2.5-14b-instruct",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -6992,11 +6202,7 @@
                     "model": "qwen2.5-7b-instruct-1m",
                     "label": "qwen2.5-7b-instruct-1m",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 1000000,
                         "mode": "chat"
@@ -7009,11 +6215,7 @@
                     "model": "qwen2.5-7b-instruct",
                     "label": "qwen2.5-7b-instruct",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -7026,11 +6228,7 @@
                     "model": "qwen2.5-3b-instruct",
                     "label": "qwen2.5-3b-instruct",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -7043,11 +6241,7 @@
                     "model": "qwen2.5-1.5b-instruct",
                     "label": "qwen2.5-1.5b-instruct",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -7060,11 +6254,7 @@
                     "model": "qwen2.5-0.5b-instruct",
                     "label": "qwen2.5-0.5b-instruct",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -7077,9 +6267,7 @@
                     "model": "qwen2.5-coder-7b-instruct",
                     "label": "qwen2.5-coder-7b-instruct",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -7092,11 +6280,7 @@
                     "model": "qwen2.5-vl-72b-instruct",
                     "label": "qwen2.5-vl-72b-instruct",
                     "model_type": "llm",
-                    "features": [
-                        "vision",
-                        "agent-thought",
-                        "video"
-                    ],
+                    "features": ["vision", "agent-thought", "video"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -7109,11 +6293,7 @@
                     "model": "qwen2.5-vl-7b-instruct",
                     "label": "qwen2.5-vl-7b-instruct",
                     "model_type": "llm",
-                    "features": [
-                        "vision",
-                        "agent-thought",
-                        "video"
-                    ],
+                    "features": ["vision", "agent-thought", "video"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -7126,11 +6306,7 @@
                     "model": "qwen2.5-vl-3b-instruct",
                     "label": "qwen2.5-vl-3b-instruct",
                     "model_type": "llm",
-                    "features": [
-                        "vision",
-                        "agent-thought",
-                        "video"
-                    ],
+                    "features": ["vision", "agent-thought", "video"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -7161,9 +6337,7 @@
                     "model": "qwen-math-plus",
                     "label": "qwen-math-plus",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 4096,
                         "mode": "chat"
@@ -7176,9 +6350,7 @@
                     "model": "qwen-math-turbo",
                     "label": "qwen-math-turbo",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 4096,
                         "mode": "chat"
@@ -7191,9 +6363,7 @@
                     "model": "qwen-mt-plus",
                     "label": "qwen-mt-plus",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 16384,
                         "mode": "chat"
@@ -7206,9 +6376,7 @@
                     "model": "qwen-mt-turbo",
                     "label": "qwen-mt-turbo",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 16384,
                         "mode": "chat"
@@ -7221,9 +6389,7 @@
                     "model": "qwen-coder-turbo-latest",
                     "label": "qwen-coder-turbo-latest",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -7236,9 +6402,7 @@
                     "model": "qwen-coder-turbo",
                     "label": "qwen-coder-turbo",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -7251,11 +6415,7 @@
                     "model": "qwen-flash-2025-07-28",
                     "label": "qwen-flash-2025-07-28(Qwen3)",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 1000000,
                         "mode": "chat"
@@ -7268,11 +6428,7 @@
                     "model": "glm-4.7",
                     "label": "glm-4.7",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 202752,
                         "mode": "chat"
@@ -7285,11 +6441,7 @@
                     "model": "qwen-flash",
                     "label": "qwen-flash",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 1000000,
                         "mode": "chat"
@@ -7302,11 +6454,7 @@
                     "model": "farui-plus",
                     "label": "farui-plus",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 12288,
                         "mode": "chat"
@@ -7319,9 +6467,7 @@
                     "model": "deepseek-v3.2",
                     "label": "DeepSeek-V3.2",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -7334,9 +6480,7 @@
                     "model": "qwen3-coder-plus-2025-09-23",
                     "label": "qwen3-coder-plus-2025-09-23",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 1000000,
                         "mode": "chat"
@@ -7349,12 +6493,7 @@
                     "model": "qwen3-omni-flash-2025-12-01",
                     "label": "qwen3-omni-flash-2025-12-01",
                     "model_type": "llm",
-                    "features": [
-                        "vision",
-                        "agent-thought",
-                        "video",
-                        "audio"
-                    ],
+                    "features": ["vision", "agent-thought", "video", "audio"],
                     "model_properties": {
                         "context_size": 65536,
                         "mode": "chat"
@@ -7410,16 +6549,15 @@
                     "model": "multimodal-embedding-v1",
                     "label": "multimodal-embedding-v1",
                     "model_type": "text-embedding",
-                    "features": [
-                        "vision"
-                    ],
+                    "features": ["vision"],
                     "model_properties": {
                         "context_size": 8192,
                         "max_chunks": 10
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "text-embedding-v1",
@@ -7432,7 +6570,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "text-embedding-v2",
@@ -7445,7 +6584,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "text-embedding-v3",
@@ -7458,7 +6598,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "text-embedding-v4",
@@ -7471,7 +6612,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 }
             ]
         },
@@ -7479,19 +6621,13 @@
             "provider": "wenxin",
             "label": "文心一言",
             "icon_url": "",
-            "supported_model_types": [
-                "llm",
-                "text-embedding",
-                "rerank"
-            ],
+            "supported_model_types": ["llm", "text-embedding", "rerank"],
             "models": [
                 {
                     "model": "ernie-3.5-128k",
                     "label": "Ernie-3.5-128K",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -7504,9 +6640,7 @@
                     "model": "ernie-3.5-8k",
                     "label": "Ernie-3.5-8K",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 8192,
                         "mode": "chat"
@@ -7519,9 +6653,7 @@
                     "model": "ernie-4.0-8k-latest",
                     "label": "Ernie-4.0-8K-Latest",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 8192,
                         "mode": "chat"
@@ -7534,9 +6666,7 @@
                     "model": "ernie-4.0-8k",
                     "label": "Ernie-4.0-8K",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 8192,
                         "mode": "chat"
@@ -7549,9 +6679,7 @@
                     "model": "ernie-4.0-turbo-128k",
                     "label": "Ernie-4.0-turbo-128K",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -7564,9 +6692,7 @@
                     "model": "ernie-4.0-turbo-8k-preview",
                     "label": "Ernie-4.0-turbo-8k-preview",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 8192,
                         "mode": "chat"
@@ -7579,9 +6705,7 @@
                     "model": "ernie-4.0-turbo-8k",
                     "label": "Ernie-4.0-turbo-8K",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 8192,
                         "mode": "chat"
@@ -7594,9 +6718,7 @@
                     "model": "ernie-4.5-turbo-128k",
                     "label": "Ernie-4.5-turbo-128K",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -7609,9 +6731,7 @@
                     "model": "ernie-lite-pro-128k",
                     "label": "Ernie-Lite-Pro-128K",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -7624,9 +6744,7 @@
                     "model": "ernie-speed-128k",
                     "label": "ERNIE-Speed-128K",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -7639,9 +6757,7 @@
                     "model": "ernie-speed-8k",
                     "label": "ERNIE-Speed-8K",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 8192,
                         "mode": "chat"
@@ -7654,9 +6770,7 @@
                     "model": "ernie-speed-pro-128k",
                     "label": "Ernie-speed-pro-128k",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 128000,
                         "mode": "chat"
@@ -7669,9 +6783,7 @@
                     "model": "ernie-x1-turbo-32k",
                     "label": "Ernie-X1-Turbo-32K",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought"
-                    ],
+                    "features": ["agent-thought"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -7703,7 +6815,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "bge-large-zh",
@@ -7716,7 +6829,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "embedding-v1",
@@ -7729,7 +6843,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "tao-8k",
@@ -7742,7 +6857,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 }
             ]
         },
@@ -7750,9 +6866,7 @@
             "provider": "x",
             "label": "xAI",
             "icon_url": "",
-            "supported_model_types": [
-                "llm"
-            ],
+            "supported_model_types": ["llm"],
             "models": [
                 {
                     "model": "grok-3-mini",
@@ -7810,7 +6924,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "grok-4-1-fast-non-reasoning",
@@ -7830,7 +6945,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "grok-4-1-fast-reasoning",
@@ -7917,54 +7033,41 @@
             "provider": "zhipuai",
             "label": "智谱 AI",
             "icon_url": "",
-            "supported_model_types": [
-                "llm",
-                "text-embedding"
-            ],
+            "supported_model_types": ["llm", "text-embedding"],
             "models": [
                 {
                     "model": "glm-4.7",
                     "label": "glm-4.7",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 200000,
                         "mode": "chat"
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "glm-4.6",
                     "label": "glm-4.6",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 200000,
                         "mode": "chat"
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "glm-4.5",
                     "label": "glm-4.5",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -7977,11 +7080,7 @@
                     "model": "glm-4.5-x",
                     "label": "glm-4.5-x",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -7994,11 +7093,7 @@
                     "model": "glm-4.5-air",
                     "label": "glm-4.5-air",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -8011,11 +7106,7 @@
                     "model": "glm-4.5-airx",
                     "label": "glm-4.5-airx",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -8028,11 +7119,7 @@
                     "model": "glm-4.5-flash",
                     "label": "glm-4.5-flash",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -8045,10 +7132,7 @@
                     "model": "glm-4.5v",
                     "label": "glm-4.5v",
                     "model_type": "llm",
-                    "features": [
-                        "vision",
-                        "agent-thought"
-                    ],
+                    "features": ["vision", "agent-thought"],
                     "model_properties": {
                         "context_size": 16384,
                         "mode": "chat"
@@ -8061,11 +7145,7 @@
                     "model": "glm-4.1v-thinking-flash",
                     "label": "glm-4.1v-thinking-flash",
                     "model_type": "llm",
-                    "features": [
-                        "vision",
-                        "video",
-                        "agent-thought"
-                    ],
+                    "features": ["vision", "video", "agent-thought"],
                     "model_properties": {
                         "context_size": 65536,
                         "mode": "chat"
@@ -8078,11 +7158,7 @@
                     "model": "glm-4.1v-thinking-flashx",
                     "label": "glm-4.1v-thinking-flashx",
                     "model_type": "llm",
-                    "features": [
-                        "vision",
-                        "video",
-                        "agent-thought"
-                    ],
+                    "features": ["vision", "video", "agent-thought"],
                     "model_properties": {
                         "context_size": 65536,
                         "mode": "chat"
@@ -8095,11 +7171,7 @@
                     "model": "glm-4-plus",
                     "label": "glm-4-plus",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -8112,11 +7184,7 @@
                     "model": "glm-4",
                     "label": "glm-4",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -8129,11 +7197,7 @@
                     "model": "glm-4-0520",
                     "label": "glm-4-0520",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -8146,11 +7210,7 @@
                     "model": "glm-4-air",
                     "label": "glm-4-air",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -8163,11 +7223,7 @@
                     "model": "glm-4-air-0111",
                     "label": "glm-4-air-0111",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -8180,11 +7236,7 @@
                     "model": "glm-4-air-250414",
                     "label": "glm-4-air-250414",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -8197,11 +7249,7 @@
                     "model": "glm-4-airx",
                     "label": "glm-4-airx",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 8192,
                         "mode": "chat"
@@ -8214,11 +7262,7 @@
                     "model": "glm-4-flash",
                     "label": "glm-4-flash",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -8231,11 +7275,7 @@
                     "model": "glm-4-flash-250414",
                     "label": "glm-4-flash-250414",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -8248,11 +7288,7 @@
                     "model": "glm-4-flashx",
                     "label": "glm-4-flashx",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -8265,11 +7301,7 @@
                     "model": "glm-4-flashx-250414",
                     "label": "glm-4-flashx-250414",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -8282,11 +7314,7 @@
                     "model": "glm-4-long",
                     "label": "glm-4-long",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 1048576,
                         "mode": "chat"
@@ -8299,9 +7327,7 @@
                     "model": "glm-4v",
                     "label": "glm-4v",
                     "model_type": "llm",
-                    "features": [
-                        "vision"
-                    ],
+                    "features": ["vision"],
                     "model_properties": {
                         "context_size": 8192,
                         "mode": "chat"
@@ -8314,9 +7340,7 @@
                     "model": "glm-4v-flash",
                     "label": "glm-4v-flash",
                     "model_type": "llm",
-                    "features": [
-                        "vision"
-                    ],
+                    "features": ["vision"],
                     "model_properties": {
                         "context_size": 4096,
                         "mode": "chat"
@@ -8329,10 +7353,7 @@
                     "model": "glm-4v-plus",
                     "label": "glm-4v-plus",
                     "model_type": "llm",
-                    "features": [
-                        "vision",
-                        "video"
-                    ],
+                    "features": ["vision", "video"],
                     "model_properties": {
                         "context_size": 8192,
                         "mode": "chat"
@@ -8345,10 +7366,7 @@
                     "model": "glm-4v-plus-0111",
                     "label": "glm-4v-plus-0111",
                     "model_type": "llm",
-                    "features": [
-                        "vision",
-                        "video"
-                    ],
+                    "features": ["vision", "video"],
                     "model_properties": {
                         "context_size": 16384,
                         "mode": "chat"
@@ -8361,10 +7379,7 @@
                     "model": "glm-z1-air",
                     "label": "glm-z1-air",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -8377,10 +7392,7 @@
                     "model": "glm-z1-airx",
                     "label": "glm-z1-airx",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 32768,
                         "mode": "chat"
@@ -8393,10 +7405,7 @@
                     "model": "glm-z1-flash",
                     "label": "glm-z1-flash",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -8409,10 +7418,7 @@
                     "model": "glm-z1-flashx",
                     "label": "glm-z1-flashx",
                     "model_type": "llm",
-                    "features": [
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -8425,11 +7431,7 @@
                     "model": "glm-3-turbo",
                     "label": "glm-3-turbo",
                     "model_type": "llm",
-                    "features": [
-                        "multi-tool-call",
-                        "agent-thought",
-                        "stream-tool-call"
-                    ],
+                    "features": ["multi-tool-call", "agent-thought", "stream-tool-call"],
                     "model_properties": {
                         "context_size": 131072,
                         "mode": "chat"
@@ -8468,7 +7470,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "embedding-3",
@@ -8480,7 +7483,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 },
                 {
                     "model": "text_embedding",
@@ -8492,7 +7496,8 @@
                     },
                     "deprecated": false,
                     "has_invalid_load_balancing_configs": false,
-                    "icon_url": ""
+                    "icon_url": "",
+                    "enabled": true
                 }
             ]
         }
