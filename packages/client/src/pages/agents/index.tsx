@@ -16,7 +16,7 @@ import {
   ItemTitle,
 } from "@buildingai/ui/components/ui/item";
 import { SidebarTrigger } from "@buildingai/ui/components/ui/sidebar";
-import { Bot, ChevronRight, Plus, Search } from "lucide-react";
+import { Bot, ChevronRight, Search, User } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const AgentsIndexPage = () => {
@@ -25,9 +25,9 @@ const AgentsIndexPage = () => {
       <div className="flex h-13 w-full items-center px-2">
         <SidebarTrigger className="md:hidden" />
         <div className="ml-auto">
-          <Button variant="ghost" size="icon-sm" className="ml-auto" asChild>
+          <Button variant="ghost" size="sm" className="ml-auto" asChild>
             <Link to="/agents/workspace">
-              <Bot />
+              <User />
               我的智能体
             </Link>
           </Button>
