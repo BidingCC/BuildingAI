@@ -1,6 +1,6 @@
 import type { BasicNodeData } from "../../types.ts";
 
-export interface OutputNodeProps extends BasicNodeData {
+export interface OutputNodeData extends BasicNodeData {
   vars: {
     name: string;
     label: string;

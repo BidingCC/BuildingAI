@@ -4,6 +4,7 @@ import { Background, BackgroundVariant, ReactFlow, ReactFlowProvider } from "@xy
 import { useShallow } from "zustand/react/shallow";
 
 import FlowNode from "./_components/flow-node";
+import { WorkflowPanel } from "./_components/flow-panel";
 import { WORKFLOW_BLOCK } from "./constants/workflow.ts";
 import { selector, useWorkflowStore } from "./store.ts";
 
@@ -31,6 +32,7 @@ function Workspace() {
             bgColor="var(--sidebar)"
           ></Background>
         </ReactFlow>
+        <WorkflowPanel></WorkflowPanel>
       </ReactFlowProvider>
     </div>
   );

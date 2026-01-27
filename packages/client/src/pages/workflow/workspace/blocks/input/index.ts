@@ -1,9 +1,9 @@
 import { WorkflowBlocks } from "../../constants/node.ts";
 import { InputNode } from "./input.node";
 import { InputPanel } from "./input.panel";
-import type { InputNodeProps } from "./input.types.ts";
+import type { InputNodeData } from "./input.types.ts";
 
-function inputNodeBuilder(): InputNodeProps {
+function inputNodeBuilder(): InputNodeData {
   return {
     name: "输入",
     type: WorkflowBlocks.Input,

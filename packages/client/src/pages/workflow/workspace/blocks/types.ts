@@ -9,3 +9,7 @@ export interface WorkflowBlock {
 export interface NodeProps<T> {
   data: T;
 }
+
+export interface PanelProps<T> {
+  data: T;
+}

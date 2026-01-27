@@ -2,9 +2,9 @@ import { WorkflowBlocks } from "@/pages/workflow/workspace/constants/node.ts";
 
 import { OutputNode } from "./output.node";
 import { OutputPanel } from "./output.panel";
-import type { OutputNodeProps } from "./output.types.ts";
+import type { OutputNodeData } from "./output.types.ts";
 
-function createOutputNodeInstance(): OutputNodeProps {
+function createOutputNodeInstance(): OutputNodeData {
   return {
     name: "输出",
     type: WorkflowBlocks.Output,
