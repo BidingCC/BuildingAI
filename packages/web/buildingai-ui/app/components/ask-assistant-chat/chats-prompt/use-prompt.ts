@@ -1,10 +1,6 @@
 import type { FileUploadResponse } from "@buildingai/service/common";
 import type { FilesList } from "@buildingai/service/models/message";
-import {
-    uploadFileAdaptive,
-    uploadFilesAdaptive,
-    uploadRemoteFileAdaptive,
-} from "@buildingai/upload";
+import { uploadFileAdaptive, uploadRemoteFileAdaptive } from "@buildingai/upload";
 
 import { getMediaType } from "../../../utils/file";
 

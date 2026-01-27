@@ -1,12 +1,8 @@
 import { BaseService } from "@buildingai/base";
 import { BusinessCode } from "@buildingai/constants/shared/business-code.constant";
-import { FileUploadService } from "@buildingai/core/modules/upload/services/file-upload.service";
+import { FileUploadService } from "@buildingai/core/modules";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import {
-    WxMpVersion,
-    WxMpVersionStatus,
-    WxMpVersionType,
-} from "@buildingai/db/entities/wx-mp-version.entity";
+import { WxMpVersion, WxMpVersionStatus, WxMpVersionType } from "@buildingai/db/entities";
 import { Repository } from "@buildingai/db/typeorm";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { Injectable } from "@nestjs/common";

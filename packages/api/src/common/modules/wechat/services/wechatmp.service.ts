@@ -1,5 +1,5 @@
 import { LOGIN_TYPE, UserTerminal, type UserTerminalType } from "@buildingai/constants";
-import { User } from "@buildingai/db/entities/user.entity";
+import { User } from "@buildingai/db/entities";
 import { FindOptionsWhere } from "@buildingai/db/typeorm";
 import { DictService } from "@buildingai/dict";
 import { HttpErrorFactory } from "@buildingai/errors";

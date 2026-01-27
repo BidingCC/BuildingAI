@@ -44,3 +44,4 @@ export { Tag } from "./tag.entity";
 export { User } from "./user.entity";
 export { UserSubscription } from "./user-subscription.entity";
 export { UserToken } from "./user-token.entity";
+export { WxMpVersion, WxMpVersionStatus, WxMpVersionType } from "./wx-mp-version.entity";

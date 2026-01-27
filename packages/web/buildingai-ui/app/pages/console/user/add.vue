@@ -13,7 +13,7 @@ const handleSubmit = async (formData: UserCreateRequest | UserUpdateRequest) => 
     try {
         // 移除确认密码字段，后端不需要
         // const { confirmPassword, ...submitData } = formData;
-        const { level, levelEndTime, ...submitData } = formData;
+        const { level: _level, levelEndTime: _levelEndTime, ...submitData } = formData;
 
         await apiCreateUser(submitData as UserCreateRequest);
         message.success(t("user.backend.messages.createSuccess"));

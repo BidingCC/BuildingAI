@@ -14,6 +14,7 @@ import { ExtensionFeatureService } from "@common/modules/auth/services/extension
 import { ExtensionFeatureScanService } from "@common/modules/auth/services/extension-feature-scan.service";
 import { RolePermissionService } from "@common/modules/auth/services/role-permission.service";
 import { UserTokenService } from "@common/modules/auth/services/user-token.service";
+import { WechatOaService } from "@common/modules/wechat/services/wechatoa.service";
 import { WechatModule } from "@common/modules/wechat/wechat.module";
 import { ChannelModule } from "@modules/channel/channel.module";
 import { forwardRef, Module } from "@nestjs/common";
@@ -40,9 +41,8 @@ import { AuthWebController } from "./controller/web/auth.controller";
             MembershipLevels,
             UserSubscription,
         ]),
-        ChannelModule,
+        forwardRef(() => ChannelModule),
         forwardRef(() => WechatModule),
-        DiscoveryModule,
         JwtModule.registerAsync({
             imports: [ConfigModule],
             inject: [ConfigService],

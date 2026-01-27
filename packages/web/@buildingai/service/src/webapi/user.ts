@@ -75,6 +75,12 @@ export interface UserInfo extends BaseEntity {
     level?: string;
     /** 用户当前会员等级结束时间 */
     levelEndTime?: string;
+    /** Whether has password */
+    hasPassword?: boolean;
+    /** Whether is bind wechat */
+    bindWechat?: boolean;
+    /** Whether is bind wechat oa */
+    bindWechatOa?: boolean;
 }
 
 export interface MembershipLevelInfo {

@@ -1,5 +1,5 @@
-import { Menu, MenuSourceType, MenuType } from "@buildingai/db/entities/menu.entity";
-import { Permission, PermissionType } from "@buildingai/db/entities/permission.entity";
+import { Menu, MenuSourceType, MenuType } from "@buildingai/db/entities";
+import { Permission, PermissionType } from "@buildingai/db/entities";
 import { DataSource, Repository } from "@buildingai/db/typeorm";
 
 import { BaseUpgradeScript, UpgradeContext } from "../../index";

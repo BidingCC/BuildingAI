@@ -1,5 +1,5 @@
 import { BaseController } from "@buildingai/base";
-import { type UserPlayground } from "@buildingai/db/interfaces/context.interface";
+import { type UserPlayground } from "@buildingai/db";
 import { Playground } from "@buildingai/decorators";
 import { BuildFileUrl } from "@buildingai/decorators/file-url.decorator";
 import { UUIDValidationPipe } from "@buildingai/pipe/param-validate.pipe";

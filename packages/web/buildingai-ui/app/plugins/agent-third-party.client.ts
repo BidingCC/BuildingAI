@@ -13,9 +13,7 @@ export default defineNuxtPlugin(() => {
                 id: "dify-config",
                 slot: "agent:config:third-party",
                 component: () =>
-                    import(
-                        "@//pages/console/ai/agent/components/configuration/_third_party/dify-config.vue"
-                    ),
+                    import("@//pages/console/ai/agent/components/configuration/_third_party/dify-config.vue"),
                 meta: {
                     platform: "dify",
                     label: "Dify",
@@ -26,9 +24,7 @@ export default defineNuxtPlugin(() => {
                 id: "coze-config",
                 slot: "agent:config:third-party",
                 component: () =>
-                    import(
-                        "@//pages/console/ai/agent/components/configuration/_third_party/coze-config.vue"
-                    ),
+                    import("@//pages/console/ai/agent/components/configuration/_third_party/coze-config.vue"),
                 meta: {
                     platform: "coze",
                     label: "Coze",

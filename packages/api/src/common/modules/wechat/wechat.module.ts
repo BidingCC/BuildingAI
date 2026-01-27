@@ -1,5 +1,5 @@
 import { TypeOrmModule } from "@buildingai/db/@nestjs/typeorm";
-import { Dict } from "@buildingai/db/entities/dict.entity";
+import { Dict } from "@buildingai/db/entities";
 import { AuthModule } from "@modules/auth/auth.module";
 import { ChannelModule } from "@modules/channel/channel.module";
 import { WxOaConfigService } from "@modules/channel/services/wxoaconfig.service";

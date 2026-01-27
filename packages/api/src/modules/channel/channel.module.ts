@@ -1,7 +1,7 @@
-import { UploadModule } from "@buildingai/core/modules/upload/upload.module";
+import { UploadModule as CoreUploadModule } from "@buildingai/core";
 import { TypeOrmModule } from "@buildingai/db/@nestjs/typeorm";
 import { Dict } from "@buildingai/db/entities";
-import { WxMpVersion } from "@buildingai/db/entities/wx-mp-version.entity";
+import { WxMpVersion } from "@buildingai/db/entities";
 import { DictCacheService } from "@buildingai/dict";
 import { DictService } from "@buildingai/dict";
 import { WxMpVersionConsoleController } from "@modules/channel/controller/console/wxmp-version.controller";
@@ -10,9 +10,15 @@ import { WxOaConfigConsoleController } from "@modules/channel/controller/console
 import { WxMpVersionService } from "@modules/channel/services/wxmp-version.service";
 import { WxMpConfigService } from "@modules/channel/services/wxmpconfig.service";
 import { WxOaConfigService } from "@modules/channel/services/wxoaconfig.service";
-import { Module } from "@nestjs/common";
+import { UploadModule } from "@modules/upload/upload.module";
+import { forwardRef, Module } from "@nestjs/common";
+
 @Module({
-    imports: [TypeOrmModule.forFeature([Dict, WxMpVersion]), UploadModule],
+    imports: [
+        TypeOrmModule.forFeature([Dict, WxMpVersion]),
+        CoreUploadModule,
+        forwardRef(() => UploadModule),
+    ],
     controllers: [
         WxOaConfigConsoleController,
         WxMpConfigConsoleController,

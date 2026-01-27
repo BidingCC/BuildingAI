@@ -1,7 +1,7 @@
 import { RedisService } from "@buildingai/cache";
 import { LOGIN_TYPE } from "@buildingai/constants";
 import { UserTerminal } from "@buildingai/constants/shared/status-codes.constant";
-import { User } from "@buildingai/db/entities/user.entity";
+import { User } from "@buildingai/db/entities";
 import { FindOptionsWhere } from "@buildingai/db/typeorm";
 import { DictService } from "@buildingai/dict";
 import { HttpErrorFactory } from "@buildingai/errors";
