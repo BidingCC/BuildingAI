@@ -15,23 +15,12 @@ const pagingRef = shallowRef<ZPagingRef>();
 // 搜索关键词
 const searchKeyword = shallowRef("");
 
-// 排序方式
-const sortBy = shallowRef<"latest" | "popular">("latest");
-const sortOptions = [
-    { label: "最新发布", value: "latest" as const },
-    { label: "最受欢迎", value: "popular" as const },
-];
-
-// 排序弹窗引用
-const sortPopupRef = ref<UniPopupInstance>();
-
 // 查询列表
 const queryList = (pageNo: number, pageSize: number) => {
     const params: QueryPublicAgentParams = {
         page: pageNo,
         pageSize: pageSize,
         keyword: "",
-        sortBy: sortBy.value,
     };
 
     // 如果有搜索关键词，添加到参数中
@@ -65,23 +54,6 @@ const handleClearSearch = () => {
     searchKeyword.value = "";
     pagingRef.value?.reload();
 };
-
-// 打开排序选择面板
-const handleOpenSortMenu = () => {
-    sortPopupRef.value?.open?.();
-};
-
-// 切换排序方式
-const handleSortChange = (value: "latest" | "popular") => {
-    sortBy.value = value;
-    sortPopupRef.value?.close?.();
-    pagingRef.value?.reload();
-};
-
-// 获取当前排序选项的标签
-const currentSortLabel = computed(() => {
-    return sortOptions.find((opt) => opt.value === sortBy.value)?.label || "最新发布";
-});
 
 const handleAgentClick = (item: Agent) => {
     uni.navigateTo({
@@ -119,38 +91,14 @@ definePage({
                 @click="handleClearSearch"
             ></view>
         </view>
-        <view flex justify-end gap="2" font-size="sm" text="muted-foreground" my="2">
-            <view text="primary" flex items-center gap="1" @click="handleOpenSortMenu">
-                {{ currentSortLabel }}
-                <view i-lucide-chevron-down size="3"></view>
-            </view>
-        </view>
 
-        <!-- 排序选择弹窗 -->
-        <uni-popup ref="sortPopupRef" type="top" :safe-area="false" z-index="999">
-            <view class="bg-background rounded-b-5 overflow-hidden shadow-lg">
-                <view
-                    class="bg-background active:bg-muted flex items-center justify-center border-b border-gray-200 py-4"
-                    :class="sortBy === 'latest' ? 'text-primary-600' : 'text-foreground'"
-                    @click="handleSortChange('latest')"
-                >
-                    <text class="text-base leading-normal">最新发布</text>
-                </view>
-                <view
-                    class="bg-background active:bg-muted flex items-center justify-center py-4"
-                    :class="sortBy === 'popular' ? 'text-primary-600' : 'text-foreground'"
-                    @click="handleSortChange('popular')"
-                >
-                    <text class="text-base leading-normal">最受欢迎</text>
-                </view>
-            </view>
-        </uni-popup>
         <z-paging
             ref="pagingRef"
             v-model="agentLists"
             @query="queryList"
             :show-scrollbar="false"
             :fixed="false"
+            mt="2"
             class="flex-1"
         >
             <view
@@ -184,7 +132,7 @@ definePage({
                         >{{ item.conversationCount }} <view i-lucide-users size="3"></view
                         >{{ item.userCount }}
                     </view>
-                    <view mt="2">编辑于2025-12-22</view>
+                    <view mt="2">编辑于{{ item.updatedAt }}</view>
                 </view>
             </view>
         </z-paging>

@@ -91,8 +91,5 @@
         "vite": "6.3.4",
         "vite-plugin-uni-polyfill": "^0.1.0",
         "vue-tsc": "catalog:dev"
-    },
-    "pnpm": {
-        "packageManager": "isolated"
     }
 }

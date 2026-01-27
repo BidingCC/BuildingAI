@@ -202,6 +202,7 @@
         "overrides": {
             "cron": "catalog:api",
             "vite": "catalog:dev",
+            "@buildingai/buildingai-mobile>vite": "6.3.4",
             "@nuxt/kit": "catalog:web",
             "buildingai": "link:packages/cli",
             "glob": "^11.0.3",
@@ -276,6 +277,11 @@
                 }
             },
             "unplugin-auto-import@*": {
+                "dependencies": {
+                    "vite": "6.3.4"
+                }
+            },
+            "@unocss/vite@*": {
                 "dependencies": {
                     "vite": "6.3.4"
                 }
