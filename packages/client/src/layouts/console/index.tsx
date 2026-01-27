@@ -222,10 +222,10 @@ export default function ConsoleLayout({ children }: { children?: React.ReactNode
   return (
     <SidebarProvider className="bd-console-layout h-dvh">
       <AppSidebar />
-      <SidebarInset className="flex h-[calc(100%-1rem)] flex-col md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-0">
+      <SidebarInset className="flex h-[calc(100%-1rem)] flex-col overflow-x-hidden md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-0">
         <AppNavbar />
         <div className="flex-1 overflow-hidden">
-          <ScrollArea className="h-full">
+          <ScrollArea className="h-full" viewportClassName="[&>div]:block!">
             <div className="m-4 mt-1 flex min-h-[calc(100vh-6.25rem)] flex-col">
               {children ? children : <ConsoleRoutes />}
             </div>
