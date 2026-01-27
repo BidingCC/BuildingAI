@@ -26,7 +26,12 @@ export class AlipayService {
                 PayConfigPayType.ALIPAY,
             );
 
-            const domain = await this.getDomain();
+            const domain = process.env.APP_DOMAIN;
+
+            if (!domain) {
+                throw HttpErrorFactory.notFound("请先在.env中配置APP_DOMAIN");
+            }
+
             const notifyUrl = `${domain}${process.env.VITE_APP_WEB_API_PREFIX}/pay/notifyAlipay`;
 
             return await alipayService.createWebPay({
