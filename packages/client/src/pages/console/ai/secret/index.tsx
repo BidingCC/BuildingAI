@@ -327,7 +327,7 @@ const SecretsManageContent = ({ template }: SecretsManageContentProps) => {
                   >
                     <Input
                       value={isEditingName ? editingField.value : secret.name}
-                      className="h-full w-full border-0 border-none bg-transparent px-0 shadow-none ring-0 focus-within:ring-0 focus-visible:ring-0"
+                      className="h-full w-full border-0 border-none bg-transparent! px-0 shadow-none ring-0 focus-within:ring-0 focus-visible:ring-0"
                       onFocus={() => handleFieldFocus(secret, "__name__", secret.name)}
                       onChange={(e) => handleFieldChange(e.target.value)}
                       onBlur={(e) => handleNameBlur(secret, e)}
@@ -373,7 +373,7 @@ const SecretsManageContent = ({ template }: SecretsManageContentProps) => {
                   <Input
                     value={newRow.name}
                     placeholder="请输入名称"
-                    className="h-full w-full border-0 border-none bg-transparent px-0 shadow-none ring-0 focus-within:ring-0 focus-visible:ring-0"
+                    className="h-full w-full border-0 border-none bg-transparent! px-0 shadow-none ring-0 focus-within:ring-0 focus-visible:ring-0"
                     onChange={(e) => {
                       setNewRow({ ...newRow, name: e.target.value });
                       if (newRowErrors.has("__name__")) {
@@ -412,7 +412,7 @@ const SecretsManageContent = ({ template }: SecretsManageContentProps) => {
                         <Input
                           value={isEditing ? editingField.value : field.value || ""}
                           placeholder={`请输入${field.name}`}
-                          className="h-full w-full border-0 border-none bg-transparent px-0 shadow-none ring-0 focus-within:ring-0 focus-visible:ring-0"
+                          className="h-full w-full border-0 border-none bg-transparent! px-0 shadow-none ring-0 focus-within:ring-0 focus-visible:ring-0"
                           onFocus={() => handleFieldFocus(secret, field.name, field.value || "")}
                           onChange={(e) => handleFieldChange(e.target.value)}
                           onBlur={(e) => handleFieldBlur(secret, e)}

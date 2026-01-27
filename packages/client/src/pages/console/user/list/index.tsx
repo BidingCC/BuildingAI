@@ -235,7 +235,7 @@ const UserListIndexPage = () => {
                       <p className="text-muted-foreground group/user-id flex items-center text-xs">
                         <span className="truncate">{user.userNo}</span>
                         <Button
-                          className="size-fit shrink-0 rounded-[4px] p-0.5 opacity-0 group-hover/user-id:opacity-100"
+                          className="size-fit shrink-0 rounded-[4px] p-0.5 opacity-0! group-hover/user-id:opacity-100!"
                           variant="ghost"
                           onClick={() => copy(user.userNo)}
                           disabled={isCopying}

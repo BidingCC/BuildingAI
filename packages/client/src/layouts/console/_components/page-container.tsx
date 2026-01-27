@@ -5,7 +5,7 @@ const PageContainer = ({
   children,
   className,
 }: {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   className?: string;
 }) => {
   return (

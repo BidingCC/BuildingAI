@@ -20,6 +20,11 @@
             "import": "./dist/entities/index.js",
             "require": "./dist/entities/index.js"
         },
+        "./entities/*": {
+            "types": "./dist/entities/*.d.ts",
+            "import": "./src/entities/*.ts",
+            "require": "./dist/entities/*.js"
+        },
         "./seeds": {
             "types": "./dist/seeds/index.d.ts",
             "import": "./dist/seeds/index.js",

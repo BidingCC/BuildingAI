@@ -129,14 +129,16 @@ export class AiMcpServerService extends BaseService<AiMcpServer> {
         // 使用基础服务的分页方法
         const result = (await this.paginate(queryDto, {
             where,
+            relations: ["tools"],
             order: {
                 sortOrder: "ASC",
                 createdAt: "DESC",
             },
-        })) as PaginationResult<AiMcpServer & { isQuickMenu: boolean }>;
+        })) as PaginationResult<AiMcpServer & { isQuickMenu: boolean; toolsCount: number }>;
 
         result.items.forEach((item) => {
             item.isQuickMenu = item.id === quickMenuId;
+            item.toolsCount = item.tools?.length || 0;
         });
 
         return result;

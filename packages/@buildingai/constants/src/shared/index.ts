@@ -4,6 +4,7 @@ export * from "./business-code.constant";
 export * from "./datasets.constants";
 export * from "./dict.constant";
 export * from "./extension.constant";
+export * from "./mcp.constant";
 export * from "./payconfig.constant";
 export * from "./status-codes.constant";
 export * from "./tag.constant";
