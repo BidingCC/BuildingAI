@@ -1,7 +1,7 @@
-import React from "react";
+import { PageContainer } from "@/layouts/console/_components/page-container";
 
 const SystemWebsiteConfigIndexPage = () => {
-  return <div>SystemWebsiteConfigIndexPage</div>;
+  return <PageContainer>SystemWebsiteConfigIndexPage</PageContainer>;
 };
 
 export default SystemWebsiteConfigIndexPage;

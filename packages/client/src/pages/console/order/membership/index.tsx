@@ -1,7 +1,7 @@
-import React from "react";
+import { PageContainer } from "@/layouts/console/_components/page-container";
 
 const OrderMembershipIndexPage = () => {
-  return <div>OrderMembershipIndexPage</div>;
+  return <PageContainer>OrderMembershipIndexPage</PageContainer>;
 };
 
 export default OrderMembershipIndexPage;

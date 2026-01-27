@@ -1,7 +1,7 @@
-import React from "react";
+import { PageContainer } from "@/layouts/console/_components/page-container";
 
 const BalanceDetailsIndexPage = () => {
-  return <div>BalanceDetailsIndexPage</div>;
+  return <PageContainer>BalanceDetailsIndexPage</PageContainer>;
 };
 
 export default BalanceDetailsIndexPage;

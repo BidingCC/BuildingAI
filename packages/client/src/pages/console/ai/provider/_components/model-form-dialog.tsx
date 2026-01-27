@@ -442,7 +442,7 @@ export const AiModelFormDialog = ({
                 />
               </div>
 
-              <DialogFooter className="bg-background absolute bottom-0 left-0 w-full rounded-lg p-4">
+              <DialogFooter className="bg-background absolute bottom-0 left-0 w-full flex-row justify-end rounded-lg p-4">
                 <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                   取消
                 </Button>

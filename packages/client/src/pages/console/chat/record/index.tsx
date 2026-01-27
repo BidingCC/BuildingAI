@@ -35,6 +35,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { usePagination } from "@/hooks/use-pagination";
+import { PageContainer } from "@/layouts/console/_components/page-container";
 
 import {
   ConversationFeedbackStats,
@@ -190,130 +191,134 @@ const ChatRecordIndexPage = () => {
   const conversations = data?.items || [];
 
   return (
-    <div className="flex h-full flex-col gap-4">
-      <div className="bg-background sticky top-0 z-10 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-        <Input
-          placeholder="搜索对话标题、摘要或用户名"
-          value={queryParams.keyword || ""}
-          onChange={(e) => {
-            setQueryParams((prev) => ({
-              ...prev,
-              keyword: e.target.value || undefined,
-              page: 1,
-            }));
-          }}
-        />
-        <Select
-          value={queryParams.status || "all"}
-          onValueChange={(value) => {
-            setQueryParams((prev) => ({
-              ...prev,
-              status: value === "all" ? undefined : (value as QueryConversationsParams["status"]),
-              page: 1,
-            }));
-          }}
+    <PageContainer>
+      <div className="flex h-full flex-col gap-4">
+        <div className="bg-background sticky top-0 z-10 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+          <Input
+            placeholder="搜索对话标题、摘要或用户名"
+            value={queryParams.keyword || ""}
+            onChange={(e) => {
+              setQueryParams((prev) => ({
+                ...prev,
+                keyword: e.target.value || undefined,
+                page: 1,
+              }));
+            }}
+          />
+          <Select
+            value={queryParams.status || "all"}
+            onValueChange={(value) => {
+              setQueryParams((prev) => ({
+                ...prev,
+                status: value === "all" ? undefined : (value as QueryConversationsParams["status"]),
+                page: 1,
+              }));
+            }}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="选择状态" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">全部状态</SelectItem>
+              <SelectItem value="active">进行中</SelectItem>
+              <SelectItem value="completed">已完成</SelectItem>
+              <SelectItem value="failed">失败</SelectItem>
+              <SelectItem value="cancelled">已取消</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select
+            value={queryParams.feedbackFilter || "all"}
+            onValueChange={(value) => {
+              setQueryParams((prev) => ({
+                ...prev,
+                feedbackFilter:
+                  value === "all"
+                    ? undefined
+                    : (value as QueryConversationsParams["feedbackFilter"]),
+                page: 1,
+              }));
+            }}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="反馈筛选" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">全部反馈</SelectItem>
+              <SelectItem value="high-like">高赞率</SelectItem>
+              <SelectItem value="high-dislike">高踩率</SelectItem>
+              <SelectItem value="has-feedback">有反馈</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex-1">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-muted-foreground">加载中...</div>
+            </div>
+          ) : conversations.length === 0 ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-muted-foreground">暂无对话记录</div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+              {conversations.map((conversation: ConversationRecord) => (
+                <ConversationCardItem
+                  key={conversation.id}
+                  conversation={conversation}
+                  onOpen={handleOpenConversation}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="bg-background sticky bottom-0 flex py-2">
+          <PaginationComponent className="mx-0 w-fit" />
+        </div>
+
+        <Drawer
+          open={!!selectedConversationId}
+          onOpenChange={(open: boolean) => !open && handleCloseConversation()}
+          direction="right"
         >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="选择状态" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">全部状态</SelectItem>
-            <SelectItem value="active">进行中</SelectItem>
-            <SelectItem value="completed">已完成</SelectItem>
-            <SelectItem value="failed">失败</SelectItem>
-            <SelectItem value="cancelled">已取消</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select
-          value={queryParams.feedbackFilter || "all"}
-          onValueChange={(value) => {
-            setQueryParams((prev) => ({
-              ...prev,
-              feedbackFilter:
-                value === "all" ? undefined : (value as QueryConversationsParams["feedbackFilter"]),
-              page: 1,
-            }));
-          }}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="反馈筛选" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">全部反馈</SelectItem>
-            <SelectItem value="high-like">高赞率</SelectItem>
-            <SelectItem value="high-dislike">高踩率</SelectItem>
-            <SelectItem value="has-feedback">有反馈</SelectItem>
-          </SelectContent>
-        </Select>
+          <DrawerContent className="h-full w-full max-w-3xl! outline-none">
+            <DrawerHeader>
+              <DrawerTitle>{selectedConversation?.title || "未命名对话"}</DrawerTitle>
+              <DrawerDescription className="sr-only">
+                {selectedConversation?.user?.username
+                  ? `对话用户：${selectedConversation.user.username}`
+                  : "对话详情"}
+              </DrawerDescription>
+              {selectedConversation?.user?.username && (
+                <div className="mt-2 flex items-center gap-2">
+                  <Avatar className="size-6">
+                    <AvatarImage
+                      src={selectedConversation.user.avatar || undefined}
+                      alt={selectedConversation.user.username}
+                    />
+                    <AvatarFallback>
+                      {selectedConversation.user.username.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm">{selectedConversation.user.username}</span>
+                </div>
+              )}
+            </DrawerHeader>
+
+            <div className="mt-6 flex h-[calc(100vh-8rem)] flex-col overflow-hidden">
+              {selectedConversationId && (
+                <ConversationMessagesDrawer
+                  key={selectedConversationId}
+                  conversationId={selectedConversationId}
+                />
+              )}
+            </div>
+          </DrawerContent>
+        </Drawer>
       </div>
-
-      <div className="flex-1">
-        {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="text-muted-foreground">加载中...</div>
-          </div>
-        ) : conversations.length === 0 ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="text-muted-foreground">暂无对话记录</div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-            {conversations.map((conversation: ConversationRecord) => (
-              <ConversationCardItem
-                key={conversation.id}
-                conversation={conversation}
-                onOpen={handleOpenConversation}
-                onDelete={handleDelete}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div className="bg-background sticky bottom-0 flex py-2">
-        <PaginationComponent className="mx-0 w-fit" />
-      </div>
-
-      <Drawer
-        open={!!selectedConversationId}
-        onOpenChange={(open: boolean) => !open && handleCloseConversation()}
-        direction="right"
-      >
-        <DrawerContent className="h-full w-full max-w-3xl! outline-none">
-          <DrawerHeader>
-            <DrawerTitle>{selectedConversation?.title || "未命名对话"}</DrawerTitle>
-            <DrawerDescription className="sr-only">
-              {selectedConversation?.user?.username
-                ? `对话用户：${selectedConversation.user.username}`
-                : "对话详情"}
-            </DrawerDescription>
-            {selectedConversation?.user?.username && (
-              <div className="mt-2 flex items-center gap-2">
-                <Avatar className="size-6">
-                  <AvatarImage
-                    src={selectedConversation.user.avatar || undefined}
-                    alt={selectedConversation.user.username}
-                  />
-                  <AvatarFallback>
-                    {selectedConversation.user.username.charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-sm">{selectedConversation.user.username}</span>
-              </div>
-            )}
-          </DrawerHeader>
-
-          <div className="mt-6 flex h-[calc(100vh-8rem)] flex-col overflow-hidden">
-            {selectedConversationId && (
-              <ConversationMessagesDrawer
-                key={selectedConversationId}
-                conversationId={selectedConversationId}
-              />
-            )}
-          </div>
-        </DrawerContent>
-      </Drawer>
-    </div>
+    </PageContainer>
   );
 };
 

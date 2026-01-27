@@ -43,6 +43,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { usePagination } from "@/hooks/use-pagination";
+import { PageContainer } from "@/layouts/console/_components/page-container";
 
 const PAGE_SIZE = 25;
 
@@ -144,157 +145,165 @@ const UserListIndexPage = () => {
   };
 
   return (
-    <div className="flex flex-1 flex-col gap-4">
-      <div className="bg-background sticky top-0 z-1 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-        <Input
-          placeholder="搜索用户名、昵称或邮箱"
-          className="text-sm"
-          onChange={handleSearchChange}
-        />
-        <Select onValueChange={handleStatusChange}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="用户状态" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">全部状态</SelectItem>
-            <SelectItem value={String(BooleanNumber.YES)}>正常</SelectItem>
-            <SelectItem value={String(BooleanNumber.NO)}>已禁用</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+    <PageContainer>
+      <div className="flex flex-1 flex-col gap-4">
+        <div className="bg-background sticky top-0 z-1 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+          <Input
+            placeholder="搜索用户名、昵称或邮箱"
+            className="text-sm"
+            onChange={handleSearchChange}
+          />
+          <Select onValueChange={handleStatusChange}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="用户状态" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">全部状态</SelectItem>
+              <SelectItem value={String(BooleanNumber.YES)}>正常</SelectItem>
+              <SelectItem value={String(BooleanNumber.NO)}>已禁用</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-      <div className="flex-1">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-          <div className="flex flex-col gap-4 rounded-lg border border-dashed p-4 hover:border-solid">
-            <div className="flex items-center gap-3">
-              <Button className="size-12 rounded-lg border-dashed" variant="outline">
-                <Plus />
-              </Button>
-              <div className="flex flex-col">
-                <span>创建用户</span>
-                <span className="text-muted-foreground py-1 text-xs font-medium">添加新的用户</span>
+        <div className="flex-1">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+            <div className="flex flex-col gap-4 rounded-lg border border-dashed p-4 hover:border-solid">
+              <div className="flex items-center gap-3">
+                <Button className="size-12 rounded-lg border-dashed" variant="outline">
+                  <Plus />
+                </Button>
+                <div className="flex flex-col">
+                  <span>创建用户</span>
+                  <span className="text-muted-foreground py-1 text-xs font-medium">
+                    添加新的用户
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
 
-          {isLoading ? (
-            Array.from({ length: 4 }).map((_, index) => (
-              <div key={index} className="bg-card flex h-28 flex-col gap-4 rounded-lg border p-4">
-                <div className="flex gap-3">
-                  <Skeleton className="size-12 rounded-lg" />
-                  <div className="flex h-full flex-1 flex-col justify-between">
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="mt-2 h-4 w-full" />
+            {isLoading ? (
+              Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className="bg-card flex h-28 flex-col gap-4 rounded-lg border p-4">
+                  <div className="flex gap-3">
+                    <Skeleton className="size-12 rounded-lg" />
+                    <div className="flex h-full flex-1 flex-col justify-between">
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="mt-2 h-4 w-full" />
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Skeleton className="h-5 w-16 rounded-full" />
+                    <Skeleton className="h-5 w-12 rounded-full" />
                   </div>
                 </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Skeleton className="h-5 w-16 rounded-full" />
-                  <Skeleton className="h-5 w-12 rounded-full" />
-                </div>
-              </div>
-            ))
-          ) : data?.items && data.items.length > 0 ? (
-            data.items.map((user) => (
-              <div
-                key={user.id}
-                className="group/user-item bg-card relative flex flex-col gap-2 rounded-lg border p-4"
-              >
-                <div className="flex items-center gap-3">
-                  <Avatar className="relative size-12 rounded-lg after:rounded-lg">
-                    <AvatarImage
-                      src={user.avatar || ""}
-                      alt={user.nickname || user.username}
-                      className="rounded-lg"
-                    />
-                    <AvatarFallback className="size-12 rounded-lg">
-                      <UserIcon className="size-6" />
-                    </AvatarFallback>
-                    <div className="center absolute inset-0 z-1 rounded-lg bg-black/5 opacity-0 backdrop-blur-xl transition-opacity group-hover/user-item:opacity-100 dark:bg-black/15">
-                      <Switch
-                        checked={user.status === BooleanNumber.YES}
-                        onCheckedChange={() => handleToggleStatus(user)}
-                        disabled={setStatusMutation.isPending || user.isRoot === BooleanNumber.YES}
+              ))
+            ) : data?.items && data.items.length > 0 ? (
+              data.items.map((user) => (
+                <div
+                  key={user.id}
+                  className="group/user-item bg-card relative flex flex-col gap-2 rounded-lg border p-4"
+                >
+                  <div className="flex items-center gap-3">
+                    <Avatar className="relative size-12 rounded-lg after:rounded-lg">
+                      <AvatarImage
+                        src={user.avatar || ""}
+                        alt={user.nickname || user.username}
+                        className="rounded-lg"
                       />
+                      <AvatarFallback className="size-12 rounded-lg">
+                        <UserIcon className="size-6" />
+                      </AvatarFallback>
+                      <div className="center absolute inset-0 z-1 rounded-lg bg-black/5 opacity-0 backdrop-blur-xl transition-opacity group-hover/user-item:opacity-100 dark:bg-black/15">
+                        <Switch
+                          checked={user.status === BooleanNumber.YES}
+                          onCheckedChange={() => handleToggleStatus(user)}
+                          disabled={
+                            setStatusMutation.isPending || user.isRoot === BooleanNumber.YES
+                          }
+                        />
+                      </div>
+                    </Avatar>
+                    <div className="flex flex-col overflow-hidden">
+                      <span className="line-clamp-1">
+                        {user.nickname || user.username}
+                        {user.nickname && (
+                          <span className="text-muted-foreground ml-1 text-xs">
+                            ({user.username})
+                          </span>
+                        )}
+                      </span>
+                      <p className="text-muted-foreground group/user-id flex items-center text-xs">
+                        <span className="truncate">{user.userNo}</span>
+                        <Button
+                          className="size-fit shrink-0 rounded-[4px] p-0.5 opacity-0 group-hover/user-id:opacity-100"
+                          variant="ghost"
+                          onClick={() => copy(user.userNo)}
+                          disabled={isCopying}
+                        >
+                          <Copy className="size-3" />
+                        </Button>
+                      </p>
                     </div>
-                  </Avatar>
-                  <div className="flex flex-col overflow-hidden">
-                    <span className="line-clamp-1">
-                      {user.nickname || user.username}
-                      {user.nickname && (
-                        <span className="text-muted-foreground ml-1 text-xs">
-                          ({user.username})
-                        </span>
-                      )}
-                    </span>
-                    <p className="text-muted-foreground group/user-id flex items-center text-xs">
-                      <span className="truncate">{user.userNo}</span>
-                      <Button
-                        className="size-fit shrink-0 rounded-[4px] p-0.5 opacity-0 group-hover/user-id:opacity-100"
-                        variant="ghost"
-                        onClick={() => copy(user.userNo)}
-                        disabled={isCopying}
-                      >
-                        <Copy className="size-3" />
-                      </Button>
+
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button className="absolute top-2 right-2" size="icon-sm" variant="ghost">
+                          <EllipsisVertical />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuItem>
+                          <Edit />
+                          编辑
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                          <Key />
+                          重置密码
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          variant="destructive"
+                          onClick={() => handleDelete(user)}
+                          disabled={deleteMutation.isPending || user.isRoot === BooleanNumber.YES}
+                        >
+                          <Trash2 />
+                          删除
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <StatusBadge isActive={user.status === BooleanNumber.YES} />
+                    {user.role && <Badge variant="secondary">{user.role.name}</Badge>}
+                    {user.isRoot === BooleanNumber.YES && (
+                      <Badge variant="default">超级管理员</Badge>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground flex items-center gap-1 text-xs">
+                      <ClockPlus className="size-3" />
+                      创建于 {new Date(user.createdAt).toLocaleString()}
                     </p>
                   </div>
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button className="absolute top-2 right-2" size="icon-sm" variant="ghost">
-                        <EllipsisVertical />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem>
-                        <Edit />
-                        编辑
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Key />
-                        重置密码
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        variant="destructive"
-                        onClick={() => handleDelete(user)}
-                        disabled={deleteMutation.isPending || user.isRoot === BooleanNumber.YES}
-                      >
-                        <Trash2 />
-                        删除
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
                 </div>
-                <div className="mt-2 flex flex-wrap items-center gap-2">
-                  <StatusBadge isActive={user.status === BooleanNumber.YES} />
-                  {user.role && <Badge variant="secondary">{user.role.name}</Badge>}
-                  {user.isRoot === BooleanNumber.YES && <Badge variant="default">超级管理员</Badge>}
-                </div>
-                <div>
-                  <p className="text-muted-foreground flex items-center gap-1 text-xs">
-                    <ClockPlus className="size-3" />
-                    创建于 {new Date(user.createdAt).toLocaleString()}
-                  </p>
-                </div>
+              ))
+            ) : (
+              <div className="col-span-1 flex h-28 items-center justify-center gap-4 sm:col-span-2 lg:col-span-3 xl:col-span-4 2xl:col-span-5">
+                <span className="text-muted-foreground text-sm">
+                  {queryParams.keyword
+                    ? `没有找到与"${queryParams.keyword}"相关的用户`
+                    : "暂无用户数据"}
+                </span>
               </div>
-            ))
-          ) : (
-            <div className="col-span-1 flex h-28 items-center justify-center gap-4 sm:col-span-2 lg:col-span-3 xl:col-span-4 2xl:col-span-5">
-              <span className="text-muted-foreground text-sm">
-                {queryParams.keyword
-                  ? `没有找到与"${queryParams.keyword}"相关的用户`
-                  : "暂无用户数据"}
-              </span>
-            </div>
-          )}
+            )}
+          </div>
+        </div>
+
+        <div className="bg-background sticky bottom-0 flex py-2">
+          <PaginationComponent className="mx-0 w-fit" />
         </div>
       </div>
-
-      <div className="bg-background sticky bottom-0 flex py-2">
-        <PaginationComponent className="mx-0 w-fit" />
-      </div>
-    </div>
+    </PageContainer>
   );
 };
 

@@ -59,6 +59,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { ProviderIcon, providerIconsMap } from "@/components/provider-icons";
+import { PageContainer } from "@/layouts/console/_components/page-container";
 
 import { AiModelFormDialog } from "./_components/model-form-dialog";
 import { AiProviderFormDialog } from "./_components/provider-form-dialog";
@@ -256,253 +257,260 @@ const AiProviderIndexPage = () => {
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="bg-background sticky top-0 z-1 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-        <Input
-          placeholder="搜索供应商名称或厂商标识"
-          className="text-sm"
-          onChange={handleSearchChange}
-        />
-        <Select onValueChange={handleStatusChange}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="供应商状态" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">全部状态</SelectItem>
-            <SelectItem value="active">已启用</SelectItem>
-            <SelectItem value="inactive">已禁用</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-        <div className="flex flex-col gap-4 rounded-lg border border-dashed p-4 hover:border-solid">
-          <div className="flex items-center gap-3">
-            <Button className="size-12 rounded-lg border-dashed" variant="outline">
-              <Plus />
-            </Button>
-            <div className="flex flex-col">
-              <span>新增厂商</span>
-              <span className="text-muted-foreground py-1 text-xs font-medium">
-                添加新的自定义模型厂商
-              </span>
-            </div>
-          </div>
-
-          <div className="flex min-h-12 flex-1 items-end gap-4">
-            <Button size="xs" className="flex-1" variant="outline">
-              <FileJson2 /> 从配置文件导入
-            </Button>
-            <Button size="xs" className="flex-1" variant="outline" onClick={handleOpenCreateDialog}>
-              <Plus /> 手动创建
-            </Button>
-          </div>
+    <PageContainer>
+      <div className="flex flex-col gap-4">
+        <div className="bg-background sticky top-0 z-1 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+          <Input
+            placeholder="搜索供应商名称或厂商标识"
+            className="text-sm"
+            onChange={handleSearchChange}
+          />
+          <Select onValueChange={handleStatusChange}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="供应商状态" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">全部状态</SelectItem>
+              <SelectItem value="active">已启用</SelectItem>
+              <SelectItem value="inactive">已禁用</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
-        {isLoading ? (
-          Array.from({ length: 4 }).map((_, index) => (
-            <div key={index} className="bg-card flex h-36.5 flex-col gap-4 rounded-lg border p-4">
-              <div className="flex gap-3">
-                <Skeleton className="size-12" />
-                <div className="flex h-full flex-1 flex-col justify-between">
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="mt-2 h-4 w-full" />
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2">
-                <Skeleton className="h-4 w-full rounded-full" />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+          <div className="flex flex-col gap-4 rounded-lg border border-dashed p-4 hover:border-solid">
+            <div className="flex items-center gap-3">
+              <Button className="size-12 rounded-lg border-dashed" variant="outline">
+                <Plus />
+              </Button>
+              <div className="flex flex-col">
+                <span>新增厂商</span>
+                <span className="text-muted-foreground py-1 text-xs font-medium">
+                  添加新的自定义模型厂商
+                </span>
               </div>
             </div>
-          ))
-        ) : data && data?.length > 0 ? (
-          data.map((provider, index) => (
-            <div
-              key={index}
-              className="group/provider-item bg-card relative flex flex-col gap-4 rounded-lg border p-4"
-            >
-              <div className="flex items-center gap-3">
-                <ProviderAvatar
-                  provider={provider.provider}
-                  iconUrl={provider.iconUrl}
-                  name={provider.name}
-                >
-                  <div className="center absolute inset-0 z-1 rounded-lg bg-black/5 opacity-0 backdrop-blur-xl transition-opacity group-hover/provider-item:opacity-100 dark:bg-black/15">
-                    <Switch
-                      checked={provider.isActive}
-                      onCheckedChange={() => handleToggleActive(provider)}
-                      disabled={toggleActiveMutation.isPending}
-                    />
-                  </div>
-                </ProviderAvatar>
-                <div className="flex flex-col">
-                  <span>{provider.name}</span>
-                  <Button
-                    variant="ghost"
-                    size="xs"
-                    className="text-muted-foreground px-0 hover:px-2"
-                    onClick={() => handleManageModels(provider)}
-                  >
-                    <Settings />
-                    管理模型({provider.models?.length || 0})
-                    <ChevronRight />
-                  </Button>
-                </div>
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button className="absolute top-2 right-2" size="icon-sm" variant="ghost">
-                      <EllipsisVertical />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem onClick={() => handleOpenEditDialog(provider)}>
-                      <Edit />
-                      编辑
-                    </DropdownMenuItem>
-
-                    <DropdownMenuSeparator />
-
-                    <DropdownMenuItem
-                      variant="destructive"
-                      onClick={() => handleDelete(provider)}
-                      disabled={deleteMutation.isPending}
-                    >
-                      <Trash2 />
-                      删除
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-
-              <div className="flex min-h-12 flex-wrap gap-2">
-                {provider.isActive ? (
-                  <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
-                    <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
-                    已启用
-                  </Badge>
-                ) : (
-                  <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
-                    <IconXboxXFilled className="fill-destructive" />
-                    已禁用
-                  </Badge>
-                )}
-                {provider.supportedModelTypes.map((type) => (
-                  <Badge key={type} variant="secondary">
-                    {type.replace("-", " ").toUpperCase()}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          ))
-        ) : (
-          <div className="col-span-1 flex h-46.5 items-center justify-center gap-4 sm:col-span-2 lg:col-span-3 xl:col-span-4 2xl:col-span-5">
-            <span className="text-muted-foreground text-sm">
-              {queryParams.keyword
-                ? `没有找到与"${queryParams.keyword}"相关的供应商`
-                : "暂无供应商数据"}
-            </span>
-          </div>
-        )}
-      </div>
-      <CommandDialog
-        open={modelsDialogOpen}
-        className="sm:max-w-3xl"
-        onOpenChange={setModelsDialogOpen}
-      >
-        <Command>
-          <div className="flex items-center justify-between pb-2">
-            <div className="flex items-center">
-              {selectedProvider && (
-                <div className="m-1 mb-0">
-                  <ProviderAvatar
-                    provider={selectedProvider.provider}
-                    iconUrl={selectedProvider.iconUrl}
-                    name={selectedProvider.name}
-                    size="sm"
-                  />
-                </div>
-              )}
-              <CommandInput className="w-full max-w-lg" placeholder="搜索模型名称..." />
-            </div>
-            <div className="p-1 pb-0">
-              <Button className="" size="sm" variant="ghost" onClick={handleOpenAddModelDialog}>
-                <PlusCircle />
-                添加模型
+            <div className="flex min-h-12 flex-1 items-end gap-4">
+              <Button size="xs" className="flex-1" variant="outline">
+                <FileJson2 /> 从配置文件导入
+              </Button>
+              <Button
+                size="xs"
+                className="flex-1"
+                variant="outline"
+                onClick={handleOpenCreateDialog}
+              >
+                <Plus /> 手动创建
               </Button>
             </div>
           </div>
-          <CommandList className="max-h-96 min-h-96">
-            <CommandEmpty>未找到模型</CommandEmpty>
-            {selectedProvider && (
-              <CommandGroup heading={`模型列表(${selectedProvider.models?.length || 0})`}>
-                {selectedProvider.models &&
-                  selectedProvider.models.length > 0 &&
-                  selectedProvider.models.map((model) => (
-                    <CommandItem
-                      key={model.id}
-                      className="group/model-item flex min-h-9 items-center justify-between"
+
+          {isLoading ? (
+            Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="bg-card flex h-36.5 flex-col gap-4 rounded-lg border p-4">
+                <div className="flex gap-3">
+                  <Skeleton className="size-12" />
+                  <div className="flex h-full flex-1 flex-col justify-between">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="mt-2 h-4 w-full" />
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <Skeleton className="h-4 w-full rounded-full" />
+                </div>
+              </div>
+            ))
+          ) : data && data?.length > 0 ? (
+            data.map((provider, index) => (
+              <div
+                key={index}
+                className="group/provider-item bg-card relative flex flex-col gap-4 rounded-lg border p-4"
+              >
+                <div className="flex items-center gap-3">
+                  <ProviderAvatar
+                    provider={provider.provider}
+                    iconUrl={provider.iconUrl}
+                    name={provider.name}
+                  >
+                    <div className="center absolute inset-0 z-1 rounded-lg bg-black/5 opacity-0 backdrop-blur-xl transition-opacity group-hover/provider-item:opacity-100 dark:bg-black/15">
+                      <Switch
+                        checked={provider.isActive}
+                        onCheckedChange={() => handleToggleActive(provider)}
+                        disabled={toggleActiveMutation.isPending}
+                      />
+                    </div>
+                  </ProviderAvatar>
+                  <div className="flex flex-col">
+                    <span>{provider.name}</span>
+                    <Button
+                      variant="ghost"
+                      size="xs"
+                      className="text-muted-foreground px-0 hover:px-2"
+                      onClick={() => handleManageModels(provider)}
                     >
-                      <span className="hidden break-all md:block">{model.name}</span>
-                      <div className="flex flex-col gap-1 md:hidden">
-                        <span className="break-all">{model.name}</span>
-                        <div className="flex items-center gap-1">
-                          <Badge variant="outline">
-                            {model.modelType.replace("-", " ").toUpperCase()}
-                          </Badge>
-                          <ModelFeatureBadges features={model.features} />
-                        </div>
-                      </div>
+                      <Settings />
+                      管理模型({provider.models?.length || 0})
+                      <ChevronRight />
+                    </Button>
+                  </div>
 
-                      <div className="flex flex-1 items-center justify-between gap-2">
-                        <div className="hidden items-center gap-1 md:flex">
-                          <Badge variant="outline">
-                            {model.modelType.replace("-", " ").toUpperCase()}
-                          </Badge>
-                          <ModelFeatureBadges features={model.features} showLabel />
-                        </div>
-                        <Button
-                          size="xs"
-                          variant="outline"
-                          className="ml-auto group-hover/model-item:flex group-data-selected/model-item:flex! md:hidden"
-                          onClick={() => handleOpenEditModelDialog(model)}
-                        >
-                          <Settings2 />
-                          配置
-                        </Button>
-                      </div>
-                      <CommandShortcut>
-                        <Switch
-                          checked={model.isActive}
-                          onCheckedChange={() => handleToggleModelActive(model)}
-                          disabled={toggleModelActiveMutation.isPending}
-                        />
-                      </CommandShortcut>
-                    </CommandItem>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button className="absolute top-2 right-2" size="icon-sm" variant="ghost">
+                        <EllipsisVertical />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem onClick={() => handleOpenEditDialog(provider)}>
+                        <Edit />
+                        编辑
+                      </DropdownMenuItem>
+
+                      <DropdownMenuSeparator />
+
+                      <DropdownMenuItem
+                        variant="destructive"
+                        onClick={() => handleDelete(provider)}
+                        disabled={deleteMutation.isPending}
+                      >
+                        <Trash2 />
+                        删除
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+
+                <div className="flex min-h-12 flex-wrap gap-2">
+                  {provider.isActive ? (
+                    <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
+                      <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
+                      已启用
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
+                      <IconXboxXFilled className="fill-destructive" />
+                      已禁用
+                    </Badge>
+                  )}
+                  {provider.supportedModelTypes.map((type) => (
+                    <Badge key={type} variant="secondary">
+                      {type.replace("-", " ").toUpperCase()}
+                    </Badge>
                   ))}
-              </CommandGroup>
-            )}
-          </CommandList>
-        </Command>
-      </CommandDialog>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="col-span-1 flex h-46.5 items-center justify-center gap-4 sm:col-span-2 lg:col-span-3 xl:col-span-4 2xl:col-span-5">
+              <span className="text-muted-foreground text-sm">
+                {queryParams.keyword
+                  ? `没有找到与"${queryParams.keyword}"相关的供应商`
+                  : "暂无供应商数据"}
+              </span>
+            </div>
+          )}
+        </div>
+        <CommandDialog
+          open={modelsDialogOpen}
+          className="sm:max-w-3xl"
+          onOpenChange={setModelsDialogOpen}
+        >
+          <Command>
+            <div className="flex items-center justify-between pb-2">
+              <div className="flex items-center">
+                {selectedProvider && (
+                  <div className="m-1 mb-0">
+                    <ProviderAvatar
+                      provider={selectedProvider.provider}
+                      iconUrl={selectedProvider.iconUrl}
+                      name={selectedProvider.name}
+                      size="sm"
+                    />
+                  </div>
+                )}
+                <CommandInput className="w-full max-w-lg" placeholder="搜索模型名称..." />
+              </div>
+              <div className="p-1 pb-0">
+                <Button className="" size="sm" variant="ghost" onClick={handleOpenAddModelDialog}>
+                  <PlusCircle />
+                  添加模型
+                </Button>
+              </div>
+            </div>
+            <CommandList className="max-h-96 min-h-96">
+              <CommandEmpty>未找到模型</CommandEmpty>
+              {selectedProvider && (
+                <CommandGroup heading={`模型列表(${selectedProvider.models?.length || 0})`}>
+                  {selectedProvider.models &&
+                    selectedProvider.models.length > 0 &&
+                    selectedProvider.models.map((model) => (
+                      <CommandItem
+                        key={model.id}
+                        className="group/model-item flex min-h-9 items-center justify-between"
+                      >
+                        <span className="hidden break-all md:block">{model.name}</span>
+                        <div className="flex flex-col gap-1 md:hidden">
+                          <span className="break-all">{model.name}</span>
+                          <div className="flex items-center gap-1">
+                            <Badge variant="outline">
+                              {model.modelType.replace("-", " ").toUpperCase()}
+                            </Badge>
+                            <ModelFeatureBadges features={model.features} />
+                          </div>
+                        </div>
 
-      <AiProviderFormDialog
-        open={formDialogOpen}
-        onOpenChange={setFormDialogOpen}
-        provider={editingProvider}
-        onSuccess={refetch}
-      />
+                        <div className="flex flex-1 items-center justify-between gap-2">
+                          <div className="hidden items-center gap-1 md:flex">
+                            <Badge variant="outline">
+                              {model.modelType.replace("-", " ").toUpperCase()}
+                            </Badge>
+                            <ModelFeatureBadges features={model.features} showLabel />
+                          </div>
+                          <Button
+                            size="xs"
+                            variant="outline"
+                            className="ml-auto group-hover/model-item:flex group-data-selected/model-item:flex! md:hidden"
+                            onClick={() => handleOpenEditModelDialog(model)}
+                          >
+                            <Settings2 />
+                            配置
+                          </Button>
+                        </div>
+                        <CommandShortcut>
+                          <Switch
+                            checked={model.isActive}
+                            onCheckedChange={() => handleToggleModelActive(model)}
+                            disabled={toggleModelActiveMutation.isPending}
+                          />
+                        </CommandShortcut>
+                      </CommandItem>
+                    ))}
+                </CommandGroup>
+              )}
+            </CommandList>
+          </Command>
+        </CommandDialog>
 
-      {selectedProvider && (
-        <AiModelFormDialog
-          open={modelFormDialogOpen}
-          onOpenChange={setModelFormDialogOpen}
-          providerId={selectedProvider.id}
-          model={editingModel}
-          onSuccess={handleModelFormSuccess}
+        <AiProviderFormDialog
+          open={formDialogOpen}
+          onOpenChange={setFormDialogOpen}
+          provider={editingProvider}
+          onSuccess={refetch}
         />
-      )}
-    </div>
+
+        {selectedProvider && (
+          <AiModelFormDialog
+            open={modelFormDialogOpen}
+            onOpenChange={setModelFormDialogOpen}
+            providerId={selectedProvider.id}
+            model={editingModel}
+            onSuccess={handleModelFormSuccess}
+          />
+        )}
+      </div>
+    </PageContainer>
   );
 };
 
