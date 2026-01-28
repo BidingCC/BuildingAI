@@ -3,7 +3,7 @@ import type { FunctionComponent } from "react";
 export interface WorkflowBlock {
   Node: FunctionComponent<any>;
   Panel: FunctionComponent<any>;
-  builder: () => any;
+  builder: (x: number, y: number) => any;
 }
 
 export interface NodeProps<T> {

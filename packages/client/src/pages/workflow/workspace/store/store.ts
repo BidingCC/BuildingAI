@@ -1,19 +1,21 @@
-import type { OnConnect, OnEdgesChange, OnNodesChange } from "@xyflow/react";
+import type { NodeMouseHandler, OnConnect, OnEdgesChange, OnNodesChange } from "@xyflow/react";
 import { addEdge, applyEdgeChanges, applyNodeChanges } from "@xyflow/react";
 import { create } from "zustand";
 
-import { createDefaultWorkflow } from "@/pages/workflow/workspace/demo.data.ts";
+import { BlockRegistry } from "@/pages/workflow/workspace/blocks";
 
-import type { AppEdge, AppNode } from "./types.ts";
+import type { WorkflowBlocksType } from "../constants/node.ts";
+import { createDefaultWorkflow } from "../demo.data.ts";
+import type { AppEdge, AppNode } from "../types.ts";
 
 interface WorkflowStore {
   nodes: AppNode[];
   edges: AppEdge[];
   onNodesChange: OnNodesChange<AppNode>;
   onEdgesChange: OnEdgesChange;
+  onNodeClick: NodeMouseHandler<AppNode>;
   onConnect: OnConnect;
-  setNodes: (nodes: AppNode[]) => void;
-  setEdges: (nodes: AppEdge[]) => void;
+  createNode: (params: { x: number; y: number; type: WorkflowBlocksType }) => void;
 }
 
 const useWorkflowStore = create<WorkflowStore>((set) => ({
@@ -39,8 +41,15 @@ const useWorkflowStore = create<WorkflowStore>((set) => ({
       };
     });
   },
-  setNodes: () => {},
-  setEdges: () => {},
+  onNodeClick: () => {
+    // console.log(event, node);
+  },
+  createNode: (params) => {
+    const newNode = BlockRegistry[params.type].builder(params.x, params.y);
+    set((state) => ({
+      nodes: state.nodes.concat(newNode),
+    }));
+  },
 }));
 
 const selector = (state: WorkflowStore) => ({
@@ -49,6 +58,11 @@ const selector = (state: WorkflowStore) => ({
   onNodesChange: state.onNodesChange,
   onEdgesChange: state.onEdgesChange,
   onConnect: state.onConnect,
+  onNodeClick: state.onNodeClick,
 });
+
+// const useSelectionStore = create(() => ({
+//   onNodeClick: state.onNodeClick,
+// }));
 
 export { selector, useWorkflowStore };

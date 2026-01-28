@@ -20,7 +20,7 @@ export function WorkflowSidebar({ ...props }: React.ComponentProps<typeof Sideba
       <SidebarHeader className="flex flex-row items-center gap-1">
         <SidebarTrigger />
       </SidebarHeader>
-      <SidebarContent>content</SidebarContent>
+      <SidebarContent></SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
