@@ -59,6 +59,8 @@ import {
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
+import { PageContainer } from "@/layouts/console/_components/page-container";
+
 type StatusBadgeProps = {
   isEnabled: boolean;
 };
@@ -325,7 +327,7 @@ const SecretsManageContent = ({ template }: SecretsManageContentProps) => {
                   >
                     <Input
                       value={isEditingName ? editingField.value : secret.name}
-                      className="h-full w-full border-0 border-none bg-transparent px-0 shadow-none ring-0 focus-within:ring-0 focus-visible:ring-0"
+                      className="h-full w-full border-0 border-none bg-transparent! px-0 shadow-none ring-0 focus-within:ring-0 focus-visible:ring-0"
                       onFocus={() => handleFieldFocus(secret, "__name__", secret.name)}
                       onChange={(e) => handleFieldChange(e.target.value)}
                       onBlur={(e) => handleNameBlur(secret, e)}
@@ -371,7 +373,7 @@ const SecretsManageContent = ({ template }: SecretsManageContentProps) => {
                   <Input
                     value={newRow.name}
                     placeholder="请输入名称"
-                    className="h-full w-full border-0 border-none bg-transparent px-0 shadow-none ring-0 focus-within:ring-0 focus-visible:ring-0"
+                    className="h-full w-full border-0 border-none bg-transparent! px-0 shadow-none ring-0 focus-within:ring-0 focus-visible:ring-0"
                     onChange={(e) => {
                       setNewRow({ ...newRow, name: e.target.value });
                       if (newRowErrors.has("__name__")) {
@@ -410,7 +412,7 @@ const SecretsManageContent = ({ template }: SecretsManageContentProps) => {
                         <Input
                           value={isEditing ? editingField.value : field.value || ""}
                           placeholder={`请输入${field.name}`}
-                          className="h-full w-full border-0 border-none bg-transparent px-0 shadow-none ring-0 focus-within:ring-0 focus-visible:ring-0"
+                          className="h-full w-full border-0 border-none bg-transparent! px-0 shadow-none ring-0 focus-within:ring-0 focus-visible:ring-0"
                           onFocus={() => handleFieldFocus(secret, field.name, field.value || "")}
                           onChange={(e) => handleFieldChange(e.target.value)}
                           onBlur={(e) => handleFieldBlur(secret, e)}
@@ -625,132 +627,138 @@ const AiSecretIndexPage = () => {
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="bg-background sticky top-0 z-1 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-        <Input placeholder="搜索模板名称或代码" className="text-sm" onChange={handleSearchChange} />
-        <Select onValueChange={handleStatusChange}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="模板状态" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">全部状态</SelectItem>
-            <SelectItem value="enabled">已启用</SelectItem>
-            <SelectItem value="disabled">已禁用</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-        <div className="flex flex-col gap-4 rounded-lg border border-dashed p-4 hover:border-solid">
-          <div className="flex items-center gap-3">
-            <Button className="size-12 rounded-lg border-dashed" variant="outline">
-              <Plus />
-            </Button>
-            <div className="flex flex-col">
-              <span>新增密钥模板</span>
-              <span className="text-muted-foreground py-1 text-xs font-medium">
-                添加新的密钥模板
-              </span>
-            </div>
-          </div>
-
-          <div className="mt-auto flex gap-4">
-            <Button size="xs" className="flex-1" variant="outline">
-              <FileJson2 /> 从配置导入
-            </Button>
-            <Button size="xs" className="flex-1" variant="outline">
-              <Plus /> 手动创建
-            </Button>
-          </div>
+    <PageContainer>
+      <div className="flex flex-col gap-4">
+        <div className="bg-background sticky top-0 z-1 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+          <Input
+            placeholder="搜索模板名称或代码"
+            className="text-sm"
+            onChange={handleSearchChange}
+          />
+          <Select onValueChange={handleStatusChange}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="模板状态" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">全部状态</SelectItem>
+              <SelectItem value="enabled">已启用</SelectItem>
+              <SelectItem value="disabled">已禁用</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
-        {isLoading ? (
-          Array.from({ length: 4 }).map((_, index) => (
-            <div key={index} className="bg-card flex h-28 flex-col gap-4 rounded-lg border p-4">
-              <div className="flex gap-3">
-                <Skeleton className="size-12 rounded-lg" />
-                <div className="flex h-full flex-1 flex-col justify-between">
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="mt-2 h-4 w-full" />
-                </div>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <Skeleton className="h-5 w-16 rounded-full" />
-                <Skeleton className="h-5 w-12 rounded-full" />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+          <div className="flex flex-col gap-4 rounded-lg border border-dashed p-4 hover:border-solid">
+            <div className="flex items-center gap-3">
+              <Button className="size-12 rounded-lg border-dashed" variant="outline">
+                <Plus />
+              </Button>
+              <div className="flex flex-col">
+                <span>新增密钥模板</span>
+                <span className="text-muted-foreground py-1 text-xs font-medium">
+                  添加新的密钥模板
+                </span>
               </div>
             </div>
-          ))
-        ) : filteredTemplates.length > 0 ? (
-          filteredTemplates.map((template) => (
-            <div
-              key={template.id}
-              className="group/secret-item bg-card relative flex flex-col gap-2 rounded-lg border p-4"
-            >
-              <div className="flex items-center gap-3">
-                <Avatar className="relative size-12 rounded-lg after:rounded-lg">
-                  <AvatarImage
-                    src={template.icon || ""}
-                    alt={template.name}
-                    className="rounded-lg"
-                  />
-                  <AvatarFallback className="size-12 rounded-lg">
-                    <KeyRound className="size-6" />
-                  </AvatarFallback>
-                  <div className="center absolute inset-0 z-1 rounded-lg bg-black/5 opacity-0 backdrop-blur-xl transition-opacity group-hover/secret-item:opacity-100 dark:bg-black/15">
-                    <Switch
-                      checked={template.isEnabled === BooleanNumber.YES}
-                      onCheckedChange={() => handleToggleEnabled(template)}
-                      disabled={setEnabledMutation.isPending}
-                    />
-                  </div>
-                </Avatar>
-                <div className="flex flex-col overflow-hidden">
-                  <span className="line-clamp-1">{template.name}</span>
-                  <SecretsManageDialog template={template} />
-                </div>
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button className="absolute top-2 right-2" size="icon-sm" variant="ghost">
-                      <EllipsisVertical />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem>
-                      <Edit />
-                      编辑
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      variant="destructive"
-                      onClick={() => handleDelete(template)}
-                      disabled={deleteMutation.isPending}
-                    >
-                      <Trash2 />
-                      删除
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-              <div className="mt-2 flex flex-wrap items-center gap-2">
-                <StatusBadge isEnabled={template.isEnabled === BooleanNumber.YES} />
-                {template.fieldConfig?.map((field) => (
-                  <Badge key={field.name} variant="secondary">
-                    {field.name}
-                  </Badge>
-                ))}
-              </div>
+            <div className="mt-auto flex gap-4">
+              <Button size="xs" className="flex-1" variant="outline">
+                <FileJson2 /> 从配置导入
+              </Button>
+              <Button size="xs" className="flex-1" variant="outline">
+                <Plus /> 手动创建
+              </Button>
             </div>
-          ))
-        ) : (
-          <div className="col-span-1 flex h-28 items-center justify-center gap-4 sm:col-span-2 lg:col-span-3 xl:col-span-4 2xl:col-span-5">
-            <span className="text-muted-foreground text-sm">
-              {searchKeyword ? `没有找到与"${searchKeyword}"相关的模板` : "暂无密钥模板数据"}
-            </span>
           </div>
-        )}
+
+          {isLoading ? (
+            Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="bg-card flex h-28 flex-col gap-4 rounded-lg border p-4">
+                <div className="flex gap-3">
+                  <Skeleton className="size-12 rounded-lg" />
+                  <div className="flex h-full flex-1 flex-col justify-between">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="mt-2 h-4 w-full" />
+                  </div>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                  <Skeleton className="h-5 w-12 rounded-full" />
+                </div>
+              </div>
+            ))
+          ) : filteredTemplates.length > 0 ? (
+            filteredTemplates.map((template) => (
+              <div
+                key={template.id}
+                className="group/secret-item bg-card relative flex flex-col gap-2 rounded-lg border p-4"
+              >
+                <div className="flex items-center gap-3">
+                  <Avatar className="relative size-12 rounded-lg after:rounded-lg">
+                    <AvatarImage
+                      src={template.icon || ""}
+                      alt={template.name}
+                      className="rounded-lg"
+                    />
+                    <AvatarFallback className="size-12 rounded-lg">
+                      <KeyRound className="size-6" />
+                    </AvatarFallback>
+                    <div className="center absolute inset-0 z-1 rounded-lg bg-black/5 opacity-0 backdrop-blur-xl transition-opacity group-hover/secret-item:opacity-100 dark:bg-black/15">
+                      <Switch
+                        checked={template.isEnabled === BooleanNumber.YES}
+                        onCheckedChange={() => handleToggleEnabled(template)}
+                        disabled={setEnabledMutation.isPending}
+                      />
+                    </div>
+                  </Avatar>
+                  <div className="flex flex-col overflow-hidden">
+                    <span className="line-clamp-1">{template.name}</span>
+                    <SecretsManageDialog template={template} />
+                  </div>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button className="absolute top-2 right-2" size="icon-sm" variant="ghost">
+                        <EllipsisVertical />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem>
+                        <Edit />
+                        编辑
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        variant="destructive"
+                        onClick={() => handleDelete(template)}
+                        disabled={deleteMutation.isPending}
+                      >
+                        <Trash2 />
+                        删除
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <StatusBadge isEnabled={template.isEnabled === BooleanNumber.YES} />
+                  {template.fieldConfig?.map((field) => (
+                    <Badge key={field.name} variant="secondary">
+                      {field.name}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="col-span-1 flex h-28 items-center justify-center gap-4 sm:col-span-2 lg:col-span-3 xl:col-span-4 2xl:col-span-5">
+              <span className="text-muted-foreground text-sm">
+                {searchKeyword ? `没有找到与"${searchKeyword}"相关的模板` : "暂无密钥模板数据"}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </PageContainer>
   );
 };
 

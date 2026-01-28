@@ -4,6 +4,8 @@ import { ScrollArea } from "@buildingai/ui/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger } from "@buildingai/ui/components/ui/tabs";
 import { TrendingDown, TrendingUp } from "lucide-react";
 
+import { PageContainer } from "@/layouts/console/_components/page-container";
+
 import DataCard from "./_components/data-card";
 import { AreaChartCard } from "./_components/line-chart";
 
@@ -101,231 +103,233 @@ const chartData = [
   { date: "2024-06-30", desktop: 446, mobile: 400 },
 ];
 
-const DashboardPage = () => {
+const DashboardIndexPage = () => {
   return (
-    <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <DataCard
-          title="对话统计"
-          description="这是副标题"
-          contentClassName="flex flex-col gap-1 px-4 md:gap-2"
-          action={
-            <div className="flex flex-col items-center justify-center">
-              <TrendingUp className="size-8 text-green-600" />
-              <div className="text-muted-foreground text-xs">
-                同比昨天增长<span className="mx-1 text-lg font-bold text-green-600">1</span>人
+    <PageContainer>
+      <div className="flex flex-col gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <DataCard
+            title="对话统计"
+            description="这是副标题"
+            contentClassName="flex flex-col gap-1 px-4 md:gap-2"
+            action={
+              <div className="flex flex-col items-center justify-center">
+                <TrendingUp className="size-8 text-green-600" />
+                <div className="text-muted-foreground text-xs">
+                  同比昨天增长<span className="mx-1 text-lg font-bold text-green-600">1</span>人
+                </div>
               </div>
+            }
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-sm">用户总数</span>
+              <span className="text-primary text-xl font-bold">
+                <CountUp direction="up" duration={0.05} to={1010} />
+              </span>
             </div>
-          }
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-sm">用户总数</span>
-            <span className="text-primary text-xl font-bold">
-              <CountUp direction="up" duration={0.05} to={1010} />
-            </span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm">用户总数</span>
-            <span className="text-primary text-xl font-bold">
-              <CountUp direction="up" duration={0.05} to={7362} />
-            </span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm">用户总数</span>
-            <span className="text-primary text-xl font-bold">
-              <CountUp direction="up" duration={0.05} to={2293} />
-            </span>
-          </div>
-        </DataCard>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">用户总数</span>
+              <span className="text-primary text-xl font-bold">
+                <CountUp direction="up" duration={0.05} to={7362} />
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">用户总数</span>
+              <span className="text-primary text-xl font-bold">
+                <CountUp direction="up" duration={0.05} to={2293} />
+              </span>
+            </div>
+          </DataCard>
 
-        <DataCard
-          title="对话统计"
-          description="这是副标题"
-          contentClassName="flex flex-col gap-1 px-4 md:gap-2"
-          action={
-            <div className="flex flex-col items-center justify-center">
-              <TrendingUp className="size-8 text-blue-600" />
-              <div className="text-muted-foreground text-xs">
-                同比昨天增长<span className="mx-1 text-lg font-bold text-blue-600">1</span>人
+          <DataCard
+            title="对话统计"
+            description="这是副标题"
+            contentClassName="flex flex-col gap-1 px-4 md:gap-2"
+            action={
+              <div className="flex flex-col items-center justify-center">
+                <TrendingUp className="size-8 text-blue-600" />
+                <div className="text-muted-foreground text-xs">
+                  同比昨天增长<span className="mx-1 text-lg font-bold text-blue-600">1</span>人
+                </div>
               </div>
+            }
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-sm">用户总数</span>
+              <span className="text-primary text-xl font-bold">
+                <CountUp direction="up" duration={0.05} to={1010} />
+              </span>
             </div>
-          }
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-sm">用户总数</span>
-            <span className="text-primary text-xl font-bold">
-              <CountUp direction="up" duration={0.05} to={1010} />
-            </span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm">用户总数</span>
-            <span className="text-primary text-xl font-bold">
-              <CountUp direction="up" duration={0.05} to={7362} />
-            </span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm">用户总数</span>
-            <span className="text-primary text-xl font-bold">
-              <CountUp direction="up" duration={0.05} to={2293} />
-            </span>
-          </div>
-        </DataCard>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">用户总数</span>
+              <span className="text-primary text-xl font-bold">
+                <CountUp direction="up" duration={0.05} to={7362} />
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">用户总数</span>
+              <span className="text-primary text-xl font-bold">
+                <CountUp direction="up" duration={0.05} to={2293} />
+              </span>
+            </div>
+          </DataCard>
 
-        <DataCard
-          title="对话统计"
-          description="这是副标题"
-          contentClassName="flex flex-col gap-1 px-4 md:gap-2"
-          action={
-            <div className="flex flex-col items-center justify-center">
-              <TrendingDown className="text-destructive size-8" />
-              <div className="text-muted-foreground text-xs">
-                同比昨天下降<span className="text-destructive mx-1 text-lg font-bold">1</span>人
+          <DataCard
+            title="对话统计"
+            description="这是副标题"
+            contentClassName="flex flex-col gap-1 px-4 md:gap-2"
+            action={
+              <div className="flex flex-col items-center justify-center">
+                <TrendingDown className="text-destructive size-8" />
+                <div className="text-muted-foreground text-xs">
+                  同比昨天下降<span className="text-destructive mx-1 text-lg font-bold">1</span>人
+                </div>
               </div>
+            }
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-sm">用户总数</span>
+              <span className="text-primary text-xl font-bold">
+                <CountUp direction="up" duration={0.05} to={1010} />
+              </span>
             </div>
-          }
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-sm">用户总数</span>
-            <span className="text-primary text-xl font-bold">
-              <CountUp direction="up" duration={0.05} to={1010} />
-            </span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm">用户总数</span>
-            <span className="text-primary text-xl font-bold">
-              <CountUp direction="up" duration={0.05} to={7362} />
-            </span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm">用户总数</span>
-            <span className="text-primary text-xl font-bold">
-              <CountUp direction="up" duration={0.05} to={2293} />
-            </span>
-          </div>
-        </DataCard>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">用户总数</span>
+              <span className="text-primary text-xl font-bold">
+                <CountUp direction="up" duration={0.05} to={7362} />
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">用户总数</span>
+              <span className="text-primary text-xl font-bold">
+                <CountUp direction="up" duration={0.05} to={2293} />
+              </span>
+            </div>
+          </DataCard>
+        </div>
+
+        <div className="grid min-h-80 grid-cols-1 gap-4 lg:grid-cols-3">
+          <AreaChartCard
+            title="订单统计"
+            description="每日订单趋势"
+            xAxisKey="date"
+            data={chartData}
+            series={[
+              { dataKey: "desktop", label: "桌面端", color: "var(--chart-1)", stackId: "a" },
+              { dataKey: "mobile", label: "移动端", color: "var(--chart-2)", stackId: "a" },
+            ]}
+            className="lg:col-span-2"
+            onTimeRangeChange={(range) => console.log("时间范围变化:", range)}
+          />
+          <DataCard
+            title="排行订单"
+            description="这是副标题"
+            contentClassName="flex flex-col gap-1 px-0 md:gap-2"
+            action={
+              <Tabs defaultValue="account">
+                <TabsList>
+                  <TabsTrigger value="account">模型</TabsTrigger>
+                  <TabsTrigger value="password">供应商</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            }
+          >
+            <ScrollArea className="h-[300px] px-4">
+              <div className="flex flex-col gap-3">
+                <div className="bg-card sticky top-0 z-1 flex items-center gap-2">
+                  <span className="text-muted-foreground min-w-6 text-xs">排名</span>
+                  <span className="text-muted-foreground text-xs">模型信息</span>
+
+                  <div className="text-muted-foreground ml-auto text-xs">消耗</div>
+                </div>
+
+                {Array.from({ length: 10 }).map((_, index) => {
+                  return (
+                    <div className="flex items-center gap-2" key={index}>
+                      <span className="text-muted-foreground min-w-6">#{index + 1}</span>
+                      <Avatar className="rounded-lg">
+                        <AvatarImage src="https://github.com/evilrabbit.png" alt="@evilrabbit" />
+                        <AvatarFallback>ER</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div>模型名称</div>
+                        <div className="text-muted-foreground text-xs">模型名称</div>
+                      </div>
+
+                      <div className="ml-auto">
+                        <div>102k</div>
+                        <div className="text-muted-foreground text-xs">106次</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </ScrollArea>
+          </DataCard>
+        </div>
+
+        <div className="grid min-h-80 grid-cols-1 gap-4 lg:grid-cols-3">
+          <AreaChartCard
+            title="订单统计"
+            description="每日订单趋势"
+            xAxisKey="date"
+            data={chartData}
+            series={[
+              { dataKey: "desktop", label: "桌面端", color: "var(--chart-3)", stackId: "a" },
+              { dataKey: "mobile", label: "移动端", color: "var(--chart-4)", stackId: "a" },
+            ]}
+            className="lg:col-span-2"
+            onTimeRangeChange={(range) => console.log("时间范围变化:", range)}
+          />
+          <DataCard
+            title="排行订单"
+            description="这是副标题"
+            contentClassName="flex flex-col gap-1 px-0 md:gap-2"
+            action={
+              <Tabs defaultValue="account">
+                <TabsList>
+                  <TabsTrigger value="account">模型</TabsTrigger>
+                  <TabsTrigger value="password">供应商</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            }
+          >
+            <ScrollArea className="h-[300px] px-4">
+              <div className="flex flex-col gap-3">
+                <div className="bg-card sticky top-0 z-1 flex items-center gap-2">
+                  <span className="text-muted-foreground min-w-6 text-xs">排名</span>
+                  <span className="text-muted-foreground text-xs">模型信息</span>
+
+                  <div className="text-muted-foreground ml-auto text-xs">消耗</div>
+                </div>
+
+                {Array.from({ length: 10 }).map((_, index) => {
+                  return (
+                    <div className="flex items-center gap-2" key={index}>
+                      <span className="text-muted-foreground min-w-6">#{index + 1}</span>
+                      <Avatar className="rounded-lg">
+                        <AvatarImage src="https://github.com/evilrabbit.png" alt="@evilrabbit" />
+                        <AvatarFallback>ER</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div>模型名称</div>
+                        <div className="text-muted-foreground text-xs">模型名称</div>
+                      </div>
+
+                      <div className="ml-auto">
+                        <div>102k</div>
+                        <div className="text-muted-foreground text-xs">106次</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </ScrollArea>
+          </DataCard>
+        </div>
       </div>
-
-      <div className="grid min-h-80 grid-cols-1 gap-4 lg:grid-cols-3">
-        <AreaChartCard
-          title="订单统计"
-          description="每日订单趋势"
-          xAxisKey="date"
-          data={chartData}
-          series={[
-            { dataKey: "desktop", label: "桌面端", color: "var(--chart-1)", stackId: "a" },
-            { dataKey: "mobile", label: "移动端", color: "var(--chart-2)", stackId: "a" },
-          ]}
-          className="lg:col-span-2"
-          onTimeRangeChange={(range) => console.log("时间范围变化:", range)}
-        />
-        <DataCard
-          title="排行订单"
-          description="这是副标题"
-          contentClassName="flex flex-col gap-1 px-0 md:gap-2"
-          action={
-            <Tabs defaultValue="account">
-              <TabsList>
-                <TabsTrigger value="account">模型</TabsTrigger>
-                <TabsTrigger value="password">供应商</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          }
-        >
-          <ScrollArea className="h-[300px] px-4">
-            <div className="flex flex-col gap-3">
-              <div className="bg-card sticky top-0 z-1 flex items-center gap-2">
-                <span className="text-muted-foreground min-w-6 text-xs">排名</span>
-                <span className="text-muted-foreground text-xs">模型信息</span>
-
-                <div className="text-muted-foreground ml-auto text-xs">消耗</div>
-              </div>
-
-              {Array.from({ length: 10 }).map((_, index) => {
-                return (
-                  <div className="flex items-center gap-2" key={index}>
-                    <span className="text-muted-foreground min-w-6">#{index + 1}</span>
-                    <Avatar className="rounded-lg">
-                      <AvatarImage src="https://github.com/evilrabbit.png" alt="@evilrabbit" />
-                      <AvatarFallback>ER</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div>模型名称</div>
-                      <div className="text-muted-foreground text-xs">模型名称</div>
-                    </div>
-
-                    <div className="ml-auto">
-                      <div>102k</div>
-                      <div className="text-muted-foreground text-xs">106次</div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </ScrollArea>
-        </DataCard>
-      </div>
-
-      <div className="grid min-h-80 grid-cols-1 gap-4 lg:grid-cols-3">
-        <AreaChartCard
-          title="订单统计"
-          description="每日订单趋势"
-          xAxisKey="date"
-          data={chartData}
-          series={[
-            { dataKey: "desktop", label: "桌面端", color: "var(--chart-3)", stackId: "a" },
-            { dataKey: "mobile", label: "移动端", color: "var(--chart-4)", stackId: "a" },
-          ]}
-          className="lg:col-span-2"
-          onTimeRangeChange={(range) => console.log("时间范围变化:", range)}
-        />
-        <DataCard
-          title="排行订单"
-          description="这是副标题"
-          contentClassName="flex flex-col gap-1 px-0 md:gap-2"
-          action={
-            <Tabs defaultValue="account">
-              <TabsList>
-                <TabsTrigger value="account">模型</TabsTrigger>
-                <TabsTrigger value="password">供应商</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          }
-        >
-          <ScrollArea className="h-[300px] px-4">
-            <div className="flex flex-col gap-3">
-              <div className="bg-card sticky top-0 z-1 flex items-center gap-2">
-                <span className="text-muted-foreground min-w-6 text-xs">排名</span>
-                <span className="text-muted-foreground text-xs">模型信息</span>
-
-                <div className="text-muted-foreground ml-auto text-xs">消耗</div>
-              </div>
-
-              {Array.from({ length: 10 }).map((_, index) => {
-                return (
-                  <div className="flex items-center gap-2" key={index}>
-                    <span className="text-muted-foreground min-w-6">#{index + 1}</span>
-                    <Avatar className="rounded-lg">
-                      <AvatarImage src="https://github.com/evilrabbit.png" alt="@evilrabbit" />
-                      <AvatarFallback>ER</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div>模型名称</div>
-                      <div className="text-muted-foreground text-xs">模型名称</div>
-                    </div>
-
-                    <div className="ml-auto">
-                      <div>102k</div>
-                      <div className="text-muted-foreground text-xs">106次</div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </ScrollArea>
-        </DataCard>
-      </div>
-    </div>
+    </PageContainer>
   );
 };
 
-export default DashboardPage;
+export default DashboardIndexPage;

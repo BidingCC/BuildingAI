@@ -55,8 +55,14 @@ function getVisibleChildren(menu: MenuItem): MenuItem[] {
 
 function NavMenuItem({ menu, basePath = "" }: { menu: MenuItem; basePath?: string }) {
   const location = useLocation();
-  const { state } = useSidebar();
+  const { state, setOpenMobile, isMobile } = useSidebar();
   const isCollapsed = state === "collapsed";
+
+  const handleLinkClick = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
   const menuPath = basePath ? `${basePath}/${menu.path}`.replace(/\/+/g, "/") : menu.path;
   const fullPath = `/console/${menuPath}`.replace(/\/+/g, "/");
   const visibleChildren = getVisibleChildren(menu);
@@ -87,6 +93,7 @@ function NavMenuItem({ menu, basePath = "" }: { menu: MenuItem; basePath?: strin
                     <Link
                       key={child.id}
                       to={childPath}
+                      onClick={handleLinkClick}
                       className={`hover:bg-accent hover:text-accent-foreground rounded-md px-2 py-1.5 text-sm transition-colors ${
                         isChildActive ? "bg-accent text-accent-foreground" : ""
                       }`}
@@ -130,7 +137,7 @@ function NavMenuItem({ menu, basePath = "" }: { menu: MenuItem; basePath?: strin
                 return (
                   <SidebarMenuSubItem key={child.id}>
                     <SidebarMenuSubButton asChild isActive={location.pathname === childPath}>
-                      <Link to={childPath}>
+                      <Link to={childPath} onClick={handleLinkClick}>
                         {/* <span>{child.name}</span> */}
                         <span>二级菜单</span>
                       </Link>
@@ -148,7 +155,7 @@ function NavMenuItem({ menu, basePath = "" }: { menu: MenuItem; basePath?: strin
   return (
     <SidebarMenuItem>
       <SidebarMenuButton asChild tooltip={menu.name} isActive={location.pathname === fullPath}>
-        <Link to={fullPath}>
+        <Link to={fullPath} onClick={handleLinkClick}>
           {/* TODO: 这里临时注释掉动态图标 */}
           {/* <LucideIcon
             name={menu.icon.replace("i-lucide-", "") as keyof typeof dynamicIconImports}

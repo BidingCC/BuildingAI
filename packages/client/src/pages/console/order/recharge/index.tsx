@@ -42,6 +42,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { usePagination } from "@/hooks/use-pagination";
+import { PageContainer } from "@/layouts/console/_components/page-container";
 
 import { DataTableFacetedFilter } from "./_components/data-table-faceted-filter";
 import { OrderDetailDialog } from "./_components/order-detail-dialog";
@@ -202,182 +203,184 @@ const OrderRechargeIndexPage = () => {
   };
 
   return (
-    <div className="flex h-[calc(100vh-6.25rem)] w-full flex-col gap-6">
-      <div className="grid grid-cols-1 gap-4 pt-px md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-        {statisticsItems.map((item, index) => (
-          <Card key={index} className="justify-center">
-            <CardContent>
-              <CardTitle className="text-center">
-                <span className="text-2xl font-bold">
-                  {statistics[item.key as keyof Statistics]}
-                </span>
-                <span className="text-muted-foreground ml-1 text-xs">{item.unit}</span>
-              </CardTitle>
-              <CardDescription className="text-center">{item.label}</CardDescription>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-      <div className="flex h-full flex-1 flex-col gap-2 overflow-hidden">
-        <div className="flex flex-wrap items-center gap-2">
-          <Input
-            placeholder="搜索订单号"
-            value={orderNoSearch}
-            onChange={(e) => setOrderNoSearch(e.target.value)}
-            className="h-8 w-[200px]"
-          />
-          <Input
-            placeholder="搜索用户ID/昵称/手机号"
-            value={userSearch}
-            onChange={(e) => setUserSearch(e.target.value)}
-            className="h-8 w-[200px]"
-          />
-          <DataTableFacetedFilter
-            title="支付状态"
-            options={paymentStatusOptions}
-            selectedValue={paymentStatusFilter}
-            onSelectionChange={setPaymentStatusFilter}
-          />
-          <DataTableFacetedFilter
-            title="支付方式"
-            options={paymentMethodOptions}
-            selectedValue={paymentMethodFilter}
-            onSelectionChange={setPaymentMethodFilter}
-          />
-          <DataTableFacetedFilter
-            title="退款状态"
-            options={refundStatusOptions}
-            selectedValue={refundStatusFilter}
-            onSelectionChange={setRefundStatusFilter}
-          />
-          {hasActiveFilters && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="outline" size="sm" className="h-8 border-dashed">
-                  <RotateCcwIcon className="mr-2 size-4" />
-                  清除筛选
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent className="sm:max-w-sm">
-                <AlertDialogHeader>
-                  <AlertDialogTitle>清除所有筛选？</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    这将清除所有已设置的筛选条件，包括搜索输入和筛选选项。此操作无法撤销。
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>取消</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleResetFilters}>清除</AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          )}
+    <PageContainer className="h-[calc(100vh-6.25rem)]">
+      <div className="flex w-full flex-col gap-6">
+        <div className="grid grid-cols-1 gap-4 pt-px md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          {statisticsItems.map((item, index) => (
+            <Card key={index} className="justify-center">
+              <CardContent>
+                <CardTitle className="text-center">
+                  <span className="text-2xl font-bold">
+                    {statistics[item.key as keyof Statistics]}
+                  </span>
+                  <span className="text-muted-foreground ml-1 text-xs">{item.unit}</span>
+                </CardTitle>
+                <CardDescription className="text-center">{item.label}</CardDescription>
+              </CardContent>
+            </Card>
+          ))}
         </div>
-        <ScrollArea className="flex h-full flex-1 overflow-hidden rounded-md border">
-          <Table className="h-full">
-            <TableHeader className="bg-muted sticky top-0 z-10">
-              <TableRow>
-                <TableHead>订单号</TableHead>
-                <TableHead>用户</TableHead>
-                <TableHead>充值数量</TableHead>
-                <TableHead>赠送数量</TableHead>
-                <TableHead>到账数量</TableHead>
-                <TableHead>实付金额</TableHead>
-                <TableHead>支付方式</TableHead>
-                <TableHead>支付状态</TableHead>
-                <TableHead>下单时间</TableHead>
-                <TableHead>操作</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data?.items.map((item, index) => (
-                <TableRow key={index}>
-                  <TableCell className="w-[100px] font-medium">{item.orderNo}</TableCell>
-                  <TableCell>{item.user?.nickname}</TableCell>
-                  <TableCell>{item.power}</TableCell>
-                  <TableCell>{item.givePower}</TableCell>
-                  <TableCell>{item.totalPower}</TableCell>
-                  <TableCell>{formatCurrency(item.orderAmount)}</TableCell>
-                  <TableCell>{item.payTypeDesc}</TableCell>
-                  <TableCell>
-                    <Badge
-                      className={cn(
-                        item.payStatus === 1
+        <div className="flex h-full flex-1 flex-col gap-2 overflow-hidden">
+          <div className="flex flex-wrap items-center gap-2">
+            <Input
+              placeholder="搜索订单号"
+              value={orderNoSearch}
+              onChange={(e) => setOrderNoSearch(e.target.value)}
+              className="h-8 w-[200px]"
+            />
+            <Input
+              placeholder="搜索用户ID/昵称/手机号"
+              value={userSearch}
+              onChange={(e) => setUserSearch(e.target.value)}
+              className="h-8 w-[200px]"
+            />
+            <DataTableFacetedFilter
+              title="支付状态"
+              options={paymentStatusOptions}
+              selectedValue={paymentStatusFilter}
+              onSelectionChange={setPaymentStatusFilter}
+            />
+            <DataTableFacetedFilter
+              title="支付方式"
+              options={paymentMethodOptions}
+              selectedValue={paymentMethodFilter}
+              onSelectionChange={setPaymentMethodFilter}
+            />
+            <DataTableFacetedFilter
+              title="退款状态"
+              options={refundStatusOptions}
+              selectedValue={refundStatusFilter}
+              onSelectionChange={setRefundStatusFilter}
+            />
+            {hasActiveFilters && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-8 border-dashed">
+                    <RotateCcwIcon className="mr-2 size-4" />
+                    清除筛选
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="sm:max-w-sm">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>清除所有筛选？</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      这将清除所有已设置的筛选条件，包括搜索输入和筛选选项。此操作无法撤销。
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>取消</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleResetFilters}>清除</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </div>
+          <ScrollArea className="flex h-full flex-1 overflow-hidden rounded-md border">
+            <Table className="h-full">
+              <TableHeader className="bg-muted sticky top-0 z-10">
+                <TableRow>
+                  <TableHead>订单号</TableHead>
+                  <TableHead>用户</TableHead>
+                  <TableHead>充值数量</TableHead>
+                  <TableHead>赠送数量</TableHead>
+                  <TableHead>到账数量</TableHead>
+                  <TableHead>实付金额</TableHead>
+                  <TableHead>支付方式</TableHead>
+                  <TableHead>支付状态</TableHead>
+                  <TableHead>下单时间</TableHead>
+                  <TableHead>操作</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {data?.items.map((item, index) => (
+                  <TableRow key={index}>
+                    <TableCell className="w-[100px] font-medium">{item.orderNo}</TableCell>
+                    <TableCell>{item.user?.nickname}</TableCell>
+                    <TableCell>{item.power}</TableCell>
+                    <TableCell>{item.givePower}</TableCell>
+                    <TableCell>{item.totalPower}</TableCell>
+                    <TableCell>{formatCurrency(item.orderAmount)}</TableCell>
+                    <TableCell>{item.payTypeDesc}</TableCell>
+                    <TableCell>
+                      <Badge
+                        className={cn(
+                          item.payStatus === 1
+                            ? item.refundStatus === 0
+                              ? "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
+                              : "bg-yellow-50 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300"
+                            : "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300",
+                        )}
+                      >
+                        {item.payStatus === 1
                           ? item.refundStatus === 0
-                            ? "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
-                            : "bg-yellow-50 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300"
-                          : "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300",
-                      )}
-                    >
-                      {item.payStatus === 1
-                        ? item.refundStatus === 0
-                          ? "已支付"
-                          : "已退款"
-                        : "未支付"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <TimeText value={item.createdAt} variant="datetime" />
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="size-8">
-                          <MoreHorizontalIcon />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onSelect={() => {
-                            setDetailOrderId(item.id);
-                            setDetailOpen(true);
-                          }}
-                        >
-                          <EyeIcon className="mr-2 size-4" />
-                          查看详情
-                        </DropdownMenuItem>
-                        {item.payStatus === 1 && item.refundStatus === 0 && (
+                            ? "已支付"
+                            : "已退款"
+                          : "未支付"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <TimeText value={item.createdAt} variant="datetime" />
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="size-8">
+                            <MoreHorizontalIcon />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
                           <DropdownMenuItem
-                            variant="destructive"
-                            onClick={() => {
-                              handleRefund(item.id);
+                            onSelect={() => {
+                              setDetailOrderId(item.id);
+                              setDetailOpen(true);
                             }}
                           >
-                            <Undo2Icon className="mr-2 size-4" />
-                            退款
+                            <EyeIcon className="mr-2 size-4" />
+                            查看详情
                           </DropdownMenuItem>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
-      </div>
-      <div className="bg-background sticky bottom-0 flex py-2">
-        <PaginationComponent className="mx-0 w-fit" />
-      </div>
+                          {item.payStatus === 1 && item.refundStatus === 0 && (
+                            <DropdownMenuItem
+                              variant="destructive"
+                              onClick={() => {
+                                handleRefund(item.id);
+                              }}
+                            >
+                              <Undo2Icon className="mr-2 size-4" />
+                              退款
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
+        </div>
+        <div className="bg-background sticky bottom-0 flex py-2">
+          <PaginationComponent className="mx-0 w-fit" />
+        </div>
 
-      <OrderDetailDialog
-        open={detailOpen}
-        orderId={detailOrderId}
-        onOpenChange={(open: boolean) => {
-          setDetailOpen(open);
-          if (!open) setDetailOrderId(null);
-        }}
-        onRefundSuccess={async () => {
-          if (detailOrderId) {
-            await refundMutation.mutateAsync(detailOrderId);
-          }
-          refetch();
-          setDetailOpen(false);
-          setDetailOrderId(null);
-        }}
-      />
-    </div>
+        <OrderDetailDialog
+          open={detailOpen}
+          orderId={detailOrderId}
+          onOpenChange={(open: boolean) => {
+            setDetailOpen(open);
+            if (!open) setDetailOrderId(null);
+          }}
+          onRefundSuccess={async () => {
+            if (detailOrderId) {
+              await refundMutation.mutateAsync(detailOrderId);
+            }
+            refetch();
+            setDetailOpen(false);
+            setDetailOrderId(null);
+          }}
+        />
+      </div>
+    </PageContainer>
   );
 };
 

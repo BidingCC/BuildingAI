@@ -1,7 +1,7 @@
-import React from "react";
+import { PageContainer } from "@/layouts/console/_components/page-container";
 
 const AccessMenuIndexPage = () => {
-  return <div>AccessMenuIndexPage</div>;
+  return <PageContainer>AccessMenuIndexPage</PageContainer>;
 };
 
 export default AccessMenuIndexPage;

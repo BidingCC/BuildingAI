@@ -1,5 +1,7 @@
+import { PageContainer } from "@/layouts/console/_components/page-container";
+
 const AgentIndexPage = () => {
-  return <div>AgentIndexPage</div>;
+  return <PageContainer>AgentIndexPage</PageContainer>;
 };
 
 export default AgentIndexPage;

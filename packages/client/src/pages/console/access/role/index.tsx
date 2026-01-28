@@ -1,7 +1,7 @@
-import React from "react";
+import { PageContainer } from "@/layouts/console/_components/page-container";
 
 const AccessRoleIndexPage = () => {
-  return <div>AccessRoleIndexPage</div>;
+  return <PageContainer>AccessRoleIndexPage</PageContainer>;
 };
 
 export default AccessRoleIndexPage;

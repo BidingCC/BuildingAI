@@ -1,3 +1,5 @@
+import { McpCommunicationType, McpServerType } from "@buildingai/constants";
+
 import { AppEntity } from "../decorators/app-entity.decorator";
 import { NormalizeFileUrl } from "../decorators/file-url.decorator";
 import { Column, JoinColumn, ManyToOne, OneToMany, type Relation } from "../typeorm";
@@ -6,35 +8,7 @@ import { AiUserMcpServer } from "./ai-user-mcp-server.entity";
 import { BaseEntity } from "./base";
 import { User } from "./user.entity";
 
-/**
- * MCP服务类型枚举
- */
-export enum McpServerType {
-    /**
-     * 用户自定义服务
-     */
-    USER = "user",
-
-    /**
-     * 系统内置服务
-     */
-    SYSTEM = "system",
-}
-
-/**
- * MCP服务通信的传输方式
- */
-export enum McpCommunicationType {
-    /**
-     * SSE
-     */
-    SSE = "sse",
-
-    /**
-     * StreamableHTTP
-     */
-    STREAMABLEHTTP = "streamable-http",
-}
+export { McpCommunicationType, McpServerType };
 
 /**
  * MCP服务配置实体

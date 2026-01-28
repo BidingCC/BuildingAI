@@ -1,7 +1,7 @@
-import React from "react";
+import { PageContainer } from "@/layouts/console/_components/page-container";
 
 const WechatOAIndexPage = () => {
-  return <div>WechatOAIndexPage</div>;
+  return <PageContainer>WechatOAIndexPage</PageContainer>;
 };
 
 export default WechatOAIndexPage;

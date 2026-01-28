@@ -1,7 +1,7 @@
-import React from "react";
+import { PageContainer } from "@/layouts/console/_components/page-container";
 
 const DecorateAppsIndexPage = () => {
-  return <div>DecorateAppsIndexPage</div>;
+  return <PageContainer>DecorateAppsIndexPage</PageContainer>;
 };
 
 export default DecorateAppsIndexPage;
