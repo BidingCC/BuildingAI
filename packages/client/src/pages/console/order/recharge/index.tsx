@@ -15,6 +15,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@buildingai/ui/components/ui/alert-dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@buildingai/ui/components/ui/avatar";
 import { Badge } from "@buildingai/ui/components/ui/badge";
 import { Button } from "@buildingai/ui/components/ui/button";
 import { Card, CardContent, CardDescription, CardTitle } from "@buildingai/ui/components/ui/card";
@@ -310,7 +311,21 @@ const OrderRechargeIndexPage = () => {
                   data.items.map((item, index) => (
                     <TableRow key={index}>
                       <TableCell className="w-[100px] font-medium">{item.orderNo}</TableCell>
-                      <TableCell>{item.user?.nickname}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Avatar className="h-8 w-8 rounded-lg after:rounded-lg">
+                            <AvatarImage
+                              src={item.user?.avatar || undefined}
+                              alt={item.user?.nickname || undefined}
+                              className="rounded-lg"
+                            />
+                            <AvatarFallback className="rounded-lg">
+                              {item.user?.nickname?.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="max-w-[120px] truncate">{item.user?.nickname}</span>
+                        </div>
+                      </TableCell>
                       <TableCell>{item.power}</TableCell>
                       <TableCell>{item.givePower}</TableCell>
                       <TableCell>{item.totalPower}</TableCell>
