@@ -39,7 +39,6 @@ import {
   DropdownMenuTrigger,
 } from "@buildingai/ui/components/ui/dropdown-menu";
 import { Input } from "@buildingai/ui/components/ui/input";
-import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog";
 import {
   SidebarGroup,
   SidebarMenu,
@@ -51,6 +50,7 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from "@buildingai/ui/components/ui/sidebar";
+import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog";
 import { cn } from "@buildingai/ui/lib/utils";
 import {
   ArrowUpRight,
@@ -179,7 +179,7 @@ function HistoryCommandItem({
           onChange={(e) => setEditValue(e.target.value)}
           onKeyDown={handleKeyDown}
           onClick={(e) => e.stopPropagation()}
-          className="h-9 flex-1 -translate-x-2 border-0 focus-within:ring-0 focus-visible:ring-0"
+          className="h-9 flex-1 -translate-x-2 border-0 px-2 shadow-none focus-within:ring-0 focus-visible:ring-0"
           autoFocus
         />
       ) : (
