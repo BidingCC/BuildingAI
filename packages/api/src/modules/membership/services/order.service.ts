@@ -554,6 +554,8 @@ export class MembershipOrderService extends BaseService<MembershipOrder> {
         const queryBuilder = this.membershipOrderRepository.createQueryBuilder("membership-order");
         queryBuilder.where("membership-order.userId = :userId", { userId });
         queryBuilder.andWhere("membership-order.payState = :payState", { payState: 1 });
+        // 只查询订单来源为订单购买（source = 1）的订单
+        queryBuilder.andWhere("membership-order.source = :source", { source: 1 });
         queryBuilder.select([
             "membership-order.id",
             "membership-order.orderNo",

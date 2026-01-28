@@ -152,7 +152,7 @@ const OrderRechargeIndexPage = () => {
     [userSearch, orderNoSearch, paymentMethodFilter, paymentStatusFilter, refundStatusFilter],
   );
 
-  const { data, refetch } = useRechargeOrderListQuery(queryParams);
+  const { data, refetch, isLoading } = useRechargeOrderListQuery(queryParams);
 
   const extend = data?.extend;
   const paymentMethodOptions = useMemo(() => {
@@ -221,7 +221,7 @@ const OrderRechargeIndexPage = () => {
           ))}
         </div>
         <div className="flex h-full flex-1 flex-col gap-2 overflow-hidden">
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 p-1">
             <Input
               placeholder="搜索订单号"
               value={orderNoSearch}
@@ -275,9 +275,9 @@ const OrderRechargeIndexPage = () => {
               </AlertDialog>
             )}
           </div>
-          <ScrollArea className="flex h-full flex-1 overflow-hidden rounded-md border">
+          <ScrollArea className="flex h-full flex-1 overflow-hidden rounded-md">
             <Table className="h-full">
-              <TableHeader className="bg-muted sticky top-0 z-10">
+              <TableHeader className="bg-muted sticky top-0 z-10 border">
                 <TableRow>
                   <TableHead>订单号</TableHead>
                   <TableHead>用户</TableHead>
@@ -292,68 +292,84 @@ const OrderRechargeIndexPage = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data?.items.map((item, index) => (
-                  <TableRow key={index}>
-                    <TableCell className="w-[100px] font-medium">{item.orderNo}</TableCell>
-                    <TableCell>{item.user?.nickname}</TableCell>
-                    <TableCell>{item.power}</TableCell>
-                    <TableCell>{item.givePower}</TableCell>
-                    <TableCell>{item.totalPower}</TableCell>
-                    <TableCell>{formatCurrency(item.orderAmount)}</TableCell>
-                    <TableCell>{item.payTypeDesc}</TableCell>
-                    <TableCell>
-                      <Badge
-                        className={cn(
-                          item.payStatus === 1
-                            ? item.refundStatus === 0
-                              ? "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
-                              : "bg-yellow-50 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300"
-                            : "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300",
-                        )}
-                      >
-                        {item.payStatus === 1
-                          ? item.refundStatus === 0
-                            ? "已支付"
-                            : "已退款"
-                          : "未支付"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <TimeText value={item.createdAt} variant="datetime" />
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="size-8">
-                            <MoreHorizontalIcon />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onSelect={() => {
-                              setDetailOrderId(item.id);
-                              setDetailOpen(true);
-                            }}
-                          >
-                            <EyeIcon className="mr-2 size-4" />
-                            查看详情
-                          </DropdownMenuItem>
-                          {item.payStatus === 1 && item.refundStatus === 0 && (
-                            <DropdownMenuItem
-                              variant="destructive"
-                              onClick={() => {
-                                handleRefund(item.id);
-                              }}
-                            >
-                              <Undo2Icon className="mr-2 size-4" />
-                              退款
-                            </DropdownMenuItem>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={10} className="text-muted-foreground h-32 text-center">
+                      加载中...
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : !data?.items || data.items.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={10} className="text-muted-foreground h-32 text-center">
+                      {hasActiveFilters
+                        ? "没有找到符合条件的订单，请尝试调整筛选条件"
+                        : "暂无充值订单数据"}
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  data.items.map((item, index) => (
+                    <TableRow key={index}>
+                      <TableCell className="w-[100px] font-medium">{item.orderNo}</TableCell>
+                      <TableCell>{item.user?.nickname}</TableCell>
+                      <TableCell>{item.power}</TableCell>
+                      <TableCell>{item.givePower}</TableCell>
+                      <TableCell>{item.totalPower}</TableCell>
+                      <TableCell>{formatCurrency(item.orderAmount)}</TableCell>
+                      <TableCell>{item.payTypeDesc}</TableCell>
+                      <TableCell>
+                        <Badge
+                          className={cn(
+                            item.payStatus === 1
+                              ? item.refundStatus === 0
+                                ? "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
+                                : "bg-yellow-50 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300"
+                              : "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300",
+                          )}
+                        >
+                          {item.payStatus === 1
+                            ? item.refundStatus === 0
+                              ? "已支付"
+                              : "已退款"
+                            : "未支付"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <TimeText value={item.createdAt} variant="datetime" />
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="size-8">
+                              <MoreHorizontalIcon />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onSelect={() => {
+                                setDetailOrderId(item.id);
+                                setDetailOpen(true);
+                              }}
+                            >
+                              <EyeIcon className="mr-2 size-4" />
+                              查看详情
+                            </DropdownMenuItem>
+                            {item.payStatus === 1 && item.refundStatus === 0 && (
+                              <DropdownMenuItem
+                                variant="destructive"
+                                onClick={() => {
+                                  handleRefund(item.id);
+                                }}
+                              >
+                                <Undo2Icon className="mr-2 size-4" />
+                                退款
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
             <ScrollBar orientation="horizontal" />
