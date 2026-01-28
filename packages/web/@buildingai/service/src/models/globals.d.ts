@@ -52,6 +52,22 @@ export interface PaginationResult<T> {
     totalPages: number;
 }
 
+/** Pagination result interface with extend data */
+export interface PaginationResultWithExtend<T, E> {
+    /** Data items list */
+    items: T[];
+    /** Total number of items */
+    total: number;
+    /** Current page number */
+    page: number;
+    /** Number of items per page */
+    pageSize: number;
+    /** Total number of pages */
+    totalPages: number;
+    /** Extend data */
+    extend: E;
+}
+
 /** Base query parameters interface */
 export interface BaseQueryParams extends Pagination {
     /** Keyword search */

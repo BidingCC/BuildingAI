@@ -6,9 +6,29 @@
  * @author BuildingAI Teams
  */
 
-import type { BaseEntity, BaseQueryParams, PaginationResult } from "../models/globals";
+import type {
+    BaseEntity,
+    BaseQueryParams,
+    PaginationResult,
+    PaginationResultWithExtend,
+} from "../models/globals";
 
 // ==================== Type Definitions ====================
+
+/** Power detail extend data interface */
+export interface PowerDetailExtend {
+    /** Membership gift power */
+    membershipGiftPower: number;
+    /** Recharge power */
+    rechargePower: number;
+    /** Remaining power */
+    power: number;
+}
+/** Power detail data interface with extend data */
+export interface PowerDetailDataWithExtend extends PaginationResultWithExtend<
+    PowerDetailItem,
+    PowerDetailExtend
+> {}
 
 /**
  * Power detail data interface

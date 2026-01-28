@@ -7,6 +7,11 @@
  */
 
 import type {
+    PowerDetailDataWithExtend,
+    PowerDetailQueryParams,
+} from "@buildingai/service/webapi/power-detail";
+import type { RechargeCenterInfo } from "@buildingai/service/webapi/recharge-center";
+import type {
     LoginResponse,
     SystemLoginAccountParams,
     SystemRegisrerAccountParams,
@@ -14,7 +19,6 @@ import type {
     UpdateUserFieldResponse,
     UserInfo,
 } from "@buildingai/service/webapi/user";
-
 // ==================== User Information Related APIs ====================
 
 /**
@@ -217,4 +221,24 @@ export function apiAuthWxOaLogin(params: { code: string }): Promise<LoginRespons
 
 export function apiBindWechatOa(params: { code: string }): Promise<{ message: string }> {
     return useWebPost("/auth/bind-wechatoa", params);
+}
+
+/**
+ * Get user power detail
+ * @description Get user power detail
+ * @returns Promise with power detail
+ */
+export function apiGetUserPowerDetail(
+    params?: PowerDetailQueryParams,
+): Promise<PowerDetailDataWithExtend> {
+    return useWebGet("/user/account-log", params);
+}
+
+/**
+ * Get recharge center information
+ * @description Get recharge center configuration and user information
+ * @returns Promise with recharge center information
+ */
+export function apiGetRechargeCenterInfo(): Promise<RechargeCenterInfo> {
+    return useWebGet("/recharge/center");
 }

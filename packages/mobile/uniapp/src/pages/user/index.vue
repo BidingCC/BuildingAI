@@ -46,6 +46,18 @@ const fetchPagesConfig = async () => {
     }
 };
 
+const toPowerDetail = () => {
+    uni.navigateTo({
+        url: "/packages/power_detail/index",
+    });
+};
+
+const toRecharge = () => {
+    uni.navigateTo({
+        url: "/packages/recharge/index",
+    });
+};
+
 onMounted(() => {
     fetchPagesConfig();
 });
@@ -90,7 +102,7 @@ onMounted(() => {
                     <view class="text-foreground text-sm font-medium"> 积分余额 </view>
 
                     <view class="text-muted-foreground flex items-center text-xs">
-                        <text>明细</text>
+                        <text @click="toPowerDetail">明细</text>
                         <view i-carbon-chevron-right class="ml-1" />
                     </view>
                 </view>
@@ -98,7 +110,10 @@ onMounted(() => {
                     <view text="muted-foreground sm">
                         <view text="warning-600 lg" font="medium">{{ userInfo?.power }}</view>
                     </view>
-                    <view class="text-background bg-primary rounded-full px-2 py-1 text-xs">
+                    <view
+                        class="text-background bg-primary rounded-full px-2 py-1 text-xs"
+                        @click="toRecharge"
+                    >
                         充值积分
                     </view>
                 </view>

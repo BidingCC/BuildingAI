@@ -113,4 +113,8 @@ export default defineConfig({
             "ring-offset": "var(--ring-offset)",
         },
     },
+    rules: [
+        ["pb-safe", { "padding-bottom": "env(safe-area-inset-bottom)" }],
+        ["mb-safe", { "margin-bottom": "env(safe-area-inset-bottom)" }],
+    ],
 });

@@ -16,7 +16,7 @@
         "editor.defaultFormatter": "dbaeumer.vscode-eslint"
     },
     "[vue]": {
-        "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
     "eslint.workingDirectories": [
         {
@@ -155,5 +155,6 @@
             "color": "#007AFF",
             "label": "H5"
         },
-    }
+    },
+    "typescript.tsdk": "node_modules/typescript/lib"
 }
