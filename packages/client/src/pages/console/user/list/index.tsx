@@ -45,6 +45,8 @@ import { toast } from "sonner";
 import { usePagination } from "@/hooks/use-pagination";
 import { PageContainer } from "@/layouts/console/_components/page-container";
 
+import { UserFormDialog } from "./_components/user-form-dialog";
+
 const PAGE_SIZE = 25;
 
 type StatusBadgeProps = {
@@ -74,6 +76,8 @@ const UserListIndexPage = () => {
     page: 1,
     pageSize: PAGE_SIZE,
   });
+  const [formDialogOpen, setFormDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
 
   const { data, refetch, isLoading } = useUsersListQuery(queryParams);
 
@@ -167,7 +171,13 @@ const UserListIndexPage = () => {
 
         <div className="flex-1">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-            <div className="flex flex-col gap-4 rounded-lg border border-dashed p-4 hover:border-solid">
+            <div
+              className="flex cursor-pointer flex-col gap-4 rounded-lg border border-dashed p-4 hover:border-solid"
+              onClick={() => {
+                setEditingUser(null);
+                setFormDialogOpen(true);
+              }}
+            >
               <div className="flex items-center gap-3">
                 <Button className="size-12 rounded-lg border-dashed" variant="outline">
                   <Plus />
@@ -252,7 +262,12 @@ const UserListIndexPage = () => {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setEditingUser(user);
+                            setFormDialogOpen(true);
+                          }}
+                        >
                           <Edit />
                           编辑
                         </DropdownMenuItem>
@@ -303,6 +318,12 @@ const UserListIndexPage = () => {
           <PaginationComponent className="mx-0 w-fit" />
         </div>
       </div>
+      <UserFormDialog
+        open={formDialogOpen}
+        onOpenChange={setFormDialogOpen}
+        user={editingUser}
+        onSuccess={() => refetch()}
+      />
     </PageContainer>
   );
 };

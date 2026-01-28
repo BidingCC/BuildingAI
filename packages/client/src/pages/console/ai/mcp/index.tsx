@@ -33,13 +33,13 @@ import {
   Edit,
   EllipsisVertical,
   FileJson2,
+  Hammer,
   Link2,
   Plus,
   Power,
   PowerOff,
   RefreshCw,
   Trash2,
-  Wrench,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -247,7 +247,7 @@ const AiMcpIndexPage = () => {
                       size="xs"
                       className="text-muted-foreground px-0 hover:px-2"
                     >
-                      <Wrench />
+                      <Hammer />
                       查看工具({server.toolsCount || 0})
                       <ChevronRight />
                     </Button>

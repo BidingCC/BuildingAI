@@ -23,8 +23,13 @@ import { User } from "lucide-react";
 import * as React from "react";
 
 import { SETTINGS_NAV, type SettingsPage } from "./constants";
-import { GeneralSetting, ProfileSetting, WalletSetting } from "./settings-items";
-import ToolsSetting from "./settings-items/tools-setting";
+import {
+  GeneralSetting,
+  ProfileSetting,
+  SubscribeSetting,
+  ToolsSetting,
+  WalletSetting,
+} from "./settings-items";
 import { SettingsDialogContext } from "./use-settings-dialog";
 
 const SETTINGS_COMPONENTS: Record<SettingsPage, React.ComponentType> = {
@@ -32,6 +37,7 @@ const SETTINGS_COMPONENTS: Record<SettingsPage, React.ComponentType> = {
   general: GeneralSetting,
   wallet: WalletSetting,
   tools: ToolsSetting,
+  subscribe: SubscribeSetting,
 };
 
 type SettingsDialogState = {
@@ -165,9 +171,11 @@ export function SettingsDialogProvider({ children }: { children: React.ReactNode
               <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
                 <div className="flex items-center gap-2 px-4">{activeNavItem?.name}</div>
               </header>
-              <div className="flex-1 overflow-hidden">
+              <div className="h-full flex-1 overflow-hidden">
                 <ScrollArea className="h-full">
-                  {React.createElement(SETTINGS_COMPONENTS[state.activePage])}
+                  <div className="p-4 pt-0">
+                    {React.createElement(SETTINGS_COMPONENTS[state.activePage])}
+                  </div>
                 </ScrollArea>
               </div>
             </main>

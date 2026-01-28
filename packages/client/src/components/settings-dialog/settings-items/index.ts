@@ -1,3 +1,5 @@
-export { default as GeneralSetting } from "./general-setting";
-export { default as ProfileSetting } from "./profile-setting";
-export { default as WalletSetting } from "./wallet-setting";
+export { GeneralSetting } from "./general-setting";
+export { ProfileSetting } from "./profile-setting";
+export { SubscribeSetting } from "./subscribe-setting";
+export { ToolsSetting } from "./tools-setting";
+export { WalletSetting } from "./wallet-setting";

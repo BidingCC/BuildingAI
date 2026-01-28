@@ -1,6 +1,6 @@
 import { Hammer, type LucideIcon, Settings, UserCircle, Wallet } from "lucide-react";
 
-export type SettingsPage = "profile" | "general" | "wallet" | "tools";
+export type SettingsPage = "profile" | "general" | "wallet" | "tools" | "subscribe";
 
 export type SettingsNavItem = {
   id: SettingsPage;
@@ -18,7 +18,8 @@ export const SETTINGS_NAV: SettingsNavGroup[] = [
     label: "账户",
     items: [
       { id: "profile", name: "个人资料", icon: UserCircle },
-      { id: "wallet", name: "钱包", icon: Wallet },
+      { id: "wallet", name: "我的钱包", icon: Wallet },
+      { id: "subscribe", name: "订阅管理", icon: UserCircle },
     ],
   },
   {
