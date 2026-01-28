@@ -204,7 +204,7 @@ const OrderRechargeIndexPage = () => {
 
   return (
     <PageContainer className="h-[calc(100vh-6.25rem)]">
-      <div className="flex w-full flex-col gap-6">
+      <div className="flex h-full w-full flex-col gap-6">
         <div className="grid grid-cols-1 gap-4 pt-px md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {statisticsItems.map((item, index) => (
             <Card key={index} className="justify-center">
