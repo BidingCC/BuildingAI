@@ -25,18 +25,20 @@ import {
 import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog";
 import {
   ChevronsUpDown,
-  CircleStar,
   Languages,
   Laptop,
   LogOut,
   Moon,
   Palette,
+  Settings,
   Sparkles,
   Sun,
   User,
   Zap,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+
+import { useSettingsDialog } from "@/components/settings-dialog";
 
 function UserButton({ isLoggedIn, userInfo }: { isLoggedIn: boolean; userInfo?: any }) {
   return (
@@ -75,6 +77,7 @@ export function DefaultNavUser() {
   const { setThemeColor, themeColor, theme } = useTheme();
   const navigate = useNavigate();
   const { confirm } = useAlertDialog();
+  const settingsDialog = useSettingsDialog();
 
   const isLoggedIn = isLogin();
 
@@ -111,7 +114,12 @@ export function DefaultNavUser() {
             sideOffset={4}
           >
             <DropdownMenuLabel className="p-0 font-normal">
-              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+              <SidebarMenuButton
+                size="lg"
+                onClick={() => {
+                  settingsDialog.open("profile");
+                }}
+              >
                 <Avatar className="h-8 w-8 rounded-lg after:rounded-lg">
                   {isLoggedIn && (
                     <AvatarImage
@@ -138,7 +146,7 @@ export function DefaultNavUser() {
                     )}
                   </span>
                 </div>
-              </div>
+              </SidebarMenuButton>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
@@ -199,6 +207,11 @@ export function DefaultNavUser() {
               <DropdownMenuItem>
                 <Languages />
                 简体中文
+              </DropdownMenuItem>
+
+              <DropdownMenuItem onClick={() => settingsDialog.open("general")}>
+                <Settings />
+                设置
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
