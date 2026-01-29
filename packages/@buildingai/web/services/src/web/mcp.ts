@@ -31,7 +31,7 @@ export type McpServer = {
     type: McpServerType;
     url: string | null;
     communicationType: McpCommunicationType;
-    customHeaders?: Record<string, string>;
+    headers?: Record<string, string>;
     providerIcon?: string;
     providerName?: string;
     providerUrl?: string;
@@ -60,7 +60,7 @@ export type CreateMcpServerParams = {
     icon?: string;
     url: string;
     communicationType?: McpCommunicationType;
-    customHeaders?: Record<string, string>;
+    headers?: Record<string, string>;
     providerName?: string;
     providerUrl?: string;
     isDisabled?: boolean;

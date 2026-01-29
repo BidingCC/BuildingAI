@@ -124,11 +124,11 @@ export class CreateAiMcpServerDto {
     userId?: string;
 
     /**
-     * 自定义请求头
+     * 请求头
      */
     @IsOptional()
-    @IsObject({ message: "自定义请求头必须是对象" })
-    customHeaders?: Record<string, string>;
+    @IsObject({ message: "请求头必须是对象" })
+    headers?: Record<string, string>;
 }
 
 /**
@@ -186,11 +186,11 @@ export class McpServerUrlConfig {
     url: string;
 
     /**
-     * 自定义请求头
+     * 请求头
      */
     @IsOptional()
-    @IsObject({ message: "自定义请求头必须是对象" })
-    customHeaders?: Record<string, string>;
+    @IsObject({ message: "请求头必须是对象" })
+    headers?: Record<string, string>;
 }
 
 /**

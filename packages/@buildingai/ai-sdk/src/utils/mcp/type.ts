@@ -9,5 +9,5 @@ export interface McpServerOptions {
     name?: string;
     description?: string;
     version?: string;
-    customHeaders?: Record<string, string>;
+    headers?: Record<string, string>;
 }

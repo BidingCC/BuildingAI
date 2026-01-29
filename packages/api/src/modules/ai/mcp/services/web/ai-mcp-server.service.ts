@@ -240,14 +240,14 @@ export class WebAiMcpServerWebService extends BaseService<AiMcpServer> {
                     url: mcpServer.url,
                     name: mcpServer.name,
                     description: mcpServer.description,
-                    customHeaders: mcpServer.customHeaders,
+                    headers: mcpServer.headers,
                 });
             } else {
                 mcpClient = new McpServerHttp({
                     url: mcpServer.url,
                     name: mcpServer.name,
                     description: mcpServer.description,
-                    customHeaders: mcpServer.customHeaders,
+                    headers: mcpServer.headers,
                 });
             }
 

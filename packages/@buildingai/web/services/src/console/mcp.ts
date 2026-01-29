@@ -29,7 +29,7 @@ export type McpServer = {
     type: McpServerType;
     url: string | null;
     communicationType: McpCommunicationType;
-    customHeaders?: Record<string, string>;
+    headers?: Record<string, string>;
     providerIcon?: string;
     providerName?: string;
     providerUrl?: string;
@@ -58,7 +58,7 @@ export type CreateAiMcpServerDto = {
     providerUrl?: string;
     sortOrder?: number;
     userId?: string;
-    customHeaders?: Record<string, string>;
+    headers?: Record<string, string>;
 };
 
 export type UpdateAiMcpServerDto = Partial<CreateAiMcpServerDto>;
@@ -77,7 +77,7 @@ export type BatchDeleteAiMcpServerDto = {
 
 export type McpServerUrlConfig = {
     url: string;
-    customHeaders?: Record<string, string>;
+    headers?: Record<string, string>;
 };
 
 export type ImportAiMcpServerDto = {

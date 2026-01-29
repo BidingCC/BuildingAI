@@ -269,7 +269,7 @@ export class WebAiMcpServerWebController {
                 type: "object",
                 properties: {
                     url: { type: "string", minLength: 1 },
-                    customHeaders: {
+                    headers: {
                         type: "object",
                         patternProperties: {
                             "^.*$": { type: "string" },
@@ -281,7 +281,7 @@ export class WebAiMcpServerWebController {
                         enum: Object.values(McpCommunicationType),
                     },
                 },
-                required: ["url", "type"],
+                required: ["url"],
                 additionalProperties: false,
             };
 
@@ -309,6 +309,14 @@ export class WebAiMcpServerWebController {
             let parsedData;
             try {
                 parsedData = JSON.parse(importJsonDto.jsonString);
+                // Set default type to 'sse' if not provided
+                if (parsedData.mcpServers) {
+                    for (const key in parsedData.mcpServers) {
+                        if (!parsedData.mcpServers[key].type) {
+                            parsedData.mcpServers[key].type = McpCommunicationType.SSE;
+                        }
+                    }
+                }
             } catch (parseError) {
                 throw HttpErrorFactory.badRequest(
                     "JSON格式不正确，无法解析：" + parseError.message,

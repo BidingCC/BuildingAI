@@ -53,7 +53,7 @@ export class McpServerHandler {
                         url: server.url,
                         name: server.name,
                         description: server.description,
-                        customHeaders: server.customHeaders,
+                        headers: server.headers,
                     });
 
                     await mcpServer.connect();

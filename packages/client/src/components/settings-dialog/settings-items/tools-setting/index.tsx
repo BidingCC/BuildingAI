@@ -12,8 +12,6 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@buildingai/ui/components/ui/dropdown-menu";
 import { Skeleton } from "@buildingai/ui/components/ui/skeleton";
@@ -24,9 +22,9 @@ import { Hammer, Plus, RefreshCw, Settings2, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { McpFormDialog } from "../_components/mcp-form-dialog";
-import { McpImportDialog } from "../_components/mcp-import-dialog";
-import { SettingItem } from "../setting-item";
+import { SettingItem } from "../../setting-item";
+import { McpFormDialog } from "./_components/mcp-form-dialog";
+import { McpImportDialog } from "./_components/mcp-import-dialog";
 
 type ConnectionStatusBadgeProps = {
   server: McpServer;
@@ -59,6 +57,7 @@ const ToolsSetting = () => {
   const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [editingServer, setEditingServer] = useState<McpServer | null>(null);
+  const [checkingServerId, setCheckingServerId] = useState<string | null>(null);
 
   const { data: servers, isLoading, refetch } = useMcpServersAllQuery();
   const { confirm } = useAlertDialog();
@@ -109,17 +108,20 @@ const ToolsSetting = () => {
   };
 
   const handleCheckConnection = (server: McpServer) => {
+    setCheckingServerId(server.id);
     checkConnectionMutation.mutate(server.id, {
       onSuccess: (data) => {
         if (data.connectable) {
-          toast.success(`连接成功`);
+          toast.success("连接正常");
         } else {
-          toast.error(`连接失败: ${data.message}`);
+          toast.error(`连接异常: ${data.message}`);
         }
         refetch();
+        setCheckingServerId(null);
       },
       onError: (error) => {
         toast.error(`检测失败: ${(error as Error).message}`);
+        setCheckingServerId(null);
       },
     });
   };
@@ -203,9 +205,9 @@ const ToolsSetting = () => {
                 className="hover:bg-muted-foreground/10 dark:hover:bg-muted-foreground/15 mr-2"
                 variant="ghost"
                 onClick={() => handleCheckConnection(server)}
-                disabled={checkConnectionMutation.isPending}
+                disabled={checkingServerId === server.id}
               >
-                <RefreshCw className={checkConnectionMutation.isPending ? "animate-spin" : ""} />
+                <RefreshCw className={checkingServerId === server.id ? "animate-spin" : ""} />
               </Button>
               <Switch
                 checked={!server.isDisabled}

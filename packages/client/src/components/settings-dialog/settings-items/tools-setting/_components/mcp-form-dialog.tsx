@@ -58,7 +58,7 @@ const formSchema = z.object({
   providerName: z.string().max(100, "提供商名称不能超过100个字符").optional(),
   providerUrl: z.string().url("请输入有效的提供商URL").optional().or(z.literal("")),
   isDisabled: z.boolean().optional(),
-  customHeaders: z.string().optional(),
+  headers: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -85,7 +85,7 @@ export const McpFormDialog = ({ open, onOpenChange, server, onSuccess }: McpForm
       providerName: "",
       providerUrl: "",
       isDisabled: false,
-      customHeaders: "",
+      headers: "",
     },
   });
 
@@ -102,7 +102,7 @@ export const McpFormDialog = ({ open, onOpenChange, server, onSuccess }: McpForm
           providerName: server.providerName || "",
           providerUrl: server.providerUrl || "",
           isDisabled: server.isDisabled,
-          customHeaders: server.customHeaders ? JSON.stringify(server.customHeaders, null, 2) : "",
+          headers: server.headers ? JSON.stringify(server.headers, null, 2) : "",
         });
       } else {
         form.reset({
@@ -115,7 +115,7 @@ export const McpFormDialog = ({ open, onOpenChange, server, onSuccess }: McpForm
           providerName: "",
           providerUrl: "",
           isDisabled: false,
-          customHeaders: "",
+          headers: "",
         });
       }
     }
@@ -127,12 +127,12 @@ export const McpFormDialog = ({ open, onOpenChange, server, onSuccess }: McpForm
   const isPending = createMutation.isPending || updateMutation.isPending;
 
   const handleSubmit = (values: FormValues) => {
-    let customHeaders: Record<string, string> | undefined;
-    if (values.customHeaders) {
+    let headers: Record<string, string> | undefined;
+    if (values.headers) {
       try {
-        customHeaders = JSON.parse(values.customHeaders);
+        headers = JSON.parse(values.headers);
       } catch {
-        toast.error("自定义请求头格式错误，请输入有效的JSON");
+        toast.error("请求头格式错误，请输入有效的JSON");
         return;
       }
     }
@@ -147,7 +147,7 @@ export const McpFormDialog = ({ open, onOpenChange, server, onSuccess }: McpForm
       providerName: values.providerName || undefined,
       providerUrl: values.providerUrl || undefined,
       isDisabled: values.isDisabled,
-      customHeaders,
+      headers,
     };
 
     if (isEditMode && server) {
@@ -324,10 +324,10 @@ export const McpFormDialog = ({ open, onOpenChange, server, onSuccess }: McpForm
 
               <FormField
                 control={form.control}
-                name="customHeaders"
+                name="headers"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>自定义请求头</FormLabel>
+                    <FormLabel>请求头</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder='{"Authorization": "Bearer xxx"}'
@@ -336,7 +336,7 @@ export const McpFormDialog = ({ open, onOpenChange, server, onSuccess }: McpForm
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription>JSON格式的自定义HTTP请求头</FormDescription>
+                    <FormDescription>JSON格式的HTTP请求头</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

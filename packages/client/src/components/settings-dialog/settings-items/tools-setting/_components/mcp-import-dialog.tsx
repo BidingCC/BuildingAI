@@ -44,7 +44,7 @@ const JSON_EXAMPLE = `{
     },
     "slack": {
       "url": "https://mcp.slack.com/sse",
-      "customHeaders": {
+      "headers": {
         "Authorization": "Bearer xxx"
       }
     }

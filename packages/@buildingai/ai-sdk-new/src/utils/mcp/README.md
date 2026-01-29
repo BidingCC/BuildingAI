@@ -77,7 +77,7 @@ const serverConfig: McpServerConfig = {
     name: "My MCP Server",
     url: "http://localhost:3000/mcp",
     communicationType: "sse",
-    customHeaders: { Authorization: "Bearer token" },
+    headers: { Authorization: "Bearer token" },
 };
 
 const client = await createClientFromServerConfig(serverConfig);
@@ -227,7 +227,7 @@ interface McpServerConfig {
     description?: string;
     url: string;
     communicationType: McpCommunicationType;
-    customHeaders?: Record<string, string>;
+    headers?: Record<string, string>;
     env?: Record<string, string>;
 }
 

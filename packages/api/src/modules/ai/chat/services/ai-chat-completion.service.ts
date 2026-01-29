@@ -321,7 +321,7 @@ export class ChatCompletionService {
                     description: server.description ?? undefined,
                     url: server.url,
                     communicationType: server.communicationType,
-                    customHeaders: server.customHeaders ?? undefined,
+                    headers: server.headers ?? undefined,
                 }));
 
             if (!serverConfigs.length) {

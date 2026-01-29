@@ -294,7 +294,7 @@ export class AiMcpServerConsoleController extends BaseController {
                         type: "string",
                         enum: Object.values(McpCommunicationType),
                     },
-                    customHeaders: {
+                    headers: {
                         type: "object",
                         patternProperties: {
                             "^.*$": { type: "string" },
@@ -330,15 +330,6 @@ export class AiMcpServerConsoleController extends BaseController {
             let parsedData;
             try {
                 parsedData = JSON.parse(importJsonDto.jsonString);
-                if (parsedData.mcpServers) {
-                    for (const key in parsedData.mcpServers) {
-                        const server = parsedData.mcpServers[key];
-                        if (server.headers) {
-                            server.customHeaders = server.headers;
-                            delete server.headers;
-                        }
-                    }
-                }
             } catch (parseError) {
                 throw HttpErrorFactory.badRequest(
                     "JSON格式不正确，无法解析：" + parseError.message,

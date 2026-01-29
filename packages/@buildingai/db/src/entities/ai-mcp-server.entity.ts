@@ -104,14 +104,14 @@ export class AiMcpServer extends BaseEntity {
     communicationType: McpCommunicationType;
 
     /**
-     * 自定义请求头
+     * 请求头
      */
     @Column({
         type: "jsonb",
         nullable: true,
-        comment: "自定义请求头，JSON格式存储",
+        comment: "请求头，JSON格式存储",
     })
-    customHeaders?: Record<string, string>;
+    headers?: Record<string, string>;
 
     /**
      * 供应商图标

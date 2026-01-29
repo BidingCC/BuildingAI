@@ -7,21 +7,21 @@ import type { McpServerConfig, McpTransportConfig } from "./types";
  * @returns 传输配置
  */
 export function createTransportFromConfig(config: McpServerConfig): McpTransportConfig {
-    const { url, communicationType, customHeaders } = config;
+    const { url, communicationType, headers } = config;
 
     switch (communicationType) {
         case "sse": {
             return {
                 type: "sse",
                 url,
-                ...(customHeaders && { headers: customHeaders }),
+                ...(headers && { headers }),
             };
         }
         case "streamable-http": {
             return {
                 type: "http",
                 url,
-                ...(customHeaders && { headers: customHeaders }),
+                ...(headers && { headers }),
             };
         }
         default: {

@@ -28,9 +28,9 @@ export interface McpServerConfig {
      */
     communicationType: McpCommunicationType;
     /**
-     * 自定义请求头
+     * 请求头
      */
-    customHeaders?: Record<string, string>;
+    headers?: Record<string, string>;
     /**
      * 环境变量（用于 stdio 传输）
      */
