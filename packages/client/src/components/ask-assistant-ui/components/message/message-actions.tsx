@@ -2,8 +2,8 @@ import {
   MessageAction as AIMessageAction,
   MessageActions as AIMessageActions,
 } from "@buildingai/ui/components/ai-elements/message";
-import { CopyIcon, RefreshCcwIcon, ThumbsDownIcon, ThumbsUpIcon } from "lucide-react";
-import { memo, type ReactNode } from "react";
+import { CopyCheck, CopyIcon, RefreshCcwIcon, ThumbsDownIcon, ThumbsUpIcon } from "lucide-react";
+import { memo, type ReactNode, useEffect, useRef, useState } from "react";
 
 import { MessageUsage, type MessageUsageProps } from "./message-usage";
 
@@ -34,8 +34,24 @@ export const MessageActions = memo(function MessageActions({
   onShowFeedbackCard,
   extraActions,
 }: MessageActionsProps) {
+  const [isCopied, setIsCopied] = useState(false);
+  const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleCopy = () => {
     navigator.clipboard.writeText(content);
+    setIsCopied(true);
+    if (copyTimeoutRef.current) {
+      clearTimeout(copyTimeoutRef.current);
+    }
+    copyTimeoutRef.current = setTimeout(() => setIsCopied(false), 2000);
   };
 
   const handleLike = async () => {
@@ -77,8 +93,8 @@ export const MessageActions = memo(function MessageActions({
           <ThumbsDownIcon className="size-4" fill={disliked ? "currentColor" : "none"} />
         </AIMessageAction>
       )}
-      <AIMessageAction label="Copy" onClick={handleCopy} tooltip="复制">
-        <CopyIcon className="size-4" />
+      <AIMessageAction label="Copy" onClick={handleCopy} tooltip={isCopied ? "已复制" : "复制"}>
+        {isCopied ? <CopyCheck className="size-4" /> : <CopyIcon className="size-4" />}
       </AIMessageAction>
       <MessageUsage
         usage={usage}
