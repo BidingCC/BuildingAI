@@ -96,7 +96,10 @@ export function SettingsDialogProvider({ children }: { children: React.ReactNode
     <SettingsDialogContext.Provider value={contextValue}>
       {children}
       <Dialog open={state.open} onOpenChange={handleOpenChange}>
-        <DialogContent className="overflow-hidden p-0 md:max-h-[500px] md:max-w-[700px] lg:max-w-[800px]">
+        <DialogContent
+          className="overflow-hidden p-0 md:max-h-[500px] md:max-w-[700px] lg:max-w-[800px]"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
           <DialogTitle className="sr-only">Settings</DialogTitle>
           <DialogDescription className="sr-only">Customize your settings here.</DialogDescription>
           <SidebarProvider className="items-start">
