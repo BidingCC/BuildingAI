@@ -7,19 +7,23 @@ import {
   ReactFlowProvider,
   useReactFlow,
 } from "@xyflow/react";
-import { type DragEvent, useCallback } from "react";
+import { type DragEvent, useCallback, useEffect } from "react";
 import { useShallow } from "zustand/react/shallow";
-
-import type { WorkflowBlocksType } from "@/pages/workflow/workspace/constants/node.ts";
 
 import FlowNode from "./_components/flow-node";
 import { WorkflowPanel } from "./_components/flow-panel";
+import NoteNode from "./_components/note-node";
+import { NoteBlockComponent } from "./blocks";
 import { BlocksPanel } from "./blocks-panel/blocks-panel";
-import { WORKFLOW_BLOCK } from "./constants/workflow.ts";
+import type { WorkflowBlocksType } from "./constants/node.ts";
+import { NOTE_BLOCK, WORKFLOW_BLOCK } from "./constants/workflow.ts";
+import { createDefaultWorkflow } from "./demo.data.ts";
 import { selector, useWorkflowStore } from "./store/store.ts";
+import type { AppNode } from "./types.ts";
 
 const nodeTypes = {
   [WORKFLOW_BLOCK]: FlowNode,
+  [NOTE_BLOCK]: NoteNode,
 };
 
 function FlowCanvas() {
@@ -35,8 +39,8 @@ function FlowCanvas() {
   const handleNodeDrop = useCallback((event: DragEvent) => {
     event.preventDefault();
 
-    const type = event.dataTransfer.getData("application/react-flow") as WorkflowBlocksType;
-    if (typeof type !== "string" || !type) {
+    const type = event.dataTransfer.getData("application/react-flow");
+    if (!type) {
       return;
     }
 
@@ -44,7 +48,15 @@ function FlowCanvas() {
       x: event.clientX,
       y: event.clientY,
     });
-    createNode({ ...position, type });
+
+    if (type === "note") {
+      const newNode = NoteBlockComponent.builder(position.x, position.y) as unknown as AppNode;
+      useWorkflowStore.setState((state) => ({
+        nodes: state.nodes.concat(newNode),
+      }));
+    } else {
+      createNode({ ...position, type: type as WorkflowBlocksType });
+    }
   }, []);
 
   return (
@@ -68,6 +80,10 @@ function FlowCanvas() {
 }
 
 function Workspace() {
+  useEffect(() => {
+    useWorkflowStore.setState({ ...createDefaultWorkflow() });
+  }, []);
+
   return (
     <ReactFlowProvider>
       <FlowCanvas></FlowCanvas>

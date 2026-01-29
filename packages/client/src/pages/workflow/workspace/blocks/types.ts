@@ -11,5 +11,6 @@ export interface NodeProps<T> {
 }
 
 export interface PanelProps<T> {
+  id: string;
   data: T;
 }

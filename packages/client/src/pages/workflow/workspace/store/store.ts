@@ -5,7 +5,6 @@ import { create } from "zustand";
 import { BlockRegistry } from "@/pages/workflow/workspace/blocks";
 
 import type { WorkflowBlocksType } from "../constants/node.ts";
-import { createDefaultWorkflow } from "../demo.data.ts";
 import type { AppEdge, AppNode } from "../types.ts";
 
 interface WorkflowStore {
@@ -16,10 +15,12 @@ interface WorkflowStore {
   onNodeClick: NodeMouseHandler<AppNode>;
   onConnect: OnConnect;
   createNode: (params: { x: number; y: number; type: WorkflowBlocksType }) => void;
+  updateNodeData: (nodeId: string, data: any) => void;
 }
 
 const useWorkflowStore = create<WorkflowStore>((set) => ({
-  ...createDefaultWorkflow(),
+  nodes: [],
+  edges: [],
   onNodesChange: (changes) => {
     set((state) => {
       return {
@@ -48,6 +49,21 @@ const useWorkflowStore = create<WorkflowStore>((set) => ({
     const newNode = BlockRegistry[params.type].builder(params.x, params.y);
     set((state) => ({
       nodes: state.nodes.concat(newNode),
+    }));
+  },
+  updateNodeData: (nodeId, data) => {
+    set((state) => ({
+      nodes: state.nodes.map((node) =>
+        node.id === nodeId
+          ? {
+              ...node,
+              data: {
+                ...node.data,
+                ...data,
+              },
+            }
+          : node,
+      ),
     }));
   },
 }));
