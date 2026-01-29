@@ -10,9 +10,9 @@ import {
 import { SidebarTrigger } from "@buildingai/ui/components/ui/sidebar";
 import { Menu } from "lucide-react";
 
-import { KnowledgeSidebarMain } from "./sidebar";
+import { DatasetsSidebarMain } from "./sidebar";
 
-export function KnowledgeNavbar() {
+export function DatasetsNavbar() {
   return (
     <div className="bg-background sticky top-0 z-1 flex h-13 shrink-0 items-center justify-between px-2 sm:px-4">
       <div>
@@ -26,11 +26,11 @@ export function KnowledgeNavbar() {
         </SheetTrigger>
         <SheetContent showCloseButton={false} className="max-w-fit" aria-describedby={undefined}>
           <SheetHeader className="sr-only">
-            <SheetTitle>knowledge sidebar</SheetTitle>
-            <SheetDescription>knowledge</SheetDescription>
+            <SheetTitle>datasets sidebar</SheetTitle>
+            <SheetDescription>datasets</SheetDescription>
           </SheetHeader>
 
-          <KnowledgeSidebarMain className="flex!" />
+          <DatasetsSidebarMain className="flex!" />
         </SheetContent>
       </Sheet>
     </div>

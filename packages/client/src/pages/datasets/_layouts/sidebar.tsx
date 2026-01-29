@@ -16,28 +16,26 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-  useSidebar,
 } from "@buildingai/ui/components/ui/sidebar";
 import { cn } from "@buildingai/ui/lib/utils";
 import { BookCopy, ChevronRight, LibraryBig, Plus, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
-export function KnowledgeSidebar() {
-  return <KnowledgeSidebarMain />;
+export function DatasetsSidebar() {
+  return <DatasetsSidebarMain />;
 }
 
-export function KnowledgeSidebarMain({ className }: { className?: string }) {
+export function DatasetsSidebarMain({ className }: { className?: string }) {
   const { pathname } = useLocation();
-  const { state } = useSidebar();
-  const [myKnowledgeItems, setMyKnowledgeItems] = useState<
+  const [myDatasetsItems, setMyDatasetsItems] = useState<
     Array<{
       id: string;
       title: string;
       path: string;
     }>
   >([]);
-  const [joinedKnowledgeItems, setJoinedKnowledgeItems] = useState<
+  const [joinedDatasetsItems, setJoinedDatasetsItems] = useState<
     Array<{
       id: string;
       title: string;
@@ -47,16 +45,16 @@ export function KnowledgeSidebarMain({ className }: { className?: string }) {
   const [loading, setLoading] = useState(false);
   const [loadingJoined, setLoadingJoined] = useState(false);
 
-  // Simulate API call to fetch my knowledge items
+  // Simulate API call to fetch my datasets items
   useEffect(() => {
     setLoading(true);
     const timer = setTimeout(() => {
-      setMyKnowledgeItems([
-        { id: "1", title: "技术文档", path: "/knowledge/1" },
-        { id: "2", title: "产品设计", path: "/knowledge/2" },
-        { id: "3", title: "市场分析", path: "/knowledge/3" },
-        { id: "4", title: "用户手册", path: "/knowledge/4" },
-        { id: "5", title: "开发指南", path: "/knowledge/5" },
+      setMyDatasetsItems([
+        { id: "1", title: "技术文档", path: "/datasets/1" },
+        { id: "2", title: "产品设计", path: "/datasets/2" },
+        { id: "3", title: "市场分析", path: "/datasets/3" },
+        { id: "4", title: "用户手册", path: "/datasets/4" },
+        { id: "5", title: "开发指南", path: "/datasets/5" },
       ]);
       setLoading(false);
     }, 800); // Simulate 800ms delay
@@ -64,17 +62,17 @@ export function KnowledgeSidebarMain({ className }: { className?: string }) {
     return () => clearTimeout(timer);
   }, []);
 
-  // Simulate API call to fetch joined knowledge items
+  // Simulate API call to fetch joined datasets items
   useEffect(() => {
     setLoadingJoined(true);
     const timer = setTimeout(() => {
-      setJoinedKnowledgeItems([
-        { id: "team1", title: "前端团队知识库", path: "/knowledge/joined/team1" },
-        { id: "team2", title: "后端开发规范", path: "/knowledge/joined/team2" },
-        { id: "team3", title: "产品设计文档", path: "/knowledge/joined/team3" },
-        { id: "team4", title: "测试用例库", path: "/knowledge/joined/team4" },
-        { id: "team5", title: "运维手册", path: "/knowledge/joined/team5" },
-        { id: "team6", title: "项目管理指南", path: "/knowledge/joined/team6" },
+      setJoinedDatasetsItems([
+        { id: "team1", title: "前端团队知识库", path: "/datasets/joined/team1" },
+        { id: "team2", title: "后端开发规范", path: "/datasets/joined/team2" },
+        { id: "team3", title: "产品设计文档", path: "/datasets/joined/team3" },
+        { id: "team4", title: "测试用例库", path: "/datasets/joined/team4" },
+        { id: "team5", title: "运维手册", path: "/datasets/joined/team5" },
+        { id: "team6", title: "项目管理指南", path: "/datasets/joined/team6" },
       ]);
       setLoadingJoined(false);
     }, 1000); // Simulate 1000ms delay
@@ -85,27 +83,27 @@ export function KnowledgeSidebarMain({ className }: { className?: string }) {
   const navs = useMemo(() => {
     return [
       {
-        id: "knowledge",
+        id: "datasets",
         title: "知识广场",
-        path: "/knowledge",
+        path: "/datasets",
         icon: LibraryBig,
       },
       {
-        id: "knowledge-my",
+        id: "datasets-my",
         title: "我的知识库",
-        path: "/knowledge/my",
+        path: "/datasets/my",
         icon: BookCopy,
-        items: myKnowledgeItems,
+        items: myDatasetsItems,
       },
       {
-        id: "knowledge-joined",
+        id: "datasets-joined",
         title: "团队知识库",
-        path: "/knowledge/joined",
+        path: "/datasets/joined",
         icon: Users,
-        items: joinedKnowledgeItems,
+        items: joinedDatasetsItems,
       },
     ];
-  }, [myKnowledgeItems, joinedKnowledgeItems]);
+  }, [myDatasetsItems, joinedDatasetsItems]);
 
   const isItemActive = (path?: string) => path === pathname;
   const hasActiveChild = (items?: Array<{ path?: string }>) =>
@@ -158,13 +156,13 @@ export function KnowledgeSidebarMain({ className }: { className?: string }) {
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub className="mr-0 pr-0">
-                      {item.id === "knowledge-my" && loading ? (
+                      {item.id === "datasets-my" && loading ? (
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton className="h-9">
                             <span className="text-muted-foreground text-sm">加载中...</span>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
-                      ) : item.id === "knowledge-joined" && loadingJoined ? (
+                      ) : item.id === "datasets-joined" && loadingJoined ? (
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton className="h-9">
                             <span className="text-muted-foreground text-sm">加载中...</span>

@@ -146,10 +146,6 @@ export function NavUser() {
                 <Languages />
                 简体中文
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Settings />
-                系统设置
-              </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => setVersionInfoOpen(true)}>

@@ -1,9 +1,9 @@
 import { useSidebar } from "@buildingai/ui/components/ui/sidebar";
-import React, { useLayoutEffect } from "react";
+import { useLayoutEffect } from "react";
 import { Outlet } from "react-router-dom";
 
-import { KnowledgeNavbar } from "./navbar";
-import { KnowledgeSidebar } from "./sidebar";
+import { DatasetsNavbar } from "./navbar";
+import { DatasetsSidebar } from "./sidebar";
 
 const KnowledgeLayout = () => {
   const { setTemporaryOpen } = useSidebar();
@@ -15,9 +15,9 @@ const KnowledgeLayout = () => {
 
   return (
     <div className="flex h-full">
-      <KnowledgeSidebar />
+      <DatasetsSidebar />
       <div className="flex flex-1 flex-col overflow-y-auto">
-        <KnowledgeNavbar />
+        <DatasetsNavbar />
         <div className="flex-1">
           <Outlet />
         </div>
