@@ -11,6 +11,7 @@ export interface UserInfo {
     phone: string;
     phoneAreaCode: string;
     avatar: string;
+    hasPassword: boolean;
     realName: string;
     totalRechargeAmount: number;
     status: BooleanNumberType;

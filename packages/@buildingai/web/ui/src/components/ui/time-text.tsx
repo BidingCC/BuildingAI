@@ -3,6 +3,12 @@ import * as React from "react";
 
 type TimeLike = string | number | Date | null | undefined;
 
+const VARIANT_FORMATS = {
+  datetime: "YYYY-MM-DD HH:mm:ss",
+  date: "YYYY-MM-DD",
+  time: "HH:mm:ss",
+} as const;
+
 export interface TimeTextProps extends React.HTMLAttributes<HTMLSpanElement> {
   /**
    * 原始时间值，支持：
@@ -17,38 +23,51 @@ export interface TimeTextProps extends React.HTMLAttributes<HTMLSpanElement> {
    */
   fallback?: React.ReactNode;
   /**
-   * 输出格式
+   * 预设格式快捷方式
    * - "datetime": YYYY-MM-DD HH:mm:ss
    * - "date": YYYY-MM-DD
    * - "time": HH:mm:ss
    * @default "datetime"
    */
-  variant?: "datetime" | "date" | "time";
+  variant?: keyof typeof VARIANT_FORMATS;
+  /**
+   * 自定义格式字符串，优先级高于 variant
+   * 支持的占位符：
+   * - YYYY: 四位年份
+   * - MM: 两位月份
+   * - DD: 两位日期
+   * - HH: 两位小时（24小时制）
+   * - mm: 两位分钟
+   * - ss: 两位秒
+   * @example "YYYY/MM/DD" | "MM-DD HH:mm" | "YYYY年MM月DD日"
+   */
+  format?: string;
 }
 
 function parseToDate(value: TimeLike): Date | null {
   if (value == null) return null;
 
   if (value instanceof Date) {
-    return isNaN(value.getTime()) ? null : value;
+    return Number.isNaN(value.getTime()) ? null : value;
   }
 
   if (typeof value === "number") {
     const d = new Date(value);
-    return isNaN(d.getTime()) ? null : d;
+    return Number.isNaN(d.getTime()) ? null : d;
   }
 
-  // 字符串情况：兼容常见的数据库时间格式
   if (typeof value === "string") {
-    if (!value.trim()) return null;
+    const trimmed = value.trim();
+    if (!trimmed) return null;
 
-    // 如果是 "YYYY-MM-DD HH:mm:ss" 之类，转成 ISO 兼容格式
-    const normalized = value.replace(" ", "T");
+    // Try ISO-compatible format first (replace space with T)
+    const normalized = trimmed.replace(" ", "T");
     const d = new Date(normalized);
-    if (!isNaN(d.getTime())) return d;
+    if (!Number.isNaN(d.getTime())) return d;
 
-    const d2 = new Date(value);
-    return isNaN(d2.getTime()) ? null : d2;
+    // Fallback to native parsing
+    const d2 = new Date(trimmed);
+    return Number.isNaN(d2.getTime()) ? null : d2;
   }
 
   return null;
@@ -58,35 +77,35 @@ function pad(num: number): string {
   return num < 10 ? `0${num}` : String(num);
 }
 
-function formatDate(date: Date, variant: NonNullable<TimeTextProps["variant"]>): string {
-  const year = date.getFullYear();
-  const month = pad(date.getMonth() + 1);
-  const day = pad(date.getDate());
-  const hours = pad(date.getHours());
-  const minutes = pad(date.getMinutes());
-  const seconds = pad(date.getSeconds());
+/**
+ * Format date using a format string with placeholders
+ */
+function formatDate(date: Date, formatStr: string): string {
+  const tokens: Record<string, string> = {
+    YYYY: String(date.getFullYear()),
+    MM: pad(date.getMonth() + 1),
+    DD: pad(date.getDate()),
+    HH: pad(date.getHours()),
+    mm: pad(date.getMinutes()),
+    ss: pad(date.getSeconds()),
+  };
 
-  if (variant === "date") {
-    return `${year}-${month}-${day}`;
-  }
-
-  if (variant === "time") {
-    return `${hours}:${minutes}:${seconds}`;
-  }
-
-  // datetime
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  return formatStr.replace(/YYYY|MM|DD|HH|mm|ss/g, (match) => tokens[match] ?? match);
 }
 
 export const TimeText = React.forwardRef<HTMLSpanElement, TimeTextProps>(
-  ({ value, fallback = "-", variant = "datetime", className, ...props }, ref) => {
-    const date = parseToDate(value);
+  ({ value, fallback = "-", variant = "datetime", format, className, ...props }, ref) => {
+    const text = React.useMemo(() => {
+      const date = parseToDate(value);
+      if (!date) return null;
 
-    const text = date ? formatDate(date, variant) : fallback;
+      const formatStr = format ?? VARIANT_FORMATS[variant];
+      return formatDate(date, formatStr);
+    }, [value, variant, format]);
 
     return (
       <span ref={ref} className={cn("tabular-nums", className)} {...props}>
-        {text}
+        {text ?? fallback}
       </span>
     );
   },

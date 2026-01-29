@@ -82,7 +82,6 @@ export class UserWebController extends BaseController {
     async getUserInfo(@Playground() user: UserPlayground) {
         // 获取用户信息（排除敏感字段）
         const userInfo = await this.userService.findOneById(user.id, {
-            excludeFields: ["password"],
             relations: ["role"],
         });
 
@@ -103,12 +102,15 @@ export class UserWebController extends BaseController {
         // 获取用户当前最高会员等级ID
         const membershipLevel = await this.userService.getUserHighestMembershipLevel(user.id);
 
+        const { password: _password, ...userInfoResult } = userInfo;
+
         return {
-            ...userInfo,
+            ...userInfoResult,
             permissions: hasPermissions,
             membershipLevel,
             permissionsCodes: permissionCodes,
             menus: menuTree,
+            hasPassword: userInfo.password !== null,
         };
     }
 

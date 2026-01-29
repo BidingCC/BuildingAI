@@ -102,3 +102,35 @@ export const SettingItem = ({
     </div>
   );
 };
+
+export const SettingItemLabel = ({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) => {
+  return <span className={cn("text-muted-foreground mb-2 text-sm", className)}>{children}</span>;
+};
+
+export const SettingItemGroup = ({
+  children,
+  className,
+  label,
+}: {
+  children: ReactNode;
+  className?: string;
+  label?: string | ReactNode;
+}) => {
+  return (
+    <div className="flex flex-col">
+      {label &&
+        (typeof label === "string" ? (
+          <span className="text-muted-foreground mb-2 text-sm">{label}</span>
+        ) : (
+          label
+        ))}
+      <div className={cn("bg-muted flex flex-col rounded-lg", className)}>{children}</div>
+    </div>
+  );
+};
