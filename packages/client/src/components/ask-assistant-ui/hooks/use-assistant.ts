@@ -1,5 +1,10 @@
 import type { AiProvider } from "@buildingai/services/web";
-import { getLocalStorage, safeJsonParse, safeJsonStringify } from "@buildingai/stores";
+import {
+  getLocalStorage,
+  safeJsonParse,
+  safeJsonStringify,
+  useAssistantStore,
+} from "@buildingai/stores";
 import type { UIMessage } from "ai";
 import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -80,15 +85,12 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
   }, [providers]);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const STORAGE_KEY = "__selected_model_id__";
   const MCP_SERVERS_STORAGE_KEY = "__selected_mcp_server_ids__";
 
+  const selectedModelId = useAssistantStore((s) => s.selectedModelId);
+  const setSelectedModelId = useAssistantStore((s) => s.setSelectedModelId);
+
   const storage = typeof window !== "undefined" ? getLocalStorage() : null;
-
-  const [selectedModelId, setSelectedModelId] = useState(() => {
-    return storage?.getItem(STORAGE_KEY) || "";
-  });
-
   const [selectedMcpServerIds, setSelectedMcpServerIds] = useState<string[]>(() => {
     if (!storage) return [];
     const cached = safeJsonParse<string[]>(storage.getItem(MCP_SERVERS_STORAGE_KEY));
@@ -103,20 +105,16 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
     const isValidModel = models.some((model) => model.id === selectedModelId);
     const modelId = isValidModel ? selectedModelId : models[0].id;
 
-    if (modelId !== selectedModelId) {
+    if (modelId !== selectedModelId || !selectedModelId) {
       setSelectedModelId(modelId);
-      storage?.setItem(STORAGE_KEY, modelId);
-    } else if (!selectedModelId) {
-      storage?.setItem(STORAGE_KEY, modelId);
     }
-  }, [models, selectedModelId, storage]);
+  }, [models, selectedModelId, setSelectedModelId]);
 
   const handleSelectModel = useCallback(
     (modelId: string) => {
       setSelectedModelId(modelId);
-      storage?.setItem(STORAGE_KEY, modelId);
     },
-    [storage],
+    [setSelectedModelId],
   );
 
   const handleSelectMcpServers = useCallback(

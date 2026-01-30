@@ -32,6 +32,7 @@ export { useMessagesPaging } from "./hooks/use-messages-paging";
 export { convertUIMessageToMessage } from "./libs/message-converter";
 export type { RawMessageRecord } from "./libs/message-repository";
 export { MessageRepository } from "./libs/message-repository";
+export { convertProvidersToModels } from "./libs/provider-converter";
 export type {
   AssistantContextValue,
   ChatStatus,
