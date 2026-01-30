@@ -121,14 +121,14 @@ export function useUpload(options: UseUploadOptions = {}): UseUploadReturn {
       if (newFiles.length === 0) return;
 
       let filesToUpload = newFiles;
+      const isReplace = maxFiles === 1 && newFiles.length > 0;
       if (maxFiles) {
-        const remainingSlots = maxFiles - files.length;
+        const remainingSlots = isReplace ? 1 : maxFiles - files.length;
         filesToUpload = newFiles.slice(0, Math.max(0, remainingSlots));
       }
 
       if (filesToUpload.length === 0) return;
 
-      // Validate all files first
       const validFiles: File[] = [];
       const uploadFileItems: UploadFile[] = [];
 
@@ -151,7 +151,7 @@ export function useUpload(options: UseUploadOptions = {}): UseUploadReturn {
         }
       }
 
-      updateFiles((prev) => [...prev, ...uploadFileItems]);
+      updateFiles((prev) => (isReplace ? uploadFileItems : [...prev, ...uploadFileItems]));
       onUploadStart?.(filesToUpload);
 
       if (validFiles.length === 0) {
