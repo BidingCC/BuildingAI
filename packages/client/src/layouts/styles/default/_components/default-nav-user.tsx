@@ -261,7 +261,9 @@ function PaymentDialog({
                 <RadioGroup
                   orientation="horizontal"
                   value={String(paymentMethod)}
-                  onValueChange={(v: string | undefined) => setPaymentMethod(Number(v) as PayConfigType)}
+                  onValueChange={(v: string | undefined) =>
+                    setPaymentMethod(Number(v) as PayConfigType)
+                  }
                   className="flex gap-3"
                 >
                   {payWayList.length > 0 &&
@@ -514,7 +516,7 @@ export function UpgradeDialog() {
                                     key={`${plan.id}-${billing.levelId}`}
                                     className="md:basis-1/2 lg:basis-1/2 xl:basis-1/3"
                                   >
-                                    <div className="p-1 h-full">
+                                    <div className="h-full p-1">
                                       <PlanCard
                                         plan={plan}
                                         billing={billing}
