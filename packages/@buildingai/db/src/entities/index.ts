@@ -44,5 +44,6 @@ export {
 } from "./secret-template.entity";
 export { Tag } from "./tag.entity";
 export { User } from "./user.entity";
+export { UserDict } from "./user-dict.entity";
 export { UserSubscription } from "./user-subscription.entity";
 export { UserToken } from "./user-token.entity";

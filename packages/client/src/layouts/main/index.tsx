@@ -1,4 +1,9 @@
-import { useDocumentHead, useRefreshUser, useRefreshWebsiteConfig } from "@buildingai/hooks";
+import {
+  useDocumentHead,
+  useRefreshUser,
+  useRefreshUserConfig,
+  useRefreshWebsiteConfig,
+} from "@buildingai/hooks";
 import { useCheckInitializeStatus } from "@buildingai/services/shared";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 
@@ -8,6 +13,7 @@ const MainLayout = () => {
   const { websiteConfig } = useRefreshWebsiteConfig();
 
   useRefreshUser();
+  useRefreshUserConfig();
 
   useDocumentHead({
     title: websiteConfig?.webinfo.name,

@@ -21,12 +21,12 @@ import {
 import { BuildFileUrl } from "@buildingai/decorators/file-url.decorator";
 import { Playground } from "@buildingai/decorators/playground.decorator";
 import { Public } from "@buildingai/decorators/public.decorator";
-import { DictService } from "@buildingai/dict";
+import { DictService, UserDictService } from "@buildingai/dict";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { WebController } from "@common/decorators/controller.decorator";
 import { RolePermissionService } from "@common/modules/auth/services/role-permission.service";
 import { MenuService } from "@modules/menu/services/menu.service";
-import { Body, Get, Inject, Patch, Query } from "@nestjs/common";
+import { Body, Get, Inject, Param, Patch, Post, Query } from "@nestjs/common";
 
 import { DatasetMemberService } from "../../../ai/datasets/services/datasets-member.service";
 import { UserService } from "../../services/user.service";
@@ -56,6 +56,7 @@ export class UserWebController extends BaseController {
         private readonly rolePermissionService: RolePermissionService,
         private readonly datasetMemberService: DatasetMemberService,
         private readonly dictService: DictService,
+        private readonly userDictService: UserDictService,
         @Inject(MenuService)
         private readonly menuService: MenuService,
         @InjectRepository(Agent)
@@ -393,5 +394,53 @@ export class UserWebController extends BaseController {
             allowMultipleLogin: false,
             showPolicyAgreement: true,
         };
+    }
+
+    /**
+     * Get all public user configurations (excludes private groups)
+     * Used for frontend localStorage cache
+     *
+     * @param user Current user
+     * @returns All public configurations grouped by group name
+     */
+    @Get("config")
+    async getAllPublicConfigs(@Playground() user: UserPlayground) {
+        return this.userDictService.getAllPublicConfigs(user.id);
+    }
+
+    /**
+     * Get user configurations by specific group
+     * Can access any group including private ones
+     *
+     * @param user Current user
+     * @param group Group name
+     * @returns User configurations as key-value pairs
+     */
+    @Get("config/:group")
+    async getConfigByGroup(@Playground() user: UserPlayground, @Param("group") group: string) {
+        return this.userDictService.getGroupValues(user.id, group);
+    }
+
+    /**
+     * Set user configuration (single or batch)
+     *
+     * @param user Current user
+     * @param body Configuration data
+     * @returns Success status
+     */
+    @Post("config")
+    async setUserConfig(
+        @Playground() user: UserPlayground,
+        @Body()
+        body:
+            | { key: string; value: any; group?: string }
+            | { items: Array<{ key: string; value: any; group?: string }> },
+    ) {
+        if ("items" in body && Array.isArray(body.items)) {
+            await this.userDictService.mset(user.id, body.items);
+        } else if ("key" in body) {
+            await this.userDictService.set(user.id, body.key, body.value, { group: body.group });
+        }
+        return { success: true };
     }
 }

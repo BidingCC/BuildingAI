@@ -1,12 +1,13 @@
 import { CacheModule } from "@buildingai/cache";
 import { TypeOrmModule } from "@buildingai/db/@nestjs/typeorm";
-import { Dict } from "@buildingai/db/entities";
+import { Dict, UserDict } from "@buildingai/db/entities";
 import { TerminalLogger } from "@buildingai/logger";
 import { Global, Logger, Module, OnModuleInit } from "@nestjs/common";
 import { EventEmitterModule } from "@nestjs/event-emitter";
 
 import { DictService } from "./services/dict.service";
 import { DictCacheService } from "./services/dict-cache.service";
+import { UserDictService } from "./services/user-dict.service";
 
 /**
  * Dictionary Configuration Module
@@ -15,9 +16,13 @@ import { DictCacheService } from "./services/dict-cache.service";
  */
 @Global()
 @Module({
-    imports: [TypeOrmModule.forFeature([Dict]), EventEmitterModule.forRoot(), CacheModule],
-    providers: [DictService, DictCacheService],
-    exports: [DictService, DictCacheService],
+    imports: [
+        TypeOrmModule.forFeature([Dict, UserDict]),
+        EventEmitterModule.forRoot(),
+        CacheModule,
+    ],
+    providers: [DictService, DictCacheService, UserDictService],
+    exports: [DictService, DictCacheService, UserDictService],
 })
 export class DictModule implements OnModuleInit {
     private readonly logger = new Logger(DictModule.name);
