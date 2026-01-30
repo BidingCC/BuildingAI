@@ -1,5 +1,6 @@
 import type { StoreApi } from "zustand";
 
+import type { StorageAdapter } from "./storage";
 import { getLocalStorage, safeJsonParse, safeJsonStringify } from "./storage";
 
 export interface PersistSyncOptions<TState extends object> {
@@ -8,6 +9,11 @@ export interface PersistSyncOptions<TState extends object> {
     partialize?: (state: TState) => unknown;
     /** merge persisted slice into current state */
     merge?: (persisted: unknown, current: TState) => Partial<TState>;
+    /**
+     * When persisted value is missing, try migrate from storage (e.g. legacy keys).
+     * Return partial state to apply, or undefined to skip.
+     */
+    migrate?: (storage: StorageAdapter) => Partial<TState> | undefined;
     /**
      * If true, listen storage event and sync across tabs.
      * Default: true
@@ -27,6 +33,11 @@ export function applyPersistSync<TState extends object>(
     const persisted = safeJsonParse<unknown>(storage.getItem(options.name));
     if (persisted !== undefined) {
         store.setState(merge(persisted, store.getState()));
+    } else if (options.migrate) {
+        const migrated = options.migrate(storage);
+        if (migrated && Object.keys(migrated).length > 0) {
+            store.setState(migrated);
+        }
     }
 
     const unsubscribeStore = store.subscribe((state) => {

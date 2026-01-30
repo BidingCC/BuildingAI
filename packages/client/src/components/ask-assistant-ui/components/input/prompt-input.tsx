@@ -31,11 +31,12 @@ import {
   Square,
   X,
 } from "lucide-react";
-import type { FormEvent, RefObject } from "react";
-import { memo, useCallback, useMemo, useState } from "react";
+import type { FormEvent, ReactNode, RefObject } from "react";
+import { memo, useCallback, useContext, useMemo, useState } from "react";
 
-import { useAssistantContext } from "../../context";
+import { AssistantContext } from "../../context";
 import { useFileUpload } from "../../hooks/use-file-upload";
+import type { Model } from "../../types";
 import { McpSelector } from "../mcp-selector";
 
 export interface PromptInputProps {
@@ -48,6 +49,14 @@ export interface PromptInputProps {
   onStop?: () => void;
   globalDrop?: boolean;
   multiple?: boolean;
+  /** 可选，不传时从 context 获取（若在 AssistantProvider 内） */
+  models?: Model[];
+  selectedModelId?: string;
+  selectedMcpServerIds?: string[];
+  onSelectMcpServers?: (ids: string[]) => void;
+  onSetFeature?: (key: string, value: boolean) => void;
+  /** 渲染在输入区工具栏前部的插槽，如模型选择器等 */
+  children?: ReactNode;
 }
 
 const StopButton = memo(({ onStop }: { onStop: () => void }) => {
@@ -77,10 +86,30 @@ interface FeatureMenuItemConfig {
   featureKey: FeatureKey;
 }
 
+const defaultNoop = () => {};
+
 const PromptInputInner = memo(
-  ({ textareaRef, status, onStop, globalDrop, multiple, onSubmit }: PromptInputProps) => {
-    const { models, selectedModelId, selectedMcpServerIds, onSelectMcpServers, onSetFeature } =
-      useAssistantContext();
+  ({
+    textareaRef,
+    status,
+    onStop,
+    globalDrop,
+    multiple,
+    onSubmit,
+    models: modelsProp,
+    selectedModelId: selectedModelIdProp,
+    selectedMcpServerIds: selectedMcpServerIdsProp,
+    onSelectMcpServers: onSelectMcpServersProp,
+    onSetFeature: onSetFeatureProp,
+    children,
+  }: PromptInputProps) => {
+    const context = useContext(AssistantContext);
+    const models = modelsProp ?? context?.models ?? [];
+    const selectedModelId = selectedModelIdProp ?? context?.selectedModelId ?? "";
+    const selectedMcpServerIds = selectedMcpServerIdsProp ?? context?.selectedMcpServerIds ?? [];
+    const onSelectMcpServers = onSelectMcpServersProp ?? context?.onSelectMcpServers ?? defaultNoop;
+    const onSetFeature = onSetFeatureProp ?? context?.onSetFeature ?? defaultNoop;
+
     const selectedModel = useMemo(
       () => models.find((m) => m.id === selectedModelId),
       [models, selectedModelId],
@@ -259,6 +288,7 @@ const PromptInputInner = memo(
                 onSelectionChange={onSelectMcpServers}
               />
             )}
+            {children}
           </AIPromptInputTools>
           {status === "submitted" || status === "streaming" ? (
             onStop ? (
@@ -277,21 +307,41 @@ const PromptInputInner = memo(
 
 PromptInputInner.displayName = "PromptInputInner";
 
-export const PromptInput = memo(
-  ({ textareaRef, status = "ready", onSubmit, onStop, globalDrop, multiple }: PromptInputProps) => {
-    return (
-      <AIPromptInputProvider>
-        <PromptInputInner
-          textareaRef={textareaRef}
-          status={status}
-          onSubmit={onSubmit}
-          onStop={onStop}
-          globalDrop={globalDrop}
-          multiple={multiple}
-        />
-      </AIPromptInputProvider>
-    );
-  },
-);
+export const PromptInput = memo((props: PromptInputProps) => {
+  const {
+    textareaRef,
+    status = "ready",
+    onSubmit,
+    onStop,
+    globalDrop,
+    multiple,
+    models,
+    selectedModelId,
+    selectedMcpServerIds,
+    onSelectMcpServers,
+    onSetFeature,
+    children,
+  } = props;
+
+  return (
+    <AIPromptInputProvider>
+      <PromptInputInner
+        textareaRef={textareaRef}
+        status={status}
+        onSubmit={onSubmit}
+        onStop={onStop}
+        globalDrop={globalDrop}
+        multiple={multiple}
+        models={models}
+        selectedModelId={selectedModelId}
+        selectedMcpServerIds={selectedMcpServerIds}
+        onSelectMcpServers={onSelectMcpServers}
+        onSetFeature={onSetFeature}
+      >
+        {children}
+      </PromptInputInner>
+    </AIPromptInputProvider>
+  );
+});
 
 PromptInput.displayName = "PromptInput";
