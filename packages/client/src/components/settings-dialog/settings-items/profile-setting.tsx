@@ -1,12 +1,15 @@
-import { useUserInfoQuery } from "@buildingai/services/shared";
+import { useCopy } from "@buildingai/hooks";
+import { uploadFile, useUserInfoQuery } from "@buildingai/services/shared";
 import { type AllowedUserField, useUpdateUserFieldMutation } from "@buildingai/services/web";
 import { useAuthStore } from "@buildingai/stores";
+import { RootOnly } from "@buildingai/ui/components/auth/root-only";
 import { Avatar, AvatarFallback, AvatarImage } from "@buildingai/ui/components/ui/avatar";
 import { Button } from "@buildingai/ui/components/ui/button";
 import { Input } from "@buildingai/ui/components/ui/input";
 import { TimeText } from "@buildingai/ui/components/ui/time-text";
-import { Check, Copy, Edit, Link, User, X } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Check, Copy, CopyCheck, Link, Loader2, PenLine, User, X } from "lucide-react";
+import { type ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 import SvgIcons from "@/components/svg-icons";
 
@@ -20,7 +23,82 @@ const ProfileSetting = () => {
   const [editValue, setEditValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+  const { copy } = useCopy();
+  const [copiedKeys, setCopiedKeys] = useState<Record<string, boolean>>({});
+  const copyTimersRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+
+  const handleCopy = useCallback(
+    async (key: string, text: string | undefined) => {
+      if (!text) return;
+
+      const success = await copy(text);
+      if (success) {
+        if (copyTimersRef.current[key]) {
+          clearTimeout(copyTimersRef.current[key]);
+        }
+
+        setCopiedKeys((prev) => ({ ...prev, [key]: true }));
+
+        copyTimersRef.current[key] = setTimeout(() => {
+          setCopiedKeys((prev) => ({ ...prev, [key]: false }));
+          delete copyTimersRef.current[key];
+        }, 2000);
+      }
+    },
+    [copy],
+  );
+
+  useEffect(() => {
+    const timers = copyTimersRef.current;
+    return () => {
+      Object.values(timers).forEach(clearTimeout);
+    };
+  }, []);
+
   const { mutate: updateField, isPending } = useUpdateUserFieldMutation();
+
+  const handleAvatarClick = useCallback(() => {
+    avatarInputRef.current?.click();
+  }, []);
+
+  const handleAvatarChange = useCallback(
+    async (e: ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      setIsUploadingAvatar(true);
+      try {
+        const result = await uploadFile(file, { description: "avatar" });
+        updateField(
+          { field: "avatar", value: result.url },
+          {
+            onSuccess: () => {
+              toast.success("头像已更新");
+            },
+            onError: () => {
+              toast.error("头像更新失败");
+            },
+            onSettled: () => {
+              setIsUploadingAvatar(false);
+              if (avatarInputRef.current) {
+                avatarInputRef.current.value = "";
+              }
+            },
+          },
+        );
+      } catch {
+        toast.error("头像上传失败");
+        setIsUploadingAvatar(false);
+        if (avatarInputRef.current) {
+          avatarInputRef.current.value = "";
+        }
+      }
+    },
+    [updateField],
+  );
 
   const handleStartEdit = useCallback((field: AllowedUserField, currentValue: string) => {
     setEditingField(field);
@@ -68,12 +146,21 @@ const ProfileSetting = () => {
             </Avatar>
           }
         >
+          <input
+            ref={avatarInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleAvatarChange}
+          />
           <Button
             className="hover:bg-muted-foreground/10 dark:hover:bg-muted-foreground/15"
             variant="ghost"
             size="icon-sm"
+            onClick={handleAvatarClick}
+            disabled={isUploadingAvatar}
           >
-            <Edit />
+            {isUploadingAvatar ? <Loader2 className="animate-spin" /> : <PenLine />}
           </Button>
         </SettingItem>
         <SettingItem
@@ -124,7 +211,7 @@ const ProfileSetting = () => {
               size="icon-sm"
               onClick={() => handleStartEdit("nickname", data?.nickname || "")}
             >
-              <Edit />
+              <PenLine />
             </Button>
           )}
         </SettingItem>
@@ -133,8 +220,9 @@ const ProfileSetting = () => {
             className="hover:bg-muted-foreground/10 dark:hover:bg-muted-foreground/15"
             variant="ghost"
             size="icon-sm"
+            onClick={() => handleCopy("userNo", data?.userNo)}
           >
-            <Copy />
+            {copiedKeys["userNo"] ? <CopyCheck /> : <Copy />}
           </Button>
         </SettingItem>
         <SettingItem
@@ -185,7 +273,7 @@ const ProfileSetting = () => {
               size="icon-sm"
               onClick={() => handleStartEdit("email", data?.email || "")}
             >
-              <Edit />
+              <PenLine />
             </Button>
           )}
         </SettingItem>
@@ -198,7 +286,7 @@ const ProfileSetting = () => {
             variant="ghost"
             size="icon-sm"
           >
-            <Edit />
+            <PenLine />
           </Button>
         </SettingItem>
         <SettingItem title={data?.phone || "未绑定"} description="手机号">
@@ -207,7 +295,7 @@ const ProfileSetting = () => {
             variant="ghost"
             size="icon-sm"
           >
-            <Edit />
+            <PenLine />
           </Button>
         </SettingItem>
         <SettingItem
@@ -228,15 +316,17 @@ const ProfileSetting = () => {
             去绑定
           </Button>
         </SettingItem>
-        <SettingItem title="注销账号" description="您的账号数据将会被永久删除，此操作不可逆">
-          <Button
-            className="hover:bg-muted-foreground/10 dark:hover:bg-muted-foreground/15"
-            variant="destructive"
-            size="sm"
-          >
-            注销
-          </Button>
-        </SettingItem>
+        <RootOnly reverse>
+          <SettingItem title="注销账号" description="您的账号数据将会被永久删除，此操作不可逆">
+            <Button
+              className="hover:bg-muted-foreground/10 dark:hover:bg-muted-foreground/15"
+              variant="destructive"
+              size="sm"
+            >
+              注销
+            </Button>
+          </SettingItem>
+        </RootOnly>
       </SettingItemGroup>
 
       <SettingItemGroup label="注册信息">

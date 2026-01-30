@@ -23,9 +23,9 @@ export const SETTINGS_NAV: SettingsNavGroup[] = [
     ],
   },
   {
-    label: "通用",
+    label: "常规",
     items: [
-      { id: "general", name: "通用设置", icon: Settings },
+      { id: "general", name: "基本设置", icon: Settings },
       { id: "tools", name: "工具管理", icon: Hammer },
     ],
   },
