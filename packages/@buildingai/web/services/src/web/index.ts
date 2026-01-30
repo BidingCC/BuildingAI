@@ -4,3 +4,4 @@ export * from "./chat";
 export * from "./chat-feedback";
 export * from "./mcp";
 export * from "./user";
+export * from "./membership";
