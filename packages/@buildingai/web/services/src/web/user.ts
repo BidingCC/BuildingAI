@@ -33,10 +33,10 @@ export function useUpdateUserFieldMutation(
     return useMutation<UpdateUserFieldResponse, Error, UpdateUserFieldRequest>({
         mutationFn: (data) =>
             apiHttpClient.patch<UpdateUserFieldResponse>("/user/update-field", data),
-        onSuccess: (data, variables, context) => {
-            queryClient.invalidateQueries({ queryKey: ["user", "info"] });
-            options?.onSuccess?.(data, variables, context);
-        },
         ...options,
+        onSuccess: (...args) => {
+            queryClient.invalidateQueries({ queryKey: ["user", "info"] });
+            options?.onSuccess?.(...args);
+        },
     });
 }

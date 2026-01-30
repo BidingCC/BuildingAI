@@ -28,9 +28,19 @@ import { McpImportDialog } from "./_components/mcp-import-dialog";
 
 type ConnectionStatusBadgeProps = {
   server: McpServer;
+  isChecking?: boolean;
 };
 
-const ConnectionStatusBadge = ({ server }: ConnectionStatusBadgeProps) => {
+const ConnectionStatusBadge = ({ server, isChecking }: ConnectionStatusBadgeProps) => {
+  if (isChecking) {
+    return (
+      <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
+        <RefreshCw className="size-3.5 animate-spin" />
+        测试中...
+      </Badge>
+    );
+  }
+
   if (server.isDisabled) {
     return (
       <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
@@ -172,7 +182,10 @@ const ToolsSetting = () => {
             title={server.name}
             description={
               <div className="flex gap-2">
-                <ConnectionStatusBadge server={server} />
+                <ConnectionStatusBadge
+                  server={server}
+                  isChecking={checkingServerId === server.id}
+                />
                 <Badge variant="outline" className="text-muted-foreground px-1.5">
                   <Hammer />
                   {server.tools?.length || 0}个工具
