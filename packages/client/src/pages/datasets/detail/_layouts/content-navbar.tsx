@@ -1,7 +1,18 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@buildingai/ui/components/ui/avatar";
 import { Button } from "@buildingai/ui/components/ui/button";
-import { ChevronLeft, Edit, MoreHorizontal, Share2, Users } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@buildingai/ui/components/ui/dropdown-menu";
+import { ChevronLeft, Edit, MoreHorizontal, Pencil, Share2, Trash2, Users } from "lucide-react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+import { DatasetEditDialog, type DatasetEditFormValues } from "../_components/dataset-edit-dialog";
+import { MemberDialog } from "../_components/member-dialog";
+import { PublishSquareDialog } from "../_components/publish-square-dialog";
 
 export interface DatasetInfo {
   id: string;
@@ -17,10 +28,22 @@ export interface DatasetInfo {
 export interface ContentNavbarProps {
   mode: "own" | "others";
   dataset: DatasetInfo;
+  onEdit?: () => void;
+  onEditSubmit?: (values: DatasetEditFormValues) => void;
+  onDelete?: () => void;
 }
 
-export function ContentNavbar({ mode, dataset }: ContentNavbarProps) {
+export function ContentNavbar({
+  mode,
+  dataset,
+  onEdit,
+  onEditSubmit,
+  onDelete,
+}: ContentNavbarProps) {
   const navigate = useNavigate();
+  const [memberDialogOpen, setMemberDialogOpen] = useState(false);
+  const [publishSquareDialogOpen, setPublishSquareDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   return (
     <header className="flex h-16 shrink-0 items-center justify-between gap-2 px-4 pl-2">
@@ -47,17 +70,55 @@ export function ContentNavbar({ mode, dataset }: ContentNavbarProps) {
         </div>
       </div>
       <div className="flex items-center gap-1">
-        <Button variant="ghost" size="sm">
+        <Button variant="ghost" size="sm" onClick={() => setPublishSquareDialogOpen(true)}>
           <Share2 className="size-4" />
           发布到知识广场
         </Button>
-        <Button variant="ghost" size="sm">
+        <PublishSquareDialog
+          open={publishSquareDialogOpen}
+          onOpenChange={setPublishSquareDialogOpen}
+        />
+        <Button variant="ghost" size="sm" onClick={() => setMemberDialogOpen(true)}>
           <Users className="size-4" />
           成员
         </Button>
-        <Button variant="ghost" size="icon">
-          <MoreHorizontal className="size-4" />
-        </Button>
+        <MemberDialog open={memberDialogOpen} onOpenChange={setMemberDialogOpen} />
+        <DatasetEditDialog
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          mode="edit"
+          initialValues={{
+            name: dataset.title,
+            coverUrl: dataset.avatar,
+            description: dataset.description ?? "",
+          }}
+          onSubmit={onEditSubmit}
+        />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <MoreHorizontal className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onClick={() => {
+                onEdit?.();
+                setEditDialogOpen(true);
+              }}
+            >
+              <Pencil className="mr-2 size-4" />
+              资料修改
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={onDelete}
+              className="text-destructive focus:text-destructive"
+            >
+              <Trash2 className="mr-2 size-4" />
+              删除
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );

@@ -4,9 +4,108 @@ import type {
     PaginatedResponse,
     QueryOptionsUtil,
 } from "@buildingai/web-types";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { consoleHttpClient } from "../base";
+
+// Level types
+export type MembershipLevelListItem = {
+    id: string;
+    name: string;
+    level: number;
+    icon: string | null;
+    description: string | null;
+    givePower: number;
+    status: boolean;
+    accountCount?: number;
+    benefits?: { icon?: string; content?: string }[];
+};
+
+export type QueryLevelsDto = {
+    page?: number;
+    pageSize?: number;
+    name?: string;
+    /** Query param: "true" | "false" (backend transforms to boolean) */
+    status?: string;
+};
+
+export type CreateLevelsDto = {
+    name: string;
+    level: number;
+    icon?: string;
+    givePower?: number;
+    description?: string;
+    benefits?: { icon?: string; content?: string }[];
+};
+
+export type UpdateLevelsDto = Partial<CreateLevelsDto> & {
+    status?: boolean;
+};
+
+export type MembershipLevelListResponse = PaginatedResponse<MembershipLevelListItem>;
+
+/**
+ * Get membership level list (paginated)
+ */
+export function useMembershipLevelListQuery(
+    params?: QueryLevelsDto,
+    options?: PaginatedQueryOptionsUtil<MembershipLevelListItem>,
+) {
+    return useQuery<MembershipLevelListResponse>({
+        queryKey: ["membership-levels", "list", params],
+        queryFn: () => consoleHttpClient.get<MembershipLevelListResponse>("/levels", { params }),
+        ...options,
+    });
+}
+
+/**
+ * Create membership level
+ */
+export function useCreateMembershipLevelMutation(
+    options?: MutationOptionsUtil<MembershipLevelListItem, CreateLevelsDto>,
+) {
+    const queryClient = useQueryClient();
+    return useMutation<MembershipLevelListItem, Error, CreateLevelsDto>({
+        mutationFn: (body) => consoleHttpClient.post<MembershipLevelListItem>("/levels", body),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["membership-levels"] });
+        },
+        ...options,
+    });
+}
+
+/**
+ * Update membership level
+ */
+export function useUpdateMembershipLevelMutation(
+    options?: MutationOptionsUtil<MembershipLevelListItem, { id: string; body: UpdateLevelsDto }>,
+) {
+    const queryClient = useQueryClient();
+    return useMutation<MembershipLevelListItem, Error, { id: string; body: UpdateLevelsDto }>({
+        mutationFn: ({ id, body }) =>
+            consoleHttpClient.patch<MembershipLevelListItem>(`/levels/${id}`, body),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["membership-levels"] });
+        },
+        ...options,
+    });
+}
+
+/**
+ * Delete membership level
+ */
+export function useDeleteMembershipLevelMutation(
+    options?: MutationOptionsUtil<{ message?: string }, string>,
+) {
+    const queryClient = useQueryClient();
+    return useMutation<{ message?: string }, Error, string>({
+        mutationFn: (id) => consoleHttpClient.delete<{ message?: string }>(`/levels/${id}`),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["membership-levels"] });
+        },
+        ...options,
+    });
+}
 
 // Order types
 export type MembershipOrderListItem = {
@@ -120,6 +219,93 @@ export function useMembershipOrderDetailQuery(
         queryKey: ["membership-order", "detail", id],
         queryFn: () => consoleHttpClient.get<MembershipOrderDetailData>(`/membership-order/${id}`),
         enabled: !!id && options?.enabled !== false,
+        ...options,
+    });
+}
+
+// Plan config types (GET /plans returns plansStatus + plans)
+export type MembershipPlanConfigItem = {
+    id: string;
+    name: string;
+    label?: string | null;
+    durationConfig: number;
+    duration?: { value?: number; unit?: string };
+    status: boolean;
+    sort: number;
+    levelCount: number;
+    levels: Array<{ id: string; name: string; level?: number; icon?: string | null } | null>;
+};
+
+export type MembershipPlansConfigResponse = {
+    plansStatus: boolean;
+    plans: MembershipPlanConfigItem[];
+};
+
+/**
+ * Get membership plans config (list all plans with level count)
+ */
+export function useMembershipPlansConfigQuery(
+    options?: QueryOptionsUtil<MembershipPlansConfigResponse>,
+) {
+    return useQuery<MembershipPlansConfigResponse>({
+        queryKey: ["membership-plans", "config"],
+        queryFn: () => consoleHttpClient.get<MembershipPlansConfigResponse>("/plans"),
+        ...options,
+    });
+}
+
+export type SetPlansDto = { status: boolean };
+
+/**
+ * Set single plan status (enable/disable)
+ */
+export function useSetMembershipPlanStatusMutation(
+    options?: MutationOptionsUtil<MembershipPlanConfigItem, { id: string; status: boolean }>,
+) {
+    const queryClient = useQueryClient();
+    return useMutation<MembershipPlanConfigItem, Error, { id: string; status: boolean }>({
+        mutationFn: ({ id, status }) =>
+            consoleHttpClient.post<MembershipPlanConfigItem>(`/plans/setPlanStatus/${id}`, {
+                status,
+            }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["membership-plans"] });
+        },
+        ...options,
+    });
+}
+
+/**
+ * Update plan sort
+ */
+export function useUpdateMembershipPlanSortMutation(
+    options?: MutationOptionsUtil<MembershipPlanConfigItem, { id: string; sort: number }>,
+) {
+    const queryClient = useQueryClient();
+    return useMutation<MembershipPlanConfigItem, Error, { id: string; sort: number }>({
+        mutationFn: ({ id, sort }) =>
+            consoleHttpClient.patch<MembershipPlanConfigItem>(`/plans/setPlanSort/${id}`, {
+                sort,
+            }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["membership-plans"] });
+        },
+        ...options,
+    });
+}
+
+/**
+ * Delete membership plan
+ */
+export function useDeleteMembershipPlanMutation(
+    options?: MutationOptionsUtil<{ message?: string }, string>,
+) {
+    const queryClient = useQueryClient();
+    return useMutation<{ message?: string }, Error, string>({
+        mutationFn: (id) => consoleHttpClient.delete<{ message?: string }>(`/plans/${id}`),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["membership-plans"] });
+        },
         ...options,
     });
 }

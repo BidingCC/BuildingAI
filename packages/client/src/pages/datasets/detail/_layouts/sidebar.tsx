@@ -5,7 +5,7 @@ import { Upload as UploadIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { DocumentItem } from "../_components/documents";
-import { DocumentList } from "../_components/documents";
+import { DocumentBatchActions, DocumentList } from "../_components/documents";
 import { DocumentsNavbar, type DocumentsSortBy } from "../_components/documents-navbar";
 import { UploadDialog } from "../_components/upload-dialog";
 import { UploadTrigger } from "../_components/upload-trigger";
@@ -35,6 +35,7 @@ export function DatasetSidebar({
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [sortBy, setSortBy] = useState<DocumentsSortBy>("name");
   const [searchExpanded, setSearchExpanded] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [dropPhase, setDropPhase] = useState<"idle" | "over" | "left">("idle");
   const zoneRef = useRef<HTMLDivElement>(null);
   const isOwn = mode === "own";
@@ -96,6 +97,18 @@ export function DatasetSidebar({
           onSortChange={setSortBy}
           searchExpanded={searchExpanded}
           onSearchExpandedChange={setSearchExpanded}
+          rightSlot={
+            !searchExpanded && selectedIds.length > 0 ? (
+              <DocumentBatchActions
+                selectedCount={selectedIds.length}
+                onEditTags={() => {}}
+                onMove={() => {}}
+                onDelete={() => {}}
+                onCopy={() => {}}
+                onClose={() => setSelectedIds([])}
+              />
+            ) : undefined
+          }
         />
         <SidebarContent className="p-0">
           <div
@@ -134,6 +147,12 @@ export function DatasetSidebar({
                   onDocumentClick={onDocumentClick}
                   searchExpanded={searchExpanded}
                   searchResultCount={documents.length}
+                  selectedIds={selectedIds}
+                  onSelectedIdsChange={setSelectedIds}
+                  onBatchEditTags={() => {}}
+                  onBatchMove={() => {}}
+                  onBatchDelete={() => {}}
+                  onBatchCopy={() => {}}
                 />
               </div>
             </ScrollArea>

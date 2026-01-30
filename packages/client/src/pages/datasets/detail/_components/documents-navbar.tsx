@@ -32,6 +32,8 @@ export interface DocumentsNavbarProps {
   /** 搜索展开时由父组件控制，用于隐藏上传区 */
   searchExpanded?: boolean;
   onSearchExpandedChange?: (expanded: boolean) => void;
+  /** 未搜索时右侧插槽，用于多选时的批量操作按钮（移动、删除、复制） */
+  rightSlot?: React.ReactNode;
 }
 
 export function DocumentsNavbar({
@@ -44,6 +46,7 @@ export function DocumentsNavbar({
   onSearchSubmit,
   searchExpanded: searchExpandedProp,
   onSearchExpandedChange,
+  rightSlot,
 }: DocumentsNavbarProps) {
   const [searchExpandedInternal, setSearchExpandedInternal] = useState(false);
   const searchExpanded = searchExpandedProp ?? searchExpandedInternal;
@@ -103,35 +106,41 @@ export function DocumentsNavbar({
             {contentCount}个内容 / {totalSize}
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+            {rightSlot != null ? (
+              rightSlot
+            ) : (
+              <>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 border-0 text-xs font-normal shadow-none"
+                    >
+                      排序
+                      <ChevronDown className="size-3.5 opacity-50" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {SORT_OPTIONS.map((opt) => (
+                      <DropdownMenuItem key={opt.value} onClick={() => onSortChange?.(opt.value)}>
+                        {opt.label}
+                        {sortBy === opt.value && <Check className="ml-auto size-4" />}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <Button
                   variant="ghost"
-                  size="sm"
-                  className="h-8 border-0 text-xs font-normal shadow-none"
+                  size="icon"
+                  className="size-8"
+                  onClick={handleSearchClick}
+                  aria-label="搜索"
                 >
-                  排序
-                  <ChevronDown className="size-3.5 opacity-50" />
+                  <Search className="size-4" />
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {SORT_OPTIONS.map((opt) => (
-                  <DropdownMenuItem key={opt.value} onClick={() => onSortChange?.(opt.value)}>
-                    {opt.label}
-                    {sortBy === opt.value && <Check className="ml-auto size-4" />}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8"
-              onClick={handleSearchClick}
-              aria-label="搜索"
-            >
-              <Search className="size-4" />
-            </Button>
+              </>
+            )}
           </div>
         </>
       )}
