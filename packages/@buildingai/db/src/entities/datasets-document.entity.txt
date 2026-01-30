@@ -18,7 +18,7 @@ export class DatasetsDocument extends BaseEntity {
     /**
      * 上传文件ID（可为空，如手动创建的文档）
      */
-    @Column({ type: "uuid", nullable: true, comment: "上传文件ID" })
+    @Column({ type: "uuid", comment: "上传文件ID" })
     fileId: string | null;
 
     /**
@@ -38,18 +38,6 @@ export class DatasetsDocument extends BaseEntity {
      */
     @Column({ type: "bigint", comment: "文件大小" })
     fileSize: number;
-
-    /**
-     * 摘要
-     */
-    @Column({ type: "text", nullable: true, comment: "摘要" })
-    summary: string | null;
-
-    /**
-     * 标签
-     */
-    @Column({ type: "text", array: true, nullable: true, comment: "标签" })
-    tags: string[] | null;
 
     /**
      * 分段数量

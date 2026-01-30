@@ -4,7 +4,7 @@ import { Playground } from "@buildingai/decorators/playground.decorator";
 import {
     IndexingSegmentsDto,
     IndexingSegmentsResponseDto,
-} from "@buildingai/dto/indexing-segments.dto";
+} from "../../dto/indexing-segments.dto";
 import { RetrievalResult } from "@buildingai/types/ai/retrieval-config.interface";
 import { ConsoleController } from "@common/decorators/controller.decorator";
 import { Permissions } from "@common/decorators/permissions.decorator";

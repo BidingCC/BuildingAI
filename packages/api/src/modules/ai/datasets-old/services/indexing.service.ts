@@ -4,7 +4,7 @@ import {
     ParentSegmentDto,
     SegmentResultDto,
     TextPreprocessingRulesDto,
-} from "@buildingai/dto/indexing-segments.dto";
+} from "../dto/indexing-segments.dto";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { UploadService } from "@modules/upload/services/upload.service";
 import { Injectable, Logger } from "@nestjs/common";

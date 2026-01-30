@@ -1,7 +1,14 @@
 import {
+    type DocumentModeType,
+    type ParentContextModeType,
     RETRIEVAL_MODE,
     type RetrievalModeType,
 } from "@buildingai/constants/shared/datasets.constants";
+import {
+    SegmentationDto,
+    SubSegmentationDto,
+    TextPreprocessingRulesDto,
+} from "@buildingai/dto/indexing-segments.dto";
 import type { RetrievalConfig } from "@buildingai/types/ai/retrieval-config.interface";
 
 import { AppEntity } from "../decorators/app-entity.decorator";
@@ -9,7 +16,6 @@ import { Column, OneToMany, type Relation } from "../typeorm";
 import { BaseEntity } from "./base";
 import { DatasetsDocument } from "./datasets-document.entity";
 import { DatasetMember } from "./datasets-member.entity";
-import { DatasetMemberApplication } from "./datasets-member-application.entity";
 import { DatasetsSegments } from "./datasets-segments.entity";
 
 /**
@@ -28,6 +34,19 @@ export class Datasets extends BaseEntity {
      */
     @Column({ type: "text", nullable: true, comment: "知识库描述" })
     description?: string;
+
+    /**
+     * 分段配置
+     */
+    @Column({ type: "json", comment: "分段配置" })
+    indexingConfig: {
+        documentMode: DocumentModeType;
+        parentContextMode?: ParentContextModeType;
+        segmentation: SegmentationDto;
+        subSegmentation?: SubSegmentationDto;
+        preprocessingRules: TextPreprocessingRulesDto;
+        fileIds: string[];
+    };
 
     /**
      * Embedding 模型ID
@@ -93,12 +112,6 @@ export class Datasets extends BaseEntity {
      */
     @OneToMany(() => DatasetMember, (member) => member.dataset)
     members?: Relation<DatasetMember[]>;
-
-    /**
-     * 知识库会员申请列表
-     */
-    @OneToMany(() => DatasetMemberApplication, (application) => application.dataset)
-    memberApplications?: Relation<DatasetMemberApplication[]>;
 
     /**
      * 关联应用（智能体）数量

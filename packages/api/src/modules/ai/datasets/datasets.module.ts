@@ -1,114 +1,23 @@
-import { QueueModule } from "@buildingai/core/modules";
 import { TypeOrmModule } from "@buildingai/db/@nestjs/typeorm";
-import { User } from "@buildingai/db/entities";
-import { AiModel } from "@buildingai/db/entities";
-import { Dict } from "@buildingai/db/entities";
-import { Agent } from "@buildingai/db/entities";
-import {
-    DatasetMember,
-    Datasets,
-    DatasetsDocument,
-    DatasetsSegments,
-} from "@buildingai/db/entities";
-import { DictService } from "@buildingai/dict";
-import { SecretManagerModule } from "@modules/ai/secret/secret.module";
-import { UploadModule } from "@modules/upload/upload.module";
+import { DatasetMember, Datasets } from "@buildingai/db/entities";
 import { Module } from "@nestjs/common";
-import { APP_GUARD } from "@nestjs/core";
 
-import { AiModelService } from "../model/services/ai-model.service";
-import { DatasetsController } from "./controllers/console/datasets.controller";
-import { DocumentsController } from "./controllers/console/documents.controller";
-import { TeamMemberController } from "./controllers/console/member.controller";
-import { SegmentsController } from "./controllers/console/segments.controller";
-import { DatasetPermissionGuard } from "./guards/datasets-permission.guard";
-import { VectorizationProcessor } from "./processors/vectorization.processor";
-import { DatasetsService } from "./services/datasets.service";
+import { ConfigModule } from "@modules/config/config.module";
+
+import { DatasetsWebController } from "./controllers/web/datasets.controller";
 import { DatasetMemberService } from "./services/datasets-member.service";
-import { DatasetsRetrievalService } from "./services/datasets-retrieval.service";
-import { DocumentsService } from "./services/documents.service";
-import { FileParserService } from "./services/file-parser.service";
-import { EmbeddingHelper } from "./services/helpers/embedding.helper";
-import { QueryPreprocessor } from "./services/helpers/query-preprocessor.helper";
-import { RerankHelper } from "./services/helpers/rerank.helper";
-import { IndexingService } from "./services/indexing.service";
-import { SegmentsService } from "./services/segments.service";
-import { VectorizationQueueService } from "./services/vectorization-queue.service";
-import { VectorizationTriggerService } from "./services/vectorization-trigger.service";
-import {
-    GeneratorService,
-    ModelAdapterService,
-    StateService,
-    VectorizationService,
-} from "./vectorization";
+import { DatasetsService } from "./services/datasets.service";
 
+/**
+ * 知识库模块（向量化数据集）
+ *
+ * Web 端知识库接口，不依赖 datasets-old。
+ * 知识库公共配置（初始空间、向量模型、检索设置）由 Config 模块的 DatasetsConfigService 提供。
+ */
 @Module({
-    imports: [
-        TypeOrmModule.forFeature([
-            Datasets,
-            DatasetsDocument,
-            DatasetsSegments,
-            DatasetMember,
-            User,
-            Dict,
-            Agent,
-            AiModel,
-        ]),
-        QueueModule,
-        UploadModule,
-        SecretManagerModule,
-    ],
-    controllers: [
-        DatasetsController,
-        DocumentsController,
-        SegmentsController,
-        TeamMemberController,
-    ],
-    providers: [
-        // Core services
-        DatasetsService,
-        DatasetsRetrievalService,
-        DocumentsService,
-        SegmentsService,
-        DatasetMemberService,
-
-        // Helper services
-        VectorizationQueueService,
-        VectorizationTriggerService,
-        FileParserService,
-        IndexingService,
-        EmbeddingHelper,
-        RerankHelper,
-        QueryPreprocessor,
-
-        // Queue processors
-        VectorizationProcessor,
-
-        // Vectorization services
-        ModelAdapterService,
-        GeneratorService,
-        StateService,
-        VectorizationService,
-
-        // External services
-        DictService,
-        AiModelService,
-
-        // Guards
-        DatasetPermissionGuard,
-        {
-            provide: APP_GUARD,
-            useClass: DatasetPermissionGuard,
-        },
-    ],
-    exports: [
-        DatasetsService,
-        DatasetsRetrievalService,
-        DocumentsService,
-        SegmentsService,
-        DatasetMemberService,
-        IndexingService,
-        DatasetPermissionGuard,
-    ],
+    imports: [TypeOrmModule.forFeature([Datasets, DatasetMember]), ConfigModule],
+    controllers: [DatasetsWebController],
+    providers: [DatasetsService, DatasetMemberService],
+    exports: [DatasetsService, DatasetMemberService],
 })
 export class AiDatasetsModule {}

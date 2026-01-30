@@ -172,7 +172,8 @@ export class DatasetPermissionGuard implements CanActivate {
      * 从请求中获取资源ID
      */
     private getResourceIdFromRequest(request: Request): string | undefined {
-        return request.params?.id;
+        const id = request.params?.id;
+        return Array.isArray(id) ? id[0] : id;
     }
 
     /**

@@ -1,3 +1,19 @@
+/**
+ * 文档处理模式常量（分段配置，仅 datasets-old 使用）
+ */
+export const DOCUMENT_MODE = {
+    NORMAL: "normal",
+    HIERARCHICAL: "hierarchical",
+} as const;
+
+/**
+ * 父块上下文模式常量（分段配置，仅 datasets-old 使用）
+ */
+export const PARENT_CONTEXT_MODE = {
+    FULL_TEXT: "fullText",
+    PARAGRAPH: "paragraph",
+} as const;
+
 export const RAG_SERVICE_CONSTANTS = {
     // Batch size for processing
     BATCH_SIZE: 10,

@@ -1,5 +1,5 @@
 import { PROCESSING_STATUS } from "@buildingai/constants/shared/datasets.constants";
-import { IndexingSegmentsDto } from "@buildingai/dto/indexing-segments.dto";
+import { IndexingSegmentsDto } from "./indexing-segments.dto";
 import { PaginationDto } from "@buildingai/dto/pagination.dto";
 import { Transform, Type } from "class-transformer";
 import {

@@ -3,7 +3,7 @@ import {
     RETRIEVAL_MODE,
     type RetrievalModeType,
 } from "@buildingai/constants/shared/datasets.constants";
-import { IndexingSegmentsDto } from "@buildingai/dto/indexing-segments.dto";
+import { IndexingSegmentsDto } from "./indexing-segments.dto";
 import { PaginationDto } from "@buildingai/dto/pagination.dto";
 import {
     RerankConfig,

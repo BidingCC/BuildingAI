@@ -5,6 +5,7 @@ import {
     AgentSquareSeeder,
     AiModelSeeder,
     AiProviderSeeder,
+    DatasetsConfigSeeder,
     ExtensionSeeder,
     MembershipLevelsSeeder,
     MembershipPlansSeeder,
@@ -73,6 +74,17 @@ export class DatabaseInitService implements OnModuleInit {
 
                 // Delegate extension upgrade logic to ExtensionUpgradeOrchestratorService
                 await this.extensionUpgradeOrchestrator.checkAndUpgradeAll();
+
+                // TODO: Temporary - Re-init menus if table is empty (remove after sync)
+                const menuCount = await this.menuRepository.count();
+                if (menuCount === 0) {
+                    this.logger.warn("⚠️ Menu table is empty, re-initializing menus...");
+                    this.permissionService.scanControllers();
+                    const permissionSeeder = new PermissionSeeder(this.permissionService);
+                    await permissionSeeder.run();
+                    const menuSeeder = new MenuSeeder(this.menuRepository, this.permissionService);
+                    await menuSeeder.run();
+                }
                 return;
             }
 
@@ -129,6 +141,7 @@ export class DatabaseInitService implements OnModuleInit {
             new MembershipLevelsSeeder(), // Membership levels
             new MembershipPlansSeeder(), // Membership plans
             new RechargeCenterSeeder(), // Recharge center configuration
+            new DatasetsConfigSeeder(), // 知识库配置（初始空间、向量模型、检索设置）
             new AgentSquareSeeder(), // Agent square configuration
         ]);
     }
@@ -144,6 +157,13 @@ export class DatabaseInitService implements OnModuleInit {
         // 2. Initialize menus (depends on permission data)
         const menuSeeder = new MenuSeeder(this.menuRepository, this.permissionService);
         await menuSeeder.run();
+
+        // TODO: Temporary - Re-init menus if table is empty (remove after sync)
+        const menuCount = await this.menuRepository.count();
+        if (menuCount === 0) {
+            this.logger.warn("⚠️ Menu table is empty, re-initializing menus...");
+            await menuSeeder.run();
+        }
     }
 
     /**

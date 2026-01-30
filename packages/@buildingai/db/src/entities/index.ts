@@ -16,6 +16,7 @@ export { Analyse, AnalyseActionType } from "./analyse.entity";
 export { Datasets } from "./datasets.entity";
 export { DatasetsDocument } from "./datasets-document.entity";
 export { DatasetMember } from "./datasets-member.entity";
+export { DatasetMemberApplication, MemberApplicationStatus } from "./datasets-member-application.entity";
 export { DatasetsSegments } from "./datasets-segments.entity";
 export { DecorateMicropageEntity } from "./decorate-micropage.entity";
 export { DecoratePageEntity } from "./decorate-page.entity";
