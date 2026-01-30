@@ -155,7 +155,10 @@ export function SettingsDialogProvider({ children }: { children: React.ReactNode
             }
             storageKey="setting-dialog-sidebar"
           >
-            <Sidebar collapsible="offExamples" className="hidden md:flex">
+            <Sidebar
+              collapsible="offExamples"
+              className="hidden group-data-[side=left]:border-r-0 md:flex"
+            >
               <SidebarContent>
                 <SidebarGroup className="gap-2">
                   <SidebarGroupContent>

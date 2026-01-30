@@ -10,11 +10,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import SvgIcons from "@/components/svg-icons";
 
-import { SettingItem, SettingItemGroup, SettingItemLabel } from "../setting-item";
+import { SettingItem, SettingItemGroup } from "../setting-item";
 
 const ProfileSetting = () => {
   const { isLogin } = useAuthStore((state) => state.authActions);
-  const { data, refetch } = useUserInfoQuery();
+  const { data } = useUserInfoQuery();
 
   const [editingField, setEditingField] = useState<AllowedUserField | null>(null);
   const [editValue, setEditValue] = useState("");

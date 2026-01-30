@@ -148,9 +148,11 @@ export function DatasetsSidebarMain({ className }: { className?: string }) {
                         <item.icon className="shrink-0" strokeWidth={hasActiveChildren ? 2.5 : 2} />
                       )}
                       <span className="mr-auto flex-1 whitespace-nowrap">{item.title}</span>
-                      <SidebarMenuAction className="[[data-state=open]_>_&]:rotate-90">
-                        <ChevronRight />
-                        <span className="sr-only">Toggle</span>
+                      <SidebarMenuAction asChild className="[[data-state=open]_>_&]:rotate-90">
+                        <span>
+                          <ChevronRight />
+                          <span className="sr-only">Toggle</span>
+                        </span>
                       </SidebarMenuAction>
                     </SidebarMenuButton>
                   </CollapsibleTrigger>

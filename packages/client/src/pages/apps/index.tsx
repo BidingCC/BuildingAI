@@ -21,7 +21,7 @@ import { ChevronRight, Search } from "lucide-react";
 
 const AppsIndexPage = () => {
   return (
-    <ScrollArea className="h-dvh">
+    <ScrollArea className="h-dvh" viewportClassName="[&_>div]:block!">
       <div className="flex w-full flex-col items-center">
         <div className="flex h-13 w-full items-center px-2">
           <SidebarTrigger className="md:hidden" />
