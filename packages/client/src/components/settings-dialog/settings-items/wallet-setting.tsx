@@ -1,14 +1,17 @@
+import { useAuthStore } from "@buildingai/stores";
 import { Button } from "@buildingai/ui/components/ui/button";
-import { ChevronRight, CircleDollarSign } from "lucide-react";
+import { ChevronRight, CircleDollarSign, Info } from "lucide-react";
 
 const WalletSetting = () => {
+  const { userInfo } = useAuthStore((state) => state.auth);
+
   return (
     <div>
       <div className="bg-primary relative overflow-hidden rounded-xl p-6">
         <div className="flex flex-col gap-1">
-          <span className="text-primary-foreground/70">钱包余额</span>
+          <span className="text-primary-foreground/70 text-sm">钱包余额</span>
           <span className="text-primary-foreground flex items-end leading-none">
-            <span className="text-3xl leading-none font-bold">100000.00</span>
+            <span className="text-3xl leading-none font-bold">{userInfo?.power}</span>
           </span>
         </div>
         <div className="mt-2 flex">
@@ -17,6 +20,7 @@ const WalletSetting = () => {
             variant="ghost"
             className="hover:bg-primary-foreground/15 text-primary-foreground hover:text-primary-foreground px-0 text-xs hover:px-1.5"
           >
+            <Info />
             积分明细
             <ChevronRight />
           </Button>
