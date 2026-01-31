@@ -5,12 +5,9 @@ import { Dict } from "@buildingai/db/entities";
 import { AccountLog } from "@buildingai/db/entities";
 import { RechargeOrder } from "@buildingai/db/entities";
 import { Recharge, RefundLog } from "@buildingai/db/entities";
-import { PayfactoryService } from "@common/modules/pay/services/payfactory.service";
-import { WxPayService } from "@common/modules/pay/services/wxpay.service";
+import { PayModule } from "@common/modules/pay/pay.module";
 import { RefundService } from "@common/modules/refund/services/refund.service";
 import { Module } from "@nestjs/common";
-
-import { PayconfigService } from "../system/services/payconfig.service";
 import { RechargeConfigController } from "./controllers/console/recharge-config.controller";
 import { RechargeOrderController } from "./controllers/console/recharge-order.controller";
 import { RechargeWebController } from "./controllers/web/recharge.controller";
@@ -29,24 +26,19 @@ import { RechargeOrderService } from "./services/recharge-order.service";
             RefundLog,
             AccountLog,
         ]),
+        PayModule,
     ],
     controllers: [RechargeConfigController, RechargeOrderController, RechargeWebController],
     providers: [
         RechargeConfigService,
         RechargeOrderService,
-        PayfactoryService,
-        WxPayService,
         RefundService,
-        PayconfigService,
         RechargeService,
     ],
     exports: [
         RechargeConfigService,
         RechargeOrderService,
-        PayfactoryService,
-        WxPayService,
         RefundService,
-        PayconfigService,
         RechargeService,
     ],
 })

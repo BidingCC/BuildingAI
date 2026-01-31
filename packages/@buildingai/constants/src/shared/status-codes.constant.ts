@@ -29,6 +29,14 @@ export const UserTerminal = {
     H5: 2,
     MP: 3,
     APP: 4,
+    OA: 5,
 } as const;
 export type UserTerminalType = (typeof UserTerminal)[keyof typeof UserTerminal];
 export type UserTerminalKey = keyof typeof UserTerminal;
+export const UserTerminalReverse = {
+    [UserTerminal.PC]: "PC",
+    [UserTerminal.H5]: "H5",
+    [UserTerminal.MP]: "MP",
+    [UserTerminal.APP]: "APP",
+    [UserTerminal.OA]: "OA",
+} as const;

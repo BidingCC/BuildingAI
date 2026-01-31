@@ -1,4 +1,6 @@
 import { PayConfigPayType } from "@buildingai/constants/shared/payconfig.constant";
+import { UserTerminalType } from "@buildingai/constants/shared/status-codes.constant";
+import { UserTerminal } from "@buildingai/constants/shared/status-codes.constant";
 import { DictCacheService } from "@buildingai/dict";
 import { HttpErrorFactory } from "@buildingai/errors";
 import {
@@ -46,12 +48,13 @@ export class WxPayService {
      * @returns 支付订单创建结果，包含二维码URL
      * @throws 当订单创建失败时抛出异常
      */
-    async createwxPayOrder(payOrder: PayOrder) {
+    async createwxPayOrder(payOrder: PayOrder, scene: UserTerminalType) {
         try {
             const { orderSn, amount, from } = payOrder;
             // 通过工厂获取微信支付服务实例
             const wechatPayService = await this.payfactoryService.getPayService(
                 PayConfigPayType.WECHAT,
+                scene,
             );
             // 创建微信native支付订单
             const result = await wechatPayService.createNativeOrder({
@@ -67,30 +70,6 @@ export class WxPayService {
             return result;
         } catch (error) {
             throw HttpErrorFactory.internal(`支付订单创建失败: ${error.message}`);
-        }
-    }
-
-    /**
-     * 取消支付订单
-     *
-     * 关闭未支付的微信支付订单
-     * 只能取消未支付的订单，已支付的订单无法取消
-     *
-     * @param orderSn 订单编号
-     * @returns 取消订单结果
-     * @throws 当取消订单失败时抛出异常
-     */
-    async cancelPayOrder(orderSn: string) {
-        try {
-            const wechatPayService = await this.payfactoryService.getPayService(
-                PayConfigPayType.WECHAT,
-            );
-            const result = await wechatPayService.closeOrder(orderSn);
-
-            this.logger.log(`支付订单取消成功: ${orderSn}`);
-            return result;
-        } catch (error) {
-            throw HttpErrorFactory.internal(`取消支付订单失败: ${error.message}`);
         }
     }
 
@@ -113,10 +92,11 @@ export class WxPayService {
      * @returns 订单状态查询结果
      * @throws 当查询失败时抛出异常
      */
-    async queryPayOrder(orderSn: string) {
+    async queryPayOrder(orderSn: string, scene: UserTerminalType) {
         try {
             const wechatPayService = await this.payfactoryService.getPayService(
-                PayConfigPayType.WECHAT,
+                UserTerminal.PC,
+                scene,
             );
             const result = await wechatPayService.queryOrderStatus(orderSn);
 
@@ -148,6 +128,7 @@ export class WxPayService {
         try {
             const wechatPayService = await this.payfactoryService.getPayService(
                 PayConfigPayType.WECHAT,
+                UserTerminal.PC,
             );
             const result = await wechatPayService.notifyPay(params);
 
@@ -173,6 +154,7 @@ export class WxPayService {
      */
     async decryptPayNotifyBody(body: Record<string, any>) {
         const wechatPayService = await this.payfactoryService.getPayService(
+            UserTerminal.PC,
             PayConfigPayType.WECHAT,
         );
         const result = wechatPayService.decryptNotifyBody(body.resource);
@@ -185,10 +167,11 @@ export class WxPayService {
      * @param params 退款参数
      * @returns 退款结果
      */
-    async refund(params: WechatPayRefundParams): Promise<any> {
+    async refund(params: WechatPayRefundParams, scene: UserTerminalType): Promise<any> {
         try {
             const wechatPayService = await this.payfactoryService.getPayService(
                 PayConfigPayType.WECHAT,
+                scene,
             );
             const result = await wechatPayService.refund(params);
 
@@ -205,10 +188,11 @@ export class WxPayService {
      * @param out_refund_no 退款单号
      * @returns 退款状态
      */
-    async queryRefundStatus(out_refund_no: string): Promise<any> {
+    async queryRefundStatus(out_refund_no: string, scene: UserTerminalType): Promise<any> {
         try {
             const wechatPayService = await this.payfactoryService.getPayService(
                 PayConfigPayType.WECHAT,
+                scene,
             );
             const result = await wechatPayService.queryRefundStatus(out_refund_no);
 

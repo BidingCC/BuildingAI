@@ -1,9 +1,11 @@
 import { BaseService } from "@buildingai/base";
+import { PayConfigPayType } from "@buildingai/constants/shared/payconfig.constant";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
 import { Dict } from "@buildingai/db/entities";
 import { Repository } from "@buildingai/db/typeorm";
 import { DictCacheService } from "@buildingai/dict";
 import { DictService } from "@buildingai/dict";
+import { PAY_EVENTS } from "@common/modules/pay/constants/pay-events.contant";
 import { WECHAT_EVENTS } from "@common/modules/wechat/constants/wechat.constant";
 import { Injectable } from "@nestjs/common";
 import { EventEmitter2 } from "@nestjs/event-emitter";
@@ -45,6 +47,8 @@ export class WxMpConfigService extends BaseService<Dict> {
     async updateConfig(config: UpdateWxMpConfigDto) {
         await this.setGroupConfig("wxmpconfig", config);
         this.eventEmitter.emit(WECHAT_EVENTS.MP_CONFIG_REFRESH);
+        this.eventEmitter.emit(PAY_EVENTS.REFRESH, PayConfigPayType.WECHAT);
+
         return { success: true };
     }
 

@@ -37,7 +37,7 @@ export const isWechatOa = (() => {
 
 export const getTerminal = () => {
     // #ifdef H5
-    return UserTerminal.H5;
+    return isWechatOa ? UserTerminal.OA : UserTerminal.H5;
     // #endif
     // #ifdef MP
     return UserTerminal.MP;

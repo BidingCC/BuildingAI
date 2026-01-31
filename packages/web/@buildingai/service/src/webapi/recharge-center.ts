@@ -7,6 +7,7 @@
  */
 
 import { type PayConfigType } from "@buildingai/constants/shared";
+import { type UserTerminalType } from "@buildingai/constants/shared/status-codes.constant";
 
 import type { BaseEntity } from "../models/globals";
 
@@ -81,6 +82,8 @@ export interface OrderParams {
     id: string;
     /** Payment method */
     payType: PayConfigType;
+    /** Terminal type */
+    scene: UserTerminalType;
 }
 
 /**
@@ -107,6 +110,8 @@ export interface PrepaidParams {
     orderId: string;
     /** Payment method */
     payType: PayConfigType;
+    /** Terminal type */
+    scene: UserTerminalType;
 }
 
 /**

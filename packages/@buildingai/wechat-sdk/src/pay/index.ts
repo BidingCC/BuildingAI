@@ -3,11 +3,15 @@ import crypto from "crypto";
 import QRCode from "qrcode";
 import WechatPay from "wechatpay-node-v3";
 
-import { resourceType, resStatusCode, WechatPayRefundParams } from "../interfaces/pay";
 import {
+    resourceType,
+    resStatusCode,
     WechatPayConfig,
+    WechatPayJsapiOrderParams,
+    WechatPayJsapiPayParams,
     WechatPayNativeOrderParams,
     WechatPayNotifyParams,
+    WechatPayRefundParams,
 } from "../interfaces/pay";
 
 export class WechatPayService {
@@ -214,6 +218,90 @@ export class WechatPayService {
         }
 
         return data;
+    }
+
+    /**
+     * 创建微信支付 JSAPI 订单（公众号/小程序）
+     *
+     * 返回值为前端调起支付所需参数（RSA 签名）。
+     */
+    async createJsapiOrder(params: WechatPayJsapiOrderParams): Promise<WechatPayJsapiPayParams> {
+        if (params.out_trade_no.length >= 32) {
+            throw new Error("商户订单号长度不能超过32位");
+        }
+        if (params.amount.total <= 0) {
+            throw new Error("支付金额必须大于0");
+        }
+        if (!params.payer?.openid) {
+            throw new Error("JSAPI 支付必须提供 payer.openid");
+        }
+
+        // 注意：回调地址与 native_pay 保持一致（后端统一处理支付回调）
+        const notifyUrl =
+            this.config.domain + process.env.VITE_APP_WEB_API_PREFIX + "/pay/notifyWxPay";
+
+        this.logger.log(notifyUrl);
+
+        // JSAPI 下单
+        // wechatpay-node-v3: transactions_jsapi
+        const res = await (this.client as any).transactions_jsapi({
+            out_trade_no: params.out_trade_no,
+            description: params.description,
+            notify_url: notifyUrl,
+            amount: {
+                total: Math.round(params.amount.total * 100),
+                currency: params.amount.currency ?? "CNY",
+            },
+            attach: params.attach,
+            payer: {
+                openid: params.payer.openid,
+            },
+        });
+
+        const { status, error, data } = res;
+        if (status !== resStatusCode.SUCCESS) {
+            const errorMessage = JSON.parse(error).message;
+            throw new Error(errorMessage);
+        }
+
+        // data.prepay_id
+        const prepayId: string | undefined = data?.prepay_id;
+        if (!prepayId) {
+            throw new Error("微信下单成功但未返回 prepay_id");
+        }
+
+        return this.buildJsapiPayParams(prepayId);
+    }
+
+    /**
+     * 生成前端调起 JSAPI 支付所需参数（RSA-SHA256）
+     *
+     * 签名串格式：
+     * appId\n
+     * timeStamp\n
+     * nonceStr\n
+     * package\n
+     */
+    buildJsapiPayParams(prepayId: string): WechatPayJsapiPayParams {
+        const appId = this.config.appId;
+        const timeStamp = `${Math.floor(Date.now() / 1000)}`;
+        const nonceStr = crypto.randomBytes(16).toString("hex");
+        const pkg = `prepay_id=${prepayId}`;
+
+        const message = `${appId}\n${timeStamp}\n${nonceStr}\n${pkg}\n`;
+        const sign = crypto.createSign("RSA-SHA256");
+        sign.update(message);
+        sign.end();
+        const paySign = sign.sign(this.config.privateKey, "base64");
+
+        return {
+            appId,
+            timeStamp,
+            nonceStr,
+            package: pkg,
+            signType: "RSA",
+            paySign,
+        };
     }
 }
 

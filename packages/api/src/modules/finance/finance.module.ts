@@ -10,8 +10,7 @@ import { RechargeOrder } from "@buildingai/db/entities";
 import { Recharge, RefundLog } from "@buildingai/db/entities";
 import { DictCacheService } from "@buildingai/dict";
 import { DictService } from "@buildingai/dict";
-import { PayfactoryService } from "@common/modules/pay/services/payfactory.service";
-import { WxPayService } from "@common/modules/pay/services/wxpay.service";
+import { PayModule } from "@common/modules/pay/pay.module";
 import { RefundService } from "@common/modules/refund/services/refund.service";
 import { FinanceController } from "@modules/finance/controllers/finance.controller";
 import { FinanceService } from "@modules/finance/services/finance.service";
@@ -31,25 +30,20 @@ import { Module } from "@nestjs/common";
             RefundLog,
             Agent,
         ]),
+        PayModule,
     ],
     controllers: [FinanceController],
     providers: [
         FinanceService,
         RefundService,
-        WxPayService,
-        PayfactoryService,
         DictCacheService,
-        PayconfigService,
         CacheService,
         DictService,
     ],
     exports: [
         FinanceService,
         RefundService,
-        WxPayService,
-        PayfactoryService,
         DictCacheService,
-        PayconfigService,
         CacheService,
         DictService,
     ],

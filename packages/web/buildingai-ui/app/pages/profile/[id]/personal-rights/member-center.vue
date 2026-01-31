@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { PayConfigPayType, type PayConfigType } from "@buildingai/constants/shared";
+import { UserTerminal } from "@buildingai/constants/shared/status-codes.constant";
 import type {
     MemberCenterInfo,
     MembershipOrderInfo,
@@ -11,7 +12,6 @@ import {
 } from "@buildingai/service/webapi/member-center";
 import type { PrepaidInfo } from "@buildingai/service/webapi/recharge-center";
 import { apiGetPayResult, apiPostPrepaid } from "@buildingai/service/webapi/recharge-center";
-
 const PaymentQrModal = defineAsyncComponent(() => import("../../components/payment-qr-modal.vue"));
 const MemberSuccessModal = defineAsyncComponent(
     () => import("../../components/member-success-modal.vue"),
@@ -218,6 +218,7 @@ const handleSubscribe = async (): Promise<void> => {
             from: "membership",
             orderId: res.orderId,
             payType: state.selectedPaymentMethod,
+            scene: UserTerminal.PC,
         });
         mountPaymentModal(prepaidInfo);
         state.isQrCodeExpired = false;
@@ -278,6 +279,7 @@ const handleRefreshQrCode = async (): Promise<void> => {
             from: "membership",
             orderId: state.orderInfo.orderId,
             payType: state.selectedPaymentMethod,
+            scene: UserTerminal.PC,
         });
         mountPaymentModal(prepaidInfo);
         state.isQrCodeExpired = false;

@@ -1,4 +1,5 @@
 import { PayConfigPayType } from "@buildingai/constants";
+import { UserTerminalType } from "@buildingai/constants/shared/status-codes.constant";
 import { DictCacheService } from "@buildingai/dict";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { PayOrder } from "@common/interfaces/pay.interface";
@@ -14,7 +15,7 @@ export class AlipayService {
         private readonly dictCacheService: DictCacheService,
     ) {}
 
-    async createWebPayOrder(payOrder: PayOrder) {
+    async createWebPayOrder(payOrder: PayOrder, scene: UserTerminalType) {
         try {
             const { orderSn, amount, from } = payOrder;
 
@@ -24,6 +25,7 @@ export class AlipayService {
 
             const alipayService = await this.payfactoryService.getPayService(
                 PayConfigPayType.ALIPAY,
+                scene,
             );
 
             const domain = process.env.APP_DOMAIN;
@@ -49,10 +51,11 @@ export class AlipayService {
         }
     }
 
-    async queryPayOrder(orderSn: string) {
+    async queryPayOrder(orderSn: string, scene: UserTerminalType) {
         try {
             const alipayService = await this.payfactoryService.getPayService(
                 PayConfigPayType.ALIPAY,
+                scene,
             );
 
             return await alipayService.query({ outTradeNo: orderSn });
@@ -63,10 +66,11 @@ export class AlipayService {
         }
     }
 
-    async cancelPayOrder(orderSn: string): Promise<any> {
+    async cancelPayOrder(orderSn: string, scene: UserTerminalType): Promise<any> {
         try {
             const alipayService = await this.payfactoryService.getPayService(
                 PayConfigPayType.ALIPAY,
+                scene,
             );
 
             return await alipayService.close({ outTradeNo: orderSn });
@@ -82,16 +86,20 @@ export class AlipayService {
         return body;
     }
 
-    async refund(params: {
-        out_trade_no: string;
-        out_refund_no: string;
-        refund: number;
-        total: number;
-        reason?: string;
-    }): Promise<any> {
+    async refund(
+        params: {
+            out_trade_no: string;
+            out_refund_no: string;
+            refund: number;
+            total: number;
+            reason?: string;
+        },
+        scene: UserTerminalType,
+    ): Promise<any> {
         try {
             const alipayService = await this.payfactoryService.getPayService(
                 PayConfigPayType.ALIPAY,
+                scene,
             );
 
             return await alipayService.refund({
@@ -105,10 +113,15 @@ export class AlipayService {
         }
     }
 
-    async queryRefundStatus(outRefundNo: string, outRequestNo?: string): Promise<any> {
+    async queryRefundStatus(
+        outRefundNo: string,
+        scene: UserTerminalType,
+        outRequestNo?: string,
+    ): Promise<any> {
         try {
             const alipayService = await this.payfactoryService.getPayService(
                 PayConfigPayType.ALIPAY,
+                scene,
             );
 
             return await alipayService.refundQuery(outRefundNo, outRequestNo);

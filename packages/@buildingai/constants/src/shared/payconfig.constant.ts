@@ -3,6 +3,11 @@ export const PayConfigPayType = {
     ALIPAY: 2, //支付宝支付
 } as const;
 export type PayConfigType = (typeof PayConfigPayType)[keyof typeof PayConfigPayType];
+export type PayConfigTypeKey = [keyof typeof PayConfigPayType];
+export const PayConfigPayTypeReverse = {
+    [PayConfigPayType.WECHAT]: "WECHAT",
+    [PayConfigPayType.ALIPAY]: "ALIPAY",
+} as const;
 
 /**
  * 商户类型, 适用于 WeChatPay
@@ -23,7 +28,6 @@ export const PayVersion = {
 export type PayVersionType = (typeof PayVersion)[keyof typeof PayVersion];
 
 export interface WeChatPayConfig {
-    appId: string;
     mchId: string;
     apiKey: string;
     paySignKey: string;

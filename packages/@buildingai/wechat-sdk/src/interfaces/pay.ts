@@ -56,3 +56,40 @@ export interface WechatPayRefundParams {
         currency: "CNY";
     };
 }
+
+/**
+ * JSAPI（公众号/小程序）下单参数
+ *
+ * 文档: https://pay.weixin.qq.com/wiki/doc/apiv3/apis/chapter3_1_1.shtml
+ */
+export interface WechatPayJsapiOrderParams {
+    /** 商品描述 */
+    description: string;
+    /** 商户订单号 */
+    out_trade_no: string;
+    /** 支付金额（元），内部会转为分 */
+    amount: {
+        total: number;
+        currency?: string; // 默认 CNY
+    };
+    /** 附加数据，回调时原样返回（可选） */
+    attach?: string;
+    /** 支付者信息（JSAPI 必填 openid） */
+    payer: {
+        openid: string;
+    };
+}
+
+/**
+ * 前端调起支付参数（公众号/小程序通用结构）
+ *
+ * 公众号端一般由 wx.chooseWXPay 使用；小程序端由 wx.requestPayment 使用。
+ */
+export type WechatPayJsapiPayParams = {
+    appId: string;
+    timeStamp: string;
+    nonceStr: string;
+    package: string;
+    signType: "RSA";
+    paySign: string;
+};

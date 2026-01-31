@@ -1,6 +1,7 @@
 import { BaseController } from "@buildingai/base";
 import { PayConfigPayType } from "@buildingai/constants";
 import { type UserPlayground } from "@buildingai/db";
+import { BuildFileUrl } from "@buildingai/decorators/file-url.decorator";
 import { Playground } from "@buildingai/decorators/playground.decorator";
 import { Public } from "@buildingai/decorators/public.decorator";
 import { WechatPayNotifyParams } from "@buildingai/wechat-sdk/interfaces/pay";
@@ -9,11 +10,16 @@ import { PrepayDto } from "@modules/pay/dto/prepay.dto";
 import { PayService } from "@modules/pay/services/pay.service";
 import { Body, Get, Headers, Post, Query, Res } from "@nestjs/common";
 import type { Response } from "express";
-
 @WebController("pay")
 export class PayWebController extends BaseController {
     constructor(private readonly payService: PayService) {
         super();
+    }
+
+    @Get("payWayList")
+    @BuildFileUrl(["**.logo"])
+    async getPayWayList() {
+        return this.payService.getPayWayList();
     }
 
     @Post("prepay")
@@ -74,15 +80,6 @@ export class PayWebController extends BaseController {
     @Get("returnAlipay")
     async returnAlipay(@Query() query: any, @Res() res: Response) {
         try {
-            // validate signature
-            // const alipayService = await this.payfactoryService.getPayService(
-            //     PayConfigPayType.ALIPAY,
-            // );
-            // const isValid = alipayService.checkNotifySignV2(query);
-            // if (!isValid) {
-            //     return res.redirect("/payment/fail");
-            // }
-
             const orderNo = query.out_trade_no;
             return res.redirect(
                 `/payment/success?orderNo=${orderNo}&payType=${PayConfigPayType.ALIPAY}}`,

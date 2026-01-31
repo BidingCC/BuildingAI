@@ -66,7 +66,6 @@ export class PayconfigService extends BaseService<Payconfig> {
         if (!payConfig) {
             throw HttpErrorFactory.notFound("支付配置不存在");
         }
-
         return payConfig;
     }
 

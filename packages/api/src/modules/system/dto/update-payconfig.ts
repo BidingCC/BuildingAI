@@ -76,13 +76,6 @@ export class WeChatPayConfigDto {
     @IsNotEmpty()
     @IsString()
     cert: string;
-
-    /**
-     * appid
-     */
-    @IsNotEmpty()
-    @IsString()
-    appId: string;
 }
 
 export class AlipayConfigDto {

@@ -44,7 +44,7 @@ export class RechargeOrder extends BaseEntity {
     /**
      * 订单来源终端
      *
-     * 1: PC, 2: H5, 3: 小程序, 4: APP
+     * 1: PC, 2: H5, 3: 小程序, 4: APP 5: OA
      */
     @Column({ type: "int", default: UserTerminal.PC })
     terminal: UserTerminalType;

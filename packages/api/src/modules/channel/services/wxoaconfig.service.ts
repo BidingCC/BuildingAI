@@ -1,10 +1,12 @@
 import { BaseService } from "@buildingai/base";
+import { PayConfigPayType } from "@buildingai/constants/shared/payconfig.constant";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
 import { Dict } from "@buildingai/db/entities";
 import { Repository } from "@buildingai/db/typeorm";
 import { DictCacheService } from "@buildingai/dict";
 import { DictService } from "@buildingai/dict";
 import { HttpErrorFactory } from "@buildingai/errors";
+import { PAY_EVENTS } from "@common/modules/pay/constants/pay-events.contant";
 import { WECHAT_EVENTS } from "@common/modules/wechat/constants/wechat.constant";
 import { UpdateWxOaConfigDto } from "@modules/channel/dto/updatewx.dto";
 import {
@@ -77,6 +79,8 @@ export class WxOaConfigService extends BaseService<Dict> {
         }
         await this.setGroupConfig("wxoaconfig", config);
         this.eventEmitter.emit(WECHAT_EVENTS.REFRESH);
+        this.eventEmitter.emit(PAY_EVENTS.REFRESH, PayConfigPayType.WECHAT);
+
         return { success: true };
     }
 

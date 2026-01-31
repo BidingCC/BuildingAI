@@ -1,14 +1,15 @@
 import { TypeOrmModule } from "@buildingai/db/@nestjs/typeorm";
 import { Payconfig } from "@buildingai/db/entities";
+import { ChannelModule } from "@modules/channel/channel.module";
 import { PayconfigService } from "@modules/system/services/payconfig.service";
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 
 import { AlipayService } from "./services/alipay.service";
 import { PayfactoryService } from "./services/payfactory.service";
 import { WxPayService } from "./services/wxpay.service";
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Payconfig])],
+    imports: [TypeOrmModule.forFeature([Payconfig]), forwardRef(() => ChannelModule)],
     controllers: [],
     providers: [PayconfigService, WxPayService, AlipayService, PayfactoryService],
     exports: [PayconfigService, WxPayService, AlipayService, PayfactoryService],

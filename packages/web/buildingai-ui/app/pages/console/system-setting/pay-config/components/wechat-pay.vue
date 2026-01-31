@@ -9,10 +9,12 @@ import {
 } from "@buildingai/constants/shared";
 import { PayConfigPayTypeLabels } from "@buildingai/service/consoleapi/payconfig";
 import { apiGetPayconfigById, apiUpdatePayconfig } from "@buildingai/service/consoleapi/payconfig";
+import { useClipboard } from "@vueuse/core";
 import { number, object, string } from "yup";
 
 const message = useMessage();
 const { t } = useI18n();
+const { copy } = useClipboard();
 const router = useRouter();
 const route = useRoute();
 
@@ -26,7 +28,6 @@ const formData = shallowReactive<WeChatPayFormType>({
     sort: 0,
     payType: PayConfigPayType.WECHAT,
     config: {
-        appId: "",
         mchId: "",
         apiKey: "",
         paySignKey: "",
@@ -78,6 +79,20 @@ const { lockFn: submitForm, isLock: isSubmitting } = useLockFn(async () => {
         console.log(error);
     }
 });
+// 支付授权目录（写死）
+const payAuthDir = ref("/pay/notify");
+
+// 复制支付授权目录
+const copyPayAuthDir = async () => {
+    try {
+        await copy(payAuthDir.value);
+        message.success(t("console-common.messages.copySuccess"));
+    } catch (error) {
+        console.error("复制失败:", error);
+        message.error(t("console-common.messages.copyFailed"));
+    }
+};
+
 const schema = object({
     name: string().required(t("payment-config.validation.nameRequired")),
     sort: number().required(t("payment-config.validation.sortRequired")),
@@ -88,7 +103,6 @@ const schema = object({
         apiKey: string().required(t("payment-config.validation.apiKeyRequired")),
         paySignKey: string().required(t("payment-config.validation.paySignKeyRequired")),
         cert: string().required(t("payment-config.validation.certRequired")),
-        appId: string().required(t("payment-config.validation.appIdRequired")),
     }).required(),
 });
 </script>
@@ -290,19 +304,30 @@ const schema = object({
                             </template>
                         </UInput>
                     </UFormField> -->
-                    <!-- appId -->
+                    <!-- 支付授权目录 -->
                     <UFormField
-                        :label="t('payment-config.form.appId')"
-                        name="config.appId"
-                        required
-                        :description="t('payment-config.form.appIdHelp')"
+                        :label="t('payment-config.form.payAuthDir')"
+                        name="payAuthDir"
+                        :description="t('payment-config.form.payAuthDirHelp')"
                     >
                         <UInput
-                            v-model="formData.config!.appId"
-                            :placeholder="t('payment-config.form.appIdInput')"
+                            :model-value="payAuthDir"
+                            variant="subtle"
+                            :placeholder="t('payment-config.form.payAuthDirHelp')"
+                            :disabled="true"
                             class="w-full"
-                        />
+                        >
+                            <template #trailing>
+                                <span
+                                    class="text-primary cursor-pointer text-xs"
+                                    @click="copyPayAuthDir"
+                                >
+                                    {{ t("payment-config.form.copy") }}
+                                </span>
+                            </template>
+                        </UInput>
                     </UFormField>
+
                     <!-- 排序 -->
                     <UFormField
                         :label="t('payment-config.form.sort')"

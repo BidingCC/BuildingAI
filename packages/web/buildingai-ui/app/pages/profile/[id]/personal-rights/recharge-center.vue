@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { PayConfigPayType, type PayConfigType } from "@buildingai/constants/shared";
+import { UserTerminal } from "@buildingai/constants/shared/status-codes.constant";
 import type { RechargeRule } from "@buildingai/service/webapi/recharge-center";
 import type { OrderInfo, PrepaidInfo } from "@buildingai/service/webapi/recharge-center";
 import {
@@ -8,7 +9,6 @@ import {
     apiPostPrepaid,
     apiPostRecharge,
 } from "@buildingai/service/webapi/recharge-center";
-
 const PaymentQrModal = defineAsyncComponent(() => import("../../components/payment-qr-modal.vue"));
 const RechargeSuccessModal = defineAsyncComponent(
     () => import("../../components/recharge-success-modal.vue"),
@@ -127,6 +127,7 @@ const handleRecharge = async (): Promise<void> => {
         const res = await apiPostRecharge({
             id: currentOption.value.id,
             payType: state.selectedPaymentMethod,
+            scene: UserTerminal.PC,
         });
         state.orderInfo = res;
 
@@ -134,6 +135,7 @@ const handleRecharge = async (): Promise<void> => {
             from: "recharge",
             orderId: res.orderId,
             payType: state.selectedPaymentMethod,
+            scene: UserTerminal.PC,
         });
         mountPaymentModal(prepaidInfo);
         state.isQrCodeExpired = false;
@@ -188,6 +190,7 @@ const handleRefreshQrCode = async (): Promise<void> => {
             from: "recharge",
             orderId: state.orderInfo.orderId,
             payType: state.selectedPaymentMethod,
+            scene: UserTerminal.PC,
         });
         mountPaymentModal(prepaidInfo);
         state.isQrCodeExpired = false;

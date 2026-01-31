@@ -4,6 +4,9 @@ import {
     ACCOUNT_LOG_TYPE,
 } from "@buildingai/constants/shared/account-log.constants";
 import { PayConfigPayType } from "@buildingai/constants/shared/payconfig.constant";
+import { BooleanNumber } from "@buildingai/constants/shared/status-codes.constant";
+import { UserTerminalType } from "@buildingai/constants/shared/status-codes.constant";
+import { UserTerminal } from "@buildingai/constants/shared/status-codes.constant";
 import { AppBillingService } from "@buildingai/core/modules";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
 import { User } from "@buildingai/db/entities";
@@ -22,7 +25,6 @@ import { WxPayService } from "@common/modules/pay/services/wxpay.service";
 import { PrepayDto } from "@modules/pay/dto/prepay.dto";
 import { Injectable } from "@nestjs/common";
 import { MoreThan, Repository } from "typeorm";
-
 @Injectable()
 export class PayService extends BaseService<Payconfig> {
     constructor(
@@ -45,12 +47,24 @@ export class PayService extends BaseService<Payconfig> {
     }
 
     /**
+     * 获取已启用的支付方式列表（供前端选择支付方式）
+     * @returns 支付方式列表，不包含敏感配置
+     */
+    async getPayWayList(): Promise<Partial<Payconfig>[]> {
+        return this.payconfigRepository.find({
+            where: { isEnable: BooleanNumber.YES },
+            select: ["id", "name", "payType", "logo", "sort", "isDefault"],
+            order: { sort: "DESC" },
+        });
+    }
+
+    /**
      * 预支付接口
      * @param prepayDto
      * @returns
      */
     async prepay(prepayDto: PrepayDto, userId: string) {
-        const { orderId, payType, from } = prepayDto;
+        const { orderId, payType, from, scene } = prepayDto;
         let order: RechargeOrder | MembershipOrder | null = null;
         switch (from) {
             case "recharge":
@@ -96,11 +110,11 @@ export class PayService extends BaseService<Payconfig> {
 
         switch (payType) {
             case PayConfigPayType.WECHAT: {
-                const qrCode = await this.wxpayService.createwxPayOrder(PayOrder);
+                const qrCode = await this.wxpayService.createwxPayOrder(PayOrder, scene);
                 return { qrCode, payType };
             }
             case PayConfigPayType.ALIPAY: {
-                const payForm = await this.alipayService.createWebPayOrder(PayOrder);
+                const payForm = await this.alipayService.createWebPayOrder(PayOrder, scene);
                 return { payForm, payType };
             }
             default:
@@ -145,6 +159,8 @@ export class PayService extends BaseService<Payconfig> {
         try {
             const wechatPayService = await this.payfactoryService.getPayService(
                 PayConfigPayType.WECHAT,
+                //回调不区分支付实例类型
+                UserTerminal.PC,
             );
             const result = await wechatPayService.notifyPay(params);
             if (!result) {
@@ -180,6 +196,7 @@ export class PayService extends BaseService<Payconfig> {
         try {
             const alipayService = await this.payfactoryService.getPayService(
                 PayConfigPayType.ALIPAY,
+                UserTerminal.PC,
             );
 
             const isValid = alipayService.checkNotifySign(body);
