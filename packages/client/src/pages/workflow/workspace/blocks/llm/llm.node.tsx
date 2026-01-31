@@ -1,24 +1,51 @@
-import { Bot } from "lucide-react";
+import type { FunctionComponent } from "react";
 
-import type { NodeProps } from "../types.ts";
-import type { LlmNodeData } from "./llm.types.ts";
+import type { BlockNodeProps } from "../base/block.base";
+import type { LlmBlockData } from "./llm.types";
 
-export function LlmNode(props: NodeProps<LlmNodeData>) {
+/**
+ * LLM Node 组件
+ */
+export const LlmNodeComponent: FunctionComponent<BlockNodeProps<LlmBlockData>> = ({ data }) => {
+  const { modelConfig, temperature, maxTokens, streaming, outputFormat } = data;
+
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 text-xs">
+      {/* 模型信息 */}
       <div className="flex items-center gap-2">
-        <Bot className="h-4 w-4 text-purple-600" />
-        <span className="text-sm font-semibold">{props.data.model}</span>
+        <span className="font-semibold text-gray-700">模型:</span>
+        <span className="rounded bg-blue-100 px-2 py-1 text-blue-700">{modelConfig.model}</span>
       </div>
 
-      <div className="line-clamp-2 text-xs text-gray-600">
-        {props.data.prompt || "未设置提示词"}
+      {/* 参数配置 */}
+      <div className="grid grid-cols-2 gap-2">
+        <div className="flex items-center gap-1">
+          <span className="text-gray-600">温度:</span>
+          <span className="font-medium">{temperature}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="text-gray-600">Token:</span>
+          <span className="font-medium">{maxTokens}</span>
+        </div>
       </div>
 
-      <div className="flex gap-3 text-xs text-gray-500">
-        <span>Temperature: {props.data.temperature}</span>
-        <span>Token: {props.data.maxTokens}</span>
+      {/* 输出配置 */}
+      <div className="flex items-center gap-2">
+        <span className="text-gray-600">格式:</span>
+        <span className="rounded bg-gray-100 px-2 py-1">{outputFormat}</span>
+        {streaming && <span className="rounded bg-green-100 px-2 py-1 text-green-700">流式</span>}
       </div>
+
+      {/* 提示词预览 */}
+      {data.userPrompt && (
+        <div className="rounded border border-gray-200 bg-gray-50 p-2">
+          <div className="text-gray-500">提示词:</div>
+          <div className="line-clamp-2 text-gray-700">
+            {data.userPrompt.substring(0, 60)}
+            {data.userPrompt.length > 60 ? "..." : ""}
+          </div>
+        </div>
+      )}
     </div>
   );
-}
+};

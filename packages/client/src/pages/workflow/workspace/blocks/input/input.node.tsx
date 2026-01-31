@@ -1,19 +1,19 @@
-import type { NodeProps } from "../types.ts";
-import type { InputNodeData } from "./input.types.ts";
+import type { FunctionComponent } from "react";
 
-export function InputNode(props: NodeProps<InputNodeData>) {
+import type { BlockNodeProps } from "../base/block.base.ts";
+import type { InputBlockData } from "./input.types.ts";
+
+export const InputNode: FunctionComponent<BlockNodeProps<InputBlockData>> = ({ data }) => {
   return (
-    <div>
-      {props.data.vars.map((item) => {
-        return (
-          <div key={item.name}>
-            <span className="mr-2">{item.label}:</span>
-            <span className="rounded bg-gray-200 px-2 py-1">
-              &#123;{item.type}&#125;&nbsp;-&nbsp;{item.name}
-            </span>
-          </div>
-        );
-      })}
+    <div className="space-y-2">
+      {data.vars.map((item) => (
+        <div key={item.name} className="flex items-center gap-2">
+          <span className="text-sm font-medium">{item.label}:</span>
+          <span className="rounded bg-gray-200 px-2 py-1 text-xs">
+            {`{${item.type}} - ${item.name}`}
+          </span>
+        </div>
+      ))}
     </div>
   );
-}
+};

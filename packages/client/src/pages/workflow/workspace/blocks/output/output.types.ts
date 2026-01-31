@@ -1,10 +1,11 @@
-import type { BasicNodeData } from "../../types.ts";
+export interface OutputVar {
+  name: string;
+  type: "string" | "number" | "boolean" | "array" | "object";
+  label: string;
+  source?: string;
+}
 
-export interface OutputNodeData extends BasicNodeData {
-  vars: {
-    name: string;
-    label: string;
-    type: "string" | "number";
-    required: boolean;
-  }[];
+export interface OutputBlockData {
+  vars: OutputVar[];
+  format?: "json" | "text" | "html";
 }

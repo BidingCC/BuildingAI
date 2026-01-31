@@ -1,49 +1,49 @@
 import { BlockBase } from "../base/block.base";
-import { OutputNode } from "./output.node";
-import { OutputPanel } from "./output.panel";
-import type { OutputBlockData } from "./output.types";
+import { InputNode } from "./input.node.tsx";
+import { InputPanel } from "./input.panel.tsx";
+import type { InputBlockData } from "./input.types.ts";
 
-export class OutputBlock extends BlockBase<OutputBlockData> {
+export class InputBlock extends BlockBase<InputBlockData> {
   constructor() {
     super({
-      type: "output",
-      label: "输出",
-      description: "定义工作流的输出结果",
-      category: "output",
-      icon: "⬆️",
+      type: "input",
+      label: "输入",
+      description: "定义工作流的输入变量",
+      category: "input",
+      icon: "⬇️",
       defaultData: () => ({
         vars: [
           {
-            name: "result",
+            name: "input",
             type: "string",
-            label: "结果",
+            label: "输入",
+            required: true,
           },
         ],
-        format: "json",
       }),
       handles: {
-        target: true,
-        source: false,
+        target: false,
+        source: true,
       },
     });
   }
 
   get NodeComponent() {
-    return OutputNode;
+    return InputNode;
   }
 
   get PanelComponent() {
-    return OutputPanel;
+    return InputPanel;
   }
 
   /**
-   * 验证输出数据
+   * 验证输入数据
    */
-  validate(data: OutputBlockData) {
+  validate(data: InputBlockData) {
     const errors: string[] = [];
 
     if (!data.vars || data.vars.length === 0) {
-      errors.push("至少需要一个输出变量");
+      errors.push("至少需要一个输入变量");
     }
 
     data.vars.forEach((v, index) => {
@@ -54,10 +54,6 @@ export class OutputBlock extends BlockBase<OutputBlockData> {
         errors.push(`变量 ${index + 1} 缺少标签`);
       }
     });
-
-    if (!data.format) {
-      errors.push("必须指定输出格式");
-    }
 
     return {
       valid: errors.length === 0,

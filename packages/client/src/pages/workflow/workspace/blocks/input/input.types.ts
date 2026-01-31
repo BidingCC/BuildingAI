@@ -1,10 +1,18 @@
-import type { BasicNodeData } from "../../types.ts";
+/**
+ * Input 变量定义
+ */
+export interface InputVar {
+  name: string;
+  type: "string" | "number" | "boolean" | "array" | "object";
+  label: string;
+  required: boolean;
+  defaultValue?: any;
+  description?: string;
+}
 
-export interface InputNodeData extends BasicNodeData {
-  vars: {
-    name: string;
-    label: string;
-    type: "string" | "number";
-    required: boolean;
-  }[];
+/**
+ * Input Block 数据结构
+ */
+export interface InputBlockData {
+  vars: InputVar[];
 }

@@ -1,12 +1,2 @@
-import { LlmNode } from "./llm.node";
-import { LlmPanel } from "./llm.panel";
-
-function LlmNodeBuilder() {
-  return {} as any;
-}
-
-export default {
-  Node: LlmNode,
-  Panel: LlmPanel,
-  builder: LlmNodeBuilder,
-};
+export { LlmBlock } from "./llm.block";
+export type { LlmBlockData, LlmProvider, ModelConfig } from "./llm.types";

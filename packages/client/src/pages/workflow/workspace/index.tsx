@@ -12,18 +12,17 @@ import { useShallow } from "zustand/react/shallow";
 
 import FlowNode from "./_components/flow-node";
 import { WorkflowPanel } from "./_components/flow-panel";
-import NoteNode from "./_components/note-node";
-import { NoteBlockComponent } from "./blocks";
+import { initializeBlocks } from "./blocks/init.ts";
 import { BlocksPanel } from "./blocks-panel/blocks-panel";
 import type { WorkflowBlocksType } from "./constants/node.ts";
-import { NOTE_BLOCK, WORKFLOW_BLOCK } from "./constants/workflow.ts";
+import { WORKFLOW_BLOCK } from "./constants/workflow.ts";
 import { createDefaultWorkflow } from "./demo.data.ts";
 import { selector, useWorkflowStore } from "./store/store.ts";
-import type { AppNode } from "./types.ts";
+
+initializeBlocks();
 
 const nodeTypes = {
   [WORKFLOW_BLOCK]: FlowNode,
-  [NOTE_BLOCK]: NoteNode,
 };
 
 function FlowCanvas() {
@@ -36,28 +35,28 @@ function FlowCanvas() {
     event.dataTransfer.dropEffect = "move";
   }, []);
 
-  const handleNodeDrop = useCallback((event: DragEvent) => {
-    event.preventDefault();
+  const handleNodeDrop = useCallback(
+    (event: DragEvent) => {
+      event.preventDefault();
 
-    const type = event.dataTransfer.getData("application/react-flow");
-    if (!type) {
-      return;
-    }
+      const type = event.dataTransfer.getData("application/react-flow");
+      if (!type) {
+        return;
+      }
 
-    const position = screenToFlowPosition({
-      x: event.clientX,
-      y: event.clientY,
-    });
+      const position = screenToFlowPosition({
+        x: event.clientX,
+        y: event.clientY,
+      });
 
-    if (type === "note") {
-      const newNode = NoteBlockComponent.builder(position.x, position.y) as unknown as AppNode;
-      useWorkflowStore.setState((state) => ({
-        nodes: state.nodes.concat(newNode),
-      }));
-    } else {
-      createNode({ ...position, type: type as WorkflowBlocksType });
-    }
-  }, []);
+      createNode({
+        x: position.x,
+        y: position.y,
+        type: type as WorkflowBlocksType,
+      });
+    },
+    [createNode, screenToFlowPosition],
+  );
 
   return (
     <ReactFlow

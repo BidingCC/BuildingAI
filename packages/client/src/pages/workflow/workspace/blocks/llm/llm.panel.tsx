@@ -1,163 +1,277 @@
-import { Button } from "@buildingai/ui/components/ui/button";
-import { Input } from "@buildingai/ui/components/ui/input";
-import { Label } from "@buildingai/ui/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@buildingai/ui/components/ui/select";
-import { Slider } from "@buildingai/ui/components/ui/slider";
-import { Textarea } from "@buildingai/ui/components/ui/textarea";
-import { useCallback, useEffect, useState } from "react";
+import type { FunctionComponent } from "react";
+import { useState } from "react";
 
-import { useWorkflowStore } from "../../store/store";
-import type { PanelProps } from "../types.ts";
-import type { LlmNodeData } from "./llm.types.ts";
+import type { BlockPanelProps } from "../base/block.base";
+import type { LlmBlockData, LlmProvider } from "./llm.types";
+import { PRESET_MODELS } from "./llm.types";
 
-export function LlmPanel(props: PanelProps<LlmNodeData>) {
-  const updateNodeData = useWorkflowStore((state) => state.updateNodeData);
+/**
+ * LLM Panel 组件
+ */
+export const LlmPanelComponent: FunctionComponent<BlockPanelProps<LlmBlockData>> = ({
+  data,
+  onDataChange,
+}) => {
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
-  // 本地表单状态
-  const [formData, setFormData] = useState({
-    model: props.data.model,
-    systemPrompt: props.data.systemPrompt,
-    prompt: props.data.prompt,
-    temperature: props.data.temperature,
-    maxTokens: props.data.maxTokens,
-  });
-  const [isDirty, setIsDirty] = useState(false);
-
-  // 当选中的节点变化时，重置表单数据
-  useEffect(() => {
-    setFormData({
-      model: props.data.model,
-      systemPrompt: props.data.systemPrompt,
-      prompt: props.data.prompt,
-      temperature: props.data.temperature,
-      maxTokens: props.data.maxTokens,
+  const handleProviderChange = (provider: LlmProvider) => {
+    const defaultModel = PRESET_MODELS[provider][0].value;
+    onDataChange({
+      modelConfig: {
+        ...data.modelConfig,
+        provider,
+        model: defaultModel,
+      },
     });
-    setIsDirty(false);
-  }, [props.id]);
-
-  const handleModelChange = useCallback((model: string) => {
-    setFormData((prev) => ({ ...prev, model }));
-    setIsDirty(true);
-  }, []);
-
-  const handleSystemPromptChange = useCallback((systemPrompt: string) => {
-    setFormData((prev) => ({ ...prev, systemPrompt }));
-    setIsDirty(true);
-  }, []);
-
-  const handlePromptChange = useCallback((prompt: string) => {
-    setFormData((prev) => ({ ...prev, prompt }));
-    setIsDirty(true);
-  }, []);
-
-  const handleTemperatureChange = useCallback((temperature: number[]) => {
-    setFormData((prev) => ({ ...prev, temperature: temperature[0] }));
-    setIsDirty(true);
-  }, []);
-
-  const handleMaxTokensChange = useCallback((maxTokens: number) => {
-    setFormData((prev) => ({ ...prev, maxTokens }));
-    setIsDirty(true);
-  }, []);
-
-  // 保存到节点数据
-  const handleSave = useCallback(() => {
-    updateNodeData(props.id, formData);
-    setIsDirty(false);
-  }, [formData, props.id, updateNodeData]);
-
-  // 取消编辑
-  const handleCancel = useCallback(() => {
-    setFormData({
-      model: props.data.model,
-      systemPrompt: props.data.systemPrompt,
-      prompt: props.data.prompt,
-      temperature: props.data.temperature,
-      maxTokens: props.data.maxTokens,
-    });
-    setIsDirty(false);
-  }, [props.data]);
+  };
 
   return (
     <div className="space-y-4">
-      <div>
-        <Label>模型</Label>
-        <Select value={formData.model} onValueChange={handleModelChange}>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="gpt-4">GPT-4</SelectItem>
-            <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
-            <SelectItem value="claude-3">Claude 3</SelectItem>
-            <SelectItem value="claude-sonnet-4-5">Claude Sonnet 4.5</SelectItem>
-          </SelectContent>
-        </Select>
+      {/* 模型选择 */}
+      <div className="space-y-2">
+        <label className="text-sm font-semibold">模型配置</label>
+
+        {/* 提供商选择 */}
+        <div>
+          <label className="text-xs text-gray-600">提供商</label>
+          <select
+            value={data.modelConfig.provider}
+            onChange={(e) => handleProviderChange(e.target.value as LlmProvider)}
+            className="w-full rounded border px-3 py-2 text-sm"
+          >
+            <option value="openai">OpenAI</option>
+            <option value="anthropic">Anthropic</option>
+            <option value="custom">自定义</option>
+          </select>
+        </div>
+
+        {/* 模型选择 */}
+        <div>
+          <label className="text-xs text-gray-600">模型</label>
+          <select
+            value={data.modelConfig.model}
+            onChange={(e) =>
+              onDataChange({
+                modelConfig: { ...data.modelConfig, model: e.target.value },
+              })
+            }
+            className="w-full rounded border px-3 py-2 text-sm"
+          >
+            {PRESET_MODELS[data.modelConfig.provider].map((model) => (
+              <option key={model.value} value={model.value}>
+                {model.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* 自定义端点（仅自定义提供商） */}
+        {data.modelConfig.provider === "custom" && (
+          <div>
+            <label className="text-xs text-gray-600">API 端点</label>
+            <input
+              type="text"
+              value={data.modelConfig.apiEndpoint || ""}
+              onChange={(e) =>
+                onDataChange({
+                  modelConfig: {
+                    ...data.modelConfig,
+                    apiEndpoint: e.target.value,
+                  },
+                })
+              }
+              className="w-full rounded border px-3 py-2 text-sm"
+              placeholder="https://api.example.com/v1"
+            />
+          </div>
+        )}
       </div>
 
-      <div>
-        <Label>系统提示词 (可选)</Label>
-        <Textarea
-          placeholder="你是一个有帮助的助手..."
-          value={formData.systemPrompt}
-          onChange={(e) => handleSystemPromptChange(e.target.value)}
-          rows={3}
-        />
-      </div>
+      {/* 提示词配置 */}
+      <div className="space-y-2">
+        <label className="text-sm font-semibold">提示词</label>
 
-      <div>
-        <Label>用户提示词</Label>
-        <Textarea
-          placeholder="输入你的提示词..."
-          value={formData.prompt}
-          onChange={(e) => handlePromptChange(e.target.value)}
-          rows={5}
-        />
-      </div>
-
-      <div>
-        <Label>温度 (Temperature)</Label>
-        <div className="flex items-center gap-4">
-          <Slider
-            value={[formData.temperature]}
-            onValueChange={handleTemperatureChange}
-            max={2}
-            step={0.1}
-            className="flex-1"
+        {/* 系统提示词 */}
+        <div>
+          <label className="text-xs text-gray-600">系统提示词（可选）</label>
+          <textarea
+            value={data.systemPrompt || ""}
+            onChange={(e) => onDataChange({ systemPrompt: e.target.value })}
+            className="w-full rounded border px-3 py-2 text-sm"
+            rows={3}
+            placeholder="定义 AI 助手的角色和行为..."
           />
-          <span className="w-12 text-right font-mono text-sm">
-            {formData.temperature.toFixed(1)}
-          </span>
+        </div>
+
+        {/* 用户提示词 */}
+        <div>
+          <label className="text-xs text-gray-600">用户提示词 *</label>
+          <textarea
+            value={data.userPrompt}
+            onChange={(e) => onDataChange({ userPrompt: e.target.value })}
+            className="w-full rounded border px-3 py-2 text-sm"
+            rows={5}
+            placeholder="输入你的提示词，使用 {{变量名}} 引用其他节点的输出..."
+          />
+          <div className="mt-1 text-xs text-gray-500">
+            提示：使用 {"{{"} 和 {"}}"} 包裹变量名，如 {"{{input}}"}
+          </div>
         </div>
       </div>
 
-      <div>
-        <Label>最大 Token 数</Label>
-        <Input
-          type="number"
-          placeholder="2000"
-          value={formData.maxTokens}
-          onChange={(e) => handleMaxTokensChange(Number(e.target.value))}
-        />
+      {/* 基础参数 */}
+      <div className="space-y-2">
+        <label className="text-sm font-semibold">参数配置</label>
+
+        {/* 温度 */}
+        <div>
+          <label className="flex items-center justify-between text-xs text-gray-600">
+            <span>温度 (Temperature)</span>
+            <span className="font-medium">{data.temperature}</span>
+          </label>
+          <input
+            type="range"
+            min="0"
+            max="2"
+            step="0.1"
+            value={data.temperature}
+            onChange={(e) => onDataChange({ temperature: parseFloat(e.target.value) })}
+            className="w-full"
+          />
+          <div className="flex justify-between text-xs text-gray-500">
+            <span>精确</span>
+            <span>创造</span>
+          </div>
+        </div>
+
+        {/* 最大 Token */}
+        <div>
+          <label className="text-xs text-gray-600">最大 Token 数</label>
+          <input
+            type="number"
+            value={data.maxTokens}
+            onChange={(e) => onDataChange({ maxTokens: parseInt(e.target.value) || 1000 })}
+            className="w-full rounded border px-3 py-2 text-sm"
+            min={1}
+            max={100000}
+          />
+        </div>
       </div>
 
-      {/* 保存/取消按钮 */}
-      {isDirty && (
-        <div className="flex gap-2 border-t pt-4">
-          <Button onClick={handleSave} className="flex-1">
-            保存
-          </Button>
-          <Button onClick={handleCancel} variant="outline" className="flex-1">
-            取消
-          </Button>
+      {/* 高级参数（折叠） */}
+      <div className="space-y-2">
+        <button
+          onClick={() => setShowAdvanced(!showAdvanced)}
+          className="flex w-full items-center justify-between text-sm font-semibold text-gray-700"
+        >
+          <span>高级参数</span>
+          <span>{showAdvanced ? "▼" : "▶"}</span>
+        </button>
+
+        {showAdvanced && (
+          <div className="space-y-2 border-l-2 border-gray-200 pl-3">
+            {/* Top P */}
+            <div>
+              <label className="flex items-center justify-between text-xs text-gray-600">
+                <span>Top P</span>
+                <span className="font-medium">{data.topP ?? 1}</span>
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.1"
+                value={data.topP ?? 1}
+                onChange={(e) => onDataChange({ topP: parseFloat(e.target.value) })}
+                className="w-full"
+              />
+            </div>
+
+            {/* Frequency Penalty */}
+            <div>
+              <label className="flex items-center justify-between text-xs text-gray-600">
+                <span>频率惩罚</span>
+                <span className="font-medium">{data.frequencyPenalty ?? 0}</span>
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="2"
+                step="0.1"
+                value={data.frequencyPenalty ?? 0}
+                onChange={(e) => onDataChange({ frequencyPenalty: parseFloat(e.target.value) })}
+                className="w-full"
+              />
+            </div>
+
+            {/* Presence Penalty */}
+            <div>
+              <label className="flex items-center justify-between text-xs text-gray-600">
+                <span>存在惩罚</span>
+                <span className="font-medium">{data.presencePenalty ?? 0}</span>
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="2"
+                step="0.1"
+                value={data.presencePenalty ?? 0}
+                onChange={(e) => onDataChange({ presencePenalty: parseFloat(e.target.value) })}
+                className="w-full"
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 输出配置 */}
+      <div className="space-y-2">
+        <label className="text-sm font-semibold">输出配置</label>
+
+        {/* 输出格式 */}
+        <div>
+          <label className="text-xs text-gray-600">输出格式</label>
+          <select
+            value={data.outputFormat}
+            onChange={(e) =>
+              onDataChange({
+                outputFormat: e.target.value as LlmBlockData["outputFormat"],
+              })
+            }
+            className="w-full rounded border px-3 py-2 text-sm"
+          >
+            <option value="text">纯文本</option>
+            <option value="json">JSON</option>
+            <option value="structured">结构化</option>
+          </select>
         </div>
-      )}
+
+        {/* 流式输出 */}
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="streaming"
+            checked={data.streaming ?? false}
+            onChange={(e) => onDataChange({ streaming: e.target.checked })}
+            className="h-4 w-4"
+          />
+          <label htmlFor="streaming" className="text-sm text-gray-700">
+            启用流式输出
+          </label>
+        </div>
+
+        {/* 输出变量名 */}
+        <div>
+          <label className="text-xs text-gray-600">输出变量名</label>
+          <input
+            type="text"
+            value={data.outputVariable || ""}
+            onChange={(e) => onDataChange({ outputVariable: e.target.value })}
+            className="w-full rounded border px-3 py-2 text-sm"
+            placeholder="llm_output"
+          />
+        </div>
+      </div>
     </div>
   );
-}
+};

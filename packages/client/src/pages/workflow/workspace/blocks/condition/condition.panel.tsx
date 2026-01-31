@@ -1,191 +1,319 @@
-import { Button } from "@buildingai/ui/components/ui/button";
-import { Input } from "@buildingai/ui/components/ui/input";
-import { Label } from "@buildingai/ui/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@buildingai/ui/components/ui/select";
-import { Plus, Trash2 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import type { FunctionComponent } from "react";
+import { nanoid } from "nanoid";
+import type { BlockPanelProps } from "../base/block.base";
+import type {
+  ConditionBlockData,
+  ConditionGroup,
+  ConditionRule,
+  ComparisonOperator,
+  LogicalOperator,
+  ValueType,
+} from "./condition.types";
+import { LOGICAL_OPERATOR_LABELS, OPERATOR_LABELS } from "./condition.types";
 
-import { useWorkflowStore } from "../../store/store";
-import type { PanelProps } from "../types.ts";
-import type { ConditionNodeData } from "./condition.types.ts";
-
-export function ConditionPanel(props: PanelProps<ConditionNodeData>) {
-  const updateNodeData = useWorkflowStore((state) => state.updateNodeData);
-
-  const [formData, setFormData] = useState(props.data.conditions);
-  const [isDirty, setIsDirty] = useState(false);
-
-  useEffect(() => {
-    setFormData(props.data.conditions);
-    setIsDirty(false);
-  }, [props.id, props.data.conditions]);
-
-  const handleAddCondition = useCallback(() => {
-    setFormData([
-      ...formData,
-      {
-        field: "",
-        operator: "eq" as const,
-        value: "",
-        logicOperator: "and" as const,
-      },
-    ]);
-    setIsDirty(true);
-  }, [formData]);
-
-  const handleRemoveCondition = useCallback(
-    (index: number) => {
-      setFormData(formData.filter((_, i) => i !== index));
-      setIsDirty(true);
-    },
-    [formData],
-  );
-
-  const handleFieldChange = useCallback(
-    (index: number, field: string) => {
-      const newConditions = [...formData];
-      newConditions[index] = { ...newConditions[index], field };
-      setFormData(newConditions);
-      setIsDirty(true);
-    },
-    [formData],
-  );
-
-  const handleOperatorChange = useCallback(
-    (index: number, operator: ConditionNodeData["conditions"][0]["operator"]) => {
-      const newConditions = [...formData];
-      newConditions[index] = { ...newConditions[index], operator };
-      setFormData(newConditions);
-      setIsDirty(true);
-    },
-    [formData],
-  );
-
-  const handleValueChange = useCallback(
-    (index: number, value: string) => {
-      const newConditions = [...formData];
-      newConditions[index] = { ...newConditions[index], value };
-      setFormData(newConditions);
-      setIsDirty(true);
-    },
-    [formData],
-  );
-
-  const handleLogicOperatorChange = useCallback(
-    (index: number, logicOperator: "and" | "or") => {
-      const newConditions = [...formData];
-      newConditions[index] = { ...newConditions[index], logicOperator };
-      setFormData(newConditions);
-      setIsDirty(true);
-    },
-    [formData],
-  );
-
-  const handleSave = useCallback(() => {
-    updateNodeData(props.id, { conditions: formData });
-    setIsDirty(false);
-  }, [formData, props.id, updateNodeData]);
-
-  const handleCancel = useCallback(() => {
-    setFormData(props.data.conditions);
-    setIsDirty(false);
-  }, [props.data.conditions]);
+/**
+ * 单个规则编辑器
+ */
+const RuleEditor: FunctionComponent<{
+  rule: ConditionRule;
+  onUpdate: (rule: ConditionRule) => void;
+  onDelete: () => void;
+}> = ({ rule, onUpdate, onDelete }) => {
+  const needsRightValue =
+    rule.operator !== "is_empty" && rule.operator !== "is_not_empty";
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Label>条件规则</Label>
-        <Button size="sm" variant="outline" onClick={handleAddCondition}>
-          <Plus className="h-4 w-4" />
-        </Button>
+    <div className="space-y-2 rounded border border-gray-200 bg-white p-3">
+      {/* 左值 */}
+      <div className="grid grid-cols-3 gap-2">
+        <div className="col-span-2">
+          <input
+            type="text"
+            value={rule.leftValue}
+            onChange={(e) => onUpdate({ ...rule, leftValue: e.target.value })}
+            className="w-full rounded border px-2 py-1 text-sm"
+            placeholder="变量或值"
+          />
+        </div>
+        <div>
+          <select
+            value={rule.leftType}
+            onChange={(e) =>
+              onUpdate({ ...rule, leftType: e.target.value as ValueType })
+            }
+            className="w-full rounded border px-2 py-1 text-sm"
+          >
+            <option value="variable">变量</option>
+            <option value="string">文本</option>
+            <option value="number">数字</option>
+            <option value="boolean">布尔</option>
+          </select>
+        </div>
       </div>
 
-      <div className="max-h-[400px] space-y-3 overflow-y-auto">
-        {formData.map((condition, index) => (
-          <div key={index} className="space-y-2 rounded-lg border p-3">
+      {/* 运算符 */}
+      <div>
+        <select
+          value={rule.operator}
+          onChange={(e) =>
+            onUpdate({ ...rule, operator: e.target.value as ComparisonOperator })
+          }
+          className="w-full rounded border px-2 py-1 text-sm"
+        >
+          {Object.entries(OPERATOR_LABELS).map(([value, label]) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* 右值 */}
+      {needsRightValue && (
+        <div className="grid grid-cols-3 gap-2">
+          <div className="col-span-2">
+            <input
+              type="text"
+              value={rule.rightValue}
+              onChange={(e) => onUpdate({ ...rule, rightValue: e.target.value })}
+              className="w-full rounded border px-2 py-1 text-sm"
+              placeholder="比较值"
+            />
+          </div>
+          <div>
+            <select
+              value={rule.rightType}
+              onChange={(e) =>
+                onUpdate({ ...rule, rightType: e.target.value as ValueType })
+              }
+              className="w-full rounded border px-2 py-1 text-sm"
+            >
+              <option value="variable">变量</option>
+              <option value="string">文本</option>
+              <option value="number">数字</option>
+              <option value="boolean">布尔</option>
+            </select>
+          </div>
+        </div>
+      )}
+
+      {/* 删除按钮 */}
+      <button
+        onClick={onDelete}
+        className="w-full rounded bg-red-50 px-3 py-1 text-xs text-red-600 hover:bg-red-100"
+      >
+        删除规则
+      </button>
+    </div>
+  );
+};
+
+/**
+ * 条件组编辑器
+ */
+const GroupEditor: FunctionComponent<{
+  group: ConditionGroup;
+  onUpdate: (group: ConditionGroup) => void;
+  onDelete: () => void;
+}> = ({ group, onUpdate, onDelete }) => {
+  const addRule = () => {
+    const newRule: ConditionRule = {
+      id: nanoid(),
+      leftValue: "",
+      leftType: "variable",
+      operator: "equals",
+      rightValue: "",
+      rightType: "string",
+    };
+    onUpdate({ ...group, rules: [...group.rules, newRule] });
+  };
+
+  const updateRule = (index: number, rule: ConditionRule) => {
+    const newRules = [...group.rules];
+    newRules[index] = rule;
+    onUpdate({ ...group, rules: newRules });
+  };
+
+  const deleteRule = (index: number) => {
+    const newRules = group.rules.filter((_, i) => i !== index);
+    onUpdate({ ...group, rules: newRules });
+  };
+
+  return (
+    <div className="space-y-3 rounded-lg border-2 border-purple-200 bg-purple-50 p-3">
+      {/* 组头部 */}
+      <div className="flex items-center justify-between">
+        <select
+          value={group.operator}
+          onChange={(e) =>
+            onUpdate({ ...group, operator: e.target.value as LogicalOperator })
+          }
+          className="rounded border bg-white px-3 py-1 text-sm font-medium"
+        >
+          {Object.entries(LOGICAL_OPERATOR_LABELS).map(([value, label]) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
+        </select>
+        <button
+          onClick={onDelete}
+          className="rounded bg-red-500 px-3 py-1 text-xs text-white hover:bg-red-600"
+        >
+          删除组
+        </button>
+      </div>
+
+      {/* 规则列表 */}
+      <div className="space-y-2">
+        {group.rules.map((rule, index) => (
+          <div key={rule.id}>
             {index > 0 && (
-              <Select
-                value={condition.logicOperator}
-                onValueChange={(value) => handleLogicOperatorChange(index, value as "and" | "or")}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="逻辑运算符" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="and">AND (与)</SelectItem>
-                  <SelectItem value="or">OR (或)</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="my-1 text-center text-xs font-semibold text-purple-700">
+                {LOGICAL_OPERATOR_LABELS[group.operator]}
+              </div>
             )}
-
-            <div className="space-y-2">
-              <Input
-                placeholder="字段名称"
-                value={condition.field}
-                onChange={(e) => handleFieldChange(index, e.target.value)}
-              />
-
-              <Select
-                value={condition.operator}
-                onValueChange={(value) =>
-                  handleOperatorChange(
-                    index,
-                    value as ConditionNodeData["conditions"][0]["operator"],
-                  )
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="eq">等于</SelectItem>
-                  <SelectItem value="ne">不等于</SelectItem>
-                  <SelectItem value="gt">大于</SelectItem>
-                  <SelectItem value="lt">小于</SelectItem>
-                  <SelectItem value="gte">大于等于</SelectItem>
-                  <SelectItem value="lte">小于等于</SelectItem>
-                  <SelectItem value="contains">包含</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Input
-                placeholder="比较值"
-                value={condition.value}
-                onChange={(e) => handleValueChange(index, e.target.value)}
-              />
-            </div>
-
-            {formData.length > 1 && (
-              <Button
-                size="sm"
-                variant="ghost"
-                className="w-full"
-                onClick={() => handleRemoveCondition(index)}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                删除条件
-              </Button>
-            )}
+            <RuleEditor
+              rule={rule}
+              onUpdate={(r) => updateRule(index, r)}
+              onDelete={() => deleteRule(index)}
+            />
           </div>
         ))}
       </div>
 
-      {isDirty && (
-        <div className="flex gap-2 border-t pt-4">
-          <Button onClick={handleSave} className="flex-1">
-            保存
-          </Button>
-          <Button onClick={handleCancel} variant="outline" className="flex-1">
-            取消
-          </Button>
-        </div>
-      )}
+      {/* 添加规则按钮 */}
+      <button
+        onClick={addRule}
+        className="w-full rounded border-2 border-dashed border-purple-300 bg-white px-3 py-2 text-sm text-purple-600 hover:border-purple-400 hover:bg-purple-50"
+      >
+        + 添加规则
+      </button>
     </div>
   );
-}
+};
+
+/**
+ * Condition Panel 组件
+ */
+export const ConditionPanelComponent: FunctionComponent<
+  BlockPanelProps<ConditionBlockData>
+> = ({ data, onDataChange }) => {
+  const addGroup = () => {
+    const newGroup: ConditionGroup = {
+      id: nanoid(),
+      operator: "and",
+      rules: [
+        {
+          id: nanoid(),
+          leftValue: "",
+          leftType: "variable",
+          operator: "equals",
+          rightValue: "",
+          rightType: "string",
+        },
+      ],
+    };
+    onDataChange({ groups: [...data.groups, newGroup] });
+  };
+
+  const updateGroup = (index: number, group: ConditionGroup) => {
+    const newGroups = [...data.groups];
+    newGroups[index] = group;
+    onDataChange({ groups: newGroups });
+  };
+
+  const deleteGroup = (index: number) => {
+    const newGroups = data.groups.filter((_, i) => i !== index);
+    onDataChange({ groups: newGroups });
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* 条件组列表 */}
+      <div className="space-y-3">
+        <label className="text-sm font-semibold">条件规则</label>
+        {data.groups.map((group, index) => (
+          <div key={group.id}>
+            {index > 0 && (
+              <div className="my-2">
+                <select
+                  value={data.groupOperator}
+                  onChange={(e) =>
+                    onDataChange({
+                      groupOperator: e.target.value as LogicalOperator,
+                    })
+                  }
+                  className="w-full rounded bg-gray-100 px-3 py-2 text-center font-semibold text-gray-700"
+                >
+                  {Object.entries(LOGICAL_OPERATOR_LABELS).map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+            <GroupEditor
+              group={group}
+              onUpdate={(g) => updateGroup(index, g)}
+              onDelete={() => deleteGroup(index)}
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* 添加条件组 */}
+      <button
+        onClick={addGroup}
+        className="w-full rounded border-2 border-dashed border-gray-300 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-600 hover:border-gray-400 hover:bg-gray-100"
+      >
+        + 添加条件组
+      </button>
+
+      {/* 输出配置 */}
+      <div className="space-y-2 border-t pt-4">
+        <label className="text-sm font-semibold">输出配置</label>
+        
+        <div>
+          <label className="text-xs text-gray-600">True 分支输出变量</label>
+          <input
+            type="text"
+            value={data.trueOutput || ""}
+            onChange={(e) => onDataChange({ trueOutput: e.target.value })}
+            className="w-full rounded border px-3 py-2 text-sm"
+            placeholder="condition_true"
+          />
+        </div>
+
+        <div>
+          <label className="text-xs text-gray-600">False 分支输出变量</label>
+          <input
+            type="text"
+            value={data.falseOutput || ""}
+            onChange={(e) => onDataChange({ falseOutput: e.target.value })}
+            className="w-full rounded border px-3 py-2 text-sm"
+            placeholder="condition_false"
+          />
+        </div>
+
+        <div>
+          <label className="text-xs text-gray-600">默认分支</label>
+          <select
+            value={data.defaultBranch || "both"}
+            onChange={(e) =>
+              onDataChange({
+                defaultBranch: e.target.value as ConditionBlockData["defaultBranch"],
+              })
+            }
+            className="w-full rounded border px-3 py-2 text-sm"
+          >
+            <option value="true">True 分支</option>
+            <option value="false">False 分支</option>
+            <option value="both">两个分支都执行</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  );
+};
