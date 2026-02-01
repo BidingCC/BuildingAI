@@ -2,6 +2,7 @@ import type { UIMessage } from "ai";
 import { memo } from "react";
 
 import { GenericTool } from "../tools/generic-tool";
+import { ImageGenerationTool } from "../tools/image-generation-tool";
 import { WeatherTool } from "../tools/weather-tool";
 
 interface ToolPartData {
@@ -39,6 +40,20 @@ export const MessageTools = memo(function MessageTools({
         if (part.type === "tool-getWeather") {
           return (
             <WeatherTool
+              key={key}
+              toolPart={toolPart}
+              addToolApprovalResponse={addToolApprovalResponse}
+            />
+          );
+        }
+
+        if (
+          part.type === "tool-dalle2ImageGeneration" ||
+          part.type === "tool-dalle3ImageGeneration" ||
+          part.type === "tool-gptImageGeneration"
+        ) {
+          return (
+            <ImageGenerationTool
               key={key}
               toolPart={toolPart}
               addToolApprovalResponse={addToolApprovalResponse}

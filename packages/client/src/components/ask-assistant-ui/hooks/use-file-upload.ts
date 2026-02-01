@@ -33,27 +33,34 @@ export function useFileUpload(multiple?: boolean, features?: string[]) {
 
   const availableFileTypes = useMemo(() => getAvailableFileTypes(features), [features]);
 
-  const handleFileSelect = useCallback(
-    (type: FileType) => {
-      const fileType = FILE_TYPES.find((ft) => ft.type === type);
-      if (!fileType) return;
+  const hasImageSupport = useMemo(() => availableFileTypes.includes("image"), [availableFileTypes]);
 
-      const input = document.createElement("input");
-      input.type = "file";
-      input.multiple = multiple ?? true;
-      if (fileType.accept) {
-        input.accept = fileType.accept;
+  const handleFileSelect = useCallback(() => {
+    if (availableFileTypes.length === 0) return;
+
+    // 组合所有可用文件类型的 accept 属性
+    const acceptList: string[] = [];
+    availableFileTypes.forEach((type) => {
+      const fileType = FILE_TYPES.find((ft) => ft.type === type);
+      if (fileType?.accept) {
+        acceptList.push(fileType.accept);
       }
-      input.onchange = (e) => {
-        const files = Array.from((e.target as HTMLInputElement).files || []);
-        if (files.length) {
-          attachments.add(files);
-        }
-      };
-      input.click();
-    },
-    [attachments, multiple],
-  );
+    });
+
+    const input = document.createElement("input");
+    input.type = "file";
+    input.multiple = multiple ?? true;
+    if (acceptList.length > 0) {
+      input.accept = acceptList.join(",");
+    }
+    input.onchange = (e) => {
+      const files = Array.from((e.target as HTMLInputElement).files || []);
+      if (files.length) {
+        attachments.add(files);
+      }
+    };
+    input.click();
+  }, [attachments, multiple, availableFileTypes]);
 
   const uploadFilesIfNeeded = useCallback(async (files: FileUIPart[]): Promise<FileUIPart[]> => {
     const needsUpload = files.some(
@@ -106,5 +113,6 @@ export function useFileUpload(multiple?: boolean, features?: string[]) {
     handleFileSelect,
     uploadFilesIfNeeded,
     availableFileTypes,
+    hasImageSupport,
   };
 }

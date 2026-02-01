@@ -28,9 +28,11 @@ coverage
 .vercel
 .cursor
 .windsurf
+.idea
 
 # Build Outputs
 .next/
+.nuxt
 out/
 build
 packages/**/dist
@@ -60,7 +62,7 @@ yarn-error.log*
 .eslintcache
 
 # extensions
-extensions/*
+extensions/**/*
 !extensions/buildingai-simple-blog
 !extensions/buildingai-simple-blog/*
 !extensions/buildingai-simple-blog/build

@@ -135,8 +135,14 @@ export interface AssistantContextValue {
   onSwitchBranch: (messageId: string) => void;
   onSelectModel: (id: string) => void;
   onSelectMcpServers: (ids: string[]) => void;
+  onSetFeature: (key: string, value: boolean) => void;
   onLike: (messageKey: string, liked: boolean) => void | Promise<void>;
-  onDislike: (messageKey: string, disliked: boolean, dislikeReason?: string, isUpdate?: boolean) => void | Promise<void>;
+  onDislike: (
+    messageKey: string,
+    disliked: boolean,
+    dislikeReason?: string,
+    isUpdate?: boolean,
+  ) => void | Promise<void>;
   addToolApprovalResponse?: (args: { id: string; approved: boolean; reason?: string }) => void;
 }
 

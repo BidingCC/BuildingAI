@@ -1,9 +1,6 @@
 import { useMcpServerQuickMenuQuery, useMcpServersAllQuery } from "@buildingai/services/web";
 import {
   PromptInput as AIPromptInput,
-  PromptInputActionMenu as AIPromptInputActionMenu,
-  PromptInputActionMenuContent as AIPromptInputActionMenuContent,
-  PromptInputActionMenuTrigger as AIPromptInputActionMenuTrigger,
   PromptInputAttachment as AIPromptInputAttachment,
   PromptInputAttachments as AIPromptInputAttachments,
   PromptInputBody as AIPromptInputBody,
@@ -17,13 +14,28 @@ import {
   PromptInputTools as AIPromptInputTools,
 } from "@buildingai/ui/components/ai-elements/prompt-input";
 import { Button } from "@buildingai/ui/components/ui/button";
-import { DropdownMenuItem } from "@buildingai/ui/components/ui/dropdown-menu";
-import { FileIcon, GlobeIcon, ImageIcon, MicIcon, Square, VideoIcon } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@buildingai/ui/components/ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@buildingai/ui/components/ui/tooltip";
+import { IconBulb } from "@tabler/icons-react";
+import {
+  GlobeIcon,
+  ImagesIcon,
+  LayoutGridIcon,
+  PaperclipIcon,
+  Plus,
+  Square,
+  X,
+} from "lucide-react";
 import type { FormEvent, RefObject } from "react";
-import { memo, useCallback, useMemo } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 
 import { useAssistantContext } from "../../context";
-import { type FileType, useFileUpload } from "../../hooks/use-file-upload";
+import { useFileUpload } from "../../hooks/use-file-upload";
 import { McpSelector } from "../mcp-selector";
 
 export interface PromptInputProps {
@@ -55,44 +67,26 @@ const StopButton = memo(({ onStop }: { onStop: () => void }) => {
 
 StopButton.displayName = "StopButton";
 
-const FILE_MENU_ITEMS = [
-  { type: "image" as const, icon: ImageIcon, label: "添加图片" },
-  { type: "video" as const, icon: VideoIcon, label: "添加视频" },
-  { type: "audio" as const, icon: MicIcon, label: "添加音频" },
-  { type: "file" as const, icon: FileIcon, label: "添加文件" },
-] as const;
+type FeatureKey = "thinking" | "generateImage" | "search";
+type SelectedMenuItem = FeatureKey | null;
 
-const FileSelectMenu = memo(
-  ({
-    onFileSelect,
-    availableTypes,
-  }: {
-    onFileSelect: (type: FileType) => void;
-    availableTypes: FileType[];
-  }) => (
-    <AIPromptInputActionMenuContent>
-      {FILE_MENU_ITEMS.filter((item) => availableTypes.includes(item.type)).map(
-        ({ type, icon: Icon, label }) => (
-          <DropdownMenuItem key={type} onSelect={() => onFileSelect(type)}>
-            <Icon className="mr-2 size-4" />
-            {label}
-          </DropdownMenuItem>
-        ),
-      )}
-    </AIPromptInputActionMenuContent>
-  ),
-);
-
-FileSelectMenu.displayName = "FileSelectMenu";
+interface FeatureMenuItemConfig {
+  id: FeatureKey;
+  icon: React.ReactNode;
+  label: string;
+  featureKey: FeatureKey;
+}
 
 const PromptInputInner = memo(
   ({ textareaRef, status, onStop, globalDrop, multiple, onSubmit }: PromptInputProps) => {
-    const { models, selectedModelId, selectedMcpServerIds, onSelectMcpServers } =
+    const { models, selectedModelId, selectedMcpServerIds, onSelectMcpServers, onSetFeature } =
       useAssistantContext();
     const selectedModel = useMemo(
       () => models.find((m) => m.id === selectedModelId),
       [models, selectedModelId],
     );
+
+    const [selectedMenuItem, setSelectedMenuItem] = useState<SelectedMenuItem>(null);
 
     const { data: mcpServers = [], isLoading: isLoadingMcpServers } = useMcpServersAllQuery({
       enabled: true,
@@ -102,9 +96,53 @@ const PromptInputInner = memo(
       enabled: true,
     });
 
-    const { handleFileSelect, uploadFilesIfNeeded, availableFileTypes } = useFileUpload(
-      multiple,
-      selectedModel?.features,
+    const { handleFileSelect, uploadFilesIfNeeded, availableFileTypes, hasImageSupport } =
+      useFileUpload(multiple, selectedModel?.features);
+
+    const featureMenuItems: FeatureMenuItemConfig[] = useMemo(
+      () => [
+        {
+          id: "thinking",
+          icon: <IconBulb className="size-4 scale-130 transform" />,
+          label: "思考",
+          featureKey: "thinking",
+        },
+        {
+          id: "generateImage",
+          icon: <ImagesIcon className="size-4 scale-110 transform" />,
+          label: "创建图片",
+          featureKey: "generateImage",
+        },
+        {
+          id: "search",
+          icon: <GlobeIcon className="size-4 scale-110 transform" />,
+          label: "网页搜索",
+          featureKey: "search",
+        },
+      ],
+      [],
+    );
+
+    const handleFeatureMenuItemClick = useCallback(
+      (item: FeatureMenuItemConfig) => {
+        setSelectedMenuItem((prev) => {
+          const isSelected = prev === item.id;
+          const newValue = isSelected ? null : item.id;
+          onSetFeature(item.featureKey, !isSelected);
+          return newValue;
+        });
+      },
+      [onSetFeature],
+    );
+
+    const handleExploreApps = useCallback(() => {
+      // TODO: 跳转到全部应用页面
+      window.open("/apps", "_blank");
+    }, []);
+
+    const selectedMenuItemConfig = useMemo(
+      () => featureMenuItems.find((item) => item.id === selectedMenuItem),
+      [featureMenuItems, selectedMenuItem],
     );
 
     const handleQuickMenuClick = useCallback(() => {
@@ -117,6 +155,14 @@ const PromptInputInner = memo(
         }
       }
     }, [quickMenuMcpServer, selectedMcpServerIds, onSelectMcpServers]);
+
+    const handleRemoveSelectedMenuItem = useCallback(() => {
+      const currentItem = featureMenuItems.find((item) => item.id === selectedMenuItem);
+      if (currentItem) {
+        onSetFeature(currentItem.featureKey, false);
+      }
+      setSelectedMenuItem(null);
+    }, [featureMenuItems, selectedMenuItem, onSetFeature]);
 
     const handleSubmit = useCallback(
       async (message: PromptInputMessage, event: FormEvent<HTMLFormElement>) => {
@@ -138,11 +184,61 @@ const PromptInputInner = memo(
         </AIPromptInputBody>
         <AIPromptInputFooter>
           <AIPromptInputTools>
-            <AIPromptInputActionMenu>
-              <AIPromptInputActionMenuTrigger />
-              <FileSelectMenu onFileSelect={handleFileSelect} availableTypes={availableFileTypes} />
-            </AIPromptInputActionMenu>
-            <AIPromptInputSpeechButton textareaRef={textareaRef} />
+            {availableFileTypes.length > 0 && (
+              <DropdownMenu>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <DropdownMenuTrigger asChild>
+                      <AIPromptInputButton>
+                        <Plus size={16} />
+                      </AIPromptInputButton>
+                    </DropdownMenuTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>更多操作</p>
+                  </TooltipContent>
+                </Tooltip>
+                <DropdownMenuContent className="w-38">
+                  <DropdownMenuItem onSelect={handleFileSelect}>
+                    <PaperclipIcon className="size-4 scale-110 transform" />
+                    {hasImageSupport ? "选择照片和文件" : "选择文件"}
+                  </DropdownMenuItem>
+                  {featureMenuItems.map((item) => (
+                    <DropdownMenuItem
+                      key={item.id}
+                      onSelect={() => handleFeatureMenuItemClick(item)}
+                    >
+                      {item.icon}
+                      {item.label}
+                    </DropdownMenuItem>
+                  ))}
+                  <DropdownMenuItem onSelect={handleExploreApps}>
+                    <LayoutGridIcon className="size-4" />
+                    全部应用
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+            {selectedMenuItemConfig && (
+              <AIPromptInputButton
+                onClick={handleRemoveSelectedMenuItem}
+                className="bg-accent text-accent-foreground"
+              >
+                {selectedMenuItemConfig.icon}
+                <span>{selectedMenuItemConfig.label}</span>
+                <X size={14} className="ml-1" />
+              </AIPromptInputButton>
+            )}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <AIPromptInputSpeechButton textareaRef={textareaRef} />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>听写</p>
+              </TooltipContent>
+            </Tooltip>
             {quickMenuMcpServer && (
               <AIPromptInputButton
                 onClick={handleQuickMenuClick}

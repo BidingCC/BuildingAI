@@ -130,6 +130,7 @@ export const Message = memo(function Message({
       {isAssistant &&
         message.parts
           ?.filter((part): part is ReasoningUIPart => part.type === "reasoning")
+          .filter((part) => part.text && part.text.trim().length > 0)
           .map((part, index, arr) => (
             <Reasoning
               key={`${message.id}-reasoning-${index}`}

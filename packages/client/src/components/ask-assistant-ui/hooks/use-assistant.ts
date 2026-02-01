@@ -7,6 +7,7 @@ import type { RawMessageRecord } from "../libs/message-repository";
 import { convertProvidersToModels } from "../libs/provider-converter";
 import type { AssistantContextValue, DisplayMessage, Suggestion } from "../types";
 import { useChatStream } from "./use-chat-stream";
+import { useFeatureFlags } from "./use-feature-flags";
 import { useFeedback } from "./use-feedback";
 import { useMessageRepository } from "./use-message-repository";
 import { useMessagesPaging } from "./use-messages-paging";
@@ -14,6 +15,7 @@ import { useMessagesPaging } from "./use-messages-paging";
 export interface UseAssistantOptions {
   providers: AiProvider[];
   suggestions?: Suggestion[];
+  enableThinking?: boolean;
 }
 
 function buildMessageRecords(
@@ -71,7 +73,7 @@ function sliceMessagesUntil(messages: UIMessage[], parentId: string | null): UIM
 }
 
 export function useAssistant(options: UseAssistantOptions): AssistantContextValue {
-  const { providers, suggestions = [] } = options;
+  const { providers, suggestions = [], enableThinking: initialEnableThinking } = options;
 
   const models = useMemo(() => {
     return convertProvidersToModels(providers);
@@ -92,6 +94,8 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
     const cached = safeJsonParse<string[]>(storage.getItem(MCP_SERVERS_STORAGE_KEY));
     return Array.isArray(cached) ? cached : [];
   });
+
+  const { feature, setFeatureFlag } = useFeatureFlags(initialEnableThinking);
 
   useEffect(() => {
     if (models.length === 0) return;
@@ -154,6 +158,9 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
   } = useChatStream({
     modelId: selectedModelId,
     mcpServerIds: selectedMcpServerIds,
+    feature: Object.fromEntries(
+      Object.entries(feature).filter(([_, value]) => value !== undefined),
+    ) as Record<string, boolean>,
     lastMessageDbIdRef,
     pendingParentIdRef,
     conversationIdRef,
@@ -274,6 +281,7 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
     onSwitchBranch,
     onSelectModel: handleSelectModel,
     onSelectMcpServers: handleSelectMcpServers,
+    onSetFeature: setFeatureFlag,
     onLike,
     onDislike,
     addToolApprovalResponse,
