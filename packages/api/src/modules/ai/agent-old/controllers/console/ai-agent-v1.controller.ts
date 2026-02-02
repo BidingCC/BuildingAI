@@ -7,7 +7,7 @@ import { PaginationDto } from "@buildingai/dto/pagination.dto";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { ConsoleController } from "@common/decorators/controller.decorator";
 import { PublicAccessTokenGuard } from "@common/guards/public-access-token.guard";
-import { MembershipValidationCommandHandler } from "@modules/ai/chat/handlers";
+// import { MembershipValidationCommandHandler } from "@modules/ai/chat/handlers";
 import { Body, Delete, Get, Param, Post, Put, Query, Req, Res, UseGuards } from "@nestjs/common";
 import type { Request, Response } from "express";
 
@@ -36,7 +36,7 @@ export class AiAgentV1Controller {
         private readonly AiAgentChatService: AiAgentChatService,
         private readonly AiAgentPublicChatService: AiAgentPublicChatService,
         private readonly annotationService: AiAgentAnnotationService,
-        private readonly membershipValidationHandler: MembershipValidationCommandHandler,
+        // private readonly membershipValidationHandler: MembershipValidationCommandHandler,
     ) {}
 
     /**
@@ -111,7 +111,7 @@ export class AiAgentV1Controller {
         }
 
         const membershipUserId = (req.user as { id?: string } | undefined)?.id ?? "anonymous";
-        await this.membershipValidationHandler.validateModelAccessOrThrow(membershipUserId, model);
+        // await this.membershipValidationHandler.validateModelAccessOrThrow(membershipUserId, model);
 
         try {
             if (dto.responseMode === "streaming") {

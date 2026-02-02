@@ -7,10 +7,6 @@ import { DatasetsSegments } from "@buildingai/db/entities";
 import { DatasetsDocument } from "@buildingai/db/entities";
 import { Datasets } from "@buildingai/db/entities";
 import { In, Repository } from "@buildingai/db/typeorm";
-import {
-    FileSegmentResultDto,
-    IndexingSegmentsDto,
-} from "../dto/indexing-segments.dto";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { RetrievalConfig } from "@buildingai/types/ai/retrieval-config.interface";
 import { isEnabled } from "@buildingai/utils";
@@ -23,6 +19,7 @@ import {
     RAG_SERVICE_CONSTANTS,
 } from "../constants/datasets-service.constants";
 import { CreateDatasetDto, QueryDatasetDto, UpdateDatasetDto } from "../dto/datasets.dto";
+import { FileSegmentResultDto, IndexingSegmentsDto } from "../dto/indexing-segments.dto";
 import { DatasetMemberService } from "./datasets-member.service";
 import { DocumentsService } from "./documents.service";
 import { RetrievalConfigBuilder } from "./helpers/retrieval-config.builder";
@@ -98,7 +95,7 @@ export class DatasetsService extends BaseService<Datasets> {
         const created = await this.create({
             name,
             description,
-            indexingConfig,
+            // indexingConfig,
             embeddingModelId,
             retrievalMode: retrievalConfig.retrievalMode,
             retrievalConfig: config,
@@ -169,7 +166,7 @@ export class DatasetsService extends BaseService<Datasets> {
             description,
             createdBy: user.id,
             embeddingModelId,
-            indexingConfig,
+            // indexingConfig,
             retrievalConfig,
         });
         const dataset = (await this.findOneById(created.id!)) as Datasets;

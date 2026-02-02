@@ -11,7 +11,7 @@ import {
     User,
     UserSubscription,
 } from "@buildingai/db/entities";
-import { MembershipValidationCommandHandler } from "@modules/ai/chat/handlers";
+// import { MembershipValidationCommandHandler } from "@modules/ai/chat/handlers";
 import { Module } from "@nestjs/common";
 
 import { AiAgentConsoleController } from "./controllers/console/ai-agent.controller";
@@ -67,7 +67,7 @@ import { AiAgentPublicChatService } from "./services/ai-agent-v1-chat.service";
         AiAgentChatsMessageService,
         AiAgentPublicChatService,
         AiAgentTemplateService,
-        MembershipValidationCommandHandler,
+        // MembershipValidationCommandHandler,
     ],
     exports: [
         AiAgentService,

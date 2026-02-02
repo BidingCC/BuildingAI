@@ -7,7 +7,7 @@ import { getProviderSecret } from "@buildingai/utils";
 import { Injectable, Logger } from "@nestjs/common";
 
 import { DatasetsService } from "../../datasets/services/datasets.service";
-import { DatasetsRetrievalService } from "../../datasets/services/datasets-retrieval.service";
+// import { DatasetsRetrievalService } from "../../datasets/services/datasets-retrieval.service";
 import { AgentChatDto } from "../dto/agent";
 import {
     DatasetRetrievalResult,
@@ -25,7 +25,7 @@ export class KnowledgeRetrievalHandler implements IKnowledgeRetrievalHandler {
 
     constructor(
         private readonly datasetsService: DatasetsService,
-        private readonly datasetsRetrievalService: DatasetsRetrievalService,
+        // private readonly datasetsRetrievalService: DatasetsRetrievalService,
         private readonly SecretService: SecretService,
     ) {}
 
@@ -118,21 +118,21 @@ export class KnowledgeRetrievalHandler implements IKnowledgeRetrievalHandler {
                         return null;
                     }
 
-                    const result = await this.datasetsRetrievalService.queryDatasetWithConfig(
-                        datasetId,
-                        query,
-                        dataset.retrievalConfig,
-                    );
+                    // const result = await this.datasetsRetrievalService.queryDatasetWithConfig(
+                    //     datasetId,
+                    //     query,
+                    //     dataset.retrievalConfig,
+                    // );
 
-                    if (!result.chunks?.length) {
-                        return null;
-                    }
+                    // if (!result.chunks?.length) {
+                    //     return null;
+                    // }
 
                     return {
                         datasetId,
                         datasetName: dataset.name,
                         retrievalConfig: dataset.retrievalConfig,
-                        chunks: result.chunks,
+                        chunks: [], // result.chunks,
                         duration: Date.now() - startTime,
                     };
                 } catch (error) {
@@ -174,18 +174,18 @@ export class KnowledgeRetrievalHandler implements IKnowledgeRetrievalHandler {
                         return [];
                     }
 
-                    const result = await this.datasetsRetrievalService.queryDatasetWithConfig(
-                        datasetId,
-                        query,
-                        {
-                            retrievalMode: "vector",
-                            topK: 3,
-                            scoreThreshold: 0.3,
-                            scoreThresholdEnabled: false,
-                        },
-                    );
+                    // const result = await this.datasetsRetrievalService.queryDatasetWithConfig(
+                    //     datasetId,
+                    //     query,
+                    //     {
+                    //         retrievalMode: "vector",
+                    //         topK: 3,
+                    //         scoreThreshold: 0.3,
+                    //         scoreThresholdEnabled: false,
+                    //     },
+                    // );
 
-                    return result.chunks || [];
+                    return []; // result.chunks || [];
                 } catch (error) {
                     this.logger.error(`预检索失败 - 知识库 ${datasetId}: ${error.message}`);
                     return [];

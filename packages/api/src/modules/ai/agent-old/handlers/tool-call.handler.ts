@@ -1,5 +1,5 @@
 import { McpServerSSE, type MCPTool } from "@buildingai/ai-sdk";
-import { McpToolCall } from "@buildingai/db/entities";
+// import { McpToolCall } from "@buildingai/db/entities";
 import { AiMcpServer } from "@buildingai/db/entities";
 import { Injectable, Logger } from "@nestjs/common";
 import type { ChatCompletionMessageToolCall } from "openai/resources/index";
@@ -9,7 +9,7 @@ import type { ChatCompletionMessageToolCall } from "openai/resources/index";
  */
 export interface ToolCallResult {
     toolResult: any;
-    mcpToolCall: McpToolCall | null;
+    mcpToolCall: any | null; // McpToolCall | null;
 }
 
 /**
@@ -67,7 +67,8 @@ export class ToolCallHandler {
 
             this.logger.log(`Tool ${toolCall.function.name} executed in ${duration}ms`);
 
-            const mcpToolCall: McpToolCall = {
+            const mcpToolCall: any = {
+                // McpToolCall = {
                 id: toolCall.id,
                 mcpServer: mcpServerUsed.server,
                 tool: mcpServerUsed.tool,
@@ -85,7 +86,8 @@ export class ToolCallHandler {
             const toolArgs = JSON.parse(toolCall.function.arguments || "{}");
             const errorResult = { error: error.message };
 
-            const mcpToolCall: McpToolCall = {
+            const mcpToolCall: any = {
+                // McpToolCall = {
                 id: toolCall.id,
                 mcpServer: mcpServerUsed.server,
                 tool: mcpServerUsed.tool,
