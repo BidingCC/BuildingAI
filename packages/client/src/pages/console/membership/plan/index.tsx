@@ -15,6 +15,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@buildingai/ui/components/ui/alert-dialog";
+import { Badge } from "@buildingai/ui/components/ui/badge";
 import { Button } from "@buildingai/ui/components/ui/button";
 import {
   DropdownMenu,
@@ -42,6 +43,7 @@ import { toast } from "sonner";
 import { PageContainer } from "@/layouts/console/_components/page-container";
 
 import { DataTableFacetedFilter } from "../../order/recharge/_components/data-table-faceted-filter";
+import { PlanFormDialog } from "./_components/plan-form-dialog";
 
 const DURATION_LABELS: Record<number, string> = {
   1: "1个月",
@@ -53,7 +55,8 @@ const DURATION_LABELS: Record<number, string> = {
 };
 
 function getDurationLabel(plan: MembershipPlanConfigItem): string {
-  if (plan.duration?.value != null && plan.duration?.unit) {
+  // 仅当订阅时长为「自定义」且存在有效 duration 时显示自定义时长
+  if (plan.durationConfig === 6 && plan.duration?.value != null && plan.duration?.unit) {
     const unitMap: Record<string, string> = {
       day: "天",
       天: "天",
@@ -77,6 +80,8 @@ const MembershipPlanIndexPage = () => {
   const { confirm } = useAlertDialog();
   const [searchKeyword, setSearchKeyword] = useState("");
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
+  const [formDialogOpen, setFormDialogOpen] = useState(false);
+  const [editingPlanId, setEditingPlanId] = useState<string | null>(null);
 
   const { data, refetch, isLoading } = useMembershipPlansConfigQuery();
   const plans = data?.plans ?? [];
@@ -136,20 +141,21 @@ const MembershipPlanIndexPage = () => {
   };
 
   const handleAdd = () => {
-    toast.info("新增计划：可在此处打开新增弹窗或跳转编辑页");
+    setEditingPlanId(null);
+    setFormDialogOpen(true);
   };
 
   const handleEdit = (plan: MembershipPlanConfigItem) => {
-    toast.info("编辑计划：可在此处打开编辑弹窗或跳转编辑页");
-    console.log(plan);
+    setEditingPlanId(plan.id);
+    setFormDialogOpen(true);
   };
 
   return (
     <PageContainer className="h-[calc(100vh-6.25rem)]">
       <div className="flex h-full w-full flex-col gap-6">
-        <div className="flex h-full flex-1 flex-col gap-2 overflow-hidden">
+        <div className="flex h-full flex-1 flex-col gap-2">
           <div className="flex items-center justify-between">
-            <div className="flex flex-wrap items-center gap-2 p-1">
+            <div className="flex flex-wrap items-center gap-2">
               <Input
                 placeholder="搜索计划名称"
                 value={searchKeyword}
@@ -191,9 +197,9 @@ const MembershipPlanIndexPage = () => {
               新增
             </Button>
           </div>
-          <ScrollArea className="flex h-full flex-1 overflow-hidden rounded-md">
+          <ScrollArea className="flex h-full flex-1 rounded-lg">
             <Table className="h-full">
-              <TableHeader className="bg-muted sticky top-0 z-10 border">
+              <TableHeader className="bg-muted sticky top-0 z-10">
                 <TableRow>
                   <TableHead>计划名称</TableHead>
                   <TableHead>订阅时长</TableHead>
@@ -224,14 +230,17 @@ const MembershipPlanIndexPage = () => {
                       <TableCell className="font-medium">{plan.name}</TableCell>
                       <TableCell>{getDurationLabel(plan)}</TableCell>
                       <TableCell>
-                        <span className="inline-flex flex-wrap gap-1">
-                          {plan.levels?.filter(Boolean).length
-                            ? plan.levels
-                                .filter(Boolean)
-                                .map((level) => level?.name ?? "-")
-                                .join("、")
-                            : "—"}
-                        </span>
+                        <div className="flex flex-wrap gap-1">
+                          {plan.levels?.filter(Boolean).length ? (
+                            plan.levels.filter(Boolean).map((level) => (
+                              <Badge key={level?.id} variant="secondary" className="font-normal">
+                                {level?.name ?? "—"}
+                              </Badge>
+                            ))
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell>
                         <Switch
@@ -274,6 +283,12 @@ const MembershipPlanIndexPage = () => {
           </ScrollArea>
         </div>
       </div>
+      <PlanFormDialog
+        open={formDialogOpen}
+        onOpenChange={setFormDialogOpen}
+        planId={editingPlanId}
+        onSuccess={() => refetch()}
+      />
     </PageContainer>
   );
 };
