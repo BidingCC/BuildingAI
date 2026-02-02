@@ -1,4 +1,10 @@
-import { type PayConfigType } from "@buildingai/constants/shared/payconfig.constant";
+import { readFile } from "node:fs/promises";
+
+import { AlipayService } from "@buildingai/alipay-sdk";
+import {
+    PayConfigPayType,
+    type PayConfigType,
+} from "@buildingai/constants/shared/payconfig.constant";
 import { DictCacheService } from "@buildingai/dict";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { WechatPayService } from "@buildingai/wechat-sdk";
@@ -6,6 +12,8 @@ import { PAY_EVENTS } from "@common/modules/pay/constants/pay-events.contant";
 import { PayconfigService } from "@modules/system/services/payconfig.service";
 import { Injectable, Logger } from "@nestjs/common";
 import { OnEvent } from "@nestjs/event-emitter";
+
+type PayServiceInstance = WechatPayService | AlipayService;
 
 /**
  * 支付服务配置接口
@@ -41,7 +49,7 @@ export class PayfactoryService {
      * Key: 支付类型
      * Value: 微信支付服务实例
      */
-    private readonly serviceCache = new Map<PayConfigType, WechatPayService>();
+    private readonly serviceCache = new Map<PayConfigType, PayServiceInstance>();
 
     constructor(
         private readonly payconfigService: PayconfigService,
@@ -49,15 +57,25 @@ export class PayfactoryService {
     ) {}
 
     /**
+     * WechatPay
+     */
+    getPayService(payType: typeof PayConfigPayType.WECHAT): Promise<WechatPayService>;
+
+    /**
+     * Alipay
+     */
+    getPayService(payType: typeof PayConfigPayType.ALIPAY): Promise<AlipayService>;
+
+    /**
      * 获取支付服务实例
      *
      * 优先从缓存获取，如果不存在则创建新实例
      *
      * @param payType 支付类型
-     * @returns 微信支付服务实例
+     * @returns 支付服务实例
      * @throws 当服务创建失败时抛出异常
      */
-    async getPayService(payType: PayConfigType): Promise<WechatPayService> {
+    async getPayService(payType: PayConfigType): Promise<PayServiceInstance> {
         // 检查缓存中是否已存在该支付类型的服务实例
         if (this.serviceCache.has(payType)) {
             this.logger.debug(`使用缓存的支付服务实例: ${payType}`);
@@ -65,51 +83,82 @@ export class PayfactoryService {
         }
 
         try {
-            // 获取配置
-            const config = await this.getPayServiceConfig(payType);
-            // 创建服务实例
-            const wechatPayService = new WechatPayService({
-                appId: config.appId,
-                mchId: config.mchId,
-                publicKey: config.publicKey,
-                privateKey: config.privateKey,
-                apiSecret: config.apiSecret,
-                domain: config.domain,
-            });
+            const domain = await this.getDomain();
+            if (!domain) {
+                throw HttpErrorFactory.badGateway("域名未配置，请在.env中配置APP_DOMAIN");
+            }
+
+            let service: PayServiceInstance;
+
+            switch (payType) {
+                case PayConfigPayType.WECHAT: {
+                    // 获取配置
+                    const config = await this.payconfigService.getPayconfig(
+                        PayConfigPayType.WECHAT,
+                    );
+                    service = new WechatPayService({
+                        appId: config.appId,
+                        mchId: config.mchId,
+                        publicKey: config.cert,
+                        privateKey: config.paySignKey,
+                        apiSecret: config.apiKey,
+                        domain: domain,
+                    });
+                    break;
+                }
+                case PayConfigPayType.ALIPAY: {
+                    const config = await this.payconfigService.getPayconfig(
+                        PayConfigPayType.ALIPAY,
+                    );
+                    const res = {
+                        appId: config.appId,
+                        privateKey: config.privateKey,
+                        gateway: config.gateway,
+                        appCertContent: config.appCert,
+                        alipayPublicCertContent: config.alipayPublicCert,
+                        alipayRootCertContent: config.alipayRootCert,
+                        useCert: true,
+                    };
+                    service = new AlipayService(res);
+                    break;
+                }
+                default:
+                    throw new Error(`Not supported: ${payType}`);
+            }
 
             // 缓存服务实例
-            this.serviceCache.set(payType, wechatPayService);
+            this.serviceCache.set(payType, service);
 
-            return wechatPayService;
+            return service;
         } catch (error) {
             this.logger.error(`创建支付服务失败: ${payType}`, error);
             throw new Error(`支付服务创建失败: ${error.message}`);
         }
     }
 
-    /**
-     * 获取支付服务配置
-     *
-     * @param payType 支付类型
-     * @returns 支付服务配置
-     */
-    private async getPayServiceConfig(payType: PayConfigType): Promise<PayServiceConfig> {
-        const payconfig = await this.payconfigService.getPayconfig(payType);
-        const domain = await this.getDomain();
-
-        if (!domain) {
-            throw HttpErrorFactory.badGateway("域名未配置，请在.env中配置APP_DOMAIN");
-        }
-
-        return {
-            appId: payconfig.appId,
-            mchId: payconfig.mchId,
-            publicKey: payconfig.cert,
-            privateKey: payconfig.paySignKey,
-            apiSecret: payconfig.apiKey,
-            domain,
-        };
-    }
+    // /**
+    //  * 获取支付服务配置
+    //  *
+    //  * @param payType 支付类型
+    //  * @returns 支付服务配置
+    //  */
+    // private async getPayServiceConfig(payType: PayConfigType): Promise<PayServiceConfig> {
+    //     const payconfig = await this.payconfigService.getPayconfig(payType);
+    //     const domain = await this.getDomain();
+    //
+    //     if (!domain) {
+    //         throw HttpErrorFactory.badGateway("域名未配置，请在.env中配置APP_DOMAIN");
+    //     }
+    //
+    //     return {
+    //         appId: payconfig.appId,
+    //         mchId: payconfig.mchId,
+    //         publicKey: payconfig.cert,
+    //         privateKey: payconfig.paySignKey,
+    //         apiSecret: payconfig.apiKey,
+    //         domain,
+    //     };
+    // }
 
     /**
      * 获取域名配置

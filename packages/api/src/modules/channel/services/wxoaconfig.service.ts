@@ -4,6 +4,7 @@ import { Dict } from "@buildingai/db/entities";
 import { Repository } from "@buildingai/db/typeorm";
 import { DictCacheService } from "@buildingai/dict";
 import { DictService } from "@buildingai/dict";
+import { HttpErrorFactory } from "@buildingai/errors";
 import { WECHAT_EVENTS } from "@common/modules/wechat/constants/wechatoa.constant";
 import { UpdateWxOaConfigDto } from "@modules/channel/dto/updatewx.dto";
 import {
@@ -47,7 +48,10 @@ export class WxOaConfigService extends BaseService<Dict> {
      * @returns 公众号配置
      */
     async getConfig() {
-        const { domain } = await this.getDomain();
+        const domain = process.env.APP_DOMAIN;
+        if (!domain) {
+            throw HttpErrorFactory.notFound("请先在.env中配置APP_DOMAIN");
+        }
         return await this.getGroupConfig<WxOaConfig>("wxoaconfig", {
             appId: "",
             appSecret: "",
@@ -67,6 +71,10 @@ export class WxOaConfigService extends BaseService<Dict> {
      * @returns 更新后的公众号配置
      */
     async updateConfig(config: UpdateWxOaConfigDto) {
+        const domain = process.env.APP_DOMAIN;
+        if (!domain) {
+            throw HttpErrorFactory.notFound("请先在.env中配置APP_DOMAIN");
+        }
         await this.setGroupConfig("wxoaconfig", config);
         this.eventEmitter.emit(WECHAT_EVENTS.REFRESH);
         return { success: true };
@@ -74,7 +82,10 @@ export class WxOaConfigService extends BaseService<Dict> {
 
     private async getGroupConfig<T = any>(group: string, defaultConfig: T): Promise<T> {
         try {
-            const { domain } = await this.getDomain();
+            const domain = process.env.APP_DOMAIN;
+            if (!domain) {
+                throw HttpErrorFactory.notFound("请先在.env中配置APP_DOMAIN");
+            }
 
             const configs = await this.dictService.findAll({
                 where: { group },

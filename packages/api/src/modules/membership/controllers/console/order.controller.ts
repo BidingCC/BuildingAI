@@ -44,4 +44,29 @@ export class MembershipOrderController extends BaseController {
         await this.membershipOrderService.refund(id);
         return { message: "退款成功" };
     }
+
+    @Post("system-adjustment")
+    @Permissions({
+        code: "system-adjustment",
+        name: "系统调整会员",
+        description: "后台管理员调整用户会员等级",
+    })
+    async createSystemAdjustmentOrder(
+        @Body()
+        body: {
+            userId: string;
+            levelId: string | null;
+            durationType: "1" | "3" | "12" | "forever" | "custom";
+            customValue?: number;
+            customUnit?: "day" | "month" | "year";
+        },
+    ) {
+        return await this.membershipOrderService.createSystemAdjustmentOrder(
+            body.userId,
+            body.levelId,
+            body.durationType,
+            body.customValue,
+            body.customUnit,
+        );
+    }
 }

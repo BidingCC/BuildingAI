@@ -4,6 +4,7 @@ import { getEnabledExtensionsFromConfig, initExtensionCache } from "@buildingai/
 import { getExtensionSchemaName } from "@buildingai/core/modules";
 import {
     BillingModule,
+    CloudStorageModule,
     SecretModule,
     UploadModule as CoreUploadModule,
 } from "@buildingai/core/modules";
@@ -111,6 +112,7 @@ export class AppModule {
                 AnalyseModule,
                 SecretModule,
                 UserModule,
+                CloudStorageModule,
                 ScheduleModule,
                 await ExtensionCoreModule.register(),
             ],

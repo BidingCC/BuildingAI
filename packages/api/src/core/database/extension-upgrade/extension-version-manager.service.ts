@@ -85,9 +85,13 @@ export class ExtensionVersionManagerService {
                 },
             );
 
+            // Track the previous version for migration range calculation
+            let previousVersion = versionInfo.installed;
+
             // Execute upgrade for each version sequentially
             for (const version of versionInfo.upgradeVersions) {
-                await this.executeVersionUpgrade(version);
+                await this.executeVersionUpgrade(version, previousVersion);
+                previousVersion = version;
             }
 
             this.logger.log(
@@ -115,8 +119,14 @@ export class ExtensionVersionManagerService {
 
     /**
      * Execute upgrade for a single version
+     *
+     * @param version Target version to upgrade to
+     * @param fromVersion Previous version (null for initial installation)
      */
-    private async executeVersionUpgrade(version: string): Promise<void> {
+    private async executeVersionUpgrade(
+        version: string,
+        fromVersion: string | null,
+    ): Promise<void> {
         this.logger.log(`[${this.extensionIdentifier}] Upgrading to ${version}...`);
         TerminalLogger.log(
             "Extension Upgrade",
@@ -132,7 +142,7 @@ export class ExtensionVersionManagerService {
                 this.dataSource,
                 this.extensionIdentifier,
             );
-            await migrationRunner.runCrossVersionMigrations([version]);
+            await migrationRunner.runVersionMigrations(fromVersion, version);
 
             // Step 2: Run upgrade script
             const upgradeService = new ExtensionUpgradeService(

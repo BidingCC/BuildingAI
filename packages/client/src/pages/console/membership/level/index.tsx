@@ -56,6 +56,7 @@ import { usePagination } from "@/hooks/use-pagination";
 import { PageContainer } from "@/layouts/console/_components/page-container";
 
 import { DataTableFacetedFilter } from "../../order/recharge/_components/data-table-faceted-filter";
+import { LevelFormDialog } from "./_components/level-form-dialog";
 
 const statusOptions = [
   { label: "启用", value: "true" },
@@ -67,6 +68,8 @@ const MembershipLevelIndexPage = () => {
   const [nameSearch, setNameSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
   const [page, setPage] = useState(1);
+  const [formDialogOpen, setFormDialogOpen] = useState(false);
+  const [editingLevel, setEditingLevel] = useState<MembershipLevelListItem | null>(null);
   const pageSize = 25;
 
   const hasActiveFilters = useMemo(() => {
@@ -131,20 +134,21 @@ const MembershipLevelIndexPage = () => {
   };
 
   const handleAdd = () => {
-    toast.info("新增等级功能：可在此处打开新增弹窗或跳转编辑页");
+    setEditingLevel(null);
+    setFormDialogOpen(true);
   };
 
   const handleEdit = (item: MembershipLevelListItem) => {
-    toast.info("编辑等级功能：可在此处打开编辑弹窗或跳转编辑页");
-    console.log(item);
+    setEditingLevel(item);
+    setFormDialogOpen(true);
   };
 
   return (
     <PageContainer className="h-[calc(100vh-6.25rem)]">
       <div className="flex h-full w-full flex-col gap-6">
-        <div className="flex h-full flex-1 flex-col gap-2 overflow-hidden">
+        <div className="flex h-full flex-1 flex-col gap-2">
           <div className="flex items-center justify-between">
-            <div className="flex flex-wrap items-center gap-2 p-1">
+            <div className="flex flex-wrap items-center gap-2">
               <Input
                 placeholder="搜索等级名称"
                 value={nameSearch}
@@ -186,9 +190,9 @@ const MembershipLevelIndexPage = () => {
               新增
             </Button>
           </div>
-          <ScrollArea className="flex h-full flex-1 overflow-hidden rounded-md">
+          <ScrollArea className="flex h-full flex-1 rounded-lg">
             <Table className="h-full">
-              <TableHeader className="bg-muted sticky top-0 z-10 border">
+              <TableHeader className="bg-muted sticky top-0 z-10">
                 <TableRow>
                   <TableHead>
                     <div className="flex items-center gap-1.5">
@@ -294,6 +298,12 @@ const MembershipLevelIndexPage = () => {
           <PaginationComponent className="mx-0 w-fit" />
         </div>
       </div>
+      <LevelFormDialog
+        open={formDialogOpen}
+        onOpenChange={setFormDialogOpen}
+        level={editingLevel}
+        onSuccess={() => refetch()}
+      />
     </PageContainer>
   );
 };

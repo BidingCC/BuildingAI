@@ -32,6 +32,25 @@ export class Extension extends BaseEntity {
     alias?: string;
 
     /**
+     * 对外显示描述
+     */
+    @Column({ type: "text", nullable: true, comment: "对外显示描述" })
+    aliasDescription?: string;
+
+    /**
+     * 对外显示图标
+     */
+    @Column({ type: "text", nullable: true, comment: "外显示图标" })
+    @NormalizeFileUrl()
+    aliasIcon?: string;
+
+    /**
+     * 是否对外显示
+     */
+    @Column({ type: "boolean", nullable: true, default: true, comment: "是否对外显示" })
+    aliasShow?: boolean;
+
+    /**
      * 应用标识符
      */
     @Column({ length: 100, unique: true, comment: "应用标识符" })

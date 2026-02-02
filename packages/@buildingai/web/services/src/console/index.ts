@@ -3,6 +3,8 @@ export * from "./datasets-config";
 export * from "./extension";
 export * from "./mcp";
 export * from "./membership";
+export * from "./menu";
+export * from "./permission";
 export * from "./provider";
 export * from "./recharge";
 export * from "./secret";

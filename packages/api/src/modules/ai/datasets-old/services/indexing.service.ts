@@ -8,6 +8,7 @@ import {
 import { HttpErrorFactory } from "@buildingai/errors";
 import { UploadService } from "@modules/upload/services/upload.service";
 import { Injectable, Logger } from "@nestjs/common";
+import * as axios from "axios";
 import { pathExists, readFile } from "fs-extra";
 
 import { FileParserService } from "./file-parser.service";
@@ -253,12 +254,37 @@ export class IndexingService {
      * Read file content and pass to parsing service
      */
     private async readFileContent(fileId: string, file: any): Promise<string> {
-        const filePath = await this.uploadService.getFilePath(fileId);
-        if (!(await pathExists(filePath))) {
-            throw new Error(`File not found or deleted: ${file.originalName}`);
+        let buffer: Buffer;
+
+        // Check if file is stored in OSS (URL starts with http:// or https://)
+        if (file.url && (file.url.startsWith("http://") || file.url.startsWith("https://"))) {
+            // OSS file: download from URL
+            try {
+                this.logger.log(`Downloading OSS file from URL: ${file.url}`);
+                const response = await axios.default.get(file.url, {
+                    responseType: "arraybuffer",
+                    timeout: 60000, // 60 seconds timeout
+                });
+                buffer = Buffer.from(response.data);
+            } catch (error) {
+                const errorMessage = error instanceof Error ? error.message : String(error);
+                this.logger.error(
+                    `Failed to download OSS file from URL: ${file.url}`,
+                    errorMessage,
+                );
+                throw new Error(
+                    `Failed to download file from OSS: ${file.originalName} - ${errorMessage}`,
+                );
+            }
+        } else {
+            // Local file: read from file system
+            const filePath = await this.uploadService.getFilePath(fileId);
+            if (!(await pathExists(filePath))) {
+                throw new Error(`File not found or deleted: ${file.originalName}`);
+            }
+            buffer = await readFile(filePath);
         }
 
-        const buffer = await readFile(filePath);
         const mockFile: Express.Multer.File = {
             buffer,
             originalname: file.originalName,
@@ -268,7 +294,7 @@ export class IndexingService {
             encoding: "utf-8",
             filename: file.storageName,
             destination: "",
-            path: filePath,
+            path: file.path || file.url || "",
             stream: null,
         };
 

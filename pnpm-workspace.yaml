@@ -5,6 +5,8 @@ packages:
   - packages/@buildingai/web/*
 
 catalog:
+  '@types/ali-oss': 6.16.13
+  ali-oss: 6.23.0
   axios: ^1.13.2
   callsites: ^4.2.0
   cli-table3: 0.6.5

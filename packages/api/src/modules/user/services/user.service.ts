@@ -221,10 +221,14 @@ export class UserService extends BaseService<User> {
             }
 
             // 找出该用户订阅中最高等级的
+            // 如果有多个相同等级的会员，选择结束日期最晚的
             let highestInfo: UserMembershipInfo | null = null;
             subs.forEach((sub) => {
                 const level = levelMap.get(sub.levelId);
-                if (level && (!highestInfo || level.level > highestInfo.level)) {
+                if (!level) return;
+
+                if (!highestInfo) {
+                    // 第一个订阅，直接设置
                     highestInfo = {
                         id: level.id,
                         name: level.name,
@@ -233,7 +237,32 @@ export class UserService extends BaseService<User> {
                         startTime: sub.startTime,
                         endTime: sub.endTime,
                     };
+                } else if (level.level > highestInfo.level) {
+                    // 等级更高，直接更新
+                    highestInfo = {
+                        id: level.id,
+                        name: level.name,
+                        icon: level.icon,
+                        level: level.level,
+                        startTime: sub.startTime,
+                        endTime: sub.endTime,
+                    };
+                } else if (level.level === highestInfo.level) {
+                    // 等级相同，选择结束日期最晚的
+                    const currentEndTime = new Date(sub.endTime).getTime();
+                    const highestEndTime = new Date(highestInfo.endTime).getTime();
+                    if (currentEndTime > highestEndTime) {
+                        highestInfo = {
+                            id: level.id,
+                            name: level.name,
+                            icon: level.icon,
+                            level: level.level,
+                            startTime: sub.startTime,
+                            endTime: sub.endTime,
+                        };
+                    }
                 }
+                // 如果 level.level < highestInfo.level，则跳过
             });
 
             resultMap.set(userId, highestInfo);
@@ -315,6 +344,32 @@ export class UserService extends BaseService<User> {
 
         // 保存用户
         const result = await this.userRepository.save(user);
+
+        // 处理会员订阅信息
+        if (createUserDto.level && createUserDto.levelEndTime) {
+            const level = await this.membershipLevelsRepository.findOne({
+                where: { id: createUserDto.level },
+            });
+
+            if (!level) {
+                throw HttpErrorFactory.notFound("会员等级不存在");
+            }
+
+            const endTime = new Date(createUserDto.levelEndTime);
+            const startTime = new Date();
+
+            // 创建用户订阅记录
+            const subscription = this.userSubscriptionRepository.create({
+                userId: result.id,
+                levelId: createUserDto.level,
+                startTime,
+                endTime,
+                source: 0, // 0-系统
+                orderId: null,
+            });
+
+            await this.userSubscriptionRepository.save(subscription);
+        }
 
         // 查询完整的用户信息，包含角色
         const userWithRole = await this.findOneById(result.id, {
@@ -505,6 +560,58 @@ export class UserService extends BaseService<User> {
             .relation(User, "role")
             .of(id)
             .set(role ? role.id : null);
+
+        // 处理会员订阅信息
+        if ("level" in updateData || "levelEndTime" in updateData) {
+            const levelId = "level" in updateData ? updateData.level : undefined;
+            const levelEndTime = "levelEndTime" in updateData ? updateData.levelEndTime : undefined;
+
+            // 如果提供了会员等级信息，则创建或更新订阅记录
+            if (levelId && levelEndTime) {
+                const level = await this.membershipLevelsRepository.findOne({
+                    where: { id: levelId },
+                });
+
+                if (!level) {
+                    throw HttpErrorFactory.notFound("会员等级不存在");
+                }
+
+                const endTime = new Date(levelEndTime);
+                const startTime = new Date();
+
+                // 查找用户是否已有系统来源的订阅记录
+                const existingSubscription = await this.userSubscriptionRepository.findOne({
+                    where: {
+                        userId: id,
+                        source: 0, // 0-系统
+                    },
+                });
+
+                if (existingSubscription) {
+                    // 更新现有订阅记录
+                    existingSubscription.levelId = levelId;
+                    existingSubscription.startTime = startTime;
+                    existingSubscription.endTime = endTime;
+                    await this.userSubscriptionRepository.save(existingSubscription);
+                } else {
+                    // 创建新的订阅记录
+                    const subscription = this.userSubscriptionRepository.create({
+                        userId: id,
+                        levelId,
+                        startTime,
+                        endTime,
+                        source: 0, // 0-系统
+                        orderId: null,
+                    });
+                    await this.userSubscriptionRepository.save(subscription);
+                }
+            } else if (levelId === null || levelId === undefined) {
+                // 如果设置为普通用户，删除该用户的所有订阅记录（包括系统赠送和自己购买的）
+                await this.userSubscriptionRepository.delete({
+                    userId: id,
+                });
+            }
+        }
 
         // 查询更新后的完整用户信息
         const result = await this.findOneById(id, {

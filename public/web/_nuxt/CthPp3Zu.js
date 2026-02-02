@@ -1,1 +1,0 @@
-import{aC as o,aB as t,aF as a,aD as s}from"#entry";function r(e){return o("/role",e)}function i(e){return o(`/role/${e}`)}function l(e){return t("/role",e)}function u(e){return s("/role",e)}function p(e){return a(`/role/${e}`)}function c(e){return t("/role/batch-delete",e)}function f(e){return s("/role/permissions",e)}export{i as a,f as b,u as c,l as d,r as e,c as f,p as g};

@@ -963,6 +963,18 @@
                         ]
                     },
                     {
+                        "name": "console-menu.systemSettings.storageConfig",
+                        "code": "system-storage-config",
+                        "path": "storage-config",
+                        "icon": "",
+                        "component": "/console/system-setting/storage-config/index",
+                        "permissionCode": "system-storage-config:list",
+                        "sort": 0,
+                        "isHidden": 0,
+                        "type": 2,
+                        "sourceType": 1
+                    },
+                    {
                         "name": "console-menu.systemSettings.agreement",
                         "code": "system-agreement",
                         "path": "agreement",

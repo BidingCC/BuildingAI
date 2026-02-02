@@ -14,6 +14,7 @@ import { isEnabled } from "@buildingai/utils";
 import { ConsoleController } from "@common/decorators/controller.decorator";
 import { Permissions } from "@common/decorators/permissions.decorator";
 import { RolePermissionService } from "@common/modules/auth/services/role-permission.service";
+import { MembershipOrderService } from "@modules/membership/services/order.service";
 import { MenuService } from "@modules/menu/services/menu.service";
 import { RoleService } from "@modules/role/services/role.service";
 import { BatchUpdateUserDto } from "@modules/user/dto/batch-update-user.dto";
@@ -46,6 +47,8 @@ export class UserConsoleController extends BaseController {
         private readonly rolePermissionService: RolePermissionService,
         private readonly roleService: RoleService,
         private readonly dictService: DictService,
+        @Inject(MembershipOrderService)
+        private readonly membershipOrderService: MembershipOrderService,
         @InjectRepository(UserSubscription)
         private readonly userSubscriptionRepository: Repository<UserSubscription>,
         @InjectRepository(MembershipLevels)
@@ -432,14 +435,43 @@ export class UserConsoleController extends BaseController {
             throw HttpErrorFactory.notFound("用户不存在");
         }
 
-        // 获取用户会员等级信息
-        const membershipLevel = await this.userService.getUserMembershipLevel(id);
+        // 获取用户会员等级信息（查找系统来源的订阅记录）
+        const systemSubscription = await this.userSubscriptionRepository.findOne({
+            where: {
+                userId: id,
+            },
+            relations: ["level"],
+            order: { createdAt: "DESC" },
+        });
 
         return {
             ...result,
-            level: membershipLevel?.name || null,
-            levelEndTime: membershipLevel?.endTime || null,
+            level: systemSubscription?.levelId || null,
+            levelEndTime: systemSubscription?.endTime
+                ? systemSubscription.endTime.toISOString()
+                : null,
         };
+    }
+
+    /**
+     * 获取用户订阅记录列表
+     *
+     * @param id 用户ID
+     * @param query 分页参数
+     * @returns 用户订阅记录列表（已付款且未退款的订单）
+     */
+    @Get(":id/subscriptions")
+    @Permissions({
+        code: "detail",
+        name: "查看用户订阅记录",
+        description: "查看指定用户的会员订阅记录",
+    })
+    @BuildFileUrl(["***.icon"])
+    async getUserSubscriptions(
+        @Param("id", UUIDValidationPipe) id: string,
+        @Query() query: { page?: number; pageSize?: number },
+    ) {
+        return await this.membershipOrderService.getUserPaidOrders(id, query);
     }
 
     /**

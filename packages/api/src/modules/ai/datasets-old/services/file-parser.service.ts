@@ -2,6 +2,8 @@ import { HttpErrorFactory } from "@buildingai/errors";
 import { UploadService } from "@modules/upload/services/upload.service";
 import { Injectable, Logger } from "@nestjs/common";
 import * as mammoth from "mammoth";
+import pdf from "pdf-parse";
+import * as XLSX from "xlsx";
 
 /**
  * File parsing service
@@ -12,6 +14,36 @@ export class FileParserService {
     private readonly logger = new Logger(FileParserService.name);
 
     constructor(private readonly uploadService: UploadService) {}
+
+    /**
+     * Clean text content to remove invalid UTF-8 characters that PostgreSQL cannot handle
+     * Removes null bytes (0x00) and other invalid characters
+     */
+    private cleanTextForDatabase(text: string): string {
+        if (!text) return text;
+        // Remove null bytes and other control characters that PostgreSQL UTF-8 cannot handle
+        // Keep only valid characters: \n (0x0A), \r (0x0D), \t (0x09) and printable characters
+        let cleaned = text.replace(/\0/g, ""); // Remove null bytes
+
+        // Remove control characters except \n (0x0A), \r (0x0D), \t (0x09)
+        cleaned = cleaned
+            .split("")
+            .filter((char) => {
+                const code = char.charCodeAt(0);
+                // Keep printable characters (32-126), \n (10), \r (13), \t (9), and extended ASCII/Unicode
+                return (
+                    code === 9 || // \t
+                    code === 10 || // \n
+                    code === 13 || // \r
+                    (code >= 32 && code !== 127) || // Printable ASCII except DEL
+                    code > 127 // Extended ASCII and Unicode
+                );
+            })
+            .join("");
+
+        // Remove replacement characters (invalid UTF-8 sequences)
+        return cleaned.replace(/\uFFFD/g, "");
+    }
 
     /**
      * Get file information
@@ -103,6 +135,24 @@ export class FileParserService {
             return this.parseMarkdown(file.buffer);
         }
 
+        // Parse PDF files
+        if (mimeType === "application/pdf" || originalName.endsWith(".pdf")) {
+            return this.parsePDF(file.buffer);
+        }
+
+        // Parse Excel files (.xlsx)
+        if (
+            mimeType === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+            originalName.endsWith(".xlsx")
+        ) {
+            return this.parseExcel(file.buffer);
+        }
+
+        // Parse Excel files (.xls)
+        if (mimeType === "application/vnd.ms-excel" || originalName.endsWith(".xls")) {
+            return this.parseExcel(file.buffer);
+        }
+
         // Parse doc files (not supported yet)
         if (mimeType === "application/msword" || originalName.endsWith(".doc")) {
             throw HttpErrorFactory.badRequest(
@@ -111,7 +161,7 @@ export class FileParserService {
         }
 
         throw HttpErrorFactory.badRequest(
-            `Unsupported file type: ${mimeType}, currently only supports .docx, .txt and .md files`,
+            `Unsupported file type: ${mimeType}, currently only supports .docx, .txt, .md, .pdf, .xlsx and .xls files`,
         );
     }
 
@@ -139,7 +189,7 @@ export class FileParserService {
             }
 
             // Minimize processing, focus on preserving punctuation and paragraph structure
-            const processedText = text
+            let processedText = text
                 .replace(/\r\n/g, "\n") // Unify line breaks
                 .replace(/\r/g, "\n") // Unify line breaks
                 .replace(/\t/g, " ") // Convert tabs to spaces
@@ -147,6 +197,9 @@ export class FileParserService {
                 .replace(/[ ]+\n/g, "\n") // Remove trailing spaces
                 .replace(/\n[ ]+/g, "\n") // Remove leading spaces
                 .trim();
+
+            // Clean invalid UTF-8 characters for database storage
+            processedText = this.cleanTextForDatabase(processedText);
 
             console.log(
                 "🔍 Processed text (first 500 chars):",
@@ -164,9 +217,16 @@ export class FileParserService {
      */
     private parseText(buffer: Buffer): string {
         try {
-            const text = buffer.toString("utf-8").trim();
+            let text = buffer.toString("utf-8").trim();
 
             if (!text) {
+                throw HttpErrorFactory.badRequest("文档内容为空");
+            }
+
+            // Clean invalid UTF-8 characters for database storage
+            text = this.cleanTextForDatabase(text);
+
+            if (!text || !text.trim()) {
                 throw HttpErrorFactory.badRequest("文档内容为空");
             }
 
@@ -194,6 +254,13 @@ export class FileParserService {
                 .replace(/\n[ ]+/g, "\n")
                 .trim();
 
+            // Clean invalid UTF-8 characters for database storage
+            text = this.cleanTextForDatabase(text);
+
+            if (!text || !text.trim()) {
+                throw HttpErrorFactory.badRequest("文档内容为空");
+            }
+
             this.logger.log(
                 `Markdown file parsed successfully, original length: ${markdown.length}, processed length: ${text.length}`,
             );
@@ -201,6 +268,87 @@ export class FileParserService {
             return text;
         } catch (error) {
             throw HttpErrorFactory.badRequest(`Failed to parse Markdown file: ${error.message}`);
+        }
+    }
+
+    /**
+     * Parse PDF file
+     */
+    private async parsePDF(buffer: Buffer): Promise<string> {
+        try {
+            const data = await pdf(buffer);
+            let text = data.text?.trim();
+
+            if (!text) {
+                throw HttpErrorFactory.badRequest("PDF 文档内容为空");
+            }
+
+            // Clean invalid UTF-8 characters for database storage
+            text = this.cleanTextForDatabase(text);
+
+            if (!text || !text.trim()) {
+                throw HttpErrorFactory.badRequest("PDF 文档内容为空");
+            }
+
+            return text;
+        } catch (error) {
+            this.logger.error(`Failed to parse PDF file: ${error.message}`, error);
+            throw HttpErrorFactory.badRequest(`Failed to parse PDF file: ${error.message}`);
+        }
+    }
+
+    /**
+     * Parse Excel file (.xlsx or .xls)
+     */
+    private parseExcel(buffer: Buffer): string {
+        try {
+            const workbook = XLSX.read(buffer, {
+                type: "buffer",
+                cellText: false,
+                cellDates: true,
+                raw: false,
+            });
+
+            const sheets: string[] = [];
+
+            workbook.SheetNames.forEach((sheetName: string) => {
+                const sheet = workbook.Sheets[sheetName];
+                if (!sheet) return;
+
+                // Convert sheet to JSON first, then format as text
+                const jsonData = XLSX.utils.sheet_to_json(sheet, {
+                    header: 1,
+                    defval: "",
+                    raw: false,
+                });
+
+                if (jsonData && jsonData.length > 0) {
+                    // Convert JSON array to readable text format
+                    const textData = (jsonData as any[][])
+                        .map((row: any[]) => row.join("\t"))
+                        .join("\n");
+
+                    sheets.push(`[Sheet: ${sheetName}]\n${textData}`);
+                }
+            });
+
+            let result = sheets.join("\n\n");
+
+            if (!result || result.trim() === "") {
+                throw HttpErrorFactory.badRequest("Excel 文件内容为空");
+            }
+
+            // Clean invalid UTF-8 characters for database storage
+            result = this.cleanTextForDatabase(result);
+
+            if (!result || result.trim() === "") {
+                throw HttpErrorFactory.badRequest("Excel 文件内容为空");
+            }
+
+            return result;
+        } catch (error) {
+            this.logger.error(`Failed to parse Excel file: ${error.message}`, error);
+            throw HttpErrorFactory.badRequest(`Failed to parse Excel file: ${error.message}`);
         }
     }
 
@@ -215,9 +363,12 @@ export class FileParserService {
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             "text/plain",
             "text/markdown",
+            "application/pdf",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "application/vnd.ms-excel",
         ];
 
-        const supportedExtensions = [".docx", ".txt", ".md"];
+        const supportedExtensions = [".docx", ".txt", ".md", ".pdf", ".xlsx", ".xls"];
 
         return (
             supportedMimeTypes.includes(mimeType) ||

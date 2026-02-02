@@ -300,6 +300,7 @@ export class ExtensionMigrationRunner {
 
     /**
      * Run cross-version migrations
+     * @deprecated Use runVersionMigrations instead for better version tracking
      */
     async runCrossVersionMigrations(versions: string[]): Promise<void> {
         this.logger.log(
@@ -315,5 +316,23 @@ export class ExtensionMigrationRunner {
             await this.runMigrations(previousVersion, targetVersion);
             previousVersion = targetVersion;
         }
+    }
+
+    /**
+     * Run migrations for a specific version range
+     *
+     * @param fromVersion The version to upgrade from (null for initial installation)
+     * @param toVersion The target version to upgrade to
+     */
+    async runVersionMigrations(fromVersion: string | null, toVersion: string): Promise<void> {
+        this.logger.log(
+            `[${this.extensionIdentifier}] Running migrations: ${fromVersion || "initial"} -> ${toVersion}`,
+        );
+        TerminalLogger.log(
+            "Extension Migration",
+            `[${this.extensionIdentifier}] Running migrations: ${fromVersion || "initial"} -> ${toVersion}`,
+        );
+
+        await this.runMigrations(fromVersion, toVersion);
     }
 }

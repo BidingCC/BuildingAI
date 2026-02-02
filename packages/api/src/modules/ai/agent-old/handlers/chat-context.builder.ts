@@ -75,9 +75,38 @@ export class ChatContextBuilder implements IChatContextBuilder {
         // 合并变量
         const variables = { ...formVariables, ...formFieldsInputs };
 
+        // 记录所有提供的变量（用于显式声明，包括未在提示词中使用的）
+        const allVariables: Array<{ key: string; value: string }> = [];
+
         // 替换变量占位符
         for (const [key, value] of Object.entries(variables)) {
-            prompt = prompt.replace(new RegExp(`{{${key}}}`, "g"), value as string);
+            if (value === undefined || value === null) return;
+            const valueStr = String(value);
+            // 记录所有变量（不管是否在提示词中有占位符）
+            allVariables.push({ key, value: valueStr });
+
+            // 检查是否在提示词中存在该变量的占位符并替换
+            const placeholderRegex = new RegExp(`{{\\s*${key}\\s*}}`, "g");
+            if (placeholderRegex.test(prompt)) {
+                prompt = prompt.replace(placeholderRegex, valueStr);
+            }
+        }
+
+        // 如果有提供的变量，在系统提示词开头添加显式声明
+        // 这样可以避免AI忽略散落在长文本中的变量值，即使占位符替换失败也能看到所有数据
+        if (allVariables.length > 0) {
+            const variablesDeclaration = [
+                "### 【用户已确认的事实数据（Context Facts）】",
+                "以下信息由系统确认，视为已知事实：",
+                "规则：",
+                "1. 不得再次向用户询问这些变量",
+                "2. 可直接基于这些值进行推理和回答",
+                "",
+                ...allVariables.map((v) => `- ${v.key}: ${v.value}`),
+                "",
+            ].join("\n");
+
+            prompt = variablesDeclaration + prompt;
         }
 
         return prompt;

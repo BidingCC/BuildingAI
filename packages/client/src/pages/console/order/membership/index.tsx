@@ -204,9 +204,9 @@ const OrderMembershipIndexPage = () => {
   };
 
   return (
-    <PageContainer className="h-[calc(100vh-6.25rem)]">
-      <div className="flex h-full w-full flex-col gap-6">
-        <div className="grid grid-cols-1 gap-4 pt-px md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+    <PageContainer className="mx-0 md:h-[calc(100vh-6.25rem)]">
+      <div className="flex h-full w-full flex-col">
+        <div className="grid grid-cols-1 gap-4 px-4 pt-px md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {statisticsItems.map((item, index) => (
             <Card key={index} className="justify-center">
               <CardContent>
@@ -221,8 +221,8 @@ const OrderMembershipIndexPage = () => {
             </Card>
           ))}
         </div>
-        <div className="flex h-full flex-1 flex-col gap-2 overflow-hidden">
-          <div className="flex flex-wrap items-center gap-2 p-1">
+        <div className="flex h-full flex-1 flex-col gap-2 overflow-hidden px-4 pt-6">
+          <div className="flex flex-wrap items-center gap-2">
             <Input
               placeholder="搜索订单号"
               value={orderNoSearch}
@@ -276,9 +276,9 @@ const OrderMembershipIndexPage = () => {
               </AlertDialog>
             )}
           </div>
-          <ScrollArea className="flex h-full flex-1 overflow-hidden rounded-md">
+          <ScrollArea className="flex h-full flex-1 overflow-hidden rounded-lg">
             <Table className="h-full">
-              <TableHeader className="bg-muted sticky top-0 z-10 border">
+              <TableHeader className="bg-muted sticky top-0 z-10">
                 <TableRow>
                   <TableHead>订单号</TableHead>
                   <TableHead>用户</TableHead>

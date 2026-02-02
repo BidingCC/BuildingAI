@@ -229,14 +229,19 @@ export interface IThirdPartyIntegrationHandler {
 
     /**
      * 处理第三方集成聊天
+     * @param agent 智能体配置
+     * @param dto 聊天请求DTO
+     * @param user 用户信息
+     * @param options 响应处理选项
+     * @param conversationRecord 对话记录
      */
-    // handleThirdPartyIntegrationChat(
-    //     agent: Agent,
-    //     dto: AgentChatDto,
-    //     user: UserPlayground,
-    //     options: ResponseHandlerOptions,
-    //     conversationRecord?: AgentChatRecord | null,
-    // ): Promise<AgentChatResponse | void>;
+    handleThirdPartyIntegrationChat(
+        agent: Agent,
+        dto: AgentChatDto,
+        user: UserPlayground,
+        options: ResponseHandlerOptions,
+        conversationRecord?: AgentChatRecord | null,
+    ): Promise<AgentChatResponse | void>;
 }
 
 /**

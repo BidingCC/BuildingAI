@@ -276,9 +276,12 @@ export class WebAiMcpServerWebController {
                         },
                         additionalProperties: false,
                     },
-                    type: {
-                        type: "string",
-                        enum: Object.values(McpCommunicationType),
+                    customHeaders: {
+                        type: "object",
+                        patternProperties: {
+                            "^.*$": { type: "string" },
+                        },
+                        additionalProperties: false,
                     },
                 },
                 required: ["url"],

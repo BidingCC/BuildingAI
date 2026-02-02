@@ -6,6 +6,7 @@ import type {
     QuickCommandConfig,
     ThirdPartyIntegrationConfig,
 } from "@buildingai/types/ai/agent-config.interface";
+import { randomBytes } from "crypto";
 
 import { DataSource } from "../../typeorm";
 import { Agent } from "./../../entities/ai-agent.entity";
@@ -63,6 +64,10 @@ interface AgentConfig {
     isPublic?: boolean;
     /** 是否已发布 */
     isPublished?: boolean;
+    /** 公开访问令牌（可选，若未提供将自动生成） */
+    publishToken?: string;
+    /** API 调用密钥（可选，若未提供将自动生成） */
+    apiKey?: string;
 }
 
 /**
@@ -133,6 +138,12 @@ export class AgentSquareSeeder extends BaseSeeder {
                     isPublished: config.isPublished ?? false,
                 };
 
+                if (agentData.isPublished) {
+                    agentData.publishToken =
+                        agent?.publishToken ?? config.publishToken ?? this.generateToken("pub");
+                    agentData.apiKey = agent?.apiKey ?? config.apiKey ?? this.generateToken("ak");
+                }
+
                 if (!agent) {
                     agent = repository.create(agentData);
                     await repository.save(agent);
@@ -152,5 +163,16 @@ export class AgentSquareSeeder extends BaseSeeder {
             this.logError(`Agent square initialization failed: ${error.message}`);
             throw error;
         }
+    }
+
+    /**
+     * 生成唯一令牌
+     *
+     * @param prefix 令牌前缀
+     * @returns 带前缀的唯一令牌
+     */
+    private generateToken(prefix = ""): string {
+        const token = randomBytes(16).toString("hex");
+        return prefix ? `${prefix}_${token}` : token;
     }
 }

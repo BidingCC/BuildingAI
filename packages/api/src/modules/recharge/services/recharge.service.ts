@@ -1,5 +1,5 @@
 import { BaseService } from "@buildingai/base";
-import { PayConfigPayType, PayConfigType } from "@buildingai/constants/shared/payconfig.constant";
+import { PayConfigType } from "@buildingai/constants/shared/payconfig.constant";
 import { BooleanNumber } from "@buildingai/constants/shared/status-codes.constant";
 import { type UserTerminalType } from "@buildingai/constants/shared/status-codes.constant";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
@@ -13,7 +13,10 @@ import { DictService } from "@buildingai/dict";
 import { PaginationDto } from "@buildingai/dto/pagination.dto";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { generateNo } from "@buildingai/utils";
+import { UpdatePayConfigDto } from "@modules/system/dto/update-payconfig";
 import { Injectable } from "@nestjs/common";
+import { plainToInstance } from "class-transformer";
+import { validateSync } from "class-validator";
 
 @Injectable()
 export class RechargeService extends BaseService<Dict> {
@@ -101,11 +104,10 @@ export class RechargeService extends BaseService<Dict> {
             select: ["id", "power", "givePower", "sellPrice", "label"],
         });
         const payWayList = await this.payconfigRepository.find({
-            where: {
-                isEnable: BooleanNumber.YES,
-            },
+            where: { isEnable: BooleanNumber.YES },
             select: ["name", "payType", "logo"],
         });
+
         return {
             user,
             rechargeStatus,
@@ -138,9 +140,9 @@ export class RechargeService extends BaseService<Dict> {
         if (false == rechargeStatus) {
             throw HttpErrorFactory.badRequest("充值已关闭");
         }
-        if (PayConfigPayType.WECHAT != payType) {
-            throw HttpErrorFactory.badRequest("支付方式错误");
-        }
+        // if (PayConfigPayType.WECHAT != payType) {
+        //     throw HttpErrorFactory.badRequest("支付方式错误");
+        // }
         const recharge = await this.rechargeRepository.findOne({
             where: {
                 id,

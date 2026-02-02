@@ -12,6 +12,7 @@ import { RolePermissionService } from "@common/modules/auth/services/role-permis
 import { UserService } from "@modules/user/services/user.service";
 import { Injectable, Logger } from "@nestjs/common";
 import { exec } from "child_process";
+import { machineIdSync } from "node-machine-id";
 import { promisify } from "util";
 
 import { initializeDto } from "../dto/system.dto";
@@ -44,6 +45,17 @@ export class SystemService {
         return {
             isInitialized,
             version: AppConfig.version,
+        };
+    }
+
+    /**
+     * 获取运行时系统信息（用于控制台展示）
+     */
+    async getRuntimeInfo(): Promise<{ version: string; systemId: string }> {
+        const systemId = await machineIdSync(true);
+        return {
+            version: AppConfig.version,
+            systemId,
         };
     }
 
