@@ -1,1 +1,0 @@
-import{u as t,c as r,a,b as n}from"#entry";function s(e){return t("/category",e)}function i(e){return a("/category",e)}function c(e){return a(`/category/${e}`)}function g(e,o){return n(`/category/${e}`,o)}function l(e){return r(`/category/${e}`)}function y(e){return t("/category/batch-delete",{ids:e})}export{c as a,g as b,s as c,y as d,l as e,i as f};

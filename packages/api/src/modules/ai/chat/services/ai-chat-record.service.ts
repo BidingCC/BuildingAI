@@ -151,14 +151,10 @@ export class AiChatRecordService extends BaseService<AiChatRecord> {
             queryBuilder.addOrderBy("conversation.updatedAt", "DESC");
 
             const excludeFields = includeUserInfo ? ["user.password", "user.openid"] : [];
-            const order = includeUserInfo
-                ? { updatedAt: "DESC" as const }
-                : { isPinned: "DESC" as const, updatedAt: "DESC" as const };
 
             const result = await this.paginateQueryBuilder(
                 queryBuilder,
                 queryDto || {},
-                order,
                 excludeFields,
             );
 

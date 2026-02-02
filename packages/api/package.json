@@ -87,6 +87,7 @@
         "xlsx": "^0.18.5"
     },
     "devDependencies": {
+        "@buildingai/alipay-sdk": "workspace:*",
         "@buildingai/eslint-config": "workspace:*",
         "@buildingai/types": "workspace:*",
         "@buildingai/typescript-config": "workspace:*",

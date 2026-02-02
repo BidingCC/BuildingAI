@@ -162,8 +162,8 @@ export class AiMcpServerService extends BaseService<AiMcpServer> {
                 // Use the full URL directly
                 const url = config.url;
 
-                // Communication type
-                const communicationType = config.type;
+                // Communication type (default to SSE if not specified)
+                const communicationType = config.type || McpCommunicationType.SSE;
 
                 // Check if a server with the same name already exists
                 const existServer = await this.findOne({

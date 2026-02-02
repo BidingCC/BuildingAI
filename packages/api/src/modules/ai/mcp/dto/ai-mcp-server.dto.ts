@@ -186,6 +186,13 @@ export class McpServerUrlConfig {
     url: string;
 
     /**
+     * 通信类型
+     */
+    @IsOptional()
+    @IsEnum(McpCommunicationType, { message: "通信类型必须是 sse 或 streamable-http" })
+    type?: McpCommunicationType;
+
+    /**
      * 请求头
      */
     @IsOptional()
