@@ -114,10 +114,10 @@ export class AiAgentV1Controller {
             }
 
             const membershipUserId = (req.user as { id?: string } | undefined)?.id ?? "anonymous";
-            await this.membershipValidationHandler.validateModelAccessOrThrow(
-                membershipUserId,
-                model,
-            );
+            // await this.membershipValidationHandler.validateModelAccessOrThrow(
+            //     membershipUserId,
+            //     model,
+            // );
         }
 
         try {

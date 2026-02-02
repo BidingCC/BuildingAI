@@ -11,7 +11,7 @@ import {
     User,
     UserSubscription,
 } from "@buildingai/db/entities";
-import { MembershipValidationCommandHandler } from "@modules/ai/chat/handlers";
+// import { MembershipValidationCommandHandler } from "@modules/ai/chat/handlers";
 import { HttpModule } from "@nestjs/axios";
 import { Module } from "@nestjs/common";
 
