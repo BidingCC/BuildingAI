@@ -9,17 +9,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { apiHttpClient } from "../base";
 
-/**
- * 分页查询参数
- */
 export type PaginationParams = {
     page?: number;
     pageSize?: number;
 };
 
-/**
- * 会话记录类型
- */
 export type ConversationRecord = {
     id: string;
     title: string | null;
@@ -38,9 +32,6 @@ export type ConversationRecord = {
     updatedAt: string;
 };
 
-/**
- * 查询会话列表参数
- */
 export type QueryConversationsParams = PaginationParams & {
     modelId?: string;
     status?: "active" | "completed" | "failed" | "cancelled";
@@ -50,9 +41,6 @@ export type QueryConversationsParams = PaginationParams & {
     endDate?: string;
 };
 
-/**
- * 消息版本类型
- */
 export type MessageVersion = {
     id: string;
     content: string;
@@ -64,25 +52,16 @@ export type MessageVersion = {
     }>;
 };
 
-/**
- * 信息来源类型
- */
 export type MessageSource = {
     href: string;
     title: string;
 };
 
-/**
- * AI推理过程类型
- */
 export type MessageReasoning = {
     content: string;
     duration: number;
 };
 
-/**
- * 工具调用类型
- */
 export type MessageToolCall = {
     name: string;
     description: string;
@@ -99,9 +78,6 @@ export type MessageToolCall = {
     error: string | undefined;
 };
 
-/**
- * 消息记录类型
- */
 export type MessageRecord = {
     id: string;
     conversationId: string;
@@ -141,16 +117,10 @@ export type MessageRecord = {
     updatedAt: string;
 };
 
-/**
- * 查询消息列表参数
- */
 export type QueryMessagesParams = PaginationParams & {
     conversationId: string;
 };
 
-/**
- * 获取会话列表
- */
 export function useConversationsQuery(
     params: QueryConversationsParams,
     options?: PaginatedQueryOptionsUtil<ConversationRecord>,
@@ -168,9 +138,6 @@ export function useConversationsQuery(
     });
 }
 
-/**
- * 获取会话详情
- */
 export function useConversationQuery(
     conversationId: string,
     options?: QueryOptionsUtil<ConversationRecord>,
@@ -188,9 +155,6 @@ export async function getConversationInfo(conversationId: string): Promise<Conve
     return apiHttpClient.get<ConversationRecord>(`/ai-conversations/${conversationId}/info`);
 }
 
-/**
- * 获取会话消息列表
- */
 export function useConversationMessagesQuery(
     params: QueryMessagesParams,
     options?: PaginatedQueryOptionsUtil<MessageRecord>,
@@ -226,9 +190,6 @@ export async function getConversationMessages(
     );
 }
 
-/**
- * 删除会话
- */
 export function useDeleteConversation(): UseMutationResult<unknown, unknown, string, unknown> {
     const queryClient = useQueryClient();
     return useMutation({
@@ -240,9 +201,6 @@ export function useDeleteConversation(): UseMutationResult<unknown, unknown, str
     });
 }
 
-/**
- * 更新会话
- */
 export function useUpdateConversation(): UseMutationResult<
     ConversationRecord,
     unknown,

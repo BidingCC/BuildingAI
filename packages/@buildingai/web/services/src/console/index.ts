@@ -1,4 +1,5 @@
 export * from "./chat";
+export * from "./datasets-config";
 export * from "./extension";
 export * from "./mcp";
 export * from "./membership";
