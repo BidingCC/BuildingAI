@@ -7,6 +7,7 @@ import type { RetrievalConfig } from "@buildingai/types/ai/retrieval-config.inte
 import { AppEntity } from "../decorators/app-entity.decorator";
 import { Column, OneToMany, type Relation } from "../typeorm";
 import { BaseEntity } from "./base";
+import { DatasetsChatRecord } from "./datasets-chat-record.entity";
 import { DatasetsDocument } from "./datasets-document.entity";
 import { DatasetMember } from "./datasets-member.entity";
 import { DatasetMemberApplication } from "./datasets-member-application.entity";
@@ -28,6 +29,9 @@ export class Datasets extends BaseEntity {
      */
     @Column({ type: "text", nullable: true, comment: "知识库描述" })
     description?: string;
+
+    @Column({ type: "varchar", length: 512, nullable: true, comment: "封面图 URL" })
+    coverUrl?: string | null;
 
     /**
      * Embedding 模型ID
@@ -77,6 +81,18 @@ export class Datasets extends BaseEntity {
     storageSize: number;
 
     /**
+     * 是否已发布到广场
+     */
+    @Column({ type: "boolean", default: false, comment: "是否已发布到广场" })
+    publishedToSquare: boolean;
+
+    /**
+     * 发布到广场的时间
+     */
+    @Column({ type: "timestamptz", nullable: true, comment: "发布到广场的时间" })
+    publishedAt?: Date | null;
+
+    /**
      * 知识库下的文档列表
      */
     @OneToMany(() => DatasetsDocument, (document) => document.dataset)
@@ -99,6 +115,12 @@ export class Datasets extends BaseEntity {
      */
     @OneToMany(() => DatasetMemberApplication, (application) => application.dataset)
     memberApplications?: Relation<DatasetMemberApplication[]>;
+
+    /**
+     * 知识库调试对话记录列表（仅用于调试知识库效果）
+     */
+    @OneToMany(() => DatasetsChatRecord, (record) => record.dataset)
+    chatRecords?: Relation<DatasetsChatRecord[]>;
 
     /**
      * 关联应用（智能体）数量

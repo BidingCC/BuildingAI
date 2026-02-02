@@ -22,6 +22,12 @@ export class DatasetsDocument extends BaseEntity {
     fileId: string | null;
 
     /**
+     * 文件存储路径（仅路径，不含域名；用于 OSS 等无 fileId 的场景）
+     */
+    @Column({ type: "varchar", length: 1024, nullable: true, comment: "文件存储路径" })
+    fileUrl: string | null;
+
+    /**
      * 文件名
      */
     @Column({ length: 255, comment: "文件名" })

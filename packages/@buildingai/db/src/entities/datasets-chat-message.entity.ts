@@ -3,13 +3,17 @@ import type { UIMessage } from "ai";
 
 import { AppEntity } from "../decorators/app-entity.decorator";
 import { Column, Index, JoinColumn, ManyToOne, type Relation } from "../typeorm";
-import { AiChatRecord } from "./ai-chat-record.entity";
 import { AiModel } from "./ai-model.entity";
 import { BaseEntity } from "./base";
+import { DatasetsChatRecord } from "./datasets-chat-record.entity";
 
-@AppEntity({ name: "ai_chat_message", comment: "AI对话消息记录" })
+/**
+ * 知识库调试对话消息
+ * 仅用于 datasets 知识库效果调试，不包含反馈功能
+ */
+@AppEntity({ name: "datasets_chat_message", comment: "知识库调试对话消息" })
 @Index(["conversationId", "createdAt"])
-export class AiChatMessage extends BaseEntity {
+export class DatasetsChatMessage extends BaseEntity {
     @Column({
         type: "uuid",
         comment: "所属对话ID",
@@ -19,9 +23,10 @@ export class AiChatMessage extends BaseEntity {
     @Column({
         type: "uuid",
         comment: "消息使用的AI模型ID",
+        nullable: true,
     })
     @Index()
-    modelId: string;
+    modelId?: string;
 
     @Column({
         type: "int",
@@ -76,22 +81,16 @@ export class AiChatMessage extends BaseEntity {
     })
     usage?: ChatMessageUsage;
 
-    @Column({
-        type: "int",
-        nullable: true,
-        comment: "用户积分消耗",
-    })
-    userConsumedPower?: number;
-
-    @ManyToOne(() => AiChatRecord, {
+    @ManyToOne(() => DatasetsChatRecord, {
         onDelete: "CASCADE",
     })
     @JoinColumn({ name: "conversation_id" })
-    conversation: Relation<AiChatRecord>;
+    conversation: Relation<DatasetsChatRecord>;
 
     @ManyToOne(() => AiModel, {
-        onDelete: "CASCADE",
+        onDelete: "SET NULL",
+        nullable: true,
     })
     @JoinColumn({ name: "model_id" })
-    model: Relation<AiModel>;
+    model?: Relation<AiModel>;
 }
