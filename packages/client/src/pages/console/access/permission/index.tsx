@@ -1,6 +1,7 @@
 import {
   type GroupedPermissions,
   type Permission,
+  type QueryPermissionListParams,
   usePermissionListQuery,
 } from "@buildingai/services/console";
 import { Badge } from "@buildingai/ui/components/ui/badge";
@@ -12,6 +13,8 @@ import {
 } from "@buildingai/ui/components/ui/collapsible";
 import { Input } from "@buildingai/ui/components/ui/input";
 import { ChevronRightIcon, FolderIcon, Info, ShieldIcon } from "lucide-react";
+import { useState } from "react";
+import { useDebounceCallback } from "usehooks-ts";
 
 import { PageContainer } from "@/layouts/console/_components/page-container";
 
@@ -68,15 +71,34 @@ const PermissionItem = ({ permission }: PermissionItemProps) => {
 };
 
 const AccessPermissionIndexPage = () => {
-  const { data } = usePermissionListQuery({
+  const [params, setParams] = useState<QueryPermissionListParams>({
     isGrouped: true,
   });
+
+  const { data } = usePermissionListQuery(params);
+
+  const handleKeywordChange = useDebounceCallback((value: string) => {
+    setParams((prev) => ({ ...prev, keyword: value || undefined }));
+  }, 300);
+
+  const handleGroupChange = useDebounceCallback((value: string) => {
+    setParams((prev) => ({ ...prev, group: value || undefined }));
+  }, 300);
+
   return (
     <PageContainer>
       <div className="flex flex-1 flex-col gap-4">
         <div className="bg-background sticky top-0 z-1 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-          <Input placeholder="搜索权限名称" className="text-sm" />
-          <Input placeholder="搜索权限分组" className="text-sm" />
+          <Input
+            placeholder="搜索权限名称"
+            className="text-sm"
+            onChange={(e) => handleKeywordChange(e.target.value)}
+          />
+          <Input
+            placeholder="搜索权限分组"
+            className="text-sm"
+            onChange={(e) => handleGroupChange(e.target.value)}
+          />
         </div>
 
         <div className="flex flex-col gap-1">
