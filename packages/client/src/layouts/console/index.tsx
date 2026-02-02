@@ -11,7 +11,8 @@ import AccessMenuIndexPage from "@/pages/console/access/menu";
 import AccessPermissionIndexPage from "@/pages/console/access/permission";
 import AccessRoleIndexPage from "@/pages/console/access/role";
 import AgentIndexPage from "@/pages/console/ai/agent";
-import DatasetsIndexPage from "@/pages/console/ai/datasets";
+import DatasetsConfigPage from "@/pages/console/ai/datasets/config";
+import DatasetsIndexPage from "@/pages/console/ai/datasets/list";
 import AiMcpIndexPage from "@/pages/console/ai/mcp";
 import AiProviderIndexPage from "@/pages/console/ai/provider";
 import AiSecretIndexPage from "@/pages/console/ai/secret";
@@ -81,6 +82,7 @@ function ConsoleRoutes() {
       // TODO: 临时静态页面，完成所有页面之后需要删掉
       { path: "/agent", element: <AgentIndexPage /> },
       { path: "/datasets", element: <DatasetsIndexPage /> },
+      { path: "/datasets/config", element: <DatasetsConfigPage /> },
       { path: "/provider", element: <AiProviderIndexPage /> },
       { path: "/mcp", element: <AiMcpIndexPage /> },
       { path: "/extension", element: <ExtensionIndexPage /> },
