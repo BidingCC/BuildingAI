@@ -16,6 +16,8 @@ import {
     RechargeCenterSeeder,
     SecretTemplateSeeder,
     SeedRunner,
+    StorageConfigSeeder,
+    WebsiteSeeder,
 } from "@buildingai/db/seeds";
 import { DataSource, Repository } from "@buildingai/db/typeorm";
 import { DictService } from "@buildingai/dict";
@@ -25,6 +27,7 @@ import { SYSTEM_CONFIG } from "@common/constants";
 import { PermissionService } from "@modules/permission/services/permission.service";
 import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import fse from "fs-extra";
+import { machineId } from "node-machine-id";
 import * as path from "path";
 
 import { ExtensionUpgradeOrchestratorService } from "../extension-upgrade/extension-upgrade-orchestrator.service";
@@ -143,6 +146,8 @@ export class DatabaseInitService implements OnModuleInit {
             new RechargeCenterSeeder(), // Recharge center configuration
             new DatasetsConfigSeeder(), // 知识库配置（初始空间、向量模型、检索设置）
             new AgentSquareSeeder(), // Agent square configuration
+            new StorageConfigSeeder(), // OSS storage
+            new WebsiteSeeder(), // Website default configuration
         ]);
     }
 

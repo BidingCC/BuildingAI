@@ -40,10 +40,21 @@ export class PayConfigSeeder extends BaseSeeder {
                     isDefault: BooleanNumber.YES,
                     logo: "/static/images/wxpay.png",
                     sort: 0,
-                    payVersion: PayVersion.V3,
-                    merchantType: Merchant.ORDINARY,
+                    config: null,
+                },
+                {
+                    name: "支付宝支付",
+                    payType: PayConfigPayType.ALIPAY,
+                    isEnable: BooleanNumber.YES,
+                    isDefault: BooleanNumber.NO,
+                    logo: "/static/images/alipay.png",
+                    sort: 1,
+                    config: null,
                 },
             ]);
+
+            const count = await repository.count();
+            this.logInfo(`实际插入后的记录数: ${count}`);
 
             this.logSuccess("Payment configuration initialized successfully");
         } catch (error) {

@@ -54,19 +54,19 @@ export class FilePathGenerator {
         };
     }
 
-    /**
-     * Generate simple storage path without organization
-     *
-     * @param extension File extension without dot
-     * @returns Storage path information
-     */
-    static generateSimple(extension: string): FileStoragePath {
-        const fileName = `${uuidv4()}${extension ? `.${extension}` : ""}`;
-
-        return {
-            path: "",
-            fileName,
-            fullPath: fileName,
-        };
-    }
+    // /**
+    //  * Generate simple storage path without organization
+    //  *
+    //  * @param extension File extension without dot
+    //  * @returns Storage path information
+    //  */
+    // static generateSimple(extension: string): FileStoragePath {
+    //     const fileName = `${uuidv4()}${extension ? `.${extension}` : ""}`;
+    //
+    //     return {
+    //         path: "",
+    //         fileName,
+    //         fullPath: fileName,
+    //     };
+    // }
 }

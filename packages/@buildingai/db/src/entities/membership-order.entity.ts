@@ -182,6 +182,16 @@ export class MembershipOrder extends BaseEntity {
     refundTime?: Date;
 
     /**
+     * 订单来源: 0-系统调整, 1-订单购买
+     */
+    @Column({
+        type: "int",
+        default: 1,
+        comment: "订单来源: 0-系统调整, 1-订单购买",
+    })
+    source: number;
+
+    /**
      * 关联的用户
      */
     @ManyToOne(() => User, {

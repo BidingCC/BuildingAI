@@ -49,6 +49,9 @@ export class WebsiteService extends BaseService<Dict> {
                 displayName: "",
                 iconUrl: "",
                 url: "",
+                copyrightText: "",
+                copyrightBrand: "",
+                copyrightUrl: "",
             },
         ]);
         const statistics = await this.getGroupConfig("statistics", {

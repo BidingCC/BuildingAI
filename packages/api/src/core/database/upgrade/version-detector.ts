@@ -78,6 +78,28 @@ export class VersionDetector {
     }
 
     /**
+     * Get existing versions from data/versions directory
+     */
+    private async getExistingVersions(): Promise<Set<string>> {
+        try {
+            await fse.ensureDir(this.versionsDir);
+            const versionFiles = await fse.readdir(this.versionsDir);
+
+            const existingVersions = new Set<string>();
+            versionFiles.forEach((file) => {
+                if (semver.valid(file)) {
+                    existingVersions.add(file);
+                }
+            });
+
+            return existingVersions;
+        } catch (error) {
+            this.logger.error(`Failed to get existing versions: ${error.message}`);
+            return new Set();
+        }
+    }
+
+    /**
      * Get all versions that need to be upgraded through
      *
      * @param installedVersion Current installed version
@@ -136,16 +158,24 @@ export class VersionDetector {
                 });
             }
 
-            // Filter and sort versions between installed and current
+            // Get existing versions to exclude
+            const existingVersions = await this.getExistingVersions();
+
+            // Filter and sort versions between installed and current, excluding existing versions
             const upgradeVersions = Array.from(allVersions)
                 .filter(
                     (version) =>
-                        semver.gt(version, installedVersion) && semver.lte(version, currentVersion),
+                        semver.gt(version, installedVersion) &&
+                        semver.lte(version, currentVersion) &&
+                        !existingVersions.has(version), // 排除已存在的版本
                 )
                 .sort((a, b) => semver.compare(a, b));
 
-            // Always include current version if not in the list
-            if (!upgradeVersions.includes(currentVersion)) {
+            // Always include current version if not in the list and not already exists
+            if (
+                !upgradeVersions.includes(currentVersion) &&
+                !existingVersions.has(currentVersion)
+            ) {
                 upgradeVersions.push(currentVersion);
             }
 

@@ -1,2 +1,0 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./CTSqGh4V.js","./Dgvg0_To.js","./Dx01Lm3C.js","./DRV5AIQP.js"])))=>i.map(i=>d[i]);
-import{d as o,i as n,aJ as r,k as c,o as d,q as a,aa as i,R as l,U as _}from"#entry";const D=o({__name:"create",setup(u){const t=l(()=>_(()=>import("./CTSqGh4V.js"),__vite__mapDeps([0,1,2,3]),import.meta.url)),e=n(()=>r().params.id),s=i("datasets");return(p,m)=>(d(),c(a(t),{class:"h-full w-full",id:a(e),datasetsDetail:a(s)},null,8,["id","datasetsDetail"]))}});export{D as default};

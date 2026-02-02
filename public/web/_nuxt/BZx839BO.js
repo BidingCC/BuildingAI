@@ -1,0 +1,1 @@
+import{aF as t,aE as s,aG as n,aI as o}from"#entry";function r(a){return t("/tag",a)}function i(a){return s("/tag",a)}function g(a,e){return n(`/tag/${a}`,e)}function p(a){return o(`/tag/${a}`)}export{r as a,i as b,g as c,p as d};

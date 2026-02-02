@@ -5,6 +5,13 @@ import { IsOptional, IsString } from "class-validator";
  */
 export class DownloadExtensionDto {
     /**
+     * Extension identifier
+     */
+    @IsOptional()
+    @IsString({ message: "Extension identifier must be a string" })
+    identifier?: string;
+
+    /**
      * Extension version
      */
     @IsOptional()

@@ -11,7 +11,7 @@ import { Tag } from "@buildingai/db/entities";
 import { User } from "@buildingai/db/entities";
 import { Repository } from "@buildingai/db/typeorm";
 import { HttpErrorFactory } from "@buildingai/errors";
-import { Injectable } from "@nestjs/common";
+import { HttpException, Injectable } from "@nestjs/common";
 import { randomBytes } from "crypto";
 
 import {
@@ -21,6 +21,7 @@ import {
     QueryAgentStatisticsDto,
     UpdateAgentConfigDto,
 } from "../dto/agent";
+import { ThirdPartyIntegrationHandler } from "../handlers/third-party-integration.handler";
 
 @Injectable()
 export class AiAgentService extends BaseService<Agent> {
@@ -41,6 +42,7 @@ export class AiAgentService extends BaseService<Agent> {
         private readonly aiModelRepository: Repository<AiModel>,
         @InjectRepository(AiProvider)
         private readonly aiProviderRepository: Repository<AiProvider>,
+        private readonly thirdPartyIntegrationHandler: ThirdPartyIntegrationHandler,
     ) {
         super(agentRepository);
     }
@@ -200,13 +202,103 @@ export class AiAgentService extends BaseService<Agent> {
 
         return this.withErrorHandling(async () => {
             const { tagIds, ...updateData } = dto;
-            const finalUpdateData = {
+            let finalUpdateData: Record<string, any> = {
                 ...updateData,
                 avatar: updateData.avatar || this.defaultAvatar,
             };
+
             if (finalUpdateData.billingConfig && finalUpdateData.billingConfig.price < 0) {
                 throw HttpErrorFactory.business("积分消耗不能小于 0");
             }
+
+            // 如果是 Dify 智能体且配置了第三方集成，自动获取应用参数
+            const createMode = dto.createMode || agent.createMode;
+            const thirdPartyConfig = dto.thirdPartyIntegration || agent.thirdPartyIntegration;
+
+            this.logger.log(
+                `[Dify] Checking config: createMode=${createMode}, hasApiKey=${!!thirdPartyConfig?.apiKey}, hasBaseURL=${!!thirdPartyConfig?.baseURL}`,
+            );
+
+            if (createMode === "dify" && thirdPartyConfig?.apiKey && thirdPartyConfig?.baseURL) {
+                try {
+                    const difyParams = await this.thirdPartyIntegrationHandler.fetchDifyParameters({
+                        apiKey: thirdPartyConfig.apiKey,
+                        baseURL: thirdPartyConfig.baseURL,
+                    });
+
+                    // 从 Dify 获取的数据直接更新（覆盖本地配置）
+                    if (difyParams.openingStatement) {
+                        finalUpdateData.openingStatement = difyParams.openingStatement;
+                    }
+                    if (difyParams.openingQuestions?.length) {
+                        finalUpdateData.openingQuestions = difyParams.openingQuestions;
+                    }
+                    // 同步自动追问配置（Dify 的 suggested_questions_after_answer 对应本项目的 autoQuestions）
+                    if (difyParams.autoQuestionsEnabled !== undefined) {
+                        finalUpdateData.autoQuestions = {
+                            enabled: difyParams.autoQuestionsEnabled,
+                            customRuleEnabled: false,
+                            customRule: "",
+                        };
+                    }
+
+                    this.logger.log(
+                        `[Dify] Auto-synced parameters for agent ${id}: openingStatement=${!!difyParams.openingStatement}, openingQuestions=${difyParams.openingQuestions?.length || 0}, autoQuestionsEnabled=${difyParams.autoQuestionsEnabled}`,
+                    );
+                } catch (error) {
+                    // 获取 Dify 参数失败不应阻止配置更新
+                    this.logger.warn(
+                        `[Dify] Failed to fetch parameters for agent ${id}: ${error.message}`,
+                    );
+
+                    throw error;
+                }
+            }
+
+            // Coze 平台：自动获取 Bot 参数
+            if (
+                createMode === "coze" &&
+                thirdPartyConfig?.apiKey &&
+                thirdPartyConfig?.baseURL &&
+                thirdPartyConfig?.appId
+            ) {
+                try {
+                    const cozeParams = await this.thirdPartyIntegrationHandler.fetchCozeParameters({
+                        apiKey: thirdPartyConfig.apiKey,
+                        baseURL: thirdPartyConfig.baseURL,
+                        botId: thirdPartyConfig.appId,
+                    });
+
+                    // 从 Coze 获取的数据直接更新（覆盖本地配置）
+                    if (cozeParams.openingStatement) {
+                        finalUpdateData.openingStatement = cozeParams.openingStatement;
+                    }
+                    if (cozeParams.openingQuestions?.length) {
+                        finalUpdateData.openingQuestions = cozeParams.openingQuestions;
+                    }
+
+                    this.logger.log(
+                        `[Coze] Auto-synced parameters for agent ${id}: openingStatement=${!!cozeParams.openingStatement}, openingQuestions=${cozeParams.openingQuestions?.length || 0}`,
+                    );
+                } catch (error) {
+                    // 获取 Coze 参数失败，向前端抛出错误
+                    this.logger.error(
+                        `[Coze] Failed to fetch parameters for agent ${id}: ${error.message}`,
+                    );
+                    throw error;
+                }
+            }
+
+            this.logger.log(
+                `[Dify] finalUpdateData keys: ${Object.keys(finalUpdateData).join(", ")}`,
+            );
+            this.logger.log(
+                `[Dify] finalUpdateData.openingStatement: ${finalUpdateData.openingStatement?.substring(0, 50) || "none"}`,
+            );
+            this.logger.log(
+                `[Dify] finalUpdateData.openingQuestions: ${JSON.stringify(finalUpdateData.openingQuestions)}`,
+            );
+
             await this.updateById(id, finalUpdateData);
 
             if (tagIds !== undefined) {
@@ -260,6 +352,19 @@ export class AiAgentService extends BaseService<Agent> {
             } else {
                 queryBuilder.where("agent.isPublic = :isPublic", {
                     isPublic: dto.isPublic,
+                });
+            }
+        }
+
+        // 创建模式筛选
+        if (dto.createMode) {
+            if (dto.keyword) {
+                queryBuilder.andWhere("agent.createMode = :createMode", {
+                    createMode: dto.createMode,
+                });
+            } else {
+                queryBuilder.where("agent.createMode = :createMode", {
+                    createMode: dto.createMode,
                 });
             }
         }
@@ -425,6 +530,10 @@ export class AiAgentService extends BaseService<Agent> {
             return await operation();
         } catch (err) {
             this.logger.error(`[!] ${errorMessage}: ${err.message}`, err.stack);
+            // ✅ 如果已经是业务异常，直接透传
+            if (err instanceof HttpException) {
+                throw err;
+            }
             throw HttpErrorFactory.business(errorMessage);
         }
     }
@@ -675,7 +784,18 @@ export class AiAgentService extends BaseService<Agent> {
      * 通过发布令牌获取公开智能体信息
      * @description 只返回公开可见的字段，过滤掉所有私密信息
      */
-    async getPublicAgentByToken(publishToken: string): Promise<Agent> {
+    async getPublicAgentByToken(publishToken: string): Promise<
+        Agent & {
+            modelFeatures?: string[];
+            fileUploadConfig?: {
+                enabled?: boolean;
+                allowedFileExtensions?: string[];
+                allowedFileTypes?: string[];
+                numberLimits?: number;
+                fileSizeLimit?: number;
+            };
+        }
+    > {
         const agent = await this.agentRepository
             .createQueryBuilder("agent")
             .select([
@@ -696,6 +816,9 @@ export class AiAgentService extends BaseService<Agent> {
                 "agent.showContext",
                 "agent.formFields",
                 "agent.quickCommands",
+                "agent.modelConfig",
+                "agent.createMode",
+                "agent.thirdPartyIntegration",
             ])
             .leftJoin("agent.tags", "tag")
             .addSelect(["tag.id", "tag.name", "tag.type", "tag.createdAt", "tag.updatedAt"])
@@ -710,7 +833,61 @@ export class AiAgentService extends BaseService<Agent> {
             await this.incrementUserCount(agent.id);
         }
 
-        return agent as Agent;
+        // 提取模型特性（如 vision、audio），用于前端判断是否支持多模态上传
+        let modelFeatures: string[] = [];
+        if (agent.modelConfig?.id) {
+            const model = await this.aiModelRepository.findOne({
+                where: { id: agent.modelConfig.id },
+                select: ["features"],
+            });
+            modelFeatures = model?.features || [];
+        }
+
+        // 获取第三方平台的文件上传配置
+        let fileUploadConfig:
+            | {
+                  enabled?: boolean;
+                  allowedFileExtensions?: string[];
+                  allowedFileTypes?: string[];
+                  numberLimits?: number;
+                  fileSizeLimit?: number;
+              }
+            | undefined;
+
+        // 如果是 Dify 智能体，获取 Dify 的文件上传配置
+        if (
+            agent.createMode === "dify" &&
+            agent.thirdPartyIntegration?.apiKey &&
+            agent.thirdPartyIntegration?.baseURL
+        ) {
+            try {
+                const difyParams = await this.thirdPartyIntegrationHandler.fetchDifyParameters({
+                    apiKey: agent.thirdPartyIntegration.apiKey,
+                    baseURL: agent.thirdPartyIntegration.baseURL,
+                });
+                fileUploadConfig = difyParams.fileUploadConfig;
+            } catch {
+                // 获取 Dify 参数失败时忽略，使用默认配置
+            }
+        }
+
+        // 移除敏感的 modelConfig 和 thirdPartyIntegration，只返回安全的公开信息
+        const { modelConfig: _modelConfig, thirdPartyIntegration: _tpi, ...publicAgent } = agent;
+
+        return {
+            ...publicAgent,
+            modelFeatures,
+            fileUploadConfig,
+        } as Agent & {
+            modelFeatures?: string[];
+            fileUploadConfig?: {
+                enabled?: boolean;
+                allowedFileExtensions?: string[];
+                allowedFileTypes?: string[];
+                numberLimits?: number;
+                fileSizeLimit?: number;
+            };
+        };
     }
 
     /**
@@ -726,6 +903,43 @@ export class AiAgentService extends BaseService<Agent> {
         }
 
         return agent as Agent;
+    }
+
+    /**
+     * 获取智能体的文件上传配置
+     * 对于 Dify 智能体，从 Dify 平台获取文件上传配置
+     * @param agentId 智能体ID
+     * @returns 文件上传配置
+     */
+    async getAgentFileUploadConfig(agentId: string): Promise<{
+        enabled?: boolean;
+        allowedFileExtensions?: string[];
+        allowedFileTypes?: string[];
+        numberLimits?: number;
+        fileSizeLimit?: number;
+    } | null> {
+        const agent = await this.getAgentDetail(agentId);
+
+        // 如果是 Dify 智能体，获取 Dify 的文件上传配置
+        if (
+            agent.createMode === "dify" &&
+            agent.thirdPartyIntegration?.apiKey &&
+            agent.thirdPartyIntegration?.baseURL
+        ) {
+            try {
+                const difyParams = await this.thirdPartyIntegrationHandler.fetchDifyParameters({
+                    apiKey: agent.thirdPartyIntegration.apiKey,
+                    baseURL: agent.thirdPartyIntegration.baseURL,
+                });
+                return difyParams.fileUploadConfig || null;
+            } catch {
+                // 获取 Dify 参数失败时返回 null
+                return null;
+            }
+        }
+
+        // 非 Dify 智能体返回 null（前端会使用默认配置）
+        return null;
     }
 
     /**

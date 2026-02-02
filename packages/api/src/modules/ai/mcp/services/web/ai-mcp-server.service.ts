@@ -169,6 +169,7 @@ export class WebAiMcpServerWebService extends BaseService<AiMcpServer> {
                         type: McpServerType.USER,
                         url,
                         creatorId,
+                        customHeaders: config.customHeaders,
                         description: `MCP server imported from JSON: ${name}`,
                         icon: "",
                         sortOrder: 0,

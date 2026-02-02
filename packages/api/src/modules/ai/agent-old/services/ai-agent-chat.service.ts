@@ -183,35 +183,35 @@ export class AiAgentChatService extends BaseService<AgentChatRecord> {
             );
         }
 
-        // // 检查第三方集成
-        // if (this.thirdPartyIntegrationHandler.isThirdPartyIntegrationEnabled(finalConfig, dto)) {
-        //     this.logger.log(
-        //         `[ThirdParty] Using third party platform: ${finalConfig.createMode} for agent ${agentId}`,
-        //     );
+        // 检查第三方集成
+        if (this.thirdPartyIntegrationHandler.isThirdPartyIntegrationEnabled(finalConfig, dto)) {
+            this.logger.log(
+                `[ThirdParty] Using third party platform: ${finalConfig.createMode} for agent ${agentId}`,
+            );
 
-        //     this.thirdPartyIntegrationHandler.validateThirdPartyConfig(finalConfig, dto);
+            this.thirdPartyIntegrationHandler.validateThirdPartyConfig(finalConfig, dto);
 
-        //     // 获取积分策略结果
-        //     const billingResult = await billingStrategy.determineBillTo(
-        //         agentInfo as Agent,
-        //         user,
-        //         this.userRepository,
-        //     );
+            // 获取积分策略结果
+            const billingResult = await billingStrategy.determineBillTo(
+                agentInfo as Agent,
+                user,
+                this.userRepository,
+            );
 
-        //     return await this.thirdPartyIntegrationHandler.handleThirdPartyIntegrationChat(
-        //         finalConfig,
-        //         modifiedDto,
-        //         user,
-        //         {
-        //             responseMode,
-        //             res,
-        //             billingResult,
-        //             billingStrategy,
-        //             billingHandler: this.billingHandler,
-        //         },
-        //         conversationRecord,
-        //     );
-        // }
+            return await this.thirdPartyIntegrationHandler.handleThirdPartyIntegrationChat(
+                finalConfig,
+                modifiedDto,
+                user,
+                {
+                    responseMode,
+                    res,
+                    billingResult,
+                    billingStrategy,
+                    billingHandler: this.billingHandler,
+                },
+                conversationRecord,
+            );
+        }
 
         // 传统聊天处理
         return await this.handleTraditionalChat(
@@ -489,6 +489,7 @@ export class AiAgentChatService extends BaseService<AgentChatRecord> {
         res.setHeader("Connection", "keep-alive");
         res.setHeader("Access-Control-Allow-Origin", "*");
         res.setHeader("Access-Control-Allow-Headers", "Cache-Control");
+        res.flushHeaders(); // 立即发送响应头
     }
 
     /**

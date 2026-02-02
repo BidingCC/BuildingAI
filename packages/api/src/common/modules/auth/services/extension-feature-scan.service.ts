@@ -2,6 +2,7 @@ import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
 import { Extension, ExtensionFeature, MembershipLevels } from "@buildingai/db/entities";
 import { In, Repository } from "@buildingai/db/typeorm";
 import { HttpErrorFactory } from "@buildingai/errors";
+import { TerminalLogger } from "@buildingai/utils";
 import { forwardRef, Inject, Injectable, Logger } from "@nestjs/common";
 import * as fs from "fs-extra";
 import * as path from "path";
@@ -303,7 +304,7 @@ export class ExtensionFeatureScanService {
                     name: feature.name,
                     description: feature.description,
                 });
-                this.logger.debug(`更新功能: ${feature.code}`);
+                TerminalLogger.info("更新功能", `${feature.code}`);
                 result.updated++;
             } else {
                 // 创建新功能
@@ -315,7 +316,7 @@ export class ExtensionFeatureScanService {
                     status: true,
                 });
                 await this.extensionFeatureRepository.save(newFeature);
-                this.logger.log(`创建功能: ${feature.code} (${feature.name})`);
+                TerminalLogger.info("创建功能", `${feature.code} (${feature.name})`);
                 result.added++;
             }
         }

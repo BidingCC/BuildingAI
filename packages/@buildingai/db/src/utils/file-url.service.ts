@@ -10,10 +10,9 @@ import { Dict } from "../entities/dict.entity";
 export const STORAGE_ENGINE = {
     /** 本地存储 */
     LOCAL: "local",
-    // 后续可扩展其他存储引擎，如：
-    // OSS: "oss",
-    // S3: "s3",
-    // COS: "cos",
+    OSS: "oss",
+    COS: "cos",
+    KODO: "kodo",
 } as const;
 
 /**

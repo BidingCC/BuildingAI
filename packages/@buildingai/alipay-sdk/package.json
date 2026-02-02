@@ -1,0 +1,45 @@
+{
+    "name": "@buildingai/alipay-sdk",
+    "version": "0.0.0",
+    "private": true,
+    "license": "MIT",
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "files": [
+        "dist/**/*"
+    ],
+    "exports": {
+        ".": {
+            "require": "./dist/index.js",
+            "import": "./dist/index.js",
+            "types": "./dist/index.d.ts"
+        },
+        "./*": {
+            "types": "./dist/*.d.ts",
+            "import": "./dist/*.js",
+            "require": "./dist/*.js"
+        }
+    },
+    "scripts": {
+        "clean": "rimraf dist .turbo dist/build.tsbuildinfo",
+        "check-types": "tsc --noEmit",
+        "build": "rimraf dist && tsc -p tsconfig.build.json",
+        "dev": "tsc -p tsconfig.build.json --watch",
+        "format": "biome format --write .",
+        "format:check": "biome ci .",
+        "lint": "eslint . --quiet",
+        "lint:fix": "eslint . --fix",
+        "watch": "tsc -p tsconfig.build.json --watch",
+        "test": "jest",
+        "test:dev": "jest --watch"
+    },
+    "dependencies": {
+        "alipay-sdk": "^4.14.0"
+    },
+    "devDependencies": {
+        "@buildingai/constants": "workspace:*",
+        "@buildingai/eslint-config": "workspace:*",
+        "@buildingai/typescript-config": "workspace:*"
+    }
+}

@@ -11,7 +11,8 @@ import {
     User,
     UserSubscription,
 } from "@buildingai/db/entities";
-// import { MembershipValidationCommandHandler } from "@modules/ai/chat/handlers";
+import { MembershipValidationCommandHandler } from "@modules/ai/chat/handlers";
+import { HttpModule } from "@nestjs/axios";
 import { Module } from "@nestjs/common";
 
 import { AiAgentConsoleController } from "./controllers/console/ai-agent.controller";
@@ -48,6 +49,7 @@ import { AiAgentPublicChatService } from "./services/ai-agent-v1-chat.service";
             UserSubscription,
             MembershipLevels,
         ]),
+        HttpModule,
         ChatHandlersModule, // 导入聊天处理器模块（已包含其他依赖模块）
     ],
     controllers: [

@@ -47,19 +47,22 @@
         "test:dev": "jest --watch"
     },
     "dependencies": {
-        "@buildingai/constants": "workspace:*",
-        "@buildingai/logger": "workspace:*",
+        "@buildingai/base": "workspace:*",
+        "@buildingai/cache": "workspace:*",
         "@buildingai/config": "workspace:*",
-        "@buildingai/utils": "workspace:*",
+        "@buildingai/constants": "workspace:*",
         "@buildingai/db": "workspace:*",
         "@buildingai/dto": "workspace:*",
-        "@nestjs/common": "catalog:api",
         "@buildingai/errors": "workspace:*",
-        "@buildingai/base": "workspace:*",
+        "@buildingai/logger": "workspace:*",
+        "@buildingai/utils": "workspace:*",
+        "@nestjs/common": "catalog:api",
+        "@types/ali-oss": "catalog:",
+        "ali-oss": "catalog:",
         "cli-table3": "catalog:"
     },
     "devDependencies": {
-        "@buildingai/typescript-config": "workspace:*",
-        "@buildingai/eslint-config": "workspace:*"
+        "@buildingai/eslint-config": "workspace:*",
+        "@buildingai/typescript-config": "workspace:*"
     }
 }

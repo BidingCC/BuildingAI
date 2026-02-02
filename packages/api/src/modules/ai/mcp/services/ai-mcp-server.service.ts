@@ -162,6 +162,9 @@ export class AiMcpServerService extends BaseService<AiMcpServer> {
                 // Use the full URL directly
                 const url = config.url;
 
+                // Communication type
+                const communicationType = config.type;
+
                 // Check if a server with the same name already exists
                 const existServer = await this.findOne({
                     where: { name },
@@ -177,6 +180,7 @@ export class AiMcpServerService extends BaseService<AiMcpServer> {
                     // If not exists, create new server
                     const created = await this.create({
                         name,
+                        communicationType,
                         type: McpServerType.SYSTEM,
                         url,
                         creatorId,

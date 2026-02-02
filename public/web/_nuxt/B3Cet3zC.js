@@ -1,1 +1,0 @@
-import{aC as i,aB as e}from"#entry";function o(s){return i("/permission/list",s)}function r(s){return i(`/permission/${s}`)}function t(){return e("/permission/sync")}function a(){return e("/permission/cleanup")}export{r as a,o as b,t as c,a as d};
