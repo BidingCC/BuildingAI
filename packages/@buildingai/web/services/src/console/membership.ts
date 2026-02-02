@@ -223,6 +223,40 @@ export function useMembershipOrderDetailQuery(
     });
 }
 
+// Plan create/update types
+export type CreatePlansDto = {
+    name: string;
+    label?: string;
+    durationConfig: number; // 1-月度 2-季度 3-半年 4-年度 5-终身 6-自定义
+    duration?: { value: number; unit: string };
+    billing?: Array<{
+        levelId: string;
+        salesPrice: number;
+        originalPrice?: number;
+        label?: string;
+        status: boolean;
+    }>;
+};
+
+export type UpdatePlansDto = CreatePlansDto;
+
+export type MembershipPlanDetail = {
+    id: string;
+    name: string;
+    label?: string | null;
+    durationConfig: number;
+    duration?: { value: number; unit: string };
+    billing?: Array<{
+        levelId: string;
+        salesPrice: number;
+        originalPrice?: number;
+        label?: string;
+        status: boolean;
+    }>;
+    status: boolean;
+    sort: number;
+};
+
 // Plan config types (GET /plans returns plansStatus + plans)
 export type MembershipPlanConfigItem = {
     id: string;
@@ -240,6 +274,54 @@ export type MembershipPlansConfigResponse = {
     plansStatus: boolean;
     plans: MembershipPlanConfigItem[];
 };
+
+/**
+ * Get membership plan detail (for edit)
+ */
+export function useMembershipPlanDetailQuery(
+    id: string | null,
+    options?: QueryOptionsUtil<MembershipPlanDetail>,
+) {
+    return useQuery<MembershipPlanDetail>({
+        queryKey: ["membership-plans", "detail", id],
+        queryFn: () => consoleHttpClient.get<MembershipPlanDetail>(`/plans/${id}`),
+        enabled: !!id && options?.enabled !== false,
+        ...options,
+    });
+}
+
+/**
+ * Create membership plan
+ */
+export function useCreateMembershipPlanMutation(
+    options?: MutationOptionsUtil<MembershipPlanDetail, CreatePlansDto>,
+) {
+    const queryClient = useQueryClient();
+    return useMutation<MembershipPlanDetail, Error, CreatePlansDto>({
+        mutationFn: (body) => consoleHttpClient.post<MembershipPlanDetail>("/plans", body),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["membership-plans"] });
+        },
+        ...options,
+    });
+}
+
+/**
+ * Update membership plan
+ */
+export function useUpdateMembershipPlanMutation(
+    options?: MutationOptionsUtil<MembershipPlanDetail, { id: string; body: UpdatePlansDto }>,
+) {
+    const queryClient = useQueryClient();
+    return useMutation<MembershipPlanDetail, Error, { id: string; body: UpdatePlansDto }>({
+        mutationFn: ({ id, body }) =>
+            consoleHttpClient.patch<MembershipPlanDetail>(`/plans/${id}`, body),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["membership-plans"] });
+        },
+        ...options,
+    });
+}
 
 /**
  * Get membership plans config (list all plans with level count)
