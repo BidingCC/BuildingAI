@@ -5,6 +5,7 @@ export const WorkflowBlocks = {
   Condition: "condition",
   Http: "http",
   Note: "note",
+  Code: "code",
 } as const;
 
 export type WorkflowBlocksType = (typeof WorkflowBlocks)[keyof typeof WorkflowBlocks];

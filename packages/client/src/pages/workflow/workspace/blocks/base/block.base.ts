@@ -4,6 +4,7 @@ import type { FunctionComponent, ReactElement } from "react";
 import type { WorkflowBlocksType } from "../../constants/node.ts";
 import { WORKFLOW } from "../../constants/workflow.ts";
 import type { AppNode } from "../../types";
+import type { VariableDefinition } from "../../types/variable.types";
 
 export interface BlockConfig<T = any> {
   type: WorkflowBlocksType;
@@ -43,6 +44,16 @@ export interface BlockPanelProps<T = any> {
 
 export type BlockPanelComponent<T> = FunctionComponent<BlockPanelProps<T>>;
 
+export type OutputVariablesConfig =
+  | { type: "fixed"; variables: VariableDefinition[] }
+  | { type: "dynamic"; dataField: string }
+  | { type: "none" };
+
+export type InputVariablesConfig =
+  | { type: "fixed"; variables: VariableDefinition[] }
+  | { type: "dynamic"; dataField: string }
+  | { type: "none" };
+
 export abstract class BlockBase<T = any> {
   protected config: BlockConfig<T>;
 
@@ -64,9 +75,6 @@ export abstract class BlockBase<T = any> {
     };
   }
 
-  /**
-   * 创建节点实例
-   */
   createNode(x: number, y: number, initialData?: Partial<T>): AppNode {
     const defaultData = this.config.defaultData();
     const data = initialData ? { ...defaultData, ...initialData } : defaultData;
@@ -84,16 +92,65 @@ export abstract class BlockBase<T = any> {
   }
 
   validate(_data: T): { valid: boolean; errors?: string[] } {
-    // 默认实现，子类可以重写
     return { valid: true };
   }
 
-  /**
-   * 节点数据转换（用于序列化/反序列化）
-   */
   transform(data: T): T {
-    // 默认实现，子类可以重写
     return data;
+  }
+  getOutputConfig(): OutputVariablesConfig {
+    return { type: "none" };
+  }
+
+  getInputConfig(): InputVariablesConfig {
+    return { type: "none" };
+  }
+
+  getOutputVariables(data: T): VariableDefinition[] {
+    const config = this.getOutputConfig();
+
+    switch (config.type) {
+      case "fixed":
+        return config.variables;
+
+      case "dynamic": {
+        const dynamicOutputs = (data as any)[config.dataField];
+        return Array.isArray(dynamicOutputs) ? dynamicOutputs : [];
+      }
+
+      case "none":
+      default:
+        return [];
+    }
+  }
+
+  getInputVariables(data: T): VariableDefinition[] {
+    const config = this.getInputConfig();
+
+    switch (config.type) {
+      case "fixed":
+        return config.variables;
+
+      case "dynamic": {
+        const dynamicInputs = (data as any)[config.dataField];
+        if (Array.isArray(dynamicInputs)) {
+          return dynamicInputs.map((input: any) => (input.definition ? input.definition : input));
+        }
+        return [];
+      }
+
+      case "none":
+      default:
+        return [];
+    }
+  }
+
+  isOutputEditable(): boolean {
+    return this.getOutputConfig().type === "dynamic";
+  }
+
+  isInputEditable(): boolean {
+    return this.getInputConfig().type === "dynamic";
   }
 
   abstract get NodeComponent(): FunctionComponent<BlockNodeProps<T>>;

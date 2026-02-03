@@ -1,7 +1,7 @@
 import type { BlockNodeComponent } from "../base/block.base.ts";
 import type { InputBlockData } from "./input.types.ts";
 
-export const InputNode: BlockNodeComponent<InputBlockData> = ({ data }) => {
+export const InputNodeComponent: BlockNodeComponent<InputBlockData> = ({ data }) => {
   return (
     <div className="space-y-2">
       {data.vars.map((item) => (

@@ -1,10 +1,7 @@
-export interface InputVar {
-  name: string;
-  type: "string" | "number" | "boolean" | "array" | "object";
-  label: string;
-  required: boolean;
+import type { VariableDefinition } from "../../types/variable.types";
+
+export interface InputVar extends VariableDefinition {
   defaultValue?: any;
-  description?: string;
 }
 
 export interface InputBlockData {

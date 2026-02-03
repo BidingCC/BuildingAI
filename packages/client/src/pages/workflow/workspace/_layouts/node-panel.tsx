@@ -70,7 +70,7 @@ function WorkflowPanel() {
   }
 
   return (
-    <Panel position="center-right" className="h-4/5 w-80">
+    <Panel position="center-right" className="h-4/5 w-96">
       <NodeEditorPanel nodeId={selectedNode.id} />
     </Panel>
   );

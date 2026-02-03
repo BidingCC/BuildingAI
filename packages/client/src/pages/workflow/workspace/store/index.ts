@@ -3,6 +3,10 @@ import { create, type StateCreator } from "zustand";
 import { devtools } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 
+import {
+  createVariablesSlice,
+  type VariablesSlice,
+} from "@/pages/workflow/workspace/store/slices/variables.slice.ts";
 import type { AppEdge, AppNode } from "@/pages/workflow/workspace/types.ts";
 
 import type { EdgesSlice } from "./slices/edges.slice";
@@ -14,7 +18,7 @@ import { createUISlice } from "./slices/ui.slice";
 
 enableMapSet();
 
-export type WorkflowStore = NodesSlice & EdgesSlice & UISlice;
+export type WorkflowStore = NodesSlice & EdgesSlice & UISlice & VariablesSlice;
 
 export const useWorkflowStore = create<WorkflowStore>()(
   devtools(
@@ -22,6 +26,7 @@ export const useWorkflowStore = create<WorkflowStore>()(
       ...createNodesSlice(...a),
       ...createEdgesSlice(...a),
       ...createUISlice(...a),
+      ...createVariablesSlice(...a),
     })),
     { name: "WorkflowStore" },
   ),
