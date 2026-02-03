@@ -9,6 +9,20 @@ export interface UserConfigState {
     configs: Record<string, Record<string, any>>;
 }
 
+export type FontSize = "xs" | "sm" | "md" | "lg" | "xl";
+
+const APPEARANCE_GROUP = "appearance";
+const FONT_SIZE_KEY = "fontSize";
+
+/**
+ * Apply font size to the document root element.
+ */
+const applyFontSize = (size: FontSize) => {
+    if (typeof document !== "undefined") {
+        document.documentElement.setAttribute("data-font-size", size);
+    }
+};
+
 export interface UserConfigActions {
     setConfig: <T = any>(group: string, key: string, value: T) => void;
     setConfigs: (configs: Record<string, Record<string, any>>) => void;
@@ -16,6 +30,9 @@ export interface UserConfigActions {
     getGroupConfigs: (group: string) => Record<string, any>;
     removeConfig: (group: string, key: string) => void;
     clearConfigs: () => void;
+    setFontSize: (size: FontSize) => void;
+    getFontSize: () => FontSize;
+    initAppearance: () => void;
 }
 
 export type UserConfigSlice = {
@@ -70,6 +87,29 @@ export const createUserConfigSlice: StateCreator<UserConfigSlice, [], [], UserCo
                 };
             }),
         clearConfigs: () => set((s) => ({ userConfig: { ...s.userConfig, configs: {} } })),
+        setFontSize: (size) => {
+            set((s) => ({
+                userConfig: {
+                    ...s.userConfig,
+                    configs: {
+                        ...s.userConfig.configs,
+                        [APPEARANCE_GROUP]: {
+                            ...s.userConfig.configs[APPEARANCE_GROUP],
+                            [FONT_SIZE_KEY]: size,
+                        },
+                    },
+                },
+            }));
+            applyFontSize(size);
+        },
+        getFontSize: () => {
+            const groupConfigs = get().userConfig.configs[APPEARANCE_GROUP];
+            return groupConfigs?.[FONT_SIZE_KEY] ?? "md";
+        },
+        initAppearance: () => {
+            const fontSize = get().userConfigActions.getFontSize();
+            applyFontSize(fontSize);
+        },
     },
 });
 

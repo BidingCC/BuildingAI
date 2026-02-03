@@ -30,7 +30,7 @@ import { Separator } from "@buildingai/ui/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@buildingai/ui/components/ui/tabs";
 import { cn } from "@buildingai/ui/lib/utils";
 import { Check, CreditCard, Zap } from "lucide-react";
-import { useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 
 function formatPrice(amount: number) {
   return `¥${Number(amount).toFixed(2)}`;
@@ -306,7 +306,7 @@ function PlanCard({
 
   return (
     <Card className="h-full">
-      <CardContent className="flex h-full flex-col gap-5 px-6 py-2">
+      <CardContent className="flex h-full flex-col gap-5 px-4 py-2 md:px-6">
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
@@ -366,23 +366,22 @@ function PlanCard({
   );
 }
 
-export function UpgradeDialog() {
+export function UpgradeDialog({
+  children,
+  open,
+  onOpenChange,
+}: {
+  children?: ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}) {
   const { data: center, isLoading, isError } = useMembershipCenterQuery();
   const plans = center?.plans ?? [];
   const defaultPlanId = plans[0]?.id;
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button
-          className="bg-primary/10 text-primary hover:bg-primary/15 rounded-full text-xs"
-          size="sm"
-          variant="secondary"
-          onClick={(e) => e.stopPropagation()}
-        >
-          升级
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      {children && <DialogTrigger asChild>{children}</DialogTrigger>}
       <DialogContent
         className="m-0 flex h-screen max-h-screen w-screen max-w-full! flex-col rounded-none p-0"
         onClick={(event: React.MouseEvent<HTMLDivElement>) => {
@@ -392,7 +391,7 @@ export function UpgradeDialog() {
         <DialogHeader className="sr-only">
           <DialogTitle>升级会员</DialogTitle>
         </DialogHeader>
-        <div className="flex flex-1 flex-col items-center overflow-auto p-6">
+        <div className="flex flex-1 flex-col items-center p-6">
           <div className="flex items-center justify-center pt-12 pb-6 text-lg font-medium">
             <h2 className="text-3xl font-normal">升级套餐</h2>
           </div>
@@ -424,9 +423,9 @@ export function UpgradeDialog() {
                       <TabsContent
                         key={plan.id}
                         value={plan.id}
-                        className="pt-6 sm:w-[60vw] md:w-xl lg:w-4xl xl:w-5xl"
+                        className="flex w-full justify-center pt-6 lg:w-4xl xl:w-5xl"
                       >
-                        <div className="group/membership">
+                        <div className="group/membership flex flex-1 justify-center md:px-12">
                           {billings.length === 0 ? (
                             <div className="text-muted-foreground py-8 text-center text-sm">
                               该套餐暂无档位
@@ -434,13 +433,13 @@ export function UpgradeDialog() {
                           ) : (
                             <Carousel
                               opts={{ align: "start" }}
-                              className="w-[60vw] md:w-full lg:w-full"
+                              className="max-w-[calc(100dvw-(8rem))] md:w-full lg:w-full"
                             >
                               <CarouselContent>
                                 {billings.map((billing) => (
                                   <CarouselItem
                                     key={`${plan.id}-${billing.levelId}`}
-                                    className="md:basis-1/2 lg:basis-1/2 xl:basis-1/3"
+                                    className="sm:basis-1/2 lg:basis-1/2 xl:basis-1/3"
                                   >
                                     <div className="h-full p-1">
                                       <PlanCard
@@ -452,8 +451,8 @@ export function UpgradeDialog() {
                                   </CarouselItem>
                                 ))}
                               </CarouselContent>
-                              <CarouselPrevious className="opacity-0! group-hover/membership:opacity-100!" />
-                              <CarouselNext className="opacity-0! group-hover/membership:opacity-100!" />
+                              <CarouselPrevious className="group-hover/membership:opacity-100! disabled:group-hover/membership:opacity-50! md:opacity-0!" />
+                              <CarouselNext className="group-hover/membership:opacity-100! disabled:group-hover/membership:opacity-50! md:opacity-0!" />
                             </Carousel>
                           )}
                         </div>

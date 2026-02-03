@@ -20,9 +20,12 @@ import { Slot } from "radix-ui";
 import * as React from "react";
 
 const SIDEBAR_STORAGE_KEY = "sidebar_state";
-const SIDEBAR_WIDTH = "16rem";
-const SIDEBAR_WIDTH_MOBILE = "18rem";
-const SIDEBAR_WIDTH_ICON = "3rem";
+// const SIDEBAR_WIDTH = "16rem";
+// const SIDEBAR_WIDTH_MOBILE = "18rem";
+// const SIDEBAR_WIDTH_ICON = "3rem";
+const SIDEBAR_WIDTH = "256px";
+const SIDEBAR_WIDTH_MOBILE = "288px";
+const SIDEBAR_WIDTH_ICON = "48px";
 const SIDEBAR_KEYBOARD_SHORTCUT = "b";
 
 type SidebarContextProps = {
