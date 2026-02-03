@@ -1,4 +1,8 @@
-import { listMyCreatedDatasets, listTeamDatasets } from "@buildingai/services/web";
+import {
+  useMyCreatedDatasetsInfiniteQuery,
+  useTeamDatasetsInfiniteQuery,
+} from "@buildingai/services/web";
+import { Badge } from "@buildingai/ui/components/ui/badge";
 import { Button } from "@buildingai/ui/components/ui/button";
 import {
   Collapsible,
@@ -18,6 +22,12 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@buildingai/ui/components/ui/sidebar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@buildingai/ui/components/ui/tooltip";
 import { cn } from "@buildingai/ui/lib/utils";
 import {
   BookCopy,
@@ -28,7 +38,7 @@ import {
   Plus,
   Users,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 import { DatasetEditDialog } from "../[id]/_components/dialogs/dataset-edit-dialog";
@@ -39,80 +49,45 @@ type SidebarItem = {
   id: string;
   title: string;
   path: string;
+  squarePublishStatus?: string;
 };
 
 export function DatasetsSidebar() {
   return <DatasetsSidebarMain />;
 }
 
+const toSidebarItem = (d: { id: string; name: string; squarePublishStatus?: string }) => ({
+  id: d.id,
+  title: d.name,
+  path: `/datasets/${d.id}`,
+  squarePublishStatus: d.squarePublishStatus,
+});
+
 export function DatasetsSidebarMain({ className }: { className?: string }) {
   const { pathname } = useLocation();
-  const [myDatasetsItems, setMyDatasetsItems] = useState<SidebarItem[]>([]);
-  const [joinedDatasetsItems, setJoinedDatasetsItems] = useState<SidebarItem[]>([]);
-  const [myTotal, setMyTotal] = useState(0);
-  const [joinedTotal, setJoinedTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [loadingJoined, setLoadingJoined] = useState(false);
-  const [loadingMoreMy, setLoadingMoreMy] = useState(false);
-  const [loadingMoreJoined, setLoadingMoreJoined] = useState(false);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
-  const toSidebarItem = (d: { id: string; name: string }) => ({
-    id: d.id,
-    title: d.name,
-    path: `/datasets/${d.id}`,
-  });
+  const myQuery = useMyCreatedDatasetsInfiniteQuery(SIDEBAR_PAGE_SIZE);
+  const teamQuery = useTeamDatasetsInfiniteQuery(SIDEBAR_PAGE_SIZE);
 
-  const refetchMyDatasets = useCallback(() => {
-    listMyCreatedDatasets({ page: 1, pageSize: SIDEBAR_PAGE_SIZE }).then(({ items, total }) => {
-      setMyDatasetsItems(items.map(toSidebarItem));
-      setMyTotal(total);
-    });
-  }, []);
+  const myDatasetsItems = useMemo(
+    () => myQuery.data?.pages.flatMap((p) => p.items).map(toSidebarItem) ?? [],
+    [myQuery.data?.pages],
+  );
+  const joinedDatasetsItems = useMemo(
+    () => teamQuery.data?.pages.flatMap((p) => p.items).map(toSidebarItem) ?? [],
+    [teamQuery.data?.pages],
+  );
 
-  useEffect(() => {
-    setLoading(true);
-    listMyCreatedDatasets({ page: 1, pageSize: SIDEBAR_PAGE_SIZE })
-      .then(({ items, total }) => {
-        setMyDatasetsItems(items.map(toSidebarItem));
-        setMyTotal(total);
-      })
-      .finally(() => setLoading(false));
-  }, []);
-
-  useEffect(() => {
-    setLoadingJoined(true);
-    listTeamDatasets({ page: 1, pageSize: SIDEBAR_PAGE_SIZE })
-      .then(({ items, total }) => {
-        setJoinedDatasetsItems(items.map(toSidebarItem));
-        setJoinedTotal(total);
-      })
-      .finally(() => setLoadingJoined(false));
-  }, []);
-
-  const hasMoreMy = myDatasetsItems.length < myTotal;
-  const hasMoreJoined = joinedDatasetsItems.length < joinedTotal;
-
-  const loadMoreMy = () => {
-    if (loadingMoreMy || !hasMoreMy) return;
-    const nextPage = Math.floor(myDatasetsItems.length / SIDEBAR_PAGE_SIZE) + 1;
-    setLoadingMoreMy(true);
-    listMyCreatedDatasets({ page: nextPage, pageSize: SIDEBAR_PAGE_SIZE })
-      .then(({ items }) => {
-        setMyDatasetsItems((prev) => [...prev, ...items.map(toSidebarItem)]);
-      })
-      .finally(() => setLoadingMoreMy(false));
-  };
-
-  const loadMoreJoined = () => {
-    if (loadingMoreJoined || !hasMoreJoined) return;
-    const nextPage = Math.floor(joinedDatasetsItems.length / SIDEBAR_PAGE_SIZE) + 1;
-    setLoadingMoreJoined(true);
-    listTeamDatasets({ page: nextPage, pageSize: SIDEBAR_PAGE_SIZE })
-      .then(({ items }) => {
-        setJoinedDatasetsItems((prev) => [...prev, ...items.map(toSidebarItem)]);
-      })
-      .finally(() => setLoadingMoreJoined(false));
-  };
+  const loading = myQuery.isLoading;
+  const loadingJoined = teamQuery.isLoading;
+  const hasMoreMy = myQuery.hasNextPage ?? false;
+  const hasMoreJoined = teamQuery.hasNextPage ?? false;
+  const loadingMoreMy = myQuery.isFetchingNextPage;
+  const loadingMoreJoined = teamQuery.isFetchingNextPage;
+  const loadMoreMy = () => myQuery.fetchNextPage();
+  const loadMoreJoined = () => teamQuery.fetchNextPage();
+  const refetchMyDatasets = () => myQuery.refetch();
 
   const navs = useMemo<
     Array<{
@@ -178,12 +153,18 @@ export function DatasetsSidebarMain({ className }: { className?: string }) {
       )}
     >
       <SidebarHeader className="flex flex-row items-center gap-1">
-        <DatasetEditDialog mode="create" onSuccess={refetchMyDatasets}>
-          <Button className="w-full" variant="outline">
-            <Plus />
-            创建知识库
-          </Button>
-        </DatasetEditDialog>
+        <Button className="w-full" variant="outline" onClick={() => setCreateDialogOpen(true)}>
+          <Plus />
+          创建知识库
+        </Button>
+        {createDialogOpen && (
+          <DatasetEditDialog
+            mode="create"
+            open
+            onOpenChange={setCreateDialogOpen}
+            onSuccess={refetchMyDatasets}
+          />
+        )}
       </SidebarHeader>
       <SidebarContent className="mt-2 px-2">
         {navs.map((item) => {
@@ -231,19 +212,48 @@ export function DatasetsSidebarMain({ className }: { className?: string }) {
                         <SidebarMenuSubItem></SidebarMenuSubItem>
                       ) : (
                         <>
-                          {item.items?.map((subItem) => (
-                            <SidebarMenuSubItem key={subItem.id}>
-                              <SidebarMenuSubButton
-                                asChild
-                                isActive={isItemActive(subItem.path)}
-                                className="h-9"
-                              >
-                                <Link to={subItem.path}>
-                                  <span className="line-clamp-1">{subItem.title}</span>
-                                </Link>
-                              </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
-                          ))}
+                          {item.items?.map((subItem) => {
+                            const isPendingReview = subItem.squarePublishStatus === "pending";
+                            return (
+                              <SidebarMenuSubItem key={subItem.id}>
+                                <SidebarMenuSubButton
+                                  asChild
+                                  isActive={isItemActive(subItem.path)}
+                                  className="h-9"
+                                >
+                                  <Link
+                                    to={subItem.path}
+                                    className="flex w-full items-center gap-1"
+                                  >
+                                    <span className="line-clamp-1 min-w-0 flex-1">
+                                      {subItem.title}
+                                    </span>
+                                    {isPendingReview && (
+                                      <TooltipProvider delayDuration={200}>
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <Button
+                                              variant="secondary"
+                                              size="xs"
+                                              onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                              }}
+                                            >
+                                              审核中
+                                            </Button>
+                                          </TooltipTrigger>
+                                          <TooltipContent className="max-w-xs">
+                                            正在审核中，审核通过后该知识库可在知识广场被发现
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      </TooltipProvider>
+                                    )}
+                                  </Link>
+                                </SidebarMenuSubButton>
+                              </SidebarMenuSubItem>
+                            );
+                          })}
                           {item.hasMore && item.loadMore && (
                             <SidebarMenuSubItem>
                               <SidebarMenuSubButton asChild>

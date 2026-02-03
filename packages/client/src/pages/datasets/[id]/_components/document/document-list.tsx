@@ -11,6 +11,7 @@ export interface DocumentListProps {
   onDocumentClick?: (document: DatasetsDocument) => void;
   searchExpanded?: boolean;
   searchResultCount?: number;
+  canManageDocuments?: boolean;
   selectedIds?: string[];
   onSelectedIdsChange?: (ids: string[]) => void;
   onBatchEditTags?: (ids: string[]) => void;
@@ -29,6 +30,7 @@ export function DocumentList({
   onDocumentClick,
   searchExpanded,
   searchResultCount = 0,
+  canManageDocuments = false,
   selectedIds = [],
   onSelectedIdsChange,
   onBatchEditTags,
@@ -76,7 +78,7 @@ export function DocumentList({
       {searchExpanded && (
         <div className="flex h-10 items-center justify-between">
           <span className="text-muted-foreground text-sm">搜索到 {searchResultCount} 个内容</span>
-          {hasSelection && (
+          {canManageDocuments && hasSelection && (
             <DocumentBatchActions
               selectedCount={selectedIds.length}
               onEditTags={handleBatchEditTags}
@@ -98,6 +100,7 @@ export function DocumentList({
           <DocumentCard
             key={doc.id}
             document={doc}
+            canManageDocuments={canManageDocuments}
             selected={selectedSet.has(doc.id)}
             onSelectChange={handleSelect}
             onClick={onDocumentClick}

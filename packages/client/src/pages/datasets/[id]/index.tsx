@@ -16,8 +16,6 @@ import { ContentLayout, PageLayout } from "./_layouts";
 import { DEFAULT_PAGE_SIZE } from "./constants";
 import { useDatasetDocumentUpload } from "./hooks";
 
-const POLL_INTERVAL_MS = 2000;
-
 function documentNeedsPolling(d: DatasetsDocument): boolean {
   return d.status === "pending" || d.status === "processing" || Boolean(d.summaryGenerating);
 }
@@ -36,7 +34,7 @@ export default function DatasetDetailPage() {
     { page: 1, pageSize: DEFAULT_PAGE_SIZE },
     {
       refetchInterval: (query) =>
-        getDocumentItems(query.state.data).some(documentNeedsPolling) ? POLL_INTERVAL_MS : false,
+        getDocumentItems(query.state.data).some(documentNeedsPolling) ? 2000 : false,
     },
   );
 
@@ -49,13 +47,7 @@ export default function DatasetDetailPage() {
     uploadDocuments(files);
   };
 
-  const handleDocumentClick = () => {
-    // TODO: 实现文档点击逻辑
-  };
-
-  const handleDelete = () => {
-    // TODO: 实现删除逻辑
-  };
+  const handleDocumentClick = () => {};
 
   return (
     <PageLayout
@@ -68,7 +60,7 @@ export default function DatasetDetailPage() {
         />
       }
     >
-      <ContentLayout dataset={dataset} onDelete={handleDelete}>
+      <ContentLayout dataset={dataset}>
         <ChatContainer
           welcomeConfig={{
             title: dataset?.name ?? "",

@@ -7,7 +7,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@buildingai/ui/components/ui/dialog";
 import {
   InputGroup,
@@ -27,9 +26,10 @@ import type { DatasetEditFormValues } from "../../types";
 
 export interface DatasetEditDialogProps {
   mode: "create" | "edit";
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   initialValues?: Partial<DatasetEditFormValues>;
   onSuccess?: () => void;
-  children: React.ReactNode;
 }
 
 const defaultForm: DatasetEditFormValues = {
@@ -39,21 +39,20 @@ const defaultForm: DatasetEditFormValues = {
 
 export function DatasetEditDialog({
   mode,
+  open,
+  onOpenChange,
   initialValues,
   onSuccess,
-  children,
 }: DatasetEditDialogProps) {
   const { id: routeId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const [open, setOpen] = useState(false);
   const [form, setForm] = useState<DatasetEditFormValues>(defaultForm);
   const [coverUrl, setCoverUrl] = useState<string | undefined>();
   const [isCoverUploading, setIsCoverUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 打开时初始化表单
   useEffect(() => {
     if (open) {
       setForm({
@@ -75,12 +74,12 @@ export function DatasetEditDialog({
     try {
       if (mode === "create") {
         const dataset = await createEmptyDataset(payload);
-        setOpen(false);
+        onOpenChange(false);
         onSuccess?.();
         await navigate(`/datasets/${dataset.id}`);
       } else if (routeId) {
         await updateDataset(routeId, payload);
-        setOpen(false);
+        onOpenChange(false);
         queryClient.invalidateQueries({ queryKey: ["datasets", routeId] });
         onSuccess?.();
       }
@@ -89,19 +88,16 @@ export function DatasetEditDialog({
     }
   };
 
-  const hasCover = Boolean(coverUrl);
   const submitLabel = mode === "create" ? "创建中..." : "保存中...";
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="gap-0 p-0 sm:max-w-md">
         <DialogHeader className="px-4 pt-4">
           <DialogTitle>{mode === "create" ? "创建知识库" : "修改知识库"}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 px-4 pt-6 pb-4">
-          {/* 名称 */}
           <FormField label="名称" required>
             <InputGroup>
               <InputGroupInput
@@ -126,7 +122,6 @@ export function DatasetEditDialog({
             </InputGroup>
           </FormField>
 
-          {/* 封面 */}
           <FormField label="封面">
             <CoverUpload
               coverUrl={coverUrl}
@@ -141,7 +136,6 @@ export function DatasetEditDialog({
             />
           </FormField>
 
-          {/* 描述 */}
           <FormField label="描述">
             <Textarea
               id="dataset-desc"
@@ -175,7 +169,6 @@ export function DatasetEditDialog({
   );
 }
 
-// 表单字段子组件
 function FormField({
   label,
   required,
@@ -196,7 +189,6 @@ function FormField({
   );
 }
 
-// 封面上传子组件
 function CoverUpload({
   coverUrl,
   isUploading,

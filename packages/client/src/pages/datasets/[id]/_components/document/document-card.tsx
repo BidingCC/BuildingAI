@@ -34,6 +34,7 @@ import { bytesToReadable, formatFileType, getFileFormatKey } from "@/utils/forma
 
 export interface DocumentCardProps {
   document: DatasetsDocument;
+  canManageDocuments?: boolean;
   selected?: boolean;
   onSelectChange?: (id: string, checked: boolean) => void;
   onClick?: (document: DatasetsDocument) => void;
@@ -45,6 +46,7 @@ export interface DocumentCardProps {
 
 export const DocumentCard = memo(function DocumentCard({
   document,
+  canManageDocuments = false,
   selected,
   onSelectChange,
   onClick,
@@ -119,61 +121,68 @@ export const DocumentCard = memo(function DocumentCard({
             size="sm"
           >
             <CardContent>
-              <div
-                data-doc-card-actions
-                className={cn(
-                  "absolute top-2 right-2 z-10 opacity-0 transition-opacity group-hover/card:opacity-100",
-                  selected && "opacity-100",
-                )}
-              >
-                <Checkbox
-                  checked={selected}
-                  onCheckedChange={(v) => onSelectChange?.(document.id, v === true)}
-                  onClick={stopPropagation}
-                  onPointerDown={stopPropagation}
-                  aria-label={`选择 ${document.fileName}`}
-                />
-              </div>
-
-              <div
-                data-doc-card-actions
-                className={cn(
-                  "absolute right-2 bottom-2 z-10 opacity-0 transition-opacity group-hover/card:opacity-100",
-                  moreOpen && "opacity-100",
-                )}
-              >
-                <DropdownMenu open={moreOpen} onOpenChange={setMoreOpen}>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="default"
-                      className="size-6 border-0 shadow-none focus-within:ring-0 focus-visible:ring-0"
+              {canManageDocuments && (
+                <>
+                  <div
+                    data-doc-card-actions
+                    className={cn(
+                      "absolute top-2 right-2 z-10 opacity-0 transition-opacity group-hover/card:opacity-100",
+                      selected && "opacity-100",
+                    )}
+                  >
+                    <Checkbox
+                      checked={selected}
+                      onCheckedChange={(v) => onSelectChange?.(document.id, v === true)}
                       onClick={stopPropagation}
                       onPointerDown={stopPropagation}
-                      aria-label="更多操作"
-                    >
-                      <MoreHorizontal className="size-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" onClick={stopPropagation}>
-                    <DropdownMenuItem onClick={() => onEditTags?.(document)}>
-                      <Pencil className="size-4" />
-                      编辑标签
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onMove?.(document)}>
-                      <ArrowLeftRightIcon className="size-4" />
-                      移动
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onDelete?.(document)} variant="destructive">
-                      <TrashIcon className="size-4" />
-                      删除
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onCopy?.(document)}>
-                      <FilesIcon className="size-4" />
-                      复制
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+                      aria-label={`选择 ${document.fileName}`}
+                    />
+                  </div>
+
+                  <div
+                    data-doc-card-actions
+                    className={cn(
+                      "absolute right-2 bottom-2 z-10 opacity-0 transition-opacity group-hover/card:opacity-100",
+                      moreOpen && "opacity-100",
+                    )}
+                  >
+                    <DropdownMenu open={moreOpen} onOpenChange={setMoreOpen}>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="default"
+                          className="size-6 border-0 shadow-none focus-within:ring-0 focus-visible:ring-0"
+                          onClick={stopPropagation}
+                          onPointerDown={stopPropagation}
+                          aria-label="更多操作"
+                        >
+                          <MoreHorizontal className="size-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" onClick={stopPropagation}>
+                        <DropdownMenuItem onClick={() => onEditTags?.(document)}>
+                          <Pencil className="size-4" />
+                          编辑标签
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onMove?.(document)}>
+                          <ArrowLeftRightIcon className="size-4" />
+                          移动
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onCopy?.(document)}>
+                          <FilesIcon className="size-4" />
+                          复制
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => onDelete?.(document)}
+                          variant="destructive"
+                        >
+                          <TrashIcon className="size-4" />
+                          删除
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </>
+              )}
 
               <div className="flex flex-col gap-3">
                 <div className="flex gap-3">
