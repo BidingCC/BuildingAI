@@ -47,26 +47,17 @@ export class DatasetMemberService extends BaseService<DatasetMember> {
         super(datasetMemberRepository);
     }
 
-    /**
-     * 获取知识库并校验存在，否则抛 404
-     */
     async getDatasetOrThrow(datasetId: string): Promise<Datasets> {
         const dataset = await this.datasetsRepository.findOne({ where: { id: datasetId } });
         if (!dataset) throw HttpErrorFactory.notFound("知识库不存在");
         return dataset;
     }
 
-    /**
-     * 是否为知识库创建者（只有创建者可以修改成员角色、同意/拒绝申请、移除成员）
-     */
     async isCreator(datasetId: string, userId: string): Promise<boolean> {
         const dataset = await this.getDatasetOrThrow(datasetId);
         return dataset.createdBy === userId;
     }
 
-    /**
-     * 知识库当前成员数量（仅统计已加入且有效的成员）
-     */
     async countMembers(datasetId: string): Promise<number> {
         await this.getDatasetOrThrow(datasetId);
         return this.datasetMemberRepository.count({
@@ -74,9 +65,6 @@ export class DatasetMemberService extends BaseService<DatasetMember> {
         });
     }
 
-    /**
-     * 获取当前用户在知识库中的成员角色，非成员返回 null
-     */
     async getMemberRole(datasetId: string, userId: string): Promise<TeamRoleType | null> {
         const member = await this.datasetMemberRepository.findOne({
             where: { datasetId, userId, isActive: true },
@@ -84,9 +72,6 @@ export class DatasetMemberService extends BaseService<DatasetMember> {
         return member?.role ?? null;
     }
 
-    /**
-     * 校验当前用户必须是知识库成员，否则抛 403
-     */
     async requireMember(datasetId: string, userId: string): Promise<DatasetMember> {
         const member = await this.datasetMemberRepository.findOne({
             where: { datasetId, userId, isActive: true },
@@ -95,17 +80,11 @@ export class DatasetMemberService extends BaseService<DatasetMember> {
         return member;
     }
 
-    /**
-     * 校验当前用户必须是创建者，否则抛 403
-     */
     async requireCreator(datasetId: string, userId: string): Promise<void> {
         const ok = await this.isCreator(datasetId, userId);
         if (!ok) throw HttpErrorFactory.forbidden("仅创建者可以执行此操作");
     }
 
-    /**
-     * 检查用户在知识库中的权限（供全局守卫使用；超级管理员视为 owner 权限）
-     */
     async checkPermission(
         datasetId: string,
         user: Pick<UserPlayground, "id" | "isRoot">,
@@ -131,49 +110,20 @@ export class DatasetMemberService extends BaseService<DatasetMember> {
         }
     }
 
-    /**
-     * 已加入的成员列表（分页，带用户信息与角色）
-     */
-    async listMembers(
-        datasetId: string,
-        userId: string,
-        query: ListMembersDto,
-    ): Promise<{ list: DatasetMember[]; total: number }> {
+    async listMembers(datasetId: string, userId: string, query: ListMembersDto) {
         await this.getDatasetOrThrow(datasetId);
         await this.requireMember(datasetId, userId);
 
-        const page = query.page ?? 1;
-        const pageSize = query.pageSize ?? 20;
-
-        const qb = this.datasetMemberRepository
-            .createQueryBuilder("m")
-            .leftJoinAndSelect("m.user", "user")
-            .where("m.dataset_id = :datasetId", { datasetId })
-            .andWhere("m.is_active = true");
-
-        const total = await qb.getCount();
-        const list = await qb
-            .orderBy("m.created_at", "ASC")
-            .skip((page - 1) * pageSize)
-            .take(pageSize)
-            .getMany();
-
-        return { list, total };
+        return this.paginate(query, {
+            where: { datasetId, isActive: true },
+            relations: ["user"],
+            order: { createdAt: "ASC" },
+        });
     }
 
-    /**
-     * 申请列表（待审核/已通过/已拒绝）- 成员可见，仅创建者可操作
-     */
-    async listApplications(
-        datasetId: string,
-        userId: string,
-        query: ListApplicationsDto,
-    ): Promise<{ list: DatasetMemberApplication[]; total: number }> {
+    async listApplications(datasetId: string, userId: string, query: ListApplicationsDto) {
         await this.getDatasetOrThrow(datasetId);
         await this.requireMember(datasetId, userId);
-
-        const page = query.page ?? 1;
-        const pageSize = query.pageSize ?? 20;
 
         const qb = this.applicationRepository
             .createQueryBuilder("a")
@@ -190,19 +140,10 @@ export class DatasetMemberService extends BaseService<DatasetMember> {
             qb.andWhere("a.status = :status", { status });
         }
 
-        const total = await qb.getCount();
-        const list = await qb
-            .orderBy("a.created_at", "DESC")
-            .skip((page - 1) * pageSize)
-            .take(pageSize)
-            .getMany();
-
-        return { list, total };
+        const items = await qb.orderBy("a.created_at", "DESC").getMany();
+        return { items };
     }
 
-    /**
-     * 申请加入知识库
-     */
     async applyToJoin(
         datasetId: string,
         user: UserPlayground,
@@ -238,9 +179,6 @@ export class DatasetMemberService extends BaseService<DatasetMember> {
         return this.applicationRepository.save(application);
     }
 
-    /**
-     * 同意申请（仅创建者可操作）- 通过后创建成员并更新申请状态
-     */
     async approveApplication(
         datasetId: string,
         applicationId: string,
@@ -289,9 +227,6 @@ export class DatasetMemberService extends BaseService<DatasetMember> {
         return member;
     }
 
-    /**
-     * 拒绝申请（仅创建者可操作）
-     */
     async rejectApplication(
         datasetId: string,
         applicationId: string,
@@ -316,9 +251,6 @@ export class DatasetMemberService extends BaseService<DatasetMember> {
         });
     }
 
-    /**
-     * 修改成员角色（仅创建者可操作）；不能把别人改成 owner，也不能移除自己的 owner
-     */
     async updateMemberRole(
         datasetId: string,
         memberId: string,
@@ -343,9 +275,6 @@ export class DatasetMemberService extends BaseService<DatasetMember> {
         return this.datasetMemberRepository.findOneOrFail({ where: { id: memberId } });
     }
 
-    /**
-     * 移除成员（仅创建者可操作）；不能移除自己（创建者）
-     */
     async removeMember(datasetId: string, memberId: string, operatorId: string): Promise<void> {
         await this.requireCreator(datasetId, operatorId);
 
@@ -364,9 +293,16 @@ export class DatasetMemberService extends BaseService<DatasetMember> {
         this.logger.log(`Member ${memberId} removed from dataset ${datasetId}`);
     }
 
-    /**
-     * 初始化知识库所有者（创建知识库时调用）
-     */
+    async leaveDataset(datasetId: string, userId: string): Promise<void> {
+        await this.getDatasetOrThrow(datasetId);
+        const member = await this.requireMember(datasetId, userId);
+        if (member.role === TEAM_ROLE.OWNER) {
+            throw HttpErrorFactory.badRequest("创建者不能退出，请使用删除知识库");
+        }
+        await this.datasetMemberRepository.update(member.id, { isActive: false });
+        this.logger.log(`User ${userId} left dataset ${datasetId}`);
+    }
+
     async initializeOwner(datasetId: string, ownerId: string): Promise<DatasetMember> {
         const owner = this.datasetMemberRepository.create({
             datasetId,

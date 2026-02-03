@@ -1,5 +1,7 @@
 import { Type } from "class-transformer";
 import {
+    ArrayMinSize,
+    IsArray,
     IsInt,
     IsNotEmpty,
     IsOptional,
@@ -37,4 +39,49 @@ export class ListDocumentsDto {
     @Min(1)
     @Max(100)
     pageSize?: number = 20;
+}
+
+export class BatchDeleteDocumentsDto {
+    @IsArray({ message: "documentIds 必须是数组" })
+    @ArrayMinSize(1, { message: "documentIds 至少包含一个文档ID" })
+    @IsUUID("4", { each: true, message: "documentIds 中每一项必须是有效的 UUID" })
+    documentIds: string[];
+}
+
+export class BatchMoveDocumentsDto {
+    @IsArray({ message: "documentIds 必须是数组" })
+    @ArrayMinSize(1, { message: "documentIds 至少包含一个文档ID" })
+    @IsUUID("4", { each: true, message: "documentIds 中每一项必须是有效的 UUID" })
+    documentIds: string[];
+
+    @IsUUID("4", { message: "targetDatasetId 必须是有效的 UUID" })
+    targetDatasetId: string;
+}
+
+export class BatchCopyDocumentsDto {
+    @IsArray({ message: "documentIds 必须是数组" })
+    @ArrayMinSize(1, { message: "documentIds 至少包含一个文档ID" })
+    @IsUUID("4", { each: true, message: "documentIds 中每一项必须是有效的 UUID" })
+    documentIds: string[];
+
+    @IsUUID("4", { message: "targetDatasetId 必须是有效的 UUID" })
+    targetDatasetId: string;
+}
+
+export class BatchAddTagsDto {
+    @IsArray({ message: "documentIds 必须是数组" })
+    @ArrayMinSize(1, { message: "documentIds 至少包含一个文档ID" })
+    @IsUUID("4", { each: true, message: "documentIds 中每一项必须是有效的 UUID" })
+    documentIds: string[];
+
+    @IsArray({ message: "tags 必须是数组" })
+    @ArrayMinSize(1, { message: "tags 至少包含一个标签" })
+    @IsString({ each: true, message: "tags 中每一项必须是字符串" })
+    tags: string[];
+}
+
+export class UpdateDocumentTagsDto {
+    @IsArray({ message: "tags 必须是数组" })
+    @IsString({ each: true, message: "tags 中每一项必须是字符串" })
+    tags: string[];
 }

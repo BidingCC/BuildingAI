@@ -2,8 +2,17 @@ import { BaseService } from "@buildingai/base";
 import { RETRIEVAL_MODE } from "@buildingai/constants/shared/datasets.constants";
 import { type UserPlayground } from "@buildingai/db";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { Datasets } from "@buildingai/db/entities";
-import { Repository } from "@buildingai/db/typeorm";
+import {
+    DatasetMember,
+    DatasetMemberApplication,
+    Datasets,
+    DatasetsChatMessage,
+    DatasetsChatRecord,
+    DatasetsDocument,
+    DatasetsSegments,
+    SquarePublishStatus,
+} from "@buildingai/db/entities";
+import { In, Repository } from "@buildingai/db/typeorm";
 import { PaginationDto } from "@buildingai/dto/pagination.dto";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { DatasetsConfigService } from "@modules/config/services/datasets-config.service";
@@ -25,6 +34,18 @@ export class DatasetsService extends BaseService<Datasets> {
     constructor(
         @InjectRepository(Datasets)
         private readonly datasetsRepository: Repository<Datasets>,
+        @InjectRepository(DatasetsSegments)
+        private readonly segmentRepository: Repository<DatasetsSegments>,
+        @InjectRepository(DatasetsDocument)
+        private readonly documentRepository: Repository<DatasetsDocument>,
+        @InjectRepository(DatasetsChatRecord)
+        private readonly chatRecordRepository: Repository<DatasetsChatRecord>,
+        @InjectRepository(DatasetsChatMessage)
+        private readonly chatMessageRepository: Repository<DatasetsChatMessage>,
+        @InjectRepository(DatasetMemberApplication)
+        private readonly applicationRepository: Repository<DatasetMemberApplication>,
+        @InjectRepository(DatasetMember)
+        private readonly datasetMemberRepository: Repository<DatasetMember>,
         private readonly datasetMemberService: DatasetMemberService,
         private readonly datasetsConfigService: DatasetsConfigService,
     ) {
@@ -86,41 +107,85 @@ export class DatasetsService extends BaseService<Datasets> {
         return this.findOneById(datasetId) as Promise<Datasets>;
     }
 
-    /**
-     * 发布到广场（仅创建者可操作）
-     */
     async publishToSquare(datasetId: string, userId: string): Promise<Datasets> {
         const dataset = await this.datasetMemberService.getDatasetOrThrow(datasetId);
         await this.datasetMemberService.requireCreator(datasetId, userId);
-        if (dataset.publishedToSquare) {
+        const status = (dataset as Datasets).squarePublishStatus ?? SquarePublishStatus.NONE;
+        if (status === SquarePublishStatus.PENDING) {
+            throw HttpErrorFactory.badRequest("已提交审核，请等待审核结果");
+        }
+        if (dataset.publishedToSquare || status === SquarePublishStatus.APPROVED) {
             throw HttpErrorFactory.badRequest("该知识库已发布到广场");
         }
-        await this.datasetsRepository.update(datasetId, {
-            publishedToSquare: true,
-            publishedAt: new Date(),
-        });
+        const skipReview = await this.datasetsConfigService.getSquarePublishSkipReview();
+        if (skipReview) {
+            await this.datasetsRepository.update(datasetId, {
+                squarePublishStatus: SquarePublishStatus.APPROVED,
+                publishedToSquare: true,
+                publishedAt: new Date(),
+            });
+        } else {
+            await this.datasetsRepository.update(datasetId, {
+                squarePublishStatus: SquarePublishStatus.PENDING,
+            });
+        }
         return this.findOneById(datasetId) as Promise<Datasets>;
     }
 
-    /**
-     * 从广场取消发布（仅创建者可操作）
-     */
     async unpublishFromSquare(datasetId: string, userId: string): Promise<Datasets> {
         const dataset = await this.datasetMemberService.getDatasetOrThrow(datasetId);
         await this.datasetMemberService.requireCreator(datasetId, userId);
-        if (!dataset.publishedToSquare) {
+        const status = (dataset as Datasets).squarePublishStatus ?? SquarePublishStatus.NONE;
+        if (!dataset.publishedToSquare && status !== SquarePublishStatus.PENDING) {
             throw HttpErrorFactory.badRequest("该知识库未发布到广场");
         }
         await this.datasetsRepository.update(datasetId, {
             publishedToSquare: false,
             publishedAt: null,
+            squarePublishStatus: SquarePublishStatus.NONE,
+            squareReviewedBy: null,
+            squareReviewedAt: null,
+            squareRejectReason: null,
         });
         return this.findOneById(datasetId) as Promise<Datasets>;
     }
 
-    /**
-     * 我创建的知识库列表（分页）
-     */
+    async approveSquarePublish(datasetId: string, operatorId: string): Promise<Datasets> {
+        const dataset = await this.datasetMemberService.getDatasetOrThrow(datasetId);
+        const status = (dataset as Datasets).squarePublishStatus ?? SquarePublishStatus.NONE;
+        if (status !== SquarePublishStatus.PENDING) {
+            throw HttpErrorFactory.badRequest("当前状态不可审核通过，仅待审核申请可操作");
+        }
+        await this.datasetsRepository.update(datasetId, {
+            squarePublishStatus: SquarePublishStatus.APPROVED,
+            publishedToSquare: true,
+            publishedAt: new Date(),
+            squareReviewedBy: operatorId,
+            squareReviewedAt: new Date(),
+            squareRejectReason: null,
+        });
+        return this.findOneById(datasetId) as Promise<Datasets>;
+    }
+
+    async rejectSquarePublish(
+        datasetId: string,
+        operatorId: string,
+        reason?: string | null,
+    ): Promise<Datasets> {
+        const dataset = await this.datasetMemberService.getDatasetOrThrow(datasetId);
+        const status = (dataset as Datasets).squarePublishStatus ?? SquarePublishStatus.NONE;
+        if (status !== SquarePublishStatus.PENDING) {
+            throw HttpErrorFactory.badRequest("当前状态不可审核拒绝，仅待审核申请可操作");
+        }
+        await this.datasetsRepository.update(datasetId, {
+            squarePublishStatus: SquarePublishStatus.REJECTED,
+            squareReviewedBy: operatorId,
+            squareReviewedAt: new Date(),
+            squareRejectReason: reason ?? null,
+        });
+        return this.findOneById(datasetId) as Promise<Datasets>;
+    }
+
     async listMyCreated(userId: string, paginationDto: PaginationDto) {
         return this.paginate(paginationDto, {
             where: { createdBy: userId },
@@ -128,9 +193,6 @@ export class DatasetsService extends BaseService<Datasets> {
         });
     }
 
-    /**
-     * 团队知识库列表（分页）：当前用户作为成员（且非创建者）的知识库
-     */
     async listTeam(userId: string, paginationDto: PaginationDto) {
         const qb = this.datasetsRepository
             .createQueryBuilder("d")
@@ -144,5 +206,31 @@ export class DatasetsService extends BaseService<Datasets> {
             .orderBy("d.updatedAt", "DESC");
 
         return this.paginateQueryBuilder(qb, paginationDto);
+    }
+
+    async deleteDataset(datasetId: string, userId: string): Promise<{ success: boolean }> {
+        await this.datasetMemberService.getDatasetOrThrow(datasetId);
+        await this.datasetMemberService.requireCreator(datasetId, userId);
+
+        await this.dataSource.transaction(async (manager) => {
+            const records = await manager
+                .getRepository(DatasetsChatRecord)
+                .find({ where: { datasetId }, select: { id: true } });
+            const conversationIds = records.map((r) => r.id);
+            if (conversationIds.length > 0) {
+                await manager.getRepository(DatasetsChatMessage).delete({
+                    conversationId: In(conversationIds),
+                });
+            }
+            await manager.getRepository(DatasetsChatRecord).delete({ datasetId });
+            await manager.getRepository(DatasetsSegments).delete({ datasetId });
+            await manager.getRepository(DatasetsDocument).delete({ datasetId });
+            await manager.getRepository(DatasetMemberApplication).delete({ datasetId });
+            await manager.getRepository(DatasetMember).delete({ datasetId });
+            await manager.getRepository(Datasets).delete({ id: datasetId });
+        });
+
+        this.logger.log(`[+] Deleted dataset: ${datasetId}`);
+        return { success: true };
     }
 }

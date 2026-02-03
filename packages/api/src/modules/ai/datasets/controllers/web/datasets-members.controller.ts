@@ -116,4 +116,14 @@ export class DatasetsMembersWebController {
         await this.memberService.removeMember(datasetId, memberId, user.id);
         return { success: true };
     }
+
+    /**
+     * 退出知识库（当前用户主动退出，创建者不可用）
+     */
+    @Post(":datasetId/leave")
+    @DatasetPermission({ permission: "canViewAll", datasetIdParam: "datasetId" })
+    async leave(@Param("datasetId") datasetId: string, @Playground() user: UserPlayground) {
+        await this.memberService.leaveDataset(datasetId, user.id);
+        return { success: true };
+    }
 }

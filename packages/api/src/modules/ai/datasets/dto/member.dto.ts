@@ -1,6 +1,6 @@
 import { TEAM_ROLE, type TeamRoleType } from "@buildingai/constants/shared/team-role.constants";
-import { Type } from "class-transformer";
-import { IsEnum, IsIn, IsInt, IsOptional, IsString, Max, Min } from "class-validator";
+import { PaginationDto } from "@buildingai/dto/pagination.dto";
+import { IsEnum, IsIn, IsOptional, IsString } from "class-validator";
 
 /**
  * 申请加入知识库 DTO
@@ -35,46 +35,12 @@ export class UpdateMemberRoleDto {
     role!: TeamRoleType;
 }
 
-/**
- * 申请列表查询（支持按状态筛选）
- */
 export class ListApplicationsDto {
     @IsOptional()
     @IsIn(["pending", "approved", "rejected"], {
         message: "status 必须是 pending | approved | rejected",
     })
     status?: "pending" | "approved" | "rejected";
-
-    @IsOptional()
-    @Type(() => Number)
-    @IsInt()
-    @Min(1)
-    @Max(100)
-    page?: number = 1;
-
-    @IsOptional()
-    @Type(() => Number)
-    @IsInt()
-    @Min(1)
-    @Max(100)
-    pageSize?: number = 20;
 }
 
-/**
- * 成员列表查询
- */
-export class ListMembersDto {
-    @IsOptional()
-    @Type(() => Number)
-    @IsInt()
-    @Min(1)
-    @Max(100)
-    page?: number = 1;
-
-    @IsOptional()
-    @Type(() => Number)
-    @IsInt()
-    @Min(1)
-    @Max(100)
-    pageSize?: number = 20;
-}
+export class ListMembersDto extends PaginationDto {}

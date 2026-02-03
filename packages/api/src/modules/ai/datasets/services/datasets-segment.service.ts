@@ -179,6 +179,23 @@ export class DatasetsSegmentService {
     }
 
     /**
+     * 将文档下所有 segment 重置为待向量化（用于移动后重新向量化，清空原 embedding）
+     */
+    async resetAllSegmentsForReVectorization(documentId: string): Promise<number> {
+        const result = await this.segmentRepository.update(
+            { documentId },
+            {
+                status: PROCESSING_STATUS.PENDING,
+                embedding: null as any,
+                vectorDimension: null as any,
+                embeddingModelId: null as any,
+                error: null as any,
+            },
+        );
+        return result.affected ?? 0;
+    }
+
+    /**
      * 创建分段记录（文档解析后调用）
      */
     async createSegments(
