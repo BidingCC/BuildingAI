@@ -60,17 +60,17 @@ const WalletSetting = () => {
           <div className="text-muted-foreground py-6 text-center text-sm">积分充值暂未开放</div>
         )}
         {rechargeStatus && !isLoading && (
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
             {rechargeRule.map((rule) => (
               <button
                 key={rule.id}
                 type="button"
-                className="bg-card hover:border-primary/50 hover:bg-muted/30 relative flex flex-col overflow-visible rounded-lg border p-4 text-left transition-colors"
+                className="bg-card hover:border-primary hover:bg-primary/10 relative flex flex-col overflow-visible rounded-lg border p-4 text-left transition-colors"
                 onClick={() => handleCardClick(rule)}
               >
                 {rule.label && (
                   <Badge
-                    className="absolute -top-2.5 right-2.5 border-0 px-2 py-0.5 text-[10px] font-medium shadow-lg"
+                    className="absolute -top-px -right-px rounded-none rounded-tr-lg rounded-bl-lg border-0 px-2 py-0.5 text-[10px] font-medium shadow-lg"
                     variant="default"
                   >
                     {rule.label}
