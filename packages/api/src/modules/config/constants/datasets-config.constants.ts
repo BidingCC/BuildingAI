@@ -5,6 +5,7 @@ export const DATASETS_CONFIG_KEYS = {
     EMBEDDING_MODEL_ID: "embedding_model_id",
     TEXT_MODEL_ID: "text_model_id",
     RETRIEVAL_CONFIG: "retrieval_config",
+    SQUARE_PUBLISH_SKIP_REVIEW: "square_publish_skip_review",
 } as const;
 
 export const DATASETS_CONFIG_DEFAULT_RETRIEVAL = {

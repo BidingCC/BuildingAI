@@ -80,4 +80,8 @@ export class UpdateDatasetsConfigDto {
     @ValidateNested()
     @Type(() => RetrievalConfigDto)
     defaultRetrievalConfig?: RetrievalConfigDto;
+
+    @IsOptional()
+    @IsBoolean()
+    squarePublishSkipReview?: boolean;
 }

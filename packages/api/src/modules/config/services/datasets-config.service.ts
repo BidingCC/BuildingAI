@@ -14,6 +14,8 @@ export interface DatasetsConfigDto {
     embeddingModelId: string;
     textModelId: string;
     defaultRetrievalConfig: RetrievalConfig;
+    /** 发布到广场免审核：true 时发布直接上架，false 时需管理员审核 */
+    squarePublishSkipReview: boolean;
 }
 
 @Injectable()
@@ -61,19 +63,36 @@ export class DatasetsConfigService {
         return this.buildDefaultRetrievalConfig();
     }
 
+    async getSquarePublishSkipReview(): Promise<boolean> {
+        const value = await this.dictService.get<boolean | number | string>(
+            DATASETS_CONFIG_KEYS.SQUARE_PUBLISH_SKIP_REVIEW,
+            false,
+            DATASETS_CONFIG_GROUP,
+        );
+        if (value === true || value === 1 || value === "1") return true;
+        return false;
+    }
+
     async getConfig(): Promise<DatasetsConfigDto> {
-        const [initialStorageMb, embeddingModelId, textModelId, defaultRetrievalConfig] =
-            await Promise.all([
-                this.getInitialStorageMb(),
-                this.getEmbeddingModelId(),
-                this.getTextModelId(),
-                this.getDefaultRetrievalConfig(),
-            ]);
+        const [
+            initialStorageMb,
+            embeddingModelId,
+            textModelId,
+            defaultRetrievalConfig,
+            squarePublishSkipReview,
+        ] = await Promise.all([
+            this.getInitialStorageMb(),
+            this.getEmbeddingModelId(),
+            this.getTextModelId(),
+            this.getDefaultRetrievalConfig(),
+            this.getSquarePublishSkipReview(),
+        ]);
         return {
             initialStorageMb,
             embeddingModelId,
             textModelId,
             defaultRetrievalConfig,
+            squarePublishSkipReview,
         };
     }
 
@@ -104,6 +123,13 @@ export class DatasetsConfigService {
             await this.dictService.set(DATASETS_CONFIG_KEYS.RETRIEVAL_CONFIG, normalized, {
                 group: DATASETS_CONFIG_GROUP,
             });
+        }
+        if (dto.squarePublishSkipReview !== undefined) {
+            await this.dictService.set(
+                DATASETS_CONFIG_KEYS.SQUARE_PUBLISH_SKIP_REVIEW,
+                dto.squarePublishSkipReview,
+                { group: DATASETS_CONFIG_GROUP },
+            );
         }
         return this.getConfig();
     }
