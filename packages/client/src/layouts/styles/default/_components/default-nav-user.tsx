@@ -1,7 +1,4 @@
 import { useAuthStore } from "@buildingai/stores";
-import { ModeItems } from "@buildingai/ui/components/mode-toggle";
-import { THEME_COLORS, useTheme } from "@buildingai/ui/components/theme-provider";
-import { ScrollThemeItems } from "@buildingai/ui/components/theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@buildingai/ui/components/ui/avatar";
 import {
   DropdownMenu,
@@ -9,11 +6,7 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuPortal,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@buildingai/ui/components/ui/dropdown-menu";
 import {
@@ -23,18 +16,8 @@ import {
   useSidebar,
 } from "@buildingai/ui/components/ui/sidebar";
 import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog";
-import {
-  ChevronsUpDown,
-  Languages,
-  Laptop,
-  LogOut,
-  Moon,
-  Palette,
-  Settings,
-  Sun,
-  User,
-  Zap,
-} from "lucide-react";
+import { ChevronsUpDown, LogOut, Settings, Sparkles, User, UserStar, Zap } from "lucide-react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { useSettingsDialog } from "@/components/settings-dialog";
@@ -75,10 +58,10 @@ export function DefaultNavUser() {
   const { userInfo } = useAuthStore((state) => state.auth);
   const { logout, isLogin } = useAuthStore((state) => state.authActions);
 
-  const { setThemeColor, themeColor, theme } = useTheme();
   const navigate = useNavigate();
   const { confirm } = useAlertDialog();
   const settingsDialog = useSettingsDialog();
+  const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
 
   const isLoggedIn = isLogin();
 
@@ -147,61 +130,21 @@ export function DefaultNavUser() {
                     )}
                   </span>
                 </div>
-                <UpgradeDialog />
               </SidebarMenuButton>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>
-                  <Palette className="text-primary fill-primary/20" />
-                  主题配色
-                </DropdownMenuSubTrigger>
-                <DropdownMenuPortal>
-                  <DropdownMenuSubContent>
-                    <DropdownMenuLabel>选择配色({THEME_COLORS.length})</DropdownMenuLabel>
-                    <ScrollThemeItems themeColor={themeColor} onSelect={setThemeColor} />
-                  </DropdownMenuSubContent>
-                </DropdownMenuPortal>
-              </DropdownMenuSub>
-
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>
-                  {
-                    {
-                      dark: (
-                        <>
-                          <Moon />
-                          深色模式
-                        </>
-                      ),
-                      light: (
-                        <>
-                          <Sun />
-                          浅色模式
-                        </>
-                      ),
-
-                      system: (
-                        <>
-                          <Laptop />
-                          系统跟随
-                        </>
-                      ),
-                    }[theme]
-                  }
-                </DropdownMenuSubTrigger>
-                <DropdownMenuPortal>
-                  <DropdownMenuSubContent>
-                    <DropdownMenuLabel>选择主题</DropdownMenuLabel>
-                    <ModeItems />
-                  </DropdownMenuSubContent>
-                </DropdownMenuPortal>
-              </DropdownMenuSub>
-
+              <DropdownMenuItem
+                onSelect={() => {
+                  setUpgradeDialogOpen(true);
+                }}
+              >
+                <Sparkles />
+                升级套餐
+              </DropdownMenuItem>
               <DropdownMenuItem>
-                <Languages />
-                简体中文
+                <UserStar />
+                个性化
               </DropdownMenuItem>
 
               <DropdownMenuItem onClick={() => settingsDialog.open("general")}>
@@ -225,6 +168,7 @@ export function DefaultNavUser() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        <UpgradeDialog open={upgradeDialogOpen} onOpenChange={setUpgradeDialogOpen} />
       </SidebarMenuItem>
     </SidebarMenu>
   );

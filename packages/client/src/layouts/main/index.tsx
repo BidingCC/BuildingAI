@@ -5,15 +5,22 @@ import {
   useRefreshWebsiteConfig,
 } from "@buildingai/hooks";
 import { useCheckInitializeStatus } from "@buildingai/services/shared";
+import { useUserConfigStore } from "@buildingai/stores";
+import { useEffect } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 
 const MainLayout = () => {
   const location = useLocation();
   const { data } = useCheckInitializeStatus();
   const { websiteConfig } = useRefreshWebsiteConfig();
+  const { initAppearance } = useUserConfigStore((s) => s.userConfigActions);
 
   useRefreshUser();
   useRefreshUserConfig();
+
+  useEffect(() => {
+    initAppearance();
+  }, [initAppearance]);
 
   useDocumentHead({
     title: websiteConfig?.webinfo.name,

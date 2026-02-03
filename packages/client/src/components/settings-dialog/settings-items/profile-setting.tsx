@@ -1,13 +1,13 @@
-import { useCopy } from "@buildingai/hooks";
 import { uploadFile, useUserInfoQuery } from "@buildingai/services/shared";
 import { type AllowedUserField, useUpdateUserFieldMutation } from "@buildingai/services/web";
 import { useAuthStore } from "@buildingai/stores";
 import { RootOnly } from "@buildingai/ui/components/auth/root-only";
+import { CopyButton } from "@buildingai/ui/components/copy-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@buildingai/ui/components/ui/avatar";
 import { Button } from "@buildingai/ui/components/ui/button";
 import { Input } from "@buildingai/ui/components/ui/input";
 import { TimeText } from "@buildingai/ui/components/ui/time-text";
-import { Check, Copy, CopyCheck, Link, Loader2, PenLine, User, X } from "lucide-react";
+import { Check, Link, Loader2, PenLine, User, X } from "lucide-react";
 import { type ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -25,38 +25,6 @@ const ProfileSetting = () => {
 
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
-
-  const { copy } = useCopy();
-  const [copiedKeys, setCopiedKeys] = useState<Record<string, boolean>>({});
-  const copyTimersRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
-
-  const handleCopy = useCallback(
-    async (key: string, text: string | undefined) => {
-      if (!text) return;
-
-      const success = await copy(text);
-      if (success) {
-        if (copyTimersRef.current[key]) {
-          clearTimeout(copyTimersRef.current[key]);
-        }
-
-        setCopiedKeys((prev) => ({ ...prev, [key]: true }));
-
-        copyTimersRef.current[key] = setTimeout(() => {
-          setCopiedKeys((prev) => ({ ...prev, [key]: false }));
-          delete copyTimersRef.current[key];
-        }, 2000);
-      }
-    },
-    [copy],
-  );
-
-  useEffect(() => {
-    const timers = copyTimersRef.current;
-    return () => {
-      Object.values(timers).forEach(clearTimeout);
-    };
-  }, []);
 
   const { mutate: updateField, isPending } = useUpdateUserFieldMutation();
 
@@ -216,14 +184,10 @@ const ProfileSetting = () => {
           )}
         </SettingItem>
         <SettingItem title={data?.userNo} description="用户编号">
-          <Button
+          <CopyButton
             className="hover:bg-muted-foreground/10 dark:hover:bg-muted-foreground/15"
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => handleCopy("userNo", data?.userNo)}
-          >
-            {copiedKeys["userNo"] ? <CopyCheck /> : <Copy />}
-          </Button>
+            value={data?.userNo ?? ""}
+          />
         </SettingItem>
         <SettingItem
           title={
