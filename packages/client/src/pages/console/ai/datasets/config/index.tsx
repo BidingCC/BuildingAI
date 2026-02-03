@@ -13,7 +13,7 @@ import { Label } from "@buildingai/ui/components/ui/label";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { EmbeddingModelSelector } from "@/components/model-selectors";
+import { EmbeddingModelSelector, ModelTypeSelector } from "@/components/model-selectors";
 import { PageContainer } from "@/layouts/console/_components/page-container";
 
 import {
@@ -25,6 +25,7 @@ import {
 const DatasetsConfigPage = () => {
   const [initialStorageMb, setInitialStorageMb] = useState(1024);
   const [embeddingModelId, setEmbeddingModelId] = useState("");
+  const [textModelId, setTextModelId] = useState("");
   const [retrieval, setRetrieval] = useState<RetrievalConfig>(
     buildEmptyRetrievalConfig(RETRIEVAL_MODE.HYBRID),
   );
@@ -44,6 +45,7 @@ const DatasetsConfigPage = () => {
     if (!data) return;
     setInitialStorageMb(data.initialStorageMb);
     setEmbeddingModelId(data.embeddingModelId ?? "");
+    setTextModelId(data.textModelId ?? "");
     const rc = data.defaultRetrievalConfig;
     if (rc) {
       setRetrieval({
@@ -72,6 +74,7 @@ const DatasetsConfigPage = () => {
     const dto: UpdateDatasetsConfigDto = {
       initialStorageMb,
       embeddingModelId: embeddingModelId.trim(),
+      textModelId: textModelId.trim() || undefined,
       defaultRetrievalConfig: {
         retrievalMode: retrieval.retrievalMode as RetrievalModeType,
         strategy: retrieval.strategy,
@@ -122,6 +125,20 @@ const DatasetsConfigPage = () => {
             placeholder="请选择模型"
             className="w-90 text-left"
           />
+        </div>
+
+        <div className="space-y-2">
+          <Label>摘要模型</Label>
+          <ModelTypeSelector
+            modelType="llm"
+            value={textModelId || undefined}
+            onSelect={setTextModelId}
+            placeholder="请选择模型（可选）"
+            className="w-90 text-left"
+          />
+          <p className="text-muted-foreground text-sm">
+            用户上传知识库文件后，AI 自动生成摘要内容，摘要计费随模型动态计费
+          </p>
         </div>
 
         <RetrievalConfigSection value={retrieval} onChange={setRetrieval} />

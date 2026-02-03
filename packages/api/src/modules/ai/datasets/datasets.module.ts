@@ -31,6 +31,7 @@ import { DatasetsDocumentService } from "./services/datasets-document.service";
 import { DatasetMemberService } from "./services/datasets-member.service";
 import { DatasetsRetrievalService } from "./services/datasets-retrieval.service";
 import { DatasetsSegmentService } from "./services/datasets-segment.service";
+import { DocumentSummaryService } from "./services/document-summary.service";
 import { SegmentationService } from "./services/segmentation.service";
 import { VectorizationRunnerService } from "./services/vectorization-runner.service";
 import { VectorizationTriggerService } from "./services/vectorization-trigger.service";
@@ -67,6 +68,7 @@ import { VectorizationTriggerService } from "./services/vectorization-trigger.se
     providers: [
         DatasetsService,
         DatasetMemberService,
+        DocumentSummaryService,
         DatasetsDocumentService,
         DatasetsSegmentService,
         DatasetsRetrievalService,

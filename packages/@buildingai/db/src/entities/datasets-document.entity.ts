@@ -52,6 +52,12 @@ export class DatasetsDocument extends BaseEntity {
     summary: string | null;
 
     /**
+     * 摘要是否正在生成中（仅当配置了摘要模型时为 true）
+     */
+    @Column({ type: "boolean", default: false, comment: "摘要是否正在生成中" })
+    summaryGenerating: boolean;
+
+    /**
      * 标签
      */
     @Column({ type: "text", array: true, nullable: true, comment: "标签" })

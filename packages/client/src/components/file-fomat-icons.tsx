@@ -9,8 +9,8 @@ export const fileFormatIconsMap: Record<string, React.ReactNode> = {
           <feGaussianBlur stdDeviation="80"></feGaussianBlur>
         </filter>
         <linearGradient id="fileBlue" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#4A90E2"></stop>
-          <stop offset="100%" stop-color="#0070C0"></stop>
+          <stop offset="0%" stopColor="#4A90E2"></stop>
+          <stop offset="100%" stopColor="#0070C0"></stop>
         </linearGradient>
       </defs>
       <rect
@@ -44,7 +44,7 @@ export const fileFormatIconsMap: Record<string, React.ReactNode> = {
         fontSize="150"
         fontWeight="800"
         fill="#FFFFFF"
-        font-family="Arial Black, Helvetica, sans-serif"
+        fontFamily="Arial Black, Helvetica, sans-serif"
       >
         DOCX
       </text>
@@ -57,8 +57,8 @@ export const fileFormatIconsMap: Record<string, React.ReactNode> = {
           <feGaussianBlur stdDeviation="80"></feGaussianBlur>
         </filter>
         <linearGradient id="fileHTML" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#E44D26"></stop>
-          <stop offset="100%" stop-color="#F16529"></stop>
+          <stop offset="0%" stopColor="#E44D26"></stop>
+          <stop offset="100%" stopColor="#F16529"></stop>
         </linearGradient>
       </defs>
       <rect
@@ -92,7 +92,7 @@ export const fileFormatIconsMap: Record<string, React.ReactNode> = {
         fontSize="150"
         fontWeight="800"
         fill="#FFFFFF"
-        font-family="Arial Black, Helvetica, sans-serif"
+        fontFamily="Arial Black, Helvetica, sans-serif"
       >
         HTML
       </text>
@@ -105,8 +105,8 @@ export const fileFormatIconsMap: Record<string, React.ReactNode> = {
           <feGaussianBlur stdDeviation="80"></feGaussianBlur>
         </filter>
         <linearGradient id="fileLightBlue" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#00B0FF"></stop>
-          <stop offset="100%" stop-color="#0091EA"></stop>
+          <stop offset="0%" stopColor="#00B0FF"></stop>
+          <stop offset="100%" stopColor="#0091EA"></stop>
         </linearGradient>
       </defs>
       <rect
@@ -140,7 +140,7 @@ export const fileFormatIconsMap: Record<string, React.ReactNode> = {
         fontSize="150"
         fontWeight="800"
         fill="#FFFFFF"
-        font-family="Arial Black, Helvetica, sans-serif"
+        fontFamily="Arial Black, Helvetica, sans-serif"
       >
         CSV
       </text>
@@ -153,8 +153,8 @@ export const fileFormatIconsMap: Record<string, React.ReactNode> = {
           <feGaussianBlur stdDeviation="80"></feGaussianBlur>
         </filter>
         <linearGradient id="fileRed" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#FF6B6B"></stop>
-          <stop offset="100%" stop-color="#E60023"></stop>
+          <stop offset="0%" stopColor="#FF6B6B"></stop>
+          <stop offset="100%" stopColor="#E60023"></stop>
         </linearGradient>
       </defs>
       <rect
@@ -188,7 +188,7 @@ export const fileFormatIconsMap: Record<string, React.ReactNode> = {
         fontSize="150"
         fontWeight="800"
         fill="#FFFFFF"
-        font-family="Arial Black, Helvetica, sans-serif"
+        fontFamily="Arial Black, Helvetica, sans-serif"
       >
         PDF
       </text>
@@ -201,8 +201,8 @@ export const fileFormatIconsMap: Record<string, React.ReactNode> = {
           <feGaussianBlur stdDeviation="80"></feGaussianBlur>
         </filter>
         <linearGradient id="fileGray" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#9E9E9E"></stop>
-          <stop offset="100%" stop-color="#616161"></stop>
+          <stop offset="0%" stopColor="#9E9E9E"></stop>
+          <stop offset="100%" stopColor="#616161"></stop>
         </linearGradient>
       </defs>
       <rect
@@ -236,7 +236,7 @@ export const fileFormatIconsMap: Record<string, React.ReactNode> = {
         fontSize="150"
         fontWeight="800"
         fill="#FFFFFF"
-        font-family="Arial Black, Helvetica, sans-serif"
+        fontFamily="Arial Black, Helvetica, sans-serif"
       >
         TXT
       </text>
@@ -249,8 +249,8 @@ export const fileFormatIconsMap: Record<string, React.ReactNode> = {
           <feGaussianBlur stdDeviation="80"></feGaussianBlur>
         </filter>
         <linearGradient id="fileOrange" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#FF9900"></stop>
-          <stop offset="100%" stop-color="#FF6600"></stop>
+          <stop offset="0%" stopColor="#FF9900"></stop>
+          <stop offset="100%" stopColor="#FF6600"></stop>
         </linearGradient>
       </defs>
       <rect
@@ -284,7 +284,7 @@ export const fileFormatIconsMap: Record<string, React.ReactNode> = {
         fontSize="150"
         fontWeight="800"
         fill="#FFFFFF"
-        font-family="Arial Black, Helvetica, sans-serif"
+        fontFamily="Arial Black, Helvetica, sans-serif"
       >
         PPT
       </text>
@@ -297,8 +297,8 @@ export const fileFormatIconsMap: Record<string, React.ReactNode> = {
           <feGaussianBlur stdDeviation="80"></feGaussianBlur>
         </filter>
         <linearGradient id="fileOrange" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#FF9900"></stop>
-          <stop offset="100%" stop-color="#FF6600"></stop>
+          <stop offset="0%" stopColor="#FF9900"></stop>
+          <stop offset="100%" stopColor="#FF6600"></stop>
         </linearGradient>
       </defs>
       <rect
@@ -332,7 +332,7 @@ export const fileFormatIconsMap: Record<string, React.ReactNode> = {
         fontSize="150"
         fontWeight="800"
         fill="#FFFFFF"
-        font-family="Arial Black, Helvetica, sans-serif"
+        fontFamily="Arial Black, Helvetica, sans-serif"
       >
         PPTX
       </text>
@@ -345,8 +345,8 @@ export const fileFormatIconsMap: Record<string, React.ReactNode> = {
           <feGaussianBlur stdDeviation="80"></feGaussianBlur>
         </filter>
         <linearGradient id="fileGreen" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#00C853"></stop>
-          <stop offset="100%" stop-color="#009624"></stop>
+          <stop offset="0%" stopColor="#00C853"></stop>
+          <stop offset="100%" stopColor="#009624"></stop>
         </linearGradient>
       </defs>
       <rect
@@ -380,7 +380,7 @@ export const fileFormatIconsMap: Record<string, React.ReactNode> = {
         fontSize="150"
         fontWeight="800"
         fill="#FFFFFF"
-        font-family="Arial Black, Helvetica, sans-serif"
+        fontFamily="Arial Black, Helvetica, sans-serif"
       >
         XLS
       </text>
@@ -393,8 +393,8 @@ export const fileFormatIconsMap: Record<string, React.ReactNode> = {
           <feGaussianBlur stdDeviation="80"></feGaussianBlur>
         </filter>
         <linearGradient id="fileGreen" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#00C853"></stop>
-          <stop offset="100%" stop-color="#009624"></stop>
+          <stop offset="0%" stopColor="#00C853"></stop>
+          <stop offset="100%" stopColor="#009624"></stop>
         </linearGradient>
       </defs>
       <rect
@@ -428,7 +428,7 @@ export const fileFormatIconsMap: Record<string, React.ReactNode> = {
         fontSize="150"
         fontWeight="800"
         fill="#FFFFFF"
-        font-family="Arial Black, Helvetica, sans-serif"
+        fontFamily="Arial Black, Helvetica, sans-serif"
       >
         XLSX
       </text>
@@ -441,8 +441,8 @@ export const fileFormatIconsMap: Record<string, React.ReactNode> = {
           <feGaussianBlur stdDeviation="80"></feGaussianBlur>
         </filter>
         <linearGradient id="fileYellow" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#FFEB3B"></stop>
-          <stop offset="100%" stop-color="#FBC02D"></stop>
+          <stop offset="0%" stopColor="#FFEB3B"></stop>
+          <stop offset="100%" stopColor="#FBC02D"></stop>
         </linearGradient>
       </defs>
       <rect
@@ -476,7 +476,7 @@ export const fileFormatIconsMap: Record<string, React.ReactNode> = {
         fontSize="150"
         fontWeight="800"
         fill="#FFFFFF"
-        font-family="Arial Black, Helvetica, sans-serif"
+        fontFamily="Arial Black, Helvetica, sans-serif"
       >
         JSON
       </text>
@@ -489,8 +489,8 @@ export const fileFormatIconsMap: Record<string, React.ReactNode> = {
           <feGaussianBlur stdDeviation="80"></feGaussianBlur>
         </filter>
         <linearGradient id="filePink" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#FF4081"></stop>
-          <stop offset="100%" stop-color="#C51162"></stop>
+          <stop offset="0%" stopColor="#FF4081"></stop>
+          <stop offset="100%" stopColor="#C51162"></stop>
         </linearGradient>
       </defs>
       <rect
@@ -524,7 +524,7 @@ export const fileFormatIconsMap: Record<string, React.ReactNode> = {
         fontSize="150"
         fontWeight="800"
         fill="#FFFFFF"
-        font-family="Arial Black, Helvetica, sans-serif"
+        fontFamily="Arial Black, Helvetica, sans-serif"
       >
         MD
       </text>
@@ -537,8 +537,8 @@ export const fileFormatIconsMap: Record<string, React.ReactNode> = {
           <feGaussianBlur stdDeviation="80"></feGaussianBlur>
         </filter>
         <linearGradient id="fileOrangeDark" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#FF6D00"></stop>
-          <stop offset="100%" stop-color="#E65100"></stop>
+          <stop offset="0%" stopColor="#FF6D00"></stop>
+          <stop offset="100%" stopColor="#E65100"></stop>
         </linearGradient>
       </defs>
       <rect
@@ -572,7 +572,7 @@ export const fileFormatIconsMap: Record<string, React.ReactNode> = {
         fontSize="150"
         fontWeight="800"
         fill="#FFFFFF"
-        font-family="Arial Black, Helvetica, sans-serif"
+        fontFamily="Arial Black, Helvetica, sans-serif"
       >
         RTF
       </text>
@@ -585,8 +585,8 @@ export const fileFormatIconsMap: Record<string, React.ReactNode> = {
           <feGaussianBlur stdDeviation="80"></feGaussianBlur>
         </filter>
         <linearGradient id="filePurple" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#7B1FA2"></stop>
-          <stop offset="100%" stop-color="#4A148C"></stop>
+          <stop offset="0%" stopColor="#7B1FA2"></stop>
+          <stop offset="100%" stopColor="#4A148C"></stop>
         </linearGradient>
       </defs>
       <rect
@@ -620,7 +620,7 @@ export const fileFormatIconsMap: Record<string, React.ReactNode> = {
         fontSize="150"
         fontWeight="800"
         fill="#FFFFFF"
-        font-family="Arial Black, Helvetica, sans-serif"
+        fontFamily="Arial Black, Helvetica, sans-serif"
       >
         XML
       </text>

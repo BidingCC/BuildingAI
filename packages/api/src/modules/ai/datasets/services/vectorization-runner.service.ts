@@ -16,7 +16,16 @@ import type {
 } from "../interfaces/vectorization.interface";
 import { DatasetsSegmentService } from "./datasets-segment.service";
 
-const BATCH_SIZE = 32;
+function getMaxChunksFromModelConfig(
+    modelConfig: Record<string, any>[] | undefined,
+): number | null {
+    if (!Array.isArray(modelConfig)) return null;
+    const item = modelConfig.find((c) => (c.field ?? c.key) === "max_chunks");
+    const raw = item?.value;
+    if (raw == null) return null;
+    const n = Number(raw);
+    return Number.isFinite(n) && n >= 1 ? n : null;
+}
 
 /**
  * 单文档向量化执行服务
@@ -122,14 +131,15 @@ export class VectorizationRunnerService {
             baseURL: getProviderSecret("baseUrl", providerSecret) || undefined,
         });
         const embeddingModel = provider(model.model);
+        const batchSize = getMaxChunksFromModelConfig(model.modelConfig) ?? 10;
 
         const total = pending.length;
         let processed = 0;
         let successCount = 0;
         let failureCount = 0;
 
-        for (let i = 0; i < pending.length; i += BATCH_SIZE) {
-            const batch = pending.slice(i, i + BATCH_SIZE);
+        for (let i = 0; i < pending.length; i += batchSize) {
+            const batch = pending.slice(i, i + batchSize);
             const texts = batch.map((s) => s.content);
 
             try {
@@ -151,6 +161,26 @@ export class VectorizationRunnerService {
                     };
                 });
 
+                const failed = results.filter((r) => !r.success);
+                if (failed.length > 0) {
+                    this.logger.warn(
+                        [
+                            `Embedding returned failures (non-throw)`,
+                            `documentId=${documentId}`,
+                            `datasetId=${datasetId}`,
+                            `provider=${model.provider.provider}`,
+                            `model=${model.model}`,
+                            `batch=${i}-${i + batch.length - 1}/${total}`,
+                            `failed=${failed.length}/${results.length}`,
+                            `segmentIds=${failed
+                                .slice(0, 8)
+                                .map((r) => r.segmentId)
+                                .join(",")}${failed.length > 8 ? "..." : ""}`,
+                            `reason=${failed[0]?.error ?? "Unknown"}`,
+                        ].join(" | "),
+                    );
+                }
+
                 await this.segmentService.saveEmbeddingResults(documentId, results);
 
                 const batchSuccess = results.filter((r) => r.success).length;
@@ -168,7 +198,19 @@ export class VectorizationRunnerService {
                 }
             } catch (err: any) {
                 this.logger.error(
-                    `Batch embedding failed for document ${documentId}: ${err?.message}`,
+                    [
+                        `Batch embedding threw error`,
+                        `documentId=${documentId}`,
+                        `datasetId=${datasetId}`,
+                        `provider=${model.provider.provider}`,
+                        `model=${model.model}`,
+                        `batch=${i}-${i + batch.length - 1}/${total}`,
+                        `segmentIds=${batch
+                            .slice(0, 8)
+                            .map((s) => s.id)
+                            .join(",")}${batch.length > 8 ? "..." : ""}`,
+                        `error=${err?.message ?? "Unknown"}`,
+                    ].join(" | "),
                     err?.stack,
                 );
                 for (const seg of batch) {

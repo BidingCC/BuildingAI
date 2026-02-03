@@ -28,6 +28,7 @@ export type DatasetsDocument = {
     fileType: string;
     fileSize: number;
     summary: string | null;
+    summaryGenerating?: boolean;
     tags: string[] | null;
     chunkCount: number;
     characterCount: number;

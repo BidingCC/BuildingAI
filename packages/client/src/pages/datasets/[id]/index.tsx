@@ -1,8 +1,10 @@
+import type { DatasetsDocument } from "@buildingai/services/web";
 import {
   useAiProvidersQuery,
   useDatasetDetail,
   useDatasetsDocumentsQuery,
 } from "@buildingai/services/web";
+import type { PaginatedResponse } from "@buildingai/web-types";
 import { useMemo } from "react";
 import { useParams } from "react-router-dom";
 
@@ -14,15 +16,29 @@ import { ContentLayout, PageLayout } from "./_layouts";
 import { DEFAULT_PAGE_SIZE } from "./constants";
 import { useDatasetDocumentUpload } from "./hooks";
 
+const POLL_INTERVAL_MS = 2000;
+
+function documentNeedsPolling(d: DatasetsDocument): boolean {
+  return d.status === "pending" || d.status === "processing" || Boolean(d.summaryGenerating);
+}
+
+function getDocumentItems(data: unknown): DatasetsDocument[] {
+  return (data as PaginatedResponse<DatasetsDocument> | undefined)?.items ?? [];
+}
+
 export default function DatasetDetailPage() {
   const { id } = useParams<{ id: string }>();
 
   const { data: providers = [] } = useAiProvidersQuery({ supportedModelTypes: "llm" });
   const { data: dataset } = useDatasetDetail(id);
-  const { data: documentsPage } = useDatasetsDocumentsQuery(id ?? "", {
-    page: 1,
-    pageSize: DEFAULT_PAGE_SIZE,
-  });
+  const { data: documentsPage } = useDatasetsDocumentsQuery(
+    id ?? "",
+    { page: 1, pageSize: DEFAULT_PAGE_SIZE },
+    {
+      refetchInterval: (query) =>
+        getDocumentItems(query.state.data).some(documentNeedsPolling) ? POLL_INTERVAL_MS : false,
+    },
+  );
 
   const { uploadDocuments } = useDatasetDocumentUpload(id);
 
