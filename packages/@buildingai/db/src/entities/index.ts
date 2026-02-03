@@ -13,7 +13,7 @@ export { AiModel } from "./ai-model.entity";
 export { AiProvider } from "./ai-provider.entity";
 export { AiUserMcpServer } from "./ai-user-mcp-server.entity";
 export { Analyse, AnalyseActionType } from "./analyse.entity";
-export { Datasets } from "./datasets.entity";
+export { Datasets, SquarePublishStatus } from "./datasets.entity";
 export { DatasetsChatMessage } from "./datasets-chat-message.entity";
 export { DatasetsChatRecord } from "./datasets-chat-record.entity";
 export { DatasetsDocument } from "./datasets-document.entity";

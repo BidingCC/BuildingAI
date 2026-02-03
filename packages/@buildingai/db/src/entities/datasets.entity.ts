@@ -14,6 +14,20 @@ import { DatasetMemberApplication } from "./datasets-member-application.entity";
 import { DatasetsSegments } from "./datasets-segments.entity";
 
 /**
+ * 发布到广场的审核状态
+ */
+export enum SquarePublishStatus {
+    /** 未申请或已撤销 */
+    NONE = "none",
+    /** 待审核 */
+    PENDING = "pending",
+    /** 审核通过（已上架） */
+    APPROVED = "approved",
+    /** 已拒绝 */
+    REJECTED = "rejected",
+}
+
+/**
  * 知识库实体
  */
 @AppEntity({ name: "datasets", comment: "知识库管理" })
@@ -91,6 +105,36 @@ export class Datasets extends BaseEntity {
      */
     @Column({ type: "timestamptz", nullable: true, comment: "发布到广场的时间" })
     publishedAt?: Date | null;
+
+    /**
+     * 发布到广场的审核状态
+     */
+    @Column({
+        type: "enum",
+        enum: SquarePublishStatus,
+        default: SquarePublishStatus.NONE,
+        comment:
+            "发布到广场审核状态：none-未申请/已撤销，pending-待审核，approved-已通过，rejected-已拒绝",
+    })
+    squarePublishStatus: SquarePublishStatus;
+
+    /**
+     * 广场发布审核人ID
+     */
+    @Column({ type: "uuid", nullable: true, comment: "广场发布审核人ID" })
+    squareReviewedBy?: string | null;
+
+    /**
+     * 广场发布审核时间
+     */
+    @Column({ type: "timestamptz", nullable: true, comment: "广场发布审核时间" })
+    squareReviewedAt?: Date | null;
+
+    /**
+     * 广场发布拒绝原因
+     */
+    @Column({ type: "text", nullable: true, comment: "广场发布拒绝原因" })
+    squareRejectReason?: string | null;
 
     /**
      * 知识库下的文档列表
