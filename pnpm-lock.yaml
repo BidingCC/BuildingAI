@@ -1171,6 +1171,9 @@ importers:
       '@buildingai/stores':
         specifier: workspace:*
         version: link:../stores
+      '@buildingai/types':
+        specifier: workspace:*
+        version: link:../../types
       '@tanstack/react-query':
         specifier: ^5.62.16
         version: 5.90.16(react@19.2.3)

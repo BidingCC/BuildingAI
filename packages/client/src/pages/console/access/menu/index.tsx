@@ -87,16 +87,16 @@ const MenuSourceTypeLabels: Record<MenuSourceType, string> = {
 
 const menuFormSchema = z.object({
   name: z.string().min(1, "菜单名称不能为空").max(50, "菜单名称不能超过50个字符"),
-  code: z.string().max(50, "编码不能超过50个字符").optional(),
-  path: z.string().max(100, "路径不能超过100个字符").optional(),
-  icon: z.string().max(50, "图标不能超过50个字符").optional(),
-  component: z.string().max(100, "组件路径不能超过100个字符").optional(),
-  permissionCode: z.string().max(100, "权限编码不能超过100个字符").optional(),
+  code: z.string().max(50, "编码不能超过50个字符"),
+  path: z.string().max(100, "路径不能超过100个字符"),
+  icon: z.string().max(50, "图标不能超过50个字符"),
+  component: z.string().max(100, "组件路径不能超过100个字符"),
+  permissionCode: z.string().max(100, "权限编码不能超过100个字符"),
   sort: z.coerce.number().min(0, "排序值不能小于0").max(9999, "排序值不能大于9999"),
   isHidden: z.boolean(),
   type: z.nativeEnum(MenuType),
   sourceType: z.nativeEnum(MenuSourceType),
-  parentId: z.string().optional(),
+  parentId: z.string().optional().nullable(),
 });
 
 type MenuFormData = z.infer<typeof menuFormSchema>;
@@ -223,7 +223,13 @@ const MenuFormDialog = ({
           <DialogTitle>{isEdit ? "编辑菜单" : "新建菜单"}</DialogTitle>
         </DialogHeader>
         <ScrollArea className="max-h-[70vh]">
-          <form id="menu-form" onSubmit={form.handleSubmit(onSubmit)} className="p-4 pb-20">
+          <form
+            id="menu-form"
+            onSubmit={form.handleSubmit(onSubmit, (errors) => {
+              console.error("Form validation errors:", errors);
+            })}
+            className="p-4 pb-20"
+          >
             <FieldGroup className="gap-4">
               <Controller
                 name="name"
@@ -419,10 +425,15 @@ const MenuFormDialog = ({
               </div>
             </FieldGroup>
             <DialogFooter className="bg-background absolute bottom-0 left-0 w-full flex-row justify-end rounded-b-lg p-4">
-              <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                disabled={isLoading}
+              >
                 取消
               </Button>
-              <Button type="submit" form="menu-form" disabled={isLoading}>
+              <Button type="submit" disabled={isLoading}>
                 {isLoading && <Loader2Icon className="animate-spin" />}
                 {isEdit ? "保存" : "创建"}
               </Button>
@@ -479,35 +490,51 @@ const MenuTreeItem = ({ menu, level = 0, onEdit, onDelete }: MenuTreeItemProps) 
   }
 
   return (
-    <Collapsible>
+    <Collapsible className="group/collapsible">
       <div style={{ paddingLeft: level * 24 }}>
-        <CollapsibleTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="group hover:bg-muted/50 h-9 w-full justify-start gap-2 px-2"
+        <div className="group/menu-item hover:bg-muted/50 flex h-9 w-full items-center gap-2 rounded-md px-2">
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" size="icon-sm" className="size-6 shrink-0">
+              <ChevronRightIcon className="size-4 transition-transform group-data-[state=open]/collapsible:rotate-90" />
+            </Button>
+          </CollapsibleTrigger>
+          <Icon className="text-muted-foreground size-4 shrink-0" />
+          <span className="flex-1 truncate text-left text-sm">{menu.name}</span>
+          {menu.code && (
+            <code className="text-muted-foreground max-w-32 truncate text-xs">{menu.code}</code>
+          )}
+          {menu.isHidden === 1 && <EyeOffIcon className="text-muted-foreground size-3.5" />}
+          <Badge variant="outline" className="text-xs">
+            {MenuTypeLabels[menu.type]}
+          </Badge>
+          <Badge
+            variant={menu.sourceType === MenuSourceType.SYSTEM ? "secondary" : "default"}
+            className="text-xs"
           >
-            <ChevronRightIcon className="size-4 transition-transform group-data-[state=open]:rotate-90" />
-            <Icon className="text-muted-foreground size-4" />
-            <span className="flex-1 truncate text-left">{menu.name}</span>
-            {menu.code && (
-              <code className="text-muted-foreground max-w-32 truncate text-xs">{menu.code}</code>
-            )}
-            {menu.isHidden === 1 && <EyeOffIcon className="text-muted-foreground size-3.5" />}
-            <Badge variant="outline" className="text-xs">
-              {MenuTypeLabels[menu.type]}
-            </Badge>
-            <Badge
-              variant={menu.sourceType === MenuSourceType.SYSTEM ? "secondary" : "default"}
-              className="text-xs"
+            {MenuSourceTypeLabels[menu.sourceType]}
+          </Badge>
+          <Badge variant="secondary" className="text-xs">
+            {menu.children?.length}
+          </Badge>
+          <div className="flex gap-1 opacity-0 transition-opacity group-hover/menu-item:opacity-100">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="size-6"
+              onClick={() => onEdit?.(menu)}
             >
-              {MenuSourceTypeLabels[menu.sourceType]}
-            </Badge>
-            <Badge variant="secondary" className="text-xs">
-              {menu.children?.length}
-            </Badge>
-          </Button>
-        </CollapsibleTrigger>
+              <PencilIcon />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="size-6"
+              onClick={() => onDelete?.(menu)}
+            >
+              <TrashIcon />
+            </Button>
+          </div>
+        </div>
       </div>
       <CollapsibleContent>
         {menu.children?.map((child) => (

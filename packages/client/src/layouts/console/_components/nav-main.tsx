@@ -80,8 +80,7 @@ function NavMenuItem({ menu, basePath = "" }: { menu: MenuItem; basePath?: strin
                   name={menu.icon.replace("i-lucide-", "") as keyof typeof dynamicIconImports}
                 /> */}
                 <Annoyed />
-                {/* <span>{menu.name}</span> */}
-                <span>一级菜单</span>
+                <span>{menu.name}</span>
               </SidebarMenuButton>
             </HoverCardTrigger>
             <HoverCardContent side="right" align="start" className="w-48 p-1">
@@ -98,8 +97,7 @@ function NavMenuItem({ menu, basePath = "" }: { menu: MenuItem; basePath?: strin
                         isChildActive ? "bg-accent text-accent-foreground" : ""
                       }`}
                     >
-                      {/* {child.name} */}
-                      二级菜单
+                      {child.name}
                     </Link>
                   );
                 })}
@@ -120,8 +118,7 @@ function NavMenuItem({ menu, basePath = "" }: { menu: MenuItem; basePath?: strin
                 name={menu.icon.replace("i-lucide-", "") as keyof typeof dynamicIconImports}
               /> */}
               <Annoyed />
-              {/* <span>{menu.name}</span> */}
-              <span>一级菜单</span>
+              <span>{menu.name}</span>
               <SidebarMenuAction asChild className="[[data-state=open]_>_&]:rotate-90">
                 <div>
                   <ChevronRight />
@@ -138,8 +135,7 @@ function NavMenuItem({ menu, basePath = "" }: { menu: MenuItem; basePath?: strin
                   <SidebarMenuSubItem key={child.id}>
                     <SidebarMenuSubButton asChild isActive={location.pathname === childPath}>
                       <Link to={childPath} onClick={handleLinkClick}>
-                        {/* <span>{child.name}</span> */}
-                        <span>二级菜单</span>
+                        <span>{child.name}</span>
                       </Link>
                     </SidebarMenuSubButton>
                   </SidebarMenuSubItem>
@@ -161,8 +157,7 @@ function NavMenuItem({ menu, basePath = "" }: { menu: MenuItem; basePath?: strin
             name={menu.icon.replace("i-lucide-", "") as keyof typeof dynamicIconImports}
           /> */}
           <Annoyed />
-          {/* <span>{menu.name}</span> */}
-          <span>顶级菜单</span>
+          <span>{menu.name}</span>
         </Link>
       </SidebarMenuButton>
     </SidebarMenuItem>
@@ -178,8 +173,7 @@ function NavMenuGroup({ group }: { group: MenuItem }) {
 
   return (
     <SidebarGroup>
-      {/* isExpanded && <SidebarGroupLabel>{group.name}</SidebarGroupLabel> */}
-      {isExpanded && <SidebarGroupLabel>分组</SidebarGroupLabel>}
+      {isExpanded && <SidebarGroupLabel>{group.name}</SidebarGroupLabel>}
 
       <SidebarMenu>
         {visibleChildren.map((menu) => (

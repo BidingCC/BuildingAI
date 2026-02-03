@@ -33,161 +33,22 @@
                 "sort": 100,
                 "isHidden": 0,
                 "type": 2,
-                "sourceType": 1,
-                "children": [
-                    {
-                        "name": "console-menu.agent.dashboard",
-                        "code": "ai-agent-dashboard",
-                        "path": ":id/dashboard",
-                        "icon": "",
-                        "component": "/console/ai/agent/[id]/dashboard",
-                        "permissionCode": "ai-agent:statistics",
-                        "sort": 0,
-                        "isHidden": 1,
-                        "type": 2,
-                        "sourceType": 1
-                    },
-                    {
-                        "name": "console-menu.agent.logs",
-                        "code": "ai-agent-logs",
-                        "path": ":id/logs",
-                        "icon": "",
-                        "component": "/console/ai/agent/[id]/logs",
-                        "permissionCode": "ai-agent-chat-record:list",
-                        "sort": 0,
-                        "isHidden": 1,
-                        "type": 2,
-                        "sourceType": 1,
-                        "children": [
-                            {
-                                "name": "console-menu.agent.annotations.review",
-                                "code": "ai-agent-logs-annotations-review",
-                                "path": "",
-                                "icon": "",
-                                "component": "",
-                                "permissionCode": "ai-agent-annotations:review",
-                                "sort": 0,
-                                "isHidden": 0,
-                                "type": 3,
-                                "sourceType": 1
-                            },
-                            {
-                                "name": "console-menu.agent.annotations.delete",
-                                "code": "ai-agent-logs-annotations-delete",
-                                "path": "",
-                                "icon": "",
-                                "component": "",
-                                "permissionCode": "ai-agent-annotations:delete",
-                                "sort": 0,
-                                "isHidden": 0,
-                                "type": 3,
-                                "sourceType": 1
-                            },
-                            {
-                                "name": "console-menu.agent.annotations.update",
-                                "code": "ai-agent-logs-annotations-update",
-                                "path": "",
-                                "icon": "",
-                                "component": "",
-                                "permissionCode": "ai-agent-annotations:update",
-                                "sort": 0,
-                                "isHidden": 0,
-                                "type": 3,
-                                "sourceType": 1
-                            },
-                            {
-                                "name": "console-menu.agent.annotations.create",
-                                "code": "ai-agent-logs-annotations-create",
-                                "path": "",
-                                "icon": "",
-                                "component": "",
-                                "permissionCode": "ai-agent-annotations:create",
-                                "sort": 0,
-                                "isHidden": 0,
-                                "type": 3,
-                                "sourceType": 1
-                            }
-                        ]
-                    },
-                    {
-                        "name": "console-menu.agent.publish",
-                        "code": "ai-agent-publish",
-                        "path": ":id/publish",
-                        "icon": "",
-                        "component": "/console/ai/agent/[id]/publish",
-                        "permissionCode": "ai-agent:publish",
-                        "sort": 0,
-                        "isHidden": 1,
-                        "type": 2,
-                        "sourceType": 1
-                    },
-                    {
-                        "name": "console-menu.agent.configuration",
-                        "code": "ai-agent-configuration",
-                        "path": ":id/configuration",
-                        "icon": "",
-                        "component": "/console/ai/agent/[id]/configuration",
-                        "permissionCode": "ai-agent:detail",
-                        "sort": 0,
-                        "isHidden": 1,
-                        "type": 2,
-                        "sourceType": 1,
-                        "children": [
-                            {
-                                "name": "console-menu.common.actions.update",
-                                "code": "ai-agent-configuration-update",
-                                "path": "",
-                                "icon": "",
-                                "component": "",
-                                "permissionCode": "ai-agent:update",
-                                "sort": 0,
-                                "isHidden": 0,
-                                "type": 3,
-                                "sourceType": 1
-                            }
-                        ]
-                    }
-                ]
+                "sourceType": 1
             },
             {
-                "name": "console-menu.datasets.title",
+                "name": "知识库",
                 "code": "ai-datasets",
                 "path": "datasets",
                 "icon": "i-lucide-file-search",
+                "component": "/console/ai/datasets/list",
                 "permissionCode": "ai-datasets:list",
                 "sort": 200,
                 "isHidden": 0,
-                "type": 1,
-                "sourceType": 1,
-                "children": [
-                    {
-                        "name": "console-menu.datasets.list",
-                        "code": "ai-datasets-list",
-                        "path": "",
-                        "icon": "",
-                        "component": "/console/ai/datasets/list",
-                        "permissionCode": "ai-datasets:list",
-                        "sort": 0,
-                        "isHidden": 0,
-                        "type": 2,
-                        "sourceType": 1
-                    },
-                    {
-                        "name": "console-menu.datasets.config",
-                        "code": "ai-datasets-config",
-                        "path": "config",
-                        "icon": "",
-                        "component": "/console/ai/datasets/config",
-                        "permissionCode": "ai-datasets:config",
-                        "sort": 10,
-                        "isHidden": 0,
-                        "type": 2,
-                        "sourceType": 1
-                    }
-                ]
+                "type": 2,
+                "sourceType": 1
             },
             {
-                "name": "console-menu.mcpServer",
+                "name": "MCP",
                 "code": "ai-config-mcp-server",
                 "path": "mcp",
                 "icon": "i-lucide-wrench",
@@ -196,48 +57,10 @@
                 "sort": 300,
                 "isHidden": 0,
                 "type": 2,
-                "sourceType": 1,
-                "children": [
-                    {
-                        "name": "console-common.delete",
-                        "code": "ai-mcp-server-delete",
-                        "path": "",
-                        "icon": "",
-                        "component": "",
-                        "permissionCode": "ai-mcp-servers:delete",
-                        "sort": 10,
-                        "isHidden": 0,
-                        "type": 3,
-                        "sourceType": 1
-                    },
-                    {
-                        "name": "console-common.edit",
-                        "code": "ai-mcp-server-update",
-                        "path": "",
-                        "icon": "",
-                        "component": "",
-                        "permissionCode": "ai-mcp-servers:update",
-                        "sort": 10,
-                        "isHidden": 0,
-                        "type": 3,
-                        "sourceType": 1
-                    },
-                    {
-                        "name": "console-common.add",
-                        "code": "ai-mcp-server-create",
-                        "path": "",
-                        "icon": "",
-                        "component": "",
-                        "permissionCode": "ai-mcp-servers:create",
-                        "sort": 10,
-                        "isHidden": 0,
-                        "type": 3,
-                        "sourceType": 1
-                    }
-                ]
+                "sourceType": 1
             },
             {
-                "name": "console-menu.providers.title",
+                "name": "模型厂商",
                 "code": "ai-config-provide",
                 "path": "provider",
                 "icon": "i-lucide-brain-circuit",
@@ -246,48 +69,10 @@
                 "sort": 400,
                 "isHidden": 0,
                 "type": 2,
-                "sourceType": 1,
-                "children": [
-                    {
-                        "name": "console-common.delete",
-                        "code": "ai-config-provide-delete",
-                        "path": "",
-                        "icon": "",
-                        "component": "",
-                        "permissionCode": "ai-providers:delete",
-                        "sort": 10,
-                        "isHidden": 0,
-                        "type": 3,
-                        "sourceType": 1
-                    },
-                    {
-                        "name": "console-common.edit",
-                        "code": "ai-config-provide-edit",
-                        "path": "",
-                        "icon": "",
-                        "component": "",
-                        "permissionCode": "ai-providers:update",
-                        "sort": 10,
-                        "isHidden": 0,
-                        "type": 3,
-                        "sourceType": 1
-                    },
-                    {
-                        "name": "console-common.add",
-                        "code": "ai-config-provide-add",
-                        "path": "",
-                        "icon": "",
-                        "component": "",
-                        "permissionCode": "ai-providers:create",
-                        "sort": 10,
-                        "isHidden": 0,
-                        "type": 3,
-                        "sourceType": 1
-                    }
-                ]
+                "sourceType": 1
             },
             {
-                "name": "console-menu.plugin",
+                "name": "应用管理",
                 "code": "plugin-manage",
                 "path": "extension",
                 "icon": "i-lucide-store",
@@ -299,7 +84,7 @@
                 "sourceType": 1
             },
             {
-                "name": "console-menu.apiKeyManage.title",
+                "name": "密钥管理",
                 "code": "api-key-manage",
                 "path": "secret",
                 "icon": "i-lucide-key-round",
@@ -313,7 +98,7 @@
         ]
     },
     {
-        "name": "console-menu.system",
+        "name": "系统管理",
         "code": "system-manage",
         "path": "",
         "icon": "",
@@ -325,7 +110,7 @@
         "sourceType": 1,
         "children": [
             {
-                "name": "console-menu.diyCenter.title",
+                "name": "装修中心",
                 "code": "diy-center",
                 "path": "decorate",
                 "icon": "i-lucide-paint-roller",
@@ -337,7 +122,7 @@
                 "sourceType": 1,
                 "children": [
                     {
-                        "name": "console-menu.diyCenter.layout",
+                        "name": "布局配置",
                         "code": "diy-layout",
                         "path": "layout",
                         "icon": "",
@@ -349,7 +134,7 @@
                         "sourceType": 1
                     },
                     {
-                        "name": "console-menu.diyCenter.appCenter",
+                        "name": "应用中心",
                         "code": "apps-center",
                         "path": "apps",
                         "icon": "",
@@ -363,7 +148,7 @@
                 ]
             },
             {
-                "name": "console-menu.aiConversation.title",
+                "name": "对话管理",
                 "code": "chat",
                 "path": "chat",
                 "icon": "i-lucide-message-square-diff",
@@ -375,7 +160,7 @@
                 "sourceType": 1,
                 "children": [
                     {
-                        "name": "console-menu.aiConversation.aiChat",
+                        "name": "对话记录",
                         "code": "conversation-ai-conversation",
                         "path": "record",
                         "icon": "",
@@ -384,36 +169,10 @@
                         "sort": 0,
                         "isHidden": 0,
                         "type": 2,
-                        "sourceType": 1,
-                        "children": [
-                            {
-                                "name": "console-common.check",
-                                "code": "conversation-ai-conversation-view",
-                                "path": "",
-                                "icon": "",
-                                "component": "",
-                                "permissionCode": "ai-conversations:detail",
-                                "sort": 0,
-                                "isHidden": 0,
-                                "type": 3,
-                                "sourceType": 1
-                            },
-                            {
-                                "name": "console-common.delete",
-                                "code": "conversation-ai-conversation-delete",
-                                "path": "",
-                                "icon": "",
-                                "component": "",
-                                "permissionCode": "ai-conversations:delete",
-                                "sort": 0,
-                                "isHidden": 0,
-                                "type": 3,
-                                "sourceType": 1
-                            }
-                        ]
+                        "sourceType": 1
                     },
                     {
-                        "name": "console-menu.aiConversation.chatConfig",
+                        "name": "对话配置",
                         "code": "122chat",
                         "path": "config",
                         "icon": "",
@@ -422,26 +181,12 @@
                         "sort": 10,
                         "isHidden": 0,
                         "type": 2,
-                        "sourceType": 1,
-                        "children": [
-                            {
-                                "name": "console-common.save",
-                                "code": "conversation-config-save",
-                                "path": "",
-                                "icon": "",
-                                "component": "",
-                                "permissionCode": "ai-conversations:update-config",
-                                "sort": 0,
-                                "isHidden": 0,
-                                "type": 3,
-                                "sourceType": 1
-                            }
-                        ]
+                        "sourceType": 1
                     }
                 ]
             },
             {
-                "name": "console-menu.userManagement.title",
+                "name": "用户管理",
                 "code": "user",
                 "path": "user",
                 "icon": "i-lucide-users",
@@ -453,7 +198,7 @@
                 "sourceType": 1,
                 "children": [
                     {
-                        "name": "console-menu.userManagement.userList",
+                        "name": "用户列表",
                         "code": "user-list",
                         "path": "list",
                         "icon": "",
@@ -462,48 +207,10 @@
                         "sort": 10,
                         "isHidden": 0,
                         "type": 2,
-                        "sourceType": 1,
-                        "children": [
-                            {
-                                "name": "console-common.delete",
-                                "code": "user-list-delete",
-                                "path": "",
-                                "icon": "",
-                                "component": "",
-                                "permissionCode": "users:delete",
-                                "sort": 0,
-                                "isHidden": 0,
-                                "type": 3,
-                                "sourceType": 1
-                            },
-                            {
-                                "name": "console-common.edit",
-                                "code": "user-list-update",
-                                "path": "update",
-                                "icon": "",
-                                "component": "/console/user/edit",
-                                "permissionCode": "users:update",
-                                "sort": 0,
-                                "isHidden": 1,
-                                "type": 2,
-                                "sourceType": 1
-                            },
-                            {
-                                "name": "console-common.create",
-                                "code": "user-list-create",
-                                "path": "create",
-                                "icon": "",
-                                "component": "/console/user/add",
-                                "permissionCode": "users:create",
-                                "sort": 0,
-                                "isHidden": 1,
-                                "type": 2,
-                                "sourceType": 1
-                            }
-                        ]
+                        "sourceType": 1
                     },
                     {
-                        "name": "console-menu.userManagement.userRecharge",
+                        "name": "用户充值",
                         "code": "user-user-recharge",
                         "path": "recharge",
                         "icon": "",
@@ -512,26 +219,12 @@
                         "sort": 100,
                         "isHidden": 0,
                         "type": 2,
-                        "sourceType": 1,
-                        "children": [
-                            {
-                                "name": "console-common.save",
-                                "code": "user-user-recharge-save",
-                                "path": "",
-                                "icon": "",
-                                "component": "",
-                                "permissionCode": "recharge-config:setConfig",
-                                "sort": 0,
-                                "isHidden": 1,
-                                "type": 2,
-                                "sourceType": 1
-                            }
-                        ]
+                        "sourceType": 1
                     }
                 ]
             },
             {
-                "name": "console-menu.membershipManagement.title",
+                "name": "会员管理",
                 "code": "membership",
                 "path": "membership",
                 "icon": "i-lucide-crown",
@@ -543,7 +236,7 @@
                 "sourceType": 1,
                 "children": [
                     {
-                        "name": "console-menu.membershipManagement.levelsList",
+                        "name": "会员等级",
                         "code": "levels-list",
                         "path": "level",
                         "icon": "",
@@ -552,36 +245,10 @@
                         "sort": 0,
                         "isHidden": 0,
                         "type": 2,
-                        "sourceType": 1,
-                        "children": [
-                            {
-                                "name": "console-common.add",
-                                "code": "levels-list-add",
-                                "path": "levels/add",
-                                "icon": "",
-                                "component": "/console/membership/levels/add",
-                                "permissionCode": "levels:create",
-                                "sort": 0,
-                                "isHidden": 1,
-                                "type": 2,
-                                "sourceType": 1
-                            },
-                            {
-                                "name": "console-common.edit",
-                                "code": "levels-list-update",
-                                "path": "levels/edit",
-                                "icon": "",
-                                "component": "/console/membership/levels/edit",
-                                "permissionCode": "levels:update",
-                                "sort": 0,
-                                "isHidden": 1,
-                                "type": 2,
-                                "sourceType": 1
-                            }
-                        ]
+                        "sourceType": 1
                     },
                     {
-                        "name": "console-menu.membershipManagement.plansList",
+                        "name": "订阅计划",
                         "code": "plans-list",
                         "path": "plan",
                         "icon": "",
@@ -590,38 +257,12 @@
                         "sort": 1,
                         "isHidden": 0,
                         "type": 2,
-                        "sourceType": 1,
-                        "children": [
-                            {
-                                "name": "console-common.add",
-                                "code": "plans-list-add",
-                                "path": "plans/add",
-                                "icon": "",
-                                "component": "/console/membership/plans/add",
-                                "permissionCode": "plans:create",
-                                "sort": 0,
-                                "isHidden": 1,
-                                "type": 2,
-                                "sourceType": 1
-                            },
-                            {
-                                "name": "console-common.edit",
-                                "code": "plans-list-update",
-                                "path": "plans/edit",
-                                "icon": "",
-                                "component": "/console/membership/plans/edit",
-                                "permissionCode": "plans:update",
-                                "sort": 0,
-                                "isHidden": 1,
-                                "type": 2,
-                                "sourceType": 1
-                            }
-                        ]
+                        "sourceType": 1
                     }
                 ]
             },
             {
-                "name": "console-menu.financial.orderManagement",
+                "name": "订单管理",
                 "code": null,
                 "path": "order",
                 "icon": "i-lucide-clipboard-list",
@@ -633,7 +274,7 @@
                 "sourceType": 1,
                 "children": [
                     {
-                        "name": "console-menu.financial.orderMembership",
+                        "name": "会员订单",
                         "code": "membership-order",
                         "path": "membership",
                         "icon": "",
@@ -645,7 +286,7 @@
                         "sourceType": 1
                     },
                     {
-                        "name": "console-menu.financial.orderList",
+                        "name": "充值订单",
                         "code": "order",
                         "path": "recharge",
                         "icon": "",
@@ -659,7 +300,7 @@
                 ]
             },
             {
-                "name": "console-menu.systemSettings.channelManagement",
+                "name": "渠道管理",
                 "code": "channel-management",
                 "path": "channel",
                 "icon": "i-lucide-network",
@@ -671,7 +312,7 @@
                 "sourceType": 1,
                 "children": [
                     {
-                        "name": "console-menu.systemSettings.wechatOaConfig",
+                        "name": "微信公众号",
                         "code": "channel-wechat-oa",
                         "path": "wechat-oa",
                         "icon": "",
@@ -680,26 +321,12 @@
                         "sort": 0,
                         "isHidden": 0,
                         "type": 2,
-                        "sourceType": 1,
-                        "children": [
-                            {
-                                "name": "console-common.update",
-                                "code": null,
-                                "path": "",
-                                "icon": "",
-                                "component": "",
-                                "permissionCode": "wxoaconfig:update-config",
-                                "sort": 0,
-                                "isHidden": 0,
-                                "type": 3,
-                                "sourceType": 1
-                            }
-                        ]
+                        "sourceType": 1
                     }
                 ]
             },
             {
-                "name": "console-menu.financial.title",
+                "name": "财务管理",
                 "code": null,
                 "path": "financial",
                 "icon": "i-lucide-circle-dollar-sign",
@@ -711,7 +338,7 @@
                 "sourceType": 1,
                 "children": [
                     {
-                        "name": "console-menu.financial.financialCenter",
+                        "name": "财务中心",
                         "code": "financial-center",
                         "path": "analysis",
                         "icon": "",
@@ -723,7 +350,7 @@
                         "sourceType": 1
                     },
                     {
-                        "name": "console-menu.financial.accountBalance",
+                        "name": "余额明细",
                         "code": "account-balance",
                         "path": "balance-details",
                         "icon": "",
@@ -737,7 +364,7 @@
                 ]
             },
             {
-                "name": "console-menu.permission.title",
+                "name": "权限管理",
                 "code": "system-permission",
                 "path": "access",
                 "icon": "i-lucide-user-lock",
@@ -749,7 +376,7 @@
                 "sourceType": 1,
                 "children": [
                     {
-                        "name": "console-menu.permission.permissionList",
+                        "name": "权限列表",
                         "code": "system-permission-list",
                         "path": "permission",
                         "icon": "",
@@ -758,48 +385,10 @@
                         "sort": 0,
                         "isHidden": 0,
                         "type": 2,
-                        "sourceType": 1,
-                        "children": [
-                            {
-                                "name": "console-common.check",
-                                "code": "system-permission-view",
-                                "path": "",
-                                "icon": "",
-                                "component": "",
-                                "permissionCode": "permission:info",
-                                "sort": 0,
-                                "isHidden": 0,
-                                "type": 3,
-                                "sourceType": 1
-                            },
-                            {
-                                "name": "system-perms.permission.cleanup",
-                                "code": "system-permission-cleanup",
-                                "path": "",
-                                "icon": "",
-                                "component": "",
-                                "permissionCode": "permission:cleanup",
-                                "sort": 0,
-                                "isHidden": 0,
-                                "type": 3,
-                                "sourceType": 1
-                            },
-                            {
-                                "name": "system-perms.permission.sync",
-                                "code": "system-permission-sync",
-                                "path": "",
-                                "icon": "",
-                                "component": "",
-                                "permissionCode": "permission:sync",
-                                "sort": 0,
-                                "isHidden": 0,
-                                "type": 3,
-                                "sourceType": 1
-                            }
-                        ]
+                        "sourceType": 1
                     },
                     {
-                        "name": "console-menu.permission.roleList",
+                        "name": "角色列表",
                         "code": "system-role",
                         "path": "role",
                         "icon": "",
@@ -808,60 +397,10 @@
                         "sort": 50,
                         "isHidden": 0,
                         "type": 2,
-                        "sourceType": 1,
-                        "children": [
-                            {
-                                "name": "system-perms.role.permissions",
-                                "code": "system-role-permission",
-                                "path": "",
-                                "icon": "",
-                                "component": "",
-                                "permissionCode": "role:assign-permissions",
-                                "sort": 0,
-                                "isHidden": 0,
-                                "type": 3,
-                                "sourceType": 1
-                            },
-                            {
-                                "name": "console-common.delete",
-                                "code": "system-role-delete",
-                                "path": "",
-                                "icon": "",
-                                "component": "",
-                                "permissionCode": "role:delete",
-                                "sort": 0,
-                                "isHidden": 0,
-                                "type": 3,
-                                "sourceType": 1
-                            },
-                            {
-                                "name": "console-common.edit",
-                                "code": "system-role-edit",
-                                "path": "",
-                                "icon": "",
-                                "component": "",
-                                "permissionCode": "role:update",
-                                "sort": 0,
-                                "isHidden": 0,
-                                "type": 3,
-                                "sourceType": 1
-                            },
-                            {
-                                "name": "console-common.add",
-                                "code": "system-role-create",
-                                "path": "",
-                                "icon": "",
-                                "component": "",
-                                "permissionCode": "role:create",
-                                "sort": 0,
-                                "isHidden": 0,
-                                "type": 3,
-                                "sourceType": 1
-                            }
-                        ]
+                        "sourceType": 1
                     },
                     {
-                        "name": "console-menu.permission.menuList",
+                        "name": "菜单列表",
                         "code": "system-menu",
                         "path": "menu",
                         "icon": "",
@@ -870,62 +409,12 @@
                         "sort": 60,
                         "isHidden": 0,
                         "type": 2,
-                        "sourceType": 1,
-                        "children": [
-                            {
-                                "name": "console-common.delete",
-                                "code": "system-menu-delete",
-                                "path": "",
-                                "icon": "",
-                                "component": "",
-                                "permissionCode": "menu:delete",
-                                "sort": 0,
-                                "isHidden": 0,
-                                "type": 3,
-                                "sourceType": 1
-                            },
-                            {
-                                "name": "console-common.batchDelete",
-                                "code": "system-menu-batch-delete",
-                                "path": "",
-                                "icon": "",
-                                "component": "",
-                                "permissionCode": "menu:delete",
-                                "sort": 0,
-                                "isHidden": 0,
-                                "type": 3,
-                                "sourceType": 1
-                            },
-                            {
-                                "name": "console-common.add",
-                                "code": "system-menu-create",
-                                "path": "",
-                                "icon": "",
-                                "component": "",
-                                "permissionCode": "menu:create",
-                                "sort": 0,
-                                "isHidden": 0,
-                                "type": 3,
-                                "sourceType": 1
-                            },
-                            {
-                                "name": "console-common.edit",
-                                "code": "system-menu-edit",
-                                "path": "",
-                                "icon": "",
-                                "component": "",
-                                "permissionCode": "menu:update",
-                                "sort": 0,
-                                "isHidden": 0,
-                                "type": 3,
-                                "sourceType": 1
-                            }
-                        ]
+                        "sourceType": 1
                     }
                 ]
             },
             {
-                "name": "console-menu.systemSettings.title",
+                "name": "系统设置",
                 "code": "system-settings",
                 "path": "system",
                 "icon": "i-lucide-settings-2",
@@ -937,7 +426,7 @@
                 "sourceType": 1,
                 "children": [
                     {
-                        "name": "console-menu.systemSettings.loginConfig",
+                        "name": "登录配置",
                         "code": "system-loginConfig-get",
                         "path": "login-config",
                         "icon": "",
@@ -946,36 +435,10 @@
                         "sort": 0,
                         "isHidden": 0,
                         "type": 2,
-                        "sourceType": 1,
-                        "children": [
-                            {
-                                "name": "console-system.website.actions.save",
-                                "code": "system-loginConfig-set",
-                                "path": "",
-                                "icon": "",
-                                "component": "",
-                                "permissionCode": "users:set-login-settings",
-                                "sort": 0,
-                                "isHidden": 0,
-                                "type": 3,
-                                "sourceType": 1
-                            }
-                        ]
-                    },
-                    {
-                        "name": "console-menu.systemSettings.storageConfig",
-                        "code": "system-storage-config",
-                        "path": "storage-config",
-                        "icon": "",
-                        "component": "/console/system-setting/storage-config/index",
-                        "permissionCode": "system-storage-config:list",
-                        "sort": 0,
-                        "isHidden": 0,
-                        "type": 2,
                         "sourceType": 1
                     },
                     {
-                        "name": "console-menu.systemSettings.agreement",
+                        "name": "政策协议",
                         "code": "system-agreement",
                         "path": "agreement",
                         "icon": "",
@@ -984,24 +447,10 @@
                         "sort": 0,
                         "isHidden": 0,
                         "type": 2,
-                        "sourceType": 1,
-                        "children": [
-                            {
-                                "name": "console-system.website.actions.save",
-                                "code": "system-agreement-save",
-                                "path": "",
-                                "icon": "",
-                                "component": "",
-                                "permissionCode": "system-website:setConfig",
-                                "sort": 0,
-                                "isHidden": 0,
-                                "type": 3,
-                                "sourceType": 1
-                            }
-                        ]
+                        "sourceType": 1
                     },
                     {
-                        "name": "console-menu.systemSettings.siteInfo",
+                        "name": "站点信息",
                         "code": "system-website",
                         "path": "website-config",
                         "icon": "",
@@ -1010,24 +459,10 @@
                         "sort": 0,
                         "isHidden": 0,
                         "type": 2,
-                        "sourceType": 1,
-                        "children": [
-                            {
-                                "name": "console-system.website.actions.save",
-                                "code": "system-website-save",
-                                "path": "",
-                                "icon": "",
-                                "component": "",
-                                "permissionCode": "system-website:setConfig",
-                                "sort": 0,
-                                "isHidden": 0,
-                                "type": 3,
-                                "sourceType": 1
-                            }
-                        ]
+                        "sourceType": 1
                     },
                     {
-                        "name": "console-menu.systemSettings.PayConfig",
+                        "name": "支付配置",
                         "code": "system-payConfig-list",
                         "path": "pay-config",
                         "icon": "",
@@ -1039,14 +474,14 @@
                         "sourceType": 1
                     },
                     {
-                        "name": "console-menu.systemSettings.PayConfig",
-                        "code": "system-payConfig-update",
-                        "path": "setPayConfig",
+                        "name": "存储配置",
+                        "code": "system-storage-config",
+                        "path": "storage-config",
                         "icon": "",
-                        "component": "/console/system-setting/pay-config/edit",
-                        "permissionCode": "system-payconfig:update",
-                        "sort": 0,
-                        "isHidden": 1,
+                        "component": "/console/system-setting/storage-config/index",
+                        "permissionCode": "system-storage-config:list",
+                        "sort": 100,
+                        "isHidden": 0,
                         "type": 2,
                         "sourceType": 1
                     }
