@@ -41,8 +41,18 @@ export class PageWebController extends BaseController {
             };
         }
 
+        // 获取布局数据，如果不存在则使用默认值
+        const layoutData = result.data || { layout: "layout-5", menus: [] };
+
+        // 过滤隐藏的菜单项
+        if (layoutData.menus && Array.isArray(layoutData.menus)) {
+            layoutData.menus = layoutData.menus.filter((menu: any) => !menu.isHidden);
+        }
+
         // 返回布局配置数据
-        return result;
+        return {
+            data: layoutData,
+        };
     }
 
     /**

@@ -1,1 +1,0 @@
-import{d as c,aI as i,f as m,i as u,$ as p,v as d,q as s}from"#entry";const S=c({__name:"access-control",props:{codes:{}},setup(o){const r=o,t=i(),n=m(),a=u(()=>r.codes.every(e=>t.hasPermission(e)));return(e,f)=>s(a)||s(n).userInfo?.isRoot?p(e.$slots,"default",{key:0}):d("",!0)}});export{S as _};

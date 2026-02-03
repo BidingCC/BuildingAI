@@ -1,1 +1,0 @@
-import{aC as t,aF as l,aG as a,aB as o}from"#entry";const r=e=>t("/levels",e),v=(e,s)=>a(`/levels/${e}`,s),u=e=>t(`/levels/${e}`),p=(e,s)=>a(`/levels/${e}`,s),i=e=>o("/levels",e),c=e=>l(`/levels/${e}`);export{r as a,i as b,u as c,p as d,c as e,v as f};

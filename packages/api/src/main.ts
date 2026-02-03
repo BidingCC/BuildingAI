@@ -49,6 +49,7 @@ async function bootstrap() {
     );
 
     app.use(cookieParser());
+    app.set("trust proxy", true);
 
     const corsEnabled = process.env.SERVER_CORS_ENABLED === "true";
     if (corsEnabled) {

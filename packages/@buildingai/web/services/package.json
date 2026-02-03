@@ -32,6 +32,7 @@
     "dependencies": {
         "@buildingai/constants": "workspace:*",
         "@buildingai/db": "workspace:*",
+        "@buildingai/types": "workspace:*",
         "@buildingai/http": "workspace:*",
         "@buildingai/stores": "workspace:*",
         "@tanstack/react-query": "^5.62.16",

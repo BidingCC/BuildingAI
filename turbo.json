@@ -57,7 +57,8 @@
         "NODE_APP_INSTANCE",
         "pm_id",
         "APP_DOMAIN",
-        "EXTENSION_IDENTIFIER"
+        "EXTENSION_IDENTIFIER",
+        "TAURI_DEV_HOST"
     ],
     "tasks": {
         "build": {

@@ -96,22 +96,29 @@ export class AiAgentV1Controller {
                   ? new UserBillingStrategy()
                   : new SmartUserBillingStrategy();
 
-        const modelId = agentChatDto.modelConfig?.id;
-        if (!modelId) {
-            throw HttpErrorFactory.badRequest("智能体需要配置模型");
+        // 第三方集成智能体不需要配置模型，跳过模型检查
+        const isThirdPartyAgent = agent.createMode && agent.createMode !== "direct";
+        if (!isThirdPartyAgent) {
+            const modelId = agentChatDto.modelConfig?.id;
+            if (!modelId) {
+                throw HttpErrorFactory.badRequest("智能体需要配置模型");
+            }
+
+            const model = await this.aiModelRepository.findOne({
+                where: { id: modelId },
+                relations: ["provider"],
+            });
+
+            if (!model) {
+                throw HttpErrorFactory.notFound("Model not found.");
+            }
+
+            const membershipUserId = (req.user as { id?: string } | undefined)?.id ?? "anonymous";
+            // await this.membershipValidationHandler.validateModelAccessOrThrow(
+            //     membershipUserId,
+            //     model,
+            // );
         }
-
-        const model = await this.aiModelRepository.findOne({
-            where: { id: modelId },
-            relations: ["provider"],
-        });
-
-        if (!model) {
-            throw HttpErrorFactory.notFound("Model not found.");
-        }
-
-        const membershipUserId = (req.user as { id?: string } | undefined)?.id ?? "anonymous";
-        // await this.membershipValidationHandler.validateModelAccessOrThrow(membershipUserId, model);
 
         try {
             if (dto.responseMode === "streaming") {

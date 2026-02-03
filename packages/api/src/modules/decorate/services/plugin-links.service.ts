@@ -296,7 +296,7 @@ export class PluginLinksService {
 
         // If it's index.vue at root level, path is just plugin identifier
         if (fileName === "index" || pathParts.length === 0) {
-            return `/buildingai/extension/${pluginIdentifier}`;
+            return `/app/${pluginIdentifier}`;
         }
 
         // If the last part is index, remove it from the path
@@ -306,12 +306,12 @@ export class PluginLinksService {
 
         // If no path parts left after removing index, return root path
         if (pathParts.length === 0) {
-            return `/buildingai/extension/${pluginIdentifier}`;
+            return `/app/${pluginIdentifier}`;
         }
 
         // Otherwise concatenate plugin identifier and remaining path parts
         const remainingPath = pathParts.join("/");
-        return `/buildingai/extension/${pluginIdentifier}/${remainingPath}`;
+        return `/app/${pluginIdentifier}/${remainingPath}`;
     }
 
     /**

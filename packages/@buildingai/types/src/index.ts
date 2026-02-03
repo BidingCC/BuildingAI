@@ -41,5 +41,6 @@ export type {
     MessageMetadata,
     TokenUsage,
 } from "./ai/agent-config.interface";
+export type { ChatMessageUsage } from "./ai/chat-message-usage.interface";
 export * from "./ai/message-content.interface";
 export * from "./ai/retrieval-config.interface";

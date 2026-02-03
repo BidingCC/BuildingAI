@@ -151,6 +151,7 @@ export class AiChatRecordService extends BaseService<AiChatRecord> {
             queryBuilder.addOrderBy("conversation.updatedAt", "DESC");
 
             const excludeFields = includeUserInfo ? ["user.password", "user.openid"] : [];
+
             const result = await this.paginateQueryBuilder(
                 queryBuilder,
                 queryDto || {},
@@ -220,7 +221,6 @@ export class AiChatRecordService extends BaseService<AiChatRecord> {
     ): Promise<Partial<AiChatRecord> | null> {
         try {
             const where = buildWhere<AiChatRecord>({
-                isDeleted: false,
                 userId,
             });
             const result = await this.findOneById(conversationId, {
@@ -336,25 +336,36 @@ export class AiChatRecordService extends BaseService<AiChatRecord> {
     }
 
     /**
-     * 软删除对话
+     * 删除对话
      * @param conversationId 对话ID
-     * @param userId 用户ID
+     * @param userId 用户ID，空字符串表示管理员操作（硬删除），有值表示普通用户操作（软删除）
      */
     async deleteConversation(conversationId: string, userId: string): Promise<void> {
         try {
-            const queryBuilder = this.repository
-                .createQueryBuilder()
-                .update(AiChatRecord)
-                .set({ isDeleted: true })
-                .where("id = :conversationId", { conversationId })
-                .andWhere("isDeleted = :isDeleted", { isDeleted: false });
+            const isAdmin = !userId || userId.trim() === "";
 
-            // 如果不是管理员操作，需要验证用户权限
-            if (userId && userId.trim() !== "") {
-                queryBuilder.andWhere("userId = :userId", { userId });
+            if (isAdmin) {
+                // 管理员操作：硬删除（直接从数据库删除）
+                const deleteResult = await this.repository.delete(conversationId);
+                if (deleteResult.affected === 0) {
+                    throw HttpErrorFactory.notFound("对话不存在或已被删除");
+                }
+            } else {
+                // 普通用户操作：软删除（设置 isDeleted = true）
+                const queryBuilder = this.repository
+                    .createQueryBuilder()
+                    .update(AiChatRecord)
+                    .set({ isDeleted: true })
+                    .where("id = :conversationId", { conversationId })
+                    .andWhere("isDeleted = :isDeleted", { isDeleted: false })
+                    .andWhere("userId = :userId", { userId });
+
+                const updateResult = await queryBuilder.execute();
+                if (updateResult.affected === 0) {
+                    throw HttpErrorFactory.notFound("对话不存在、已被删除或无权限删除");
+                }
             }
-
-            await queryBuilder.execute();
+            return;
         } catch (error) {
             this.logger.error(`删除对话失败: ${error.message}`, error.stack);
             throw HttpErrorFactory.badRequest("Failed to delete conversation.");
@@ -364,23 +375,28 @@ export class AiChatRecordService extends BaseService<AiChatRecord> {
     /**
      * 批量删除对话
      * @param ids 对话ID数组
-     * @param userId 用户ID
+     * @param userId 用户ID，空字符串表示管理员操作（硬删除），有值表示普通用户操作（软删除）
      */
     async batchDeleteConversations(ids: string[], userId: string = ""): Promise<void> {
         try {
-            const queryBuilder = this.repository
-                .createQueryBuilder()
-                .update(AiChatRecord)
-                .set({ isDeleted: true })
-                .where("id IN (:...ids)", { ids })
-                .andWhere("isDeleted = :isDeleted", { isDeleted: false });
+            const isAdmin = !userId || userId.trim() === "";
 
-            // 如果不是管理员操作，需要验证用户权限
-            if (userId && userId.trim() !== "") {
-                queryBuilder.andWhere("userId = :userId", { userId });
+            if (isAdmin) {
+                // 管理员操作：硬删除（直接从数据库删除）
+                await this.repository.delete(ids);
+            } else {
+                // 普通用户操作：软删除（设置 isDeleted = true）
+                const queryBuilder = this.repository
+                    .createQueryBuilder()
+                    .update(AiChatRecord)
+                    .set({ isDeleted: true })
+                    .where("id IN (:...ids)", { ids })
+                    .andWhere("isDeleted = :isDeleted", { isDeleted: false })
+                    .andWhere("userId = :userId", { userId });
+
+                await queryBuilder.execute();
             }
-
-            await queryBuilder.execute();
+            return;
         } catch (error) {
             this.logger.error(`批量删除对话失败: ${error.message}`, error.stack);
             throw HttpErrorFactory.badRequest("Failed to batch delete conversations.");

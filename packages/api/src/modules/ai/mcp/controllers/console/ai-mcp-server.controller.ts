@@ -302,7 +302,7 @@ export class AiMcpServerConsoleController extends BaseController {
                         additionalProperties: false,
                     },
                 },
-                required: ["url"],
+                required: ["url", "type"],
                 additionalProperties: false,
             };
 

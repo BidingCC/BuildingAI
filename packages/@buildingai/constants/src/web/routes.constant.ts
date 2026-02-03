@@ -20,6 +20,7 @@ export const ROUTES = {
     CONSOLE: "/console",
     /** Extension page path */
     EXTENSION: "/extension",
+    APP: "/app",
     /** BuildingAI middleware page path */
     BUILDINGAI_MIDDLEWARE: "/buildingai-middleware",
 } as const;

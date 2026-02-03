@@ -8,6 +8,7 @@ import { Body, Get, Post, Query } from "@nestjs/common";
 // 已移除 ImportAgentDto 导入，使用 DSL 专用 DTO
 import {
     AgentTemplateDto,
+    BatchImportAgentDslDto,
     CreateAgentFromTemplateDto,
     ImportAgentDslDto,
     QueryTemplateDto,
@@ -87,6 +88,28 @@ export class AiAgentTemplateController {
         });
 
         return agent;
+    }
+
+    /**
+     * 批量导入智能体 DSL 配置
+     * 从多个 DSL 格式文件批量导入智能体配置
+     *
+     * @param dto 批量导入 DSL 配置DTO
+     * @param user 当前用户信息
+     * @returns 批量导入结果
+     */
+    @Post("batch-import-dsl")
+    @Permissions({
+        code: "import-dsl",
+        name: "批量导入智能体 DSL 配置",
+    })
+    async batchImportAgentDsl(
+        @Body() dto: BatchImportAgentDslDto,
+        @Playground() user: UserPlayground,
+    ) {
+        // 添加创建者ID
+        dto.createBy = user.id;
+        return await this.AiAgentTemplateService.batchImportAgentDsl(dto, user);
     }
 
     // ========== 模板管理相关接口 ==========

@@ -64,6 +64,8 @@ export interface ApplicationListItem {
     id: string;
     name: string;
     identifier: string;
+    key?: string;
+    newVersion?: string;
     version: string;
     description: string;
     icon: string;

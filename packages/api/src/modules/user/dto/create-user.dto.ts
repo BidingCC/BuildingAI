@@ -124,4 +124,19 @@ export class CreateUserDto {
     @IsInt({ message: "注册来源必须是整数" })
     @IsIn([0, 1, 2, 3, 4], { message: "注册来源只能是0-4之间的数字" })
     source?: number;
+
+    /**
+     * 会员等级ID
+     */
+    @IsOptional()
+    @ValidateIf((o) => o.level && o.level.trim() !== "")
+    @IsUUID(4, { message: "会员等级ID必须是有效的UUID格式" })
+    level?: string;
+
+    /**
+     * 会员等级到期时间
+     */
+    @IsOptional()
+    @IsString({ message: "会员等级到期时间必须是字符串" })
+    levelEndTime?: string;
 }

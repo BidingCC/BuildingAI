@@ -1,3 +1,4 @@
+import { listMyCreatedDatasets, listTeamDatasets } from "@buildingai/services/web";
 import { Button } from "@buildingai/ui/components/ui/button";
 import {
   Collapsible,
@@ -18,9 +19,27 @@ import {
   SidebarMenuSubItem,
 } from "@buildingai/ui/components/ui/sidebar";
 import { cn } from "@buildingai/ui/lib/utils";
-import { BookCopy, ChevronRight, LibraryBig, Plus, Users } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import {
+  BookCopy,
+  ChevronDown,
+  ChevronRight,
+  LibraryBig,
+  Loader2,
+  Plus,
+  Users,
+} from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+
+import { DatasetEditDialog } from "../[id]/_components/dialogs/dataset-edit-dialog";
+
+const SIDEBAR_PAGE_SIZE = 20;
+
+type SidebarItem = {
+  id: string;
+  title: string;
+  path: string;
+};
 
 export function DatasetsSidebar() {
   return <DatasetsSidebarMain />;
@@ -28,60 +47,86 @@ export function DatasetsSidebar() {
 
 export function DatasetsSidebarMain({ className }: { className?: string }) {
   const { pathname } = useLocation();
-  const [myDatasetsItems, setMyDatasetsItems] = useState<
-    Array<{
-      id: string;
-      title: string;
-      path: string;
-    }>
-  >([]);
-  const [joinedDatasetsItems, setJoinedDatasetsItems] = useState<
-    Array<{
-      id: string;
-      title: string;
-      path: string;
-    }>
-  >([]);
+  const [myDatasetsItems, setMyDatasetsItems] = useState<SidebarItem[]>([]);
+  const [joinedDatasetsItems, setJoinedDatasetsItems] = useState<SidebarItem[]>([]);
+  const [myTotal, setMyTotal] = useState(0);
+  const [joinedTotal, setJoinedTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [loadingJoined, setLoadingJoined] = useState(false);
+  const [loadingMoreMy, setLoadingMoreMy] = useState(false);
+  const [loadingMoreJoined, setLoadingMoreJoined] = useState(false);
 
-  // Simulate API call to fetch my datasets items
+  const toSidebarItem = (d: { id: string; name: string }) => ({
+    id: d.id,
+    title: d.name,
+    path: `/datasets/${d.id}`,
+  });
+
+  const refetchMyDatasets = useCallback(() => {
+    listMyCreatedDatasets({ page: 1, pageSize: SIDEBAR_PAGE_SIZE }).then(({ items, total }) => {
+      setMyDatasetsItems(items.map(toSidebarItem));
+      setMyTotal(total);
+    });
+  }, []);
+
   useEffect(() => {
     setLoading(true);
-    const timer = setTimeout(() => {
-      setMyDatasetsItems([
-        { id: "1", title: "技术文档", path: "/datasets/1" },
-        { id: "2", title: "产品设计", path: "/datasets/2" },
-        { id: "3", title: "市场分析", path: "/datasets/3" },
-        { id: "4", title: "用户手册", path: "/datasets/4" },
-        { id: "5", title: "开发指南", path: "/datasets/5" },
-      ]);
-      setLoading(false);
-    }, 800); // Simulate 800ms delay
-
-    return () => clearTimeout(timer);
+    listMyCreatedDatasets({ page: 1, pageSize: SIDEBAR_PAGE_SIZE })
+      .then(({ items, total }) => {
+        setMyDatasetsItems(items.map(toSidebarItem));
+        setMyTotal(total);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
-  // Simulate API call to fetch joined datasets items
   useEffect(() => {
     setLoadingJoined(true);
-    const timer = setTimeout(() => {
-      setJoinedDatasetsItems([
-        { id: "team1", title: "前端团队知识库", path: "/datasets/joined/team1" },
-        { id: "team2", title: "后端开发规范", path: "/datasets/joined/team2" },
-        { id: "team3", title: "产品设计文档", path: "/datasets/joined/team3" },
-        { id: "team4", title: "测试用例库", path: "/datasets/joined/team4" },
-        { id: "team5", title: "运维手册", path: "/datasets/joined/team5" },
-        { id: "team6", title: "项目管理指南", path: "/datasets/joined/team6" },
-      ]);
-      setLoadingJoined(false);
-    }, 1000); // Simulate 1000ms delay
-
-    return () => clearTimeout(timer);
+    listTeamDatasets({ page: 1, pageSize: SIDEBAR_PAGE_SIZE })
+      .then(({ items, total }) => {
+        setJoinedDatasetsItems(items.map(toSidebarItem));
+        setJoinedTotal(total);
+      })
+      .finally(() => setLoadingJoined(false));
   }, []);
 
-  const navs = useMemo(() => {
-    return [
+  const hasMoreMy = myDatasetsItems.length < myTotal;
+  const hasMoreJoined = joinedDatasetsItems.length < joinedTotal;
+
+  const loadMoreMy = () => {
+    if (loadingMoreMy || !hasMoreMy) return;
+    const nextPage = Math.floor(myDatasetsItems.length / SIDEBAR_PAGE_SIZE) + 1;
+    setLoadingMoreMy(true);
+    listMyCreatedDatasets({ page: nextPage, pageSize: SIDEBAR_PAGE_SIZE })
+      .then(({ items }) => {
+        setMyDatasetsItems((prev) => [...prev, ...items.map(toSidebarItem)]);
+      })
+      .finally(() => setLoadingMoreMy(false));
+  };
+
+  const loadMoreJoined = () => {
+    if (loadingMoreJoined || !hasMoreJoined) return;
+    const nextPage = Math.floor(joinedDatasetsItems.length / SIDEBAR_PAGE_SIZE) + 1;
+    setLoadingMoreJoined(true);
+    listTeamDatasets({ page: nextPage, pageSize: SIDEBAR_PAGE_SIZE })
+      .then(({ items }) => {
+        setJoinedDatasetsItems((prev) => [...prev, ...items.map(toSidebarItem)]);
+      })
+      .finally(() => setLoadingMoreJoined(false));
+  };
+
+  const navs = useMemo<
+    Array<{
+      id: string;
+      title: string;
+      path?: string;
+      icon?: typeof LibraryBig;
+      items?: SidebarItem[];
+      hasMore?: boolean;
+      loadMore?: () => void;
+      loadingMore?: boolean;
+    }>
+  >(
+    () => [
       {
         id: "datasets",
         title: "知识广场",
@@ -91,19 +136,35 @@ export function DatasetsSidebarMain({ className }: { className?: string }) {
       {
         id: "datasets-my",
         title: "我的知识库",
-        path: "/datasets/my",
+        path: "",
         icon: BookCopy,
         items: myDatasetsItems,
+        hasMore: hasMoreMy,
+        loadMore: loadMoreMy,
+        loadingMore: loadingMoreMy,
       },
       {
         id: "datasets-joined",
         title: "团队知识库",
-        path: "/datasets/joined",
+        path: "",
         icon: Users,
         items: joinedDatasetsItems,
+        hasMore: hasMoreJoined,
+        loadMore: loadMoreJoined,
+        loadingMore: loadingMoreJoined,
       },
-    ];
-  }, [myDatasetsItems, joinedDatasetsItems]);
+    ],
+    [
+      myDatasetsItems,
+      joinedDatasetsItems,
+      hasMoreMy,
+      hasMoreJoined,
+      loadMoreMy,
+      loadMoreJoined,
+      loadingMoreMy,
+      loadingMoreJoined,
+    ],
+  );
 
   const isItemActive = (path?: string) => path === pathname;
   const hasActiveChild = (items?: Array<{ path?: string }>) =>
@@ -117,26 +178,22 @@ export function DatasetsSidebarMain({ className }: { className?: string }) {
       )}
     >
       <SidebarHeader className="flex flex-row items-center gap-1">
-        <Button className="w-full" variant="outline">
-          <Plus />
-          创建知识库
-        </Button>
+        <DatasetEditDialog mode="create" onSuccess={refetchMyDatasets}>
+          <Button className="w-full" variant="outline">
+            <Plus />
+            创建知识库
+          </Button>
+        </DatasetEditDialog>
       </SidebarHeader>
       <SidebarContent className="mt-2 px-2">
         {navs.map((item) => {
           const isActive = isItemActive(item.path);
-          const hasItems = item.items && item.items.length > 0;
+          const isCollapsible = item.id === "datasets-my" || item.id === "datasets-joined";
           const hasActiveChildren = hasActiveChild(item.items);
 
-          // Render collapsible menu item for "我的知识库"
-          if (hasItems) {
+          if (isCollapsible) {
             return (
-              <Collapsible
-                key={item.id}
-                asChild
-                defaultOpen={hasActiveChildren}
-                className="group/collapsible"
-              >
+              <Collapsible key={item.id} asChild defaultOpen className="group/collapsible">
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton
@@ -170,20 +227,48 @@ export function DatasetsSidebarMain({ className }: { className?: string }) {
                             <span className="text-muted-foreground text-sm">加载中...</span>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
+                      ) : (item.items?.length ?? 0) === 0 ? (
+                        <SidebarMenuSubItem></SidebarMenuSubItem>
                       ) : (
-                        item.items?.map((subItem) => (
-                          <SidebarMenuSubItem key={subItem.id}>
-                            <SidebarMenuSubButton
-                              asChild
-                              isActive={isItemActive(subItem.path)}
-                              className="h-9"
-                            >
-                              <Link to={subItem.path}>
-                                <span className="line-clamp-1">{subItem.title}</span>
-                              </Link>
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                        ))
+                        <>
+                          {item.items?.map((subItem) => (
+                            <SidebarMenuSubItem key={subItem.id}>
+                              <SidebarMenuSubButton
+                                asChild
+                                isActive={isItemActive(subItem.path)}
+                                className="h-9"
+                              >
+                                <Link to={subItem.path}>
+                                  <span className="line-clamp-1">{subItem.title}</span>
+                                </Link>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          ))}
+                          {item.hasMore && item.loadMore && (
+                            <SidebarMenuSubItem>
+                              <SidebarMenuSubButton asChild>
+                                <button
+                                  type="button"
+                                  className="text-muted-foreground h-9"
+                                  onClick={item.loadMore}
+                                  disabled={item.loadingMore}
+                                >
+                                  {item.loadingMore ? (
+                                    <>
+                                      <Loader2 className="size-4 animate-spin" />
+                                      <span className="text-sm">加载中...</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <ChevronDown className="size-4" />
+                                      <span className="text-sm">加载更多</span>
+                                    </>
+                                  )}
+                                </button>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          )}
+                        </>
                       )}
                     </SidebarMenuSub>
                   </CollapsibleContent>
@@ -192,7 +277,6 @@ export function DatasetsSidebarMain({ className }: { className?: string }) {
             );
           }
 
-          // Render simple link menu item
           return (
             <SidebarMenuItem key={item.id}>
               <SidebarMenuButton className="group/link-menu-item h-9" isActive={isActive} asChild>

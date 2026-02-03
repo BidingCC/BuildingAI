@@ -1,3 +1,4 @@
+import type { ChatMessageUsage } from "@buildingai/types";
 import type { UIMessage } from "ai";
 
 import { AppEntity } from "../decorators/app-entity.decorator";
@@ -73,23 +74,7 @@ export class AiChatMessage extends BaseEntity {
         nullable: true,
         comment: "Token使用情况",
     })
-    usage?: {
-        inputTokens?: number;
-        outputTokens?: number;
-        totalTokens?: number;
-        inputTokenDetails?: {
-            noCacheTokens?: number;
-            cacheReadTokens?: number;
-            cacheWriteTokens?: number;
-        };
-        outputTokenDetails?: {
-            textTokens?: number;
-            reasoningTokens?: number;
-        };
-        reasoningTokens?: number;
-        cachedInputTokens?: number;
-        raw?: Record<string, unknown>;
-    };
+    usage?: ChatMessageUsage;
 
     @Column({
         type: "int",

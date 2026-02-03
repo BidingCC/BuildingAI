@@ -1,3 +1,5 @@
+import type { SegmentationOptions } from "../interfaces/vectorization.interface";
+
 /**
  * 知识库服务常量（创建空知识库等默认配置）
  * 知识库字典配置（group/keys）在 Config 模块：constants/datasets-config.constants.ts
@@ -8,3 +10,12 @@ export const DATASETS_DEFAULT_CONSTANTS = {
     DEFAULT_SEMANTIC_WEIGHT: 0.7,
     DEFAULT_KEYWORD_WEIGHT: 0.3,
 } as const;
+
+/** 默认分段配置（与 datasets-old indexing 效果一致） */
+export const DEFAULT_SEGMENTATION_OPTIONS: SegmentationOptions = {
+    segmentIdentifier: "\n",
+    maxSegmentLength: 500,
+    segmentOverlap: 50,
+    replaceConsecutiveWhitespace: true,
+    removeUrlsAndEmails: false,
+};

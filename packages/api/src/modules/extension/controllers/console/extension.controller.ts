@@ -129,6 +129,54 @@ export class ExtensionConsoleController extends BaseController {
     }
 
     /**
+     * Install application by activation code
+     */
+    @Post("install-by-activation-code/:activationCode")
+    @Permissions({
+        code: "install-by-activation-code",
+        name: "通过兑换码安装应用",
+    })
+    async installByActivationCode(
+        @Param("activationCode") activationCode: string,
+        @Body() dto: DownloadExtensionDto,
+    ) {
+        return await this.extensionOperationService.installByActivationCode(
+            activationCode,
+            dto.identifier,
+            dto.version,
+            this.extensionMarketService,
+        );
+    }
+
+    /**
+     * upgrade content
+     */
+    @Get("upgrade-content/:identifier")
+    @Permissions({
+        code: "upgrade-content",
+        name: "更新应用内容",
+    })
+    async upgradeContent(@Param("identifier") identifier: string) {
+        return await this.extensionOperationService.upgradeContent(
+            identifier,
+            this.extensionMarketService,
+        );
+    }
+
+    /**
+     * Get application by activation code
+     */
+    @Get("get-by-activation-code/:activationCode")
+    @Permissions({
+        code: "get-by-activation-code",
+        name: "通过兑换码获取应用信息",
+    })
+    @BuildFileUrl(["**.icon"])
+    async getApplicationByActivationCode(@Param("activationCode") activationCode: string) {
+        return await this.extensionMarketService.getApplicationByActivationCode(activationCode);
+    }
+
+    /**
      * Upgrade extension
      */
     @Post("upgrade/:identifier")
@@ -193,18 +241,23 @@ export class ExtensionConsoleController extends BaseController {
         code: "list",
         name: "查看应用列表",
     })
-    @BuildFileUrl(["**.icon", "**.avatar"])
+    @BuildFileUrl(["**.icon", "**.avatar", "**.aliasIcon"])
     async lists(@Query() query: QueryExtensionDto) {
         // Get extension list (handles platformSecret check internally)
-        let extensionsList = await this.extensionMarketService.getMixedApplicationList();
+        const allExtensionsList = await this.extensionMarketService.getMixedApplicationList();
+
+        // 统计全部、已安装、未安装的数量（在筛选之前统计）
+        const statistics = {
+            total: allExtensionsList.length,
+            installed: allExtensionsList.filter((ext) => ext.isInstalled === true).length,
+            uninstalled: allExtensionsList.filter((ext) => ext.isInstalled === false).length,
+        };
 
         // Extension filter conditions
+        let extensionsList = allExtensionsList;
         if (query.keyword) {
-            const keyword = query.keyword.toLowerCase();
-            extensionsList = extensionsList.filter(
-                (ext) =>
-                    ext.name.toLowerCase().includes(keyword) ||
-                    ext.identifier.toLowerCase().includes(keyword),
+            extensionsList = extensionsList.filter((ext) =>
+                ext.name.toLowerCase().includes(query.keyword.toLowerCase()),
             );
         }
 
@@ -230,7 +283,14 @@ export class ExtensionConsoleController extends BaseController {
             extensionsList = extensionsList.filter((ext) => ext.isInstalled === query.isInstalled);
         }
 
-        return this.paginationResult(extensionsList, extensionsList.length, query);
+        extensionsList = extensionsList.sort(
+            (a, b) =>
+                new Date(b.createdAt || b.updatedAt || 0).getTime() -
+                new Date(a.createdAt || a.updatedAt || 0).getTime(),
+        );
+
+        const result = this.paginationResult(extensionsList, extensionsList.length, query);
+        return { ...result, extend: { statistics } };
     }
 
     /**
@@ -308,7 +368,7 @@ export class ExtensionConsoleController extends BaseController {
      * @returns Extension details
      */
     @Get("detail/:identifier")
-    @BuildFileUrl(["**.icon"])
+    @BuildFileUrl(["**.aliasIcon", "**.icon"])
     @Permissions({
         code: "detail-by-identifier-from-db",
         name: "查看入库应用详情",
@@ -450,7 +510,7 @@ export class ExtensionConsoleController extends BaseController {
      * @returns Updated extension
      */
     @Patch(":id")
-    @BuildFileUrl(["**.icon", "**.author.avatar"])
+    @BuildFileUrl(["**.icon", "**.author.avatar", "++.aliasIcon"])
     @Permissions({
         code: "update",
         name: "更新应用",

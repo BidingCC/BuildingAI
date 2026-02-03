@@ -14,9 +14,14 @@ export { AiProvider } from "./ai-provider.entity";
 export { AiUserMcpServer } from "./ai-user-mcp-server.entity";
 export { Analyse, AnalyseActionType } from "./analyse.entity";
 export { Datasets } from "./datasets.entity";
+export { DatasetsChatMessage } from "./datasets-chat-message.entity";
+export { DatasetsChatRecord } from "./datasets-chat-record.entity";
 export { DatasetsDocument } from "./datasets-document.entity";
 export { DatasetMember } from "./datasets-member.entity";
-export { DatasetMemberApplication, MemberApplicationStatus } from "./datasets-member-application.entity";
+export {
+    DatasetMemberApplication,
+    MemberApplicationStatus,
+} from "./datasets-member-application.entity";
 export { DatasetsSegments } from "./datasets-segments.entity";
 export { DecorateMicropageEntity } from "./decorate-micropage.entity";
 export { DecoratePageEntity } from "./decorate-page.entity";
@@ -42,6 +47,7 @@ export {
     SecretTemplateType,
     type TemplateField,
 } from "./secret-template.entity";
+export { StorageConfig } from "./storage-config.entity";
 export { Tag } from "./tag.entity";
 export { User } from "./user.entity";
 export { UserDict } from "./user-dict.entity";

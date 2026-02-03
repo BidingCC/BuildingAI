@@ -19,4 +19,8 @@ export class CreateEmptyDatasetDto {
     @IsOptional()
     @IsString({ message: "知识库描述必须是字符串" })
     description?: string;
+
+    @IsOptional()
+    @IsString({ message: "封面图 URL 必须是字符串" })
+    coverUrl?: string;
 }

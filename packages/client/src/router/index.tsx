@@ -6,9 +6,7 @@ import AgentsWorkspacePage from "@/pages/agents/workspace";
 import AppsIndexPage from "@/pages/apps";
 import DatasetsIndexPage from "@/pages/datasets";
 import DatasetsLayout from "@/pages/datasets/_layouts";
-import DatasetsDetailPage from "@/pages/datasets/detail";
-import JoinedDatasetsIndexPage from "@/pages/datasets/joined";
-import MyDatasetsIndexPage from "@/pages/datasets/my";
+import DatasetsDetailPage from "@/pages/datasets/[id]";
 import InstallPage from "@/pages/install";
 import WorkflowIndexPage from "@/pages/workflow";
 import WorkflowDetailPage from "@/pages/workflow/detail";
@@ -71,16 +69,8 @@ export const router = createBrowserRouter([
                 element: <DatasetsIndexPage />,
               },
               {
-                path: "/datasets/my",
-                element: <MyDatasetsIndexPage />,
-              },
-              {
                 path: "/datasets/:id",
                 element: <DatasetsDetailPage />,
-              },
-              {
-                path: "/datasets/joined",
-                element: <JoinedDatasetsIndexPage />,
               },
             ],
           },

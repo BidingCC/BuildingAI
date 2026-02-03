@@ -96,6 +96,22 @@ export class AiAgentConsoleController {
     }
 
     /**
+     * 获取智能体文件上传配置
+     * 对于 Dify 智能体，从 Dify 平台获取文件上传配置
+     *
+     * @param id 智能体ID
+     * @returns 文件上传配置
+     */
+    @Get(":id/file-upload-config")
+    @Permissions({
+        code: "detail",
+        name: "查看智能体详情",
+    })
+    async getFileUploadConfig(@Param("id") id: string) {
+        return this.AiAgentService.getAgentFileUploadConfig(id);
+    }
+
+    /**
      * 更新智能体配置
      *
      * @param id 智能体ID
