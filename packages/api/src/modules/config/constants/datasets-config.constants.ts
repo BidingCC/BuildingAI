@@ -3,6 +3,7 @@ export const DATASETS_CONFIG_GROUP = "datasets_config";
 export const DATASETS_CONFIG_KEYS = {
     INITIAL_STORAGE_MB: "initial_storage_mb",
     EMBEDDING_MODEL_ID: "embedding_model_id",
+    TEXT_MODEL_ID: "text_model_id",
     RETRIEVAL_CONFIG: "retrieval_config",
 } as const;
 

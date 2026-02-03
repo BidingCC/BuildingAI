@@ -12,6 +12,7 @@ import {
 export interface DatasetsConfigDto {
     initialStorageMb: number;
     embeddingModelId: string;
+    textModelId: string;
     defaultRetrievalConfig: RetrievalConfig;
 }
 
@@ -39,6 +40,15 @@ export class DatasetsConfigService {
         return typeof value === "string" ? value : "";
     }
 
+    async getTextModelId(): Promise<string> {
+        const value = await this.dictService.get<string>(
+            DATASETS_CONFIG_KEYS.TEXT_MODEL_ID,
+            "",
+            DATASETS_CONFIG_GROUP,
+        );
+        return typeof value === "string" ? value : "";
+    }
+
     async getDefaultRetrievalConfig(): Promise<RetrievalConfig> {
         const raw = await this.dictService.get<RetrievalConfig>(
             DATASETS_CONFIG_KEYS.RETRIEVAL_CONFIG,
@@ -52,14 +62,17 @@ export class DatasetsConfigService {
     }
 
     async getConfig(): Promise<DatasetsConfigDto> {
-        const [initialStorageMb, embeddingModelId, defaultRetrievalConfig] = await Promise.all([
-            this.getInitialStorageMb(),
-            this.getEmbeddingModelId(),
-            this.getDefaultRetrievalConfig(),
-        ]);
+        const [initialStorageMb, embeddingModelId, textModelId, defaultRetrievalConfig] =
+            await Promise.all([
+                this.getInitialStorageMb(),
+                this.getEmbeddingModelId(),
+                this.getTextModelId(),
+                this.getDefaultRetrievalConfig(),
+            ]);
         return {
             initialStorageMb,
             embeddingModelId,
+            textModelId,
             defaultRetrievalConfig,
         };
     }
@@ -78,6 +91,11 @@ export class DatasetsConfigService {
                 dto.embeddingModelId,
                 { group: DATASETS_CONFIG_GROUP },
             );
+        }
+        if (dto.textModelId !== undefined) {
+            await this.dictService.set(DATASETS_CONFIG_KEYS.TEXT_MODEL_ID, dto.textModelId, {
+                group: DATASETS_CONFIG_GROUP,
+            });
         }
         if (dto.defaultRetrievalConfig !== undefined) {
             const normalized = this.normalizeRetrievalConfig(

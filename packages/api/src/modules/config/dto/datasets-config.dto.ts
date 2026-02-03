@@ -72,6 +72,10 @@ export class UpdateDatasetsConfigDto {
     embeddingModelId?: string;
 
     @IsOptional()
+    @IsString()
+    textModelId?: string;
+
+    @IsOptional()
     @IsObject()
     @ValidateNested()
     @Type(() => RetrievalConfigDto)
