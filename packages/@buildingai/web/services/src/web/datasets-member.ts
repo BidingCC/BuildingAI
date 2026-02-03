@@ -1,7 +1,11 @@
 import { useAuthStore } from "@buildingai/stores";
-import type { PaginatedQueryOptionsUtil, PaginatedResponse } from "@buildingai/web-types";
-import type { UseMutationResult, UseQueryResult } from "@tanstack/react-query";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type {
+    InfiniteData,
+    UseInfiniteQueryResult,
+    UseMutationResult,
+    UseQueryResult,
+} from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { apiHttpClient } from "../base";
 export type ApplyToDatasetParams = {
@@ -22,10 +26,27 @@ export type ListMembersParams = {
     pageSize?: number;
 };
 
+export type DatasetMembersResponse = {
+    items: DatasetMember[];
+    total: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+};
+
 export type ListApplicationsParams = {
     status?: "pending" | "approved" | "rejected";
-    page?: number;
-    pageSize?: number;
+};
+
+export type DatasetApplicationsResponse = {
+    items: DatasetApplication[];
+};
+
+export type DatasetMemberUser = {
+    id: string;
+    nickname?: string;
+    avatar?: string;
+    [key: string]: unknown;
 };
 
 export type DatasetMember = {
@@ -34,7 +55,10 @@ export type DatasetMember = {
     userId: string;
     role: string;
     isActive: boolean;
-    joinedAt: string;
+    joinedAt?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    user?: DatasetMemberUser;
     [key: string]: unknown;
 };
 
@@ -48,24 +72,24 @@ export type DatasetApplication = {
     rejectReason?: string | null;
     createdAt: string;
     updatedAt: string;
+    user?: DatasetMemberUser;
     [key: string]: unknown;
 };
 
 export async function listDatasetsMembers(
     datasetId: string,
     params?: ListMembersParams,
-): Promise<PaginatedResponse<DatasetMember>> {
-    return apiHttpClient.get<PaginatedResponse<DatasetMember>>(
-        `/ai-datasets/${datasetId}/members`,
-        { params: params ?? {} },
-    );
+): Promise<DatasetMembersResponse> {
+    return apiHttpClient.get<DatasetMembersResponse>(`/ai-datasets/${datasetId}/members`, {
+        params: params ?? {},
+    });
 }
 
 export async function listDatasetsApplications(
     datasetId: string,
     params?: ListApplicationsParams,
-): Promise<PaginatedResponse<DatasetApplication>> {
-    return apiHttpClient.get<PaginatedResponse<DatasetApplication>>(
+): Promise<DatasetApplicationsResponse> {
+    return apiHttpClient.get<DatasetApplicationsResponse>(
         `/ai-datasets/${datasetId}/applications`,
         { params: params ?? {} },
     );
@@ -116,13 +140,17 @@ export async function removeDatasetsMember(
     );
 }
 
+export async function leaveDatasets(datasetId: string): Promise<{ success: boolean }> {
+    return apiHttpClient.post<{ success: boolean }>(`/ai-datasets/${datasetId}/leave`);
+}
+
 export function useDatasetsMembersQuery(
     datasetId: string,
     params?: ListMembersParams,
-    options?: PaginatedQueryOptionsUtil<DatasetMember>,
-): UseQueryResult<PaginatedResponse<DatasetMember>, unknown> {
+    options?: { enabled?: boolean },
+): UseQueryResult<DatasetMembersResponse, unknown> {
     const { isLogin } = useAuthStore((state) => state.authActions);
-    return useQuery<PaginatedResponse<DatasetMember>>({
+    return useQuery<DatasetMembersResponse>({
         queryKey: ["datasets", datasetId, "members", params],
         queryFn: () => listDatasetsMembers(datasetId, params),
         enabled: !!datasetId && isLogin() && options?.enabled !== false,
@@ -130,13 +158,39 @@ export function useDatasetsMembersQuery(
     });
 }
 
+export function useDatasetsMembersInfiniteQuery(
+    datasetId: string,
+    options?: { enabled?: boolean },
+): UseInfiniteQueryResult<InfiniteData<DatasetMembersResponse>, unknown> & {
+    members: DatasetMember[];
+} {
+    const { isLogin } = useAuthStore((state) => state.authActions);
+    const result = useInfiniteQuery<DatasetMembersResponse>({
+        queryKey: ["datasets", datasetId, "members", "infinite"],
+        queryFn: ({ pageParam }) =>
+            listDatasetsMembers(datasetId, {
+                page: pageParam as number,
+                pageSize: 20,
+            }),
+        getNextPageParam: (lastPage) => {
+            if (lastPage.page >= lastPage.totalPages) return undefined;
+            return lastPage.page + 1;
+        },
+        initialPageParam: 1,
+        enabled: !!datasetId && isLogin() && options?.enabled !== false,
+        ...options,
+    });
+    const members = result.data?.pages.flatMap((p) => p.items) ?? [];
+    return { ...result, members };
+}
+
 export function useDatasetsApplicationsQuery(
     datasetId: string,
     params?: ListApplicationsParams,
-    options?: PaginatedQueryOptionsUtil<DatasetApplication>,
-): UseQueryResult<PaginatedResponse<DatasetApplication>, unknown> {
+    options?: { enabled?: boolean },
+): UseQueryResult<DatasetApplicationsResponse, unknown> {
     const { isLogin } = useAuthStore((state) => state.authActions);
-    return useQuery<PaginatedResponse<DatasetApplication>>({
+    return useQuery<DatasetApplicationsResponse>({
         queryKey: ["datasets", datasetId, "applications", params],
         queryFn: () => listDatasetsApplications(datasetId, params),
         enabled: !!datasetId && isLogin() && options?.enabled !== false,
@@ -223,6 +277,23 @@ export function useRemoveDatasetsMember(
         onSuccess: () => {
             queryClient.invalidateQueries({
                 queryKey: ["datasets", datasetId, "members"],
+            });
+        },
+    });
+}
+
+export function useLeaveDatasets(
+    datasetId: string,
+): UseMutationResult<{ success: boolean }, unknown, void, unknown> {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: () => leaveDatasets(datasetId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["datasets", datasetId],
+            });
+            queryClient.invalidateQueries({
+                queryKey: ["datasets"],
             });
         },
     });

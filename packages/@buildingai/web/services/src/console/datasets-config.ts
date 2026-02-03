@@ -9,6 +9,7 @@ export type DatasetsConfigDto = {
     embeddingModelId: string;
     textModelId: string;
     defaultRetrievalConfig: RetrievalConfig;
+    squarePublishSkipReview: boolean;
 };
 
 export type UpdateDatasetsConfigDto = {
@@ -16,6 +17,7 @@ export type UpdateDatasetsConfigDto = {
     embeddingModelId?: string;
     textModelId?: string;
     defaultRetrievalConfig?: Partial<RetrievalConfig>;
+    squarePublishSkipReview?: boolean;
 };
 
 export function useDatasetsConfigQuery(options?: QueryOptionsUtil<DatasetsConfigDto>) {

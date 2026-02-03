@@ -77,12 +77,102 @@ export async function deleteDatasetsDocument(
     );
 }
 
+export type BatchDeleteDocumentsParams = {
+    documentIds: string[];
+};
+
+export type BatchDeleteDocumentsResult = {
+    deleted: number;
+};
+
+export async function batchDeleteDatasetsDocuments(
+    datasetId: string,
+    params: BatchDeleteDocumentsParams,
+): Promise<BatchDeleteDocumentsResult> {
+    return apiHttpClient.post<BatchDeleteDocumentsResult>(
+        `/ai-datasets/${datasetId}/documents/batch-delete`,
+        params,
+    );
+}
+
 export async function retryDocumentVectorization(
     datasetId: string,
     documentId: string,
 ): Promise<{ success: boolean }> {
     return apiHttpClient.post<{ success: boolean }>(
         `/ai-datasets/${datasetId}/documents/${documentId}/retry-vectorization`,
+    );
+}
+
+export type BatchAddTagsParams = {
+    documentIds: string[];
+    tags: string[];
+};
+
+export type BatchAddTagsResult = {
+    updated: number;
+};
+
+export async function batchAddTagsDatasetsDocuments(
+    datasetId: string,
+    params: BatchAddTagsParams,
+): Promise<BatchAddTagsResult> {
+    return apiHttpClient.post<BatchAddTagsResult>(
+        `/ai-datasets/${datasetId}/documents/batch-add-tags`,
+        params,
+    );
+}
+
+export type BatchMoveDocumentsParams = {
+    documentIds: string[];
+    targetDatasetId: string;
+};
+
+export type BatchMoveDocumentsResult = {
+    moved: number;
+};
+
+export async function batchMoveDatasetsDocuments(
+    datasetId: string,
+    params: BatchMoveDocumentsParams,
+): Promise<BatchMoveDocumentsResult> {
+    return apiHttpClient.post<BatchMoveDocumentsResult>(
+        `/ai-datasets/${datasetId}/documents/batch-move`,
+        params,
+    );
+}
+
+export type BatchCopyDocumentsParams = {
+    documentIds: string[];
+    targetDatasetId: string;
+};
+
+export type BatchCopyDocumentsResult = {
+    copied: number;
+};
+
+export async function batchCopyDatasetsDocuments(
+    datasetId: string,
+    params: BatchCopyDocumentsParams,
+): Promise<BatchCopyDocumentsResult> {
+    return apiHttpClient.post<BatchCopyDocumentsResult>(
+        `/ai-datasets/${datasetId}/documents/batch-copy`,
+        params,
+    );
+}
+
+export type UpdateDocumentTagsParams = {
+    tags: string[];
+};
+
+export async function updateDocumentTags(
+    datasetId: string,
+    documentId: string,
+    params: UpdateDocumentTagsParams,
+): Promise<DatasetsDocument> {
+    return apiHttpClient.patch<DatasetsDocument>(
+        `/ai-datasets/${datasetId}/documents/${documentId}/tags`,
+        params,
     );
 }
 
@@ -142,6 +232,21 @@ export function useDeleteDatasetsDocument(
     });
 }
 
+export function useBatchDeleteDatasetsDocuments(
+    datasetId: string,
+): UseMutationResult<BatchDeleteDocumentsResult, unknown, string[], unknown> {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (documentIds: string[]) =>
+            batchDeleteDatasetsDocuments(datasetId, { documentIds }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["datasets", datasetId, "documents"],
+            });
+        },
+    });
+}
+
 export function useRetryDocumentVectorization(
     datasetId: string,
 ): UseMutationResult<{ success: boolean }, unknown, string, unknown> {
@@ -149,6 +254,75 @@ export function useRetryDocumentVectorization(
     return useMutation({
         mutationFn: (documentId: string) => retryDocumentVectorization(datasetId, documentId),
         onSuccess: (_, documentId) => {
+            queryClient.invalidateQueries({
+                queryKey: ["datasets", datasetId, "documents"],
+            });
+            queryClient.invalidateQueries({
+                queryKey: ["datasets", datasetId, "document", documentId],
+            });
+        },
+    });
+}
+
+export function useBatchAddTagsDatasetsDocuments(
+    datasetId: string,
+): UseMutationResult<BatchAddTagsResult, unknown, BatchAddTagsParams, unknown> {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (params: BatchAddTagsParams) =>
+            batchAddTagsDatasetsDocuments(datasetId, params),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["datasets", datasetId, "documents"],
+            });
+        },
+    });
+}
+
+export function useBatchMoveDatasetsDocuments(
+    datasetId: string,
+): UseMutationResult<BatchMoveDocumentsResult, unknown, BatchMoveDocumentsParams, unknown> {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (params: BatchMoveDocumentsParams) =>
+            batchMoveDatasetsDocuments(datasetId, params),
+        onSuccess: (_, params) => {
+            queryClient.invalidateQueries({
+                queryKey: ["datasets", datasetId, "documents"],
+            });
+            queryClient.invalidateQueries({
+                queryKey: ["datasets", params.targetDatasetId, "documents"],
+            });
+        },
+    });
+}
+
+export function useBatchCopyDatasetsDocuments(
+    datasetId: string,
+): UseMutationResult<BatchCopyDocumentsResult, unknown, BatchCopyDocumentsParams, unknown> {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (params: BatchCopyDocumentsParams) =>
+            batchCopyDatasetsDocuments(datasetId, params),
+        onSuccess: (_, params) => {
+            queryClient.invalidateQueries({
+                queryKey: ["datasets", datasetId, "documents"],
+            });
+            queryClient.invalidateQueries({
+                queryKey: ["datasets", params.targetDatasetId, "documents"],
+            });
+        },
+    });
+}
+
+export function useUpdateDocumentTags(
+    datasetId: string,
+): UseMutationResult<DatasetsDocument, unknown, { documentId: string; tags: string[] }, unknown> {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ documentId, tags }: { documentId: string; tags: string[] }) =>
+            updateDocumentTags(datasetId, documentId, { tags }),
+        onSuccess: (_, { documentId }) => {
             queryClient.invalidateQueries({
                 queryKey: ["datasets", datasetId, "documents"],
             });
