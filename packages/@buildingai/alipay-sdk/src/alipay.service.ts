@@ -84,46 +84,42 @@ export class AlipayService {
     }
 
     async createWebPay(params: AlipayWebPayParams) {
-        try {
-            const bizContent: any = {
-                out_trade_no: params.outTradeNo,
-                total_amount: params.totalAmount,
-                subject: params.subject,
-                product_code: "FAST_INSTANT_TRADE_PAY",
-            };
+        const bizContent: any = {
+            out_trade_no: params.outTradeNo,
+            total_amount: params.totalAmount,
+            subject: params.subject,
+            product_code: "FAST_INSTANT_TRADE_PAY",
+        };
 
-            if (params.body) {
-                bizContent.body = params.body;
-            }
-
-            if (params.timeoutExpress) {
-                bizContent.timeout_express = params.timeoutExpress;
-            }
-
-            // Pass-through parameters (used by callbacks to identify the business type)
-            if (params.passbackParams) {
-                bizContent.passback_params = params.passbackParams;
-            } else if (params.body && params.body.includes("from:")) {
-                // Try to get from the body
-                const fromMatch = params.body.match(/from:(\w+)/);
-                if (fromMatch) {
-                    bizContent.passback_params = fromMatch[1];
-                }
-            }
-
-            const result = this.alipaySdk.pageExecute("alipay.trade.page.pay", {
-                bizContent,
-                method: "POST",
-                // returnUrl: params.returnUrl,
-                notifyUrl: params.notifyUrl,
-            });
-
-            this.logger.log(`Create Alipay order successfully: ${params.outTradeNo}`);
-
-            return result;
-        } catch (error) {
-            throw error;
+        if (params.body) {
+            bizContent.body = params.body;
         }
+
+        if (params.timeoutExpress) {
+            bizContent.timeout_express = params.timeoutExpress;
+        }
+
+        // Pass-through parameters (used by callbacks to identify the business type)
+        if (params.passbackParams) {
+            bizContent.passback_params = params.passbackParams;
+        } else if (params.body && params.body.includes("from:")) {
+            // Try to get from the body
+            const fromMatch = params.body.match(/from:(\w+)/);
+            if (fromMatch) {
+                bizContent.passback_params = fromMatch[1];
+            }
+        }
+
+        const result = this.alipaySdk.pageExecute("alipay.trade.page.pay", {
+            bizContent,
+            method: "POST",
+            // returnUrl: params.returnUrl,
+            notifyUrl: params.notifyUrl,
+        });
+
+        this.logger.log(`Create Alipay order successfully: ${params.outTradeNo}`);
+
+        return result;
     }
 
     async wapPay() {}
