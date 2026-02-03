@@ -7,12 +7,14 @@ import { consoleHttpClient } from "../base";
 export type DatasetsConfigDto = {
     initialStorageMb: number;
     embeddingModelId: string;
+    textModelId: string;
     defaultRetrievalConfig: RetrievalConfig;
 };
 
 export type UpdateDatasetsConfigDto = {
     initialStorageMb?: number;
     embeddingModelId?: string;
+    textModelId?: string;
     defaultRetrievalConfig?: Partial<RetrievalConfig>;
 };
 
