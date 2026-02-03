@@ -13,6 +13,7 @@ import { pathExists, readFile } from "fs-extra";
 
 import type { CreateDocumentDto, ListDocumentsDto } from "../dto/document.dto";
 import { DatasetsSegmentService } from "./datasets-segment.service";
+import { DocumentSummaryService } from "./document-summary.service";
 import { SegmentationService } from "./segmentation.service";
 import { VectorizationTriggerService } from "./vectorization-trigger.service";
 
@@ -29,6 +30,7 @@ export class DatasetsDocumentService extends BaseService<DatasetsDocument> {
         private readonly segmentationService: SegmentationService,
         private readonly segmentService: DatasetsSegmentService,
         private readonly vectorizationTrigger: VectorizationTriggerService,
+        private readonly documentSummaryService: DocumentSummaryService,
     ) {
         super(documentRepository);
     }
@@ -190,6 +192,12 @@ export class DatasetsDocumentService extends BaseService<DatasetsDocument> {
 
         await this.vectorizationTrigger.triggerDocument(datasetId, documentId);
         this.logger.log(`Document created and vectorization triggered: ${documentId}`);
+
+        this.documentSummaryService
+            .generateAndSave(documentId, rawText)
+            .catch((err) =>
+                this.logger.warn(`Document summary skipped: ${documentId} - ${err?.message}`),
+            );
 
         const doc = await this.documentRepository.findOne({
             where: { id: documentId },
