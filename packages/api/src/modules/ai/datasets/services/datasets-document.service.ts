@@ -3,7 +3,7 @@ import { PROCESSING_STATUS } from "@buildingai/constants/shared/datasets.constan
 import { type UserPlayground } from "@buildingai/db";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
 import { Datasets, DatasetsDocument, DatasetsSegments } from "@buildingai/db/entities";
-import { In, Repository } from "@buildingai/db/typeorm";
+import { ILike, In, Raw, Repository } from "@buildingai/db/typeorm";
 import { PaginationDto } from "@buildingai/dto/pagination.dto";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { llmFileParser } from "@buildingai/llm-file-parser";
@@ -235,11 +235,35 @@ export class DatasetsDocumentService extends BaseService<DatasetsDocument> {
             .execute();
     }
 
+    private static readonly LIST_ORDER: Record<string, Record<string, "ASC" | "DESC">> = {
+        name: { fileName: "ASC" },
+        size: { fileSize: "ASC" },
+        uploadTime: { createdAt: "DESC" },
+    };
+
     async listByDataset(datasetId: string, paginationDto: ListDocumentsDto | PaginationDto) {
-        return this.paginate(paginationDto, {
-            where: { datasetId },
-            order: { createdAt: "DESC" },
-        });
+        const listDto = paginationDto as ListDocumentsDto;
+        const keyword = listDto?.keyword?.trim();
+        const sortBy = listDto?.sortBy ?? "uploadTime";
+
+        const where = keyword
+            ? ([
+                  { datasetId, fileName: ILike(`%${keyword}%`) },
+                  { datasetId, summary: ILike(`%${keyword}%`) },
+                  {
+                      datasetId,
+                      tags: Raw((alias) => `array_to_string(${alias}, ' ') ILIKE :kw`, {
+                          kw: `%${keyword}%`,
+                      }),
+                  },
+              ] as any)
+            : { datasetId };
+
+        const order =
+            DatasetsDocumentService.LIST_ORDER[sortBy] ??
+            DatasetsDocumentService.LIST_ORDER.uploadTime;
+
+        return this.paginate(paginationDto, { where, order });
     }
 
     async getOne(datasetId: string, documentId: string): Promise<DatasetsDocument | null> {

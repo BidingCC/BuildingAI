@@ -14,9 +14,13 @@ export type CreateDocumentParams = {
     url?: string;
 };
 
+export type DocumentSortBy = "name" | "size" | "uploadTime";
+
 export type ListDocumentsParams = {
     page?: number;
     pageSize?: number;
+    sortBy?: DocumentSortBy;
+    keyword?: string;
 };
 
 export type DatasetsDocument = {
@@ -53,11 +57,21 @@ export async function listDatasetsDocuments(
     datasetId: string,
     params?: ListDocumentsParams,
 ): Promise<PaginatedResponse<DatasetsDocument>> {
-    const page = params?.page ?? 1;
-    const pageSize = params?.pageSize ?? 20;
+    const { page, pageSize, sortBy, keyword } = {
+        page: 1,
+        pageSize: 20,
+        sortBy: "uploadTime" as DocumentSortBy,
+        ...params,
+    };
+    const queryParams = {
+        page,
+        pageSize,
+        sortBy,
+        ...(keyword?.trim() && { keyword: keyword.trim() }),
+    };
     return apiHttpClient.get<PaginatedResponse<DatasetsDocument>>(
         `/ai-datasets/${datasetId}/documents`,
-        { params: { page, pageSize } },
+        { params: queryParams },
     );
 }
 

@@ -2,6 +2,7 @@ import { Type } from "class-transformer";
 import {
     ArrayMinSize,
     IsArray,
+    IsIn,
     IsInt,
     IsNotEmpty,
     IsOptional,
@@ -11,6 +12,9 @@ import {
     Min,
     ValidateIf,
 } from "class-validator";
+
+export const DOCUMENT_SORT_BY_VALUES = ["name", "size", "uploadTime"] as const;
+export type DocumentSortBy = (typeof DOCUMENT_SORT_BY_VALUES)[number];
 
 export class CreateDocumentDto {
     @ValidateIf((o) => !o.url?.trim())
@@ -39,6 +43,15 @@ export class ListDocumentsDto {
     @Min(1)
     @Max(100)
     pageSize?: number = 20;
+
+    @IsOptional()
+    @IsString()
+    @IsIn(DOCUMENT_SORT_BY_VALUES)
+    sortBy?: DocumentSortBy = "uploadTime";
+
+    @IsOptional()
+    @IsString()
+    keyword?: string;
 }
 
 export class BatchDeleteDocumentsDto {

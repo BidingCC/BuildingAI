@@ -5,7 +5,7 @@ import {
   useDatasetsDocumentsQuery,
 } from "@buildingai/services/web";
 import type { PaginatedResponse } from "@buildingai/web-types";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { convertProvidersToModels } from "@/components/ask-assistant-ui";
@@ -15,6 +15,7 @@ import { SidebarContent } from "./_components/sidebar";
 import { ContentLayout, PageLayout } from "./_layouts";
 import { DEFAULT_PAGE_SIZE } from "./constants";
 import { useDatasetDocumentUpload } from "./hooks";
+import type { DocumentSortBy } from "./types";
 
 function documentNeedsPolling(d: DatasetsDocument): boolean {
   return d.status === "pending" || d.status === "processing" || Boolean(d.summaryGenerating);
@@ -26,17 +27,24 @@ function getDocumentItems(data: unknown): DatasetsDocument[] {
 
 export default function DatasetDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const [sortBy, setSortBy] = useState<DocumentSortBy>("uploadTime");
+  const [keyword, setKeyword] = useState("");
 
   const { data: providers = [] } = useAiProvidersQuery({ supportedModelTypes: "llm" });
   const { data: dataset } = useDatasetDetail(id);
-  const { data: documentsPage } = useDatasetsDocumentsQuery(
-    id ?? "",
-    { page: 1, pageSize: DEFAULT_PAGE_SIZE },
-    {
-      refetchInterval: (query) =>
-        getDocumentItems(query.state.data).some(documentNeedsPolling) ? 2000 : false,
-    },
+  const listParams = useMemo(
+    () => ({
+      page: 1,
+      pageSize: DEFAULT_PAGE_SIZE,
+      sortBy,
+      keyword: keyword.trim() || undefined,
+    }),
+    [sortBy, keyword],
   );
+  const { data: documentsPage } = useDatasetsDocumentsQuery(id ?? "", listParams, {
+    refetchInterval: (query) =>
+      getDocumentItems(query.state.data).some(documentNeedsPolling) ? 2000 : false,
+  });
 
   const { uploadDocuments } = useDatasetDocumentUpload(id);
 
@@ -55,6 +63,10 @@ export default function DatasetDetailPage() {
         <SidebarContent
           dataset={dataset}
           documents={documents}
+          sortBy={sortBy}
+          onSortChange={setSortBy}
+          searchKeyword={keyword}
+          onSearchChange={setKeyword}
           onUpload={handleUpload}
           onDocumentClick={handleDocumentClick}
         />

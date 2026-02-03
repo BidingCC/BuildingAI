@@ -74,7 +74,6 @@ export function DocumentList({
 
   return (
     <div className="space-y-4">
-      {/* 搜索结果头部 */}
       {searchExpanded && (
         <div className="flex h-10 items-center justify-between">
           <span className="text-muted-foreground text-sm">搜索到 {searchResultCount} 个内容</span>
@@ -91,10 +90,8 @@ export function DocumentList({
         </div>
       )}
 
-      {/* 上传入口 */}
       {uploadSlot !== undefined && <div>{uploadSlot ?? null}</div>}
 
-      {/* 文档列表 */}
       <div className="space-y-3">
         {documents.map((doc) => (
           <DocumentCard

@@ -23,6 +23,10 @@ import { UploadTrigger } from "../upload";
 export interface SidebarContentProps {
   dataset: Dataset | undefined;
   documents: DatasetsDocument[];
+  sortBy?: DocumentSortBy;
+  onSortChange?: (value: DocumentSortBy) => void;
+  searchKeyword?: string;
+  onSearchChange?: (value: string) => void;
   onUpload?: (files: File[]) => void;
   onDocumentClick?: (document: DatasetsDocument) => void;
 }
@@ -30,6 +34,10 @@ export interface SidebarContentProps {
 export function SidebarContent({
   dataset,
   documents,
+  sortBy = "uploadTime",
+  onSortChange,
+  searchKeyword = "",
+  onSearchChange,
   onUpload,
   onDocumentClick,
 }: SidebarContentProps) {
@@ -42,7 +50,6 @@ export function SidebarContent({
   const [moveDocumentIds, setMoveDocumentIds] = useState<string[]>([]);
   const [copyDialogOpen, setCopyDialogOpen] = useState(false);
   const [copyDocumentIds, setCopyDocumentIds] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<DocumentSortBy>("name");
   const [searchExpanded, setSearchExpanded] = useState(false);
 
   const canManageDocuments = dataset?.canManageDocuments ?? false;
@@ -152,7 +159,10 @@ export function SidebarContent({
           contentCount={dataset?.documentCount ?? documents.length}
           totalSize={dataset != null ? bytesToReadable(Number(dataset.storageSize)) : "0 B"}
           sortBy={sortBy}
-          onSortChange={setSortBy}
+          onSortChange={onSortChange}
+          searchValue={searchKeyword}
+          onSearchChange={onSearchChange}
+          onSearchSubmit={onSearchChange}
           searchExpanded={searchExpanded}
           onSearchExpandedChange={setSearchExpanded}
           rightSlot={
