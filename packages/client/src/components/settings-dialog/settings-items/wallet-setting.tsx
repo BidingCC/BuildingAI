@@ -76,13 +76,22 @@ const WalletSetting = () => {
                     {rule.label}
                   </Badge>
                 )}
-                <span className="font-semibold tabular-nums">{rule.power.toLocaleString()}</span>
+                <span className="font-semibold tabular-nums">
+                  {rule.power.toLocaleString()}
+
+                  {rule.givePower > 0 && (
+                    <span className="text-primary text-xs">
+                      <span className="text-muted-foreground text-xs font-normal">+</span>
+                      {rule.givePower.toLocaleString()}
+                    </span>
+                  )}
+                </span>
                 {rule.givePower > 0 ? (
-                  <span className="text-muted-foreground text-sm">
-                    包括 {rule.power} + {rule.givePower} 赠送
+                  <span className="text-muted-foreground text-xs">
+                    赠送 <span className="text-primary">{rule.givePower}</span> 积分
                   </span>
                 ) : (
-                  <span className="text-muted-foreground text-sm">包括 {rule.power} 积分</span>
+                  <span className="text-muted-foreground text-xs">无赠送积分</span>
                 )}
                 <span className="mt-2 text-right font-bold">{formatPrice(rule.sellPrice)}</span>
               </button>
