@@ -211,9 +211,7 @@ function PaymentDialog({
                     <Separator className="border-border border-t border-dashed bg-transparent data-[orientation=horizontal]:h-0" />
                     <div className="flex items-center justify-between pt-1">
                       <span className="text-muted-foreground">实付金额</span>
-                      <span className="text-primary text-lg font-semibold tabular-nums">
-                        {planPrice}
-                      </span>
+                      <span className="text-lg font-semibold tabular-nums">{planPrice}</span>
                     </div>
                   </div>
                 </CardContent>

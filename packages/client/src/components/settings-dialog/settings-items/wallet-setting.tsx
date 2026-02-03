@@ -1,9 +1,34 @@
+"use client";
+
+import { type RechargeRuleItem, useRechargeCenterQuery } from "@buildingai/services/web";
 import { useAuthStore } from "@buildingai/stores";
+import { Badge } from "@buildingai/ui/components/ui/badge";
 import { Button } from "@buildingai/ui/components/ui/button";
 import { ChevronRight, CircleDollarSign, Info } from "lucide-react";
+import { useState } from "react";
+
+import { RechargeDetailDialog } from "./recharge-detail-dialog";
+
+function formatPrice(amount: number) {
+  return `¥${Number(amount).toFixed(2)}`;
+}
 
 const WalletSetting = () => {
   const { userInfo } = useAuthStore((state) => state.auth);
+  const { data: center, isLoading } = useRechargeCenterQuery();
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [selectedRule, setSelectedRule] = useState<RechargeRuleItem | null>(null);
+
+  const rechargeRule = center?.rechargeRule ?? [];
+  const payWayList = center?.payWayList ?? [];
+  const rechargeExplain = center?.rechargeExplain ?? "";
+  const rechargeStatus = center?.rechargeStatus ?? false;
+
+  const handleCardClick = (rule: RechargeRuleItem) => {
+    if (!rechargeStatus) return;
+    setSelectedRule(rule);
+    setDetailOpen(true);
+  };
 
   return (
     <div>
@@ -30,17 +55,49 @@ const WalletSetting = () => {
 
       <div className="mt-4 space-y-4">
         <h1 className="text-sm font-bold">积分购买</h1>
-        <div className="grid grid-cols-3 gap-4">
-          {Array.from({ length: 4 }).map((_, index) => {
-            return (
-              <div className="bg-card flex flex-col rounded-lg border p-4">
-                <span>1082{index + 1}</span>
-                <span className="text-muted-foreground text-sm">套餐{index + 1}这样那样的</span>
-              </div>
-            );
-          })}
-        </div>
+        {isLoading && <div className="text-muted-foreground py-6 text-center text-sm">加载中…</div>}
+        {!rechargeStatus && !isLoading && (
+          <div className="text-muted-foreground py-6 text-center text-sm">积分充值暂未开放</div>
+        )}
+        {rechargeStatus && !isLoading && (
+          <div className="grid grid-cols-3 gap-4">
+            {rechargeRule.map((rule) => (
+              <button
+                key={rule.id}
+                type="button"
+                className="bg-card hover:border-primary/50 hover:bg-muted/30 relative flex flex-col overflow-visible rounded-lg border p-4 text-left transition-colors"
+                onClick={() => handleCardClick(rule)}
+              >
+                {rule.label && (
+                  <Badge
+                    className="absolute -top-2.5 right-2.5 border-0 px-2 py-0.5 text-[10px] font-medium shadow-lg"
+                    variant="default"
+                  >
+                    {rule.label}
+                  </Badge>
+                )}
+                <span className="font-semibold tabular-nums">{rule.power.toLocaleString()}</span>
+                {rule.givePower > 0 ? (
+                  <span className="text-muted-foreground text-sm">
+                    包括 {rule.power} + {rule.givePower} 赠送
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground text-sm">包括 {rule.power} 积分</span>
+                )}
+                <span className="mt-2 text-right font-bold">{formatPrice(rule.sellPrice)}</span>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
+
+      <RechargeDetailDialog
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        rule={selectedRule}
+        payWayList={payWayList}
+        rechargeExplain={rechargeExplain}
+      />
     </div>
   );
 };
