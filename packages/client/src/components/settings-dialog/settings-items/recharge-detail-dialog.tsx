@@ -105,7 +105,7 @@ export function RechargeDetailDialog({
           ) : !showQr ? (
             <>
               <Card className="border-border">
-                <CardContent className="p-4">
+                <CardContent className="px-4">
                   <div className="space-y-3 text-sm">
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">充值数量</span>

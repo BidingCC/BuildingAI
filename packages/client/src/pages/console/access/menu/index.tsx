@@ -9,16 +9,6 @@ import {
   useMenuTreeQuery,
   useUpdateMenuMutation,
 } from "@buildingai/services/console";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@buildingai/ui/components/ui/alert-dialog";
 import { Badge } from "@buildingai/ui/components/ui/badge";
 import { Button } from "@buildingai/ui/components/ui/button";
 import {
@@ -44,6 +34,7 @@ import {
   SelectValue,
 } from "@buildingai/ui/components/ui/select";
 import { Switch } from "@buildingai/ui/components/ui/switch";
+import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ChevronRightIcon,
@@ -458,7 +449,7 @@ const MenuTreeItem = ({ menu, level = 0, onEdit, onDelete }: MenuTreeItemProps) 
 
   const content = (
     <div className="hover:bg-muted/50 group/menu-item flex h-9 items-center gap-2 rounded-md px-2 py-1.5 text-sm">
-      {!hasChildren && <div className="w-4" />}
+      {!hasChildren && <div className="w-6" />}
       <Icon className="text-muted-foreground size-4" />
       <span className="flex-1 truncate">{menu.name}</span>
       {menu.code && (
@@ -490,12 +481,16 @@ const MenuTreeItem = ({ menu, level = 0, onEdit, onDelete }: MenuTreeItemProps) 
   }
 
   return (
-    <Collapsible className="group/collapsible">
+    <Collapsible>
       <div style={{ paddingLeft: level * 24 }}>
         <div className="group/menu-item hover:bg-muted/50 flex h-9 w-full items-center gap-2 rounded-md px-2">
           <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="icon-sm" className="size-6 shrink-0">
-              <ChevronRightIcon className="size-4 transition-transform group-data-[state=open]/collapsible:rotate-90" />
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="size-6 shrink-0 data-[state=open]:rotate-90"
+            >
+              <ChevronRightIcon className="size-4 transition-transform" />
             </Button>
           </CollapsibleTrigger>
           <Icon className="text-muted-foreground size-4 shrink-0" />
@@ -557,8 +552,7 @@ const AccessMenuIndexPage = () => {
 
   const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [editingMenu, setEditingMenu] = useState<Menu | undefined>();
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [deletingMenu, setDeletingMenu] = useState<Menu | undefined>();
+  const { confirm } = useAlertDialog();
 
   const { data: menuTree, isLoading, refetch } = useMenuTreeQuery(sourceType);
   const deleteMutation = useDeleteMenuMutation();
@@ -599,27 +593,29 @@ const AccessMenuIndexPage = () => {
     setFormDialogOpen(true);
   }, []);
 
-  const handleDelete = useCallback((menu: Menu) => {
-    setDeletingMenu(menu);
-    setDeleteDialogOpen(true);
-  }, []);
+  const handleDelete = useCallback(
+    async (menu: Menu) => {
+      try {
+        await confirm({
+          title: "确认删除",
+          description: `确定要删除菜单「${menu.name}」吗？此操作不可撤销。`,
+          confirmText: "删除",
+          confirmVariant: "destructive",
+        });
 
-  const handleConfirmDelete = useCallback(async () => {
-    if (!deletingMenu) return;
-
-    try {
-      const result = await deleteMutation.mutateAsync(deletingMenu.id);
-      if (result.success) {
-        toast.success("删除成功");
-        setDeleteDialogOpen(false);
-        setDeletingMenu(undefined);
-      } else {
-        toast.error(result.message || "删除失败");
+        const result = await deleteMutation.mutateAsync(menu.id);
+        if (result.success) {
+          toast.success("删除成功");
+          refetch();
+        } else {
+          toast.error(result.message || "删除失败");
+        }
+      } catch {
+        // User cancelled or error occurred
       }
-    } catch {
-      toast.error("删除失败");
-    }
-  }, [deletingMenu, deleteMutation]);
+    },
+    [confirm, deleteMutation, refetch],
+  );
 
   return (
     <PageContainer>
@@ -672,28 +668,6 @@ const AccessMenuIndexPage = () => {
         menuTree={menuTree}
         onSuccess={() => refetch()}
       />
-
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>确认删除</AlertDialogTitle>
-            <AlertDialogDescription>
-              确定要删除菜单「{deletingMenu?.name}」吗？此操作不可撤销。
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>取消</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmDelete}
-              disabled={deleteMutation.isPending}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {deleteMutation.isPending && <Loader2Icon className="animate-spin" />}
-              删除
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </PageContainer>
   );
 };

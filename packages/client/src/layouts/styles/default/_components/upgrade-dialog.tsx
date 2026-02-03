@@ -374,16 +374,14 @@ export function UpgradeDialog() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <span
-          role="button"
-          tabIndex={0}
-          className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring inline-flex cursor-pointer items-center justify-center rounded-full px-3 py-2 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-          onClick={(event: React.MouseEvent<HTMLSpanElement>) => {
-            event.stopPropagation();
-          }}
+        <Button
+          className="bg-primary/10 text-primary hover:bg-primary/15 rounded-full text-xs"
+          size="sm"
+          variant="secondary"
+          onClick={(e) => e.stopPropagation()}
         >
           升级
-        </span>
+        </Button>
       </DialogTrigger>
       <DialogContent
         className="m-0 flex h-screen max-h-screen w-screen max-w-full! flex-col rounded-none p-0"

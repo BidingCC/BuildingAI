@@ -31,7 +31,6 @@ import {
   Moon,
   Palette,
   Settings,
-  Sparkles,
   Sun,
   User,
   Zap,
@@ -151,13 +150,6 @@ export function DefaultNavUser() {
                 <UpgradeDialog />
               </SidebarMenuButton>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuSub>
