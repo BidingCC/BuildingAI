@@ -20,28 +20,8 @@ import {
 } from "lucide-react";
 import { memo, useCallback, useMemo, useState } from "react";
 
-import { bytesToReadable, formatFileType } from "@/utils/format";
-
-// ============================================================================
-// 文件图标（基于 MIME 类型）
-// ============================================================================
-
-function getFileIcon(fileType: string) {
-  const m = fileType?.toLowerCase() ?? "";
-  if (m.includes("word") || m.includes("doc")) {
-    return <FileText className="size-4 text-blue-600" />;
-  }
-  if (m.includes("pdf")) {
-    return <FileText className="size-4 text-red-600" />;
-  }
-  if (m.includes("excel") || m.includes("spreadsheet") || m.includes("csv")) {
-    return <FileText className="size-4 text-green-600" />;
-  }
-  if (m.includes("powerpoint") || m.includes("presentation")) {
-    return <FileText className="size-4 text-orange-600" />;
-  }
-  return <FileText className="size-4 text-gray-500" />;
-}
+import { FileFormatIcon } from "@/components/file-fomat-icons";
+import { bytesToReadable, formatFileType, getFileFormatKey } from "@/utils/format";
 
 // ============================================================================
 // DocumentCard
@@ -69,7 +49,25 @@ export const DocumentCard = memo(function DocumentCard({
   onCopy,
 }: DocumentCardProps) {
   const [moreOpen, setMoreOpen] = useState(false);
-  const fileIcon = useMemo(() => getFileIcon(document.fileType), [document.fileType]);
+  const formatKey = useMemo(() => getFileFormatKey(document.fileType), [document.fileType]);
+  const fileIconMain = useMemo(
+    () =>
+      formatKey ? (
+        <FileFormatIcon format={formatKey} className="size-20" />
+      ) : (
+        <FileText className="text-muted-foreground size-20" />
+      ),
+    [formatKey],
+  );
+  const fileIconFooter = useMemo(
+    () =>
+      formatKey ? (
+        <FileFormatIcon format={formatKey} className="size-4" />
+      ) : (
+        <FileText className="text-muted-foreground size-4" />
+      ),
+    [formatKey],
+  );
   const fileSizeStr = useMemo(() => bytesToReadable(document.fileSize), [document.fileSize]);
   const fileTypeLabel = useMemo(() => formatFileType(document.fileType), [document.fileType]);
 
@@ -165,16 +163,14 @@ export const DocumentCard = memo(function DocumentCard({
               )}
             </div>
             <div className="shrink-0">
-              <div className="bg-muted flex size-16 h-full w-full items-center justify-center rounded-lg">
-                {fileIcon}
-              </div>
+              <div className="flex h-full w-full items-center justify-center">{fileIconMain}</div>
             </div>
           </div>
 
           {/* 底部信息 */}
           <div className="flex items-center justify-between gap-2">
             <div className="flex min-w-0 flex-1 items-center gap-2">
-              {fileIcon}
+              {fileIconFooter}
               <span className="text-muted-foreground truncate text-xs">
                 {fileTypeLabel} {fileSizeStr}
               </span>

@@ -32,7 +32,7 @@ export function SidebarContent({
   const isOwner = dataset?.isOwner ?? false;
 
   // 使用 hooks 管理状态
-  const { selectedIds, clearSelection } = useDocumentSelection();
+  const { selectedIds, clearSelection, selectAll } = useDocumentSelection();
   const { zoneRef, isOver, showDropZone, handlers } = useDocumentDrop({
     enabled: isOwner,
     onDrop: onUpload,
@@ -79,6 +79,8 @@ export function SidebarContent({
               <div className="space-y-4 px-4 pb-4">
                 <DocumentList
                   documents={documents}
+                  selectedIds={selectedIds}
+                  onSelectedIdsChange={selectAll}
                   uploadSlot={
                     searchExpanded ? null : isOwner ? (
                       <UploadTrigger variant="area" onClick={() => setUploadDialogOpen(true)} />

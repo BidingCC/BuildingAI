@@ -8,4 +8,6 @@ export * from "./datasets-document";
 export * from "./datasets-member";
 export * from "./mcp";
 export * from "./membership";
+export * from "./recharge";
+export * from "./user";
 export * from "./user";

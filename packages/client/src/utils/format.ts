@@ -1,69 +1,140 @@
-const BYTE_UNITS = ["B", "KB", "MB", "GB"] as const;
-
-// ============================================================================
-// MIME 类型 → 用户可读格式映射
-// ============================================================================
+const BYTE_UNITS = ["B", "K", "M", "G"] as const;
 
 const MIME_TO_LABEL: Record<string, string> = {
-  // Office Word
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "Word 文档 (.docx)",
-  "application/msword": "Word 文档 (.doc)",
-  // Office Excel
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "Excel 表格 (.xlsx)",
-  "application/vnd.ms-excel": "Excel 表格 (.xls)",
-  "text/csv": "CSV 表格 (.csv)",
-  // Office PowerPoint
-  "application/vnd.openxmlformats-officedocument.presentationml.presentation":
-    "PowerPoint 演示 (.pptx)",
-  "application/vnd.ms-powerpoint": "PowerPoint 演示 (.ppt)",
-  // PDF
-  "application/pdf": "PDF 文档 (.pdf)",
-  // 文本
-  "text/plain": "纯文本 (.txt)",
-  "text/markdown": "Markdown (.md)",
-  "text/rtf": "富文本 (.rtf)",
-  "application/rtf": "富文本 (.rtf)",
-  // 网页
-  "text/html": "HTML 网页 (.html)",
-  "application/xhtml+xml": "XHTML (.xhtml)",
-  // 数据
-  "application/json": "JSON (.json)",
-  "application/xml": "XML (.xml)",
-  "text/xml": "XML (.xml)",
-  "text/json": "JSON (.json)",
-  // 二进制
-  "application/octet-stream": "未知格式",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "Word 格式",
+  "application/msword": "Word 格式",
+
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "Excel 格式",
+  "application/vnd.ms-excel": "Excel 格式",
+  "text/csv": "CSV 格式",
+
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation": "PPT 格式",
+  "application/vnd.ms-powerpoint": "PPT 格式",
+
+  "application/pdf": "PDF 格式",
+
+  "text/plain": "TXT 格式",
+  "text/markdown": "Markdown 格式",
+  "text/md": "Markdown 格式",
+  "text/rtf": "RTF 格式",
+  "application/rtf": "RTF 格式",
+
+  "text/html": "HTML 格式",
+  "application/xhtml+xml": "HTML 格式",
+
+  "application/json": "JSON 格式",
+  "text/json": "JSON 格式",
+  "application/xml": "XML 格式",
+  "text/xml": "XML 格式",
+
+  "image/jpeg": "JPEG 图片",
+  "image/png": "PNG 图片",
+  "image/gif": "GIF 图片",
+  "image/webp": "WebP 图片",
+  "image/svg+xml": "SVG 图片",
+
+  "audio/mpeg": "MP3 音频",
+  "audio/wav": "WAV 音频",
+  "audio/ogg": "OGG 音频",
+
+  "video/mp4": "MP4 视频",
+  "video/webm": "WebM 视频",
+  "video/ogg": "OGG 视频",
+
+  "application/zip": "ZIP 压缩包",
+  "application/x-zip-compressed": "ZIP 压缩包",
+  "application/x-rar-compressed": "RAR 压缩包",
+  "application/x-7z-compressed": "7Z 压缩包",
+
+  "application/octet-stream": "二进制文件",
 };
 
-/**
- * 将 MIME 类型转换为用户可读的文件格式标签
- * @param mimeType MIME 类型，如 application/vnd.openxmlformats-officedocument.wordprocessingml.document
- * @returns 用户可读的格式，如 "Word 文档 (.docx)"，未知类型时尝试从 MIME 推导
- */
-export function formatFileType(mimeType: string): string {
-  const normalized = mimeType?.toLowerCase().trim();
-  if (!normalized) return "未知格式";
+const FALLBACK_RULES: Array<[RegExp, string]> = [
+  [/wordprocessingml|msword/, "Word 格式"],
+  [/spreadsheetml|ms-excel/, "Excel 格式"],
+  [/presentationml|ms-powerpoint/, "PPT 格式"],
+  [/pdf/, "PDF 格式"],
+  [/markdown|md$/, "Markdown 格式"],
+  [/plain|txt$/, "TXT 格式"],
+  [/csv/, "CSV 格式"],
+  [/json/, "JSON 格式"],
+  [/xml/, "XML 格式"],
+  [/html|xhtml/, "HTML 格式"],
+  [/rtf/, "RTF 格式"],
+  [/^image\//, "图片文件"],
+  [/^audio\//, "音频文件"],
+  [/^video\//, "视频文件"],
+];
+
+export function formatFileType(mimeType?: string): string {
+  if (!mimeType) return "未知格式";
+
+  const normalized = mimeType.toLowerCase().trim();
 
   const exact = MIME_TO_LABEL[normalized];
   if (exact) return exact;
 
-  // 模糊匹配：按 MIME 片段推导
-  if (normalized.includes("wordprocessingml") || normalized.includes("msword"))
-    return "Word 文档 (.docx/.doc)";
-  if (normalized.includes("spreadsheetml") || normalized.includes("ms-excel"))
-    return "Excel 表格 (.xlsx/.xls)";
-  if (normalized.includes("presentationml") || normalized.includes("ms-powerpoint"))
-    return "PowerPoint 演示 (.pptx/.ppt)";
-  if (normalized.includes("pdf")) return "PDF 文档 (.pdf)";
-  if (normalized.includes("markdown") || normalized === "text/md") return "Markdown (.md)";
-  if (normalized.includes("plain") || normalized === "text/txt") return "纯文本 (.txt)";
-  if (normalized.includes("csv")) return "CSV 表格 (.csv)";
-  if (normalized.includes("json")) return "JSON (.json)";
-  if (normalized.includes("xml")) return "XML (.xml)";
-  if (normalized.includes("html")) return "HTML (.html)";
-  if (normalized.includes("rtf")) return "富文本 (.rtf)";
+  for (const [rule, label] of FALLBACK_RULES) {
+    if (rule.test(normalized)) return label;
+  }
 
-  return normalized;
+  return "未知格式";
+}
+
+/** file-fomat-icons 中使用的格式 key：docx, html, csv, pdf, txt, ppt, pptx, xls, xlsx, json, md, rtf, xml */
+const MIME_TO_FORMAT_KEY: Record<string, string> = {
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
+  "application/msword": "docx",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "xlsx",
+  "application/vnd.ms-excel": "xls",
+  "text/csv": "csv",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation": "pptx",
+  "application/vnd.ms-powerpoint": "ppt",
+  "application/pdf": "pdf",
+  "text/plain": "txt",
+  "text/markdown": "md",
+  "text/md": "md",
+  "text/rtf": "rtf",
+  "application/rtf": "rtf",
+  "text/html": "html",
+  "application/xhtml+xml": "html",
+  "application/json": "json",
+  "text/json": "json",
+  "application/xml": "xml",
+  "text/xml": "xml",
+};
+
+const FORMAT_KEY_FALLBACK: Array<[RegExp, string]> = [
+  [/wordprocessingml|msword/, "docx"],
+  [/spreadsheetml/, "xlsx"],
+  [/ms-excel/, "xls"],
+  [/presentationml/, "pptx"],
+  [/ms-powerpoint/, "ppt"],
+  [/pdf/, "pdf"],
+  [/markdown|^text\/md/, "md"],
+  [/^text\/plain|txt$/, "txt"],
+  [/csv/, "csv"],
+  [/json/, "json"],
+  [/xml/, "xml"],
+  [/html|xhtml/, "html"],
+  [/rtf/, "rtf"],
+];
+
+/**
+ * 将 MIME 类型转换为 fileFormatIconsMap 的 key，用于 FileFormatIcon
+ */
+export function getFileFormatKey(mimeType?: string): string {
+  if (!mimeType) return "";
+
+  const normalized = mimeType.toLowerCase().trim();
+  const exact = MIME_TO_FORMAT_KEY[normalized];
+  if (exact) return exact;
+
+  for (const [rule, key] of FORMAT_KEY_FALLBACK) {
+    if (rule.test(normalized)) return key;
+  }
+
+  return "";
 }
 
 export function bytesToReadable(bytes: number): string {
