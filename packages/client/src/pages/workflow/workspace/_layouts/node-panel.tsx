@@ -32,7 +32,7 @@ function NodeEditorPanel({ nodeId }: { nodeId: string }) {
           <span className="text-muted-foreground text-xs">{node.data.type}</span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="overflow-y-auto">
+      <CardContent className="overflow-y-auto pb-4">
         <PanelComponent data={data} onChange={immediateUpdate} />
       </CardContent>
     </Card>

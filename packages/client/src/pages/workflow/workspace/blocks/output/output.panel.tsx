@@ -12,7 +12,7 @@ import type { OutputBlockData } from "./output.types";
 
 export function OutputPanelComponent({ data, onChange }: BlockPanelProps<OutputBlockData>) {
   return (
-    <div className="flex-1 space-y-4 overflow-y-auto p-4">
+    <div>
       <VarListWithRef
         title="输出变量"
         variables={data.inputs}
