@@ -1,28 +1,65 @@
 /**
- * @fileoverview Text parser (TXT, MD, RTF)
+ * @fileoverview Text parser (TXT, MD, RTF, code files)
  */
 
+import { CODE_EXTENSIONS } from "../supported-formats";
 import type { ParseOptions, ParseResult, StructuredTextBlock } from "../types";
 import { BaseParser } from "./base.parser";
+
+const CODE_MIME_TYPES = new Set([
+    "text/plain",
+    "text/x-python",
+    "application/javascript",
+    "text/javascript",
+    "application/typescript",
+    "text/x-java-source",
+    "text/x-go",
+    "text/x-rust",
+    "text/x-c",
+    "text/x-c++",
+    "text/x-csharp",
+    "application/x-ruby",
+    "application/x-php",
+    "text/x-swift",
+    "text/x-vue",
+    "text/x-svelte",
+    "text/css",
+    "text/x-scss",
+    "text/x-sass",
+    "text/x-less",
+    "application/x-sh",
+    "text/x-yaml",
+    "application/yaml",
+    "application/x-yaml",
+    "application/x-toml",
+    "application/sql",
+    "text/x-r",
+    "text/x-lua",
+    "text/x-perl",
+    "text/x-scala",
+    "text/x-groovy",
+]);
 
 export class TextParser extends BaseParser {
     canParse(mimeType: string, filename: string): boolean {
         const lowerFilename = filename.toLowerCase();
-        return (
+        const docOrText =
             mimeType === "text/plain" ||
             mimeType === "text/markdown" ||
             mimeType === "text/rtf" ||
             lowerFilename.endsWith(".txt") ||
             lowerFilename.endsWith(".md") ||
             lowerFilename.endsWith(".markdown") ||
-            lowerFilename.endsWith(".rtf")
-        );
+            lowerFilename.endsWith(".rtf");
+        if (docOrText) return true;
+        if (CODE_MIME_TYPES.has(mimeType)) return true;
+        return CODE_EXTENSIONS.some((ext) => lowerFilename.endsWith(`.${ext}`));
     }
 
     async parse(
         buffer: Buffer,
         filename: string,
-        options: ParseOptions = {},
+        _options: ParseOptions = {},
     ): Promise<ParseResult> {
         try {
             const lowerFilename = filename.toLowerCase();
@@ -41,12 +78,17 @@ export class TextParser extends BaseParser {
                 ? this.markdownToStructuredBlocks(text)
                 : this.textToStructuredBlocks(text);
 
+            const filetype = isRtf
+                ? "rtf"
+                : isMarkdown
+                  ? "md"
+                  : (this.getCodeFiletype(lowerFilename) ?? "txt");
             return {
                 blocks,
                 text: this.cleanText(text),
                 metadata: {
                     filename,
-                    filetype: isRtf ? "rtf" : isMarkdown ? "md" : "txt",
+                    filetype,
                     size: buffer.length,
                 },
             };
@@ -55,6 +97,11 @@ export class TextParser extends BaseParser {
                 `Failed to parse text file: ${error instanceof Error ? error.message : "Unknown error"}`,
             );
         }
+    }
+
+    private getCodeFiletype(lowerFilename: string): string | null {
+        const ext = CODE_EXTENSIONS.find((e) => lowerFilename.endsWith(`.${e}`));
+        return ext ?? null;
     }
 
     private parseRtf(rtfContent: string): string {

@@ -1,41 +1,37 @@
 # @buildingai/llm-file-parser
 
-A comprehensive document parser designed specifically for LLM consumption. Extracts structured text from various file formats with clean, well-organized output.
+面向 LLM 使用的文档解析库，从多种文件格式中提取结构化文本，输出清晰、易读的内容。
 
-## Features
+## 特性
 
-- 📄 **Multiple Format Support**: PDF, DOCX, PPTX, XLSX, XLS, TXT, MD, CSV, RTF, HTML, JSON, XML, plus common code files (JS, TS, PY, Java, Go, Rust, Vue, CSS, YAML, SQL, etc.)
-- 🔗 **HTTP/HTTPS URL Support**: Download and parse files directly from URLs
-- 🎯 **Structured Output**: Clean paragraphs, headings, lists with proper hierarchy
-- 🤖 **LLM-Optimized**: Output format designed for optimal LLM understanding
-- 🔌 **Unstructured.io Integration**: Optional integration with unstructured.io API
-- 📦 **Type-Safe**: Full TypeScript support
+- 📄 **多格式支持**：PDF、DOCX、PPTX、XLSX、XLS、TXT、MD、CSV、RTF、HTML、JSON、XML，以及常见代码文件（JS、TS、PY、Java、Go、Rust、Vue、CSS、YAML、SQL 等）
+- 🔗 **HTTP/HTTPS URL**：支持从 URL 下载并解析文件
+- 🎯 **结构化输出**：段落、标题、列表层级清晰
+- 🤖 **适配 LLM**：输出格式便于模型理解
+- 🔌 **Unstructured.io**：可选接入 unstructured.io API
+- 📦 **类型安全**：完整 TypeScript 支持
 
-## Installation
+## 安装
 
 ```bash
 pnpm add @buildingai/llm-file-parser
 ```
 
-## Quick Start
+## 快速开始
 
-### Parse from URL
+### 从 URL 解析
 
 ```typescript
 import { llmFileParser } from "@buildingai/llm-file-parser";
 
-// Parse and get structured result
 const result = await llmFileParser.parseFromUrl("https://example.com/document.pdf");
-
-// Get formatted text for LLM
 const text = llmFileParser.formatForLLM(result);
 console.log(text);
 
-// Or parse and format in one call
 const formattedText = await llmFileParser.parseAndFormat("https://example.com/document.pdf");
 ```
 
-### Parse from Buffer
+### 从 Buffer 解析
 
 ```typescript
 import { llmFileParser } from "@buildingai/llm-file-parser";
@@ -47,11 +43,10 @@ const result = await llmFileParser.parseFromBuffer(
     "document.docx",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 );
-
 const text = llmFileParser.formatForLLM(result);
 ```
 
-### Using Unstructured.io Service
+### 使用 Unstructured.io
 
 ```typescript
 import { llmFileParser } from "@buildingai/llm-file-parser";
@@ -63,7 +58,7 @@ const result = await llmFileParser.parseFromUrl("https://example.com/document.pd
 });
 ```
 
-### Parse HTML
+### 解析 HTML
 
 ```typescript
 import { llmFileParser } from "@buildingai/llm-file-parser";
@@ -72,19 +67,16 @@ const result = await llmFileParser.parseFromUrl("https://example.com/page.html")
 const text = llmFileParser.formatForLLM(result);
 ```
 
-### Parse JSON/XML
+### 解析 JSON / XML
 
 ```typescript
 import { llmFileParser } from "@buildingai/llm-file-parser";
 
-// Parse JSON
 const jsonResult = await llmFileParser.parseFromUrl("https://example.com/data.json");
-
-// Parse XML
 const xmlResult = await llmFileParser.parseFromUrl("https://example.com/data.xml");
 ```
 
-### Parse Code Files
+### 解析代码文件
 
 ```typescript
 import { llmFileParser } from "@buildingai/llm-file-parser";
@@ -95,9 +87,9 @@ const result = await llmFileParser.parseFromBuffer(buffer, "index.ts", "applicat
 const text = llmFileParser.formatForLLM(result);
 ```
 
-### Supported Format Constants
+### 支持格式常量
 
-Use exported constants for file picker `accept`, filters, or UI labels:
+用于文件选择器 `accept`、筛选或 UI 展示：
 
 ```typescript
 import {
@@ -107,103 +99,97 @@ import {
     isSupportedExtension,
 } from "@buildingai/llm-file-parser";
 
-// For <input type="file" accept={...} />
+// <input type="file" accept={...} />
 <input type="file" accept={SUPPORTED_FILE_EXTENSIONS.join(",")} />
 
-// Display supported formats (includes both upper and lower case)
+// 展示支持格式（含大小写）
 console.log(SUPPORTED_FORMATS_DISPLAY);
 
-// Check if a filename is supported
+// 判断文件名是否支持
 if (isSupportedExtension(file.name)) {
     // ...
 }
 ```
 
-- **`SUPPORTED_FILE_EXTENSIONS`**: `readonly string[]` — extensions with dot, both cases (e.g. `.pdf`, `.PDF`, `.docx`, `.DOCX`, …)
-- **`SUPPORTED_FORMATS_DISPLAY`**: `string` — comma-separated list for display
-- **`SUPPORTED_EXTENSIONS_LOWER`**: `readonly string[]` — lowercase extensions only
-- **`isSupportedExtension(filename: string)`**: `boolean` — whether the filename has a supported extension
+- **`SUPPORTED_FILE_EXTENSIONS`**：`readonly string[]`，带点号扩展名，大小写各一份（如 `.pdf`、`.PDF`、`.docx`、`.DOCX` 等）
+- **`SUPPORTED_FORMATS_DISPLAY`**：`string`，逗号分隔的展示用字符串
+- **`SUPPORTED_EXTENSIONS_LOWER`**：`readonly string[]`，仅小写扩展名
+- **`isSupportedExtension(filename: string)`**：`boolean`，判断文件名是否为支持格式
 
-### Stream Parsing (Like AI SDK's streamText)
+### 流式解析（类似 AI SDK 的 streamText）
 
 ```typescript
 import { llmFileParser } from "@buildingai/llm-file-parser";
 
-// Stream parse document (similar to streamText)
 const stream = await llmFileParser.streamParseFromUrl("https://example.com/document.pdf");
 
-// Process chunks as they arrive
 for await (const chunk of stream) {
     if (chunk.type === "metadata") {
         console.log("Document metadata:", chunk.metadata);
     } else if (chunk.type === "block") {
         console.log("Block:", chunk.block);
-        // Process block immediately
     } else if (chunk.type === "done") {
         console.log("Final result:", chunk.result);
     }
 }
 
-// Or get final result directly
 const finalResult = await stream.finalResult();
 console.log("Complete document:", finalResult);
 ```
 
-### Stream Parse and Format
+### 流式解析并格式化
 
 ```typescript
 import { llmFileParser } from "@buildingai/llm-file-parser";
 
-// Stream parse and get formatted text chunks
 for await (const textChunk of llmFileParser.streamParseAndFormat("https://example.com/document.pdf")) {
     console.log(textChunk);
-    // Process formatted text chunks as they arrive
 }
 ```
 
-## API Reference
+## API 参考
 
 ### `LLMFileParser`
 
 #### `parseFromUrl(url: string, options?: ParseOptions): Promise<ParseResult>`
 
-Parse document from HTTP/HTTPS URL.
+从 HTTP/HTTPS URL 解析文档。
 
 #### `parseFromBuffer(buffer: Buffer, filename: string, mimeType?: string, options?: ParseOptions): Promise<ParseResult>`
 
-Parse document from buffer.
+从 Buffer 解析文档。
 
 #### `formatForLLM(result: ParseResult): string`
 
-Format parse result to structured text for LLM consumption.
+将解析结果格式化为供 LLM 使用的文本。
 
 #### `parseAndFormat(url: string, options?: ParseOptions): Promise<string>`
 
-Parse and format in one call (convenience method).
+解析并格式化，一步完成。
 
 #### `streamParseFromUrl(url: string, options?: ParseOptions): Promise<ParseStream>`
 
-Stream parse document from URL. Returns an async iterable that yields chunks as they are parsed.
+从 URL 流式解析，返回可迭代的解析块。
 
 #### `streamParseFromBuffer(buffer: Buffer, filename: string, mimeType?: string, options?: ParseOptions): Promise<ParseStream>`
 
-Stream parse document from buffer.
+从 Buffer 流式解析。
 
 #### `streamParseAndFormat(url: string, options?: ParseOptions): AsyncGenerator<string>`
 
-Stream parse and format in one call. Yields formatted text chunks as they are parsed.
+流式解析并直接产出格式化文本块。
 
 ### `ParseOptions`
 
 ```typescript
 interface ParseOptions {
-    maxFileSize?: number;              // Max file size in bytes (default: 50MB)
-    preserveFormatting?: boolean;       // Preserve formatting (default: true)
-    includeMetadata?: boolean;          // Include metadata (default: false)
-    unstructuredApiUrl?: string;       // Unstructured API endpoint
-    unstructuredApiKey?: string;       // Unstructured API key
-    useUnstructuredService?: boolean;   // Use unstructured.io (default: false)
-    timeout?: number;                   // Timeout in ms (default: 30000)
+    maxFileSize?: number;
+    preserveFormatting?: boolean;
+    includeMetadata?: boolean;
+    unstructuredApiUrl?: string;
+    unstructuredApiKey?: string;
+    useUnstructuredService?: boolean;
+    timeout?: number;
 }
 ```
 
@@ -211,15 +197,15 @@ interface ParseOptions {
 
 ```typescript
 interface ParseResult {
-    blocks: StructuredTextBlock[];       // Structured text blocks
-    text: string;                       // Plain text representation
-    metadata: {                         // Document metadata
+    blocks: StructuredTextBlock[];
+    text: string;
+    metadata: {
         filename?: string;
         filetype?: string;
         size?: number;
         pages?: number;
     };
-    elements?: UnstructuredElement[];   // Raw unstructured elements (if available)
+    elements?: UnstructuredElement[];
 }
 ```
 
@@ -227,47 +213,42 @@ interface ParseResult {
 
 ```typescript
 interface ParseStream {
-    // Async iterator for streaming chunks
     [Symbol.asyncIterator](): AsyncIterator<ParseStreamChunk>;
-    
-    // Get final parse result (waits for stream to complete)
     finalResult(): Promise<ParseResult>;
-    
-    // Cancel the parsing process (optional)
     cancel?(): void;
 }
 
 interface ParseStreamChunk {
     type: "block" | "text" | "metadata" | "done";
-    block?: StructuredTextBlock;      // If type is "block"
-    text?: string;                     // If type is "text"
-    metadata?: ParseResult["metadata"]; // If type is "metadata"
-    result?: ParseResult;              // If type is "done"
+    block?: StructuredTextBlock;
+    text?: string;
+    metadata?: ParseResult["metadata"];
+    result?: ParseResult;
 }
 ```
 
-## Supported Formats
+## 支持格式
 
-- **PDF**: `.pdf`
-- **Word**: `.docx`
-- **PowerPoint**: `.pptx`
-- **Excel**: `.xlsx`, `.xls`, `.csv`
-- **Text**: `.txt`, `.md`, `.markdown`, `.rtf`
-- **HTML**: `.html`, `.htm`, `.xhtml`
-- **JSON / XML**: `.json`, `.jsonl`, `.xml`
-- **Code**: `.js`, `.jsx`, `.ts`, `.tsx`, `.mjs`, `.cjs`, `.py`, `.pyw`, `.pyi`, `.java`, `.kt`, `.kts`, `.go`, `.rs`, `.c`, `.h`, `.cpp`, `.hpp`, `.cc`, `.cxx`, `.cs`, `.rb`, `.php`, `.swift`, `.vue`, `.svelte`, `.css`, `.scss`, `.sass`, `.less`, `.sh`, `.bash`, `.zsh`, `.yaml`, `.yml`, `.toml`, `.sql`, `.r`, `.lua`, `.pl`, `.pm`, `.scala`, `.groovy`
+- **PDF**：`.pdf`
+- **Word**：`.docx`
+- **PowerPoint**：`.pptx`
+- **Excel**：`.xlsx`、`.xls`、`.csv`
+- **文本**：`.txt`、`.md`、`.markdown`、`.rtf`
+- **HTML**：`.html`、`.htm`、`.xhtml`
+- **JSON / XML**：`.json`、`.jsonl`、`.xml`
+- **代码**：`.js`、`.jsx`、`.ts`、`.tsx`、`.mjs`、`.cjs`、`.py`、`.pyw`、`.pyi`、`.java`、`.kt`、`.kts`、`.go`、`.rs`、`.c`、`.h`、`.cpp`、`.hpp`、`.cc`、`.cxx`、`.cs`、`.rb`、`.php`、`.swift`、`.vue`、`.svelte`、`.css`、`.scss`、`.sass`、`.less`、`.sh`、`.bash`、`.zsh`、`.yaml`、`.yml`、`.toml`、`.sql`、`.r`、`.lua`、`.pl`、`.pm`、`.scala`、`.groovy`
 
-## Output Format
+## 输出格式
 
-The parser outputs structured text blocks optimized for LLM consumption:
+解析结果为面向 LLM 的结构化文本块：
 
-- **Headings**: Properly formatted with markdown-style `#` prefixes
-- **Paragraphs**: Clean, normalized text with proper spacing
-- **Lists**: Bullet-point format with proper indentation
-- **Tables**: Structured representation
-- **Metadata**: Optional document information
+- **标题**：Markdown 风格 `#` 层级
+- **段落**：归一化文本与间距
+- **列表**：缩进与项目符号
+- **表格**：结构化表示
+- **元数据**：可选文档信息
 
-## Example Output
+## 输出示例
 
 ```markdown
 # Document: example.pdf

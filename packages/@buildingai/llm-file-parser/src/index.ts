@@ -336,7 +336,13 @@ export class LLMFileParser {
 // Export singleton instance
 export const llmFileParser = new LLMFileParser();
 
-// Export types
+export {
+    isSupportedExtension,
+    SUPPORTED_EXTENSIONS_LOWER,
+    SUPPORTED_FILE_EXTENSIONS,
+    SUPPORTED_FORMATS_DISPLAY,
+} from "./supported-formats";
+
 export type {
     ElementType,
     ParseOptions,
