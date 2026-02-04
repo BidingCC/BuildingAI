@@ -1,3 +1,4 @@
+export * from "./apps-decorate";
 export * from "./chat";
 export * from "./datasets-config";
 export * from "./extension";

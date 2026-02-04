@@ -1,5 +1,5 @@
 import type { MutationOptionsUtil, QueryOptionsUtil } from "@buildingai/web-types";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 
 import { apiHttpClient } from "../base";
 
@@ -86,6 +86,39 @@ export type PrepayResponse = {
     payType: number;
 };
 
+export type UserSubscriptionItem = {
+    id: string;
+    level: MembershipLevel | null;
+    startTime: string;
+    endTime: string;
+    source: number;
+    sourceDesc: string;
+    duration: string | null;
+    refundStatus: number;
+    isExpired: boolean;
+    isActive: boolean;
+    createdAt: string;
+};
+
+export type UserSubscriptionsResponse = {
+    items: UserSubscriptionItem[];
+    total: number;
+    page: number;
+    pageSize: number;
+};
+
+export function useUserSubscriptionsQuery(
+    params?: { page?: number; pageSize?: number },
+    options?: QueryOptionsUtil<UserSubscriptionsResponse>,
+) {
+    return useQuery<UserSubscriptionsResponse>({
+        queryKey: ["membership", "subscriptions", params],
+        queryFn: () =>
+            apiHttpClient.get<UserSubscriptionsResponse>("/membership/subscriptions", { params }),
+        ...options,
+    });
+}
+
 export function useMembershipCenterQuery(
     params?: { id?: string },
     options?: QueryOptionsUtil<MembershipCenterResponse>,
@@ -113,4 +146,68 @@ export function usePayPrepayMutation(options?: MutationOptionsUtil<PrepayRespons
         mutationFn: (body) => apiHttpClient.post<PrepayResponse>("/pay/prepay", body),
         ...options,
     });
+}
+
+export type UserMembershipOrderItem = {
+    id: string;
+    orderNo: string;
+    planName: string;
+    levelName: string;
+    duration: string;
+    orderAmount: number;
+    payType: PayConfigType;
+    payTypeDesc: string;
+    refundStatus: number;
+    createdAt: string;
+    source: number;
+    sourceDesc: string;
+    levelSnap?: {
+        id: string;
+        name: string;
+        icon?: string | null;
+        level: number;
+    };
+};
+
+export type UserMembershipOrdersResponse = {
+    items: UserMembershipOrderItem[];
+    total: number;
+    page: number;
+    pageSize: number;
+};
+
+export function useMembershipOrderListsQuery(
+    params?: { page?: number; pageSize?: number },
+    options?: QueryOptionsUtil<UserMembershipOrdersResponse>,
+) {
+    return useQuery<UserMembershipOrdersResponse>({
+        queryKey: ["membership", "order", "lists", params],
+        queryFn: () =>
+            apiHttpClient.get<UserMembershipOrdersResponse>("/membership/order/lists", { params }),
+        ...options,
+    });
+}
+
+export function useMembershipOrderListsInfiniteQuery(
+    params?: { levelId?: string },
+    options?: { enabled?: boolean },
+) {
+    const pageSize = 15;
+    const result = useInfiniteQuery<UserMembershipOrdersResponse>({
+        queryKey: ["membership", "order", "lists", "infinite", pageSize, params?.levelId],
+        queryFn: ({ pageParam }) =>
+            apiHttpClient.get<UserMembershipOrdersResponse>("/membership/order/lists", {
+                params: { page: pageParam as number, pageSize, levelId: params?.levelId },
+            }),
+        getNextPageParam: (lastPage) => {
+            const totalPages = Math.ceil(lastPage.total / lastPage.pageSize);
+            if (lastPage.page >= totalPages) return undefined;
+            return lastPage.page + 1;
+        },
+        initialPageParam: 1,
+        enabled: options?.enabled !== false,
+        ...options,
+    });
+    const items = result.data?.pages.flatMap((p) => p.items) ?? [];
+    return { ...result, items };
 }
