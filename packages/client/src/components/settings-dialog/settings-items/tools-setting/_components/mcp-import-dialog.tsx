@@ -40,10 +40,10 @@ type McpImportDialogProps = {
 const JSON_EXAMPLE = `{
   "mcpServers": {
     "github": {
-      "url": "https://mcp.github.com/sse"
+      "url": "https://mcp1.buildingai.cc/sse"
     },
     "slack": {
-      "url": "https://mcp.slack.com/sse",
+      "url": "https://mcp2.buildingai.cc/sse",
       "headers": {
         "Authorization": "Bearer xxx"
       }

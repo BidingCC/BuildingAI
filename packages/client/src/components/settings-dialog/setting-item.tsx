@@ -1,4 +1,6 @@
+import { Button, buttonVariants } from "@buildingai/ui/components/ui/button";
 import { cn } from "@buildingai/ui/lib/utils";
+import type { VariantProps } from "class-variance-authority";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 
@@ -132,5 +134,34 @@ export const SettingItemGroup = ({
         ))}
       <div className={cn("bg-muted flex flex-col rounded-lg", className)}>{children}</div>
     </div>
+  );
+};
+
+export const SettingItemAction = ({
+  className,
+  variant = "ghost",
+  size = "icon-sm",
+  asChild = false,
+  loading = false,
+  disabled,
+  children,
+  ...props
+}: React.ComponentProps<"button"> &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean;
+    loading?: boolean;
+  }) => {
+  return (
+    <Button
+      size={size}
+      variant={variant}
+      className={cn("hover:bg-muted-foreground/10 dark:hover:bg-muted-foreground/15", className)}
+      disabled={disabled}
+      loading={loading}
+      asChild={asChild}
+      {...props}
+    >
+      {children}
+    </Button>
   );
 };

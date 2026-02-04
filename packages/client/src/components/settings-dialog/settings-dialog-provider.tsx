@@ -32,6 +32,7 @@ import {
   ToolsSetting,
   WalletSetting,
 } from "./settings-items";
+import { AboutSetting } from "./settings-items/about-setting";
 import { NoticeSetting } from "./settings-items/notice-setting";
 import PersonalizedSetting from "./settings-items/personalized-setting";
 import { SettingsDialogContext } from "./use-settings-dialog";
@@ -44,6 +45,7 @@ const SETTINGS_COMPONENTS: Record<SettingsPage, React.ComponentType> = {
   subscribe: SubscribeSetting,
   notice: NoticeSetting,
   personalized: PersonalizedSetting,
+  about: AboutSetting,
 };
 
 /**

@@ -9,6 +9,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
 
+import { SettingsDialogProvider } from "./components/settings-dialog";
 import { router } from "./router";
 
 const queryClient = new QueryClient();
@@ -18,9 +19,11 @@ createRoot(document.getElementById("root")!).render(
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AlertDialogProvider>
-          {/* <ReactQueryDevtools buttonPosition="top-right"  /> */}
-          <Toaster position="top-center" />
-          <RouterProvider router={router} />
+          <SettingsDialogProvider>
+            {/* <ReactQueryDevtools buttonPosition="top-right"  /> */}
+            <Toaster position="top-center" />
+            <RouterProvider router={router} />
+          </SettingsDialogProvider>
         </AlertDialogProvider>
       </ThemeProvider>
     </QueryClientProvider>

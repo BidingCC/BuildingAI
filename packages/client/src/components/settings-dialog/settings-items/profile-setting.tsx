@@ -4,7 +4,6 @@ import { useAuthStore } from "@buildingai/stores";
 import { RootOnly } from "@buildingai/ui/components/auth/root-only";
 import { CopyButton } from "@buildingai/ui/components/copy-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@buildingai/ui/components/ui/avatar";
-import { Button } from "@buildingai/ui/components/ui/button";
 import { Input } from "@buildingai/ui/components/ui/input";
 import { TimeText } from "@buildingai/ui/components/ui/time-text";
 import { Check, Link, Loader2, PenLine, User, X } from "lucide-react";
@@ -13,7 +12,7 @@ import { toast } from "sonner";
 
 import SvgIcons from "@/components/svg-icons";
 
-import { SettingItem, SettingItemGroup } from "../setting-item";
+import { SettingItem, SettingItemAction, SettingItemGroup } from "../setting-item";
 
 const ProfileSetting = () => {
   const { isLogin } = useAuthStore((state) => state.authActions);
@@ -121,15 +120,9 @@ const ProfileSetting = () => {
             className="hidden"
             onChange={handleAvatarChange}
           />
-          <Button
-            className="hover:bg-muted-foreground/10 dark:hover:bg-muted-foreground/15"
-            variant="ghost"
-            size="icon-sm"
-            onClick={handleAvatarClick}
-            disabled={isUploadingAvatar}
-          >
+          <SettingItemAction onClick={handleAvatarClick} disabled={isUploadingAvatar}>
             {isUploadingAvatar ? <Loader2 className="animate-spin" /> : <PenLine />}
-          </Button>
+          </SettingItemAction>
         </SettingItem>
         <SettingItem
           title={
@@ -153,41 +146,23 @@ const ProfileSetting = () => {
         >
           {editingField === "nickname" ? (
             <div className="flex items-center gap-1">
-              <Button
-                className="hover:bg-muted-foreground/10 dark:hover:bg-muted-foreground/15"
-                variant="ghost"
-                size="icon-sm"
-                onClick={handleSaveEdit}
-                disabled={isPending}
-              >
+              <SettingItemAction onClick={handleSaveEdit} disabled={isPending}>
                 <Check />
-              </Button>
-              <Button
-                className="hover:bg-muted-foreground/10 dark:hover:bg-muted-foreground/15"
-                variant="ghost"
-                size="icon-sm"
-                onClick={handleCancelEdit}
-                disabled={isPending}
-              >
+              </SettingItemAction>
+              <SettingItemAction onClick={handleCancelEdit} disabled={isPending}>
                 <X />
-              </Button>
+              </SettingItemAction>
             </div>
           ) : (
-            <Button
-              className="hover:bg-muted-foreground/10 dark:hover:bg-muted-foreground/15"
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => handleStartEdit("nickname", data?.nickname || "")}
-            >
+            <SettingItemAction onClick={() => handleStartEdit("nickname", data?.nickname || "")}>
               <PenLine />
-            </Button>
+            </SettingItemAction>
           )}
         </SettingItem>
         <SettingItem title={data?.userNo} description="用户编号">
-          <CopyButton
-            className="hover:bg-muted-foreground/10 dark:hover:bg-muted-foreground/15"
-            value={data?.userNo ?? ""}
-          />
+          <SettingItemAction asChild>
+            <CopyButton value={data?.userNo ?? ""} />
+          </SettingItemAction>
         </SettingItem>
         <SettingItem
           title={
@@ -211,56 +186,31 @@ const ProfileSetting = () => {
         >
           {editingField === "email" ? (
             <div className="flex items-center gap-1">
-              <Button
-                className="hover:bg-muted-foreground/10 dark:hover:bg-muted-foreground/15"
-                variant="ghost"
-                size="icon-sm"
-                onClick={handleSaveEdit}
-                disabled={isPending}
-              >
+              <SettingItemAction onClick={handleSaveEdit} disabled={isPending}>
                 <Check />
-              </Button>
-              <Button
-                className="hover:bg-muted-foreground/10 dark:hover:bg-muted-foreground/15"
-                variant="ghost"
-                size="icon-sm"
-                onClick={handleCancelEdit}
-                disabled={isPending}
-              >
+              </SettingItemAction>
+              <SettingItemAction onClick={handleCancelEdit} disabled={isPending}>
                 <X />
-              </Button>
+              </SettingItemAction>
             </div>
           ) : (
-            <Button
-              className="hover:bg-muted-foreground/10 dark:hover:bg-muted-foreground/15"
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => handleStartEdit("email", data?.email || "")}
-            >
+            <SettingItemAction onClick={() => handleStartEdit("email", data?.email || "")}>
               <PenLine />
-            </Button>
+            </SettingItemAction>
           )}
         </SettingItem>
       </SettingItemGroup>
 
       <SettingItemGroup label="安全设置">
         <SettingItem title={data?.hasPassword ? "已设置" : "未设置"} description="密码">
-          <Button
-            className="hover:bg-muted-foreground/10 dark:hover:bg-muted-foreground/15"
-            variant="ghost"
-            size="icon-sm"
-          >
+          <SettingItemAction>
             <PenLine />
-          </Button>
+          </SettingItemAction>
         </SettingItem>
         <SettingItem title={data?.phone || "未绑定"} description="手机号">
-          <Button
-            className="hover:bg-muted-foreground/10 dark:hover:bg-muted-foreground/15"
-            variant="ghost"
-            size="icon-sm"
-          >
+          <SettingItemAction>
             <PenLine />
-          </Button>
+          </SettingItemAction>
         </SettingItem>
         <SettingItem
           title={"未绑定"}
@@ -271,24 +221,16 @@ const ProfileSetting = () => {
             </div>
           }
         >
-          <Button
-            className="hover:bg-muted-foreground/10 dark:hover:bg-muted-foreground/15"
-            variant="ghost"
-            size="sm"
-          >
+          <SettingItemAction variant="ghost" size="sm">
             <Link />
             去绑定
-          </Button>
+          </SettingItemAction>
         </SettingItem>
         <RootOnly reverse>
           <SettingItem title="注销账号" description="您的账号数据将会被永久删除，此操作不可逆">
-            <Button
-              className="hover:bg-muted-foreground/10 dark:hover:bg-muted-foreground/15"
-              variant="destructive"
-              size="sm"
-            >
+            <SettingItemAction variant="destructive" size="sm">
               注销
-            </Button>
+            </SettingItemAction>
           </SettingItem>
         </RootOnly>
       </SettingItemGroup>
