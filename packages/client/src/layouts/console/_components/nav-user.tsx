@@ -1,7 +1,4 @@
 import { useAuthStore } from "@buildingai/stores";
-import { ModeItems } from "@buildingai/ui/components/mode-toggle";
-import { THEME_COLORS, useTheme } from "@buildingai/ui/components/theme-provider";
-import { ScrollThemeItems } from "@buildingai/ui/components/theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@buildingai/ui/components/ui/avatar";
 import {
   Dialog,
@@ -12,14 +9,8 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuPortal,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@buildingai/ui/components/ui/dropdown-menu";
 import {
@@ -29,18 +20,7 @@ import {
   useSidebar,
 } from "@buildingai/ui/components/ui/sidebar";
 import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog";
-import {
-  ChevronsUpDown,
-  Info,
-  Languages,
-  Laptop,
-  LogOut,
-  Moon,
-  Palette,
-  Settings,
-  Sun,
-  User,
-} from "lucide-react";
+import { ChevronsUpDown, LogOut, Settings, User } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -51,7 +31,6 @@ export function NavUser() {
   const { userInfo } = useAuthStore((state) => state.auth);
   const { logout, isLogin } = useAuthStore((state) => state.authActions);
 
-  const { setThemeColor, themeColor, theme } = useTheme();
   const settingsDialog = useSettingsDialog();
   const navigate = useNavigate();
   const { confirm } = useAlertDialog();
@@ -94,64 +73,6 @@ export function NavUser() {
             align="end"
             sideOffset={4}
           >
-            <DropdownMenuGroup>
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>
-                  <Palette className="text-primary fill-primary/20" />
-                  主题配色
-                </DropdownMenuSubTrigger>
-                <DropdownMenuPortal>
-                  <DropdownMenuSubContent>
-                    <DropdownMenuLabel>选择配色({THEME_COLORS.length})</DropdownMenuLabel>
-                    <ScrollThemeItems themeColor={themeColor} onSelect={setThemeColor} />
-                  </DropdownMenuSubContent>
-                </DropdownMenuPortal>
-              </DropdownMenuSub>
-
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>
-                  {
-                    {
-                      dark: (
-                        <>
-                          <Moon />
-                          深色模式
-                        </>
-                      ),
-                      light: (
-                        <>
-                          <Sun />
-                          浅色模式
-                        </>
-                      ),
-
-                      system: (
-                        <>
-                          <Laptop />
-                          系统跟随
-                        </>
-                      ),
-                    }[theme]
-                  }
-                </DropdownMenuSubTrigger>
-                <DropdownMenuPortal>
-                  <DropdownMenuSubContent>
-                    <DropdownMenuLabel>选择主题</DropdownMenuLabel>
-                    <ModeItems />
-                  </DropdownMenuSubContent>
-                </DropdownMenuPortal>
-              </DropdownMenuSub>
-
-              <DropdownMenuItem>
-                <Languages />
-                简体中文
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => setVersionInfoOpen(true)}>
-              <Info />
-              版本信息
-            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => settingsDialog.open("general")}>
               <Settings />
               设置

@@ -222,9 +222,9 @@ function ConsoleRoutes() {
 
 export default function ConsoleLayout({ children }: { children?: React.ReactNode }) {
   return (
-    <SidebarProvider className="bd-console-layout h-dvh">
+    <SidebarProvider storageKey="layout-console-sidebar" className="bd-console-layout h-dvh">
       <AppSidebar />
-      <SidebarInset className="flex h-[calc(100%-1rem)] flex-col overflow-x-hidden md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-0">
+      <SidebarInset className="flex h-full flex-col overflow-x-hidden md:h-[calc(100%-1rem)] md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-0">
         <AppNavbar />
         <div className="flex-1 overflow-hidden">
           <ScrollArea className="h-full" viewportClassName="[&>div]:block!">

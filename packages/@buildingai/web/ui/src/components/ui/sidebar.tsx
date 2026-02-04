@@ -605,7 +605,7 @@ function SidebarMenuAction({
       data-slot="sidebar-menu-action"
       data-sidebar="menu-action"
       className={cn(
-        "text-sidebar-foreground ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground peer-hover/menu-button:text-sidebar-accent-foreground absolute top-1/2 right-2 flex aspect-square w-5 -translate-y-1/2 items-center justify-center rounded-sm p-0 outline-hidden transition-transform group-data-[collapsible=icon]:hidden after:absolute after:-inset-2 focus-visible:ring-2 md:after:hidden [&>svg]:size-4 [&>svg]:shrink-0",
+        "text-sidebar-foreground ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground peer-hover/menu-button:text-sidebar-accent-foreground absolute top-1.5 right-1 flex aspect-square w-5 items-center justify-center rounded-sm p-0 outline-hidden transition-transform group-data-[collapsible=icon]:hidden after:absolute after:-inset-2 focus-visible:ring-2 in-[.h-9]:top-2 in-[.h-9]:right-2 md:after:hidden [&>svg]:size-4 [&>svg]:shrink-0 [.h-9[data-sidebar='menu-sub-button']~&]:top-2 [.h-9[data-sidebar='menu-sub-button']~&]:right-2",
         showOnHover &&
           "peer-data-active/menu-button:text-sidebar-accent-foreground data-open:bg-sidebar-accent group-focus-within/menu-item:opacity-100 group-focus-within/menu-sub-item:opacity-100 group-hover/menu-item:opacity-100 group-hover/menu-sub-item:opacity-100 data-open:opacity-100 md:opacity-0",
         className,

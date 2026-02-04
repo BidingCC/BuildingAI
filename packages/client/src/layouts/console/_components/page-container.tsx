@@ -8,11 +8,7 @@ const PageContainer = ({
   children?: React.ReactNode;
   className?: string;
 }) => {
-  return (
-    <div className={cn("m-4 mt-1 flex min-h-[calc(100vh-6.25rem)] flex-col", className)}>
-      {children}
-    </div>
-  );
+  return <div className={cn("min-h-inset m-4 mt-1 flex flex-col", className)}>{children}</div>;
 };
 
 export { PageContainer };

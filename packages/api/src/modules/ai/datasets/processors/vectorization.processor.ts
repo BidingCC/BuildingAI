@@ -8,11 +8,6 @@ import type { Job } from "bullmq";
 
 import { VectorizationRunnerService } from "../services/vectorization-runner.service";
 
-/**
- * 向量化队列消费者
- *
- * 消费 vectorization 队列中的 vectorize_document 任务，调用 VectorizationRunnerService 执行单文档向量化
- */
 @Processor("vectorization")
 export class VectorizationProcessor extends WorkerHost {
     private readonly logger = new Logger(VectorizationProcessor.name);

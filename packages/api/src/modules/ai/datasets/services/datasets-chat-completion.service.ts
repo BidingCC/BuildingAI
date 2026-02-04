@@ -129,10 +129,19 @@ If no relevant information is found in the tool calls, respond "Sorry, I don't k
                         4,
                         0.5,
                     );
-                    return result.chunks.map((chunk) => ({
-                        name: chunk.content,
-                        similarity: chunk.score,
-                    }));
+                    const meta = result.chunks.map((chunk) => {
+                        const fileName = chunk.fileName ?? "";
+                        const fileType = (chunk.metadata?.fileType as string) ?? "";
+                        const fileUrl = (chunk.metadata?.fileUrl as string) ?? "";
+
+                        return {
+                            title: fileName || chunk.content.slice(0, 80),
+                            format: fileType,
+                            href: fileUrl || undefined,
+                            content: chunk.content,
+                        };
+                    });
+                    return meta;
                 },
             });
 
