@@ -68,14 +68,12 @@ export const NoteNodeComponent: BlockNodeComponent<NoteBlockData> = ({ id, data 
       className={`max-w-64 min-w-48 rounded-lg border-2 p-4 shadow-md transition-shadow hover:shadow-lg ${COLOR_STYLES[data.color]}`}
       onDoubleClick={handleDoubleClick}
     >
-      {/* 头部 */}
       <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <StickyNote className="h-4 w-4" />
           <span className="text-sm font-semibold">笔记</span>
         </div>
 
-        {/* 颜色选择器 */}
         <div className="relative">
           <button
             className="rounded p-1 transition-colors hover:bg-black/5"
@@ -107,7 +105,6 @@ export const NoteNodeComponent: BlockNodeComponent<NoteBlockData> = ({ id, data 
         </div>
       </div>
 
-      {/* 内容区域 */}
       {isEditing ? (
         <textarea
           ref={textareaRef}

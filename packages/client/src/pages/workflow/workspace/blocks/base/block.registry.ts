@@ -1,49 +1,32 @@
-import type { WorkflowBlocksType } from "../../constants/node.ts";
-import type { BlockBase, BlockMetadata } from "./block.base.ts";
+import type { WorkflowBlocksType } from "@/pages/workflow/workspace/constants/node.ts";
 
-export class BlockRegistry {
-  private static instance: BlockRegistry;
-  private blocks = new Map<string, BlockBase>();
+import type { BlockBase, BlockMetadata } from "./block.base";
 
-  private constructor() {}
-
-  static getInstance(): BlockRegistry {
-    if (!BlockRegistry.instance) {
-      BlockRegistry.instance = new BlockRegistry();
-    }
-    return BlockRegistry.instance;
-  }
+class BlockRegistryClass {
+  private blocks = new Map<WorkflowBlocksType, BlockBase>();
 
   register(block: BlockBase): void {
-    const metadata = block.getMetadata();
-
-    if (this.blocks.has(metadata.type)) {
-      console.warn(`Block type "${metadata.type}" is already registered. Overwriting.`);
-    }
-
-    this.blocks.set(metadata.type, block);
-  }
-
-  registerAll(blocks: BlockBase[]): void {
-    blocks.forEach((block) => this.register(block));
+    this.blocks.set(block.type, block);
   }
 
   get(type: WorkflowBlocksType): BlockBase | undefined {
     return this.blocks.get(type);
   }
 
-  has(type: WorkflowBlocksType): boolean {
-    return this.blocks.has(type);
+  getAll(): BlockBase[] {
+    return Array.from(this.blocks.values());
   }
 
   getAllMetadata(): BlockMetadata[] {
-    return Array.from(this.blocks.values())
-      .map((block) => block.getMetadata())
-      .filter((metadata) => metadata.enabled);
+    return this.getAll().map((b) => b.getMetadata());
   }
 
-  getByCategory(category: string): BlockMetadata[] {
-    return this.getAllMetadata().filter((metadata) => metadata.category === category);
+  getByCategory(category: string): BlockBase[] {
+    return this.getAll().filter((b) => b.getMetadata().category === category);
+  }
+
+  has(type: WorkflowBlocksType): boolean {
+    return this.blocks.has(type);
   }
 
   clear(): void {
@@ -51,5 +34,4 @@ export class BlockRegistry {
   }
 }
 
-/** 单例 */
-export const blockRegistry = BlockRegistry.getInstance();
+export const blockRegistry = new BlockRegistryClass();

@@ -1,18 +1,28 @@
-import type { BlockNodeComponent } from "../base/block.base";
+import { cn } from "@buildingai/ui/lib/utils";
+
+import { VARIABLE_TYPE_COLORS } from "../../types/variable.types";
+import type { BlockNodeProps } from "../base/block.base";
 import type { OutputBlockData } from "./output.types";
 
-export const OutputNodeComponent: BlockNodeComponent<OutputBlockData> = ({ data }) => {
+export function OutputNodeComponent({ data }: BlockNodeProps<OutputBlockData>) {
   return (
-    <div className="space-y-2">
-      <div className="text-xs text-gray-500">格式: {data.format || "json"}</div>
-      {data.outputs.map((item) => (
-        <div key={item.name} className="flex items-center gap-2">
-          <span className="text-sm font-medium">{item.label}:</span>
-          <span className="rounded bg-blue-100 px-2 py-1 text-xs">
-            {`{${item.type}} - ${item.name}`}
-          </span>
+    <div className="p-3">
+      {data.inputs?.length ? (
+        <div className="space-y-1.5">
+          {data.inputs.map((v) => (
+            <div key={v.name} className="flex items-center justify-between text-xs">
+              <span className="text-gray-600">{v.label || v.name}</span>
+              <span
+                className={cn("rounded px-1.5 py-0.5 text-[10px]", VARIABLE_TYPE_COLORS[v.type])}
+              >
+                {v.type}
+              </span>
+            </div>
+          ))}
         </div>
-      ))}
+      ) : (
+        <div className="text-center text-xs text-gray-400">无输出变量</div>
+      )}
     </div>
   );
-};
+}

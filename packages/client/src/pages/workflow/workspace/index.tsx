@@ -1,4 +1,5 @@
 import "@xyflow/react/dist/style.css";
+import "./blocks/init.ts";
 
 import {
   Background,
@@ -14,13 +15,10 @@ import { WorkflowNode } from "./_components/workflow-node";
 import { BlocksSidebar } from "./_layouts/blocks-sidebar";
 import { WorkflowPanel } from "./_layouts/node-panel";
 import { WorkflowToolbar } from "./_layouts/workflow-toolbar";
-import { initializeBlocks } from "./blocks/init.ts";
 import type { WorkflowBlocksType } from "./constants/node.ts";
 import { WORKFLOW } from "./constants/workflow.ts";
 import { createDefaultWorkflow } from "./demo.data.ts";
 import { selectReactFlowProps, useWorkflowStore } from "./store";
-
-initializeBlocks();
 
 const nodeTypes = {
   [WORKFLOW]: WorkflowNode,

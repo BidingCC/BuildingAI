@@ -1,38 +1,17 @@
 /**
- * HTTP 请求方法
+ * HttpBlock 类型定义
  */
-export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD" | "OPTIONS";
 
-/**
- * 认证类型
- */
-export type AuthType = "none" | "bearer" | "basic" | "api_key";
+import type { InputVariable } from "../../types/variable.types";
 
-/**
- * 请求头
- */
-export interface HttpHeader {
-  id: string;
+export interface KeyValue {
   key: string;
   value: string;
   enabled: boolean;
 }
 
-/**
- * 查询参数
- */
-export interface QueryParam {
-  id: string;
-  key: string;
-  value: string;
-  enabled: boolean;
-}
-
-/**
- * 认证配置
- */
 export interface AuthConfig {
-  type: AuthType;
+  type: "none" | "bearer" | "basic" | "api_key";
   token?: string;
   username?: string;
   password?: string;
@@ -40,61 +19,16 @@ export interface AuthConfig {
   apiKeyHeader?: string;
 }
 
-/**
- * 请求体类型
- */
-export type BodyType = "none" | "json" | "form" | "text" | "xml";
-
-/**
- * HTTP Block 数据结构
- */
 export interface HttpBlockData {
-  // 基础配置
-  method: HttpMethod;
+  inputs: InputVariable[];
+  outputs: InputVariable[];
+  method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
   url: string;
-
-  // 请求头
-  headers: HttpHeader[];
-
-  // 查询参数
-  queryParams: QueryParam[];
-
-  // 认证配置
+  headers: KeyValue[];
+  queryParams: KeyValue[];
   auth: AuthConfig;
-
-  // 请求体
-  bodyType: BodyType;
+  bodyType: "none" | "json" | "form" | "raw";
   body?: string;
-
-  // 超时配置（毫秒）
-  timeout?: number;
-
-  // 重试配置
-  retries?: number;
-  retryDelay?: number;
-
-  // 响应处理
-  followRedirects?: boolean;
-  validateStatus?: boolean;
-
-  // 输出配置
-  outputVariable?: string;
-  extractResponse?: "full" | "body" | "headers" | "status";
+  timeout: number;
+  retries: number;
 }
-
-export const HTTP_METHODS: Array<{ value: HttpMethod; label: string; color: string }> = [
-  { value: "GET", label: "GET", color: "bg-green-100 text-green-700" },
-  { value: "POST", label: "POST", color: "bg-blue-100 text-blue-700" },
-  { value: "PUT", label: "PUT", color: "bg-yellow-100 text-yellow-700" },
-  { value: "DELETE", label: "DELETE", color: "bg-red-100 text-red-700" },
-  { value: "PATCH", label: "PATCH", color: "bg-purple-100 text-purple-700" },
-  { value: "HEAD", label: "HEAD", color: "bg-gray-100 text-gray-700" },
-  { value: "OPTIONS", label: "OPTIONS", color: "bg-gray-100 text-gray-700" },
-];
-
-export const AUTH_TYPE_LABELS: Record<AuthType, string> = {
-  none: "无认证",
-  bearer: "Bearer Token",
-  basic: "Basic Auth",
-  api_key: "API Key",
-};

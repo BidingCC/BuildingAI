@@ -8,6 +8,61 @@ export type VariableType =
   | "file"
   | "array[file]";
 
+/**
+ * 变量定义（纯定义，不含值/引用）
+ */
+export interface VariableDefinition {
+  name: string;
+  label: string;
+  type: VariableType;
+  required?: boolean;
+  description?: string;
+  defaultValue?: any;
+}
+
+/**
+ * 变量引用
+ */
+export interface VariableReference {
+  nodeId: string;
+  varName: string;
+}
+
+/**
+ * 输入变量配置（带引用/值）
+ */
+export interface InputVariable extends VariableDefinition {
+  /** 引用上游变量 */
+  ref?: VariableReference;
+  /** 直接值（当不使用引用时） */
+  value?: any;
+}
+
+/**
+ * 可用变量（用于 VariablePicker）
+ */
+export interface AvailableVariable {
+  nodeId: string;
+  nodeName: string;
+  nodeType: string;
+  variable: VariableDefinition;
+}
+
+export interface GroupedVariables {
+  nodeId: string;
+  nodeName: string;
+  nodeType: string;
+  variables: VariableDefinition[];
+}
+
+export const SYSTEM_VARIABLES: VariableDefinition[] = [
+  { name: "sys.user_id", label: "用户 ID", type: "string" },
+  { name: "sys.app_id", label: "应用 ID", type: "string" },
+  { name: "sys.workflow_id", label: "工作流 ID", type: "string" },
+  { name: "sys.workflow_run_id", label: "运行 ID", type: "string" },
+  { name: "sys.timestamp", label: "时间戳", type: "number" },
+];
+
 export const VARIABLE_TYPE_COLORS: Record<VariableType, string> = {
   string: "text-emerald-600 bg-emerald-50 border-emerald-200",
   number: "text-blue-600 bg-blue-50 border-blue-200",
@@ -19,82 +74,16 @@ export const VARIABLE_TYPE_COLORS: Record<VariableType, string> = {
   "array[file]": "text-indigo-600 bg-indigo-50 border-indigo-200",
 };
 
-export const VARIABLE_TYPE_ICONS: Record<VariableType, string> = {
-  string: "s",
-  number: "#",
-  boolean: "b",
-  array: "[]",
-  object: "{}",
-  any: "*",
-  file: "f",
-  "array[file]": "a",
-};
-
-export interface VariableDefinition {
-  name: string;
-  label: string;
-  type: VariableType;
-  required?: boolean;
-  description?: string;
-  defaultValue?: any;
-}
-
-export interface VariableReference {
-  nodeId: string;
-  varName: string;
-}
-
-export type InputVarValue =
-  | {
-      mode: "value";
-      value: any;
-    }
-  | {
-      mode: "reference";
-      ref: VariableReference;
-    };
-
-export interface InputVarConfig {
-  definition: VariableDefinition;
-  value: InputVarValue;
-}
-
-export interface AvailableVariable {
-  nodeId: string;
-  nodeName: string;
-  nodeType: string;
-  variable: VariableDefinition;
-}
-
-export interface GroupedAvailableVariables {
-  nodeId: string;
-  nodeName: string;
-  nodeType: string;
-  variables: VariableDefinition[];
-}
-
-export const SYSTEM_VARIABLES: VariableDefinition[] = [
-  { name: "sys.user_id", label: "用户 ID", type: "string", description: "当前用户的 ID" },
-  { name: "sys.app_id", label: "应用 ID", type: "string", description: "当前应用的 ID" },
-  { name: "sys.workflow_id", label: "工作流 ID", type: "string", description: "当前工作流的 ID" },
-  {
-    name: "sys.workflow_run_id",
-    label: "运行 ID",
-    type: "string",
-    description: "本次运行的唯一 ID",
-  },
-  { name: "sys.timestamp", label: "时间戳", type: "number", description: "当前时间戳（毫秒）" },
+export const VARIABLE_TYPE_OPTIONS: { value: VariableType; label: string }[] = [
+  { value: "string", label: "String" },
+  { value: "number", label: "Number" },
+  { value: "boolean", label: "Boolean" },
+  { value: "array", label: "Array" },
+  { value: "object", label: "Object" },
+  { value: "any", label: "Any" },
+  { value: "file", label: "File" },
+  { value: "array[file]", label: "Array[File]" },
 ];
-
-export function createDefaultInputVarConfig(definition: VariableDefinition): InputVarConfig {
-  return {
-    definition,
-    value: {
-      mode: "value",
-      value: definition.defaultValue ?? getTypeDefaultValue(definition.type),
-    },
-  };
-}
 
 export function getTypeDefaultValue(type: VariableType): any {
   switch (type) {
@@ -114,21 +103,8 @@ export function getTypeDefaultValue(type: VariableType): any {
   }
 }
 
-export function formatVariableRef(
-  ref: VariableReference,
-  availableVars: AvailableVariable[],
-): string {
-  const found = availableVars.find(
-    (v) => v.nodeId === ref.nodeId && v.variable.name === ref.varName,
-  );
-  if (found) {
-    return `${found.nodeName} / ${found.variable.label}`;
-  }
-  return `${ref.nodeId} / ${ref.varName}`;
-}
-
-export function groupAvailableVariables(vars: AvailableVariable[]): GroupedAvailableVariables[] {
-  const grouped = new Map<string, GroupedAvailableVariables>();
+export function groupVariables(vars: AvailableVariable[]): GroupedVariables[] {
+  const grouped = new Map<string, GroupedVariables>();
 
   for (const v of vars) {
     if (!grouped.has(v.nodeId)) {
@@ -143,4 +119,12 @@ export function groupAvailableVariables(vars: AvailableVariable[]): GroupedAvail
   }
 
   return Array.from(grouped.values());
+}
+
+export function createVariable(
+  name: string,
+  type: VariableType = "string",
+  label?: string,
+): VariableDefinition {
+  return { name, label: label || name, type };
 }

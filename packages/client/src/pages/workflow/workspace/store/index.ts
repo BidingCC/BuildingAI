@@ -1,74 +1,59 @@
-import { enableMapSet } from "immer";
 import { create, type StateCreator } from "zustand";
-import { devtools } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 
-import {
-  createVariablesSlice,
-  type VariablesSlice,
-} from "@/pages/workflow/workspace/store/slices/variables.slice.ts";
-import type { AppEdge, AppNode } from "@/pages/workflow/workspace/types.ts";
+import { createEdgesSlice, type EdgesSlice } from "./slices/edges.slice";
+import { createNodesSlice, type NodesSlice } from "./slices/nodes.slice";
 
-import type { EdgesSlice } from "./slices/edges.slice";
-import { createEdgesSlice } from "./slices/edges.slice";
-import type { NodesSlice } from "./slices/nodes.slice";
-import { createNodesSlice } from "./slices/nodes.slice";
-import type { UISlice } from "./slices/ui.slice";
-import { createUISlice } from "./slices/ui.slice";
+// ==================== Store 类型 ====================
 
-enableMapSet();
+export type WorkflowStore = NodesSlice & EdgesSlice;
 
-export type WorkflowStore = NodesSlice & EdgesSlice & UISlice & VariablesSlice;
+// ==================== Store 实例 ====================
 
 export const useWorkflowStore = create<WorkflowStore>()(
-  devtools(
-    immer((...a: Parameters<StateCreator<WorkflowStore>>) => ({
-      ...createNodesSlice(...a),
-      ...createEdgesSlice(...a),
-      ...createUISlice(...a),
-      ...createVariablesSlice(...a),
-    })),
-    { name: "WorkflowStore" },
-  ),
+  immer((...args: Parameters<StateCreator<WorkflowStore>>) => ({
+    ...createNodesSlice(...args),
+    ...createEdgesSlice(...args),
+  })),
 );
 
-export const selectSelectedNode = (state: WorkflowStore) => {
-  if (!state.selectedNodeId) return null;
-  return state.nodesMap.get(state.selectedNodeId) || null;
-};
+// ==================== 选择器 ====================
 
+/**
+ * 选择 ReactFlow 需要的 props
+ */
 export const selectReactFlowProps = (state: WorkflowStore) => ({
   nodes: state.nodes,
   edges: state.edges,
   onNodesChange: state.onNodesChange,
   onEdgesChange: state.onEdgesChange,
   onConnect: state.onConnect,
-  onNodeClick: state.onNodeClick,
 });
 
-export const getStoreState = () => useWorkflowStore.getState();
-
-export const resetWorkflow = () => {
-  const state = useWorkflowStore.getState();
-  state.clearNodes();
-  state.clearEdges();
-  state.selectNode(null);
+/**
+ * 选择当前选中的节点
+ */
+export const selectSelectedNode = (state: WorkflowStore) => {
+  if (!state.selectedNodeId) return null;
+  return state.nodesMap.get(state.selectedNodeId) ?? null;
 };
 
-export const exportWorkflow = () => {
-  const state = useWorkflowStore.getState();
-  return {
-    nodes: state.getAllNodes(),
-    edges: state.getAllEdges(),
-  };
-};
+/**
+ * 选择节点列表
+ */
+export const selectNodes = (state: WorkflowStore) => state.nodes;
 
-export const importWorkflow = (data: { nodes: AppNode[]; edges: AppEdge[] }) => {
-  const state = useWorkflowStore.getState();
+/**
+ * 选择边列表
+ */
+export const selectEdges = (state: WorkflowStore) => state.edges;
 
-  state.clearNodes();
-  state.clearEdges();
+/**
+ * 选择选中的节点 ID
+ */
+export const selectSelectedNodeId = (state: WorkflowStore) => state.selectedNodeId;
 
-  state.addNodes(data.nodes);
-  data.edges.forEach((edge) => state.addEdge(edge));
-};
+// ==================== 导出 ====================
+
+export * from "./slices/edges.slice";
+export * from "./slices/nodes.slice";

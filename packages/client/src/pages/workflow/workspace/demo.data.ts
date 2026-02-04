@@ -1,14 +1,19 @@
 import { nanoid } from "nanoid";
 
-import { blockRegistry } from "./blocks/init";
-import { WorkflowBlocks } from "./constants/node.ts";
-import type { AppEdge } from "./types.ts";
+import { blockRegistry } from "./blocks/base/block.registry";
+import { WorkflowBlocks } from "./constants/node";
+import type { AppEdge, AppNode } from "./types";
 
-export function createDefaultWorkflow() {
-  const nodes = [
-    blockRegistry.get(WorkflowBlocks.Input)!.createNode(0, 0),
-    blockRegistry.get(WorkflowBlocks.Output)!.createNode(500, 0),
-  ];
+export function createDefaultWorkflow(): { nodes: AppNode[]; edges: AppEdge[] } {
+  const inputBlock = blockRegistry.get(WorkflowBlocks.Input);
+  const outputBlock = blockRegistry.get(WorkflowBlocks.Output);
+
+  if (!inputBlock || !outputBlock) {
+    console.warn("Required blocks not registered");
+    return { nodes: [], edges: [] };
+  }
+
+  const nodes = [inputBlock.createNode(100, 200), outputBlock.createNode(500, 200)];
 
   const edges: AppEdge[] = [
     {
@@ -18,8 +23,5 @@ export function createDefaultWorkflow() {
     },
   ];
 
-  return {
-    nodes,
-    edges,
-  };
+  return { nodes, edges };
 }

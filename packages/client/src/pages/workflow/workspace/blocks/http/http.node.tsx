@@ -1,68 +1,52 @@
-import type { BlockNodeComponent } from "../base/block.base";
-import type { HttpBlockData } from "./http.types";
-import { HTTP_METHODS } from "./http.types";
+import { cn } from "@buildingai/ui/lib/utils";
 
-export const HttpNodeComponent: BlockNodeComponent<HttpBlockData> = ({ data }) => {
-  const methodConfig = HTTP_METHODS.find((m) => m.value === data.method);
-  const activeHeaders = data.headers.filter((h) => h.enabled).length;
-  const activeParams = data.queryParams.filter((p) => p.enabled).length;
+import { VARIABLE_TYPE_COLORS } from "../../types/variable.types";
+import type { BlockNodeProps } from "../base/block.base";
+import type { HttpBlockData } from "./http.types";
+
+export function HttpNodeComponent({ data }: BlockNodeProps<HttpBlockData>) {
+  const outputs = data.outputs;
 
   return (
-    <div className="space-y-2 text-xs">
-      {/* HTTP 方法和 URL */}
-      <div className="space-y-1">
-        <div className="flex items-center gap-2">
-          <span className={`rounded px-2 py-1 font-bold ${methodConfig?.color || "bg-gray-100"}`}>
-            {data.method}
-          </span>
-        </div>
-        <div className="rounded border border-gray-200 bg-gray-50 p-2">
-          <div className="break-all text-gray-700">{data.url || "未设置 URL"}</div>
-        </div>
+    <div className="space-y-2 p-3">
+      <div className="flex items-center gap-2 text-xs">
+        <span className="rounded bg-blue-100 px-1.5 py-0.5 font-mono text-blue-700">
+          {data.method}
+        </span>
+        <span className="truncate text-gray-500">{data.url || "未配置"}</span>
       </div>
 
-      {/* 请求配置概览 */}
-      <div className="grid grid-cols-2 gap-2">
-        {/* 请求头数量 */}
-        {activeHeaders > 0 && (
-          <div className="flex items-center gap-1 rounded bg-blue-50 px-2 py-1">
-            <span className="text-blue-700">📋</span>
-            <span className="text-blue-700">{activeHeaders} 个请求头</span>
+      {data.inputs?.length > 0 && (
+        <div className="border-t pt-2">
+          <div className="mb-1 text-[10px] text-gray-400">输入</div>
+          <div className="space-y-1">
+            {data.inputs.map((v) => (
+              <div key={v.name} className="flex items-center justify-between text-xs">
+                <span className="text-gray-600">{v.label || v.name}</span>
+                <span
+                  className={cn("rounded px-1 py-0.5 text-[10px]", VARIABLE_TYPE_COLORS[v.type])}
+                >
+                  {v.type}
+                </span>
+              </div>
+            ))}
           </div>
-        )}
-
-        {/* 查询参数数量 */}
-        {activeParams > 0 && (
-          <div className="flex items-center gap-1 rounded bg-green-50 px-2 py-1">
-            <span className="text-green-700">🔗</span>
-            <span className="text-green-700">{activeParams} 个参数</span>
-          </div>
-        )}
-
-        {/* 认证类型 */}
-        {data.auth.type !== "none" && (
-          <div className="flex items-center gap-1 rounded bg-purple-50 px-2 py-1">
-            <span className="text-purple-700">🔐</span>
-            <span className="text-purple-700">{data.auth.type}</span>
-          </div>
-        )}
-
-        {/* 请求体类型 */}
-        {data.bodyType !== "none" && (
-          <div className="flex items-center gap-1 rounded bg-yellow-50 px-2 py-1">
-            <span className="text-yellow-700">📦</span>
-            <span className="text-yellow-700">{data.bodyType.toUpperCase()}</span>
-          </div>
-        )}
-      </div>
-
-      {/* 超时和重试 */}
-      {(data.timeout || data.retries) && (
-        <div className="flex items-center gap-2 text-gray-600">
-          {data.timeout && <span>⏱️ {data.timeout}ms</span>}
-          {data.retries && <span>🔄 {data.retries} 次重试</span>}
         </div>
       )}
+
+      <div className="border-t pt-2">
+        <div className="mb-1 text-[10px] text-gray-400">输出</div>
+        <div className="space-y-1">
+          {outputs.map((v) => (
+            <div key={v.name} className="flex items-center justify-between text-xs">
+              <span className="text-gray-600">{v.label}</span>
+              <span className={cn("rounded px-1 py-0.5 text-[10px]", VARIABLE_TYPE_COLORS[v.type])}>
+                {v.type}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
-};
+}

@@ -1,13 +1,6 @@
-import type { VariableReference, VariableType } from "../../types/variable.types";
-
-export interface OutputVarConfig {
-  name: string;
-  label: string;
-  type: VariableType;
-  ref: VariableReference;
-}
+import type { InputVariable } from "../../types/variable.types";
 
 export interface OutputBlockData {
-  outputs: OutputVarConfig[];
-  format?: "json" | "text" | "html";
+  inputs: InputVariable[];
+  format: "json" | "text";
 }

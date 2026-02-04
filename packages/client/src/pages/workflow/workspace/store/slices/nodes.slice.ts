@@ -1,167 +1,150 @@
 import type { OnNodesChange } from "@xyflow/react";
 import { applyNodeChanges } from "@xyflow/react";
-import { produce } from "immer";
 import type { StateCreator } from "zustand";
 
-import { blockRegistry } from "../../blocks/init";
-import type { WorkflowBlocksType } from "../../constants/node.ts";
-import type { AppNode } from "../../types";
+import { blockRegistry } from "../../blocks/base/block.registry";
+import type { WorkflowBlocksType } from "../../constants/node";
+import type { AppNode } from "../../types/node.types";
 
 export interface NodesSliceState {
-  nodesMap: Map<string, AppNode>;
+  /** 节点列表 */
   nodes: AppNode[];
+  /** 节点 Map（用于 O(1) 查找） */
+  nodesMap: Map<string, AppNode>;
+  /** 选中的节点 ID */
+  selectedNodeId: string | null;
 }
 
 export interface NodesSliceActions {
-  onNodesChange: OnNodesChange<AppNode>;
+  // 基础操作
+  setNodes: (nodes: AppNode[]) => void;
   addNode: (node: AppNode) => void;
   addNodes: (nodes: AppNode[]) => void;
-  updateNode: (id: string, updates: Partial<AppNode>) => void;
-  updateNodeData: (id: string, data: any) => void;
-  deleteNode: (id: string) => void;
-  getNode: (id: string) => AppNode | undefined;
-  getAllNodes: () => AppNode[];
-  getNodesByType: (type: WorkflowBlocksType) => AppNode[];
+  removeNode: (id: string) => void;
   clearNodes: () => void;
-  createNode: (params: {
-    x: number;
-    y: number;
-    type: WorkflowBlocksType;
-    initialData?: any;
-  }) => void;
-  validateWorkflow: () => { valid: boolean; errors: string[] };
+
+  // 节点数据更新
+  updateNode: (id: string, updates: Partial<AppNode>) => void;
+  updateNodeData: (id: string, dataUpdates: Record<string, any>) => void;
+
+  // 选择操作
+  selectNode: (id: string | null) => void;
+  setSelectedNodeId: (id: string | null) => void;
+
+  // 创建节点
+  createNode: (params: { x: number; y: number; type: WorkflowBlocksType }) => AppNode | null;
+
+  // ReactFlow 集成
+  onNodesChange: OnNodesChange<AppNode>;
 }
 
 export type NodesSlice = NodesSliceState & NodesSliceActions;
 
-export const createNodesSlice: StateCreator<NodesSlice> = (set, get) => ({
-  nodesMap: new Map(),
+/**
+ * 根据节点数组创建 Map
+ */
+function createNodesMap(nodes: AppNode[]): Map<string, AppNode> {
+  return new Map(nodes.map((node) => [node.id, node]));
+}
+
+export const createNodesSlice: StateCreator<NodesSlice, [], [], NodesSlice> = (set, get) => ({
+  // 状态
   nodes: [],
+  nodesMap: new Map(),
+  selectedNodeId: null,
 
-  onNodesChange: (changes) => {
-    set(
-      produce<NodesSliceState>((draft) => {
-        const updatedNodes = applyNodeChanges(changes, draft.nodes);
+  // 设置节点列表
+  setNodes: (nodes) =>
+    set({
+      nodes,
+      nodesMap: createNodesMap(nodes),
+    }),
 
-        draft.nodesMap.clear();
-        updatedNodes.forEach((node: AppNode) => {
-          draft.nodesMap.set(node.id, node);
-        });
-        draft.nodes = updatedNodes;
-      }),
-    );
-  },
+  // 添加单个节点
+  addNode: (node) =>
+    set((state) => {
+      const newNodes = [...state.nodes, node];
+      return {
+        nodes: newNodes,
+        nodesMap: createNodesMap(newNodes),
+      };
+    }),
 
-  addNode: (node) => {
-    set(
-      produce((draft) => {
-        draft.nodesMap.set(node.id, node);
-        draft.nodes = Array.from(draft.nodesMap.values());
-      }),
-    );
-  },
+  // 批量添加节点
+  addNodes: (nodes) =>
+    set((state) => {
+      const newNodes = [...state.nodes, ...nodes];
+      return {
+        nodes: newNodes,
+        nodesMap: createNodesMap(newNodes),
+      };
+    }),
 
-  addNodes: (nodes) => {
-    set(
-      produce<NodesSliceState>((draft) => {
-        nodes.forEach((node) => {
-          draft.nodesMap.set(node.id, node);
-        });
-        draft.nodes = Array.from(draft.nodesMap.values());
-      }),
-    );
-  },
+  // 删除节点
+  removeNode: (id) =>
+    set((state) => {
+      const newNodes = state.nodes.filter((node) => node.id !== id);
+      return {
+        nodes: newNodes,
+        nodesMap: createNodesMap(newNodes),
+        selectedNodeId: state.selectedNodeId === id ? null : state.selectedNodeId,
+      };
+    }),
 
-  updateNode: (id, updates) => {
-    set(
-      produce((draft) => {
-        const node = draft.nodesMap.get(id);
-        if (node) {
-          Object.assign(node, updates);
-          draft.nodes = Array.from(draft.nodesMap.values());
-        }
-      }),
-    );
-  },
+  // 清空节点
+  clearNodes: () =>
+    set({
+      nodes: [],
+      nodesMap: new Map(),
+      selectedNodeId: null,
+    }),
 
-  updateNodeData: (id, data) => {
-    set(
-      produce<NodesSliceState>((draft) => {
-        const node = draft.nodesMap.get(id);
-        if (node) {
-          Object.assign(node.data, data);
-          draft.nodes = Array.from(draft.nodesMap.values());
-        }
-      }),
-    );
-  },
+  // 更新节点
+  updateNode: (id, updates) =>
+    set((state) => {
+      const newNodes = state.nodes.map((node) => (node.id === id ? { ...node, ...updates } : node));
+      return {
+        nodes: newNodes,
+        nodesMap: createNodesMap(newNodes),
+      };
+    }),
 
-  deleteNode: (id) => {
-    set(
-      produce<NodesSliceState>((draft) => {
-        draft.nodesMap.delete(id);
-        draft.nodes = Array.from(draft.nodesMap.values());
-      }),
-    );
-  },
+  // 更新节点数据
+  updateNodeData: (id, dataUpdates) =>
+    set((state) => {
+      const newNodes = state.nodes.map((node) =>
+        node.id === id ? { ...node, data: { ...node.data, ...dataUpdates } } : node,
+      );
+      return {
+        nodes: newNodes,
+        nodesMap: createNodesMap(newNodes),
+      };
+    }),
 
-  getNode: (id) => {
-    return get().nodesMap.get(id);
-  },
+  // 选择节点
+  selectNode: (id) => set({ selectedNodeId: id }),
+  setSelectedNodeId: (id) => set({ selectedNodeId: id }),
 
-  getAllNodes: () => {
-    return Array.from(get().nodesMap.values());
-  },
-
-  getNodesByType: (type) => {
-    return Array.from(get().nodesMap.values()).filter((node) => node.data.type === type);
-  },
-
-  clearNodes: () => {
-    set(
-      produce((draft) => {
-        draft.nodesMap.clear();
-        draft.nodes = [];
-      }),
-    );
-  },
-
-  createNode: (params) => {
-    const block = blockRegistry.get(params.type);
-
+  // 创建节点
+  createNode: ({ x, y, type }) => {
+    const block = blockRegistry.get(type);
     if (!block) {
-      console.error(`Block type "${params.type}" not found in registry`);
-      return;
+      console.warn(`Block type "${type}" not found in registry`);
+      return null;
     }
 
-    const newNode = block.createNode(params.x, params.y, params.initialData);
-    get().addNode(newNode);
+    const node = block.createNode(x, y);
+    get().addNode(node);
+    return node;
   },
 
-  validateWorkflow: () => {
-    const { nodesMap } = get();
-    const errors: string[] = [];
-
-    nodesMap.forEach((node) => {
-      const block = blockRegistry.get(node.data.type);
-
-      if (!block) {
-        errors.push(`节点 ${node.id}: Block type "${node.data.type}" 未注册`);
-        return;
-      }
-
-      const validation = block.validate(node.data);
-
-      if (!validation.valid && validation.errors) {
-        validation.errors.forEach((error: any) => {
-          errors.push(`节点 ${node.data.name} (${node.id}): ${error}`);
-        });
-      }
-    });
-
-    return {
-      valid: errors.length === 0,
-      errors,
-    };
-  },
+  // ReactFlow 节点变化处理
+  onNodesChange: (changes) =>
+    set((state) => {
+      const newNodes = applyNodeChanges(changes, state.nodes);
+      return {
+        nodes: newNodes,
+        nodesMap: createNodesMap(newNodes),
+      };
+    }),
 });

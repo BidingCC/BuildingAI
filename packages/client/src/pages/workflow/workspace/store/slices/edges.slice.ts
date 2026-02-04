@@ -1,98 +1,66 @@
-import type { OnConnect, OnEdgesChange } from "@xyflow/react";
-import { addEdge, applyEdgeChanges } from "@xyflow/react";
-import { produce } from "immer";
+import type { Connection, OnConnect, OnEdgesChange } from "@xyflow/react";
+import { addEdge as addReactFlowEdge, applyEdgeChanges } from "@xyflow/react";
+import { nanoid } from "nanoid";
 import type { StateCreator } from "zustand";
 
-import type { AppEdge } from "../../types";
+import type { AppEdge } from "../../types/node.types";
 
 export interface EdgesSliceState {
-  edgesMap: Map<string, AppEdge>;
+  /** 边列表 */
   edges: AppEdge[];
 }
 
 export interface EdgesSliceActions {
-  onEdgesChange: OnEdgesChange;
-  onConnect: OnConnect;
+  // 基础操作
+  setEdges: (edges: AppEdge[]) => void;
   addEdge: (edge: AppEdge) => void;
-  deleteEdge: (id: string) => void;
-  deleteEdgesByNode: (nodeId: string) => void;
-  getAllEdges: () => AppEdge[];
+  removeEdge: (id: string) => void;
   clearEdges: () => void;
+
+  // ReactFlow 集成
+  onEdgesChange: OnEdgesChange<AppEdge>;
+  onConnect: OnConnect;
 }
 
 export type EdgesSlice = EdgesSliceState & EdgesSliceActions;
 
-export const createEdgesSlice: StateCreator<EdgesSlice> = (set, get) => ({
-  edgesMap: new Map(),
+export const createEdgesSlice: StateCreator<EdgesSlice, [], [], EdgesSlice> = (set) => ({
+  // 状态
   edges: [],
 
-  onEdgesChange: (changes) => {
-    set(
-      produce<EdgesSliceState>((draft) => {
-        const updatedEdges = applyEdgeChanges(changes, draft.edges);
+  // 设置边列表
+  setEdges: (edges) => set({ edges }),
 
-        draft.edgesMap.clear();
-        updatedEdges.forEach((edge: AppEdge) => {
-          draft.edgesMap.set(edge.id, edge);
-        });
-        draft.edges = updatedEdges;
-      }),
-    );
-  },
+  // 添加边
+  addEdge: (edge) =>
+    set((state) => ({
+      edges: [...state.edges, edge],
+    })),
 
-  onConnect: (connection) => {
-    set(
-      produce<EdgesSliceState>((draft) => {
-        const newEdges = addEdge(connection, draft.edges);
+  // 删除边
+  removeEdge: (id) =>
+    set((state) => ({
+      edges: state.edges.filter((edge) => edge.id !== id),
+    })),
 
-        draft.edgesMap.clear();
-        newEdges.forEach((edge: AppEdge) => {
-          draft.edgesMap.set(edge.id, edge);
-        });
-        draft.edges = newEdges;
-      }),
-    );
-  },
+  // 清空边
+  clearEdges: () => set({ edges: [] }),
 
-  addEdge: (edge) => {
-    set(
-      produce<EdgesSliceState>((draft) => {
-        draft.edgesMap.set(edge.id, edge);
-        draft.edges = Array.from(draft.edgesMap.values());
-      }),
-    );
-  },
+  // ReactFlow 边变化处理
+  onEdgesChange: (changes) =>
+    set((state) => ({
+      edges: applyEdgeChanges(changes, state.edges),
+    })),
 
-  deleteEdge: (id) => {
-    set(
-      produce<EdgesSliceState>((draft) => {
-        draft.edgesMap.delete(id);
-        draft.edges = Array.from(draft.edgesMap.values());
-      }),
-    );
-  },
-
-  deleteEdgesByNode: (nodeId) => {
-    set(
-      produce<EdgesSliceState>((draft) => {
-        for (const [id, edge] of draft.edgesMap) {
-          if (edge.source === nodeId || edge.target === nodeId) {
-            draft.edgesMap.delete(id);
-          }
-        }
-        draft.edges = Array.from(draft.edgesMap.values());
-      }),
-    );
-  },
-
-  getAllEdges: () => get().edges,
-
-  clearEdges: () => {
-    set(
-      produce<EdgesSliceState>((draft) => {
-        draft.edgesMap.clear();
-        draft.edges = [];
-      }),
-    );
-  },
+  // ReactFlow 连接处理
+  onConnect: (connection: Connection) =>
+    set((state) => ({
+      edges: addReactFlowEdge(
+        {
+          ...connection,
+          id: nanoid(),
+        },
+        state.edges,
+      ),
+    })),
 });
