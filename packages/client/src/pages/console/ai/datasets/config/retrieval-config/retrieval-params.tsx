@@ -4,6 +4,7 @@ import { Input } from "@buildingai/ui/components/ui/input";
 import { Label } from "@buildingai/ui/components/ui/label";
 import { Slider } from "@buildingai/ui/components/ui/slider";
 import { Switch } from "@buildingai/ui/components/ui/switch";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@buildingai/ui/components/ui/tooltip";
 import { cn } from "@buildingai/ui/lib/utils";
 import { HelpCircle, Layers, Scale } from "lucide-react";
 
@@ -44,37 +45,55 @@ const TopKField = ({ value, onChange }: Props) => (
   </div>
 );
 
-const ScoreThresholdField = ({ value, onChange }: Props) => (
-  <div className="space-y-2">
-    <div className="flex items-center gap-1">
-      <Label>Score 阈值</Label>
-      <HelpCircle className="text-muted-foreground size-3.5" />
+const ScoreThresholdField = ({ value, onChange }: Props) => {
+  const enabled = value.scoreThresholdEnabled ?? false;
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1">
+          <Label>Score 阈值</Label>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button type="button" className="text-muted-foreground hover:text-foreground">
+                <HelpCircle className="size-3.5" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>用于设置文本片段筛选的相似度阈值。</TooltipContent>
+          </Tooltip>
+        </div>
+        <Switch
+          checked={enabled}
+          onCheckedChange={(v) => onChange((r) => ({ ...r, scoreThresholdEnabled: v }))}
+        />
+      </div>
+      <div className={cn("flex items-center gap-3", !enabled && "opacity-50")}>
+        <Slider
+          min={0}
+          max={1}
+          step={0.05}
+          value={[value.scoreThreshold ?? 0.5]}
+          onValueChange={([v]) => onChange((r) => ({ ...r, scoreThreshold: v }))}
+          disabled={!enabled}
+        />
+        <Input
+          type="number"
+          min={0}
+          max={1}
+          step={0.05}
+          className="w-16"
+          value={value.scoreThreshold ?? 0.5}
+          onChange={(e) =>
+            onChange((r) => ({
+              ...r,
+              scoreThreshold: Math.min(1, Math.max(0, Number(e.target.value) || 0)),
+            }))
+          }
+          disabled={!enabled}
+        />
+      </div>
     </div>
-    <div className="flex items-center gap-3">
-      <Slider
-        min={0}
-        max={1}
-        step={0.05}
-        value={[value.scoreThreshold ?? 0.5]}
-        onValueChange={([v]) => onChange((r) => ({ ...r, scoreThreshold: v }))}
-      />
-      <Input
-        type="number"
-        min={0}
-        max={1}
-        step={0.05}
-        className="w-16"
-        value={value.scoreThreshold ?? 0.5}
-        onChange={(e) =>
-          onChange((r) => ({
-            ...r,
-            scoreThreshold: Math.min(1, Math.max(0, Number(e.target.value) || 0)),
-          }))
-        }
-      />
-    </div>
-  </div>
-);
+  );
+};
 
 export function RetrievalParams({ value, onChange }: Props) {
   const isVector = value.retrievalMode === RETRIEVAL_MODE.VECTOR;
