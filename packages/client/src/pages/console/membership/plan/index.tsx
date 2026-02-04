@@ -151,7 +151,7 @@ const MembershipPlanIndexPage = () => {
   };
 
   return (
-    <PageContainer className="h-[calc(100vh-6.25rem)]">
+    <PageContainer className="h-inset">
       <div className="flex h-full w-full flex-col gap-6">
         <div className="flex h-full flex-1 flex-col gap-2">
           <div className="flex items-center justify-between">

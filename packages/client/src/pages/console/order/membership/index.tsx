@@ -204,7 +204,7 @@ const OrderMembershipIndexPage = () => {
   };
 
   return (
-    <PageContainer className="mx-0 md:h-[calc(100vh-6.25rem)]">
+    <PageContainer className="md:h-inset mx-0">
       <div className="flex h-full w-full flex-col">
         <div className="grid grid-cols-1 gap-4 px-4 pt-px md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {statisticsItems.map((item, index) => (

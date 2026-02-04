@@ -92,9 +92,7 @@ const AppNavbar = () => {
           </TooltipContent>
         </Tooltip>
 
-        <div>
-          <Separator orientation="vertical" className="mx-0.5 data-[orientation=vertical]:h-3.5" />
-        </div>
+        <Separator orientation="vertical" className="mx-0.5 data-[orientation=vertical]:h-3.5" />
         <Breadcrumb>
           <BreadcrumbList>
             {breadcrumbItems.map((item, index) => {
