@@ -5,6 +5,7 @@
 @import "./theme.css";
 
 @source "../components";
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark, .dark *));
 
