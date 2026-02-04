@@ -7,6 +7,7 @@ import { Button } from "@buildingai/ui/components/ui/button";
 import { ChevronRight, CircleDollarSign, Info } from "lucide-react";
 import { useState } from "react";
 
+import { PowerDetailDialog } from "./power-detail-dialog";
 import { RechargeDetailDialog } from "./recharge-detail-dialog";
 
 function formatPrice(amount: number) {
@@ -18,6 +19,7 @@ const WalletSetting = () => {
   const { data: center, isLoading } = useRechargeCenterQuery();
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedRule, setSelectedRule] = useState<RechargeRuleItem | null>(null);
+  const [powerDetailOpen, setPowerDetailOpen] = useState(false);
 
   const rechargeRule = center?.rechargeRule ?? [];
   const payWayList = center?.payWayList ?? [];
@@ -44,6 +46,7 @@ const WalletSetting = () => {
             size="xs"
             variant="ghost"
             className="hover:bg-primary-foreground/15 text-primary-foreground hover:text-primary-foreground px-0 text-xs hover:px-1.5"
+            onClick={() => setPowerDetailOpen(true)}
           >
             <Info />
             积分明细
@@ -70,7 +73,7 @@ const WalletSetting = () => {
               >
                 {rule.label && (
                   <Badge
-                    className="absolute -top-px -right-px rounded-none rounded-tr-lg rounded-bl-lg border-0 px-2 py-0.5 text-[10px] font-medium shadow-lg shadow-none"
+                    className="absolute -top-px -right-px rounded-none rounded-tr-lg rounded-bl-lg border-0 px-2 py-0.5 text-[10px] font-medium shadow-none"
                     variant="default"
                   >
                     {rule.label}
@@ -107,6 +110,8 @@ const WalletSetting = () => {
         payWayList={payWayList}
         rechargeExplain={rechargeExplain}
       />
+
+      <PowerDetailDialog open={powerDetailOpen} onOpenChange={setPowerDetailOpen} />
     </div>
   );
 };
