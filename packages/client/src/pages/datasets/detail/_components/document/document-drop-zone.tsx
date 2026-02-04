@@ -1,7 +1,7 @@
 import { cn } from "@buildingai/ui/lib/utils";
 import { Upload as UploadIcon } from "lucide-react";
 
-import { SUPPORTED_FORMATS } from "../../constants";
+const SUPPORTED_FORMATS = "支持 docx、xlsx、pptx、pdf、csv、md 等格式";
 
 export interface DocumentDropZoneProps {
   isOver: boolean;

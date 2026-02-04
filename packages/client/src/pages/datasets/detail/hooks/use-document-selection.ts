@@ -1,6 +1,12 @@
 import { useCallback, useMemo, useState } from "react";
 
-import type { DocumentSelectionState } from "../types";
+interface DocumentSelectionState {
+  selectedIds: string[];
+  toggleSelect: (id: string) => void;
+  selectAll: (ids: string[]) => void;
+  clearSelection: () => void;
+  isSelected: (id: string) => boolean;
+}
 
 export function useDocumentSelection(): DocumentSelectionState {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);

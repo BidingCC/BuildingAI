@@ -5,15 +5,16 @@ import {
   usePublishDatasetToSquare,
   useUnpublishDatasetFromSquare,
 } from "@buildingai/services/web";
-import { useQueryClient } from "@tanstack/react-query";
 import { Avatar, AvatarFallback, AvatarImage } from "@buildingai/ui/components/ui/avatar";
 import { Button } from "@buildingai/ui/components/ui/button";
 import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog";
-import { ChevronLeft } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { ChevronLeft, FileStack } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
+import { useDocSidebar } from "../../_layouts";
 import { MemberDialog } from "../dialogs/member-dialog";
 import { PublishDialog } from "../dialogs/publish-dialog";
 import { HeaderActions } from "./header-actions";
@@ -24,6 +25,7 @@ export interface ContentHeaderProps {
 
 export function ContentHeader({ dataset }: ContentHeaderProps) {
   const navigate = useNavigate();
+  const docSidebar = useDocSidebar();
   const [memberDialogOpen, setMemberDialogOpen] = useState(false);
   const [publishDialogOpen, setPublishDialogOpen] = useState(false);
 
@@ -100,10 +102,20 @@ export function ContentHeader({ dataset }: ContentHeaderProps) {
   return (
     <>
       <header className="flex h-16 shrink-0 items-center justify-between gap-2 px-4 pl-2">
-        <div className="flex items-center gap-1">
+        <div className="flex min-w-0 flex-1 items-center gap-1">
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
             <ChevronLeft />
           </Button>
+          {docSidebar && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={docSidebar.openDocSidebar}
+              title="文档列表"
+            >
+              <FileStack className="size-4" />
+            </Button>
+          )}
           <DatasetInfo
             title={title}
             avatar={avatar}

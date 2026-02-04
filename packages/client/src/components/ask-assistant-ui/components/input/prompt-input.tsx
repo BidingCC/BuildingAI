@@ -39,6 +39,8 @@ import { useFileUpload } from "../../hooks/use-file-upload";
 import type { Model } from "../../types";
 import { McpSelector } from "../mcp-selector";
 
+export type PromptInputHiddenTool = "more" | "speech" | "quickMenu" | "mcp";
+
 export interface PromptInputProps {
   textareaRef?: RefObject<HTMLTextAreaElement | null>;
   status?: "submitted" | "streaming" | "ready" | "error";
@@ -49,13 +51,12 @@ export interface PromptInputProps {
   onStop?: () => void;
   globalDrop?: boolean;
   multiple?: boolean;
-  /** 可选，不传时从 context 获取（若在 AssistantProvider 内） */
   models?: Model[];
   selectedModelId?: string;
   selectedMcpServerIds?: string[];
   onSelectMcpServers?: (ids: string[]) => void;
   onSetFeature?: (key: string, value: boolean) => void;
-  /** 渲染在输入区工具栏前部的插槽，如模型选择器等 */
+  hiddenTools?: PromptInputHiddenTool[];
   children?: ReactNode;
 }
 
@@ -101,6 +102,7 @@ const PromptInputInner = memo(
     selectedMcpServerIds: selectedMcpServerIdsProp,
     onSelectMcpServers: onSelectMcpServersProp,
     onSetFeature: onSetFeatureProp,
+    hiddenTools = [],
     children,
   }: PromptInputProps) => {
     const context = useContext(AssistantContext);
@@ -114,6 +116,8 @@ const PromptInputInner = memo(
       () => models.find((m) => m.id === selectedModelId),
       [models, selectedModelId],
     );
+
+    const hiddenSet = useMemo(() => new Set<PromptInputHiddenTool>(hiddenTools), [hiddenTools]);
 
     const [selectedMenuItem, setSelectedMenuItem] = useState<SelectedMenuItem>(null);
 
@@ -213,7 +217,7 @@ const PromptInputInner = memo(
         </AIPromptInputBody>
         <AIPromptInputFooter>
           <AIPromptInputTools>
-            {availableFileTypes.length > 0 && (
+            {availableFileTypes.length > 0 && !hiddenSet.has("more") && (
               <DropdownMenu>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -258,17 +262,19 @@ const PromptInputInner = memo(
                 <X size={14} className="ml-1" />
               </AIPromptInputButton>
             )}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div>
-                  <AIPromptInputSpeechButton textareaRef={textareaRef} />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>听写</p>
-              </TooltipContent>
-            </Tooltip>
-            {quickMenuMcpServer && (
+            {!hiddenSet.has("speech") && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div>
+                    <AIPromptInputSpeechButton textareaRef={textareaRef} />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>听写</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+            {quickMenuMcpServer && !hiddenSet.has("quickMenu") && (
               <AIPromptInputButton
                 onClick={handleQuickMenuClick}
                 className={
@@ -281,7 +287,7 @@ const PromptInputInner = memo(
                 <span>{quickMenuMcpServer.name || "Search"}</span>
               </AIPromptInputButton>
             )}
-            {!isLoadingMcpServers && (
+            {!hiddenSet.has("mcp") && !isLoadingMcpServers && (
               <McpSelector
                 mcpServers={mcpServers}
                 selectedMcpServerIds={selectedMcpServerIds}
@@ -320,6 +326,7 @@ export const PromptInput = memo((props: PromptInputProps) => {
     selectedMcpServerIds,
     onSelectMcpServers,
     onSetFeature,
+    hiddenTools,
     children,
   } = props;
 
@@ -337,6 +344,7 @@ export const PromptInput = memo((props: PromptInputProps) => {
         selectedMcpServerIds={selectedMcpServerIds}
         onSelectMcpServers={onSelectMcpServers}
         onSetFeature={onSetFeature}
+        hiddenTools={hiddenTools}
       >
         {children}
       </PromptInputInner>

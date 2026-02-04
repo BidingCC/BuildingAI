@@ -1,7 +1,7 @@
 import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import type { DropPhase } from "../types";
+type DropPhase = "idle" | "over" | "left";
 
 const isFilesTransfer = (dt: DataTransfer) => dt.types.includes("Files");
 

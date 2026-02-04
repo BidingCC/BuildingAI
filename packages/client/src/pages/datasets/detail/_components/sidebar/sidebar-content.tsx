@@ -1,4 +1,4 @@
-import type { Dataset, DatasetsDocument } from "@buildingai/services/web";
+import type { Dataset, DatasetsDocument, DocumentSortBy } from "@buildingai/services/web";
 import {
   useBatchDeleteDatasetsDocuments,
   useDeleteDatasetsDocument,
@@ -12,7 +12,6 @@ import { useCallback, useState } from "react";
 import { bytesToReadable } from "@/utils/format";
 
 import { useDocumentDrop, useDocumentSelection } from "../../hooks";
-import type { DocumentSortBy } from "../../types";
 import { CopyDialog } from "../dialogs/copy-dialog";
 import { EditTagsDialog, type EditTagsDialogMode } from "../dialogs/edit-tags-dialog";
 import { MoveDialog } from "../dialogs/move-dialog";
