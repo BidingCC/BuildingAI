@@ -12,52 +12,25 @@ import type { Request } from "express";
 
 import { DatasetMemberService } from "../services/datasets-member.service";
 
-/**
- * 知识库权限装饰器元数据键
- */
 export const DATASET_PERMISSION_KEY = "dataset_permission";
 
-/**
- * 资源类型枚举
- */
 export enum ResourceType {
     DOCUMENT = "document",
     SEGMENT = "segment",
 }
 
-/**
- * 知识库权限选项
- */
 export interface DatasetPermissionOptions {
-    /**
-     * 权限代码
-     */
     permission: keyof (typeof TEAM_ROLE_PERMISSIONS)[keyof typeof TEAM_ROLE_PERMISSIONS];
 
-    /**
-     * 数据集ID参数名（默认为 'datasetId'）
-     */
     datasetIdParam?: string;
 
-    /**
-     * 是否检查资源所有权（编辑者只能操作自己创建的资源）
-     */
     checkOwnership?: boolean;
 
-    /**
-     * 资源类型（用于检查所有权）
-     */
     resourceType?: ResourceType;
 
-    /**
-     * 资源ID参数名（用于所有权检查，默认为 'documentId'）
-     */
     resourceIdParam?: string;
 }
 
-/**
- * 知识库权限装饰器
- */
 export const DatasetPermission = (options: DatasetPermissionOptions) => {
     return function (target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) {
         Reflect.defineMetadata(DATASET_PERMISSION_KEY, options, descriptor.value);
@@ -65,11 +38,6 @@ export const DatasetPermission = (options: DatasetPermissionOptions) => {
     };
 };
 
-/**
- * 知识库权限守卫
- *
- * 验证用户是否具有在特定知识库中执行操作的权限；未加 @DatasetPermission 的接口不校验。
- */
 @Injectable()
 export class DatasetPermissionGuard implements CanActivate {
     constructor(

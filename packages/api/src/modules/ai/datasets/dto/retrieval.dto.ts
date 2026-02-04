@@ -1,9 +1,6 @@
 import { Type } from "class-transformer";
 import { IsNumber, IsOptional, IsString, Max, Min } from "class-validator";
 
-/**
- * 检索请求 DTO
- */
 export class RetrieveDto {
     @IsString({ message: "query 必须是字符串" })
     query: string;

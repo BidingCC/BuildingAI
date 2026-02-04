@@ -15,7 +15,6 @@ import {
     ValidateNested,
 } from "class-validator";
 
-/** 知识库对话状态 */
 export enum DatasetsConversationStatus {
     ACTIVE = "active",
     COMPLETED = "completed",
@@ -23,7 +22,6 @@ export enum DatasetsConversationStatus {
     CANCELLED = "cancelled",
 }
 
-/** 创建知识库对话 DTO */
 export class CreateDatasetsChatRecordDto {
     @IsOptional()
     @IsString()
@@ -44,7 +42,6 @@ export class CreateDatasetsChatRecordDto {
     config?: Record<string, any>;
 }
 
-/** 更新知识库对话 DTO */
 export class UpdateDatasetsChatRecordDto {
     @IsOptional()
     @IsString()
@@ -65,7 +62,6 @@ export class UpdateDatasetsChatRecordDto {
     config?: Record<string, any>;
 }
 
-/** 查询知识库对话 DTO */
 export class QueryDatasetsChatRecordDto extends PaginationDto {
     @IsOptional()
     @IsEnum(DatasetsConversationStatus)
@@ -77,7 +73,6 @@ export class QueryDatasetsChatRecordDto extends PaginationDto {
     keyword?: string;
 }
 
-/** Token 使用 DTO（与 ai-chat 对齐） */
 export class TokenUsageDto {
     @IsOptional()
     @IsInt()
@@ -122,7 +117,6 @@ export class TokenUsageDto {
     raw?: Record<string, unknown>;
 }
 
-/** 创建知识库对话消息 DTO */
 export class CreateDatasetsMessageDto {
     @IsUUID()
     modelId: string;
@@ -148,7 +142,6 @@ export class CreateDatasetsMessageDto {
     tokens?: TokenUsageDto;
 }
 
-/** 更新知识库对话消息 DTO */
 export class UpdateDatasetsMessageDto {
     @IsOptional()
     @IsObject()
@@ -168,7 +161,6 @@ export class UpdateDatasetsMessageDto {
     tokens?: TokenUsageDto;
 }
 
-/** 知识库对话流式参数（内部使用，与 ChatCompletionParams 对齐） */
 export interface DatasetsChatCompletionParams {
     datasetId: string;
     userId: string;
@@ -185,7 +177,6 @@ export interface DatasetsChatCompletionParams {
     feature?: Record<string, boolean>;
 }
 
-/** 知识库对话流式请求 DTO（参考 ai-chat ChatRequestDto） */
 export class DatasetsChatRequestDto {
     @ValidateIf((o) => !o.messages)
     @IsArray()

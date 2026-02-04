@@ -4,11 +4,6 @@ import { DatasetsDocument } from "@buildingai/db/entities";
 import { In, Repository } from "@buildingai/db/typeorm";
 import { Injectable, Logger } from "@nestjs/common";
 
-/**
- * 向量化触发服务
- *
- * 封装入队逻辑：单文档 vectorize_document、按知识库批量入队（每个待处理文档一个 Job）
- */
 @Injectable()
 export class VectorizationTriggerService {
     private readonly logger = new Logger(VectorizationTriggerService.name);
@@ -19,9 +14,6 @@ export class VectorizationTriggerService {
         private readonly documentRepository: Repository<DatasetsDocument>,
     ) {}
 
-    /**
-     * 入队单文档向量化任务
-     */
     async triggerDocument(datasetId: string, documentId: string): Promise<void> {
         await this.queueService.addToQueue(
             "vectorization",
@@ -38,9 +30,6 @@ export class VectorizationTriggerService {
         this.logger.log(`Vectorization job queued: document ${documentId}`);
     }
 
-    /**
-     * 按知识库批量入队：对该知识库下所有 status 为 pending/failed 的文档各入队一个 Job
-     */
     async triggerDataset(datasetId: string): Promise<number> {
         const jobs = await this.queueService.getQueueJobs("vectorization");
         const existingDocIds = new Set(
