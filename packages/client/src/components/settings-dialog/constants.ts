@@ -1,6 +1,7 @@
 import {
   Bell,
   Hammer,
+  Info,
   type LucideIcon,
   Settings,
   UserCircle,
@@ -15,6 +16,7 @@ export type SettingsPage =
   | "tools"
   | "subscribe"
   | "notice"
+  | "about"
   | "personalized";
 
 export type SettingsNavItem = {
@@ -32,8 +34,8 @@ export const SETTINGS_NAV: SettingsNavGroup[] = [
   {
     label: "账户",
     items: [
-      { id: "profile", name: "个人资料", icon: UserCircle },
-      { id: "wallet", name: "我的钱包", icon: Wallet },
+      { id: "profile", name: "账户", icon: UserCircle },
+      { id: "wallet", name: "钱包", icon: Wallet },
       { id: "subscribe", name: "订阅管理", icon: UserCircle },
     ],
   },
@@ -41,12 +43,15 @@ export const SETTINGS_NAV: SettingsNavGroup[] = [
     label: "常规",
     items: [
       { id: "general", name: "基本设置", icon: Settings },
-      { id: "tools", name: "工具管理", icon: Hammer },
-      { id: "notice", name: "通知管理", icon: Bell },
+      { id: "notice", name: "通知", icon: Bell },
+      { id: "about", name: "关于", icon: Info },
     ],
   },
   {
     label: "AI设置",
-    items: [{ id: "personalized", name: "个性化", icon: UserStar }],
+    items: [
+      { id: "personalized", name: "个性化", icon: UserStar },
+      { id: "tools", name: "工具", icon: Hammer },
+    ],
   },
 ];

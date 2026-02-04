@@ -6,10 +6,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@buildingai/ui/components/u
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@buildingai/ui/components/ui/dialog";
 import {
   DropdownMenu,
@@ -40,12 +38,13 @@ import {
   Moon,
   Palette,
   Settings,
-  Sparkles,
   Sun,
   User,
 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+import { useSettingsDialog } from "@/components/settings-dialog";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
@@ -53,6 +52,7 @@ export function NavUser() {
   const { logout, isLogin } = useAuthStore((state) => state.authActions);
 
   const { setThemeColor, themeColor, theme } = useTheme();
+  const settingsDialog = useSettingsDialog();
   const navigate = useNavigate();
   const { confirm } = useAlertDialog();
 
@@ -151,6 +151,10 @@ export function NavUser() {
             <DropdownMenuItem onClick={() => setVersionInfoOpen(true)}>
               <Info />
               版本信息
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => settingsDialog.open("general")}>
+              <Settings />
+              设置
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />

@@ -22,7 +22,7 @@ import { Hammer, Plus, RefreshCw, Settings2, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { SettingItem } from "../../setting-item";
+import { SettingItem, SettingItemAction } from "../../setting-item";
 import { McpFormDialog } from "./_components/mcp-form-dialog";
 import { McpImportDialog } from "./_components/mcp-import-dialog";
 
@@ -154,14 +154,9 @@ const ToolsSetting = () => {
       <SettingItem title="添加MCP服务" description="添加新的MCP服务配置">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
-              size="icon-sm"
-              variant="ghost"
-              onClick={handleCreate}
-              className="hover:bg-muted-foreground/10 dark:hover:bg-muted-foreground/15"
-            >
+            <SettingItemAction onClick={handleCreate}>
               <Plus />
-            </Button>
+            </SettingItemAction>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuGroup>
@@ -204,24 +199,16 @@ const ToolsSetting = () => {
                 <Trash2 className="text-destructive" />
               </Button>
 
-              <Button
-                size="icon-sm"
-                className="hover:bg-muted-foreground/10 dark:hover:bg-muted-foreground/15"
-                variant="ghost"
-                onClick={() => handleEdit(server)}
-              >
+              <SettingItemAction onClick={() => handleEdit(server)}>
                 <Settings2 />
-              </Button>
+              </SettingItemAction>
 
-              <Button
-                size="icon-sm"
-                className="hover:bg-muted-foreground/10 dark:hover:bg-muted-foreground/15 mr-2"
-                variant="ghost"
+              <SettingItemAction
                 onClick={() => handleCheckConnection(server)}
                 disabled={checkingServerId === server.id}
               >
                 <RefreshCw className={checkingServerId === server.id ? "animate-spin" : ""} />
-              </Button>
+              </SettingItemAction>
               <Switch
                 checked={!server.isDisabled}
                 onCheckedChange={() => handleToggleStatus(server)}
