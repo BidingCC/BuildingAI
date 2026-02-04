@@ -25,6 +25,7 @@ import { memo, type ReactNode, useState } from "react";
 import { useSmoothText } from "../../hooks/use-smooth-text";
 import { convertUIMessageToMessage } from "../../libs/message-converter";
 import { FileParseQueue } from "./file-parse-queue";
+import { KnowledgeReferences } from "./knowledge-references";
 import { MessageActions } from "./message-actions";
 import { MessageBranch } from "./message-branch";
 import { FeedbackCard, MessageFeedback } from "./message-feedback";
@@ -146,6 +147,7 @@ export const Message = memo(function Message({
             </Reasoning>
           ))}
 
+      {isAssistant && <KnowledgeReferences parts={message.parts} />}
       {isAssistant && sources && sources.length > 0 && (
         <Sources>
           <SourcesTrigger count={sources.length} />

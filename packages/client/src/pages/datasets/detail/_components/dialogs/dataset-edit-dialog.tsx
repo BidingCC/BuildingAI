@@ -22,7 +22,11 @@ import { Loader2, Pencil, UploadIcon, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import type { DatasetEditFormValues } from "../../types";
+export interface DatasetEditFormValues {
+  name: string;
+  coverUrl?: string;
+  description: string;
+}
 
 export interface DatasetEditDialogProps {
   mode: "create" | "edit";

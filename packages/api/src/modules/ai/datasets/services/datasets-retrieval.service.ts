@@ -125,6 +125,7 @@ export class DatasetsRetrievalService {
                 enabled: 1,
             },
             select: ["id", "content", "embedding", "chunkIndex", "contentLength", "documentId"],
+            relations: ["document"],
             relationLoadStrategy: "query",
         });
 
@@ -141,13 +142,24 @@ export class DatasetsRetrievalService {
         const chunks: RetrievalChunk[] = scored
             .filter((x) => x.score >= threshold)
             .slice(0, k)
-            .map(({ segment, score }) => ({
-                id: segment.id,
-                content: segment.content,
-                score,
-                chunkIndex: segment.chunkIndex,
-                contentLength: segment.contentLength,
-            }));
+            .map(({ segment, score }) => {
+                const doc = segment.document;
+                return {
+                    id: segment.id,
+                    content: segment.content,
+                    score,
+                    chunkIndex: segment.chunkIndex,
+                    contentLength: segment.contentLength,
+                    fileName: doc?.fileName,
+                    metadata:
+                        doc != null
+                            ? {
+                                  fileType: doc.fileType,
+                                  fileUrl: doc.fileUrl ?? undefined,
+                              }
+                            : undefined,
+                };
+            });
 
         return {
             chunks,

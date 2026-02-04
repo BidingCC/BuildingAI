@@ -1,6 +1,6 @@
 export type { ChatProps } from "./chat";
 export { Chat } from "./chat";
-export type { PromptInputProps } from "./components/input/prompt-input";
+export type { PromptInputHiddenTool, PromptInputProps } from "./components/input/prompt-input";
 export { PromptInput } from "./components/input/prompt-input";
 export type { SuggestionData, SuggestionsProps } from "./components/input/suggestions";
 export { Suggestions } from "./components/input/suggestions";

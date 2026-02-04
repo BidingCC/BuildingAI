@@ -1,15 +1,14 @@
 import type { PromptInputMessage } from "@buildingai/ui/components/ai-elements/prompt-input";
 import { InfiniteScrollTopScrollButton } from "@buildingai/ui/components/infinite-scroll-top";
 import { cn } from "@buildingai/ui/lib/utils";
-import type { FormEvent } from "react";
+import type { FormEvent, RefObject } from "react";
 import { memo, useCallback, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import type { Model } from "@/components/ask-assistant-ui";
 import { ModelSelector, PromptInput, Suggestions } from "@/components/ask-assistant-ui";
 
-import { AI_DISCLAIMER } from "../../constants";
-import type { ChatStatus, Suggestion } from "../../types";
+import type { ChatStatus, Suggestion } from "./chat-container";
 
 interface ChatInputProps {
   hasMessages: boolean;
@@ -19,6 +18,8 @@ interface ChatInputProps {
   models: Model[];
   selectedModelId: string;
   onSelectModel: (id: string) => void;
+  textareaRef?: RefObject<HTMLTextAreaElement | null>;
+  onStop?: () => void;
 }
 
 export const ChatInput = memo(function ChatInput({
@@ -29,9 +30,12 @@ export const ChatInput = memo(function ChatInput({
   models,
   selectedModelId,
   onSelectModel,
+  textareaRef: textareaRefProp,
+  onStop,
 }: ChatInputProps) {
   const { id } = useParams<{ id: string }>();
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const ownRef = useRef<HTMLTextAreaElement>(null);
+  const textareaRef = textareaRefProp ?? ownRef;
   const [modelSelectorOpen, setModelSelectorOpen] = useState(false);
 
   const handleSubmit = useCallback(
@@ -54,7 +58,7 @@ export const ChatInput = memo(function ChatInput({
   const showSuggestions = !hasMessages && suggestions.length > 0 && status !== "streaming";
 
   return (
-    <div className={cn("sticky z-10", id ? "bottom-0" : "bottom-0")}>
+    <div className={cn("sticky z-10", id ? "bottom-13" : "bottom-0")}>
       <InfiniteScrollTopScrollButton className="-top-12 z-20" />
 
       <div className="bg-background mx-auto w-full max-w-3xl rounded-t-lg">
@@ -66,10 +70,12 @@ export const ChatInput = memo(function ChatInput({
           textareaRef={textareaRef}
           status={status}
           onSubmit={handleSubmit}
+          onStop={onStop}
           models={models}
           selectedModelId={selectedModelId}
           onSelectMcpServers={() => {}}
           onSetFeature={() => {}}
+          hiddenTools={["more", "mcp", "quickMenu"]}
         >
           <ModelSelector
             models={models}
@@ -82,7 +88,7 @@ export const ChatInput = memo(function ChatInput({
       </div>
 
       <div className="text-muted-foreground bg-background py-1.5 text-center text-xs">
-        {AI_DISCLAIMER}
+        内容由 AI 生成，请仔细甄别
       </div>
     </div>
   );

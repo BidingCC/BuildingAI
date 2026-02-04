@@ -1,7 +1,7 @@
 import { cn } from "@buildingai/ui/lib/utils";
 import { memo } from "react";
 
-import type { ChatMessage as ChatMessageType } from "../../types";
+import type { ChatMessageType } from "./chat-container";
 
 interface ChatMessageProps {
   message: ChatMessageType;

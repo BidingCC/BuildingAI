@@ -6,7 +6,7 @@ import AgentsWorkspacePage from "@/pages/agents/workspace";
 import AppsIndexPage from "@/pages/apps";
 import DatasetsIndexPage from "@/pages/datasets";
 import DatasetsLayout from "@/pages/datasets/_layouts";
-import DatasetsDetailPage from "@/pages/datasets/[id]";
+import DatasetsDetailPage from "@/pages/datasets/detail";
 import InstallPage from "@/pages/install";
 import WorkflowIndexPage from "@/pages/workflow";
 import WorkflowDetailPage from "@/pages/workflow/detail";

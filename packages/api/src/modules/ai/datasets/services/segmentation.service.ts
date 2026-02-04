@@ -3,26 +3,13 @@ import { Injectable, Logger } from "@nestjs/common";
 import { DEFAULT_SEGMENTATION_OPTIONS } from "../constants/datasets.constants";
 import type { SegmentationOptions, SegmentInput } from "../interfaces/vectorization.interface";
 
-/** 句末分隔正则 */
-const SPLIT_REGEX = /[。！？.!?]\s*/g;
 const COLLAPSE_WS = /[ \t]{2,}/g;
-const COLLAPSE_NL = /\n{2,}/g;
+const COLLAPSE_NL = /\n{3,}/g;
 
-/**
- * 分段服务
- *
- * 将原始文本按配置切分为分段（与 datasets-old indexing.service 切割效果一致），
- * 供文档解析后写入 Segment 并向量化。
- */
 @Injectable()
 export class SegmentationService {
     private readonly logger = new Logger(SegmentationService.name);
 
-    /**
-     * 将原始文本切分为分段
-     * @param rawText 原始文本（解析后的全文）
-     * @param options 分段配置，不传则使用默认配置
-     */
     segment(rawText: string, options?: Partial<SegmentationOptions>): SegmentInput[] {
         const opts = { ...DEFAULT_SEGMENTATION_OPTIONS, ...options };
         const processed = this.preprocessText(rawText, opts);
@@ -31,13 +18,7 @@ export class SegmentationService {
             return [];
         }
 
-        const separator = this.processSegmentIdentifier(opts.segmentIdentifier);
-        const segments = this.splitLongSegment(
-            processed,
-            separator,
-            opts.maxSegmentLength,
-            opts.segmentOverlap ?? 0,
-        );
+        const segments = this.splitRecursive(processed, opts);
 
         return segments
             .map((content, index) => ({
@@ -52,58 +33,233 @@ export class SegmentationService {
         return segmentIdentifier.replace(/\\n/g, "\n").replace(/\\t/g, "\t").replace(/\\r/g, "\r");
     }
 
-    private splitLongSegment(
+    private splitRecursive(text: string, opts: SegmentationOptions): string[] {
+        const chunkSize = Math.max(1, Math.floor(opts.maxSegmentLength));
+        const chunkOverlap = Math.max(0, Math.floor(opts.segmentOverlap ?? 0));
+        const keepSeparator = opts.keepSeparator !== false;
+        const separators = (
+            opts.separators?.length ? opts.separators : ["\n\n", "。", ". ", " ", ""]
+        ).map((s) => String(s ?? ""));
+
+        const mode = opts.mode ?? (opts.fixedSeparator != null ? "fixed" : "automatic");
+        if (mode === "fixed") {
+            const fixed = this.processSegmentIdentifier(
+                (opts.fixedSeparator ?? opts.segmentIdentifier ?? "\n\n") as string,
+            );
+            return text
+                .split(fixed)
+                .flatMap((chunk) => {
+                    const t = chunk.trim();
+                    if (!t) return [];
+                    if (t.length <= chunkSize) return [t];
+                    return this.recursiveSplitText(
+                        t,
+                        separators,
+                        chunkSize,
+                        chunkOverlap,
+                        keepSeparator,
+                    );
+                })
+                .filter((x) => x.trim());
+        }
+
+        return this.recursiveSplitText(
+            text,
+            separators,
+            chunkSize,
+            chunkOverlap,
+            keepSeparator,
+        ).filter((x) => x.trim());
+    }
+
+    private recursiveSplitText(
         text: string,
-        segmentIdentifier: string,
-        maxLength: number,
-        overlap: number,
+        separators: string[],
+        chunkSize: number,
+        chunkOverlap: number,
+        keepSeparator: boolean,
     ): string[] {
-        let initialBlocks: string[] =
-            text.split(segmentIdentifier).join(",").indexOf(",,") !== -1
-                ? text.split(segmentIdentifier).join(",").split(",,")
-                : text.split(segmentIdentifier);
+        const picked = this.pickSeparator(text, separators);
+        if (picked === "") {
+            return this.splitByCharactersWithOverlap(text, chunkSize, chunkOverlap);
+        }
 
-        const segments: string[] = [];
-        const minAdvance = Math.max(1, Math.floor(maxLength / 4));
+        const sepIndex = separators.indexOf(picked);
+        const nextSeps = sepIndex >= 0 ? separators.slice(sepIndex + 1) : [];
+        const splits = this.splitOnSeparator(text, picked, keepSeparator);
+        const filtered = this.filterSplits(splits, picked);
 
-        for (const blkRaw of initialBlocks) {
-            const blk = (typeof blkRaw === "string" ? blkRaw : String(blkRaw)).trim();
-            if (!blk) continue;
+        const final: string[] = [];
+        const good: string[] = [];
+        const goodLens: number[] = [];
 
-            let start = 0;
-            while (start < blk.length) {
-                let end = Math.min(start + maxLength, blk.length);
+        for (const s of filtered) {
+            const len = s.length;
+            if (len < chunkSize) {
+                good.push(s);
+                goodLens.push(len);
+                continue;
+            }
 
-                if (end < blk.length) {
-                    const slice = blk.substring(start, end);
-                    SPLIT_REGEX.lastIndex = 0;
-                    let match: RegExpExecArray | null;
-                    let lastValid = -1;
-                    while ((match = SPLIT_REGEX.exec(slice))) {
-                        lastValid = start + match.index + match[0].length;
-                    }
-                    if (lastValid > start) {
-                        end = lastValid;
-                    }
-                }
+            if (good.length) {
+                final.push(
+                    ...this.mergeSplits(
+                        good,
+                        picked,
+                        goodLens,
+                        chunkSize,
+                        chunkOverlap,
+                        keepSeparator,
+                    ),
+                );
+                good.length = 0;
+                goodLens.length = 0;
+            }
 
-                const part = blk.slice(start, end).trim();
-                if (part) {
-                    segments.push(part);
-                }
-
-                start = end < blk.length ? Math.max(start + minAdvance, end - overlap) : end;
+            const t = s.trim();
+            if (!t) continue;
+            if (nextSeps.length === 0) {
+                final.push(t);
+            } else {
+                final.push(
+                    ...this.recursiveSplitText(t, nextSeps, chunkSize, chunkOverlap, keepSeparator),
+                );
             }
         }
 
-        return segments;
+        if (good.length) {
+            final.push(
+                ...this.mergeSplits(good, picked, goodLens, chunkSize, chunkOverlap, keepSeparator),
+            );
+        }
+
+        return final;
+    }
+
+    private pickSeparator(text: string, separators: string[]): string {
+        for (const sep of separators) {
+            if (!sep) continue;
+            if (text.includes(sep)) return sep;
+        }
+        return separators[separators.length - 1] ?? "";
+    }
+
+    private splitOnSeparator(text: string, separator: string, keepSeparator: boolean): string[] {
+        if (separator === "") return Array.from(text);
+        const parts = separator === " " ? text.split(/\s+/) : text.split(separator);
+        if (!keepSeparator) return parts;
+        if (parts.length <= 1) return parts;
+        const out = parts.slice(0, -1).map((p) => p + separator);
+        out.push(parts[parts.length - 1]);
+        return out;
+    }
+
+    private filterSplits(splits: string[], separator: string): string[] {
+        if (separator === "\n") {
+            return splits.filter((s) => s !== "");
+        }
+        return splits.filter((s) => s !== "" && s !== "\n");
+    }
+
+    private splitByCharactersWithOverlap(
+        text: string,
+        chunkSize: number,
+        chunkOverlap: number,
+    ): string[] {
+        const chars = Array.from(text);
+        const out: string[] = [];
+        const maxBeforeOverlap = Math.max(1, chunkSize - chunkOverlap);
+
+        let current: string[] = [];
+        let currentLen = 0;
+        let overlapPart: string[] = [];
+        let overlapLen = 0;
+
+        for (const c of chars) {
+            const l = c.length;
+            if (currentLen + l <= maxBeforeOverlap) {
+                current.push(c);
+                currentLen += l;
+                continue;
+            }
+            if (currentLen + l <= chunkSize) {
+                current.push(c);
+                currentLen += l;
+                overlapPart.push(c);
+                overlapLen += l;
+                continue;
+            }
+
+            const doc = current.join("").trim();
+            if (doc) out.push(doc);
+
+            current = overlapPart.length ? [...overlapPart, c] : [c];
+            currentLen = overlapLen + l;
+            overlapPart = [];
+            overlapLen = 0;
+        }
+
+        const last = current.join("").trim();
+        if (last) out.push(last);
+        return out;
+    }
+
+    private mergeSplits(
+        splits: string[],
+        separator: string,
+        lengths: number[],
+        chunkSize: number,
+        chunkOverlap: number,
+        keepSeparator: boolean,
+    ): string[] {
+        const joiner = keepSeparator ? "" : separator;
+        const sepLen = joiner.length;
+        const docs: string[] = [];
+
+        const current: string[] = [];
+        const currentLens: number[] = [];
+        let total = 0;
+
+        for (let i = 0; i < splits.length; i++) {
+            const d = splits[i] ?? "";
+            const len = lengths[i] ?? d.length;
+            const additional = current.length > 0 ? sepLen : 0;
+
+            if (total + len + additional > chunkSize) {
+                if (current.length) {
+                    const doc = current.join(joiner).trim();
+                    if (doc) docs.push(doc);
+                }
+
+                while (
+                    total > chunkOverlap ||
+                    (total + len + (current.length > 0 ? sepLen : 0) > chunkSize && total > 0)
+                ) {
+                    const removedLen = currentLens.shift();
+                    current.shift();
+                    total -= removedLen ?? 0;
+                    if (current.length > 0) total -= sepLen;
+                }
+            }
+
+            current.push(d);
+            currentLens.push(len);
+            total += len + (current.length > 1 ? sepLen : 0);
+        }
+
+        if (current.length) {
+            const doc = current.join(joiner).trim();
+            if (doc) docs.push(doc);
+        }
+        return docs;
     }
 
     private preprocessText(text: string, opts: SegmentationOptions): string {
-        let result = text.replace(/\n{3,}/g, "\n\n");
+        let result = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+        result = result.replace(COLLAPSE_NL, "\n\n");
 
         if (opts.replaceConsecutiveWhitespace !== false) {
-            result = result.replace(COLLAPSE_WS, " ").replace(COLLAPSE_NL, "\n").trim();
+            result = result.replace(COLLAPSE_WS, " ").replace(COLLAPSE_NL, "\n\n").trim();
         }
 
         if (opts.removeUrlsAndEmails) {
@@ -111,7 +267,7 @@ export class SegmentationService {
                 .replace(/https?:\/\/[\w./:%#$&?()~\-+=]+/gi, "")
                 .replace(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, "")
                 .replace(COLLAPSE_WS, " ")
-                .replace(COLLAPSE_NL, "\n")
+                .replace(COLLAPSE_NL, "\n\n")
                 .trim();
         }
 

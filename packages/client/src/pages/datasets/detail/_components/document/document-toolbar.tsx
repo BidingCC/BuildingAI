@@ -10,12 +10,16 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@buildingai/ui/components/ui/input-group";
+import type { DocumentSortBy } from "@buildingai/services/web";
 import { Check, ChevronDown, Search, X } from "lucide-react";
 import type { ReactNode } from "react";
 import { useState } from "react";
 
-import { SORT_OPTIONS } from "../../constants";
-import type { DocumentSortBy } from "../../types";
+const SORT_OPTIONS: { value: DocumentSortBy; label: string }[] = [
+  { value: "name", label: "文件名称" },
+  { value: "size", label: "文件大小" },
+  { value: "uploadTime", label: "上传时间" },
+];
 
 export interface DocumentToolbarProps {
   contentCount?: number;

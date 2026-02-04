@@ -37,6 +37,10 @@ export const MessageTools = memo(function MessageTools({
         const toolPart = part as unknown as ToolPartData;
         const key = toolPart.toolCallId || `tool-${index}`;
 
+        if ("output" in toolPart && Array.isArray(toolPart.output) && toolPart.output.length > 0) {
+          return null;
+        }
+
         if (part.type === "tool-getWeather") {
           return (
             <WeatherTool

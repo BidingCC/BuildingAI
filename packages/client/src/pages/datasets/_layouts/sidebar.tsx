@@ -2,7 +2,6 @@ import {
   useMyCreatedDatasetsInfiniteQuery,
   useTeamDatasetsInfiniteQuery,
 } from "@buildingai/services/web";
-import { Badge } from "@buildingai/ui/components/ui/badge";
 import { Button } from "@buildingai/ui/components/ui/button";
 import {
   Collapsible,
@@ -41,7 +40,7 @@ import {
 import { useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
-import { DatasetEditDialog } from "../[id]/_components/dialogs/dataset-edit-dialog";
+import { DatasetEditDialog } from "../detail/_components/dialogs/dataset-edit-dialog";
 
 const SIDEBAR_PAGE_SIZE = 20;
 

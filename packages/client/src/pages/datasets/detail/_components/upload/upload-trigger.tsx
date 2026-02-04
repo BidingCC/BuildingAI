@@ -1,7 +1,7 @@
 import { Button } from "@buildingai/ui/components/ui/button";
 import { Plus, UploadIcon } from "lucide-react";
 
-import { SUPPORTED_FORMATS } from "../../constants";
+const SUPPORTED_FORMATS = "支持 docx、xlsx、pptx、pdf、csv、md 等格式";
 
 export interface UploadTriggerProps {
   onClick?: () => void;
