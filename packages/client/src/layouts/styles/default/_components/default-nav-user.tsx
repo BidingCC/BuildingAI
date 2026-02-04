@@ -142,7 +142,7 @@ export function DefaultNavUser() {
                 <Sparkles />
                 升级套餐
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => settingsDialog.open("personalized")}>
                 <UserStar />
                 个性化
               </DropdownMenuItem>

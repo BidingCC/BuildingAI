@@ -70,7 +70,7 @@ const WalletSetting = () => {
               >
                 {rule.label && (
                   <Badge
-                    className="absolute -top-px -right-px rounded-none rounded-tr-lg rounded-bl-lg border-0 px-2 py-0.5 text-[10px] font-medium shadow-lg"
+                    className="absolute -top-px -right-px rounded-none rounded-tr-lg rounded-bl-lg border-0 px-2 py-0.5 text-[10px] font-medium shadow-lg shadow-none"
                     variant="default"
                   >
                     {rule.label}
