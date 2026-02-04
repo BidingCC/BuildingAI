@@ -74,9 +74,9 @@ export const DocumentCard = memo(function DocumentCard({
   const fileIconMain = useMemo(
     () =>
       formatKey ? (
-        <FileFormatIcon format={formatKey} className="size-20" />
+        <FileFormatIcon format={formatKey} className="size-10" />
       ) : (
-        <FileText className="text-muted-foreground size-20" />
+        <FileText className="text-muted-foreground size-10" />
       ),
     [formatKey],
   );
@@ -221,7 +221,7 @@ export const DocumentCard = memo(function DocumentCard({
                     )}
                   </div>
                   <div className="shrink-0">
-                    <div className="flex h-full w-full items-center justify-center">
+                    <div className="flex h-full w-full items-start justify-center">
                       {fileIconMain}
                     </div>
                   </div>
