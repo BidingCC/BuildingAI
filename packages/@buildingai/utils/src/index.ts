@@ -5,6 +5,7 @@ export * from "./create-resolvable-promise.js";
 export * from "./delayed-promise.js";
 export * from "./file.js";
 export * from "./file-url-processor.js";
+export * from "./format.js";
 export * from "./helper.js";
 export * from "./http-client.js";
 export * from "./http-client.types.js";

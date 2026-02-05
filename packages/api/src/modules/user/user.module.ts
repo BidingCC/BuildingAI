@@ -10,7 +10,7 @@ import {
 import { Permission } from "@buildingai/db/entities";
 import { Role } from "@buildingai/db/entities";
 import { AiDatasetsModule } from "@modules/ai/datasets/datasets.module";
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 
 import { MembershipModule } from "../membership/membership.module";
 import { MenuModule } from "../menu/menu.module";
@@ -36,7 +36,7 @@ import { UserService } from "./services/user.service";
         ]),
         MenuModule,
         RoleModule,
-        AiDatasetsModule,
+        forwardRef(() => AiDatasetsModule),
         MembershipModule,
     ],
     controllers: [UserConsoleController, UserWebController],

@@ -12,10 +12,12 @@ import {
 } from "@buildingai/db/entities";
 import { AiModelModule } from "@modules/ai/model/ai-model.module";
 import { ConfigModule } from "@modules/config/config.module";
+import { UserModule } from "@modules/user/user.module";
 import { UploadModule } from "@modules/upload/upload.module";
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 import { APP_GUARD } from "@nestjs/core";
 
+import { DatasetsConsoleController } from "./controllers/console/datasets.controller";
 import { DatasetsWebController } from "./controllers/web/datasets.controller";
 import { DatasetsChatMessageWebController } from "./controllers/web/datasets-chat-message.controller";
 import { DatasetsChatRecordWebController } from "./controllers/web/datasets-chat-record.controller";
@@ -58,8 +60,10 @@ import { VectorizationTriggerService } from "./services/vectorization-trigger.se
         QueueModule,
         UploadModule,
         AiModelModule,
+        forwardRef(() => UserModule),
     ],
     controllers: [
+        DatasetsConsoleController,
         DatasetsWebController,
         DatasetsDocumentsWebController,
         DatasetsMembersWebController,
