@@ -40,12 +40,38 @@
                 "code": "ai-datasets",
                 "path": "datasets",
                 "icon": "i-lucide-file-search",
-                "component": "/console/ai/datasets/list",
+                "component": "",
                 "permissionCode": "ai-datasets:list",
                 "sort": 200,
                 "isHidden": 0,
-                "type": 2,
-                "sourceType": 1
+                "type": 1,
+                "sourceType": 1,
+                "children": [
+                    {
+                        "name": "知识库列表",
+                        "code": "ai-datasets-list",
+                        "path": "",
+                        "icon": "",
+                        "component": "/console/ai/datasets/list",
+                        "permissionCode": "ai-datasets:list",
+                        "sort": 0,
+                        "isHidden": 0,
+                        "type": 2,
+                        "sourceType": 1
+                    },
+                    {
+                        "name": "知识库配置",
+                        "code": "ai-datasets-config",
+                        "path": "config",
+                        "icon": "",
+                        "component": "/console/ai/datasets/config",
+                        "permissionCode": "ai-datasets:get-config",
+                        "sort": 10,
+                        "isHidden": 0,
+                        "type": 2,
+                        "sourceType": 1
+                    }
+                ]
             },
             {
                 "name": "MCP",
