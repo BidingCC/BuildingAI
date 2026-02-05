@@ -1,4 +1,4 @@
-// export * from "./apps-decorate";
+export * from "./apps-decorate";
 export * from "./chat";
 export * from "./datasets";
 export * from "./datasets-config";

@@ -2,6 +2,7 @@ import {
   type ConsoleDatasetItem,
   type QueryConsoleDatasetsDto,
   useConsoleDatasetsListQuery,
+  useDeleteDatasetMutation,
 } from "@buildingai/services/console";
 import { Badge } from "@buildingai/ui/components/ui/badge";
 import { Button } from "@buildingai/ui/components/ui/button";
@@ -31,6 +32,7 @@ import { TimeText } from "@buildingai/ui/components/ui/time-text";
 import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog";
 import { BookOpen, EllipsisVertical, FileCheck, Info, Layers, Trash2, User } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { usePagination } from "@/hooks/use-pagination";
 import { PageContainer } from "@/layouts/console/_components/page-container";
@@ -104,6 +106,13 @@ const DatasetsIndexPage = () => {
   const [vectorOpen, setVectorOpen] = useState(false);
   const { confirm: alertConfirm } = useAlertDialog();
   const { data, isLoading, refetch } = useConsoleDatasetsListQuery(queryParams);
+  const deleteMutation = useDeleteDatasetMutation({
+    onSuccess: () => {
+      toast.success("已删除");
+      refetch();
+    },
+    onError: (e) => toast.error(`删除失败: ${e.message}`),
+  });
 
   const { PaginationComponent } = usePagination({
     total: data?.total ?? 0,
@@ -144,8 +153,18 @@ const DatasetsIndexPage = () => {
       confirmText: "确定",
     }).catch(() => {});
   };
-  const handleDelete = (row: ConsoleDatasetItem) => {
-    console.log("delete", row.id);
+  const handleDelete = async (row: ConsoleDatasetItem) => {
+    try {
+      await alertConfirm({
+        title: "删除知识库",
+        description: `确定要删除「${row.name}」吗？将同时删除其下所有文档与对话记录，此操作不可恢复。`,
+        confirmText: "删除",
+        confirmVariant: "destructive",
+      });
+      deleteMutation.mutate(row.id);
+    } catch {
+      // 用户取消
+    }
   };
   const handleVector = (row: ConsoleDatasetItem) => {
     setVectorDataset(row);
@@ -254,6 +273,7 @@ const DatasetsIndexPage = () => {
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             className="text-destructive focus:text-destructive"
+                            disabled={deleteMutation.isPending}
                             onSelect={() => handleDelete(row)}
                           >
                             <Trash2 className="mr-2 size-4" />
@@ -272,9 +292,8 @@ const DatasetsIndexPage = () => {
             </TableBody>
           </Table>
         </div>
-        <div className="bg-background sticky bottom-0 flex py-2">
-          <PaginationComponent className="mx-0 w-fit" />
-        </div>
+
+        <PaginationComponent className="bg-background sticky bottom-0 mx-0 flex w-fit py-2" />
       </div>
       {reviewOpen && (
         <ReviewDialog

@@ -94,6 +94,16 @@ export function useConsoleDatasetDetailQuery(
     });
 }
 
+export function useDeleteDatasetMutation(
+    options?: MutationOptionsUtil<{ success: boolean }, string>,
+) {
+    return useMutation<{ success: boolean }, Error, string>({
+        mutationFn: (id) =>
+            consoleHttpClient.delete<{ success: boolean }>(`/datasets/${id}`),
+        ...options,
+    });
+}
+
 export function useSetDatasetVectorConfigMutation(
     options?: MutationOptionsUtil<
         ConsoleDatasetVectorConfig,

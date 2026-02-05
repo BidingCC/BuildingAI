@@ -250,4 +250,27 @@ export class DatasetsService extends BaseService<Datasets> {
         this.logger.log(`[+] Deleted dataset: ${datasetId}`);
         return { success: true };
     }
+
+    async deleteDatasetForConsole(datasetId: string): Promise<{ success: boolean }> {
+        await this.datasetMemberService.getDatasetOrThrow(datasetId);
+        await this.dataSource.transaction(async (manager) => {
+            const records = await manager
+                .getRepository(DatasetsChatRecord)
+                .find({ where: { datasetId }, select: { id: true } });
+            const conversationIds = records.map((r) => r.id);
+            if (conversationIds.length > 0) {
+                await manager.getRepository(DatasetsChatMessage).delete({
+                    conversationId: In(conversationIds),
+                });
+            }
+            await manager.getRepository(DatasetsChatRecord).delete({ datasetId });
+            await manager.getRepository(DatasetsSegments).delete({ datasetId });
+            await manager.getRepository(DatasetsDocument).delete({ datasetId });
+            await manager.getRepository(DatasetMemberApplication).delete({ datasetId });
+            await manager.getRepository(DatasetMember).delete({ datasetId });
+            await manager.getRepository(Datasets).delete({ id: datasetId });
+        });
+        this.logger.log(`[+] Console deleted dataset: ${datasetId}`);
+        return { success: true };
+    }
 }

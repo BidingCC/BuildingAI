@@ -7,7 +7,7 @@ import { bytesToReadable } from "@buildingai/utils";
 import { ConsoleController } from "@common/decorators/controller.decorator";
 import { Permissions } from "@common/decorators/permissions.decorator";
 import { UserService } from "@modules/user/services/user.service";
-import { Body, Get, Param, Patch, Post, Query } from "@nestjs/common";
+import { Body, Delete, Get, Param, Patch, Post, Query } from "@nestjs/common";
 
 import { ListConsoleDatasetsDto } from "../../dto/list-console-datasets.dto";
 import { SetDatasetVectorConfigDto } from "../../dto/set-dataset-vector-config.dto";
@@ -108,5 +108,11 @@ export class DatasetsConsoleController {
         @Playground() user: UserPlayground,
     ) {
         return this.datasetsService.rejectSquarePublish(datasetId, user.id, dto.reason);
+    }
+
+    @Delete(":id")
+    @Permissions({ code: "delete", name: "删除知识库", description: "删除指定知识库及其文档与数据" })
+    async remove(@Param("id") datasetId: string) {
+        return this.datasetsService.deleteDatasetForConsole(datasetId);
     }
 }
