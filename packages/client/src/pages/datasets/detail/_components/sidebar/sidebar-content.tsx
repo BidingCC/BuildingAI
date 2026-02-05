@@ -7,9 +7,8 @@ import { ScrollArea } from "@buildingai/ui/components/ui/scroll-area";
 import { SidebarContent as SidebarContentBase } from "@buildingai/ui/components/ui/sidebar";
 import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog";
 import { cn } from "@buildingai/ui/lib/utils";
+import { bytesToReadable } from "@buildingai/utils/format";
 import { useCallback, useState } from "react";
-
-import { bytesToReadable } from "@/utils/format";
 
 import { useDocumentDrop, useDocumentSelection } from "../../hooks";
 import { CopyDialog } from "../dialogs/copy-dialog";

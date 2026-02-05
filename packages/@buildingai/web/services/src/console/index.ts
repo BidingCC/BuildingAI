@@ -1,5 +1,6 @@
-export * from "./apps-decorate";
+// export * from "./apps-decorate";
 export * from "./chat";
+export * from "./datasets";
 export * from "./datasets-config";
 export * from "./extension";
 export * from "./mcp";

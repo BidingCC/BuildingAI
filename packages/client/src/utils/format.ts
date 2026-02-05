@@ -1,5 +1,3 @@
-const BYTE_UNITS = ["B", "K", "M", "G"] as const;
-
 const MIME_TO_LABEL: Record<string, string> = {
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "Word 格式",
   "application/msword": "Word 格式",
@@ -135,11 +133,4 @@ export function getFileFormatKey(mimeType?: string): string {
   }
 
   return "";
-}
-
-export function bytesToReadable(bytes: number): string {
-  if (bytes === 0) return "0 B";
-  const k = 1024;
-  const i = Math.min(Math.floor(Math.log(bytes) / Math.log(k)), BYTE_UNITS.length - 1);
-  return `${(bytes / Math.pow(k, i)).toFixed(2)} ${BYTE_UNITS[i]}`;
 }
