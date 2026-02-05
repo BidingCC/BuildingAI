@@ -5,7 +5,6 @@ import type {
 } from "@buildingai/constants/shared/extension.constant";
 import type {
     MutationOptionsUtil,
-    PaginatedQueryOptionsUtil,
     PaginatedResponse,
     QueryOptionsUtil,
 } from "@buildingai/web-types";
@@ -51,6 +50,9 @@ export type CreateExtensionDto = {
 export type UpdateExtensionDto = {
     name?: string;
     alias?: string;
+    aliasDescription?: string;
+    aliasIcon?: string;
+    aliasShow?: boolean;
     description?: string;
     type?: ExtensionTypeType;
     author?: {
@@ -83,6 +85,9 @@ export type Extension = {
     id: string;
     name: string;
     alias?: string;
+    aliasShow?: boolean;
+    aliasDescription?: string;
+    aliasIcon?: string;
     identifier: string;
     version: string;
     description?: string;
@@ -105,6 +110,16 @@ export type Extension = {
     isCompatible: boolean;
     latestVersion?: string | null;
     hasUpdate: boolean;
+};
+
+export type ExtensionListStatistics = {
+    total: number;
+    installed: number;
+    uninstalled: number;
+};
+
+export type ExtensionsListResponse = PaginatedResponse<Extension> & {
+    extend?: { statistics: ExtensionListStatistics };
 };
 
 export type ExtensionVersion = {
@@ -195,16 +210,15 @@ export function useCreateExtensionMutation(
 }
 
 /**
- * Get extension list
+ * Get extension list (console 应用列表)
  */
 export function useExtensionsListQuery(
     params?: QueryExtensionDto,
-    options?: PaginatedQueryOptionsUtil<Extension>,
+    options?: QueryOptionsUtil<ExtensionsListResponse>,
 ) {
     return useQuery({
         queryKey: ["extensions", "list", params],
-        queryFn: () =>
-            consoleHttpClient.get<PaginatedResponse<Extension>>("/extensions", { params }),
+        queryFn: () => consoleHttpClient.get<ExtensionsListResponse>("/extensions", { params }),
         ...options,
     });
 }

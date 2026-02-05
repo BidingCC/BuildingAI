@@ -31,14 +31,15 @@ const RETRIEVAL_OPTIONS = [
 type Props = {
   value: RetrievalConfig;
   onChange: (v: RetrievalConfig | ((prev: RetrievalConfig) => RetrievalConfig)) => void;
+  className?: string;
 };
 
-export function RetrievalConfigSection({ value, onChange }: Props) {
+export function RetrievalConfigSection({ value, onChange, className }: Props) {
   return (
     <section className="space-y-3">
       <h2 className="text-base font-medium">检索设置</h2>
       <p className="text-muted-foreground text-sm">选择一种检索方式并配置参数，点击卡片可切换</p>
-      <div className="flex w-lg flex-col gap-3">
+      <div className={cn("flex min-w-0 flex-col gap-3", className ?? "w-full lg:w-lg")}>
         {RETRIEVAL_OPTIONS.map(({ mode, title, desc, icon: Icon }) => {
           const active = value.retrievalMode === mode;
           return (

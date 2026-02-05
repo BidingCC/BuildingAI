@@ -102,7 +102,7 @@ const DatasetsConfigPage = () => {
 
   return (
     <PageContainer>
-      <div className="space-y-6 pb-6">
+      <div className="min-w-0 space-y-6 pb-6">
         <h1 className="text-xl font-semibold">知识库设置</h1>
 
         <div className="space-y-2">
@@ -126,7 +126,7 @@ const DatasetsConfigPage = () => {
               min={1}
               value={initialStorageMb}
               onChange={(e) => setInitialStorageMb(Number(e.target.value) || 1)}
-              className="w-90"
+              className="w-full sm:w-90"
             />
             <span className="text-muted-foreground text-sm">M</span>
           </div>
@@ -140,7 +140,7 @@ const DatasetsConfigPage = () => {
             value={embeddingModelId || undefined}
             onSelect={setEmbeddingModelId}
             placeholder="请选择模型"
-            className="w-90 text-left"
+            className="w-full text-left sm:w-90"
           />
         </div>
 
@@ -151,7 +151,7 @@ const DatasetsConfigPage = () => {
             value={textModelId || undefined}
             onSelect={setTextModelId}
             placeholder="请选择模型（可选）"
-            className="w-90 text-left"
+            className="w-full text-left sm:w-90"
           />
           <p className="text-muted-foreground text-sm">
             用户上传知识库文件后，AI 自动生成摘要内容，摘要计费随模型动态计费

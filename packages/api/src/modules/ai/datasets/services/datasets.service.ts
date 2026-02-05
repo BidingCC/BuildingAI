@@ -19,6 +19,7 @@ import { DatasetsConfigService } from "@modules/config/services/datasets-config.
 import { Injectable, Logger } from "@nestjs/common";
 
 import { CreateEmptyDatasetDto } from "../dto/create-empty-dataset.dto";
+import type { SetDatasetVectorConfigDto } from "../dto/set-dataset-vector-config.dto";
 import { UpdateDatasetDto } from "../dto/update-dataset.dto";
 import { DatasetMemberService } from "./datasets-member.service";
 
@@ -100,6 +101,22 @@ export class DatasetsService extends BaseService<Datasets> {
         if (dto.name !== undefined) payload.name = dto.name;
         if (dto.description !== undefined) payload.description = dto.description;
         if (dto.coverUrl !== undefined) payload.coverUrl = dto.coverUrl;
+        if (Object.keys(payload).length === 0) {
+            return this.findOneById(datasetId) as Promise<Datasets>;
+        }
+        await this.datasetsRepository.update(datasetId, payload);
+        return this.findOneById(datasetId) as Promise<Datasets>;
+    }
+
+    async updateVectorConfig(
+        datasetId: string,
+        dto: SetDatasetVectorConfigDto,
+    ): Promise<Datasets> {
+        await this.datasetMemberService.getDatasetOrThrow(datasetId);
+        const payload: Record<string, unknown> = {};
+        if (dto.embeddingModelId !== undefined) payload.embeddingModelId = dto.embeddingModelId;
+        if (dto.retrievalMode !== undefined) payload.retrievalMode = dto.retrievalMode;
+        if (dto.retrievalConfig !== undefined) payload.retrievalConfig = dto.retrievalConfig;
         if (Object.keys(payload).length === 0) {
             return this.findOneById(datasetId) as Promise<Datasets>;
         }
