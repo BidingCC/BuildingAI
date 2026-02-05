@@ -98,6 +98,8 @@ export class AuthService extends BaseService<User> {
                 ...payload,
                 role,
                 permissions,
+                openid: user.openid ?? undefined,
+                mp_openid: user.mpOpenid ?? undefined,
             };
 
             return {

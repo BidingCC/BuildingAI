@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { OrderPayFrom } from "@buildingai/constants/shared/payconfig.constant";
 import { PayConfigPayType, type PayConfigType } from "@buildingai/constants/shared";
 import { UserTerminal } from "@buildingai/constants/shared/status-codes.constant";
 import type { RechargeRule } from "@buildingai/service/webapi/recharge-center";
@@ -48,7 +49,7 @@ const { start: startPaymentPolling, clear: stopPaymentPolling } = usePollingTask
 
             const res = await apiGetPayResult({
                 orderId: state.orderInfo.orderId,
-                from: "recharge",
+                from: OrderPayFrom.RECHARGE,
             });
 
             if (res.payStatus === 1) {
@@ -132,7 +133,7 @@ const handleRecharge = async (): Promise<void> => {
         state.orderInfo = res;
 
         const prepaidInfo = await apiPostPrepaid({
-            from: "recharge",
+            from: OrderPayFrom.RECHARGE,
             orderId: res.orderId,
             payType: state.selectedPaymentMethod,
             scene: UserTerminal.PC,
@@ -187,7 +188,7 @@ const handleRefreshQrCode = async (): Promise<void> => {
         }
 
         const prepaidInfo = await apiPostPrepaid({
-            from: "recharge",
+            from: OrderPayFrom.RECHARGE,
             orderId: state.orderInfo.orderId,
             payType: state.selectedPaymentMethod,
             scene: UserTerminal.PC,

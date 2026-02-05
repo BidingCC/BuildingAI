@@ -51,7 +51,7 @@ export class MembershipWebController extends BaseController {
             levelId,
             payType,
             user.id,
-            user.terminal,
+            submitOrderDto.scene,
         );
     }
 

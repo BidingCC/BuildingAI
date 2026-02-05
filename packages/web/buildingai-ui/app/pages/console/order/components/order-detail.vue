@@ -1,6 +1,15 @@
 <script setup lang="ts">
+import {
+    OrderStatus,
+    OrderStatusReverse,
+    RefundStatus,
+} from "@buildingai/constants/shared/payconfig.constant";
 import type { OrderDetailData } from "@buildingai/service/consoleapi/order-recharge";
-import { apiRefund } from "@buildingai/service/consoleapi/order-recharge";
+import {
+    apiRefund,
+    apiSyncPayResult,
+    apiSyncRefundResult,
+} from "@buildingai/service/consoleapi/order-recharge";
 
 import type { TableColumn } from "#ui/types";
 
@@ -18,17 +27,34 @@ const props = defineProps<{
 const emits = defineEmits<{
     (e: "close"): void;
     (e: "get-list"): void;
+    (e: "sync-done", detail: OrderDetailData): void;
 }>();
+
+const currentOrder = ref<OrderDetailData | null>(props.order ?? null);
+watch(
+    () => props.order,
+    (v) => {
+        currentOrder.value = v ?? null;
+    },
+    { immediate: true },
+);
 
 const { t } = useI18n();
 const toast = useMessage();
 
-const tableData = shallowRef<Order[]>([
+/** 订单状态展示（OrderStatusReverse 枚举取值） */
+const orderStatusLabel = computed(() => {
+    const key = (currentOrder.value?.orderStatus ??
+        OrderStatus.CREATED) as keyof typeof OrderStatusReverse;
+    return OrderStatusReverse[key];
+});
+
+const tableData = computed<Order[]>(() => [
     {
-        rechargeQuantity: props.order?.power,
-        freeQuantity: props.order?.givePower,
-        quantityReceived: props.order?.totalPower,
-        paidInAmount: props.order?.orderAmount,
+        rechargeQuantity: currentOrder.value?.power,
+        freeQuantity: currentOrder.value?.givePower,
+        quantityReceived: currentOrder.value?.totalPower,
+        paidInAmount: currentOrder.value?.orderAmount,
     },
 ]);
 
@@ -70,14 +96,44 @@ const handleRefund = async () => {
         color: "warning",
     });
 
-    await apiRefund(props.order?.id || "");
-    toast.success("退款成功");
+    await apiRefund(currentOrder.value?.id || "");
+    toast.success("退款已提交，请等待退款成功");
     getOrderList();
     emits("close");
 };
 
 const getOrderList = () => {
     emits("get-list");
+};
+
+const syncing = ref<"pay" | "refund" | null>(null);
+const handleSyncPayResult = async () => {
+    if (!currentOrder.value?.id) return;
+    syncing.value = "pay";
+    try {
+        const res = await apiSyncPayResult(currentOrder.value.id);
+        currentOrder.value = res;
+        emits("sync-done", res);
+        toast.success(t("order.backend.recharge.detail.syncPaySuccess"));
+    } catch (e) {
+        toast.error((e as Error)?.message ?? "同步失败");
+    } finally {
+        syncing.value = null;
+    }
+};
+const handleSyncRefundResult = async () => {
+    if (!currentOrder.value?.id) return;
+    syncing.value = "refund";
+    try {
+        const res = await apiSyncRefundResult(currentOrder.value.id);
+        currentOrder.value = res;
+        emits("sync-done", res);
+        toast.success(t("order.backend.recharge.detail.syncRefundSuccess"));
+    } catch (e) {
+        toast.error((e as Error)?.message ?? "同步失败");
+    } finally {
+        syncing.value = null;
+    }
 };
 </script>
 
@@ -89,7 +145,7 @@ const getOrderList = () => {
                     {{ t("order.backend.recharge.list.orderNo") }}
                 </div>
                 <div class="text-secondary-foreground mt-1 truncate">
-                    {{ order?.orderNo }}
+                    {{ currentOrder?.orderNo }}
                 </div>
             </div>
             <div>
@@ -97,7 +153,7 @@ const getOrderList = () => {
                     {{ t("order.backend.recharge.detail.orderSource") }}
                 </div>
                 <div class="text-secondary-foreground mt-1 truncate">
-                    {{ order?.terminalDesc }}
+                    {{ currentOrder?.terminalDesc }}
                 </div>
             </div>
             <div>
@@ -105,7 +161,7 @@ const getOrderList = () => {
                     {{ t("order.backend.recharge.detail.userInfo") }}
                 </div>
                 <div class="text-secondary-foreground mt-1 truncate">
-                    {{ order?.user?.username }}
+                    {{ currentOrder?.user?.username }}
                 </div>
             </div>
             <div>
@@ -113,7 +169,15 @@ const getOrderList = () => {
                     {{ t("order.backend.recharge.detail.orderType") }}
                 </div>
                 <div class="text-secondary-foreground mt-1 truncate">
-                    {{ order?.orderType }}
+                    {{ currentOrder?.orderType }}
+                </div>
+            </div>
+            <div>
+                <div class="text-muted-foreground text-sm">
+                    {{ t("order.backend.recharge.detail.orderStatus") }}
+                </div>
+                <div class="text-secondary-foreground mt-1 truncate">
+                    {{ orderStatusLabel }}
                 </div>
             </div>
             <div>
@@ -122,7 +186,7 @@ const getOrderList = () => {
                 </div>
                 <div class="text-secondary-foreground mt-1 truncate">
                     {{
-                        order?.payStatus === 1
+                        currentOrder?.payStatus === 1
                             ? t("order.backend.recharge.detail.paid")
                             : t("order.backend.recharge.detail.unpaid")
                     }}
@@ -133,7 +197,7 @@ const getOrderList = () => {
                     {{ t("order.backend.recharge.detail.paymentMethod") }}
                 </div>
                 <div class="text-secondary-foreground mt-1 truncate">
-                    {{ order?.payTypeDesc }}
+                    {{ currentOrder?.payTypeDesc }}
                 </div>
             </div>
             <div>
@@ -142,8 +206,8 @@ const getOrderList = () => {
                 </div>
                 <div class="text-secondary-foreground mt-1 truncate">
                     <TimeDisplay
-                        v-if="order?.createdAt"
-                        :datetime="order.createdAt"
+                        v-if="currentOrder?.createdAt"
+                        :datetime="currentOrder.createdAt"
                         mode="datetime"
                     />
                 </div>
@@ -153,33 +217,56 @@ const getOrderList = () => {
                     {{ t("order.backend.recharge.detail.paidAt") }}
                 </div>
                 <div class="text-secondary-foreground mt-1 truncate">
-                    <TimeDisplay v-if="order?.payTime" :datetime="order.payTime" mode="datetime" />
+                    <TimeDisplay
+                        v-if="currentOrder?.payTime"
+                        :datetime="currentOrder.payTime"
+                        mode="datetime"
+                    />
+                    <span v-else>-</span>
                 </div>
             </div>
             <div>
                 <div class="text-muted-foreground text-sm">
                     {{ t("order.backend.recharge.detail.refundStatus") }}
                 </div>
-                <div v-if="order?.refundStatus" class="mt-1 truncate text-red-500">
-                    {{ order?.refundStatusDesc }}
+                <div v-if="currentOrder?.refundStatus" class="mt-1 truncate text-red-500">
+                    {{ currentOrder?.refundStatusDesc }}
                 </div>
                 <div v-else class="text-secondary-foreground mt-1 truncate">-</div>
             </div>
-            <div v-if="order?.refundStatus">
+            <div v-if="currentOrder?.refundStatus">
                 <div class="text-muted-foreground text-sm">
                     {{ t("order.backend.recharge.detail.serialNumber") }}
                 </div>
                 <div class="text-secondary-foreground mt-1 truncate">
-                    {{ order?.refundNo }}
+                    {{ currentOrder?.refundNo }}
                 </div>
             </div>
         </div>
         <UTable ref="table" :data="tableData" :columns="columns" class="flex-1"></UTable>
 
         <template #footer>
-            <div class="flex items-center justify-end gap-2">
+            <div class="flex flex-wrap items-center justify-end gap-2">
                 <UButton
-                    v-if="order?.refundStatus === 0 && order?.payStatus === 1"
+                    v-if="currentOrder?.orderStatus === OrderStatus.CREATED"
+                    color="neutral"
+                    variant="soft"
+                    :loading="syncing === 'pay'"
+                    @click="handleSyncPayResult"
+                >
+                    {{ t("order.backend.recharge.detail.syncPayResult") }}
+                </UButton>
+                <UButton
+                    v-if="currentOrder?.refundStatus === RefundStatus.ING"
+                    color="neutral"
+                    variant="soft"
+                    :loading="syncing === 'refund'"
+                    @click="handleSyncRefundResult"
+                >
+                    {{ t("order.backend.recharge.detail.syncRefundResult") }}
+                </UButton>
+                <UButton
+                    v-if="currentOrder?.refundStatus === 0 && currentOrder?.payStatus === 1"
                     color="primary"
                     @click="handleRefund"
                     >{{ t("order.backend.recharge.detail.refund") }}</UButton

@@ -1,6 +1,15 @@
 <script setup lang="ts">
+import {
+    OrderStatus,
+    OrderStatusReverse,
+    RefundStatus,
+} from "@buildingai/constants/shared/payconfig.constant";
 import type { MembershipOrderDetailData } from "@buildingai/service/consoleapi/order-membership";
-import { apiMembershipOrderRefund } from "@buildingai/service/consoleapi/order-membership";
+import {
+    apiMembershipOrderRefund,
+    apiSyncMembershipPayResult,
+    apiSyncMembershipRefundResult,
+} from "@buildingai/service/consoleapi/order-membership";
 
 const props = defineProps<{
     order?: MembershipOrderDetailData | null;
@@ -9,10 +18,27 @@ const props = defineProps<{
 const emits = defineEmits<{
     (e: "close"): void;
     (e: "get-list"): void;
+    (e: "sync-done", detail: MembershipOrderDetailData): void;
 }>();
+
+const currentOrder = ref<MembershipOrderDetailData | null>(props.order ?? null);
+watch(
+    () => props.order,
+    (v) => {
+        currentOrder.value = v ?? null;
+    },
+    { immediate: true },
+);
 
 const { t } = useI18n();
 const toast = useMessage();
+
+/** 订单状态展示（OrderStatusReverse 枚举取值） */
+const orderStatusLabel = computed(() => {
+    const key = (currentOrder.value?.orderStatus ??
+        OrderStatus.CREATED) as keyof typeof OrderStatusReverse;
+    return OrderStatusReverse[key];
+});
 
 /**
  * 处理退款操作
@@ -24,7 +50,7 @@ const handleRefund = async () => {
         color: "warning",
     });
 
-    await apiMembershipOrderRefund(props.order?.id || "");
+    await apiMembershipOrderRefund(currentOrder.value?.id || "");
     toast.success(t("console-common.refundSuccess"));
     getOrderList();
     emits("close");
@@ -35,6 +61,36 @@ const handleRefund = async () => {
  */
 const getOrderList = () => {
     emits("get-list");
+};
+
+const syncing = ref<"pay" | "refund" | null>(null);
+const handleSyncPayResult = async () => {
+    if (!currentOrder.value?.id) return;
+    syncing.value = "pay";
+    try {
+        const res = await apiSyncMembershipPayResult(currentOrder.value.id);
+        currentOrder.value = res;
+        emits("sync-done", res);
+        toast.success(t("order.backend.membership.detail.syncPaySuccess"));
+    } catch (e) {
+        toast.error((e as Error)?.message ?? "同步失败");
+    } finally {
+        syncing.value = null;
+    }
+};
+const handleSyncRefundResult = async () => {
+    if (!currentOrder.value?.id) return;
+    syncing.value = "refund";
+    try {
+        const res = await apiSyncMembershipRefundResult(currentOrder.value.id);
+        currentOrder.value = res;
+        emits("sync-done", res);
+        toast.success(t("order.backend.membership.detail.syncRefundSuccess"));
+    } catch (e) {
+        toast.error((e as Error)?.message ?? "同步失败");
+    } finally {
+        syncing.value = null;
+    }
 };
 </script>
 
@@ -47,7 +103,7 @@ const getOrderList = () => {
                     {{ t("order.backend.membership.list.orderNo") }}
                 </div>
                 <div class="text-secondary-foreground mt-1 truncate">
-                    {{ order?.orderNo }}
+                    {{ currentOrder?.orderNo }}
                 </div>
             </div>
             <!-- 订单来源 -->
@@ -56,7 +112,7 @@ const getOrderList = () => {
                     {{ t("order.backend.membership.detail.orderSource") }}
                 </div>
                 <div class="text-secondary-foreground mt-1 truncate">
-                    {{ order?.terminalDesc }}
+                    {{ currentOrder?.terminalDesc }}
                 </div>
             </div>
             <!-- 用户信息 -->
@@ -65,7 +121,7 @@ const getOrderList = () => {
                     {{ t("order.backend.membership.detail.userInfo") }}
                 </div>
                 <div class="text-secondary-foreground mt-1 truncate">
-                    {{ order?.user?.nickname }}
+                    {{ currentOrder?.user?.nickname }}
                 </div>
             </div>
             <!-- 订单类型 -->
@@ -74,7 +130,16 @@ const getOrderList = () => {
                     {{ t("order.backend.membership.detail.orderType") }}
                 </div>
                 <div class="text-secondary-foreground mt-1 truncate">
-                    {{ order?.orderType }}
+                    {{ currentOrder?.orderType }}
+                </div>
+            </div>
+            <!-- 订单状态 -->
+            <div>
+                <div class="text-muted-foreground text-sm">
+                    {{ t("order.backend.recharge.detail.orderStatus") }}
+                </div>
+                <div class="text-secondary-foreground mt-1 truncate">
+                    {{ orderStatusLabel }}
                 </div>
             </div>
             <!-- 会员套餐 -->
@@ -83,7 +148,7 @@ const getOrderList = () => {
                     {{ t("order.backend.membership.list.planName") }}
                 </div>
                 <div class="text-secondary-foreground mt-1 truncate">
-                    {{ order?.plan?.name }}
+                    {{ currentOrder?.plan?.name }}
                 </div>
             </div>
             <!-- 会员等级 -->
@@ -92,7 +157,7 @@ const getOrderList = () => {
                     {{ t("order.backend.membership.list.levelName") }}
                 </div>
                 <div class="text-secondary-foreground mt-1 truncate">
-                    {{ order?.level?.name }}
+                    {{ currentOrder?.level?.name }}
                 </div>
             </div>
             <!-- 会员时长 -->
@@ -101,7 +166,7 @@ const getOrderList = () => {
                     {{ t("order.backend.membership.list.duration") }}
                 </div>
                 <div class="text-secondary-foreground mt-1 truncate">
-                    {{ order?.duration }}
+                    {{ currentOrder?.duration }}
                 </div>
             </div>
             <!-- 订单金额 -->
@@ -109,7 +174,7 @@ const getOrderList = () => {
                 <div class="text-muted-foreground text-sm">
                     {{ t("order.backend.membership.list.orderAmount") }}
                 </div>
-                <div class="text-secondary-foreground mt-1 truncate">¥{{ order?.orderAmount }}</div>
+                <div class="text-secondary-foreground mt-1 truncate">¥{{ currentOrder?.orderAmount }}</div>
             </div>
             <!-- 支付状态 -->
             <div>
@@ -118,7 +183,7 @@ const getOrderList = () => {
                 </div>
                 <div class="text-secondary-foreground mt-1 truncate">
                     {{
-                        order?.payState === 1
+                        currentOrder?.payState === 1
                             ? t("order.backend.membership.detail.paid")
                             : t("order.backend.membership.detail.unpaid")
                     }}
@@ -130,7 +195,7 @@ const getOrderList = () => {
                     {{ t("order.backend.membership.detail.paymentMethod") }}
                 </div>
                 <div class="text-secondary-foreground mt-1 truncate">
-                    {{ order?.payTypeDesc }}
+                    {{ currentOrder?.payTypeDesc }}
                 </div>
             </div>
             <!-- 下单时间 -->
@@ -140,8 +205,8 @@ const getOrderList = () => {
                 </div>
                 <div class="text-secondary-foreground mt-1 truncate">
                     <TimeDisplay
-                        v-if="order?.createdAt"
-                        :datetime="order.createdAt"
+                        v-if="currentOrder?.createdAt"
+                        :datetime="currentOrder.createdAt"
                         mode="datetime"
                     />
                 </div>
@@ -152,7 +217,7 @@ const getOrderList = () => {
                     {{ t("order.backend.membership.detail.paidAt") }}
                 </div>
                 <div class="text-secondary-foreground mt-1 truncate">
-                    <TimeDisplay v-if="order?.payTime" :datetime="order.payTime" mode="datetime" />
+                    <TimeDisplay v-if="currentOrder?.payTime" :datetime="currentOrder.payTime" mode="datetime" />
                     <span v-else>-</span>
                 </div>
             </div>
@@ -161,26 +226,47 @@ const getOrderList = () => {
                 <div class="text-muted-foreground text-sm">
                     {{ t("order.backend.membership.detail.refundStatus") }}
                 </div>
-                <div v-if="order?.refundStatus" class="mt-1 truncate text-red-500">
-                    {{ order?.refundStatusDesc }}
+                <div v-if="currentOrder?.refundStatus" class="mt-1 truncate text-red-500">
+                    {{ currentOrder?.refundStatusDesc }}
                 </div>
                 <div v-else class="text-secondary-foreground mt-1 truncate">-</div>
             </div>
             <!-- 退款流水号 -->
-            <div v-if="order?.refundStatus">
+            <div v-if="currentOrder?.refundStatus">
                 <div class="text-muted-foreground text-sm">
                     {{ t("order.backend.membership.detail.serialNumber") }}
                 </div>
                 <div class="text-secondary-foreground mt-1 truncate">
-                    {{ order?.refundNo }}
+                    {{ currentOrder?.refundNo }}
                 </div>
             </div>
         </div>
 
         <template #footer>
-            <div class="flex items-center justify-end gap-2">
+            <div class="flex flex-wrap items-center justify-end gap-2">
                 <UButton
-                    v-if="order?.refundStatus === 0 && order?.payState === 1"
+                    v-if="currentOrder?.orderStatus === OrderStatus.CREATED"
+                    color="neutral"
+                    variant="soft"
+                    :loading="syncing === 'pay'"
+                    @click="handleSyncPayResult"
+                >
+                    {{ t("order.backend.membership.detail.syncPayResult") }}
+                </UButton>
+                <UButton
+                    v-if="currentOrder?.refundStatus === RefundStatus.ING"
+                    color="neutral"
+                    variant="soft"
+                    :loading="syncing === 'refund'"
+                    @click="handleSyncRefundResult"
+                >
+                    {{ t("order.backend.membership.detail.syncRefundResult") }}
+                </UButton>
+                <UButton
+                    v-if="
+                        currentOrder?.refundStatus === RefundStatus.NONE &&
+                        currentOrder?.payState === 1
+                    "
                     color="primary"
                     @click="handleRefund"
                 >

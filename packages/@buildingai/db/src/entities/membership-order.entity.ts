@@ -1,4 +1,9 @@
-import { type PayConfigType } from "@buildingai/constants/shared/payconfig.constant";
+import {
+    type OrderStatusType,
+    type PayConfigType,
+    type PayStatusType,
+    type RefundStatusType,
+} from "@buildingai/constants/shared/payconfig.constant";
 import {
     UserTerminal,
     type UserTerminalType,
@@ -139,7 +144,7 @@ export class MembershipOrder extends BaseEntity {
         default: 0,
         comment: "订单主状态:0-待支付;1-订单完成;2-取消订单",
     })
-    status: number;
+    status: OrderStatusType;
 
     /**
      * 支付状态
@@ -149,7 +154,7 @@ export class MembershipOrder extends BaseEntity {
         comment: "支付状态：0-待支付;1-已支付",
         default: 0,
     })
-    payState: number;
+    payState: PayStatusType;
 
     /**
      * 支付时间
@@ -167,9 +172,9 @@ export class MembershipOrder extends BaseEntity {
     @Column({
         type: "int",
         default: 0,
-        comment: "退款状态:0-未退款;1-已退款",
+        comment: "退款状态: NONE-0 未退款;  SUCCESS-1 已退款; FAILED-2 退款失败 ING-3 退款中;",
     })
-    refundStatus: number;
+    refundStatus: RefundStatusType;
 
     /**
      * 退款时间

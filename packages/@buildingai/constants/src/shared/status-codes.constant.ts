@@ -40,3 +40,11 @@ export const UserTerminalReverse = {
     [UserTerminal.APP]: "APP",
     [UserTerminal.OA]: "OA",
 } as const;
+
+export const UserTerminalDescMap: Record<number, string> = {
+    [UserTerminal.PC]: "电脑PC",
+    [UserTerminal.H5]: "H5",
+    [UserTerminal.MP]: "微信小程序",
+    [UserTerminal.APP]: "APP",
+    [UserTerminal.OA]: "公众号",
+};

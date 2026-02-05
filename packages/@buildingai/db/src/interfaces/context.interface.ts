@@ -23,4 +23,8 @@ export interface LoginUserPlayground {
 export interface UserPlayground extends LoginUserPlayground {
     permissions: string[];
     role: Role | null;
+    /** 微信公众号 openid */
+    openid?: string;
+    /** 微信小程序 openid */
+    mp_openid?: string;
 }

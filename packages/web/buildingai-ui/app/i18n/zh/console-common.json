@@ -125,7 +125,7 @@
     "goTo": "前往",
     "page": "页",
     "confirmRefund": "是否确定退款？",
-    "refundSuccess": "退款成功",
+    "refundSuccess": "退款已提交，请等待退款",
     "noData": "暂无数据",
     "phoneAreaCodes": {
         "china": "中国大陆",

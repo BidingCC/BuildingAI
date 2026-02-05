@@ -24,6 +24,8 @@ export interface MembershipOrderListItem {
     orderNo: string;
     payType: number;
     payState: number;
+    /** 订单状态：0-待支付 1-已完成 2-订单关闭 */
+    orderStatus?: number;
     refundStatus: number;
     plan: Record<string, any>;
     level: Record<string, any>;
@@ -115,6 +117,34 @@ export const apiGetMembershipOrderList = (
  */
 export const apiGetMembershipOrderDetail = (id: string): Promise<MembershipOrderDetailData> => {
     return useConsoleGet(`/membership-order/${id}`);
+};
+
+/**
+ * 查询支付结果并同步，返回最新订单详情
+ * @param id 订单ID
+ */
+export const apiSyncMembershipPayResult = (
+    id: string,
+): Promise<MembershipOrderDetailData> => {
+    return useConsoleGet("/membership-order/sync-pay-result/" + id);
+};
+
+/**
+ * 查询退款结果并同步，返回最新订单详情
+ * @param id 订单ID
+ */
+export const apiSyncMembershipRefundResult = (
+    id: string,
+): Promise<MembershipOrderDetailData> => {
+    return useConsoleGet("/membership-order/sync-refund-result/" + id);
+};
+
+/**
+ * 关闭会员订单（仅未支付订单）
+ * @param id 订单ID
+ */
+export const apiCloseMembershipOrder = (id: string): Promise<{ message: string }> => {
+    return useConsolePost("/membership-order/close", { id });
 };
 
 /**

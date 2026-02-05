@@ -37,6 +37,7 @@
                 "orderSource": "Order Source",
                 "userInfo": "User Information",
                 "orderType": "Order Type",
+                "orderStatus": "Order Status",
                 "paymentStatus": "Payment Status",
                 "paymentMethod": "Payment Method",
                 "createdAt": "Order Time",
@@ -46,7 +47,11 @@
                 "close": "Close",
                 "refund": "Request a refund",
                 "paid": "Paid",
-                "unpaid": "Unpaid"
+                "unpaid": "Unpaid",
+                "syncPayResult": "Query Pay Result",
+                "syncRefundResult": "Query Refund Result",
+                "syncPaySuccess": "Pay result synced",
+                "syncRefundSuccess": "Refund result synced"
             }
         },
         "recharge": {
@@ -70,6 +75,9 @@
                 "createdAt": "Order Time",
                 "actions": "Actions",
                 "refund": "Refund",
+                "closeOrder": "Close Order",
+                "closeOrderConfirm": "Close this unpaid order? It cannot be paid after closing.",
+                "closeOrderSuccess": "Order closed",
                 "viewDetails": "View Details",
                 "searchOrderNo": "Search order no",
                 "searchUser": "Search user ID/nickname/phone",
@@ -77,7 +85,9 @@
                 "alipayPay": "Alipay",
                 "paid": "Paid",
                 "unpaid": "Unpaid",
+                "cancelled": "Cancelled",
                 "refunded": "Refunded",
+                "refunding": "Refunding",
                 "notRefunded": "Not Refunded",
                 "refundStatus": "Refund Status"
             },
@@ -86,6 +96,7 @@
                 "orderSource": "Order Source",
                 "userInfo": "User Info",
                 "orderType": "Order Type",
+                "orderStatus": "Order Status",
                 "paymentStatus": "Payment Status",
                 "paymentMethod": "Payment Method",
                 "createdAt": "Order Time",
@@ -95,7 +106,11 @@
                 "close": "Close",
                 "refund": "Request Refund",
                 "paid": "Paid",
-                "unpaid": "Unpaid"
+                "unpaid": "Unpaid",
+                "syncPayResult": "Query Pay Result",
+                "syncRefundResult": "Query Refund Result",
+                "syncPaySuccess": "Pay result synced",
+                "syncRefundSuccess": "Refund result synced"
             }
         }
     },

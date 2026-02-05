@@ -1,4 +1,5 @@
 import { ExtensionStatus } from "@buildingai/constants/shared/extension.constant";
+import { OrderPayFrom } from "@buildingai/constants/shared/payconfig.constant";
 import {
     AiModel,
     DecoratePageEntity,
@@ -96,7 +97,7 @@ export class Upgrade extends BaseUpgradeScript {
                 code: `${resource}:${action}`,
                 name: `permission.${resource}.${action}`,
                 description: `${action === "list" ? "查看" : action === "update" ? "编辑" : "创建"}会员${resource === "levels" ? "等级" : "套餐"}`,
-                group: "membership",
+                group: OrderPayFrom.MEMBERSHIP,
                 groupName: "permission.group.membership",
             })),
         );

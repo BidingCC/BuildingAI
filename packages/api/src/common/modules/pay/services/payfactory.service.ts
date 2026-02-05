@@ -59,7 +59,7 @@ export class PayfactoryService {
      */
     getPayService(
         payType: typeof PayConfigPayType.WECHAT,
-        scene: UserTerminalType,
+        scene?: UserTerminalType,
     ): Promise<WechatPayService>;
 
     /**
@@ -67,7 +67,7 @@ export class PayfactoryService {
      */
     getPayService(
         payType: typeof PayConfigPayType.ALIPAY,
-        scene: UserTerminalType,
+        scene?: UserTerminalType,
     ): Promise<AlipayService>;
 
     /**
@@ -81,13 +81,13 @@ export class PayfactoryService {
      */
     async getPayService(
         payType: PayConfigType,
-        scene: UserTerminalType,
+        scene: UserTerminalType = UserTerminal.PC,
     ): Promise<PayServiceInstance> {
         // 检查缓存中是否已存在该支付类型的服务实例
         const cacheKey =
             PAY_SCENE_MAP[PayConfigPayTypeReverse[payType]][UserTerminalReverse[scene]];
         if (this.serviceCache.has(cacheKey)) {
-            this.logger.debug(`使用缓存的支付服务实例: ${cacheKey}`);
+            // this.logger.debug(`使用缓存的支付服务实例: ${cacheKey}`);
             return this.serviceCache.get(cacheKey)!;
         }
 

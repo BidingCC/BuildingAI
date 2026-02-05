@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { OrderPayFrom } from "@buildingai/constants/shared/payconfig.constant";
 const RechargeTable = defineAsyncComponent(() => import("../components/recharge-table.vue"));
 const SubscriptionTable = defineAsyncComponent(
     () => import("../components/subscription-table.vue"),
@@ -18,7 +19,7 @@ const tabItems = computed(() => [
         label: t("order.frontend.subscription.tab.subscription"),
     },
     {
-        value: "recharge",
+        value: OrderPayFrom.RECHARGE,
         label: t("order.frontend.subscription.tab.recharge"),
     },
 ]);
@@ -36,7 +37,7 @@ definePageMeta({
         <UTabs v-model="activeTab" :items="tabItems" class="w-fit" />
         <UCard class="max-h-full" :ui="{ body: 'h-full overflow-hidden flex flex-col' }">
             <!-- 充值记录表格 -->
-            <RechargeTable v-if="activeTab === 'recharge'" />
+            <RechargeTable v-if="activeTab === OrderPayFrom.RECHARGE" />
 
             <!-- 订阅记录表格 -->
             <SubscriptionTable v-else-if="activeTab === 'subscription'" />

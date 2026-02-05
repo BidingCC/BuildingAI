@@ -1,3 +1,8 @@
+import { type PayConfigType } from "@buildingai/constants/shared/payconfig.constant";
+import {
+    type PayStatusType,
+    type RefundStatusType,
+} from "@buildingai/constants/shared/payconfig.constant";
 import { PaginationDto } from "@buildingai/dto/pagination.dto";
 import { IsOptional, IsString } from "class-validator";
 
@@ -18,15 +23,22 @@ export class QueryMembershipOrderDto extends PaginationDto {
     @IsOptional()
     endTime?: string;
 
-    @IsString({ message: "支付方式必须是字符串" })
+    /**
+     * 支付类型
+     */
+    // @IsEnum(PayConfigPayType)
     @IsOptional()
-    payType?: string;
+    payType?: PayConfigType;
 
-    @IsString({ message: "支付状态必须是字符串" })
+    /**
+     * 支付状态
+     */
     @IsOptional()
-    payState?: string;
+    payStatus?: PayStatusType;
 
-    @IsString({ message: "退款状态必须是字符串" })
+    /**
+     * 退款状态
+     */
     @IsOptional()
-    refundState?: string;
+    refundStatus?: RefundStatusType;
 }

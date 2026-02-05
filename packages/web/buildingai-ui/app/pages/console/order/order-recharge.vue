@@ -1,10 +1,17 @@
 <script setup lang="ts">
+import {
+    OrderStatus,
+    OrderStatusReverse,
+    PayStatus,
+    RefundStatus,
+} from "@buildingai/constants/shared/payconfig.constant";
 import type {
     OrderDetailData,
     OrderListItem,
     Statistics,
 } from "@buildingai/service/consoleapi/order-recharge";
 import {
+    apiCloseOrder,
     apiGetOrderDetail,
     apiGetOrderList,
     apiRefund,
@@ -112,8 +119,8 @@ const columns: TableColumn<OrderListItem>[] = [
         header: t("order.backend.recharge.list.paymentMethod"),
     },
     {
-        accessorKey: "paymentStatus",
-        header: t("order.backend.recharge.list.paymentStatus"),
+        accessorKey: "OrderStatus",
+        header: "订单状态",
     },
     {
         accessorKey: "createdAt",
@@ -161,9 +168,34 @@ const refund = async (id?: string): Promise<void> => {
         color: "warning",
     });
     await apiRefund(id || "");
-    getLists(); // 使用 usePaging 的 getLists 方法
+    getLists();
     toast.success(t("console-common.refundSuccess"));
 };
+
+const closeOrder = async (id?: string): Promise<void> => {
+    await useModal({
+        title: t("order.backend.recharge.list.closeOrder"),
+        description: t("order.backend.recharge.list.closeOrderConfirm"),
+        color: "warning",
+    });
+    await apiCloseOrder(id || "");
+    getLists();
+    toast.success(t("order.backend.recharge.list.closeOrderSuccess"));
+};
+
+/** 订单状态展示（OrderStatusReverse 枚举取值） */
+function getOrderStatusInfo(row: Row<OrderListItem>) {
+    const status = (row.original.orderStatus ??
+        OrderStatus.CREATED) as keyof typeof OrderStatusReverse;
+    const label = OrderStatusReverse[status];
+    const color =
+        status === OrderStatus.SUCCESS
+            ? ("success" as const)
+            : status === OrderStatus.CLOSED
+              ? ("neutral" as const)
+              : ("error" as const);
+    return { label, color };
+}
 
 // 操作栏
 function getRowItems(row: Row<OrderListItem>) {
@@ -178,7 +210,7 @@ function getRowItems(row: Row<OrderListItem>) {
                   },
               }
             : null,
-        row.original.payStatus === 1 &&
+        row.original.orderStatus === OrderStatus.SUCCESS &&
         hasAccessByCodes(["recharge-order:refund"]) &&
         row.original.refundStatus === 0
             ? {
@@ -186,8 +218,18 @@ function getRowItems(row: Row<OrderListItem>) {
                   icon: "tabler:arrow-back",
                   color: "error",
                   onSelect() {
-                      // 调用退款接口
                       refund(row.original.id);
+                  },
+              }
+            : null,
+        row.original.orderStatus === OrderStatus.CREATED &&
+        hasAccessByCodes(["recharge-order:close"])
+            ? {
+                  label: t("order.backend.recharge.list.closeOrder"),
+                  icon: "i-lucide-x-circle",
+                  color: "error",
+                  onSelect() {
+                      closeOrder(row.original.id);
                   },
               }
             : null,
@@ -331,11 +373,11 @@ onMounted(() => getLists());
                             },
                             {
                                 label: t('order.backend.recharge.list.paid'),
-                                value: '1',
+                                value: PayStatus.PAID,
                             },
                             {
                                 label: t('order.backend.recharge.list.unpaid'),
-                                value: '0',
+                                value: PayStatus.PENDING,
                             },
                         ]"
                         v-model="searchForm.payStatus"
@@ -378,40 +420,29 @@ onMounted(() => getLists());
                     td: 'border-b border-default',
                     tr: '[&:has(>td[colspan])]:hidden',
                 }"
-                class=""
             >
                 <template #user-cell="{ row }">
                     <UAvatar v-if="row.original.user?.avatar" :src="row.original.user?.avatar" />
                     <UAvatar v-else icon="i-heroicons-user" :name="row.original.user?.username" />
                     {{ row.original.user?.nickname }}
                 </template>
-                <template #paymentStatus-cell="{ row }">
-                    <div class="flex flex-col items-start">
-                        <div class="flex flex-col items-center">
-                            <div
-                                v-if="row.original.refundStatus === 1"
-                                class="text-muted-foreground mb-1 flex justify-center text-xs font-medium"
-                            >
-                                {{ t("order.backend.recharge.list.paid") }}
-                            </div>
-                            <UBadge
-                                :color="
-                                    row.original.refundStatus === 1
-                                        ? 'warning'
-                                        : row.original.payStatus === 1
-                                          ? 'success'
-                                          : 'error'
-                                "
-                            >
-                                {{
-                                    row.original.refundStatus === 1
-                                        ? t("order.backend.recharge.list.refunded")
-                                        : row.original.payStatus === 1
-                                          ? t("order.backend.recharge.list.paid")
-                                          : t("order.backend.recharge.list.unpaid")
-                                }}
-                            </UBadge>
+                <template #OrderStatus-cell="{ row }">
+                    <div class="flex flex-col items-center justify-center gap-1">
+                        <div
+                            v-if="row.original.refundStatus === RefundStatus.ING"
+                            class="text-xs text-amber-500"
+                        >
+                            退款中
                         </div>
+                        <div
+                            v-else-if="row.original.refundStatus === RefundStatus.SUCCESS"
+                            class="text-xs text-red-500"
+                        >
+                            已退款
+                        </div>
+                        <UBadge :color="getOrderStatusInfo(row).color">
+                            {{ getOrderStatusInfo(row).label }}
+                        </UBadge>
                     </div>
                 </template>
                 <template #actions-cell="{ row }">

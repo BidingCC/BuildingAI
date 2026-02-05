@@ -46,7 +46,11 @@
                 "close": "閉じる",
                 "refund": "返金を申請する",
                 "paid": "支払い済み",
-                "unpaid": "未払い"
+                "unpaid": "未払い",
+                "syncPayResult": "支払い結果を照会",
+                "syncRefundResult": "返金結果を照会",
+                "syncPaySuccess": "支払い結果を同期しました",
+                "syncRefundSuccess": "返金結果を同期しました"
             }
         },
         "recharge": {
@@ -70,6 +74,9 @@
                 "createdAt": "注文日時",
                 "actions": "操作",
                 "refund": "返金",
+                "closeOrder": "注文を閉じる",
+                "closeOrderConfirm": "この未払い注文を閉じますか？閉じた後は支払いできません。",
+                "closeOrderSuccess": "注文を閉じました",
                 "viewDetails": "詳細を表示",
                 "searchOrderNo": "注文番号を検索",
                 "searchUser": "ユーザーID/ニックネーム/電話番号を検索",
@@ -77,7 +84,9 @@
                 "alipayPay": "Alipay",
                 "paid": "支払済み",
                 "unpaid": "未払い",
+                "cancelled": "キャンセル済み",
                 "refunded": "返金済み",
+                "refunding": "返金処理中",
                 "notRefunded": "未返金",
                 "refundStatus": "返金ステータス"
             },
@@ -86,6 +95,7 @@
                 "orderSource": "注文元",
                 "userInfo": "ユーザー情報",
                 "orderType": "注文タイプ",
+                "orderStatus": "注文ステータス",
                 "paymentStatus": "支払いステータス",
                 "paymentMethod": "支払い方法",
                 "createdAt": "注文日時",
@@ -95,7 +105,11 @@
                 "close": "閉じる",
                 "refund": "返金申請",
                 "paid": "支払い済み",
-                "unpaid": "未払い"
+                "unpaid": "未払い",
+                "syncPayResult": "支払い結果を照会",
+                "syncRefundResult": "返金結果を照会",
+                "syncPaySuccess": "支払い結果を同期しました",
+                "syncRefundSuccess": "返金結果を同期しました"
             }
         }
     },

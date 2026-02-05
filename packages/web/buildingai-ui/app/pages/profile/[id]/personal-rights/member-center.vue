@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { OrderPayFrom } from "@buildingai/constants/shared/payconfig.constant";
 import { PayConfigPayType, type PayConfigType } from "@buildingai/constants/shared";
 import { UserTerminal } from "@buildingai/constants/shared/status-codes.constant";
 import type {
@@ -61,7 +62,7 @@ const { start: startPaymentPolling, clear: stopPaymentPolling } = usePollingTask
 
             const res = await apiGetPayResult({
                 orderId: state.orderInfo.orderId,
-                from: "membership",
+                from: OrderPayFrom.MEMBERSHIP,
             });
 
             if (res.payState === 1) {
@@ -211,11 +212,12 @@ const handleSubscribe = async (): Promise<void> => {
             planId: currentPlan.value.id,
             levelId: currentBillingItem.value.levelId,
             payType: state.selectedPaymentMethod,
+            scene: UserTerminal.PC,
         });
         state.orderInfo = res;
 
         const prepaidInfo = await apiPostPrepaid({
-            from: "membership",
+            from: OrderPayFrom.MEMBERSHIP,
             orderId: res.orderId,
             payType: state.selectedPaymentMethod,
             scene: UserTerminal.PC,
@@ -276,7 +278,7 @@ const handleRefreshQrCode = async (): Promise<void> => {
         }
 
         const prepaidInfo = await apiPostPrepaid({
-            from: "membership",
+            from: OrderPayFrom.MEMBERSHIP,
             orderId: state.orderInfo.orderId,
             payType: state.selectedPaymentMethod,
             scene: UserTerminal.PC,

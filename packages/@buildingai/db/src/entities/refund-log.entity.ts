@@ -41,6 +41,12 @@ export class RefundLog extends BaseEntity {
 
     @Column({
         type: "int",
+        comment: "退款来源：1 充值订单 2 会员订单",
+    })
+    from: number;
+
+    @Column({
+        type: "int",
         comment: "支付类型",
     })
     payType: PayConfigType;

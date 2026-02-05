@@ -1,6 +1,9 @@
 import { type PayConfigType } from "@buildingai/constants/shared/payconfig.constant";
-import { IsEnum, IsNotEmpty, IsUUID } from "class-validator";
-
+import {
+    UserTerminal,
+    type UserTerminalType,
+} from "@buildingai/constants/shared/status-codes.constant";
+import { IsDefined, IsEnum, IsNotEmpty, IsUUID } from "class-validator";
 /**
  * 提交会员订单 DTO
  */
@@ -25,4 +28,11 @@ export class SubmitMembershipOrderDto {
     @IsNotEmpty({ message: "支付类型不能为空" })
     @IsEnum([1, 2, 3], { message: "支付类型错误" })
     payType: PayConfigType;
+
+    /**
+     * 终端类型
+     */
+    @IsDefined({ message: "终端类型不能为空" })
+    @IsEnum(UserTerminal, { message: "终端类型错误" })
+    scene: UserTerminalType;
 }

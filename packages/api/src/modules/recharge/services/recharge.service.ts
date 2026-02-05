@@ -68,7 +68,9 @@ export class RechargeService extends BaseService<Dict> {
         orderLists.items = orderLists.items.map((order) => {
             const totalPower = order.power + order.givePower;
             let payTypeDesc = payWayList.find((item) => item.payType == order.payType)?.name;
-            if (1 === order.refundStatus) {
+            if (order.refundStatus === 2) {
+                payTypeDesc = "退款中";
+            } else if (order.refundStatus === 1) {
                 payTypeDesc = "已退款";
             }
 
@@ -139,9 +141,6 @@ export class RechargeService extends BaseService<Dict> {
         if (false == rechargeStatus) {
             throw HttpErrorFactory.badRequest("充值已关闭");
         }
-        // if (PayConfigPayType.WECHAT != payType) {
-        //     throw HttpErrorFactory.badRequest("支付方式错误");
-        // }
         const recharge = await this.rechargeRepository.findOne({
             where: {
                 id,

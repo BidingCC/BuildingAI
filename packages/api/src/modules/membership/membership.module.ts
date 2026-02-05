@@ -11,6 +11,7 @@ import {
 import { DictModule } from "@buildingai/dict";
 import { PayModule } from "@common/modules/pay/pay.module";
 import { RefundService } from "@common/modules/refund/services/refund.service";
+import { PayModule as AppPayModule } from "@modules/pay/pay.module";
 import { Module } from "@nestjs/common";
 
 import { LevelsConsoleController } from "./controllers/console/levels.controller";
@@ -37,6 +38,7 @@ import { PlansService } from "./services/plans.service";
         ]),
         DictModule,
         PayModule,
+        AppPayModule,
     ],
     controllers: [
         LevelsConsoleController,

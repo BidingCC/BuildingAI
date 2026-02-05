@@ -23,6 +23,28 @@ export class MembershipOrderController extends BaseController {
         return await this.membershipOrderService.lists(queryMembershipOrderDto);
     }
 
+    @Get("sync-pay-result/:id")
+    @Permissions({
+        code: "detail",
+        name: "查询支付结果",
+        description: "向支付渠道查询支付结果并同步订单",
+    })
+    @BuildFileUrl(["**.avatar"])
+    async syncPayResult(@Param("id") id: string) {
+        return await this.membershipOrderService.syncPayResult(id);
+    }
+
+    @Get("sync-refund-result/:id")
+    @Permissions({
+        code: "detail",
+        name: "查询退款结果",
+        description: "向支付渠道查询退款结果并同步订单",
+    })
+    @BuildFileUrl(["**.avatar"])
+    async syncRefundResult(@Param("id") id: string) {
+        return await this.membershipOrderService.syncRefundResult(id);
+    }
+
     @Get(":id")
     @Permissions({
         code: "detail",
@@ -34,6 +56,17 @@ export class MembershipOrderController extends BaseController {
         return await this.membershipOrderService.detail(id);
     }
 
+    @Post("close")
+    @Permissions({
+        code: "close",
+        name: "关闭订单",
+        description: "关闭未支付的会员订单",
+    })
+    async close(@Body("id") id: string) {
+        await this.membershipOrderService.closeOrder(id);
+        return { message: "订单已关闭" };
+    }
+
     @Post("refund")
     @Permissions({
         code: "refund",
@@ -42,7 +75,7 @@ export class MembershipOrderController extends BaseController {
     })
     async refund(@Body("id") id: string) {
         await this.membershipOrderService.refund(id);
-        return { message: "退款成功" };
+        return { message: "退款已提交，请等待退款成功" };
     }
 
     @Post("system-adjustment")

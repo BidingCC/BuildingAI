@@ -6,6 +6,8 @@
  * @author BuildingAI Teams
  */
 
+import type { UserTerminalType } from "@buildingai/constants/shared/status-codes.constant";
+
 import type { BaseEntity } from "../models/globals";
 
 // ==================== Type Definitions ====================
@@ -153,6 +155,8 @@ export interface MembershipOrderParams {
     levelId: string;
     /** 支付方式 */
     payType: number;
+    /** 终端类型 */
+    scene: UserTerminalType;
 }
 
 /**

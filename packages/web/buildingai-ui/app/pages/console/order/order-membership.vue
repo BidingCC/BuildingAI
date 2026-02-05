@@ -1,10 +1,16 @@
 <script setup lang="ts">
+import {
+    OrderStatus,
+    OrderStatusReverse,
+    RefundStatus,
+} from "@buildingai/constants/shared/payconfig.constant";
 import type {
     MembershipOrderDetailData,
     MembershipOrderListItem,
     MembershipOrderStatistics,
 } from "@buildingai/service/consoleapi/order-membership";
 import {
+    apiCloseMembershipOrder,
     apiGetMembershipOrderDetail,
     apiGetMembershipOrderList,
     apiMembershipOrderRefund,
@@ -122,8 +128,8 @@ const columns: TableColumn<MembershipOrderListItem>[] = [
         },
     },
     {
-        accessorKey: "payState",
-        header: t("order.backend.membership.list.paymentStatus"),
+        accessorKey: "orderStatus",
+        header: "订单状态",
     },
     {
         accessorKey: "createdAt",
@@ -176,6 +182,34 @@ const refund = async (id?: string): Promise<void> => {
 };
 
 /**
+ * 关闭订单（仅未支付订单）
+ */
+const closeOrder = async (id?: string): Promise<void> => {
+    await useModal({
+        title: t("order.backend.recharge.list.closeOrder"),
+        description: t("order.backend.recharge.list.closeOrderConfirm"),
+        color: "warning",
+    });
+    await apiCloseMembershipOrder(id || "");
+    getLists();
+    toast.success(t("order.backend.recharge.list.closeOrderSuccess"));
+};
+
+/** 订单状态展示（OrderStatusReverse 枚举取值） */
+function getOrderStatusInfo(row: Row<MembershipOrderListItem>) {
+    const status = (row.original.orderStatus ??
+        OrderStatus.CREATED) as keyof typeof OrderStatusReverse;
+    const label = OrderStatusReverse[status];
+    const color =
+        status === OrderStatus.SUCCESS
+            ? ("success" as const)
+            : status === OrderStatus.CLOSED
+              ? ("neutral" as const)
+              : ("error" as const);
+    return { label, color };
+}
+
+/**
  * 操作栏配置
  */
 function getRowItems(row: Row<MembershipOrderListItem>) {
@@ -190,15 +224,26 @@ function getRowItems(row: Row<MembershipOrderListItem>) {
                   },
               }
             : null,
-        row.original.payState === 1 &&
+        row.original.orderStatus === OrderStatus.SUCCESS &&
         hasAccessByCodes(["membership-order:refund"]) &&
-        row.original.refundStatus === 0
+        row.original.refundStatus === RefundStatus.NONE
             ? {
                   label: t("order.backend.membership.list.refund"),
                   icon: "tabler:arrow-back",
                   color: "error",
                   onSelect() {
                       refund(row.original.id);
+                  },
+              }
+            : null,
+        row.original.orderStatus === OrderStatus.CREATED &&
+        hasAccessByCodes(["membership-order:close"])
+            ? {
+                  label: t("order.backend.recharge.list.closeOrder"),
+                  icon: "i-lucide-x-circle",
+                  color: "error",
+                  onSelect() {
+                      closeOrder(row.original.id);
                   },
               }
             : null,
@@ -379,33 +424,23 @@ onMounted(() => getLists());
             }"
             class="flex-1"
         >
-            <template #payState-cell="{ row }">
-                <div class="flex flex-col items-start">
-                    <div class="flex flex-col items-center">
-                        <div
-                            v-if="row.original.refundStatus === 1"
-                            class="text-muted-foreground mb-1 flex justify-center text-xs font-medium"
-                        >
-                            {{ t("order.backend.recharge.list.paid") }}
-                        </div>
-                        <UBadge
-                            :color="
-                                row.original.refundStatus === 1
-                                    ? 'warning'
-                                    : row.original.payState === 1
-                                      ? 'success'
-                                      : 'error'
-                            "
-                        >
-                            {{
-                                row.original.refundStatus === 1
-                                    ? t("order.backend.recharge.list.refunded")
-                                    : row.original.payState === 1
-                                      ? t("order.backend.recharge.list.paid")
-                                      : t("order.backend.recharge.list.unpaid")
-                            }}
-                        </UBadge>
+            <template #orderStatus-cell="{ row }">
+                <div class="flex flex-col items-center justify-center gap-1">
+                    <div
+                        v-if="row.original.refundStatus === RefundStatus.ING"
+                        class="text-xs text-amber-500"
+                    >
+                        退款中
                     </div>
+                    <div
+                        v-else-if="row.original.refundStatus === RefundStatus.SUCCESS"
+                        class="text-xs text-red-500"
+                    >
+                        已退款
+                    </div>
+                    <UBadge :color="getOrderStatusInfo(row).color">
+                        {{ getOrderStatusInfo(row).label }}
+                    </UBadge>
                 </div>
             </template>
             <template #actions-cell="{ row }">

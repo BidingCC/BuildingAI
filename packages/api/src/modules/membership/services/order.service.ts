@@ -4,7 +4,18 @@ import {
     ACCOUNT_LOG_SOURCE,
     ACCOUNT_LOG_TYPE,
 } from "@buildingai/constants/shared/account-log.constants";
-import { type UserTerminalType } from "@buildingai/constants/shared/status-codes.constant";
+import {
+    OrderPayFrom,
+    OrderStatus,
+    PAY_TIMEOUT,
+    PayStatus,
+    RefundStatus,
+} from "@buildingai/constants/shared/payconfig.constant";
+import {
+    UserTerminal,
+    UserTerminalDescMap,
+    type UserTerminalType,
+} from "@buildingai/constants/shared/status-codes.constant";
 import { AppBillingService } from "@buildingai/core/modules";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
 import { MembershipLevels, MembershipOrder, MembershipPlans } from "@buildingai/db/entities";
@@ -16,8 +27,9 @@ import { HttpErrorFactory } from "@buildingai/errors";
 import { generateNo } from "@buildingai/utils";
 import { REFUND_ORDER_FROM } from "@common/modules/refund/constants/refund.constants";
 import { RefundService } from "@common/modules/refund/services/refund.service";
+import { PayService } from "@modules/pay/services/pay.service";
 import { Injectable } from "@nestjs/common";
-import { In, Repository } from "typeorm";
+import { In, LessThanOrEqual, Repository } from "typeorm";
 
 import { QueryMembershipOrderDto } from "../dto/query-membership-order.dto";
 
@@ -87,6 +99,7 @@ export class MembershipOrderService extends BaseService<MembershipOrder> {
         private readonly refundService: RefundService,
         private readonly dictService: DictService,
         private readonly appBillingService: AppBillingService,
+        private readonly payService: PayService,
     ) {
         super(membershipOrderRepository);
     }
@@ -97,7 +110,7 @@ export class MembershipOrderService extends BaseService<MembershipOrder> {
      * @returns 订单列表及统计信息
      */
     async lists(queryMembershipOrderDto: QueryMembershipOrderDto) {
-        const { orderNo, userKeyword, startTime, endTime, payType, payState, refundState } =
+        const { orderNo, userKeyword, startTime, endTime, payType, payStatus, refundStatus } =
             queryMembershipOrderDto;
         const queryBuilder = this.membershipOrderRepository.createQueryBuilder("membership-order");
         queryBuilder.leftJoin("membership-order.user", "user");
@@ -133,14 +146,15 @@ export class MembershipOrderService extends BaseService<MembershipOrder> {
                 payType,
             });
         }
-        if (payState) {
+        // 使用 != null 以便传入 0（未支付/未退款）时也能正确筛选
+        if (payStatus != null) {
             queryBuilder.andWhere("membership-order.payState = :payState", {
-                payState,
+                payStatu: payStatus,
             });
         }
-        if (refundState) {
-            queryBuilder.andWhere("membership-order.refundStatus = :refundState", {
-                refundState,
+        if (refundStatus != null) {
+            queryBuilder.andWhere("membership-order.refundStatus = :refundStatus", {
+                refundStatus,
             });
         }
 
@@ -151,6 +165,7 @@ export class MembershipOrderService extends BaseService<MembershipOrder> {
             "membership-order.levelId",
             "membership-order.payType",
             "membership-order.payState",
+            "membership-order.status",
             "membership-order.refundStatus",
             "membership-order.totalAmount",
             "membership-order.duration",
@@ -195,14 +210,27 @@ export class MembershipOrderService extends BaseService<MembershipOrder> {
         // 组装返回数据
         const items = orderLists.items.map((order) => {
             const payTypeDesc = payWayList.find((item) => item.payType == order.payType)?.name;
-            const payStateDesc = order.payState == 1 ? "已支付" : "未支付";
-            const refundStateDesc = order.refundStatus == 1 ? "已退款" : "未退款";
+            const payStateDesc = order.payState == PayStatus.PAID ? "已支付" : "未支付";
+            const refundStateDesc =
+                order.refundStatus === RefundStatus.SUCCESS
+                    ? "已退款"
+                    : order.refundStatus === RefundStatus.ING
+                      ? "退款中"
+                      : "未退款";
             const plan = planMap.get(order.planId) || null;
             const level = levelMap.get(order.levelId) || null;
 
-            // 移除 planId 和 levelId，替换为 plan 和 level 对象
+            // 移除 planId 和 levelId，替换为 plan 和 level 对象；status 以 orderStatus 返回与充值订单一致
             const { planId: _planId, levelId: _levelId, ...rest } = order;
-            return { ...rest, plan, level, payTypeDesc, payStateDesc, refundStateDesc };
+            return {
+                ...rest,
+                plan,
+                level,
+                payTypeDesc,
+                payStateDesc,
+                refundStateDesc,
+                orderStatus: order.status,
+            };
         });
 
         // 统计只统计订单来源为订单购买（source = 1）的订单
@@ -211,7 +239,7 @@ export class MembershipOrderService extends BaseService<MembershipOrder> {
         });
         const totalAmount =
             (await this.membershipOrderRepository.sum("orderAmount", {
-                payState: 1,
+                payState: PayStatus.PAID,
                 source: 1,
             })) || 0;
         const totalRefundOrder = await this.membershipOrderRepository.count({
@@ -219,7 +247,7 @@ export class MembershipOrderService extends BaseService<MembershipOrder> {
         });
         const totalRefundAmount =
             (await this.membershipOrderRepository.sum("orderAmount", {
-                refundStatus: 1,
+                refundStatus: RefundStatus.SUCCESS,
                 source: 1,
             })) || 0;
 
@@ -254,9 +282,11 @@ export class MembershipOrderService extends BaseService<MembershipOrder> {
         queryBuilder.where("membership-order.id = :id", { id });
         queryBuilder.select([
             "membership-order.id",
+            "membership-order.userId",
             "membership-order.orderNo",
             "membership-order.payType",
             "membership-order.payState",
+            "membership-order.status",
             "membership-order.refundStatus",
             "membership-order.planSnap",
             "membership-order.levelSnap",
@@ -265,6 +295,7 @@ export class MembershipOrderService extends BaseService<MembershipOrder> {
             "membership-order.payTime",
             "membership-order.createdAt",
             "membership-order.orderAmount",
+            "membership-order.terminal",
             "user.nickname",
             "user.avatar",
         ]);
@@ -273,7 +304,9 @@ export class MembershipOrderService extends BaseService<MembershipOrder> {
             throw HttpErrorFactory.badRequest("会员订单不存在");
         }
         let refundStatusDesc = "-";
-        if (detail.refundStatus) {
+        if (detail.refundStatus === RefundStatus.ING) {
+            refundStatusDesc = "退款中";
+        } else if (detail.refundStatus === RefundStatus.SUCCESS) {
             refundStatusDesc = "已退款";
         }
         const orderType = "会员订单";
@@ -284,14 +317,18 @@ export class MembershipOrderService extends BaseService<MembershipOrder> {
             },
         });
         let refundNo = "";
-        if (detail.refundStatus) {
+        if (
+            detail.refundStatus === RefundStatus.ING ||
+            detail.refundStatus === RefundStatus.SUCCESS
+        ) {
             refundNo = (
                 await this.refundLogRepository.findOne({
                     where: { orderId: detail.id },
                 })
             )?.refundNo;
         }
-        const terminalDesc = "电脑PC";
+        const terminalDesc =
+            UserTerminalDescMap[detail.terminal] ?? UserTerminalDescMap[UserTerminal.PC];
         return {
             ...detail,
             orderType,
@@ -299,7 +336,95 @@ export class MembershipOrderService extends BaseService<MembershipOrder> {
             terminalDesc,
             refundNo,
             payTypeDesc: payTypeDesc.name,
+            orderStatus: detail.status,
         };
+    }
+
+    /**
+     * 查询支付结果并同步：向支付渠道查询订单支付状态，若已支付则更新订单与会员权益，返回最新详情
+     */
+    async syncPayResult(id: string) {
+        const order = await this.membershipOrderRepository.findOne({
+            where: { id },
+            select: ["id", "userId", "payState"],
+        });
+        if (!order) throw HttpErrorFactory.badRequest("会员订单不存在");
+        if (order.payState === 1) return this.detail(id);
+        await this.payService.getPayResult(id, OrderPayFrom.MEMBERSHIP, order.userId);
+        return this.detail(id);
+    }
+
+    /**
+     * 查询退款结果并同步：退款中时向支付渠道查询退款状态，若已成功则更新订单与扣积分，返回最新详情
+     */
+    async syncRefundResult(id: string) {
+        const order = await this.membershipOrderRepository.findOne({
+            where: { id },
+            select: ["id", "userId", "refundStatus"],
+        });
+        if (!order) throw HttpErrorFactory.badRequest("会员订单不存在");
+        if (order.refundStatus !== RefundStatus.ING) return this.detail(id);
+        await this.payService.getRefundResult(id, OrderPayFrom.MEMBERSHIP, order.userId);
+        return this.detail(id);
+    }
+
+    /**
+     * 定时任务：先查询支付结果并更新表，再关闭仍超时未支付的会员订单（创建时间超过 PAY_TIMEOUT 的待支付订单，仅订单购买 source=1）
+     */
+    async closeExpiredMembershipOrders(): Promise<void> {
+        const deadline = new Date(Date.now() - PAY_TIMEOUT);
+        const orders = await this.membershipOrderRepository.find({
+            where: {
+                source: SUBSCRIPTION_SOURCE.ORDER,
+                payState: PayStatus.PENDING,
+                status: OrderStatus.CREATED,
+                createdAt: LessThanOrEqual(deadline),
+            },
+            select: ["id", "orderNo", "payType", "userId"],
+        });
+        if (orders.length === 0) return;
+        this.logger.log(`处理超时会员订单，共 ${orders.length} 笔`);
+        for (const order of orders) {
+            try {
+                const result = await this.payService.getPayResult(
+                    order.id,
+                    OrderPayFrom.MEMBERSHIP,
+                    order.userId,
+                );
+                if (result && (result as MembershipOrder).payState === PayStatus.PAID) {
+                    continue;
+                }
+                await this.payService.closePayOrder(order.orderNo, order.payType);
+                await this.membershipOrderRepository.update(order.id, {
+                    status: OrderStatus.CLOSED,
+                });
+            } catch (err) {
+                this.logger.warn(
+                    `关闭支付渠道订单失败 ${order.orderNo}: ${(err as Error).message}`,
+                );
+            }
+        }
+    }
+
+    /**
+     * 关闭订单（仅未支付订单）：关闭支付渠道订单并更新本地订单状态为已关闭
+     * @param id 会员订单 ID
+     */
+    async closeOrder(id: string) {
+        const order = await this.membershipOrderRepository.findOne({ where: { id } });
+        if (!order) throw HttpErrorFactory.badRequest("会员订单不存在");
+        if (order.payState !== PayStatus.PENDING) {
+            throw HttpErrorFactory.badRequest("仅未支付订单可关闭");
+        }
+
+        try {
+            await this.payService.closePayOrder(order.orderNo, order.payType);
+        } catch (err) {
+            throw HttpErrorFactory.badRequest(`关闭支付订单失败: ${(err as Error).message}`);
+        }
+        await this.membershipOrderRepository.update(id, {
+            status: OrderStatus.CLOSED,
+        });
     }
 
     /**
@@ -318,55 +443,24 @@ export class MembershipOrderService extends BaseService<MembershipOrder> {
             if (0 == order.payState) {
                 throw new Error("订单未支付,不能发起退款");
             }
-            if (order.refundStatus) {
+            if (order.refundStatus === RefundStatus.SUCCESS) {
                 throw new Error("订单已退款");
             }
+            if (order.refundStatus === RefundStatus.ING) {
+                throw new Error("订单退款处理中，请勿重复操作");
+            }
 
-            // 从订单快照中获取赠送的积分数量
-            const levelSnap = order.levelSnap as any;
-            const givePower = levelSnap?.givePower || 0;
-
-            await this.membershipOrderRepository.manager.transaction(async (entityManager) => {
-                // 发起退款
-                await this.refundService.initiateRefund({
-                    entityManager,
-                    orderId: order.id,
-                    userId: order.userId,
-                    orderNo: order.orderNo,
-                    from: REFUND_ORDER_FROM.FROM_MEMBERSHIP,
-                    payType: order.payType,
-                    transactionId: order.transactionId,
-                    orderAmount: order.orderAmount,
-                    refundAmount: order.orderAmount,
-                });
-
-                // 更新退款状态
-                await entityManager.update(MembershipOrder, id, {
-                    refundStatus: 1,
-                });
-
-                // 删除用户订阅记录
-                await entityManager.delete(UserSubscription, {
-                    orderId: order.id,
-                });
-
-                // 扣除购买会员时赠送的积分
-                if (givePower > 0) {
-                    await this.appBillingService.deductUserPower(
-                        {
-                            userId: order.userId,
-                            amount: givePower,
-                            accountType: ACCOUNT_LOG_TYPE.MEMBERSHIP_GIFT_DEC,
-                            source: {
-                                type: ACCOUNT_LOG_SOURCE.MEMBERSHIP_GIFT,
-                                source: "会员退款扣除",
-                            },
-                            remark: `会员退款扣除赠送积分：${givePower}`,
-                            associationNo: order.orderNo,
-                        },
-                        entityManager,
-                    );
-                }
+            // 仅发起退款，不包事务；订单状态更新、删除订阅与扣积分在退款回调中处理
+            await this.refundService.initiateRefund({
+                entityManager: this.membershipOrderRepository.manager,
+                orderId: order.id,
+                userId: order.userId,
+                orderNo: order.orderNo,
+                from: REFUND_ORDER_FROM.FROM_MEMBERSHIP,
+                payType: order.payType,
+                transactionId: order.transactionId,
+                orderAmount: order.orderAmount,
+                refundAmount: order.orderAmount,
             });
         } catch (error) {
             throw HttpErrorFactory.badRequest(error.message);
@@ -433,11 +527,6 @@ export class MembershipOrderService extends BaseService<MembershipOrder> {
             if (false === membershipStatus) {
                 throw HttpErrorFactory.badRequest("会员功能已关闭");
             }
-
-            // 验证支付方式
-            // if (PayConfigPayType.WECHAT !== payType) {
-            //     throw HttpErrorFactory.badRequest("支付方式错误");
-            // }
 
             // 查询套餐信息
             const plan = await this.membershipPlansRepository.findOne({

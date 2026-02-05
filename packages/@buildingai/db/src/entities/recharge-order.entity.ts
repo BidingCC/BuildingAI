@@ -1,4 +1,9 @@
-import { type PayConfigType } from "@buildingai/constants/shared/payconfig.constant";
+import {
+    type OrderStatusType,
+    type PayConfigType,
+    type PayStatusType,
+    type RefundStatusType,
+} from "@buildingai/constants/shared/payconfig.constant";
 import {
     UserTerminal,
     type UserTerminalType,
@@ -103,7 +108,14 @@ export class RechargeOrder extends BaseEntity {
         default: 0,
         comment: "支付状态",
     })
-    payStatus: number;
+    payStatus: PayStatusType;
+
+    @Column({
+        type: "int",
+        default: 0,
+        comment: "订单状态",
+    })
+    orderStatus: OrderStatusType;
 
     @Column({
         type: "timestamp with time zone",
@@ -117,7 +129,7 @@ export class RechargeOrder extends BaseEntity {
         default: 0,
         comment: "退款状态",
     })
-    refundStatus: number;
+    refundStatus: RefundStatusType;
 
     @Column({
         type: "timestamp with time zone",

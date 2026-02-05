@@ -65,6 +65,8 @@ export interface OrderListItem {
     orderNo?: string;
     /** Order amount */
     orderAmount?: string;
+    /** Order status: 0-待支付, 1-已完成, 2-订单关闭 */
+    orderStatus?: number;
     /** Payment status: 1-paid, 0-unpaid */
     payStatus?: number;
     /** Payment status description */
@@ -77,8 +79,10 @@ export interface OrderListItem {
     payTypeDesc?: string;
     /** Recharge power amount */
     power?: number;
-    /** Refund status: 1-refunded, 0-not refunded */
+    /** Refund status: 0-not refunded, 1-refunded, 2-refunding */
     refundStatus?: number;
+    /** Refund status description (e.g. 已退款, 退款中) */
+    refundStatusDesc?: string;
     /** Total power amount */
     totalPower?: number;
     /** User information */
@@ -130,8 +134,10 @@ export interface OrderDetailData {
     orderAmount: string;
     /** Order number */
     orderNo: string;
-    /** Order status */
+    /** Order type (e.g. 充值订单) */
     orderType: string;
+    /** Order status: 0-待支付, 1-已完成, 2-订单关闭 */
+    orderStatus: number;
     /** Order source description */
     terminalDesc?: string;
     /** Refund number */
@@ -179,6 +185,24 @@ export const apiGetOrderDetail = (id: string): Promise<OrderDetailData> => {
 };
 
 /**
+ * Sync pay result and return updated order detail
+ * @param id Order ID
+ * @returns Promise with updated order detail
+ */
+export const apiSyncPayResult = (id: string): Promise<OrderDetailData> => {
+    return useConsoleGet("/recharge-order/sync-pay-result/" + id);
+};
+
+/**
+ * Sync refund result and return updated order detail
+ * @param id Order ID
+ * @returns Promise with updated order detail
+ */
+export const apiSyncRefundResult = (id: string): Promise<OrderDetailData> => {
+    return useConsoleGet("/recharge-order/sync-refund-result/" + id);
+};
+
+/**
  * Process refund
  * @description Process refund for specified order
  * @param id Order ID
@@ -186,4 +210,13 @@ export const apiGetOrderDetail = (id: string): Promise<OrderDetailData> => {
  */
 export const apiRefund = (id: string): Promise<void> => {
     return useConsolePost("/recharge-order/refund", { id });
+};
+
+/**
+ * Close order (unpaid only)
+ * @param id Order ID
+ * @returns Promise with operation result
+ */
+export const apiCloseOrder = (id: string): Promise<{ message: string }> => {
+    return useConsolePost("/recharge-order/close", { id });
 };

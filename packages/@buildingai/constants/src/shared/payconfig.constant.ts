@@ -81,3 +81,60 @@ export interface WeChatPayConfigInfo extends BasePayConfigInfo {
 }
 
 export type PayConfigInfo = WeChatPayConfigInfo | AlipayPayConfigInfo;
+
+export const OrderPayFrom = {
+    RECHARGE: "recharge",
+    MEMBERSHIP: "membership",
+} as const;
+export type OrderPayFromType = (typeof OrderPayFrom)[keyof typeof OrderPayFrom];
+
+/** 支付超时时间（毫秒），超时未支付可关闭订单。10 分钟 */
+export const PAY_TIMEOUT = 10 * 60 * 1000;
+
+/** 退款提交后延时查询退款结果的间隔（毫秒），5 分钟后主动查一次渠道结果 */
+export const REFUND_QUERY_DELAY_MS = 5 * 60 * 1000;
+
+//订单状态
+
+export const OrderStatus = {
+    CREATED: 0, //待支付
+    SUCCESS: 1, //已完成
+    CLOSED: 2, //订单关闭
+} as const;
+export type OrderStatusType = (typeof OrderStatus)[keyof typeof OrderStatus];
+export const OrderStatusReverse = {
+    [OrderStatus.CREATED]: "待支付",
+    [OrderStatus.SUCCESS]: "已完成",
+    [OrderStatus.CLOSED]: "订单关闭",
+} as const;
+export type OrderStatusReverseType = (typeof OrderStatusReverse)[keyof typeof OrderStatusReverse];
+
+//支付状态
+
+export const PayStatus = {
+    PENDING: 0, //待支付
+    PAID: 1, //已支付
+} as const;
+export type PayStatusType = (typeof PayStatus)[keyof typeof PayStatus];
+export const PayStatusReverse = {
+    [PayStatus.PENDING]: "待支付",
+    [PayStatus.PAID]: "已支付",
+} as const;
+export type PayStatusReverseType = (typeof PayStatusReverse)[keyof typeof PayStatusReverse];
+
+//退款状态
+export const RefundStatus = {
+    NONE: 0, //未退款
+    SUCCESS: 1, //已退款
+    FAILED: 2, //退款失败
+    ING: 3, //退款中
+} as const;
+export type RefundStatusType = (typeof RefundStatus)[keyof typeof RefundStatus];
+export const RefundStatusReverse = {
+    [RefundStatus.NONE]: "未退款",
+    [RefundStatus.SUCCESS]: "已退款",
+    [RefundStatus.FAILED]: "退款异常",
+    [RefundStatus.ING]: "退款中",
+} as const;
+export type RefundStatusReverseType =
+    (typeof RefundStatusReverse)[keyof typeof RefundStatusReverse];

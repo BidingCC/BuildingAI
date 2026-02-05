@@ -5,6 +5,7 @@ import { Dict } from "@buildingai/db/entities";
 import { AccountLog } from "@buildingai/db/entities";
 import { RechargeOrder } from "@buildingai/db/entities";
 import { Recharge } from "@buildingai/db/entities";
+import { RefundLog } from "@buildingai/db/entities";
 import { MembershipOrder } from "@buildingai/db/entities";
 import { UserSubscription } from "@buildingai/db/entities";
 import { PayModule as CommonPayModule } from "@common/modules/pay/pay.module";
@@ -24,6 +25,7 @@ import { PayService } from "./services/pay.service";
             User,
             Payconfig,
             AccountLog,
+            RefundLog,
             MembershipOrder,
             UserSubscription,
         ]),

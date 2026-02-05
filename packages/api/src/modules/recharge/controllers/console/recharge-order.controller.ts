@@ -22,6 +22,28 @@ export class RechargeOrderController extends BaseController {
         return await this.rechargeOrderService.lists(queryRechargeOrderDto);
     }
 
+    @Get("sync-pay-result/:id")
+    @Permissions({
+        code: "detail",
+        name: "查询支付结果",
+        description: "向支付渠道查询支付结果并同步订单",
+    })
+    @BuildFileUrl(["**.avatar"])
+    async syncPayResult(@Param("id") id: string) {
+        return await this.rechargeOrderService.syncPayResult(id);
+    }
+
+    @Get("sync-refund-result/:id")
+    @Permissions({
+        code: "detail",
+        name: "查询退款结果",
+        description: "向支付渠道查询退款结果并同步订单",
+    })
+    @BuildFileUrl(["**.avatar"])
+    async syncRefundResult(@Param("id") id: string) {
+        return await this.rechargeOrderService.syncRefundResult(id);
+    }
+
     @Get(":id")
     @Permissions({
         code: "detail",
@@ -41,6 +63,17 @@ export class RechargeOrderController extends BaseController {
     })
     async refund(@Body("id") id: string) {
         await this.rechargeOrderService.refund(id);
-        return { message: "退款成功" };
+        return { message: "退款已提交，请等待退款成功" };
+    }
+
+    @Post("close")
+    @Permissions({
+        code: "close",
+        name: "关闭订单",
+        description: "关闭未支付的充值订单",
+    })
+    async close(@Body("id") id: string) {
+        await this.rechargeOrderService.closeOrder(id);
+        return { message: "订单已关闭" };
     }
 }

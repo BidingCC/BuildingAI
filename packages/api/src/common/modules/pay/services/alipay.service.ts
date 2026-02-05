@@ -15,7 +15,7 @@ export class AlipayService {
         private readonly dictCacheService: DictCacheService,
     ) {}
 
-    async createWebPayOrder(payOrder: PayOrder, scene: UserTerminalType) {
+    async createWebPayOrder(payOrder: PayOrder) {
         try {
             const { orderSn, amount, from } = payOrder;
 
@@ -25,7 +25,6 @@ export class AlipayService {
 
             const alipayService = await this.payfactoryService.getPayService(
                 PayConfigPayType.ALIPAY,
-                scene,
             );
 
             const domain = process.env.APP_DOMAIN;
@@ -51,11 +50,10 @@ export class AlipayService {
         }
     }
 
-    async queryPayOrder(orderSn: string, scene: UserTerminalType) {
+    async queryPayOrder(orderSn: string) {
         try {
             const alipayService = await this.payfactoryService.getPayService(
                 PayConfigPayType.ALIPAY,
-                scene,
             );
 
             return await alipayService.query({ outTradeNo: orderSn });
@@ -66,11 +64,10 @@ export class AlipayService {
         }
     }
 
-    async cancelPayOrder(orderSn: string, scene: UserTerminalType): Promise<any> {
+    async cancelPayOrder(orderSn: string): Promise<any> {
         try {
             const alipayService = await this.payfactoryService.getPayService(
                 PayConfigPayType.ALIPAY,
-                scene,
             );
 
             return await alipayService.close({ outTradeNo: orderSn });
@@ -79,32 +76,25 @@ export class AlipayService {
         }
     }
 
-    /**
-     * Not needed yet
-     */
     async decryptPayNotifyBody(body: Record<string, any>) {
         return body;
     }
 
-    async refund(
-        params: {
-            out_trade_no: string;
-            out_refund_no: string;
-            refund: number;
-            total: number;
-            reason?: string;
-        },
-        scene: UserTerminalType,
-    ): Promise<any> {
+    async refund(params: {
+        out_trade_no: string;
+        out_refund_no: string;
+        refund: number;
+        total: number;
+        reason?: string;
+    }): Promise<any> {
         try {
             const alipayService = await this.payfactoryService.getPayService(
                 PayConfigPayType.ALIPAY,
-                scene,
             );
 
             return await alipayService.refund({
                 outTradeNo: params.out_trade_no,
-                refundAmount: (params.refund / 100).toFixed(2), // 分转元
+                refundAmount: Number(params.refund).toFixed(2), // 金额单位：元，保留两位小数
                 refundReason: params.reason || "User requests for refund",
                 outRequestNo: params.out_refund_no,
             });
@@ -113,15 +103,10 @@ export class AlipayService {
         }
     }
 
-    async queryRefundStatus(
-        outRefundNo: string,
-        scene: UserTerminalType,
-        outRequestNo?: string,
-    ): Promise<any> {
+    async queryRefundStatus(outRefundNo: string, outRequestNo?: string): Promise<any> {
         try {
             const alipayService = await this.payfactoryService.getPayService(
                 PayConfigPayType.ALIPAY,
-                scene,
             );
 
             return await alipayService.refundQuery(outRefundNo, outRequestNo);
@@ -130,10 +115,10 @@ export class AlipayService {
         }
     }
 
-    private async getDomain(): Promise<string> {
-        const config = await this.dictCacheService.getGroupValues<{
-            domain?: string;
-        }>("storage_config");
-        return config?.domain || process.env.APP_DOMAIN || "";
-    }
+    // private async getDomain(): Promise<string> {
+    //     const config = await this.dictCacheService.getGroupValues<{
+    //         domain?: string;
+    //     }>("storage_config");
+    //     return config?.domain || process.env.APP_DOMAIN || "";
+    // }
 }

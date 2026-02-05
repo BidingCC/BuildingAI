@@ -1,17 +1,18 @@
-import { PayConfigType } from "@buildingai/constants/shared/payconfig.constant";
+import {
+    OrderPayFrom,
+    type OrderPayFromType,
+    PayConfigType,
+} from "@buildingai/constants/shared/payconfig.constant";
 
-export const PayFrom = {
-    RECHARGE: "recharge",
-    ORDER: "order",
-    MEMBERSHIP: "membership",
-} as const;
-export type PayFromValue = (typeof PayFrom)[keyof typeof PayFrom];
+/** 订单支付来源（与 OrderPayFrom 一致） */
+export const PayFrom = OrderPayFrom;
+export type PayFromValue = OrderPayFromType;
 
 export interface PayOrder {
     orderSn: string;
     amount: number;
     payType: PayConfigType;
-    from: PayFromValue;
+    from: OrderPayFromType;
 }
 export interface PayParams {
     payType: PayConfigType;

@@ -4,8 +4,14 @@ import { TypeOrmModule } from "@buildingai/db/@nestjs/typeorm";
 import { AccountLog, User, UserSubscription } from "@buildingai/db/entities";
 import { Module } from "@nestjs/common";
 
+import { MembershipModule } from "@modules/membership/membership.module";
+import { PayModule } from "@modules/pay/pay.module";
+import { RechargeModule } from "@modules/recharge/recharge.module";
+
 import { ScheduleController } from "./controllers/schedule.controller";
 import { MembershipGiftService } from "./services/membership-gift.service";
+import { OrderScheduleService } from "./services/order-schedule.service";
+import { RefundScheduleService } from "./services/refund-schedule.service";
 
 /**
  * 定时任务模块
@@ -16,9 +22,17 @@ import { MembershipGiftService } from "./services/membership-gift.service";
     imports: [
         NestScheduleModule.forRoot(),
         TypeOrmModule.forFeature([User, UserSubscription, AccountLog]),
+        MembershipModule,
+        PayModule,
+        RechargeModule,
     ],
     controllers: [ScheduleController],
-    providers: [ScheduleService, MembershipGiftService],
+    providers: [
+        ScheduleService,
+        MembershipGiftService,
+        OrderScheduleService,
+        RefundScheduleService,
+    ],
     exports: [ScheduleService],
 })
 export class ScheduleModule {}

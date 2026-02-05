@@ -1,5 +1,4 @@
 import { BaseController } from "@buildingai/base";
-import { PayConfigPayType } from "@buildingai/constants";
 import { type UserPlayground } from "@buildingai/db";
 import { BuildFileUrl } from "@buildingai/decorators/file-url.decorator";
 import { Playground } from "@buildingai/decorators/playground.decorator";
@@ -18,13 +17,14 @@ export class PayWebController extends BaseController {
 
     @Get("payWayList")
     @BuildFileUrl(["**.logo"])
-    async getPayWayList() {
-        return this.payService.getPayWayList();
+    async getPayWayList(@Query("scene") scene?: string) {
+        const sceneNum = scene ? Number(scene) : undefined;
+        return this.payService.getPayWayList(sceneNum);
     }
 
     @Post("prepay")
     async prepay(@Body() prepayDto: PrepayDto, @Playground() user: UserPlayground) {
-        return this.payService.prepay(prepayDto, user.id);
+        return this.payService.prepay(prepayDto, user);
     }
 
     @Get("getPayResult")
@@ -56,37 +56,51 @@ export class PayWebController extends BaseController {
             serial: headers["wechatpay-serial"],
             signature: headers["wechatpay-signature"],
         };
-        console.log("回调开始");
         await this.payService.notifyWxPay(playload, body);
         //商户需告知微信支付接收回调成功，HTTP应答状态码需返回200或204，无需返回应答报文
         res.status(200).send("");
     }
+    /**
+     * 微信退款结果回调
+     * 文档：https://pay.weixin.qq.com/doc/v3/merchant/4012791865
+     * 要求：5 秒内完成验签并应答；验签通过返回 200/204，验签失败返回 4XX/5XX 及 { code, message }；应答后再处理业务逻辑（推荐异步）
+     */
+    @Public()
+    @Post("notifyRefundWxPay")
+    async notifyRefundWxPay(
+        @Headers() headers: Headers,
+        @Body() body: Record<string, any>,
+        @Res() res: Response,
+    ) {
+        const payload: WechatPayNotifyParams = {
+            timestamp: headers["wechatpay-timestamp"],
+            nonce: headers["wechatpay-nonce"],
+            body,
+            serial: headers["wechatpay-serial"],
+            signature: headers["wechatpay-signature"],
+        };
+        const verified = await this.payService.verifyWxRefundNotify(payload);
+        if (!verified) {
+            res.status(500).json({ code: "FAIL", message: "验签失败" });
+            return;
+        }
+        res.status(200).send("");
+        setImmediate(() => this.payService.processWxRefundNotify(body).catch(() => {}));
+    }
 
     /**
-     * Ref: https://opendocs.alipay.com/open/270/105902?pathHash=d5cd617e#%E5%BC%82%E6%AD%A5%E9%80%9A%E7%9F%A5%E7%89%B9%E6%80%A7
+     * 支付宝支付/退款异步通知（同一地址，根据 body 区分）
+     * 要求：先验签并立即返回 200 + success/fail；验签通过后异步处理业务（与微信退款回调一致）
+     * Ref: https://opendocs.alipay.com/open/270/105902#%E5%BC%82%E6%AD%A5%E9%80%9A%E7%9F%A5%E7%89%B9%E6%80%A7
      */
     @Public()
     @Post("notifyAlipay")
     async notifyAlipay(@Body() body: Record<string, any>, @Res() res: Response) {
-        try {
-            await this.payService.notifyAlipay(body);
-            return res.status(200).send("success");
-        } catch {
+        const verified = await this.payService.verifyAlipayNotify(body);
+        if (!verified) {
             return res.status(200).send("fail");
         }
-    }
-
-    @Public()
-    @Get("returnAlipay")
-    async returnAlipay(@Query() query: any, @Res() res: Response) {
-        try {
-            const orderNo = query.out_trade_no;
-            return res.redirect(
-                `/payment/success?orderNo=${orderNo}&payType=${PayConfigPayType.ALIPAY}}`,
-            );
-        } catch (error) {
-            console.error("Alipay sync callback processing failed:", error);
-            return res.redirect("/payment/fail");
-        }
+        res.status(200).send("success");
+        setImmediate(() => this.payService.processAlipayNotify(body).catch(() => {}));
     }
 }

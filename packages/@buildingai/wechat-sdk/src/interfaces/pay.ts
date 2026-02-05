@@ -33,6 +33,7 @@ export interface WechatPayNotifyAnalysisParams {
 }
 
 export const resStatusCode = {
+    CLOSED: 204,
     SUCCESS: 200,
     FAIL: 400,
 } as const;

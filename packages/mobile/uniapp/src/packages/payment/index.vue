@@ -1,19 +1,28 @@
 <script setup lang="ts">
-import type { PayConfigType } from "@buildingai/constants/shared/payconfig.constant";
+import type {
+    OrderPayFromType,
+    PayConfigType,
+} from "@buildingai/constants/shared/payconfig.constant";
+import { OrderPayFrom } from "@buildingai/constants/shared/payconfig.constant";
+import { PayConfigPayType } from "@buildingai/constants/shared/payconfig.constant";
+import { UserTerminal } from "@buildingai/constants/shared/status-codes.constant";
 
 import { useLockFn } from "@/hooks/use-lock-fn";
-import { apiGetPayWayList, type PayWayItem } from "@/service/pay";
+import { usePay } from "@/hooks/use-pay";
+import { apiGetPayWayList, apiPostPrepaid, type PayWayItem } from "@/service/pay";
 import { apiPostRecharge } from "@/service/recharge";
+import { useUserStore } from "@/stores/user";
 import { getTerminal } from "@/utils/env";
-
 const { t } = useI18n();
+const userStore = useUserStore();
+const { launchPay } = usePay();
 
 const payWayList = shallowRef<PayWayItem[]>([]);
 const selectedPayWayId = ref("");
 
 /** 从充值页带入：套餐 id、来源、展示金额（从当前页 options 读取） */
 const rechargeId = shallowRef("");
-const from = shallowRef("recharge");
+const from = shallowRef<OrderPayFromType>(OrderPayFrom.RECHARGE);
 const sellPrice = shallowRef("0");
 
 onMounted(() => {
@@ -21,7 +30,7 @@ onMounted(() => {
     const page = pages[pages.length - 1] as { options?: Record<string, string> };
     const opts = page?.options ?? {};
     rechargeId.value = opts.rechargeId ?? "";
-    from.value = opts.from ?? "recharge";
+    from.value = (opts.from as OrderPayFromType) ?? OrderPayFrom.RECHARGE;
     const sellPriceEncoded = opts.sellPrice;
     sellPrice.value = sellPriceEncoded ? decodeURIComponent(sellPriceEncoded) : "0";
 
@@ -47,12 +56,53 @@ const { isLock, lockFn: onPay } = useLockFn(async () => {
         uni.showToast({ title: "请选择支付方式", icon: "none" });
         return;
     }
-    await apiPostRecharge({
+
+    const scene = getTerminal();
+    // 微信支付前按端判断是否已绑定微信：小程序需 bindWechat，公众号需 bindWechatOa
+    if (selected.payType === PayConfigPayType.WECHAT) {
+        await userStore.getUser();
+        const userInfo = userStore.userInfo;
+        if (scene === UserTerminal.MP) {
+            if (!userInfo?.bindWechat) {
+                uni.showToast({ title: "请先绑定微信小程序", icon: "none" });
+                setTimeout(() => {
+                    uni.reLaunch({ url: "/packages/user-settings/index" });
+                }, 1500);
+                return;
+            }
+        } else if (scene === UserTerminal.OA) {
+            if (!userInfo?.bindWechatOa) {
+                uni.showToast({ title: "请先绑定微信公众号", icon: "none" });
+                setTimeout(() => {
+                    uni.reLaunch({ url: "/packages/user-settings/index" });
+                }, 1500);
+                return;
+            }
+        }
+    }
+    const rechargeRes = await apiPostRecharge({
         id: rechargeId.value,
         payType: selected.payType as PayConfigType,
-        scene: getTerminal(),
+        scene,
     });
-    uni.showToast({ title: "订单创建成功", icon: "success" });
+
+    try {
+        const prepaidInfo = await apiPostPrepaid({
+            from: OrderPayFrom.RECHARGE,
+            orderId: rechargeRes.orderId,
+            payType: selected.payType as PayConfigType,
+            scene,
+        });
+
+        await launchPay(prepaidInfo, selected.payType, scene);
+    } catch (error) {
+        uni.showToast({ title: "支付失败", icon: "none" });
+        console.error(error);
+    }
+    const sellPriceEnc = encodeURIComponent(sellPrice.value);
+    uni.redirectTo({
+        url: `/packages/payment-result/index?orderId=${rechargeRes.orderId}&from=recharge&sellPrice=${sellPriceEnc}`,
+    });
 });
 
 definePage({

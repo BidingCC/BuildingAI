@@ -71,18 +71,6 @@ export class WechatPayService {
             },
             attach: params.attach,
         });
-        console.log({
-            out_trade_no: params.out_trade_no,
-            description: params.description,
-            //域名拼接请求前缀，用于回调
-            notify_url:
-                this.config.domain + process.env.VITE_APP_WEB_API_PREFIX + "/pay/notifyWxPay",
-            amount: {
-                total: Math.round(params.amount.total * 100),
-                currency: params.amount.currency,
-            },
-            attach: params.attach,
-        });
 
         const { status, error, data } = res;
 
@@ -123,9 +111,10 @@ export class WechatPayService {
      */
     async closeOrder(out_trade_no: string) {
         const res = await this.client.close(out_trade_no);
+
         const { status, error, data } = res;
 
-        if (status !== resStatusCode.SUCCESS) {
+        if (status !== resStatusCode.CLOSED) {
             const errorMessage = JSON.parse(error).message;
             throw new Error(errorMessage);
         }
@@ -181,9 +170,7 @@ export class WechatPayService {
             reason: params.reason,
             //退款结果通知url
             notify_url:
-                this.config.domain +
-                process.env.VITE_APP_CONSOLE_API_PREFIX +
-                "/pay/notifyRefundWxPay",
+                this.config.domain + process.env.VITE_APP_WEB_API_PREFIX + "/pay/notifyRefundWxPay",
             amount: {
                 //退款金额，币种的最小单位，只能为整数，不能超过原订单支付金额
                 total: Math.round(params.amount.total * 100),
@@ -264,44 +251,7 @@ export class WechatPayService {
             throw new Error(errorMessage);
         }
 
-        // data.prepay_id
-        const prepayId: string | undefined = data?.prepay_id;
-        if (!prepayId) {
-            throw new Error("微信下单成功但未返回 prepay_id");
-        }
-
-        return this.buildJsapiPayParams(prepayId);
-    }
-
-    /**
-     * 生成前端调起 JSAPI 支付所需参数（RSA-SHA256）
-     *
-     * 签名串格式：
-     * appId\n
-     * timeStamp\n
-     * nonceStr\n
-     * package\n
-     */
-    buildJsapiPayParams(prepayId: string): WechatPayJsapiPayParams {
-        const appId = this.config.appId;
-        const timeStamp = `${Math.floor(Date.now() / 1000)}`;
-        const nonceStr = crypto.randomBytes(16).toString("hex");
-        const pkg = `prepay_id=${prepayId}`;
-
-        const message = `${appId}\n${timeStamp}\n${nonceStr}\n${pkg}\n`;
-        const sign = crypto.createSign("RSA-SHA256");
-        sign.update(message);
-        sign.end();
-        const paySign = sign.sign(this.config.privateKey, "base64");
-
-        return {
-            appId,
-            timeStamp,
-            nonceStr,
-            package: pkg,
-            signType: "RSA",
-            paySign,
-        };
+        return data;
     }
 }
 
