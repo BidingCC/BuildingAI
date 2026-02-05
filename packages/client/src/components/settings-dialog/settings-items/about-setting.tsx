@@ -6,13 +6,14 @@ import {
   DialogTitle,
 } from "@buildingai/ui/components/ui/dialog";
 import { ScrollArea } from "@buildingai/ui/components/ui/scroll-area";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, QrCode } from "lucide-react";
 import { useState } from "react";
 
 import { SettingItem, SettingItemAction, SettingItemGroup } from "../setting-item";
 
 const AboutSetting = () => {
   const [agreementOpen, setAgreementOpen] = useState(false);
+  const [customerServiceOpen, setCustomerServiceOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"service" | "privacy">("service");
   const { data, isLoading } = useAgreementConfigQuery();
 
@@ -53,7 +54,7 @@ const AboutSetting = () => {
         </SettingItemGroup>
 
         <SettingItemGroup label="联系我们">
-          <SettingItem title="联系客服">
+          <SettingItem title="联系客服" onClick={() => setCustomerServiceOpen(true)}>
             <SettingItemAction>
               <ChevronRight />
             </SettingItemAction>
@@ -90,6 +91,20 @@ const AboutSetting = () => {
               )}
             </div>
           </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={customerServiceOpen} onOpenChange={setCustomerServiceOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>联系客服</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center gap-4 py-4">
+            <div className="bg-muted flex size-52 items-center justify-center rounded-lg border">
+              <QrCode className="text-muted-foreground size-24" strokeWidth={1} />
+            </div>
+            <p className="text-muted-foreground text-center text-sm">扫码添加客服微信</p>
+          </div>
         </DialogContent>
       </Dialog>
     </>
