@@ -8,9 +8,9 @@ import type { NodeProps } from "@xyflow/react";
 import { useMemo } from "react";
 
 import { blockRegistry } from "../blocks/base/block.registry";
-import type { BasicNodeData } from "../types";
+import type { BaseNodeData } from "../types";
 
-type FlowNodeProps = NodeProps & { data: BasicNodeData };
+type FlowNodeProps = NodeProps & { data: BaseNodeData };
 
 function WorkflowNode(props: FlowNodeProps) {
   const { data, selected } = props;

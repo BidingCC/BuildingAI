@@ -1,4 +1,4 @@
-import "@xyflow/react/dist/style.css";
+import "@xyflow/react/dist/base.css";
 import "./blocks/init.ts";
 
 import {

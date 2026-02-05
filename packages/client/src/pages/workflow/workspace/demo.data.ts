@@ -13,7 +13,7 @@ export function createDefaultWorkflow(): { nodes: AppNode[]; edges: AppEdge[] } 
     return { nodes: [], edges: [] };
   }
 
-  const nodes = [inputBlock.createNode(100, 200), outputBlock.createNode(500, 200)];
+  const nodes = [inputBlock.createNode(0, 0), outputBlock.createNode(500, 0)];
 
   const edges: AppEdge[] = [
     {

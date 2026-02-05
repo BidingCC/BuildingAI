@@ -15,37 +15,37 @@ export class ConditionBlock extends BlockBase<ConditionBlockData> {
       description: "根据条件执行不同的分支逻辑",
       category: "logic",
       icon: createElement(GitBranch),
-      defaultData: () => ({
-        // 默认一对 if/else
-        branches: [
-          {
-            id: nanoid(),
-            type: "if",
-            label: "条件 1",
-            condition: {
-              leftRef: { nodeId: "", varName: "" },
-              operator: "equals",
-              rightValue: {
-                type: "custom",
-                value: "",
-                valueType: "string",
+      defaultData: () => {
+        const ifHandleId = `branch-${nanoid()}`;
+        const elseHandleId = `branch-${nanoid()}`;
+
+        return {
+          branches: [
+            {
+              id: nanoid(),
+              type: "if",
+              handleId: ifHandleId,
+              condition: {
+                leftRef: { nodeId: "", varName: "" },
+                operator: "equals",
+                rightValue: {
+                  type: "custom",
+                  value: "",
+                  valueType: "string",
+                },
               },
             },
-          },
-          {
-            id: nanoid(),
-            type: "else",
-            label: "默认",
-          },
-        ],
-        outputs: [
-          { name: "branch", label: "执行的分支", type: "string" },
-          { name: "result", label: "条件结果", type: "boolean" },
-        ],
-      }),
+            {
+              id: nanoid(),
+              type: "else",
+              handleId: elseHandleId,
+            },
+          ],
+        };
+      },
       handles: {
         target: true,
-        source: true,
+        source: false,
       },
     });
   }
@@ -79,12 +79,19 @@ export class ConditionBlock extends BlockBase<ConditionBlockData> {
       errors.push("ELSE 分支必须是最后一个分支");
     }
 
-    // 3. 验证每个分支
+    // 3. 检查每个分支是否有 handleId
     data.branches.forEach((branch, index) => {
-      // if 和 else-if 必须有条件
+      if (!branch.handleId) {
+        errors.push(`分支 ${index + 1} 缺少 handleId`);
+      }
+    });
+
+    // 4. 验证每个分支的条件
+    data.branches.forEach((branch, index) => {
+      // if 和 elif 必须有条件
       if (branch.type !== "else") {
         if (!branch.condition) {
-          errors.push(`分支 "${index}" 缺少条件配置`);
+          errors.push(`分支 ${index + 1} 缺少条件配置`);
           return;
         }
 
@@ -92,7 +99,7 @@ export class ConditionBlock extends BlockBase<ConditionBlockData> {
 
         // 左值必须配置
         if (!cond.leftRef.nodeId || !cond.leftRef.varName) {
-          errors.push(`分支 "${index}" 的左值必须选择一个变量`);
+          errors.push(`分支 ${index + 1} 的左值必须选择一个变量`);
         }
 
         // 需要右值的运算符
@@ -102,12 +109,12 @@ export class ConditionBlock extends BlockBase<ConditionBlockData> {
           if (cond.rightValue.type === "variable") {
             // 变量引用
             if (!cond.rightValue.ref?.nodeId || !cond.rightValue.ref?.varName) {
-              errors.push(`分支 "${index}" 的右值变量未选择`);
+              errors.push(`分支 ${index + 1} 的右值变量未选择`);
             }
           } else {
             // 自定义值
             if (cond.rightValue.value === undefined || cond.rightValue.value === "") {
-              errors.push(`分支 "${index}" 的右值不能为空`);
+              errors.push(`分支 ${index + 1} 的右值不能为空`);
             }
           }
         }

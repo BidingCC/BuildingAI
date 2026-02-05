@@ -47,14 +47,13 @@ export interface BranchCondition {
 export interface ConditionBranch {
   id: string;
   type: BranchType;
+  handleId: string;
   // 条件配置（else 分支没有条件）
   condition?: BranchCondition;
 }
 
 export interface ConditionBlockData {
-  // 分支列表（至少包含一个 if 和一个 else）
   branches: ConditionBranch[];
-  outputs: { name: string; label: string; type: VariableType }[];
 }
 
 export const OPERATOR_LABELS: Record<ComparisonOperator, string> = {
@@ -79,7 +78,13 @@ export const BRANCH_TYPE_LABELS: Record<BranchType, string> = {
 };
 
 export const BRANCH_TYPE_COLORS: Record<BranchType, string> = {
-  if: "bg-blue-100 text-blue-700 border-blue-300",
-  elif: "bg-purple-100 text-purple-700 border-purple-300",
-  else: "bg-gray-100 text-gray-700 border-gray-300",
+  if: "bg-blue-50 text-blue-700 border-blue-200",
+  elif: "bg-purple-50 text-purple-700 border-purple-200",
+  else: "bg-gray-50 text-gray-700 border-gray-200",
+};
+
+export const BRANCH_TYPE_DOT_COLORS: Record<BranchType, string> = {
+  if: "bg-blue-500",
+  elif: "bg-purple-500",
+  else: "bg-gray-500",
 };
