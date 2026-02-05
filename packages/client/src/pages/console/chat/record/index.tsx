@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@buildingai/ui/components/ui/select";
+import { Skeleton } from "@buildingai/ui/components/ui/skeleton";
 import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
 import { EllipsisVertical, MessageSquare, Trash2, Zap } from "lucide-react";
@@ -41,6 +42,8 @@ import {
   ConversationFeedbackStats,
   ConversationMessagesDrawer,
 } from "./conversation-messages-drawer";
+
+const PAGE_SIZE = 50;
 
 const formatCompactNumber = (num: number): string => {
   if (num < 1000) {
@@ -140,7 +143,7 @@ const ConversationCardItem = ({ conversation, onOpen, onDelete }: ConversationCa
 const ChatRecordIndexPage = () => {
   const [queryParams, setQueryParams] = useState<QueryConversationsParams>({
     page: 1,
-    pageSize: 20,
+    pageSize: PAGE_SIZE,
   });
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [selectedConversation, setSelectedConversation] = useState<ConversationRecord | null>(null);
@@ -151,7 +154,7 @@ const ChatRecordIndexPage = () => {
 
   const { PaginationComponent } = usePagination({
     total: data?.total || 0,
-    pageSize: 20,
+    pageSize: PAGE_SIZE,
     page: queryParams.page || 1,
     onPageChange: (page) => {
       setQueryParams((prev) => ({ ...prev, page }));
@@ -252,26 +255,50 @@ const ChatRecordIndexPage = () => {
         </div>
 
         <div className="flex-1">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="text-muted-foreground">加载中...</div>
-            </div>
-          ) : conversations.length === 0 ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="text-muted-foreground">暂无对话记录</div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-              {conversations.map((conversation: ConversationRecord) => (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+            {isLoading ? (
+              Array.from({ length: 8 }).map((_, index) => (
+                <div key={index} className="bg-card flex flex-col gap-2 rounded-lg border p-4">
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="size-12 rounded-lg" />
+                    <div className="flex min-w-0 flex-1 flex-col gap-1 overflow-hidden">
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-3 w-16" />
+                    </div>
+                  </div>
+                  <Skeleton className="h-10 w-full" />
+                  <div className="flex gap-4 py-3">
+                    <Skeleton className="h-3 w-20" />
+                    <Skeleton className="h-3 w-16" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex gap-2">
+                      <Skeleton className="h-5 w-12 rounded-full" />
+                      <Skeleton className="h-5 w-14 rounded-full" />
+                    </div>
+                    <Skeleton className="h-3 w-20" />
+                  </div>
+                </div>
+              ))
+            ) : conversations.length === 0 ? (
+              <div className="col-span-1 flex h-28 items-center justify-center gap-4 sm:col-span-2 lg:col-span-3 xl:col-span-4 2xl:col-span-5">
+                <span className="text-muted-foreground text-sm">
+                  {queryParams.keyword
+                    ? `没有找到与"${queryParams.keyword}"相关的对话`
+                    : "暂无对话记录"}
+                </span>
+              </div>
+            ) : (
+              conversations.map((conversation: ConversationRecord) => (
                 <ConversationCardItem
                   key={conversation.id}
                   conversation={conversation}
                   onOpen={handleOpenConversation}
                   onDelete={handleDelete}
                 />
-              ))}
-            </div>
-          )}
+              ))
+            )}
+          </div>
         </div>
 
         <div className="bg-background sticky bottom-0 flex py-2">
