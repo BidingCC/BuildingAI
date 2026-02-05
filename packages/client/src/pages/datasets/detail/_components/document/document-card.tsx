@@ -19,6 +19,7 @@ import {
   TooltipTrigger,
 } from "@buildingai/ui/components/ui/tooltip";
 import { cn } from "@buildingai/ui/lib/utils";
+import { bytesToReadable } from "@buildingai/utils/format";
 import {
   ArrowLeftRightIcon,
   FilesIcon,
@@ -30,7 +31,7 @@ import {
 import { memo, useCallback, useMemo, useRef, useState } from "react";
 
 import { FileFormatIcon } from "@/components/file-fomat-icons";
-import { bytesToReadable, formatFileType, getFileFormatKey } from "@/utils/format";
+import { formatFileType, getFileFormatKey } from "@/utils/format";
 
 export interface DocumentCardProps {
   document: DatasetsDocument;

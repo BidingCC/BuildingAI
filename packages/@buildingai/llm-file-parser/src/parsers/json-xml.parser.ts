@@ -31,35 +31,33 @@ export class JsonXmlParser extends BaseParser {
             const lowerFilename = filename.toLowerCase();
             const isJson = lowerFilename.endsWith(".json") || lowerFilename.endsWith(".jsonl");
             const isXml = lowerFilename.endsWith(".xml");
-
-            // Try to detect format from content if extension is unclear
             const content = buffer.toString("utf-8").trim();
-            const detectedIsJson = content.startsWith("{") || content.startsWith("[");
-            const detectedIsXml = content.startsWith("<");
 
             let blocks: StructuredTextBlock[];
             let text: string;
+            let filetype: string;
 
-            if (isJson || (!isXml && detectedIsJson)) {
-                // Parse JSON
+            if (isJson) {
                 const result = this.parseJson(content, lowerFilename.endsWith(".jsonl"));
                 blocks = result.blocks;
                 text = result.text;
-            } else if (isXml || detectedIsXml) {
-                // Parse XML
+                filetype = "json";
+            } else if (isXml) {
                 const result = await this.parseXml(content);
                 blocks = result.blocks;
                 text = result.text;
+                filetype = "xml";
             } else {
-                // Try JSON first, then XML
                 try {
                     const result = this.parseJson(content, false);
                     blocks = result.blocks;
                     text = result.text;
+                    filetype = "json";
                 } catch {
                     const result = await this.parseXml(content);
                     blocks = result.blocks;
                     text = result.text;
+                    filetype = "xml";
                 }
             }
 
@@ -68,7 +66,7 @@ export class JsonXmlParser extends BaseParser {
                 text,
                 metadata: {
                     filename,
-                    filetype: isJson ? "json" : "xml",
+                    filetype,
                     size: buffer.length,
                 },
             };

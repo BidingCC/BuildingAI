@@ -1,3 +1,4 @@
+import type { DocumentSortBy } from "@buildingai/services/web";
 import { Button } from "@buildingai/ui/components/ui/button";
 import {
   DropdownMenu,
@@ -10,7 +11,6 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@buildingai/ui/components/ui/input-group";
-import type { DocumentSortBy } from "@buildingai/services/web";
 import { Check, ChevronDown, Search, X } from "lucide-react";
 import type { ReactNode } from "react";
 import { useState } from "react";

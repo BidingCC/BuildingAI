@@ -25,6 +25,7 @@
         "@buildingai/services": "workspace:*",
         "@buildingai/stores": "workspace:*",
         "@buildingai/ui": "workspace:*",
+        "@buildingai/utils": "workspace:*",
         "@buildingai/web-types": "workspace:*",
         "@hookform/resolvers": "^5.2.2",
         "@tabler/icons-react": "catalog:web",

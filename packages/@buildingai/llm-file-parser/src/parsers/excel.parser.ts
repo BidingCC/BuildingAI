@@ -27,7 +27,7 @@ export class ExcelParser extends BaseParser {
     ): Promise<ParseResult> {
         try {
             const lowerFilename = filename.toLowerCase();
-            const isCsv = lowerFilename.endsWith(".csv") || buffer.toString("utf-8").includes(",");
+            const isCsv = lowerFilename.endsWith(".csv");
 
             let workbook: XLSX.WorkBook;
 

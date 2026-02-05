@@ -12,10 +12,12 @@ import {
 } from "@buildingai/db/entities";
 import { AiModelModule } from "@modules/ai/model/ai-model.module";
 import { ConfigModule } from "@modules/config/config.module";
+import { UserModule } from "@modules/user/user.module";
 import { UploadModule } from "@modules/upload/upload.module";
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 import { APP_GUARD } from "@nestjs/core";
 
+import { DatasetsConsoleController } from "./controllers/console/datasets.controller";
 import { DatasetsWebController } from "./controllers/web/datasets.controller";
 import { DatasetsChatMessageWebController } from "./controllers/web/datasets-chat-message.controller";
 import { DatasetsChatRecordWebController } from "./controllers/web/datasets-chat-record.controller";
@@ -32,6 +34,7 @@ import { DatasetMemberService } from "./services/datasets-member.service";
 import { DatasetsRetrievalService } from "./services/datasets-retrieval.service";
 import { DatasetsSegmentService } from "./services/datasets-segment.service";
 import { DocumentSummaryService } from "./services/document-summary.service";
+import { DatasetsQueryPreprocessorService } from "./services/datasets-query-preprocessor.service";
 import { SegmentationService } from "./services/segmentation.service";
 import { VectorizationRunnerService } from "./services/vectorization-runner.service";
 import { VectorizationTriggerService } from "./services/vectorization-trigger.service";
@@ -57,8 +60,10 @@ import { VectorizationTriggerService } from "./services/vectorization-trigger.se
         QueueModule,
         UploadModule,
         AiModelModule,
+        forwardRef(() => UserModule),
     ],
     controllers: [
+        DatasetsConsoleController,
         DatasetsWebController,
         DatasetsDocumentsWebController,
         DatasetsMembersWebController,
@@ -76,6 +81,7 @@ import { VectorizationTriggerService } from "./services/vectorization-trigger.se
         DatasetsChatMessageService,
         DatasetsChatCompletionService,
         SegmentationService,
+        DatasetsQueryPreprocessorService,
         VectorizationTriggerService,
         VectorizationRunnerService,
         VectorizationProcessor,
