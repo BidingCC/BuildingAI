@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { useShallow } from "zustand/react/shallow";
 
 import { selectSelectedNode, useWorkflowStore } from "../store";
-import type { AppNode, BasicNodeData } from "../types";
+import type { AppNode, BaseNodeData } from "../types";
 
 export function useWorkflowSelection() {
   const selectedNodeId = useWorkflowStore((state) => state.selectedNodeId);
@@ -41,6 +41,6 @@ export function useWorkflowSelection() {
   };
 }
 
-export function useSelectedNode<T extends BasicNodeData = BasicNodeData>(): AppNode<T> | null {
+export function useSelectedNode<T extends BaseNodeData = BaseNodeData>(): AppNode<T> | null {
   return useWorkflowStore(useShallow(selectSelectedNode)) as AppNode<T> | null;
 }

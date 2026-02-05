@@ -1,6 +1,5 @@
-/**
- * 比较运算符
- */
+import type { VariableReference, VariableType } from "../../types/variable.types";
+
 export type ComparisonOperator =
   | "equals"
   | "not_equals"
@@ -16,57 +15,48 @@ export type ComparisonOperator =
   | "is_not_empty";
 
 /**
- * 逻辑运算符
+ * 分支类型
  */
-export type LogicalOperator = "and" | "or";
+export type BranchType = "if" | "elif" | "else";
 
 /**
- * 值类型
+ * 右值配置
  */
-export type ValueType = "string" | "number" | "boolean" | "variable";
+export interface RightValue {
+  type: "variable" | "custom";
+  // 变量引用
+  ref?: VariableReference;
+  // 自定义值
+  value?: any;
+  // 值类型（与左值类型一致）
+  valueType?: VariableType;
+}
 
 /**
- * 条件规则
+ * 条件配置
  */
-export interface ConditionRule {
-  id: string;
-  leftValue: string;
-  leftType: ValueType;
+export interface BranchCondition {
+  leftRef: VariableReference;
   operator: ComparisonOperator;
-  rightValue: string;
-  rightType: ValueType;
+  rightValue: RightValue;
 }
 
 /**
- * 条件组
+ * 条件分支
  */
-export interface ConditionGroup {
+export interface ConditionBranch {
   id: string;
-  operator: LogicalOperator;
-  rules: ConditionRule[];
+  type: BranchType;
+  // 条件配置（else 分支没有条件）
+  condition?: BranchCondition;
 }
 
-/**
- * Condition Block 数据结构
- */
 export interface ConditionBlockData {
-  // 条件组列表
-  groups: ConditionGroup[];
-
-  // 组之间的逻辑运算符
-  groupOperator: LogicalOperator;
-
-  // 输出配置
-  trueOutput?: string;
-  falseOutput?: string;
-
-  // 默认分支（当条件为 false 时）
-  defaultBranch?: "true" | "false" | "both";
+  // 分支列表（至少包含一个 if 和一个 else）
+  branches: ConditionBranch[];
+  outputs: { name: string; label: string; type: VariableType }[];
 }
 
-/**
- * 运算符显示名称
- */
 export const OPERATOR_LABELS: Record<ComparisonOperator, string> = {
   equals: "等于",
   not_equals: "不等于",
@@ -82,10 +72,14 @@ export const OPERATOR_LABELS: Record<ComparisonOperator, string> = {
   is_not_empty: "不为空",
 };
 
-/**
- * 逻辑运算符显示名称
- */
-export const LOGICAL_OPERATOR_LABELS: Record<LogicalOperator, string> = {
-  and: "并且 (AND)",
-  or: "或者 (OR)",
+export const BRANCH_TYPE_LABELS: Record<BranchType, string> = {
+  if: "IF",
+  elif: "ELSE IF",
+  else: "ELSE",
+};
+
+export const BRANCH_TYPE_COLORS: Record<BranchType, string> = {
+  if: "bg-blue-100 text-blue-700 border-blue-300",
+  elif: "bg-purple-100 text-purple-700 border-purple-300",
+  else: "bg-gray-100 text-gray-700 border-gray-300",
 };

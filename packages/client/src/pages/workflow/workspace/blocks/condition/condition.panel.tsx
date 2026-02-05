@@ -1,186 +1,246 @@
+import { Button } from "@buildingai/ui/components/ui/button";
+import { Input } from "@buildingai/ui/components/ui/input";
+import { Label } from "@buildingai/ui/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@buildingai/ui/components/ui/select";
+import { cn } from "@buildingai/ui/lib/utils";
+import { Plus, Trash2 } from "lucide-react";
 import { nanoid } from "nanoid";
+import { useMemo } from "react";
 
+import { VariablePicker } from "../../components/VariablePicker";
+import { useWorkflowStore } from "../../store";
+import type { VariableType } from "../../types/variable.types";
+import { VariableUtils } from "../../utils/variable-utils";
 import type { BlockPanelComponent } from "../base/block.base";
-import type {
-  ComparisonOperator,
-  ConditionBlockData,
-  ConditionGroup,
-  ConditionRule,
-  LogicalOperator,
-  ValueType,
-} from "./condition.types";
-import { LOGICAL_OPERATOR_LABELS, OPERATOR_LABELS } from "./condition.types";
+import type { ComparisonOperator, ConditionBlockData, ConditionBranch } from "./condition.types";
+import { BRANCH_TYPE_COLORS, BRANCH_TYPE_LABELS, OPERATOR_LABELS } from "./condition.types";
 
-const RuleEditor = ({
-  rule,
-  onUpdate,
-  onDelete,
-}: {
-  rule: ConditionRule;
-  onUpdate: (rule: ConditionRule) => void;
+interface BranchEditor {
+  branch: ConditionBranch;
+  index: number;
+  onUpdate: (branch: ConditionBranch) => void;
   onDelete: () => void;
-}) => {
-  const needsRightValue = rule.operator !== "is_empty" && rule.operator !== "is_not_empty";
+  canDelete: boolean;
+}
+
+const BranchEditor = ({ branch, onUpdate, onDelete, canDelete }: BranchEditor) => {
+  const selectedNodeId = useWorkflowStore((s) => s.selectedNodeId);
+  const nodes = useWorkflowStore((s) => s.nodes);
+  const edges = useWorkflowStore((s) => s.edges);
+
+  // 获取左值变量的类型
+  const leftVarType = useMemo<VariableType | null>(() => {
+    if (!branch.condition?.leftRef.nodeId || !branch.condition?.leftRef.varName) {
+      return null;
+    }
+
+    if (!selectedNodeId) return null;
+
+    const availableVars = VariableUtils.getAvailableVariables(selectedNodeId, nodes, edges, true);
+    const leftVar = availableVars.find(
+      (v) =>
+        v.nodeId === branch.condition!.leftRef.nodeId &&
+        v.variable.name === branch.condition!.leftRef.varName,
+    );
+
+    return leftVar?.variable.type || null;
+  }, [branch.condition?.leftRef, selectedNodeId, nodes, edges]);
+
+  const needsRightValue =
+    branch.condition?.operator !== "is_empty" && branch.condition?.operator !== "is_not_empty";
 
   return (
-    <div className="space-y-2 rounded border border-gray-200 bg-white p-3">
-      {/* 左值 */}
-      <div className="grid grid-cols-3 gap-2">
-        <div className="col-span-2">
-          <input
-            type="text"
-            value={rule.leftValue}
-            onChange={(e) => onUpdate({ ...rule, leftValue: e.target.value })}
-            className="w-full rounded border px-2 py-1 text-sm"
-            placeholder="变量或值"
-          />
+    <div className={cn("space-y-3 rounded-lg border-2 p-4", BRANCH_TYPE_COLORS[branch.type])}>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="rounded px-2 py-1 text-sm font-bold">
+            {BRANCH_TYPE_LABELS[branch.type]}
+          </span>
         </div>
-        <div>
-          <select
-            value={rule.leftType}
-            onChange={(e) => onUpdate({ ...rule, leftType: e.target.value as ValueType })}
-            className="w-full rounded border px-2 py-1 text-sm"
+
+        {canDelete && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onDelete}
+            className="text-red-600 hover:bg-red-100 hover:text-red-700"
           >
-            <option value="variable">变量</option>
-            <option value="string">文本</option>
-            <option value="number">数字</option>
-            <option value="boolean">布尔</option>
-          </select>
-        </div>
+            <Trash2 className="size-4" />
+          </Button>
+        )}
       </div>
 
-      {/* 运算符 */}
-      <div>
-        <select
-          value={rule.operator}
-          onChange={(e) => onUpdate({ ...rule, operator: e.target.value as ComparisonOperator })}
-          className="w-full rounded border px-2 py-1 text-sm"
-        >
-          {Object.entries(OPERATOR_LABELS).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* 右值 */}
-      {needsRightValue && (
-        <div className="grid grid-cols-3 gap-2">
-          <div className="col-span-2">
-            <input
-              type="text"
-              value={rule.rightValue}
-              onChange={(e) => onUpdate({ ...rule, rightValue: e.target.value })}
-              className="w-full rounded border px-2 py-1 text-sm"
-              placeholder="比较值"
+      {/* 条件配置（else 分支没有条件） */}
+      {branch.type !== "else" && branch.condition && (
+        <div className="space-y-3 rounded border border-gray-200 bg-white p-3">
+          {/* 左值：必须是变量 */}
+          <div className="space-y-1">
+            <Label className="text-xs">左值（变量）</Label>
+            <VariablePicker
+              value={branch.condition.leftRef}
+              onChange={(ref) => {
+                onUpdate({
+                  ...branch,
+                  condition: {
+                    ...branch.condition!,
+                    leftRef: ref || { nodeId: "", varName: "" },
+                    // 重置右值类型
+                    rightValue: {
+                      ...branch.condition!.rightValue,
+                      valueType: undefined,
+                    },
+                  },
+                });
+              }}
+              placeholder="选择左值变量"
             />
           </div>
-          <div>
-            <select
-              value={rule.rightType}
-              onChange={(e) => onUpdate({ ...rule, rightType: e.target.value as ValueType })}
-              className="w-full rounded border px-2 py-1 text-sm"
+
+          {/* 运算符 */}
+          <div className="space-y-1">
+            <Label className="text-xs">运算符</Label>
+            <Select
+              value={branch.condition.operator}
+              onValueChange={(value) => {
+                onUpdate({
+                  ...branch,
+                  condition: {
+                    ...branch.condition!,
+                    operator: value as ComparisonOperator,
+                  },
+                });
+              }}
             >
-              <option value="variable">变量</option>
-              <option value="string">文本</option>
-              <option value="number">数字</option>
-              <option value="boolean">布尔</option>
-            </select>
+              <SelectTrigger className="h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(OPERATOR_LABELS).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
+
+          {/* 右值 */}
+          {needsRightValue && (
+            <div className="space-y-2">
+              <Label className="text-xs">右值</Label>
+
+              {/* 选择右值类型：变量或自定义 */}
+              <Select
+                value={branch.condition.rightValue.type}
+                onValueChange={(value: "variable" | "custom") => {
+                  onUpdate({
+                    ...branch,
+                    condition: {
+                      ...branch.condition!,
+                      rightValue: {
+                        type: value,
+                        valueType: leftVarType || "string",
+                        // 切换时清空之前的值
+                        ref: undefined,
+                        value: undefined,
+                      },
+                    },
+                  });
+                }}
+              >
+                <SelectTrigger className="h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="variable">变量</SelectItem>
+                  <SelectItem value="custom">自定义值</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* 变量选择 */}
+              {branch.condition.rightValue.type === "variable" && (
+                <VariablePicker
+                  value={branch.condition.rightValue.ref || null}
+                  onChange={(ref) => {
+                    onUpdate({
+                      ...branch,
+                      condition: {
+                        ...branch.condition!,
+                        rightValue: {
+                          ...branch.condition!.rightValue,
+                          ref: ref || undefined,
+                        },
+                      },
+                    });
+                  }}
+                  typeFilter={leftVarType ? [leftVarType] : undefined}
+                  placeholder="选择右值变量"
+                />
+              )}
+
+              {/* 自定义值输入 */}
+              {branch.condition.rightValue.type === "custom" && (
+                <div>
+                  {leftVarType === "boolean" ? (
+                    <Select
+                      value={String(branch.condition.rightValue.value || "true")}
+                      onValueChange={(value) => {
+                        onUpdate({
+                          ...branch,
+                          condition: {
+                            ...branch.condition!,
+                            rightValue: {
+                              ...branch.condition!.rightValue,
+                              value: value === "true",
+                              valueType: "boolean",
+                            },
+                          },
+                        });
+                      }}
+                    >
+                      <SelectTrigger className="h-8">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="true">true</SelectItem>
+                        <SelectItem value="false">false</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Input
+                      type={leftVarType === "number" ? "number" : "text"}
+                      value={branch.condition.rightValue.value || ""}
+                      onChange={(e) => {
+                        const value =
+                          leftVarType === "number" ? Number(e.target.value) : e.target.value;
+                        onUpdate({
+                          ...branch,
+                          condition: {
+                            ...branch.condition!,
+                            rightValue: {
+                              ...branch.condition!.rightValue,
+                              value,
+                              valueType: leftVarType || "string",
+                            },
+                          },
+                        });
+                      }}
+                      placeholder={`输入${leftVarType === "number" ? "数字" : "文本"}值`}
+                      className="h-8"
+                    />
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
-
-      <button
-        onClick={onDelete}
-        className="w-full rounded bg-red-50 px-3 py-1 text-xs text-red-600 hover:bg-red-100"
-      >
-        删除规则
-      </button>
-    </div>
-  );
-};
-
-const GroupEditor = ({
-  group,
-  onUpdate,
-  onDelete,
-}: {
-  group: ConditionGroup;
-  onUpdate: (group: ConditionGroup) => void;
-  onDelete: () => void;
-}) => {
-  const addRule = () => {
-    const newRule: ConditionRule = {
-      id: nanoid(),
-      leftValue: "",
-      leftType: "variable",
-      operator: "equals",
-      rightValue: "",
-      rightType: "string",
-    };
-    onUpdate({ ...group, rules: [...group.rules, newRule] });
-  };
-
-  const updateRule = (index: number, rule: ConditionRule) => {
-    const newRules = [...group.rules];
-    newRules[index] = rule;
-    onUpdate({ ...group, rules: newRules });
-  };
-
-  const deleteRule = (index: number) => {
-    const newRules = group.rules.filter((_, i) => i !== index);
-    onUpdate({ ...group, rules: newRules });
-  };
-
-  return (
-    <div className="space-y-3 rounded-lg border-2 border-purple-200 bg-purple-50 p-3">
-      {/* 组头部 */}
-      <div className="flex items-center justify-between">
-        <select
-          value={group.operator}
-          onChange={(e) => onUpdate({ ...group, operator: e.target.value as LogicalOperator })}
-          className="rounded border bg-white px-3 py-1 text-sm font-medium"
-        >
-          {Object.entries(LOGICAL_OPERATOR_LABELS).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
-        <button
-          onClick={onDelete}
-          className="rounded bg-red-500 px-3 py-1 text-xs text-white hover:bg-red-600"
-        >
-          删除组
-        </button>
-      </div>
-
-      {/* 规则列表 */}
-      <div className="space-y-2">
-        {group.rules.map((rule, index) => (
-          <div key={rule.id}>
-            {index > 0 && (
-              <div className="my-1 text-center text-xs font-semibold text-purple-700">
-                {LOGICAL_OPERATOR_LABELS[group.operator]}
-              </div>
-            )}
-            <RuleEditor
-              rule={rule}
-              onUpdate={(r) => updateRule(index, r)}
-              onDelete={() => deleteRule(index)}
-            />
-          </div>
-        ))}
-      </div>
-
-      {/* 添加规则按钮 */}
-      <button
-        onClick={addRule}
-        className="w-full rounded border-2 border-dashed border-purple-300 bg-white px-3 py-2 text-sm text-purple-600 hover:border-purple-400 hover:bg-purple-50"
-      >
-        + 添加规则
-      </button>
     </div>
   );
 };
@@ -189,121 +249,66 @@ export const ConditionPanelComponent: BlockPanelComponent<ConditionBlockData> = 
   data,
   onChange,
 }) => {
-  const addGroup = () => {
-    const newGroup: ConditionGroup = {
+  const addElseIf = () => {
+    const elseIndex = data.branches.findIndex((b) => b.type === "else");
+    const newBranch: ConditionBranch = {
       id: nanoid(),
-      operator: "and",
-      rules: [
-        {
-          id: nanoid(),
-          leftValue: "",
-          leftType: "variable",
-          operator: "equals",
-          rightValue: "",
-          rightType: "string",
+      type: "elif",
+      condition: {
+        leftRef: { nodeId: "", varName: "" },
+        operator: "equals",
+        rightValue: {
+          type: "custom",
+          value: "",
+          valueType: "string",
         },
-      ],
+      },
     };
-    onChange({ groups: [...data.groups, newGroup] });
+
+    // 插入到 else 之前
+    const newBranches = [...data.branches];
+    newBranches.splice(elseIndex, 0, newBranch);
+    onChange({ branches: newBranches });
   };
 
-  const updateGroup = (index: number, group: ConditionGroup) => {
-    const newGroups = [...data.groups];
-    newGroups[index] = group;
-    onChange({ groups: newGroups });
+  const updateBranch = (index: number, branch: ConditionBranch) => {
+    const newBranches = [...data.branches];
+    newBranches[index] = branch;
+    onChange({ branches: newBranches });
   };
 
-  const deleteGroup = (index: number) => {
-    const newGroups = data.groups.filter((_, i) => i !== index);
-    onChange({ groups: newGroups });
+  const deleteBranch = (index: number) => {
+    const newBranches = data.branches.filter((_, i) => i !== index);
+    onChange({ branches: newBranches });
+  };
+
+  const canDelete = (branch: ConditionBranch) => {
+    if (branch.type === "if") {
+      return data.branches.filter((b) => b.type === "if").length > 1;
+    }
+    return branch.type !== "else";
   };
 
   return (
     <div className="space-y-4">
-      {/* 条件组列表 */}
       <div className="space-y-3">
-        <label className="text-sm font-semibold">条件规则</label>
-        {data.groups.map((group, index) => (
-          <div key={group.id}>
-            {index > 0 && (
-              <div className="my-2">
-                <select
-                  value={data.groupOperator}
-                  onChange={(e) =>
-                    onChange({
-                      groupOperator: e.target.value as LogicalOperator,
-                    })
-                  }
-                  className="w-full rounded bg-gray-100 px-3 py-2 text-center font-semibold text-gray-700"
-                >
-                  {Object.entries(LOGICAL_OPERATOR_LABELS).map(([value, label]) => (
-                    <option key={value} value={value}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-            <GroupEditor
-              group={group}
-              onUpdate={(g) => updateGroup(index, g)}
-              onDelete={() => deleteGroup(index)}
-            />
-          </div>
+        <Label className="text-sm font-semibold">条件分支</Label>
+        {data.branches.map((branch, index) => (
+          <BranchEditor
+            key={branch.id}
+            branch={branch}
+            index={index}
+            onUpdate={(b) => updateBranch(index, b)}
+            onDelete={() => deleteBranch(index)}
+            canDelete={canDelete(branch)}
+          />
         ))}
       </div>
 
-      {/* 添加条件组 */}
-      <button
-        onClick={addGroup}
-        className="w-full rounded border-2 border-dashed border-gray-300 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-600 hover:border-gray-400 hover:bg-gray-100"
-      >
-        + 添加条件组
-      </button>
-
-      {/* 输出配置 */}
-      <div className="space-y-2 border-t pt-4">
-        <label className="text-sm font-semibold">输出配置</label>
-
-        <div>
-          <label className="text-xs text-gray-600">True 分支输出变量</label>
-          <input
-            type="text"
-            value={data.trueOutput || ""}
-            onChange={(e) => onChange({ trueOutput: e.target.value })}
-            className="w-full rounded border px-3 py-2 text-sm"
-            placeholder="condition_true"
-          />
-        </div>
-
-        <div>
-          <label className="text-xs text-gray-600">False 分支输出变量</label>
-          <input
-            type="text"
-            value={data.falseOutput || ""}
-            onChange={(e) => onChange({ falseOutput: e.target.value })}
-            className="w-full rounded border px-3 py-2 text-sm"
-            placeholder="condition_false"
-          />
-        </div>
-
-        <div>
-          <label className="text-xs text-gray-600">默认分支</label>
-          <select
-            value={data.defaultBranch || "both"}
-            onChange={(e) =>
-              onChange({
-                defaultBranch: e.target.value as ConditionBlockData["defaultBranch"],
-              })
-            }
-            className="w-full rounded border px-3 py-2 text-sm"
-          >
-            <option value="true">True 分支</option>
-            <option value="false">False 分支</option>
-            <option value="both">两个分支都执行</option>
-          </select>
-        </div>
-      </div>
+      <Button onClick={addElseIf} variant="outline" className="w-full border-dashed">
+        <Plus className="mr-2 size-4" />
+        添加 ELSE-IF 分支
+      </Button>
     </div>
   );
 };

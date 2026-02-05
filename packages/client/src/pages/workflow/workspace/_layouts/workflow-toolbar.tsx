@@ -13,8 +13,10 @@ import {
   TooltipTrigger,
 } from "@buildingai/ui/components/ui/tooltip";
 import { Panel } from "@xyflow/react";
-import { CheckCircle, Play, RefreshCw } from "lucide-react";
+import { Bug, CheckCircle, Play, RefreshCw } from "lucide-react";
 import { useState } from "react";
+
+import { useWorkflowStore } from "@/pages/workflow/workspace/store";
 
 import { ValidationResultPanel } from "../_components/validation-result-panel";
 import { useWorkflowValidation } from "../hooks/useWorkflowValidation";
@@ -41,6 +43,17 @@ export function WorkflowToolbar() {
 
     console.log("运行工作流...");
     // TODO: 实际的运行逻辑
+  };
+
+  const handlePrint = () => {
+    console.log(
+      JSON.parse(
+        JSON.stringify({
+          nodes: useWorkflowStore.getState().nodes,
+          edges: useWorkflowStore.getState().edges,
+        }),
+      ),
+    );
   };
 
   const handleCloseDialog = () => {
@@ -84,6 +97,11 @@ export function WorkflowToolbar() {
               <p>验证并运行工作流</p>
             </TooltipContent>
           </Tooltip>
+
+          <Button size="sm" variant="outline" onClick={handlePrint} disabled={isValidating}>
+            <Bug className="mr-2 size-4" />
+            打印当前结构
+          </Button>
         </TooltipProvider>
       </div>
 
