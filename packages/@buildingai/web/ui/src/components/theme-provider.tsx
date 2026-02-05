@@ -105,6 +105,9 @@ export function ThemeProvider({
     const root = window.document.documentElement;
 
     const applyMode = () => {
+      // Disable transitions during theme change
+      root.classList.add("disable-transitions");
+
       root.classList.remove("light", "dark");
 
       if (theme === "system") {
@@ -112,10 +115,16 @@ export function ThemeProvider({
           ? "dark"
           : "light";
         root.classList.add(systemTheme);
-        return;
+      } else {
+        root.classList.add(theme);
       }
 
-      root.classList.add(theme);
+      // Re-enable transitions after styles are applied
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          root.classList.remove("disable-transitions");
+        }, 0);
+      });
     };
 
     applyMode();
@@ -124,11 +133,6 @@ export function ThemeProvider({
 
     const media = window.matchMedia("(prefers-color-scheme: dark)");
     const onChange = () => applyMode();
-
-    if (typeof media.addEventListener === "function") {
-      media.addEventListener("change", onChange);
-      return () => media.removeEventListener("change", onChange);
-    }
 
     media.addEventListener("change", onChange);
     return () => media.removeEventListener("change", onChange);
