@@ -19,6 +19,15 @@
   html {
     @apply font-sans;
   }
+  .disable-transitions,
+  .disable-transitions *,
+  .disable-transitions *::before,
+  .disable-transitions *::after {
+    transition-property:
+      color, background-color, border-color, text-decoration-color, fill, stroke, box-shadow,
+      outline-color !important;
+    transition-duration: 0s !important;
+  }
   button:not(:disabled),
   [role="button"]:not(:disabled) {
     cursor: pointer;
