@@ -84,9 +84,7 @@ function Workspace() {
     useWorkflowStore.getState().clearEdges();
 
     useWorkflowStore.getState().addNodes(defaultData.nodes);
-    defaultData.edges.forEach((edge) => {
-      useWorkflowStore.getState().addEdge(edge);
-    });
+    useWorkflowStore.getState().setEdges(defaultData.edges);
   }, []);
 
   return (
