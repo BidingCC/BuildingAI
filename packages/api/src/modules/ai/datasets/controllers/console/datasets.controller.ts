@@ -2,13 +2,15 @@ import { type UserPlayground } from "@buildingai/db";
 import { Datasets, SquarePublishStatus } from "@buildingai/db/entities";
 import { type FindOptionsWhere, ILike, In } from "@buildingai/db/typeorm";
 import { Playground } from "@buildingai/decorators/playground.decorator";
+import { HttpErrorFactory } from "@buildingai/errors";
 import { bytesToReadable } from "@buildingai/utils";
 import { ConsoleController } from "@common/decorators/controller.decorator";
 import { Permissions } from "@common/decorators/permissions.decorator";
 import { UserService } from "@modules/user/services/user.service";
-import { Body, Get, Param, Post, Query } from "@nestjs/common";
+import { Body, Get, Param, Patch, Post, Query } from "@nestjs/common";
 
 import { ListConsoleDatasetsDto } from "../../dto/list-console-datasets.dto";
+import { SetDatasetVectorConfigDto } from "../../dto/set-dataset-vector-config.dto";
 import { RejectSquarePublishDto } from "../../dto/square-publish.dto";
 import { DatasetsService } from "../../services/datasets.service";
 
@@ -62,6 +64,34 @@ export class DatasetsConsoleController {
             pageSize: result.pageSize,
             totalPages: result.totalPages,
         };
+    }
+
+    @Get(":id")
+    @Permissions({
+        code: "detail",
+        name: "知识库详情",
+        description: "查询知识库详情（含向量配置）",
+    })
+    async getOne(@Param("id") datasetId: string) {
+        const dataset = await this.datasetsService.findOneById(datasetId);
+        if (!dataset) throw HttpErrorFactory.notFound("知识库不存在");
+        return {
+            id: dataset.id,
+            name: dataset.name,
+            embeddingModelId: dataset.embeddingModelId ?? null,
+            retrievalMode: dataset.retrievalMode,
+            retrievalConfig: dataset.retrievalConfig,
+        };
+    }
+
+    @Patch(":id/vector-config")
+    @Permissions({
+        code: "vector-config",
+        name: "设置向量配置",
+        description: "设置知识库检索方式与向量模型",
+    })
+    async setVectorConfig(@Param("id") datasetId: string, @Body() dto: SetDatasetVectorConfigDto) {
+        return this.datasetsService.updateVectorConfig(datasetId, dto);
     }
 
     @Post(":id/approve-square")

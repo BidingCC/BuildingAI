@@ -2,10 +2,25 @@ import type {
     MutationOptionsUtil,
     PaginatedQueryOptionsUtil,
     PaginatedResponse,
+    QueryOptionsUtil,
 } from "@buildingai/web-types";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { consoleHttpClient } from "../base";
+
+export type ConsoleDatasetVectorConfig = {
+    id: string;
+    name: string;
+    embeddingModelId: string | null;
+    retrievalMode: string;
+    retrievalConfig: Record<string, unknown>;
+};
+
+export type SetDatasetVectorConfigDto = {
+    embeddingModelId?: string;
+    retrievalMode?: string;
+    retrievalConfig?: Record<string, unknown>;
+};
 
 export type ConsoleDatasetStatus = "all" | "none" | "pending" | "approved" | "rejected";
 
@@ -63,6 +78,35 @@ export function useRejectDatasetSquareMutation(
             consoleHttpClient.post<ConsoleDatasetItem>(`/datasets/${id}/reject-square`, {
                 reason,
             }),
+        ...options,
+    });
+}
+
+export function useConsoleDatasetDetailQuery(
+    id: string | null,
+    options?: QueryOptionsUtil<ConsoleDatasetVectorConfig>,
+) {
+    return useQuery({
+        queryKey: ["console", "datasets", "detail", id],
+        queryFn: () => consoleHttpClient.get<ConsoleDatasetVectorConfig>(`/datasets/${id}`),
+        enabled: !!id,
+        ...options,
+    });
+}
+
+export function useSetDatasetVectorConfigMutation(
+    options?: MutationOptionsUtil<
+        ConsoleDatasetVectorConfig,
+        { id: string; dto: SetDatasetVectorConfigDto }
+    >,
+) {
+    return useMutation<
+        ConsoleDatasetVectorConfig,
+        Error,
+        { id: string; dto: SetDatasetVectorConfigDto }
+    >({
+        mutationFn: ({ id, dto }) =>
+            consoleHttpClient.patch<ConsoleDatasetVectorConfig>(`/datasets/${id}/vector-config`, dto),
         ...options,
     });
 }

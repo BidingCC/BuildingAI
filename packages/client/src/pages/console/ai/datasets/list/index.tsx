@@ -36,6 +36,7 @@ import { usePagination } from "@/hooks/use-pagination";
 import { PageContainer } from "@/layouts/console/_components/page-container";
 
 import { ReviewDialog } from "./_components/review-dialog";
+import { VectorConfigDialog } from "./_components/vector-config-dialog";
 
 const PAGE_SIZE = 30;
 
@@ -99,6 +100,8 @@ const DatasetsIndexPage = () => {
 
   const [reviewDataset, setReviewDataset] = useState<ConsoleDatasetItem | null>(null);
   const [reviewOpen, setReviewOpen] = useState(false);
+  const [vectorDataset, setVectorDataset] = useState<ConsoleDatasetItem | null>(null);
+  const [vectorOpen, setVectorOpen] = useState(false);
   const { confirm: alertConfirm } = useAlertDialog();
   const { data, isLoading, refetch } = useConsoleDatasetsListQuery(queryParams);
 
@@ -145,7 +148,8 @@ const DatasetsIndexPage = () => {
     console.log("delete", row.id);
   };
   const handleVector = (row: ConsoleDatasetItem) => {
-    console.log("vector", row.id);
+    setVectorDataset(row);
+    setVectorOpen(true);
   };
 
   return (
@@ -280,6 +284,13 @@ const DatasetsIndexPage = () => {
           onSuccess={() => refetch()}
         />
       )}
+      <VectorConfigDialog
+        open={vectorOpen}
+        onOpenChange={setVectorOpen}
+        datasetId={vectorDataset?.id ?? null}
+        datasetName={vectorDataset?.name ?? ""}
+        onSuccess={() => refetch()}
+      />
     </PageContainer>
   );
 };
