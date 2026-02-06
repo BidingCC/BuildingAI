@@ -5,10 +5,12 @@ import { Playground } from "@buildingai/decorators/playground.decorator";
 import { Public } from "@buildingai/decorators/public.decorator";
 import { WechatPayNotifyParams } from "@buildingai/wechat-sdk/interfaces/pay";
 import { WebController } from "@common/decorators/controller.decorator";
+import { getClientIp } from "@common/utils/ip.util";
 import { PrepayDto } from "@modules/pay/dto/prepay.dto";
 import { PayService } from "@modules/pay/services/pay.service";
-import { Body, Get, Headers, Post, Query, Res } from "@nestjs/common";
-import type { Response } from "express";
+import { Body, Get, Headers, Post, Query, Req, Res } from "@nestjs/common";
+import type { Request, Response } from "express";
+
 @WebController("pay")
 export class PayWebController extends BaseController {
     constructor(private readonly payService: PayService) {
@@ -23,8 +25,13 @@ export class PayWebController extends BaseController {
     }
 
     @Post("prepay")
-    async prepay(@Body() prepayDto: PrepayDto, @Playground() user: UserPlayground) {
-        return this.payService.prepay(prepayDto, user);
+    async prepay(
+        @Body() prepayDto: PrepayDto,
+        @Playground() user: UserPlayground,
+        @Req() req: Request,
+    ) {
+        const clientIp = getClientIp(req);
+        return this.payService.prepay(prepayDto, user, { clientIp });
     }
 
     @Get("getPayResult")

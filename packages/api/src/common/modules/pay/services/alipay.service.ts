@@ -1,11 +1,11 @@
 import { PayConfigPayType } from "@buildingai/constants";
 import { UserTerminalType } from "@buildingai/constants/shared/status-codes.constant";
+import { UserTerminal } from "@buildingai/constants/shared/status-codes.constant";
 import { DictCacheService } from "@buildingai/dict";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { PayOrder } from "@common/interfaces/pay.interface";
 import { PayfactoryService } from "@common/modules/pay/services/payfactory.service";
 import { Injectable, Logger } from "@nestjs/common";
-
 @Injectable()
 export class AlipayService {
     private readonly logger = new Logger(AlipayService.name);
@@ -15,7 +15,7 @@ export class AlipayService {
         private readonly dictCacheService: DictCacheService,
     ) {}
 
-    async createWebPayOrder(payOrder: PayOrder) {
+    async createAliPayOrder(payOrder: PayOrder, scene: UserTerminalType) {
         try {
             const { orderSn, amount, from } = payOrder;
 
@@ -32,19 +32,30 @@ export class AlipayService {
             if (!domain) {
                 throw HttpErrorFactory.notFound("请先在.env中配置APP_DOMAIN");
             }
-
             const notifyUrl = `${domain}${process.env.VITE_APP_WEB_API_PREFIX}/pay/notifyAlipay`;
 
-            return await alipayService.createWebPay({
-                outTradeNo: orderSn,
-                totalAmount: amount.toString(),
-                // product name
-                subject: from,
-                body: `from:${from}`,
-                passbackParams: from,
-                timeoutExpress: "10m",
-                notifyUrl,
-            });
+            if (scene === UserTerminal.PC) {
+                return await alipayService.createWebPay({
+                    outTradeNo: orderSn,
+                    totalAmount: amount.toString(),
+                    // product name
+                    subject: from,
+                    body: `from:${from}`,
+                    passbackParams: from,
+                    timeoutExpress: "10m",
+                    notifyUrl,
+                });
+            } else if (scene === UserTerminal.H5) {
+                return await alipayService.createWapPay({
+                    outTradeNo: orderSn,
+                    totalAmount: amount.toString(),
+                    subject: from,
+                    body: `from:${from}`,
+                    passbackParams: from,
+                    timeoutExpress: "10m",
+                    notifyUrl,
+                });
+            }
         } catch (error) {
             throw HttpErrorFactory.internal(`Payment order creation failed: ${error.message}`);
         }

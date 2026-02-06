@@ -34,7 +34,7 @@ export interface WeChatPayConfig {
     cert: string;
     merchantType: MerchantType;
     payVersion: PayVersionType;
-    payAuthDir?: string;
+    payAuthDir: string;
 }
 
 export const AlipaySignType = {
@@ -78,6 +78,8 @@ export interface AlipayPayConfigInfo extends BasePayConfigInfo {
 export interface WeChatPayConfigInfo extends BasePayConfigInfo {
     payType: typeof PayConfigPayType.WECHAT;
     config: WeChatPayConfig | null;
+    /** 支付授权目录（接口从 APP_DOMAIN 生成返回） */
+    payAuthDir?: string;
 }
 
 export type PayConfigInfo = WeChatPayConfigInfo | AlipayPayConfigInfo;

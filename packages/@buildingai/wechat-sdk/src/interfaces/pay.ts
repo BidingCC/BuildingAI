@@ -94,3 +94,37 @@ export type WechatPayJsapiPayParams = {
     signType: "RSA";
     paySign: string;
 };
+
+/**
+ * H5（手机浏览器）下单参数
+ *
+ * 文档: https://pay.weixin.qq.com/wiki/doc/apiv3/apis/chapter3_3_1.shtml
+ */
+export interface WechatPayH5OrderParams {
+    /** 商品描述 */
+    description: string;
+    /** 商户订单号 */
+    out_trade_no: string;
+    /** 支付金额（元），内部会转为分 */
+    amount: {
+        total: number;
+        currency?: string;
+    };
+    /** 附加数据，回调时原样返回（可选） */
+    attach?: string;
+    /** 场景信息：用户端 IP 与 H5 信息 */
+    scene_info: {
+        /** 用户端实际 IP，如从 request 获取 */
+        payer_client_ip: string;
+        /** H5 信息 */
+        h5_info: {
+            /** 场景类型，如 "Wap" */
+            type: string;
+        };
+    };
+}
+
+/** H5 下单返回：跳转支付链接 */
+export interface WechatPayH5OrderResult {
+    h5_url: string;
+}

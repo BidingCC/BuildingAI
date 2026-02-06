@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { OrderPayFrom } from "@buildingai/constants/shared/payconfig.constant";
 import type { OrderPayFromType } from "@buildingai/constants/shared/payconfig.constant";
+import { OrderPayFrom } from "@buildingai/constants/shared/payconfig.constant";
+
 import { usePollingTask } from "@/hooks/use-polling-task";
 import type { PayResult } from "@/service/pay";
 import { apiGetPayResult } from "@/service/pay";
@@ -12,19 +13,19 @@ const orderId = ref("");
 const from = ref<OrderPayFromType>(OrderPayFrom.RECHARGE);
 const sellPrice = ref("");
 
-/** 轮询结果：loading | success | pending | timeout */
-const status = ref<"loading" | "success" | "pending" | "timeout">("loading");
+/** 轮询结果：pending 待支付（含轮询中）| success | timeout 轮询结束仍待支付 */
+const status = ref<"pending" | "success" | "timeout">("pending");
 const payResult = ref<PayResult | null>(null);
 
 const POLL_INTERVAL = 2000;
-const POLL_MAX_ATTEMPTS = 30;
+const POLL_MAX_ATTEMPTS = 5;
 
 function isPaid(res: PayResult): boolean {
     return res.payStatus === 1 || res.payState === 1;
 }
 
 async function checkPayResult(stopFn: () => void) {
-    if (status.value !== "loading") return;
+    if (status.value !== "pending") return;
     try {
         const res = await apiGetPayResult({
             orderId: orderId.value,
@@ -44,7 +45,7 @@ const { start: startPolling } = usePollingTask(checkPayResult, {
     interval: POLL_INTERVAL,
     maxAttempts: POLL_MAX_ATTEMPTS,
     onEnded: () => {
-        if (status.value === "loading") {
+        if (status.value === "pending") {
             status.value = "timeout";
         }
     },
@@ -58,11 +59,6 @@ onMounted(async () => {
     from.value = (opts.from as OrderPayFromType) || OrderPayFrom.RECHARGE;
     const sellPriceEnc = opts.sellPrice;
     sellPrice.value = sellPriceEnc ? decodeURIComponent(sellPriceEnc) : "";
-
-    if (!orderId.value || !from.value) {
-        status.value = "pending";
-        return;
-    }
 
     // 先查一次，成功则不再轮询
     try {
@@ -100,17 +96,8 @@ const onViewRecord = () => {
     <view class="pb-safe flex min-h-full flex-col">
         <BdNavbar :title="t('pages.paymentResult')" filter="blur(4px)" />
         <view class="mt-16 flex flex-1 flex-col items-center px-4">
-            <!-- 轮询中 -->
-            <template v-if="status === 'loading'">
-                <view class="bg-primary mb-6 flex size-16 items-center justify-center rounded-full">
-                    <view i-lucide-rotate-cw class="size-12 animate-spin text-white" />
-                </view>
-                <view class="text-xl font-semibold">支付结果确认中</view>
-                <view class="text-muted-foreground mt-2 text-sm">请稍候...</view>
-            </template>
-
             <!-- 支付成功 -->
-            <template v-else-if="status === 'success'">
+            <template v-if="status === 'success'">
                 <view
                     class="mb-6 flex size-16 items-center justify-center rounded-full bg-green-500"
                 >
@@ -120,8 +107,8 @@ const onViewRecord = () => {
                 <view class="text-muted-foreground mt-2 text-sm">感谢您的支付，积分已到账</view>
             </template>
 
-            <!-- 超时：结果确认中 -->
-            <template v-else-if="status === 'timeout'">
+            <!-- 待支付：进入即显示，有订单信息时在后台轮询 -->
+            <template v-else-if="(status === 'pending' && orderId && from) || status === 'timeout'">
                 <view class="mb-6 flex size-16 items-center justify-center rounded-full bg-red-500">
                     <view i-lucide-clock class="size-12 text-white" />
                 </view>
@@ -130,8 +117,8 @@ const onViewRecord = () => {
                     若已完成支付，请稍后在积分明细中查看到账情况
                 </view>
             </template>
-            <!-- 缺少参数 -->
-            <template v-else>
+            <!-- 缺少参数：pending 且无订单信息 -->
+            <template v-else-if="status === 'pending'">
                 <view class="bg-muted mb-6 flex size-16 items-center justify-center rounded-full">
                     <view i-lucide-alert-circle class="text-muted-foreground size-12" />
                 </view>

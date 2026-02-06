@@ -6,6 +6,7 @@
  */
 
 import type { OrderPayFromType } from "@buildingai/constants/shared/payconfig.constant";
+
 import { getTerminal } from "@/utils/env";
 
 // ==================== 支付方式列表 ====================
@@ -53,6 +54,9 @@ export interface PrepaidParams {
 
 /** 预支付返回：微信 Native(qrCode) / 微信 JSAPI 调起参数 / 支付宝(payForm) */
 export interface PrepaidInfo {
+    /** 微信 H5 支付 URL */
+    h5_url: string;
+    /** 支付类型：1 微信 2 支付宝 */
     payType: number;
     /** 微信 JSAPI 调起参数（小程序、公众号、APP） */
     timeStamp?: string;

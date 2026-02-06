@@ -61,6 +61,7 @@ const { lockFn: getPayConfigDetail, isLock } = useLockFn(async () => {
         if (data.config) {
             formData.config = data.config;
         }
+        payAuthDir.value = data.payAuthDir ?? "-";
     } catch (_error) {
         message.error(t("payment-config.form.getPayconfigDetailFailed"));
         router.back();
@@ -80,7 +81,7 @@ const { lockFn: submitForm, isLock: isSubmitting } = useLockFn(async () => {
     }
 });
 // 支付授权目录（写死）
-const payAuthDir = ref("/pay/notify");
+const payAuthDir = ref("-");
 
 // 复制支付授权目录
 const copyPayAuthDir = async () => {

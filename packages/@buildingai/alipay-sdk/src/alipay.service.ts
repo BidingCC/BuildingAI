@@ -6,6 +6,7 @@ import {
     AlipayConfig,
     AlipayQueryParams,
     AlipayRefundParams,
+    AlipayWapPayParams,
     AlipayWebPayParams,
 } from "./interfaces";
 
@@ -84,49 +85,91 @@ export class AlipayService {
     }
 
     async createWebPay(params: AlipayWebPayParams) {
-        try {
-            const bizContent: any = {
-                out_trade_no: params.outTradeNo,
-                total_amount: params.totalAmount,
-                subject: params.subject,
-                product_code: "FAST_INSTANT_TRADE_PAY",
-            };
+        const bizContent: any = {
+            out_trade_no: params.outTradeNo,
+            total_amount: params.totalAmount,
+            subject: params.subject,
+            product_code: "FAST_INSTANT_TRADE_PAY",
+        };
 
-            if (params.body) {
-                bizContent.body = params.body;
-            }
-
-            if (params.timeoutExpress) {
-                bizContent.timeout_express = params.timeoutExpress;
-            }
-
-            // Pass-through parameters (used by callbacks to identify the business type)
-            if (params.passbackParams) {
-                bizContent.passback_params = params.passbackParams;
-            } else if (params.body && params.body.includes("from:")) {
-                // Try to get from the body
-                const fromMatch = params.body.match(/from:(\w+)/);
-                if (fromMatch) {
-                    bizContent.passback_params = fromMatch[1];
-                }
-            }
-
-            const result = this.alipaySdk.pageExecute("alipay.trade.page.pay", {
-                bizContent,
-                method: "POST",
-                // returnUrl: params.returnUrl,
-                notifyUrl: params.notifyUrl,
-            });
-
-            this.logger.log(`Create Alipay order successfully: ${params.outTradeNo}`);
-
-            return result;
-        } catch (error) {
-            throw error;
+        if (params.body) {
+            bizContent.body = params.body;
         }
+
+        if (params.timeoutExpress) {
+            bizContent.timeout_express = params.timeoutExpress;
+        }
+
+        // Pass-through parameters (used by callbacks to identify the business type)
+        if (params.passbackParams) {
+            bizContent.passback_params = params.passbackParams;
+        } else if (params.body && params.body.includes("from:")) {
+            // Try to get from the body
+            const fromMatch = params.body.match(/from:(\w+)/);
+            if (fromMatch) {
+                bizContent.passback_params = fromMatch[1];
+            }
+        }
+
+        const result = this.alipaySdk.pageExecute("alipay.trade.page.pay", {
+            bizContent,
+            method: "POST",
+            // returnUrl: params.returnUrl,
+            notifyUrl: params.notifyUrl,
+        });
+
+        this.logger.log(`Create Alipay order successfully: ${params.outTradeNo}`);
+
+        return result;
     }
 
-    async wapPay() {}
+    /**
+     * 手机网站支付（alipay.trade.wap.pay）
+     * 文档：https://opendocs.alipay.com/open/29ae8cb6_alipay.trade.wap.pay
+     * 用于手机浏览器场景，返回表单 HTML，前端提交后跳转支付宝收银台
+     */
+    async createWapPay(params: AlipayWapPayParams) {
+        const bizContent: Record<string, string> = {
+            out_trade_no: params.outTradeNo,
+            total_amount: params.totalAmount,
+            subject: params.subject,
+            product_code: params.productCode ?? "QUICK_WAP_WAY",
+        };
+
+        if (params.body) {
+            bizContent.body = params.body;
+        }
+
+        if (params.timeoutExpress) {
+            bizContent.timeout_express = params.timeoutExpress;
+        }
+
+        if (params.passbackParams) {
+            bizContent.passback_params = params.passbackParams;
+        } else if (params.body?.includes("from:")) {
+            const fromMatch = params.body.match(/from:(\w+)/);
+            if (fromMatch?.[1]) {
+                bizContent.passback_params = fromMatch[1];
+            }
+        }
+
+        const executeParams: Record<string, unknown> = {
+            bizContent,
+            method: "POST",
+        };
+        if (params.notifyUrl) {
+            executeParams.notifyUrl = params.notifyUrl;
+        }
+        if (params.quitUrl) {
+            executeParams.quitUrl = params.quitUrl;
+        }
+
+        const result = this.alipaySdk.pageExecute("alipay.trade.wap.pay", executeParams);
+
+        this.logger.log(`Create Alipay WAP order successfully: ${params.outTradeNo}`);
+
+        return result;
+    }
 
     async query(params: AlipayQueryParams) {
         try {

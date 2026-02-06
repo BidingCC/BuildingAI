@@ -1,6 +1,7 @@
 <script lang="ts" setup>
-import { OrderPayFrom } from "@buildingai/constants/shared/payconfig.constant";
 import { PayConfigPayType, type PayConfigType } from "@buildingai/constants/shared";
+import { OrderPayFrom } from "@buildingai/constants/shared/payconfig.constant";
+import { PayStatus } from "@buildingai/constants/shared/payconfig.constant";
 import { UserTerminal } from "@buildingai/constants/shared/status-codes.constant";
 import type { RechargeRule } from "@buildingai/service/webapi/recharge-center";
 import type { OrderInfo, PrepaidInfo } from "@buildingai/service/webapi/recharge-center";
@@ -52,7 +53,7 @@ const { start: startPaymentPolling, clear: stopPaymentPolling } = usePollingTask
                 from: OrderPayFrom.RECHARGE,
             });
 
-            if (res.payStatus === 1) {
+            if (res.payStatus === PayStatus.PAID) {
                 stopPolling();
                 await refreshRechargeInfo();
                 await userStore.getUser();

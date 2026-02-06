@@ -4,10 +4,7 @@ import { UserTerminal } from "@buildingai/constants/shared/status-codes.constant
 import type { UserPlayground } from "@buildingai/db";
 import { DictCacheService } from "@buildingai/dict";
 import { HttpErrorFactory } from "@buildingai/errors";
-import {
-    WechatPayNotifyParams,
-    WechatPayRefundParams,
-} from "@buildingai/wechat-sdk/interfaces/pay";
+import { WechatPayRefundParams } from "@buildingai/wechat-sdk/interfaces/pay";
 import { PayOrder } from "@common/interfaces/pay.interface";
 import { Injectable, Logger } from "@nestjs/common";
 
@@ -46,10 +43,16 @@ export class WxPayService {
      * @param payOrder.amount 支付金额（分）
      * @param payOrder.payType 支付类型
      * @param payOrder.from 支付来源（recharge/order）
-     * @returns 支付订单创建结果，包含二维码URL
+     * @param options H5 场景可选：clientIp
+     * @returns 支付订单创建结果，包含二维码URL 或 h5_url
      * @throws 当订单创建失败时抛出异常
      */
-    async createwxPayOrder(payOrder: PayOrder, scene: UserTerminalType, user?: UserPlayground) {
+    async createwxPayOrder(
+        payOrder: PayOrder,
+        scene: UserTerminalType,
+        user?: UserPlayground,
+        options?: { clientIp?: string },
+    ) {
         try {
             const { orderSn, amount, from } = payOrder;
             // 通过工厂获取微信支付服务实例
@@ -72,7 +75,7 @@ export class WxPayService {
                 });
                 return { ...result, payType: PayConfigPayType.WECHAT };
             }
-            // 创建微信native支付订单
+            // 创建微信 native 支付订单（PC 扫码）
             if (scene === UserTerminal.PC) {
                 const result = await wechatPayService.createNativeOrder({
                     out_trade_no: orderSn,
@@ -83,6 +86,22 @@ export class WxPayService {
                     attach: from,
                 });
                 return { qrCode: { code_url: result.code_url }, payType: PayConfigPayType.WECHAT };
+            }
+            // 创建微信 H5 支付订单（手机浏览器）
+            if (scene === UserTerminal.H5) {
+                const result = await wechatPayService.createH5Order({
+                    out_trade_no: orderSn,
+                    description: `from:${from}`,
+                    amount: { total: Number(amount) },
+                    attach: from,
+                    scene_info: {
+                        payer_client_ip: options?.clientIp ?? "127.0.0.1",
+                        h5_info: {
+                            type: "Wap",
+                        },
+                    },
+                });
+                return { h5_url: result.h5_url, payType: PayConfigPayType.WECHAT };
             }
             this.logger.log(`微信支付订单创建成功: ${orderSn}`);
         } catch (error) {

@@ -2,6 +2,7 @@
 import {
     OrderStatus,
     OrderStatusReverse,
+    PayStatus,
     RefundStatus,
 } from "@buildingai/constants/shared/payconfig.constant";
 import type { OrderDetailData } from "@buildingai/service/consoleapi/order-recharge";
@@ -186,7 +187,7 @@ const handleSyncRefundResult = async () => {
                 </div>
                 <div class="text-secondary-foreground mt-1 truncate">
                     {{
-                        currentOrder?.payStatus === 1
+                        currentOrder?.payStatus === PayStatus.PAID
                             ? t("order.backend.recharge.detail.paid")
                             : t("order.backend.recharge.detail.unpaid")
                     }}

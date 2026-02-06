@@ -9,7 +9,7 @@ import { UserTerminal } from "@buildingai/constants/shared/status-codes.constant
 
 import { useLockFn } from "@/hooks/use-lock-fn";
 import { usePay } from "@/hooks/use-pay";
-import { apiGetPayWayList, apiPostPrepaid, type PayWayItem } from "@/service/pay";
+import { apiGetPayWayList, apiPostPrepaid, type PayWayItem, type PrepaidInfo } from "@/service/pay";
 import { apiPostRecharge } from "@/service/recharge";
 import { useUserStore } from "@/stores/user";
 import { getTerminal } from "@/utils/env";
@@ -24,7 +24,8 @@ const selectedPayWayId = ref("");
 const rechargeId = shallowRef("");
 const from = shallowRef<OrderPayFromType>(OrderPayFrom.RECHARGE);
 const sellPrice = shallowRef("0");
-
+const isPayed = ref(false);
+const orderId = shallowRef("");
 onMounted(() => {
     const pages = getCurrentPages();
     const page = pages[pages.length - 1] as { options?: Record<string, string> };
@@ -45,6 +46,11 @@ onMounted(() => {
 function onPayWayChange(e: { detail: { value: string } }) {
     selectedPayWayId.value = e.detail.value;
 }
+const onPaymentResult = () => {
+    uni.redirectTo({
+        url: `/packages/payment-result/index?orderId=${orderId.value}&from=recharge&sellPrice=${sellPrice.value}`,
+    });
+};
 
 const { isLock, lockFn: onPay } = useLockFn(async () => {
     if (!rechargeId.value) {
@@ -85,7 +91,7 @@ const { isLock, lockFn: onPay } = useLockFn(async () => {
         payType: selected.payType as PayConfigType,
         scene,
     });
-
+    orderId.value = rechargeRes.orderId;
     try {
         const prepaidInfo = await apiPostPrepaid({
             from: OrderPayFrom.RECHARGE,
@@ -93,16 +99,25 @@ const { isLock, lockFn: onPay } = useLockFn(async () => {
             payType: selected.payType as PayConfigType,
             scene,
         });
-
         await launchPay(prepaidInfo, selected.payType, scene);
     } catch (error) {
-        uni.showToast({ title: "支付失败", icon: "none" });
         console.error(error);
     }
     const sellPriceEnc = encodeURIComponent(sellPrice.value);
+    // #ifndef H5
     uni.redirectTo({
         url: `/packages/payment-result/index?orderId=${rechargeRes.orderId}&from=recharge&sellPrice=${sellPriceEnc}`,
     });
+    // #endif
+    // #ifdef H5
+    if (isWechatOa) {
+        uni.redirectTo({
+            url: `/packages/payment-result/index?orderId=${rechargeRes.orderId}&from=recharge&sellPrice=${sellPriceEnc}`,
+        });
+    } else {
+        isPayed.value = true;
+    }
+    // #endif
 });
 
 definePage({
@@ -158,7 +173,17 @@ definePage({
                 :class="{ 'opacity-60': isLock }"
                 @click="onPay"
             >
-                {{ isLock ? "提交中..." : "立即支付" }}
+                <span v-if="isPayed" @click="onPaymentResult"> 已完成支付支付 </span>
+                <span v-else>
+                    {{ isLock ? "支付中" : "立即支付" }}
+                </span>
+            </view>
+            <view
+                v-if="isPayed"
+                class="text-muted-foreground mt-3 text-center text-sm"
+                @click="onPaymentResult"
+            >
+                取消支付
             </view>
         </view>
     </view>

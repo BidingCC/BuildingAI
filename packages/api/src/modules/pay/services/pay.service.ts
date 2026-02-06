@@ -78,9 +78,10 @@ export class PayService extends BaseService<Payconfig> {
     /**
      * 预支付接口
      * @param prepayDto
+     * @param options 可选，如 clientIp（H5 微信支付必填）
      * @returns
      */
-    async prepay(prepayDto: PrepayDto, user: UserPlayground) {
+    async prepay(prepayDto: PrepayDto, user: UserPlayground, options?: { clientIp?: string }) {
         const { orderId, payType, from, scene } = prepayDto;
         let order: RechargeOrder | MembershipOrder | null = null;
         switch (from) {
@@ -127,11 +128,16 @@ export class PayService extends BaseService<Payconfig> {
 
         switch (payType) {
             case PayConfigPayType.WECHAT: {
-                const result = await this.wxpayService.createwxPayOrder(PayOrder, scene, user);
+                const result = await this.wxpayService.createwxPayOrder(
+                    PayOrder,
+                    scene,
+                    user,
+                    scene === UserTerminal.H5 ? { clientIp: options?.clientIp } : undefined,
+                );
                 return result;
             }
             case PayConfigPayType.ALIPAY: {
-                const payForm = await this.alipayService.createWebPayOrder(PayOrder);
+                const payForm = await this.alipayService.createAliPayOrder(PayOrder, scene);
                 return { payForm, payType };
             }
             default:
@@ -536,7 +542,6 @@ export class PayService extends BaseService<Payconfig> {
         if (!order) {
             return;
         }
-        // 如果订单已支付,应该走退款逻辑
         if (order.payState === PayStatus.PAID) {
             return;
         }

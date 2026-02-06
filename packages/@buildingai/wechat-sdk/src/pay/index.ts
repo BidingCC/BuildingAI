@@ -7,6 +7,8 @@ import {
     resourceType,
     resStatusCode,
     WechatPayConfig,
+    WechatPayH5OrderParams,
+    WechatPayH5OrderResult,
     WechatPayJsapiOrderParams,
     WechatPayJsapiPayParams,
     WechatPayNativeOrderParams,
@@ -252,6 +254,59 @@ export class WechatPayService {
         }
 
         return data;
+    }
+
+    /**
+     * 创建微信支付 H5 订单（手机浏览器）
+     *
+     * 调用微信支付 API 创建 H5 支付订单，返回 h5_url 供前端跳转完成支付。
+     *
+     * @param params 订单参数
+     * @param params.out_trade_no 商户订单号
+     * @param params.description 商品描述
+     * @param params.amount 支付金额（元）
+     * @param params.scene_info 场景信息（用户 IP 与 H5 信息）
+     * @returns 包含 h5_url 的对象，前端通过 location 跳转该 URL
+     */
+    async createH5Order(params: WechatPayH5OrderParams): Promise<WechatPayH5OrderResult> {
+        if (params.out_trade_no.length >= 32) {
+            throw new Error("商户订单号长度不能超过32位");
+        }
+        if (params.amount.total <= 0) {
+            throw new Error("支付金额必须大于0");
+        }
+        if (!params.scene_info?.payer_client_ip || !params.scene_info?.h5_info?.type) {
+            throw new Error("H5 支付必须提供 scene_info.payer_client_ip 与 scene_info.h5_info");
+        }
+
+        const notifyUrl =
+            this.config.domain + process.env.VITE_APP_WEB_API_PREFIX + "/pay/notifyWxPay";
+
+        const res = await this.client.transactions_h5({
+            out_trade_no: params.out_trade_no,
+            description: params.description,
+            notify_url: notifyUrl,
+            amount: {
+                total: Math.round(params.amount.total * 100),
+                currency: params.amount.currency ?? "CNY",
+            },
+            attach: params.attach,
+            scene_info: {
+                payer_client_ip: params.scene_info.payer_client_ip,
+                h5_info: {
+                    type: params.scene_info.h5_info.type,
+                    app_name: "H5",
+                },
+            },
+        });
+
+        const { status, error, data } = res;
+        if (status !== resStatusCode.SUCCESS) {
+            const errorMessage = JSON.parse(error).message;
+            throw new Error(errorMessage);
+        }
+
+        return { h5_url: data.h5_url };
     }
 }
 

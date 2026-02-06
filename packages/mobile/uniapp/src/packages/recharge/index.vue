@@ -76,7 +76,7 @@ const { isLock, lockFn: toPayment } = useLockFn(async () => {
             ></view>
         </view>
         <view
-            class="bg-primary mx-3 mt-auto rounded-lg p-2 text-center text-white"
+            class="bg-primary mx-3 mt-auto mb-3 rounded-lg p-2 text-center text-white"
             :class="{ 'opacity-60': isLock }"
             @click="toPayment"
         >
