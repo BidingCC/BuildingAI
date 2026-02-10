@@ -2,11 +2,10 @@ import { ScheduleService } from "@buildingai/core";
 import { ScheduleModule as NestScheduleModule } from "@buildingai/core/@nestjs/schedule";
 import { TypeOrmModule } from "@buildingai/db/@nestjs/typeorm";
 import { AccountLog, User, UserSubscription } from "@buildingai/db/entities";
-import { Module } from "@nestjs/common";
-
 import { MembershipModule } from "@modules/membership/membership.module";
 import { PayModule } from "@modules/pay/pay.module";
 import { RechargeModule } from "@modules/recharge/recharge.module";
+import { Module } from "@nestjs/common";
 
 import { ScheduleController } from "./controllers/schedule.controller";
 import { MembershipGiftService } from "./services/membership-gift.service";

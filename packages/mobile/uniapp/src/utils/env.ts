@@ -35,6 +35,11 @@ export const isWechatOa = (() => {
     // #endif
 })();
 
+export const isAndroid = () => {
+    const u = navigator.userAgent;
+    return u.indexOf("Android") > -1 || u.indexOf("Adr") > -1;
+};
+
 export const getTerminal = () => {
     // #ifdef H5
     return isWechatOa ? UserTerminal.OA : UserTerminal.H5;

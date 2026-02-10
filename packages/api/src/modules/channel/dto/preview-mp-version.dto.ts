@@ -11,5 +11,3 @@ export class PreviewMpVersionDto {
     @IsOptional()
     description?: string;
 }
-
-

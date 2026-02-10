@@ -68,7 +68,7 @@ export class PayconfigConsoleController extends BaseController {
             throw HttpErrorFactory.notFound("支付配置不存在");
         }
 
-        return { ...result, payAuthDir: process.env.APP_DOMAIN };
+        return { ...result, payAuthDir: process.env.APP_DOMAIN + "/" };
     }
     /**
      * 根据id更改支付配置

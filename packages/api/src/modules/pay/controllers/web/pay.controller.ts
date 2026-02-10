@@ -3,8 +3,10 @@ import { type UserPlayground } from "@buildingai/db";
 import { BuildFileUrl } from "@buildingai/decorators/file-url.decorator";
 import { Playground } from "@buildingai/decorators/playground.decorator";
 import { Public } from "@buildingai/decorators/public.decorator";
+import { HttpErrorFactory } from "@buildingai/errors";
 import { WechatPayNotifyParams } from "@buildingai/wechat-sdk/interfaces/pay";
 import { WebController } from "@common/decorators/controller.decorator";
+import { WechatOaService } from "@common/modules/wechat/services/wechatoa.service";
 import { getClientIp } from "@common/utils/ip.util";
 import { PrepayDto } from "@modules/pay/dto/prepay.dto";
 import { PayService } from "@modules/pay/services/pay.service";
@@ -13,7 +15,10 @@ import type { Request, Response } from "express";
 
 @WebController("pay")
 export class PayWebController extends BaseController {
-    constructor(private readonly payService: PayService) {
+    constructor(
+        private readonly payService: PayService,
+        private readonly wechatOaService: WechatOaService,
+    ) {
         super();
     }
 
@@ -41,6 +46,33 @@ export class PayWebController extends BaseController {
         @Playground() user: UserPlayground,
     ) {
         return this.payService.getPayResult(orderId, from, user.id);
+    }
+
+    /**
+     * 获取微信 JS-SDK wx.config() 所需的配置参数
+     *
+     * 文档: https://developers.weixin.qq.com/doc/offiaccount/OA_Web_Apps/JS-SDK.html
+     *
+     * @param url 当前页面的完整 URL（不包含 # 及其后面部分）
+     * @param jsApiList 需要使用的 JS 接口列表，逗号分隔，默认为 'chooseWXPay'
+     * @returns wx.config() 所需的配置参数
+     */
+    @Get("jssdk-config")
+    @Public()
+    async getJssdkConfig(@Query("url") url: string, @Query("jsApiList") jsApiList?: string) {
+        if (!url) {
+            throw HttpErrorFactory.badRequest("url 参数不能为空");
+        }
+
+        // 解析 jsApiList，如果为空则使用默认值
+        const apiList = jsApiList
+            ? jsApiList
+                  .split(",")
+                  .map((api) => api.trim())
+                  .filter(Boolean)
+            : ["chooseWXPay"];
+
+        return this.wechatOaService.getJssdkConfig(url, apiList);
     }
 
     /**

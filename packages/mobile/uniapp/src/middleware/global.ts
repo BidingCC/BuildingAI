@@ -3,14 +3,16 @@ import { getCurrentPageMeta } from "virtual:pages-meta";
 import { pages } from "virtual:uni-pages";
 
 import { useUserStore } from "@/stores/user";
-
+import { wechatH5 } from "@/utils/wechat";
 export default defineMiddleware((to, from) => {
     const userStore = useUserStore();
     console.log("[global]", to, "from:", from);
 
     const requireAuth = getCurrentPageMeta()?.style?.auth !== false;
     const currentRoute = getCurrentPageMeta()?.path;
-
+    wechatH5.config().catch((error) => {
+        console.error("微信 JS-SDK 配置失败:", error);
+    });
     console.log(
         "requireAuth",
         requireAuth,

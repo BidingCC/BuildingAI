@@ -10,6 +10,7 @@ import { MembershipOrder } from "@buildingai/db/entities";
 import { UserSubscription } from "@buildingai/db/entities";
 import { PayModule as CommonPayModule } from "@common/modules/pay/pay.module";
 import { WxPayService } from "@common/modules/pay/services/wxpay.service";
+import { WechatModule } from "@common/modules/wechat/wechat.module";
 import { PayconfigService } from "@modules/system/services/payconfig.service";
 import { Module } from "@nestjs/common";
 
@@ -30,6 +31,7 @@ import { PayService } from "./services/pay.service";
             UserSubscription,
         ]),
         CommonPayModule,
+        WechatModule,
     ],
     controllers: [PayWebController],
     providers: [PayService, PayconfigService, WxPayService],

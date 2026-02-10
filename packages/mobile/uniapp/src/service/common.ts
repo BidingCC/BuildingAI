@@ -10,6 +10,7 @@ import type { SiteConfig } from "@buildingai/service/common";
 import type { LoginSettings } from "@buildingai/service/consoleapi/login-settings";
 import type { WebsiteConfig } from "@buildingai/service/consoleapi/website";
 
+import { WechatH5 } from "@/utils/wechat";
 // ==================== File Upload Type Definitions ====================
 
 /**
@@ -222,4 +223,38 @@ export type RecordAnalyseResponse = { recorded: boolean; message: string } | { m
  */
 export function apiRecordAnalyse(params: RecordAnalyseRequest): Promise<RecordAnalyseResponse> {
     return useWebPost<RecordAnalyseResponse>("/analyse", params);
+}
+
+// ==================== WeChat JS-SDK Related APIs ====================
+
+/**
+ * WeChat JS-SDK configuration interface
+ * @description Configuration parameters for WeChat JS-SDK wx.config()
+ */
+export interface WechatJssdkConfig {
+    /** WeChat AppID */
+    appId: string;
+    /** Timestamp */
+    timestamp: string;
+    /** Random string */
+    nonceStr: string;
+    /** Signature */
+    signature: string;
+    /** JS API list */
+    jsApiList: string[];
+}
+
+/**
+ * Get WeChat JS-SDK configuration
+ * @description Get configuration parameters for WeChat JS-SDK wx.config()
+ * @param params Request parameters
+ * @param params.url Current page URL (without # and following parts)
+ * @param params.jsApiList JS API list, comma-separated, defaults to 'chooseWXPay'
+ * @returns Promise with JS-SDK configuration
+ */
+export function apiGetJssdkConfig(jsApiList?: string): Promise<WechatJssdkConfig> {
+    return useWebGet<WechatJssdkConfig>("/pay/jssdk-config", {
+        url: WechatH5.signLink(),
+        jsApiList: jsApiList || "",
+    });
 }

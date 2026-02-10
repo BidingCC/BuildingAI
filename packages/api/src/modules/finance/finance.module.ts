@@ -33,19 +33,7 @@ import { Module } from "@nestjs/common";
         PayModule,
     ],
     controllers: [FinanceController],
-    providers: [
-        FinanceService,
-        RefundService,
-        DictCacheService,
-        CacheService,
-        DictService,
-    ],
-    exports: [
-        FinanceService,
-        RefundService,
-        DictCacheService,
-        CacheService,
-        DictService,
-    ],
+    providers: [FinanceService, RefundService, DictCacheService, CacheService, DictService],
+    exports: [FinanceService, RefundService, DictCacheService, CacheService, DictService],
 })
 export class FinanceModule {}

@@ -8,6 +8,7 @@ import type { UserTerminalType } from "@buildingai/constants/shared/status-codes
 
 import type { PrepaidInfo } from "@/service/pay";
 import { getTerminal, isApp, isH5, isMpWeixin, isWechatOa } from "@/utils/env";
+import { wechatH5 } from "@/utils/wechat";
 
 /**
  * 微信小程序内调起支付
@@ -44,11 +45,11 @@ function launchWechatMpPay(params: {
 
 /** 调起微信支付（按端：小程序已实现，H5/公众号/APP 预留） */
 async function launchWechatPay(scene: UserTerminalType, prepaidInfo?: PrepaidInfo): Promise<void> {
+    const timeStamp = prepaidInfo?.timeStamp;
+    const nonceStr = prepaidInfo?.nonceStr;
+    const packageVal = prepaidInfo?.package;
+    const paySign = prepaidInfo?.paySign;
     if (scene === UserTerminal.MP || isMpWeixin) {
-        const timeStamp = prepaidInfo?.timeStamp;
-        const nonceStr = prepaidInfo?.nonceStr;
-        const packageVal = prepaidInfo?.package;
-        const paySign = prepaidInfo?.paySign;
         if (!timeStamp || !nonceStr || !packageVal || !paySign) {
             throw new Error("预支付返回缺少微信调起参数");
         }
@@ -64,8 +65,16 @@ async function launchWechatPay(scene: UserTerminalType, prepaidInfo?: PrepaidInf
     }
 
     if (scene === UserTerminal.OA && isH5 && isWechatOa) {
-        // TODO: 公众号 H5 内调起（wx.chooseWXPay）
-        uni.showToast({ title: "公众号支付开发中", icon: "none" });
+        if (!timeStamp || !nonceStr || !packageVal || !paySign) {
+            throw new Error("预支付返回缺少微信调起参数");
+        }
+        await wechatH5.chooseWXPay({
+            timestamp: timeStamp || "",
+            nonceStr: nonceStr || "",
+            package: packageVal || "",
+            signType: prepaidInfo?.signType || "RSA",
+            paySign: paySign || "",
+        });
         return;
     }
 

@@ -3,14 +3,15 @@ import * as crypto from "crypto";
 import WXBizMsgCrypt from "wechat-crypto";
 import { parseStringPromise } from "xml2js";
 
-import { ActionNametype } from "../interfaces/os";
-import { MsgType, type MsgtypeKey } from "../interfaces/os";
+import { ActionNametype } from "../interfaces/oa";
+import { MsgType, type MsgtypeKey } from "../interfaces/oa";
 
 /**
  * 微信公众号服务
  *
  * 提供微信公众号相关的API调用功能，包括：
  * - 获取access_token
+ * - 获取jsapi_ticket
  * - 生成二维码
  */
 export class WechatOaClient {
@@ -58,6 +59,45 @@ export class WechatOaClient {
 
         return {
             access_token: data.access_token,
+            expires_in: data.expires_in,
+        };
+    }
+
+    /**
+     * 获取 jsapi_ticket
+     *
+     * jsapi_ticket 是调用微信 JS 接口的临时票据，有效期为 7200 秒
+     * 通过 access_token 来获取
+     *
+     * 文档: https://developers.weixin.qq.com/doc/offiaccount/OA_Web_Apps/JS-SDK.html#62
+     *
+     * @param access_token 微信公众平台 access_token
+     * @returns 包含 jsapi_ticket 和过期时间的对象
+     * @throws WechatApiError 当API调用失败时抛出错误
+     */
+    async getJsapiTicket(access_token: string): Promise<{
+        ticket: string;
+        expires_in: number;
+    }> {
+        const { data } = await axios.get<{
+            ticket: string;
+            expires_in: number;
+            errmsg?: string;
+            errcode?: number;
+        }>("https://api.weixin.qq.com/cgi-bin/ticket/getticket", {
+            params: {
+                type: "jsapi",
+                access_token,
+            },
+            timeout: 10000, // 10秒超时
+        });
+
+        if (!data.ticket || data.errcode) {
+            throw new Error(`获取 jsapi_ticket 失败: ${data.errmsg || `错误码: ${data.errcode}`}`);
+        }
+
+        return {
+            ticket: data.ticket,
             expires_in: data.expires_in,
         };
     }

@@ -14,3 +14,30 @@ declare global {
         wxs: any;
     }
 }
+declare interface Window {
+    entryUrl: string;
+}
+declare interface Wx {
+    config: (config: {
+        debug?: boolean;
+        appId: string;
+        timestamp: string;
+        nonceStr: string;
+        signature: string;
+        jsApiList: string[];
+    }) => void;
+    ready: (callback: () => void) => void;
+    error: (callback: (res: { errMsg: string }) => void) => void;
+    chooseWXPay: (config: {
+        timestamp: string;
+        nonceStr: string;
+        package: string;
+        signType: string;
+        paySign: string;
+        success: () => void;
+        fail: () => void;
+        cancel: () => void;
+    }) => void;
+}
+
+declare const wx: Wx;

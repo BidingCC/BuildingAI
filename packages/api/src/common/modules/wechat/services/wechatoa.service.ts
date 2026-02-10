@@ -7,8 +7,8 @@ import { DictService } from "@buildingai/dict";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { isEnabled } from "@buildingai/utils";
 import { WechatOaClient } from "@buildingai/wechat-sdk";
-import { ActionName } from "@buildingai/wechat-sdk/interfaces/os";
-import { MsgType } from "@buildingai/wechat-sdk/interfaces/os";
+import { ActionName } from "@buildingai/wechat-sdk/interfaces/oa";
+import { MsgType } from "@buildingai/wechat-sdk/interfaces/oa";
 import { AuthService } from "@common/modules/auth/services/auth.service";
 import { WxOaConfigService } from "@modules/channel/services/wxoaconfig.service";
 import { LoginSettingsConfig } from "@modules/user/dto/login-settings.dto";
@@ -25,6 +25,8 @@ import { WECHAT_EVENTS, WECHAT_SCENE_PREFIX } from "../constants/wechat.constant
  *
  * 提供微信公众号相关的业务功能，包括：
  * - 获取access_token（带Redis缓存）
+ * - 获取jsapi_ticket（带Redis缓存）
+ * - 同步更新access_token和jsapi_ticket
  * - 生成二维码
  * - 配置管理
  * - 微信登录回调处理
@@ -38,6 +40,12 @@ export class WechatOaService {
      * 用于存储微信access_token的缓存键前缀
      */
     private readonly CACHE_PREFIX = "wechat:access_token";
+
+    /**
+     * JSAPI Ticket缓存前缀
+     * 用于存储微信jsapi_ticket的缓存键前缀
+     */
+    private readonly JSAPI_TICKET_CACHE_PREFIX = "wechat:jsapi_ticket";
 
     /**
      * 场景值缓存前缀
@@ -69,15 +77,19 @@ export class WechatOaService {
     ) {}
 
     /**
-     * 获取微信access_token
+     * 获取微信access_token和jsapi_ticket
      *
-     * 优先从Redis缓存获取，如果缓存不存在或已过期则重新请求微信API
+     * 同时从微信API获取access_token和jsapi_ticket
      * access_token是调用微信公众平台API的全局唯一接口调用凭据
+     * jsapi_ticket是调用微信JS接口的临时票据
      *
-     * @returns access_token字符串
+     * @returns 包含access_token和jsapi_ticket的对象
      * @throws 当配置不存在或API调用失败时抛出错误
      */
-    private async getAccessToken(): Promise<string> {
+    private async getAccessTokenAndJsapiTicket(): Promise<{
+        access_token: string;
+        jsapi_ticket: string;
+    }> {
         // 从配置服务获取微信公众号的appId和appSecret
         const { appId, appSecret, token, encodingAESKey } =
             await this.wxoaconfigService.getConfig();
@@ -85,10 +97,16 @@ export class WechatOaService {
         // 初始化微信客户端
         this.wechatOaClient = new WechatOaClient(token, encodingAESKey, appId);
 
+        // 获取access_token
         const { access_token } = await this.wechatOaClient.getAccessToken(appId, appSecret);
 
-        // 返回缓存的access_token
-        return access_token;
+        // 使用access_token获取jsapi_ticket
+        const { ticket: jsapi_ticket } = await this.wechatOaClient.getJsapiTicket(access_token);
+
+        return {
+            access_token,
+            jsapi_ticket,
+        };
     }
 
     /**
@@ -100,22 +118,120 @@ export class WechatOaService {
      * @returns access_token字符串
      * @throws 当配置不存在或API调用失败时抛出错误
      */
-    async getAccessTokenByRedis() {
+    async getAccessByRedis() {
         const { appId } = await this.wxoaconfigService.getConfig();
         // 构建缓存键
         const cacheKey = `${this.CACHE_PREFIX}:${appId}`;
+        const jsapiTicketCacheKey = `${this.JSAPI_TICKET_CACHE_PREFIX}:${appId}`;
+
         // 从Redis缓存获取access_token
         const cachedResult = await this.redisService.get<string>(cacheKey);
+        const jsapiTicketCacheResult = await this.redisService.get<string>(jsapiTicketCacheKey);
 
-        // 如果缓存中没有access_token，则从微信API获取
-        if (!cachedResult || !this.wechatOaClient) {
-            const access_token = await this.getAccessToken();
+        // 如果缓存中没有access_token，则从微信API获取（同时获取jsapi_ticket）
+        if (!cachedResult || !jsapiTicketCacheResult || !this.wechatOaClient) {
+            const { access_token, jsapi_ticket } = await this.getAccessTokenAndJsapiTicket();
 
             // 将access_token缓存到Redis，有效期设置为7100秒（微信官方是7200秒，提前100秒过期）
             await this.redisService.set(cacheKey, access_token, 7200 - 100);
-            return access_token;
+
+            // 同时缓存jsapi_ticket，有效期设置为7100秒（微信官方是7200秒，提前100秒过期）
+            await this.redisService.set(jsapiTicketCacheKey, jsapi_ticket, 7200 - 100);
+
+            return { access_token, jsapi_ticket };
         }
-        return cachedResult;
+        return { access_token: cachedResult, jsapi_ticket: jsapiTicketCacheResult };
+    }
+
+    /**
+     * 生成随机字符串
+     *
+     * @param length 字符串长度，默认 16
+     * @returns 随机字符串
+     */
+    private generateNonceStr(length: number = 16): string {
+        const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        let result = "";
+        for (let i = 0; i < length; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
+    }
+
+    /**
+     * 生成 JS-SDK 签名
+     *
+     * 签名算法：
+     * 1. 对所有待签名参数按照字段名的 ASCII 码从小到大排序（字典序）
+     * 2. 使用 URL 键值对的格式（即 key1=value1&key2=value2…）拼接成字符串
+     * 3. 对拼接后的字符串进行 sha1 加密
+     *
+     * @param jsapiTicket jsapi_ticket
+     * @param nonceStr 随机字符串
+     * @param timestamp 时间戳
+     * @param url 当前页面的 URL（不包含 # 及其后面部分）
+     * @returns 签名字符串
+     */
+    private generateJssdkSignature(
+        jsapiTicket: string,
+        nonceStr: string,
+        timestamp: number,
+        url: string,
+    ): string {
+        // 移除 URL 中的 hash 部分（# 及其后面的内容）
+        const cleanUrl = url.split("#")[0];
+
+        // 按照字段名 ASCII 码从小到大排序
+        const string1 = `jsapi_ticket=${jsapiTicket}&noncestr=${nonceStr}&timestamp=${timestamp}&url=${cleanUrl}`;
+
+        // 使用 sha1 加密
+        const signature = crypto.createHash("sha1").update(string1).digest("hex");
+
+        this.logger.debug(`JS-SDK 签名生成: ${string1} -> ${signature}`);
+
+        return signature;
+    }
+
+    /**
+     * 获取微信 JS-SDK wx.config() 所需的配置参数
+     *
+     * 文档: https://developers.weixin.qq.com/doc/offiaccount/OA_Web_Apps/JS-SDK.html
+     *
+     * @param url 当前页面的完整 URL（不包含 # 及其后面部分）
+     * @param jsApiList 需要使用的 JS 接口列表，默认为 ['chooseWXPay']
+     * @returns wx.config() 所需的配置参数
+     * @throws 当配置不存在或API调用失败时抛出错误
+     */
+    async getJssdkConfig(
+        url: string,
+        jsApiList: string[] = ["chooseWXPay"],
+    ): Promise<{
+        appId: string;
+        timestamp: number;
+        nonceStr: string;
+        signature: string;
+        jsApiList: string[];
+    }> {
+        // 从配置服务获取 appId
+        const { appId } = await this.wxoaconfigService.getConfig();
+
+        // 获取 jsapi_ticket（从 Redis 缓存）
+        const { jsapi_ticket } = await this.getAccessByRedis();
+
+        // 生成随机字符串和时间戳
+        const nonceStr = this.generateNonceStr();
+        const timestamp = Math.floor(Date.now() / 1000);
+
+        // 生成签名
+        const signature = this.generateJssdkSignature(jsapi_ticket, nonceStr, timestamp, url);
+
+        return {
+            appId,
+            timestamp,
+            nonceStr,
+            signature,
+            jsApiList,
+        };
     }
 
     /**
@@ -134,7 +250,7 @@ export class WechatOaService {
     }> {
         try {
             // 获取有效的access_token
-            const accessToken = await this.getAccessTokenByRedis();
+            const { access_token } = await this.getAccessByRedis();
 
             // 生成一个随机UUID作为场景值
             const sceneStr = uuidv4();
@@ -152,7 +268,7 @@ export class WechatOaService {
 
             // 调用微信客户端生成二维码
             return this.wechatOaClient.getQrCode(
-                accessToken,
+                access_token,
                 expire_seconds,
                 ActionName.QR_STR_SCENE,
                 sceneStr,
@@ -382,7 +498,7 @@ export class WechatOaService {
     private async sendAuthTemplateMessage(openid: string, authUrl: string, message?: string) {
         try {
             // 获取有效的access_token
-            const access_token = await this.getAccessTokenByRedis();
+            const { access_token } = await this.getAccessByRedis();
 
             // 发送模板消息
             return this.wechatOaClient.sendTemplateMessage(
@@ -467,7 +583,7 @@ export class WechatOaService {
     private async sendTemplateMessage(openid: string, content: string) {
         try {
             // 获取有效的access_token
-            const access_token = await this.getAccessTokenByRedis();
+            const { access_token } = await this.getAccessByRedis();
 
             // 调用微信客户端发送模板消息
             return this.wechatOaClient.sendTemplateMessage(
@@ -523,7 +639,7 @@ export class WechatOaService {
     @OnEvent(WECHAT_EVENTS.REFRESH, { async: true })
     async handleAccessTokenRefresh() {
         this.logger.log("access_token 刷新");
-        await this.getAccessTokenByRedis();
+        await this.getAccessByRedis();
     }
 
     async updateQrCodeStatusByCode(code: string, state: string) {

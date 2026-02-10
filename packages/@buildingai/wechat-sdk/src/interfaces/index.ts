@@ -1,2 +1,2 @@
-export * from "./os";
+export * from "./oa";
 export * from "./pay";
