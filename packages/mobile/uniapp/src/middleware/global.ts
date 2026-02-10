@@ -10,7 +10,7 @@ export default defineMiddleware((to, from) => {
 
     const requireAuth = getCurrentPageMeta()?.style?.auth !== false;
     const currentRoute = getCurrentPageMeta()?.path;
-    wechatH5.config().catch((error) => {
+    wechatH5.initWx().catch((error) => {
         console.error("微信 JS-SDK 配置失败:", error);
     });
     console.log(

@@ -110,7 +110,6 @@ export default defineConfig({
         UnoCSS(),
     ],
     server: {
-        allowedHosts: ["ka388227.natappfree.cc"],
         host: "0.0.0.0",
         hmr: true,
         port: 4092,

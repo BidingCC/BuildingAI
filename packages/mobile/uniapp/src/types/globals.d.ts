@@ -18,14 +18,16 @@ declare interface Window {
     entryUrl: string;
 }
 declare interface Wx {
-    config: (config: {
-        debug?: boolean;
-        appId: string;
-        timestamp: string;
-        nonceStr: string;
-        signature: string;
-        jsApiList: string[];
-    }) => void;
+    config:
+        | undefined
+        | ((config: {
+              debug?: boolean;
+              appId: string;
+              timestamp: string;
+              nonceStr: string;
+              signature: string;
+              jsApiList: string[];
+          }) => void);
     ready: (callback: () => void) => void;
     error: (callback: (res: { errMsg: string }) => void) => void;
     chooseWXPay: (config: {

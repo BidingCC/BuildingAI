@@ -10,7 +10,7 @@ import type { SiteConfig } from "@buildingai/service/common";
 import type { LoginSettings } from "@buildingai/service/consoleapi/login-settings";
 import type { WebsiteConfig } from "@buildingai/service/consoleapi/website";
 
-import { WechatH5 } from "@/utils/wechat";
+import { wechatH5 } from "@/utils/wechat";
 // ==================== File Upload Type Definitions ====================
 
 /**
@@ -254,7 +254,7 @@ export interface WechatJssdkConfig {
  */
 export function apiGetJssdkConfig(jsApiList?: string): Promise<WechatJssdkConfig> {
     return useWebGet<WechatJssdkConfig>("/pay/jssdk-config", {
-        url: WechatH5.signLink(),
+        url: wechatH5.signLink(),
         jsApiList: jsApiList || "",
     });
 }
