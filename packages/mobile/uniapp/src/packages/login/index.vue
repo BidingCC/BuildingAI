@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { LoginMethod } from "@buildingai/service/consoleapi/login-settings";
-import type { LoginResponse, SystemLoginAccountParams } from "@buildingai/service/webapi/user";
+import { LoginMethod } from "@buildingai/services/consoleapi/login-settings";
+import type { LoginResponse, SystemLoginAccountParams } from "@buildingai/services/webapi/user";
 
 import BdModal from "@/components/bd-modal.vue?async";
 import BdSeparator from "@/components/bd-separator.vue?async";

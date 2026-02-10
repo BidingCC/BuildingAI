@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { Agent } from "@buildingai/service/consoleapi/ai-agent";
-import type { FormFieldConfig } from "@buildingai/service/consoleapi/ai-agent";
-import type { AiMessage } from "@buildingai/service/models/message";
-import type { AiConversation } from "@buildingai/service/webapi/ai-conversation";
+import type { Agent } from "@buildingai/services/consoleapi/ai-agent";
+import type { FormFieldConfig } from "@buildingai/services/consoleapi/ai-agent";
+import type { AiMessage } from "@buildingai/services/models/message";
+import type { AiConversation } from "@buildingai/services/webapi/ai-conversation";
 import type { MessageContentPart } from "@buildingai/types";
 import { useQuery } from "@uni-helper/uni-use";
 

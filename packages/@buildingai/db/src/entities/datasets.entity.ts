@@ -1,22 +1,31 @@
 import {
-    type DocumentModeType,
-    type ParentContextModeType,
     RETRIEVAL_MODE,
     type RetrievalModeType,
 } from "@buildingai/constants/shared/datasets.constants";
-import {
-    SegmentationDto,
-    SubSegmentationDto,
-    TextPreprocessingRulesDto,
-} from "@buildingai/dto/indexing-segments.dto";
 import type { RetrievalConfig } from "@buildingai/types/ai/retrieval-config.interface";
 
 import { AppEntity } from "../decorators/app-entity.decorator";
 import { Column, OneToMany, type Relation } from "../typeorm";
 import { BaseEntity } from "./base";
+import { DatasetsChatRecord } from "./datasets-chat-record.entity";
 import { DatasetsDocument } from "./datasets-document.entity";
 import { DatasetMember } from "./datasets-member.entity";
+import { DatasetMemberApplication } from "./datasets-member-application.entity";
 import { DatasetsSegments } from "./datasets-segments.entity";
+
+/**
+ * 发布到广场的审核状态
+ */
+export enum SquarePublishStatus {
+    /** 未申请或已撤销 */
+    NONE = "none",
+    /** 待审核 */
+    PENDING = "pending",
+    /** 审核通过（已上架） */
+    APPROVED = "approved",
+    /** 已拒绝 */
+    REJECTED = "rejected",
+}
 
 /**
  * 知识库实体
@@ -35,18 +44,8 @@ export class Datasets extends BaseEntity {
     @Column({ type: "text", nullable: true, comment: "知识库描述" })
     description?: string;
 
-    /**
-     * 分段配置
-     */
-    @Column({ type: "json", comment: "分段配置" })
-    indexingConfig: {
-        documentMode: DocumentModeType;
-        parentContextMode?: ParentContextModeType;
-        segmentation: SegmentationDto;
-        subSegmentation?: SubSegmentationDto;
-        preprocessingRules: TextPreprocessingRulesDto;
-        fileIds: string[];
-    };
+    @Column({ type: "varchar", length: 512, nullable: true, comment: "封面图 URL" })
+    coverUrl?: string | null;
 
     /**
      * Embedding 模型ID
@@ -96,6 +95,48 @@ export class Datasets extends BaseEntity {
     storageSize: number;
 
     /**
+     * 是否已发布到广场
+     */
+    @Column({ type: "boolean", default: false, comment: "是否已发布到广场" })
+    publishedToSquare: boolean;
+
+    /**
+     * 发布到广场的时间
+     */
+    @Column({ type: "timestamptz", nullable: true, comment: "发布到广场的时间" })
+    publishedAt?: Date | null;
+
+    /**
+     * 发布到广场的审核状态
+     */
+    @Column({
+        type: "enum",
+        enum: SquarePublishStatus,
+        default: SquarePublishStatus.NONE,
+        comment:
+            "发布到广场审核状态：none-未申请/已撤销，pending-待审核，approved-已通过，rejected-已拒绝",
+    })
+    squarePublishStatus: SquarePublishStatus;
+
+    /**
+     * 广场发布审核人ID
+     */
+    @Column({ type: "uuid", nullable: true, comment: "广场发布审核人ID" })
+    squareReviewedBy?: string | null;
+
+    /**
+     * 广场发布审核时间
+     */
+    @Column({ type: "timestamptz", nullable: true, comment: "广场发布审核时间" })
+    squareReviewedAt?: Date | null;
+
+    /**
+     * 广场发布拒绝原因
+     */
+    @Column({ type: "text", nullable: true, comment: "广场发布拒绝原因" })
+    squareRejectReason?: string | null;
+
+    /**
      * 知识库下的文档列表
      */
     @OneToMany(() => DatasetsDocument, (document) => document.dataset)
@@ -112,6 +153,18 @@ export class Datasets extends BaseEntity {
      */
     @OneToMany(() => DatasetMember, (member) => member.dataset)
     members?: Relation<DatasetMember[]>;
+
+    /**
+     * 知识库会员申请列表
+     */
+    @OneToMany(() => DatasetMemberApplication, (application) => application.dataset)
+    memberApplications?: Relation<DatasetMemberApplication[]>;
+
+    /**
+     * 知识库调试对话记录列表（仅用于调试知识库效果）
+     */
+    @OneToMany(() => DatasetsChatRecord, (record) => record.dataset)
+    chatRecords?: Relation<DatasetsChatRecord[]>;
 
     /**
      * 关联应用（智能体）数量

@@ -1,0 +1,47 @@
+{
+    "name": "@buildingai/llm-file-parser",
+    "version": "0.0.0",
+    "private": true,
+    "license": "MIT",
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "files": [
+        "dist/**/*"
+    ],
+    "exports": {
+        ".": {
+            "require": "./dist/index.js",
+            "import": "./dist/index.js",
+            "types": "./dist/index.d.ts"
+        }
+    },
+    "scripts": {
+        "clean": "rimraf dist .turbo dist/build.tsbuildinfo",
+        "check-types": "tsc --noEmit",
+        "build": "rimraf dist && tsc -p tsconfig.build.json",
+        "dev": "tsc -p tsconfig.build.json --watch",
+        "format": "biome format --write .",
+        "format:check": "biome ci .",
+        "lint": "eslint . --quiet",
+        "lint:fix": "eslint . --fix",
+        "watch": "tsc -p tsconfig.build.json --watch"
+    },
+    "dependencies": {
+        "@buildingai/utils": "workspace:*",
+        "adm-zip": "^0.5.16",
+        "cheerio": "^1.2.0",
+        "file-type": "^21.3.0",
+        "mammoth": "^1.11.0",
+        "pdf-parse": "^1.1.4",
+        "xlsx": "^0.18.5",
+        "xml2js": "^0.6.2"
+    },
+    "devDependencies": {
+        "@buildingai/eslint-config": "workspace:*",
+        "@buildingai/typescript-config": "workspace:*",
+        "@types/adm-zip": "^0.5.7",
+        "@types/pdf-parse": "^1.1.5",
+        "@types/xml2js": "^0.4.14"
+    }
+}

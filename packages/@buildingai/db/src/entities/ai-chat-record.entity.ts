@@ -100,10 +100,10 @@ export class AiChatRecord extends BaseEntity {
         type: "varchar",
         length: 20,
         default: "active",
-        comment: "对话状态: active-进行中, completed-已完成, failed-失败",
+        comment: "对话状态: active-进行中, completed-已完成, failed-失败, cancelled-已取消",
     })
     @Index()
-    status: "active" | "completed" | "failed";
+    status: "active" | "completed" | "failed" | "cancelled";
 
     /**
      * 是否置顶

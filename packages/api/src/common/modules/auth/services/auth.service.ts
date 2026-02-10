@@ -17,6 +17,7 @@ import { generateNo } from "@buildingai/utils";
 import { isDisabled } from "@buildingai/utils";
 import { Injectable } from "@nestjs/common";
 import * as bcrypt from "bcryptjs";
+import { isEmail, isMobilePhone } from "class-validator";
 
 import { RegisterDto } from "../dto/register.dto";
 import { RolePermissionService } from "./role-permission.service";
@@ -36,6 +37,32 @@ export class AuthService extends BaseService<User> {
         public userTokenService: UserTokenService,
     ) {
         super(userRepository);
+    }
+
+    async checkAccount(account: string) {
+        let res = {
+            hasAccount: false,
+            type: "",
+        };
+        const accountData = await this.userRepository.findOne({
+            where: [{ username: account }, { email: account }, { phone: account }],
+        });
+        if (!accountData) {
+            return res;
+        }
+
+        if (isEmail(account) && accountData.email === account) {
+            res.type = "email";
+        }
+        if (isMobilePhone(account, "zh-CN") && accountData.phone === account) {
+            res.type = "mobile";
+        }
+        if (accountData.username === account) {
+            res.type = "username";
+        }
+        res.hasAccount = true;
+
+        return res;
     }
 
     /**
@@ -202,7 +229,7 @@ export class AuthService extends BaseService<User> {
     /**
      * 用户登录
      *
-     * @param username 用户名
+     * @param username 用户名或邮箱
      * @param password 密码
      * @param terminal 登录终端
      * @param ipAddress IP地址
@@ -216,9 +243,9 @@ export class AuthService extends BaseService<User> {
         ipAddress?: string,
         userAgent?: string,
     ) {
-        // 查找用户
+        // 查找用户（支持用户名或邮箱登录）
         const user = await this.findOne({
-            where: { username },
+            where: [{ username }, { email: username }],
             relations: ["role", "permissions"],
         });
 
@@ -267,7 +294,7 @@ export class AuthService extends BaseService<User> {
             lastLoginAt: new Date(),
         });
 
-        const { password: _pwd, ...userInfo } = user;
+        const { password: _pwd, openid: _openid, deletedAt: _deletedAt, ...userInfo } = user;
 
         return {
             token: tokenResult.token,

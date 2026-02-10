@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { McpToolCall } from "@buildingai/service/consoleapi/mcp-server";
+import type { McpToolCall } from "@buildingai/services/consoleapi/mcp-server";
 import { ref } from "vue";
 
 import { formatDuration } from "@/utils/helper";

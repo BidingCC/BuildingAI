@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ModelType } from "@buildingai/service/models/globals";
+import type { ModelType } from "@buildingai/services/models/globals";
 
 import type { AiModel, AiProvider } from "@/service/ai-conversation";
 import { apiGetAiModel, apiGetAiProviders, apiGetDefaultAiModel } from "@/service/ai-conversation";

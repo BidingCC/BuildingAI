@@ -1,0 +1,84 @@
+{
+    "name": "@buildingai/ui",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
+    "scripts": {
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix",
+        "update:components": "pnpm dlx shadcn@latest add -a -o"
+    },
+    "exports": {
+        "./components/*": {
+            "import": "./src/components/*.tsx",
+            "require": "./src/components/*.tsx",
+            "types": "./src/components/*.tsx"
+        },
+        "./styles/*": "./src/styles/*",
+        "./hooks/*": {
+            "import": "./src/hooks/*.tsx",
+            "require": "./src/hooks/*.tsx",
+            "types": "./src/hooks/*.tsx"
+        },
+        "./lib/*": {
+            "import": "./src/lib/*.ts",
+            "require": "./src/lib/*.ts",
+            "types": "./src/lib/*.ts"
+        }
+    },
+    "dependencies": {
+        "@base-ui/react": "^1.1.0",
+        "@buildingai/constants": "workspace:*",
+        "@buildingai/services": "workspace:*",
+        "@buildingai/stores": "workspace:*",
+        "@fontsource-variable/inter": "^5.2.8",
+        "@gsap/react": "^2.1.2",
+        "@hookform/resolvers": "^5.2.2",
+        "@radix-ui/react-label": "^2.1.8",
+        "@radix-ui/react-slot": "^1.2.4",
+        "@radix-ui/react-use-controllable-state": "^1.2.2",
+        "@tabler/icons-react": "catalog:web",
+        "@tailwindcss/typography": "^0.5.19",
+        "@tailwindcss/vite": "^4.1.18",
+        "ai": "^6.0.37",
+        "class-variance-authority": "^0.7.1",
+        "clsx": "^2.1.1",
+        "cmdk": "^1.1.1",
+        "date-fns": "^4.1.0",
+        "embla-carousel-react": "^8.6.0",
+        "gsap": "^3.14.2",
+        "input-otp": "^1.4.2",
+        "lucide-react": "catalog:web",
+        "motion": "^12.26.2",
+        "radix-ui": "^1.4.3",
+        "react": "catalog:web",
+        "react-day-picker": "^9.13.0",
+        "react-dom": "catalog:web",
+        "react-hook-form": "^7.71.1",
+        "react-resizable-panels": "^3.0.6",
+        "recharts": "catalog:web",
+        "shadcn": "^3.8.2",
+        "shiki": "^3.21.0",
+        "sonner": "^2.0.7",
+        "streamdown": "^2.0.1",
+        "tailwind-merge": "^3.4.0",
+        "tailwindcss": "^4.1.18",
+        "tokenlens": "^1.3.1",
+        "tw-animate-css": "^1.4.0",
+        "use-stick-to-bottom": "^1.1.1",
+        "vaul": "^1.1.2",
+        "zod": "^4.3.5"
+    },
+    "devDependencies": {
+        "@buildingai/eslint-config": "workspace:*",
+        "@buildingai/typescript-config": "workspace:*",
+        "@eslint/js": "^9.39.2",
+        "@types/node": "^24.10.9",
+        "@types/react": "catalog:web",
+        "@types/react-dom": "^19.2.3",
+        "@vitejs/plugin-react": "^5.1.2",
+        "eslint": "^9.39.2",
+        "eslint-plugin-react-hooks": "^7.0.1",
+        "eslint-plugin-react-refresh": "^0.4.26"
+    }
+}

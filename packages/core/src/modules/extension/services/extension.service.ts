@@ -153,14 +153,19 @@ export class ExtensionsService extends BaseService<Extension> {
         queryExtensionDto: QueryExtensionDto,
         options?: { excludeFields?: E },
     ): Promise<PaginationResult<ExcludeFieldsResult<Extension, E>>> {
-        const { name, identifier, type, status, isLocal, ...pagination } = queryExtensionDto;
+        const { keyword, identifier, type, status, isLocal, ...pagination } = queryExtensionDto;
 
         const where = buildWhere<Extension>({
-            name: name ? ILike(`%${name}%`) : undefined,
-            identifier: identifier ? ILike(`%${identifier}%`) : undefined,
             type,
             status,
             isLocal,
+            ...(keyword && {
+                or: [{ name: ILike(`%${keyword}%`) }, { identifier: ILike(`%${keyword}%`) }],
+            }),
+            ...(identifier &&
+                !keyword && {
+                    identifier: ILike(`%${identifier}%`),
+                }),
         });
 
         return await super.paginate(pagination, {

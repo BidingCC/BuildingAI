@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { McpServerInfo } from "@buildingai/service/webapi/mcp-server";
+import type { McpServerInfo } from "@buildingai/services/webapi/mcp-server";
 import { useVModel } from "@vueuse/core";
 
 import BdPopover from "@/async-components/bd-popover/index.vue?async";

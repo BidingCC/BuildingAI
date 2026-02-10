@@ -20,6 +20,11 @@
             "import": "./dist/entities/index.js",
             "require": "./dist/entities/index.js"
         },
+        "./entities/*": {
+            "types": "./dist/entities/*.d.ts",
+            "import": "./src/entities/*.ts",
+            "require": "./dist/entities/*.js"
+        },
         "./seeds": {
             "types": "./dist/seeds/index.d.ts",
             "import": "./dist/seeds/index.js",
@@ -69,7 +74,6 @@
         "@buildingai/eslint-config": "workspace:*",
         "@buildingai/types": "workspace:*",
         "@buildingai/typescript-config": "workspace:*",
-        "@types/pg": "^8.15.5",
-        "globals": "^16.5.0"
+        "@types/pg": "^8.15.5"
     }
 }

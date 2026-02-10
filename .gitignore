@@ -28,6 +28,12 @@ coverage
 .vercel
 .cursor
 .windsurf
+.trae
+.agent
+.agents
+.kiro
+.claude
+.gemini
 
 # Build Outputs
 .next/

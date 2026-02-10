@@ -8,8 +8,10 @@ import { SecretTemplate } from "@buildingai/db/entities";
 import { Dict } from "@buildingai/db/entities";
 import {
     AccountLog,
+    AiChatFeedback,
     AiChatMessage,
     AiChatRecord,
+    AiChatToolCall,
     AiMcpServer,
     AiMcpTool,
     AiUserMcpServer,
@@ -22,27 +24,24 @@ import { AiMcpServerService } from "../mcp/services/ai-mcp-server.service";
 import { AiMcpToolService } from "../mcp/services/ai-mcp-tool.service";
 import { AiModelService } from "../model/services/ai-model.service";
 import { AiProviderService } from "../provider/services/ai-provider.service";
+import { AiChatFeedbackConsoleController } from "./controllers/console/ai-chat-feedback.controller";
 import { AiChatRecordConsoleController } from "./controllers/console/ai-chat-record.controller";
+import { AiChatFeedbackWebController } from "./controllers/web/ai-chat-feedback.controller";
 import { AiChatMessageWebController } from "./controllers/web/ai-chat-message.controller";
 import { AiChatRecordWebController } from "./controllers/web/ai-chat-record.controller";
-import {
-    ChatCompletionCommandHandler,
-    ConversationCommandHandler,
-    McpServerCommandHandler,
-    MembershipValidationCommandHandler,
-    MessageContextCommandHandler,
-    ModelValidationCommandHandler,
-    PowerDeductionCommandHandler,
-    TitleGenerationCommandHandler,
-    ToolCallCommandHandler,
-    UserPowerValidationCommandHandler,
-} from "./handlers";
+import { ChatCompletionService } from "./services/ai-chat-completion.service";
+import { AiChatFeedbackService } from "./services/ai-chat-feedback.service";
 import { AiChatsMessageService } from "./services/ai-chat-message.service";
 import { AiChatRecordService } from "./services/ai-chat-record.service";
 import { ChatConfigService } from "./services/chat-config.service";
 
 /**
- * AI对话记录后台管理模块
+ * AI对话模块
+ *
+ * 提供完整的AI对话功能，包括:
+ * - 流式/非流式对话 (兼容 AI SDK useChat)
+ * - 对话记录管理
+ * - 消息管理
  */
 @Module({
     imports: [
@@ -54,6 +53,8 @@ import { ChatConfigService } from "./services/chat-config.service";
             AiMcpTool,
             AiChatRecord,
             AiChatMessage,
+            AiChatFeedback,
+            AiChatToolCall,
             Dict,
             AccountLog,
             Secret,
@@ -64,11 +65,14 @@ import { ChatConfigService } from "./services/chat-config.service";
     ],
     controllers: [
         AiChatRecordConsoleController,
+        AiChatFeedbackConsoleController,
         AiChatRecordWebController,
         AiChatMessageWebController,
+        AiChatFeedbackWebController,
     ],
     providers: [
         ChatConfigService,
+        ChatCompletionService,
         AiModelService,
         AiProviderService,
         SecretService,
@@ -78,18 +82,8 @@ import { ChatConfigService } from "./services/chat-config.service";
         AiUserMcpServer,
         AiChatRecordService,
         AiChatsMessageService,
-        // Command Handlers
-        ConversationCommandHandler,
-        ModelValidationCommandHandler,
-        MembershipValidationCommandHandler,
-        UserPowerValidationCommandHandler,
-        McpServerCommandHandler,
-        MessageContextCommandHandler,
-        ToolCallCommandHandler,
-        PowerDeductionCommandHandler,
-        TitleGenerationCommandHandler,
-        ChatCompletionCommandHandler,
+        AiChatFeedbackService,
     ],
-    exports: [ChatConfigService, AiChatRecordService, AiChatsMessageService],
+    exports: [ChatConfigService, ChatCompletionService, AiChatRecordService, AiChatsMessageService],
 })
 export class AiChatModule {}

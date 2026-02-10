@@ -1,0 +1,219 @@
+import { useAuthStore } from "@buildingai/stores";
+import type {
+    PaginatedQueryOptionsUtil,
+    PaginatedResponse,
+    QueryOptionsUtil,
+} from "@buildingai/web-types";
+import type { UseMutationResult, UseQueryResult } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
+import { apiHttpClient } from "../base";
+
+export type PaginationParams = {
+    page?: number;
+    pageSize?: number;
+};
+
+export type ConversationRecord = {
+    id: string;
+    title: string | null;
+    userId: string;
+    modelId: string | null;
+    summary: string | null;
+    messageCount: number;
+    totalTokens: number;
+    totalPower: number;
+    config: Record<string, any> | null;
+    status: "active" | "completed" | "failed" | "cancelled";
+    isPinned: boolean;
+    isDeleted: boolean;
+    metadata: Record<string, any> | null;
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type QueryConversationsParams = PaginationParams & {
+    modelId?: string;
+    status?: "active" | "completed" | "failed" | "cancelled";
+    isPinned?: boolean;
+    keyword?: string;
+    startDate?: string;
+    endDate?: string;
+};
+
+export type MessageVersion = {
+    id: string;
+    content: string;
+    attachments?: Array<{
+        type: "file";
+        url: string;
+        mediaType?: string;
+        filename?: string;
+    }>;
+};
+
+export type MessageSource = {
+    href: string;
+    title: string;
+};
+
+export type MessageReasoning = {
+    content: string;
+    duration: number;
+};
+
+export type MessageToolCall = {
+    name: string;
+    description: string;
+    status:
+        | "input-streaming"
+        | "input-available"
+        | "approval-requested"
+        | "approval-responded"
+        | "output-available"
+        | "output-error"
+        | "output-denied";
+    parameters: Record<string, unknown>;
+    result: string | undefined;
+    error: string | undefined;
+};
+
+export type MessageRecord = {
+    id: string;
+    conversationId: string;
+    modelId: string;
+    role: "user" | "assistant";
+    sequence: number;
+    parentId?: string | null;
+    message: {
+        role: "user" | "assistant" | "system" | "tool";
+        parts: Array<{
+            type: string;
+            [key: string]: any;
+        }>;
+        metadata?: Record<string, any>;
+    };
+    status: "streaming" | "completed" | "failed";
+    errorMessage?: string | null;
+    usage?: {
+        inputTokens?: number;
+        outputTokens?: number;
+        totalTokens?: number;
+        inputTokenDetails?: {
+            noCacheTokens?: number;
+            cacheReadTokens?: number;
+            cacheWriteTokens?: number;
+        };
+        outputTokenDetails?: {
+            textTokens?: number;
+            reasoningTokens?: number;
+        };
+        reasoningTokens?: number;
+        cachedInputTokens?: number;
+        raw?: Record<string, unknown>;
+    } | null;
+    userConsumedPower?: number | null;
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type QueryMessagesParams = PaginationParams & {
+    conversationId: string;
+};
+
+export function useConversationsQuery(
+    params: QueryConversationsParams,
+    options?: PaginatedQueryOptionsUtil<ConversationRecord>,
+): UseQueryResult<PaginatedResponse<ConversationRecord>, unknown> {
+    const { isLogin } = useAuthStore((state) => state.authActions);
+
+    return useQuery<PaginatedResponse<ConversationRecord>>({
+        queryKey: ["conversations", params],
+        queryFn: () =>
+            apiHttpClient.get<PaginatedResponse<ConversationRecord>>("/ai-conversations", {
+                params,
+            }),
+        enabled: isLogin() && options?.enabled !== false,
+        ...options,
+    });
+}
+
+export function useConversationQuery(
+    conversationId: string,
+    options?: QueryOptionsUtil<ConversationRecord>,
+): UseQueryResult<ConversationRecord, unknown> {
+    return useQuery<ConversationRecord>({
+        queryKey: ["conversation", conversationId],
+        queryFn: () =>
+            apiHttpClient.get<ConversationRecord>(`/ai-conversations/${conversationId}/info`),
+        enabled: !!conversationId,
+        ...options,
+    });
+}
+
+export async function getConversationInfo(conversationId: string): Promise<ConversationRecord> {
+    return apiHttpClient.get<ConversationRecord>(`/ai-conversations/${conversationId}/info`);
+}
+
+export function useConversationMessagesQuery(
+    params: QueryMessagesParams,
+    options?: PaginatedQueryOptionsUtil<MessageRecord>,
+): UseQueryResult<PaginatedResponse<MessageRecord>, unknown> {
+    return useQuery<PaginatedResponse<MessageRecord>>({
+        queryKey: ["conversation-messages", params.conversationId, params],
+        queryFn: () =>
+            apiHttpClient.get<PaginatedResponse<MessageRecord>>(
+                `/ai-conversations/${params.conversationId}/messages`,
+                {
+                    params: {
+                        page: params.page,
+                        pageSize: params.pageSize,
+                    },
+                },
+            ),
+        ...options,
+        enabled: options?.enabled ?? false,
+    });
+}
+
+export async function getConversationMessages(
+    params: QueryMessagesParams,
+): Promise<PaginatedResponse<MessageRecord>> {
+    return apiHttpClient.get<PaginatedResponse<MessageRecord>>(
+        `/ai-conversations/${params.conversationId}/messages`,
+        {
+            params: {
+                page: params.page,
+                pageSize: params.pageSize,
+            },
+        },
+    );
+}
+
+export function useDeleteConversation(): UseMutationResult<unknown, unknown, string, unknown> {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (conversationId: string) =>
+            apiHttpClient.delete(`/ai-conversations/${conversationId}`),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["conversations"] });
+        },
+    });
+}
+
+export function useUpdateConversation(): UseMutationResult<
+    ConversationRecord,
+    unknown,
+    { id: string; title: string },
+    unknown
+> {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, title }: { id: string; title: string }) =>
+            apiHttpClient.patch<ConversationRecord>(`/ai-conversations/${id}`, { title }),
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({ queryKey: ["conversations"] });
+            queryClient.invalidateQueries({ queryKey: ["conversation", variables.id] });
+        },
+    });
+}

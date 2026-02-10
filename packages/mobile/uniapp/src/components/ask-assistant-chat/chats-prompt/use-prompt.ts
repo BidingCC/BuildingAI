@@ -1,4 +1,4 @@
-import type { FilesList } from "@buildingai/service/models/message";
+import type { FilesList } from "@buildingai/services/models/message";
 
 import { useUpload } from "@/hooks/use-request";
 import type { FileUploadResponse } from "@/service/common";

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { AiMessage } from "@buildingai/service/models/message";
+import type { AiMessage } from "@buildingai/services/models/message";
 import { computed } from "vue";
 
 // #ifdef H5

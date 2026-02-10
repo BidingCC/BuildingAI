@@ -254,10 +254,12 @@ export class ExtensionConsoleController extends BaseController {
         };
 
         // Extension filter conditions
-        let extensionsList = allExtensionsList;
-        if (query.name) {
+        let extensionsList = allExtensionsList.map((item) =>
+            item.status === ExtensionStatus.ENABLED ? item : { ...item, aliasShow: false },
+        );
+        if (query.keyword) {
             extensionsList = extensionsList.filter((ext) =>
-                ext.name.toLowerCase().includes(query.name.toLowerCase()),
+                ext.name.toLowerCase().includes(query.keyword.toLowerCase()),
             );
         }
 

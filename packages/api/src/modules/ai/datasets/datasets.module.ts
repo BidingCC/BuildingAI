@@ -1,114 +1,100 @@
-import { QueueModule } from "@buildingai/core/modules";
+import { QueueModule, SecretService } from "@buildingai/core/modules";
 import { TypeOrmModule } from "@buildingai/db/@nestjs/typeorm";
-import { User } from "@buildingai/db/entities";
-import { AiModel } from "@buildingai/db/entities";
-import { Dict } from "@buildingai/db/entities";
-import { Agent } from "@buildingai/db/entities";
 import {
     DatasetMember,
+    DatasetMemberApplication,
     Datasets,
+    DatasetsChatMessage,
+    DatasetsChatRecord,
     DatasetsDocument,
     DatasetsSegments,
+    User,
 } from "@buildingai/db/entities";
-import { DictService } from "@buildingai/dict";
-import { SecretManagerModule } from "@modules/ai/secret/secret.module";
+import { AiModelModule } from "@modules/ai/model/ai-model.module";
+import { ConfigModule } from "@modules/config/config.module";
+import { UserModule } from "@modules/user/user.module";
 import { UploadModule } from "@modules/upload/upload.module";
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 import { APP_GUARD } from "@nestjs/core";
 
-import { AiModelService } from "../model/services/ai-model.service";
-import { DatasetsController } from "./controllers/console/datasets.controller";
-import { DocumentsController } from "./controllers/console/documents.controller";
-import { TeamMemberController } from "./controllers/console/member.controller";
-import { SegmentsController } from "./controllers/console/segments.controller";
+import { DatasetsConsoleController } from "./controllers/console/datasets.controller";
+import { DatasetsWebController } from "./controllers/web/datasets.controller";
+import { DatasetsChatMessageWebController } from "./controllers/web/datasets-chat-message.controller";
+import { DatasetsChatRecordWebController } from "./controllers/web/datasets-chat-record.controller";
+import { DatasetsDocumentsWebController } from "./controllers/web/datasets-documents.controller";
+import { DatasetsMembersWebController } from "./controllers/web/datasets-members.controller";
 import { DatasetPermissionGuard } from "./guards/datasets-permission.guard";
 import { VectorizationProcessor } from "./processors/vectorization.processor";
 import { DatasetsService } from "./services/datasets.service";
+import { DatasetsChatCompletionService } from "./services/datasets-chat-completion.service";
+import { DatasetsChatMessageService } from "./services/datasets-chat-message.service";
+import { DatasetsChatRecordService } from "./services/datasets-chat-record.service";
+import { DatasetsDocumentService } from "./services/datasets-document.service";
 import { DatasetMemberService } from "./services/datasets-member.service";
 import { DatasetsRetrievalService } from "./services/datasets-retrieval.service";
-import { DocumentsService } from "./services/documents.service";
-import { FileParserService } from "./services/file-parser.service";
-import { EmbeddingHelper } from "./services/helpers/embedding.helper";
-import { QueryPreprocessor } from "./services/helpers/query-preprocessor.helper";
-import { RerankHelper } from "./services/helpers/rerank.helper";
-import { IndexingService } from "./services/indexing.service";
-import { SegmentsService } from "./services/segments.service";
-import { VectorizationQueueService } from "./services/vectorization-queue.service";
+import { DatasetsSegmentService } from "./services/datasets-segment.service";
+import { DocumentSummaryService } from "./services/document-summary.service";
+import { DatasetsQueryPreprocessorService } from "./services/datasets-query-preprocessor.service";
+import { SegmentationService } from "./services/segmentation.service";
+import { VectorizationRunnerService } from "./services/vectorization-runner.service";
 import { VectorizationTriggerService } from "./services/vectorization-trigger.service";
-import {
-    GeneratorService,
-    ModelAdapterService,
-    StateService,
-    VectorizationService,
-} from "./vectorization";
 
+/**
+ * 知识库模块（向量化数据集）
+ *
+ * Web 端知识库与文档接口；向量化队列消费在 Processor；不依赖 datasets-old。
+ */
 @Module({
     imports: [
         TypeOrmModule.forFeature([
             Datasets,
+            DatasetMember,
+            DatasetMemberApplication,
             DatasetsDocument,
             DatasetsSegments,
-            DatasetMember,
+            DatasetsChatRecord,
+            DatasetsChatMessage,
             User,
-            Dict,
-            Agent,
-            AiModel,
         ]),
+        ConfigModule,
         QueueModule,
         UploadModule,
-        SecretManagerModule,
+        AiModelModule,
+        forwardRef(() => UserModule),
     ],
     controllers: [
-        DatasetsController,
-        DocumentsController,
-        SegmentsController,
-        TeamMemberController,
+        DatasetsConsoleController,
+        DatasetsWebController,
+        DatasetsDocumentsWebController,
+        DatasetsMembersWebController,
+        DatasetsChatRecordWebController,
+        DatasetsChatMessageWebController,
     ],
     providers: [
-        // Core services
         DatasetsService,
-        DatasetsRetrievalService,
-        DocumentsService,
-        SegmentsService,
         DatasetMemberService,
-
-        // Helper services
-        VectorizationQueueService,
+        DocumentSummaryService,
+        DatasetsDocumentService,
+        DatasetsSegmentService,
+        DatasetsRetrievalService,
+        DatasetsChatRecordService,
+        DatasetsChatMessageService,
+        DatasetsChatCompletionService,
+        SegmentationService,
+        DatasetsQueryPreprocessorService,
         VectorizationTriggerService,
-        FileParserService,
-        IndexingService,
-        EmbeddingHelper,
-        RerankHelper,
-        QueryPreprocessor,
-
-        // Queue processors
+        VectorizationRunnerService,
         VectorizationProcessor,
-
-        // Vectorization services
-        ModelAdapterService,
-        GeneratorService,
-        StateService,
-        VectorizationService,
-
-        // External services
-        DictService,
-        AiModelService,
-
-        // Guards
         DatasetPermissionGuard,
-        {
-            provide: APP_GUARD,
-            useClass: DatasetPermissionGuard,
-        },
+        SecretService,
+        { provide: APP_GUARD, useClass: DatasetPermissionGuard },
     ],
     exports: [
         DatasetsService,
-        DatasetsRetrievalService,
-        DocumentsService,
-        SegmentsService,
         DatasetMemberService,
-        IndexingService,
-        DatasetPermissionGuard,
+        DatasetsDocumentService,
+        DatasetsSegmentService,
+        DatasetsRetrievalService,
     ],
 })
 export class AiDatasetsModule {}

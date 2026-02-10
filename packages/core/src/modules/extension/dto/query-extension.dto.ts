@@ -13,11 +13,11 @@ import { IsBoolean, IsEnum, IsOptional, IsString } from "class-validator";
  */
 export class QueryExtensionDto extends PaginationDto {
     /**
-     * Extension name (fuzzy search)
+     * Keyword for searching extension name or identifier (fuzzy search)
      */
-    @IsString({ message: "Extension name must be a string" })
+    @IsString({ message: "Keyword must be a string" })
     @IsOptional()
-    name?: string;
+    keyword?: string;
 
     /**
      * Extension identifier (fuzzy search)

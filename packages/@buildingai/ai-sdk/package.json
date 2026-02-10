@@ -19,6 +19,11 @@
             "require": "./dist/openai.js",
             "import": "./dist/openai.js",
             "types": "./dist/openai.d.ts"
+        },
+        "./interfaces/*": {
+            "import": "./src/interfaces/*.ts",
+            "require": "./src/interfaces/*.ts",
+            "types": "./src/interfaces/*.ts"
         }
     },
     "scripts": {

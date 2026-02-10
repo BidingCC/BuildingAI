@@ -9,8 +9,8 @@
 import type {
     PowerDetailDataWithExtend,
     PowerDetailQueryParams,
-} from "@buildingai/service/webapi/power-detail";
-import type { RechargeCenterInfo } from "@buildingai/service/webapi/recharge-center";
+} from "@buildingai/services/webapi/power-detail";
+import type { RechargeCenterInfo } from "@buildingai/services/webapi/recharge-center";
 import type {
     LoginResponse,
     SystemLoginAccountParams,
@@ -18,7 +18,7 @@ import type {
     UpdateUserFieldRequest,
     UpdateUserFieldResponse,
     UserInfo,
-} from "@buildingai/service/webapi/user";
+} from "@buildingai/services/webapi/user";
 // ==================== User Information Related APIs ====================
 
 /**

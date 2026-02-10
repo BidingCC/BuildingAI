@@ -1,0 +1,55 @@
+@import "@buildingai/ui/styles/index.css";
+@import "./utils.css";
+
+html {
+  --font-size-scale: 1;
+}
+
+html[data-font-size="xs"] {
+  --font-size-scale: 0.875;
+}
+
+html[data-font-size="sm"] {
+  --font-size-scale: 0.9375;
+}
+
+html[data-font-size="md"] {
+  --font-size-scale: 1;
+}
+
+html[data-font-size="lg"] {
+  --font-size-scale: 1.0625;
+}
+
+html[data-font-size="xl"] {
+  --font-size-scale: 1.125;
+}
+
+html,
+body {
+  @apply h-full min-h-dvh;
+  font-size: calc(1rem * var(--font-size-scale));
+}
+
+#root {
+  @apply h-full min-h-dvh;
+}
+
+.chat-scroll {
+  @apply border-border;
+}
+
+.chat-scroll > div:hover {
+  scrollbar-color: var(--border) transparent;
+}
+
+.chat-scroll > div {
+  @apply overflow-y-auto px-3 sm:pr-0;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  scrollbar-gutter: stable;
+}
+
+[data-streamdown="code-block"] {
+  content-visibility: visible !important;
+}

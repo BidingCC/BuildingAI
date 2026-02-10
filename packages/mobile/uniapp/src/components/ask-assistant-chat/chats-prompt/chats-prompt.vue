@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { FilesList } from "@buildingai/service/models/message";
+import type { FilesList } from "@buildingai/services/models/message";
 import { useVModel } from "@vueuse/core";
 import { onMounted, watch } from "vue";
 

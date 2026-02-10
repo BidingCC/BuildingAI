@@ -2,7 +2,7 @@
 import type {
     PowerDetailItem,
     PowerDetailQueryParams,
-} from "@buildingai/service/webapi/power-detail";
+} from "@buildingai/services/webapi/power-detail";
 
 import { apiGetUserPowerDetail } from "@/service/user";
 const { t } = useI18n();

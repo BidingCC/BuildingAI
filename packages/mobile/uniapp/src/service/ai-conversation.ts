@@ -12,10 +12,10 @@ import type {
     ModelType,
     Pagination,
     PaginationResult,
-} from "@buildingai/service/models/globals";
-import type { AiMessage } from "@buildingai/service/models/message";
-import type { McpServerInfo } from "@buildingai/service/webapi/mcp-server";
-import type { UserInfo } from "@buildingai/service/webapi/user";
+} from "@buildingai/services/models/globals";
+import type { AiMessage } from "@buildingai/services/models/message";
+import type { McpServerInfo } from "@buildingai/services/webapi/mcp-server";
+import type { UserInfo } from "@buildingai/services/webapi/user";
 import type { ChatStreamConfig } from "@buildingai/types";
 
 // ==================== Type Definitions ====================

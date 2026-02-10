@@ -1,0 +1,78 @@
+{
+    "name": "@buildingai/ai-sdk-new",
+    "version": "0.0.0",
+    "private": true,
+    "license": "MIT",
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "files": [
+        "dist/**/*"
+    ],
+    "exports": {
+        ".": {
+            "require": "./dist/index.js",
+            "import": "./dist/index.js",
+            "types": "./dist/index.d.ts"
+        },
+        "./providers": {
+            "require": "./dist/providers/index.js",
+            "import": "./dist/providers/index.js",
+            "types": "./dist/providers/index.d.ts"
+        },
+        "./utils/token-usage": {
+            "require": "./dist/utils/token-usage.js",
+            "import": "./dist/utils/token-usage.js",
+            "types": "./dist/utils/token-usage.d.ts"
+        },
+        "./interfaces/*": {
+            "import": "./src/interfaces/*.ts",
+            "require": "./src/interfaces/*.ts",
+            "types": "./src/interfaces/*.ts"
+        }
+    },
+    "scripts": {
+        "clean": "rimraf dist .turbo dist/build.tsbuildinfo",
+        "check-types": "tsc --noEmit",
+        "build": "rimraf dist && tsc -p tsconfig.build.json",
+        "dev": "tsc -p tsconfig.build.json --watch",
+        "format": "biome format --write .",
+        "format:check": "biome ci .",
+        "lint": "eslint . --quiet",
+        "lint:fix": "eslint . --fix",
+        "watch": "tsc -p tsconfig.build.json --watch",
+        "test": "jest",
+        "test:dev": "jest --watch"
+    },
+    "dependencies": {
+        "@ai-sdk/anthropic": "^3.0.15",
+        "@ai-sdk/azure": "^3.0.12",
+        "@ai-sdk/cohere": "^3.0.8",
+        "@ai-sdk/deepseek": "^2.0.8",
+        "@ai-sdk/google": "^3.0.10",
+        "@ai-sdk/mcp": "^1.0.10",
+        "@ai-sdk/openai": "^3.0.12",
+        "@ai-sdk/openai-compatible": "^2.0.13",
+        "@ai-sdk/provider": "^3.0.4",
+        "@ai-sdk/provider-utils": "^4.0.8",
+        "@ai-sdk/xai": "^3.0.26",
+        "@buildingai/constants": "workspace:*",
+        "@buildingai/utils": "workspace:*",
+        "@modelcontextprotocol/sdk": "1.21.0",
+        "@openrouter/ai-sdk-provider": "^1.5.4",
+        "@types/pdf-parse": "^1.1.5",
+        "ai": "^6.0.40",
+        "ai-sdk-ollama": "^3.1.1",
+        "mammoth": "^1.11.0",
+        "pdf-parse": "^1.1.4",
+        "tiktoken": "^1.0.22",
+        "vercel-minimax-ai-provider": "^0.0.1",
+        "xlsx": "^0.18.5",
+        "zhipu-ai-provider": "^0.2.1",
+        "zod": "^4.3.5"
+    },
+    "devDependencies": {
+        "@buildingai/eslint-config": "workspace:*",
+        "@buildingai/typescript-config": "workspace:*"
+    }
+}

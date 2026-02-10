@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { FormFieldConfig } from "@buildingai/service/consoleapi/ai-agent";
+import type { FormFieldConfig } from "@buildingai/services/consoleapi/ai-agent";
 import type { UniForms } from "@uni-helper/uni-types";
 import { useVModel } from "@vueuse/core";
 

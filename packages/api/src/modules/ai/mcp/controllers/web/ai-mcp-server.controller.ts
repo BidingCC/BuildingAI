@@ -269,10 +269,6 @@ export class WebAiMcpServerWebController {
                 type: "object",
                 properties: {
                     url: { type: "string", minLength: 1 },
-                    type: {
-                        type: "string",
-                        enum: Object.values(McpCommunicationType),
-                    },
                     headers: {
                         type: "object",
                         patternProperties: {
@@ -288,7 +284,7 @@ export class WebAiMcpServerWebController {
                         additionalProperties: false,
                     },
                 },
-                required: ["url", "type"],
+                required: ["url"],
                 additionalProperties: false,
             };
 
@@ -316,13 +312,11 @@ export class WebAiMcpServerWebController {
             let parsedData;
             try {
                 parsedData = JSON.parse(importJsonDto.jsonString);
-                // 将 headers 转换为 customHeaders
+                // Set default type to 'sse' if not provided
                 if (parsedData.mcpServers) {
                     for (const key in parsedData.mcpServers) {
-                        const server = parsedData.mcpServers[key];
-                        if (server.headers) {
-                            server.customHeaders = server.headers;
-                            delete server.headers;
+                        if (!parsedData.mcpServers[key].type) {
+                            parsedData.mcpServers[key].type = McpCommunicationType.SSE;
                         }
                     }
                 }

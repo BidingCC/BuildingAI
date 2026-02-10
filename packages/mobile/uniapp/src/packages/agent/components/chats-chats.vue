@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { AiConversation } from "@buildingai/service/webapi/ai-conversation";
+import type { AiConversation } from "@buildingai/services/webapi/ai-conversation";
 
 import { apiGetConversations } from "@/service/agent";
 

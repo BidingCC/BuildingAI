@@ -1,240 +1,118 @@
 import { type UserPlayground } from "@buildingai/db";
-import { Datasets } from "@buildingai/db/entities";
+import { Datasets, SquarePublishStatus } from "@buildingai/db/entities";
+import { type FindOptionsWhere, ILike, In } from "@buildingai/db/typeorm";
 import { Playground } from "@buildingai/decorators/playground.decorator";
-import {
-    IndexingSegmentsDto,
-    IndexingSegmentsResponseDto,
-} from "@buildingai/dto/indexing-segments.dto";
-import { RetrievalResult } from "@buildingai/types/ai/retrieval-config.interface";
+import { HttpErrorFactory } from "@buildingai/errors";
+import { bytesToReadable } from "@buildingai/utils";
 import { ConsoleController } from "@common/decorators/controller.decorator";
 import { Permissions } from "@common/decorators/permissions.decorator";
+import { UserService } from "@modules/user/services/user.service";
 import { Body, Delete, Get, Param, Patch, Post, Query } from "@nestjs/common";
 
-import {
-    CreateDatasetDto,
-    DeleteDatasetDto,
-    QueryDatasetDto,
-    RetrievalTestDto,
-    UpdateDatasetDto,
-} from "../../dto/datasets.dto";
-import { DatasetPermission } from "../../guards/datasets-permission.guard";
+import { ListConsoleDatasetsDto } from "../../dto/list-console-datasets.dto";
+import { SetDatasetVectorConfigDto } from "../../dto/set-dataset-vector-config.dto";
+import { RejectSquarePublishDto } from "../../dto/square-publish.dto";
 import { DatasetsService } from "../../services/datasets.service";
-import { DatasetsRetrievalService } from "../../services/datasets-retrieval.service";
-import { IndexingService } from "../../services/indexing.service";
 
-@ConsoleController("ai-datasets", "数据集")
-export class DatasetsController {
-    /**
-     * Creates a new DatasetsController instance
-     *
-     * @param datasetsService - Service for handling dataset operations
-     * @param datasetsRetrievalService - Service for handling dataset retrieval operations
-     * @param indexingService - Service for handling document indexing operations
-     */
+@ConsoleController("datasets", "知识库")
+export class DatasetsConsoleController {
     constructor(
         private readonly datasetsService: DatasetsService,
-        private readonly datasetsRetrievalService: DatasetsRetrievalService,
-        private readonly indexingService: IndexingService,
+        private readonly userService: UserService,
     ) {}
 
-    /**
-     * Create Dataset
-     *
-     * Creates a new AI dataset with specified configuration
-     *
-     * @param dto - Dataset creation parameters
-     * @param user - Current user information
-     * @returns Created dataset information
-     */
-    @Post("create")
-    @Permissions({
-        code: "create",
-        name: "创建数据集",
-    })
-    async create(
-        @Body() dto: CreateDatasetDto,
-        @Playground() user: UserPlayground,
-    ): Promise<Datasets> {
-        return this.datasetsService.createDatasets(dto, user);
-    }
-
-    /**
-     * Create Empty Dataset
-     *
-     * Creates an empty dataset containing only name and description without any documents
-     *
-     * @param dto - Dataset creation parameters including name, description and embedding model
-     * @param user - Current user information
-     * @returns Created empty dataset information
-     */
-    @Post("create-empty")
-    @Permissions({
-        code: "create-empty",
-        name: "创建空数据集",
-    })
-    async createEmpty(
-        @Body()
-        dto: { name: string; description?: string; embeddingModelId: string },
-        @Playground() user: UserPlayground,
-    ): Promise<Datasets> {
-        return this.datasetsService.createEmptyDataset(dto, user);
-    }
-
-    /**
-     * Dataset Segmentation and Processing
-     *
-     * Reads file content and performs segmentation processing based on provided file ID list.
-     * Does not store to database, directly returns segmentation results for preview.
-     *
-     * @param dto - Segmentation parameters including segmentation configuration and file ID list
-     * @param user - Current user information
-     * @returns Segmentation processing results with limited segments (max 20 per file)
-     */
-    @Post("indexing-segments")
-    @Permissions({
-        code: "indexing-segments",
-        name: "数据集分段处理",
-    })
-    async indexingSegments(@Body() dto: IndexingSegmentsDto): Promise<IndexingSegmentsResponseDto> {
-        const result = await this.indexingService.indexingSegments(dto);
-        // Limit segment count to 20 to prevent frontend rendering too many segments that may cause freezing
-        if (Array.isArray(result.fileResults)) {
-            result.fileResults = result.fileResults.map((fileResult) => ({
-                ...fileResult,
-                segments: Array.isArray(fileResult.segments)
-                    ? fileResult.segments.slice(0, 20)
-                    : fileResult.segments,
-            }));
-        }
-        return result;
-    }
-
-    /**
-     * Get Dataset List
-     *
-     * Supports keyword search for dataset names and descriptions.
-     * Super administrators can see all datasets, regular users can only see datasets they created or are members of.
-     *
-     * @param dto - Query parameters including search keywords and pagination
-     * @param user - Current user information
-     * @returns Dataset list and pagination information
-     */
     @Get()
-    @Permissions({
-        code: "list",
-        name: "查询数据集列表",
-    })
-    async list(@Query() dto: QueryDatasetDto, @Playground() user: UserPlayground) {
-        return this.datasetsService.list(dto, user);
+    @Permissions({ code: "list", name: "知识库列表", description: "分页查询知识库列表" })
+    async list(@Query() dto: ListConsoleDatasetsDto) {
+        const { page = 1, pageSize = 20, name, status } = dto;
+        const where: FindOptionsWhere<Datasets> = {};
+        if (name?.trim()) {
+            where.name = ILike(`%${name.trim()}%`);
+        }
+        if (status && status !== "all") {
+            where.squarePublishStatus = status as SquarePublishStatus;
+        }
+        const result = await this.datasetsService.paginate(
+            { page, pageSize },
+            { where: Object.keys(where).length ? where : undefined, order: { updatedAt: "DESC" } },
+        );
+        const creatorIds = [...new Set((result.items as Datasets[]).map((d) => d.createdBy))];
+        const users =
+            creatorIds.length > 0
+                ? await this.userService.findAll({
+                      where: { id: In(creatorIds) },
+                      select: { id: true, nickname: true },
+                  })
+                : [];
+        const creatorMap = new Map(users.map((u) => [u.id, u.nickname ?? "-"]));
+        const items = (result.items as Datasets[]).map((d) => ({
+            id: d.id,
+            name: d.name,
+            creatorName: creatorMap.get(d.createdBy) ?? "-",
+            documentCount: d.documentCount ?? 0,
+            storageSize: d.storageSize ?? 0,
+            storageSizeFormatted: bytesToReadable(Number(d.storageSize ?? 0)),
+            squarePublishStatus: d.squarePublishStatus ?? SquarePublishStatus.NONE,
+            squareRejectReason: d.squareRejectReason ?? null,
+            sort: 0,
+            updatedAt: d.updatedAt,
+        }));
+        return {
+            items,
+            total: result.total,
+            page: result.page,
+            pageSize: result.pageSize,
+            totalPages: result.totalPages,
+        };
     }
 
-    /**
-     * Get Dataset Details
-     *
-     * Retrieves detailed information about a specific dataset
-     *
-     * @param id - Dataset ID
-     * @param user - Current user information
-     * @returns Dataset details
-     */
     @Get(":id")
     @Permissions({
         code: "detail",
-        name: "查看数据集详情",
+        name: "知识库详情",
+        description: "查询知识库详情（含向量配置）",
     })
-    async getById(@Param("id") id: string, @Playground() user: UserPlayground): Promise<Datasets> {
-        return this.datasetsService.getDatasetById(id, user.id, user);
+    async getOne(@Param("id") datasetId: string) {
+        const dataset = await this.datasetsService.findOneById(datasetId);
+        if (!dataset) throw HttpErrorFactory.notFound("知识库不存在");
+        return {
+            id: dataset.id,
+            name: dataset.name,
+            embeddingModelId: dataset.embeddingModelId ?? null,
+            retrievalMode: dataset.retrievalMode,
+            retrievalConfig: dataset.retrievalConfig,
+        };
     }
 
-    /**
-     * Update Dataset
-     *
-     * Updates existing dataset configuration and settings
-     *
-     * @param id - Dataset ID
-     * @param dto - Update parameters
-     * @param user - Current user information
-     * @returns Updated dataset information
-     */
-    @Patch(":id/update")
+    @Patch(":id/vector-config")
     @Permissions({
-        code: "update",
-        name: "更新数据集",
+        code: "vector-config",
+        name: "设置向量配置",
+        description: "设置知识库检索方式与向量模型",
     })
-    @DatasetPermission({ permission: "canManageDataset", datasetIdParam: "id" })
-    async updateDataset(
-        @Param("id") id: string,
-        @Body() dto: UpdateDatasetDto,
+    async setVectorConfig(@Param("id") datasetId: string, @Body() dto: SetDatasetVectorConfigDto) {
+        return this.datasetsService.updateVectorConfig(datasetId, dto);
+    }
+
+    @Post(":id/approve-square")
+    @Permissions({ code: "review", name: "审核通过", description: "知识库广场发布审核通过" })
+    async approveSquare(@Param("id") datasetId: string, @Playground() user: UserPlayground) {
+        return this.datasetsService.approveSquarePublish(datasetId, user.id);
+    }
+
+    @Post(":id/reject-square")
+    @Permissions({ code: "review", name: "审核拒绝", description: "知识库广场发布审核拒绝" })
+    async rejectSquare(
+        @Param("id") datasetId: string,
+        @Body() dto: RejectSquarePublishDto,
         @Playground() user: UserPlayground,
     ) {
-        return this.datasetsService.updateDataset(id, user.id, dto);
+        return this.datasetsService.rejectSquarePublish(datasetId, user.id, dto.reason);
     }
 
-    /**
-     * Delete Dataset
-     *
-     * Deletes dataset and its related documents and segment data
-     *
-     * @param dto - Delete parameters containing dataset ID
-     * @param user - Current user information
-     * @returns Delete result
-     */
     @Delete(":id")
-    @Permissions({
-        code: "delete",
-        name: "删除数据集",
-    })
-    @DatasetPermission({ permission: "canDelete", datasetIdParam: "id" })
-    async remove(@Param() dto: DeleteDatasetDto) {
-        const success = await this.datasetsService.deleteDataset(dto.id);
-        return { success };
-    }
-
-    /**
-     * Dataset Retrieval Test
-     *
-     * Allows testing different retrieval configurations with custom retrievalConfig parameters
-     *
-     * @param id - Dataset ID
-     * @param dto - Retrieval test parameters including query and retrieval configuration
-     * @param user - Current user information
-     * @returns Retrieval test results
-     */
-    @Post(":id/retrieval-test")
-    @Permissions({
-        code: "retrieval-test",
-        name: "数据集召回测试",
-    })
-    async retrievalTest(
-        @Param("id") id: string,
-        @Body() dto: RetrievalTestDto,
-        @Playground() user: UserPlayground,
-    ): Promise<RetrievalResult> {
-        // Verify knowledge base permissions
-        await this.datasetsService.getDatasetById(id, user.id, user);
-
-        // Execute retrieval test
-        return this.datasetsRetrievalService.queryDatasetWithConfig(
-            id,
-            dto.query,
-            dto.retrievalConfig,
-        );
-    }
-
-    /**
-     * Retry Dataset Vectorization
-     *
-     * Retries vectorization for all failed documents in the dataset
-     *
-     * @param id - Dataset ID
-     * @returns Retry operation result
-     */
-    @Post(":id/retry")
-    @Permissions({
-        code: "retry",
-        name: "重试数据集向量化",
-    })
-    async retryDataset(@Param("id") id: string) {
-        return this.datasetsService.retryDataset(id);
+    @Permissions({ code: "delete", name: "删除知识库", description: "删除指定知识库及其文档与数据" })
+    async remove(@Param("id") datasetId: string) {
+        return this.datasetsService.deleteDatasetForConsole(datasetId);
     }
 }

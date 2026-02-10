@@ -6,10 +6,10 @@
  * @author BuildingAI Teams
  */
 
-import type { Agent } from "@buildingai/service/consoleapi/ai-agent";
-import type { PaginationResult } from "@buildingai/service/models/globals";
-import type { AiMessage } from "@buildingai/service/models/message";
-import type { QueryPublicAgentParams } from "@buildingai/service/webapi/ai-agent";
+import type { Agent } from "@buildingai/services/consoleapi/ai-agent";
+import type { PaginationResult } from "@buildingai/services/models/globals";
+import type { AiMessage } from "@buildingai/services/models/message";
+import type { QueryPublicAgentParams } from "@buildingai/services/webapi/ai-agent";
 // ==================== Type Definitions ====================
 
 /**

@@ -21,11 +21,12 @@ import {
 import { BuildFileUrl } from "@buildingai/decorators/file-url.decorator";
 import { Playground } from "@buildingai/decorators/playground.decorator";
 import { Public } from "@buildingai/decorators/public.decorator";
-import { DictService } from "@buildingai/dict";
+import { DictService, UserDictService } from "@buildingai/dict";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { WebController } from "@common/decorators/controller.decorator";
 import { RolePermissionService } from "@common/modules/auth/services/role-permission.service";
-import { Body, Get, Inject, Patch, Query } from "@nestjs/common";
+import { MenuService } from "@modules/menu/services/menu.service";
+import { Body, Get, Inject, Param, Patch, Post, Query } from "@nestjs/common";
 
 import { DatasetMemberService } from "../../../ai/datasets/services/datasets-member.service";
 import { UserService } from "../../services/user.service";
@@ -55,6 +56,9 @@ export class UserWebController extends BaseController {
         private readonly rolePermissionService: RolePermissionService,
         private readonly datasetMemberService: DatasetMemberService,
         private readonly dictService: DictService,
+        private readonly userDictService: UserDictService,
+        @Inject(MenuService)
+        private readonly menuService: MenuService,
         @InjectRepository(Agent)
         private readonly agentRepository: Repository<Agent>,
         @InjectRepository(AccountLog)
@@ -79,7 +83,6 @@ export class UserWebController extends BaseController {
     async getUserInfo(@Playground() user: UserPlayground) {
         // 获取用户信息（排除敏感字段）
         const userInfo = await this.userService.findOneById(user.id, {
-            // excludeFields: ["password"],
             relations: ["role"],
         });
 
@@ -90,11 +93,16 @@ export class UserWebController extends BaseController {
         // 获取用户的所有权限码
         const permissionCodes = await this.rolePermissionService.getUserPermissions(user.id);
 
+        const menuTree = await this.menuService.getMenuTreeByPermissions(
+            userInfo.isRoot ? [] : permissionCodes,
+        );
+
         // 判断用户是否有权限：有权限就是1，没有权限就是0
         const hasPermissions = user.isRoot === 1 || permissionCodes.length > 0 ? 1 : 0;
 
         // 获取用户当前最高会员等级ID
-        const membershipLevelId = await this.getUserHighestMembershipLevelId(user.id);
+        const membershipLevel = await this.userService.getUserHighestMembershipLevel(user.id);
+
         const { mpOpenid, password, openid, unionid, ...restUserInfo } = userInfo;
         return {
             ...restUserInfo,
@@ -102,42 +110,10 @@ export class UserWebController extends BaseController {
             bindWechatOa: !!openid,
             hasPassword: !!password,
             permissions: hasPermissions,
-            membershipLevelId,
+            membershipLevel,
+            permissionsCodes: permissionCodes,
+            menus: menuTree,
         };
-    }
-
-    /**
-     * 获取用户当前最高会员等级ID
-     *
-     * @param userId 用户ID
-     * @returns 最高会员等级ID，无有效会员则返回 null
-     */
-    private async getUserHighestMembershipLevelId(userId: string): Promise<string | null> {
-        const now = new Date();
-
-        // 查询用户所有有效订阅的等级ID
-        const subscriptions = await this.userSubscriptionRepository.find({
-            where: {
-                userId,
-                endTime: MoreThan(now),
-            },
-            select: ["levelId"],
-        });
-
-        const levelIds = subscriptions.filter((sub) => sub.levelId).map((sub) => sub.levelId!);
-
-        if (levelIds.length === 0) {
-            return null;
-        }
-
-        // 查询这些等级中 level 值最高的
-        const highestLevel = await this.membershipLevelsRepository.findOne({
-            where: { id: In(levelIds) },
-            order: { level: "DESC" },
-            select: ["id"],
-        });
-
-        return highestLevel?.id ?? null;
     }
 
     /**
@@ -419,5 +395,53 @@ export class UserWebController extends BaseController {
             allowMultipleLogin: false,
             showPolicyAgreement: true,
         };
+    }
+
+    /**
+     * Get all public user configurations (excludes private groups)
+     * Used for frontend localStorage cache
+     *
+     * @param user Current user
+     * @returns All public configurations grouped by group name
+     */
+    @Get("config")
+    async getAllPublicConfigs(@Playground() user: UserPlayground) {
+        return this.userDictService.getAllPublicConfigs(user.id);
+    }
+
+    /**
+     * Get user configurations by specific group
+     * Can access any group including private ones
+     *
+     * @param user Current user
+     * @param group Group name
+     * @returns User configurations as key-value pairs
+     */
+    @Get("config/:group")
+    async getConfigByGroup(@Playground() user: UserPlayground, @Param("group") group: string) {
+        return this.userDictService.getGroupValues(user.id, group);
+    }
+
+    /**
+     * Set user configuration (single or batch)
+     *
+     * @param user Current user
+     * @param body Configuration data
+     * @returns Success status
+     */
+    @Post("config")
+    async setUserConfig(
+        @Playground() user: UserPlayground,
+        @Body()
+        body:
+            | { key: string; value: any; group?: string }
+            | { items: Array<{ key: string; value: any; group?: string }> },
+    ) {
+        if ("items" in body && Array.isArray(body.items)) {
+            await this.userDictService.mset(user.id, body.items);
+        } else if ("key" in body) {
+            await this.userDictService.set(user.id, body.key, body.value, { group: body.group });
+        }
+        return { success: true };
     }
 }

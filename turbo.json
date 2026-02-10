@@ -3,6 +3,7 @@
     "ui": "tui",
     "concurrency": "20",
     "globalEnv": [
+        "DEV",
         "NODE_ENV",
         "APP_NAME",
         "SERVER_PORT",
@@ -56,7 +57,8 @@
         "NODE_APP_INSTANCE",
         "pm_id",
         "APP_DOMAIN",
-        "EXTENSION_IDENTIFIER"
+        "EXTENSION_IDENTIFIER",
+        "TAURI_DEV_HOST"
     ],
     "tasks": {
         "build": {

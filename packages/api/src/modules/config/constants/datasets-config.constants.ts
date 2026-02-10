@@ -1,0 +1,16 @@
+export const DATASETS_CONFIG_GROUP = "datasets_config";
+
+export const DATASETS_CONFIG_KEYS = {
+    INITIAL_STORAGE_MB: "initial_storage_mb",
+    EMBEDDING_MODEL_ID: "embedding_model_id",
+    TEXT_MODEL_ID: "text_model_id",
+    RETRIEVAL_CONFIG: "retrieval_config",
+    SQUARE_PUBLISH_SKIP_REVIEW: "square_publish_skip_review",
+} as const;
+
+export const DATASETS_CONFIG_DEFAULT_RETRIEVAL = {
+    TOP_K: 3,
+    SCORE_THRESHOLD: 0.5,
+    SEMANTIC_WEIGHT: 0.7,
+    KEYWORD_WEIGHT: 0.3,
+} as const;

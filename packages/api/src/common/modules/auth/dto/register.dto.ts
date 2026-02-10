@@ -10,6 +10,7 @@ import {
     Length,
     Matches,
     MinLength,
+    ValidateIf,
 } from "class-validator";
 
 /**
@@ -52,6 +53,7 @@ export class RegisterDto {
      * 邮箱（可选）
      */
     @IsOptional()
+    @ValidateIf((o) => o.email !== undefined && o.email !== "")
     @IsEmail({}, { message: "邮箱格式不正确" })
     email?: string;
 

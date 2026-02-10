@@ -1,3 +1,0 @@
-{
-    "extends": "../buildingai-ui/.nuxt/tsconfig.server.json"
-}

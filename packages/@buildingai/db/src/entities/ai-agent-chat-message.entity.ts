@@ -9,9 +9,27 @@ import { AppEntity } from "../decorators/app-entity.decorator";
 import { Column, Index, JoinColumn, ManyToOne, type Relation } from "../typeorm";
 import { Agent } from "./ai-agent.entity";
 import { AgentChatRecord } from "./ai-agent-chat-record.entity";
-import { McpToolCall } from "./ai-chat-message.entity";
 import { BaseEntity } from "./base";
 import { User } from "./user.entity";
+
+/**
+ * MCP工具调用记录接口
+ */
+export interface McpToolCall {
+    id?: string;
+    /** 工具输入参数 */
+    input?: Record<string, any>;
+    /** 工具输出结果 */
+    output?: Record<string, any>;
+    /** 调用时间戳 */
+    timestamp?: number;
+    /** 执行状态 */
+    status?: "success" | "error";
+    /** 错误信息（如果有） */
+    error?: string;
+    /** 执行耗时（毫秒） */
+    duration?: number;
+}
 
 /**
  * 智能体对话消息实体

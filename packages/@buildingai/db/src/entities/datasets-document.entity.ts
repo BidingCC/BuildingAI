@@ -16,10 +16,16 @@ export class DatasetsDocument extends BaseEntity {
     datasetId: string;
 
     /**
-     * 上传文件ID
+     * 上传文件ID（可为空，如手动创建的文档）
      */
-    @Column({ type: "uuid", comment: "上传文件ID" })
-    fileId: string;
+    @Column({ type: "uuid", nullable: true, comment: "上传文件ID" })
+    fileId: string | null;
+
+    /**
+     * 文件存储路径（仅路径，不含域名；用于 OSS 等无 fileId 的场景）
+     */
+    @Column({ type: "varchar", length: 1024, nullable: true, comment: "文件存储路径" })
+    fileUrl: string | null;
 
     /**
      * 文件名
@@ -38,6 +44,24 @@ export class DatasetsDocument extends BaseEntity {
      */
     @Column({ type: "bigint", comment: "文件大小" })
     fileSize: number;
+
+    /**
+     * 摘要
+     */
+    @Column({ type: "text", nullable: true, comment: "摘要" })
+    summary: string | null;
+
+    /**
+     * 摘要是否正在生成中（仅当配置了摘要模型时为 true）
+     */
+    @Column({ type: "boolean", default: false, comment: "摘要是否正在生成中" })
+    summaryGenerating: boolean;
+
+    /**
+     * 标签
+     */
+    @Column({ type: "text", array: true, nullable: true, comment: "标签" })
+    tags: string[] | null;
 
     /**
      * 分段数量

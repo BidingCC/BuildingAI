@@ -4,7 +4,7 @@ import { LOGIN_TYPE } from "@buildingai/constants";
 import { type UserPlayground } from "@buildingai/db";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
 import { MembershipLevels, UserSubscription } from "@buildingai/db/entities";
-import { In, MoreThan, Repository } from "@buildingai/db/typeorm";
+import { In, Repository } from "@buildingai/db/typeorm";
 import { BuildFileUrl } from "@buildingai/decorators/file-url.decorator";
 import { Playground } from "@buildingai/decorators/playground.decorator";
 import { DictService } from "@buildingai/dict";
@@ -85,52 +85,18 @@ export class UserConsoleController extends BaseController {
         );
 
         // 获取用户当前最高会员等级ID
-        const membershipLevelId = await this.getUserHighestMembershipLevelId(user.id);
+        const membershipLevel = await this.userService.getUserHighestMembershipLevel(user.id);
         const { password, ...restUserInfo } = userInfo;
         return {
             user: {
                 ...restUserInfo,
                 hasPassword: !!password,
                 permissions: userInfo.isRoot || permissionCodes.length > 0 ? 1 : 0,
-                membershipLevelId,
+                membershipLevel,
             },
             permissions: permissionCodes,
             menus: menuTree,
         };
-    }
-
-    /**
-     * 获取用户当前最高会员等级ID
-     *
-     * @param userId 用户ID
-     * @returns 最高会员等级ID，无有效会员则返回 null
-     */
-    private async getUserHighestMembershipLevelId(userId: string): Promise<string | null> {
-        const now = new Date();
-
-        // 查询用户所有有效订阅的等级ID
-        const subscriptions = await this.userSubscriptionRepository.find({
-            where: {
-                userId,
-                endTime: MoreThan(now),
-            },
-            select: ["levelId"],
-        });
-
-        const levelIds = subscriptions.filter((sub) => sub.levelId).map((sub) => sub.levelId!);
-
-        if (levelIds.length === 0) {
-            return null;
-        }
-
-        // 查询这些等级中 level 值最高的
-        const highestLevel = await this.membershipLevelsRepository.findOne({
-            where: { id: In(levelIds) },
-            order: { level: "DESC" },
-            select: ["id"],
-        });
-
-        return highestLevel?.id ?? null;
     }
 
     /**

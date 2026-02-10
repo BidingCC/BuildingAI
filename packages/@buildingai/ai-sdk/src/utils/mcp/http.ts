@@ -20,7 +20,7 @@ export class McpServerHttp {
         // Initialize MCP transport layer (Streamable HTTP) with custom headers support
         this.transport = new StreamableHTTPClientTransport(new URL(options.url), {
             requestInit: {
-                headers: options.customHeaders || {},
+                headers: options.headers || {},
             },
         });
         // Initialize MCP client
@@ -60,7 +60,7 @@ export class McpServerHttp {
         try {
             const response = await this.client.listTools();
 
-            this.tools = response.tools.map((tool) => ({
+            this.tools = response.tools.map((tool: any) => ({
                 name: tool.name,
                 description: tool.description || "",
                 inputSchema: tool.inputSchema,
@@ -142,7 +142,7 @@ export class McpServerHttp {
             // Create new transport and client
             this.transport = new StreamableHTTPClientTransport(new URL(this.options.url), {
                 requestInit: {
-                    headers: this.options.customHeaders || {},
+                    headers: this.options.headers || {},
                 },
             });
 

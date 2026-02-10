@@ -1,34 +1,47 @@
-import {
-    PROCESSING_STATUS,
-    RETRIEVAL_MODE,
-    type RetrievalModeType,
-} from "@buildingai/constants/shared/datasets.constants";
+import { getProviderForEmbedding, getProviderForRerank, rerankV3 } from "@buildingai/ai-sdk-new";
+import { PROCESSING_STATUS } from "@buildingai/constants/shared/datasets.constants";
+import { SecretService } from "@buildingai/core/modules";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
-import { DatasetsSegments } from "@buildingai/db/entities";
-import { Datasets } from "@buildingai/db/entities";
+import { Datasets, DatasetsSegments } from "@buildingai/db/entities";
 import { Repository } from "@buildingai/db/typeorm";
 import { HttpErrorFactory } from "@buildingai/errors";
-import {
-    DbQueryResult,
-    FullTextSearchResult,
-    HybridSearchResult,
-    RerankConfig,
+import type {
     RetrievalChunk,
     RetrievalConfig,
     RetrievalResult,
-    VectorSearchResult,
-    WeightConfig,
 } from "@buildingai/types/ai/retrieval-config.interface";
+import { getProviderSecret } from "@buildingai/utils";
+import { AiModelService } from "@modules/ai/model/services/ai-model.service";
+import { DatasetsConfigService } from "@modules/config/services/datasets-config.service";
 import { Injectable, Logger } from "@nestjs/common";
+import { embed } from "ai";
 
-import { RAG_SERVICE_CONSTANTS } from "../constants/datasets-service.constants";
-import { EmbeddingHelper } from "./helpers/embedding.helper";
-import { QueryPreprocessor } from "./helpers/query-preprocessor.helper";
-import { RerankHelper } from "./helpers/rerank.helper";
+import { DATASETS_DEFAULT_CONSTANTS } from "../constants/datasets.constants";
+import { DatasetsQueryPreprocessorService } from "./datasets-query-preprocessor.service";
 
-/**
- * Dataset retrieval service for handling knowledge base queries
- */
+function cosineSimilarity(a: number[], b: number[]): number {
+    if (a.length !== b.length || a.length === 0) return 0;
+    let dot = 0;
+    let na = 0;
+    let nb = 0;
+    for (let i = 0; i < a.length; i++) {
+        dot += a[i] * b[i];
+        na += a[i] * a[i];
+        nb += b[i] * b[i];
+    }
+    const denom = Math.sqrt(na) * Math.sqrt(nb);
+    return denom === 0 ? 0 : dot / denom;
+}
+
+type Candidate = {
+    chunk: RetrievalChunk;
+    segmentId: string;
+    documentId?: string;
+    embedding?: number[];
+    semanticScore?: number;
+    fullTextScore?: number;
+};
+
 @Injectable()
 export class DatasetsRetrievalService {
     private readonly logger = new Logger(DatasetsRetrievalService.name);
@@ -38,422 +51,669 @@ export class DatasetsRetrievalService {
         private readonly datasetsRepository: Repository<Datasets>,
         @InjectRepository(DatasetsSegments)
         private readonly segmentsRepository: Repository<DatasetsSegments>,
-        private readonly embeddingHelper: EmbeddingHelper,
-        private readonly rerankHelper: RerankHelper,
-        private readonly queryPreprocessor: QueryPreprocessor,
+        private readonly aiModelService: AiModelService,
+        private readonly secretService: SecretService,
+        private readonly datasetsConfigService: DatasetsConfigService,
+        private readonly queryPreprocessor: DatasetsQueryPreprocessorService,
     ) {}
 
-    /**
-     * Validates dataset existence and readiness
-     */
-    private async validateDataset(datasetId: string): Promise<Datasets> {
-        const dataset = await this.datasetsRepository.findOne({
-            where: { id: datasetId },
-        });
-        if (!dataset) {
-            throw HttpErrorFactory.notFound("Dataset not found");
-        }
-        return dataset;
-    }
-
-    /**
-     * Maps database query results to RetrievalChunk format
-     */
-    private mapDbResultsToChunks(results: DbQueryResult[], scoreMultiplier = 1): RetrievalChunk[] {
-        return results.map((result) => ({
-            id: result.segment_id || result.id,
-            documentId: result.document_id,
-            content: result.segment_content || result.content,
-            score: result.score * scoreMultiplier,
-            metadata: result.segment_metadata,
-            chunkIndex: result.chunk_index,
-            contentLength: result.content_length,
-            fileName: result.document_name,
-        }));
-    }
-
-    /**
-     * Builds base query for segments with common conditions
-     */
-    private buildBaseQuery(datasetId: string) {
-        return this.segmentsRepository
-            .createQueryBuilder("segment")
-            .leftJoin("segment.document", "document")
-            .select([
-                "segment.id AS segment_id",
-                "segment.documentId AS document_id",
-                "segment.content AS segment_content",
-                "segment.metadata AS segment_metadata",
-                "segment.chunkIndex AS chunk_index",
-                "segment.contentLength AS content_length",
-                "document.fileName AS document_name",
-            ])
-            .where("segment.datasetId = :datasetId", { datasetId })
-            .andWhere("segment.status = :status", {
-                status: PROCESSING_STATUS.COMPLETED,
-            })
-            .andWhere("segment.enabled = :enabled", { enabled: 1 });
-    }
-
-    /**
-     * Queries dataset with specified or default configuration
-     */
-    async queryDatasetWithConfig(
+    async retrieve(
         datasetId: string,
         query: string,
-        customConfig?: RetrievalConfig,
+        topK?: number,
+        scoreThreshold?: number,
     ): Promise<RetrievalResult> {
         const startTime = Date.now();
+        const q = String(query ?? "").trim();
+        this.logger.debug(`Retrieve: dataset=${datasetId}, query=${q.slice(0, 80)}`);
+        if (!q) return { chunks: [], totalTime: Date.now() - startTime };
 
-        const dataset = await this.validateDataset(datasetId);
-        const config = customConfig || dataset.retrievalConfig;
-        const mode = customConfig?.retrievalMode || dataset.retrievalMode;
-        const topK = config!.topK || RAG_SERVICE_CONSTANTS.DEFAULT_TOP_K;
-
-        this.logger.debug(`[Retrieval Service] Retrieval mode: ${mode}`);
-        this.logger.debug(
-            `[Retrieval Service] Final config: ${JSON.stringify({ ...config, topK })}`,
-        );
-
-        const chunks = await this.dispatchRetrieval(mode, datasetId, query, {
-            ...config,
-            topK,
+        const dataset = await this.datasetsRepository.findOne({
+            where: { id: datasetId },
+            select: ["id", "embeddingModelId", "retrievalMode", "retrievalConfig"],
         });
+        if (!dataset) throw HttpErrorFactory.notFound("知识库不存在");
 
-        const totalTime = Date.now() - startTime;
+        const defaultConfig = await this.datasetsConfigService.getDefaultRetrievalConfig();
+        const config = this.mergeConfig(defaultConfig, dataset.retrievalConfig);
+        const mode = this.resolveMode(config.retrievalMode ?? dataset.retrievalMode);
+        const k = Math.max(
+            1,
+            Math.floor(topK ?? config.topK ?? DATASETS_DEFAULT_CONSTANTS.DEFAULT_TOP_K),
+        );
+        const threshold =
+            scoreThreshold ?? (config.scoreThresholdEnabled ? config.scoreThreshold : undefined);
+        const preK = Math.min(50, Math.max(k * 4, k));
+
+        const semanticRequired = mode === "vector" || mode === "hybrid";
+        const fullTextRequired = mode === "fullText" || mode === "hybrid";
+        const keywordRequired = mode === "keyword";
+
+        const queryEmbedding = semanticRequired ? await this.embedQueryOrNull(dataset, q) : null;
+
+        const [semantic, fullText, keyword] = await Promise.all([
+            semanticRequired && queryEmbedding
+                ? this.semanticSearch(datasetId, q, queryEmbedding, preK)
+                : [],
+            fullTextRequired ? this.fullTextSearch(datasetId, q, preK) : [],
+            keywordRequired ? this.keywordSearch(datasetId, q, preK) : [],
+        ]);
+
+        if (mode === "vector") {
+            const base = this.applyThreshold(this.deduplicate(semantic), threshold);
+            const reranked = await this.maybeRerank(q, base, config, k);
+            return {
+                chunks: reranked.slice(0, k).map((c) => c.chunk),
+                totalTime: Date.now() - startTime,
+            };
+        }
+
+        if (mode === "fullText") {
+            const base = this.applyThreshold(this.deduplicate(fullText), threshold);
+            const reranked = await this.maybeRerank(q, base, config, k);
+            return {
+                chunks: reranked.slice(0, k).map((c) => c.chunk),
+                totalTime: Date.now() - startTime,
+            };
+        }
+
+        if (mode === "keyword") {
+            const base = this.applyThreshold(this.deduplicate(keyword), threshold);
+            const reranked = await this.maybeRerank(q, base, config, k);
+            return {
+                chunks: reranked.slice(0, k).map((c) => c.chunk),
+                totalTime: Date.now() - startTime,
+            };
+        }
+
+        const merged = this.deduplicate([...semantic, ...fullText]);
+        if (merged.length === 0) return { chunks: [], totalTime: Date.now() - startTime };
+
+        const scored =
+            config.strategy === "rerank"
+                ? await this.maybeRerank(q, merged, config, k)
+                : this.weightedScore(q, merged, queryEmbedding, config);
+
+        const final = this.applyThreshold(scored, threshold)
+            .slice(0, k)
+            .map((c) => c.chunk);
+        return { chunks: final, totalTime: Date.now() - startTime };
+    }
+
+    private resolveMode(mode: string): "vector" | "fullText" | "hybrid" | "keyword" {
+        const m = String(mode ?? "").trim();
+        if (!m) return "hybrid";
+        if (m === "vector" || m === "fullText" || m === "hybrid" || m === "keyword") return m;
+        if (m === "semantic_search") return "vector";
+        if (m === "full_text_search") return "fullText";
+        if (m === "hybrid_search") return "hybrid";
+        if (m === "keyword_search") return "keyword";
+        return "hybrid";
+    }
+
+    private mergeConfig(
+        base: RetrievalConfig,
+        override: RetrievalConfig | undefined | null,
+    ): RetrievalConfig {
+        const D = DATASETS_DEFAULT_CONSTANTS;
+        const o = override && typeof override === "object" ? override : ({} as RetrievalConfig);
         return {
-            chunks,
-            totalTime,
+            retrievalMode: o.retrievalMode ?? base.retrievalMode ?? "hybrid",
+            strategy: o.strategy ?? base.strategy ?? "weighted_score",
+            topK: o.topK ?? base.topK ?? D.DEFAULT_TOP_K,
+            scoreThreshold: o.scoreThreshold ?? base.scoreThreshold ?? D.DEFAULT_SCORE_THRESHOLD,
+            scoreThresholdEnabled: o.scoreThresholdEnabled ?? base.scoreThresholdEnabled ?? false,
+            weightConfig: {
+                semanticWeight:
+                    o.weightConfig?.semanticWeight ??
+                    base.weightConfig?.semanticWeight ??
+                    D.DEFAULT_SEMANTIC_WEIGHT,
+                keywordWeight:
+                    o.weightConfig?.keywordWeight ??
+                    base.weightConfig?.keywordWeight ??
+                    D.DEFAULT_KEYWORD_WEIGHT,
+            },
+            rerankConfig: {
+                enabled: o.rerankConfig?.enabled ?? base.rerankConfig?.enabled ?? false,
+                modelId: o.rerankConfig?.modelId ?? base.rerankConfig?.modelId ?? "",
+            },
         };
     }
 
-    /**
-     * Dispatches retrieval based on mode
-     */
-    private async dispatchRetrieval(
-        mode: RetrievalModeType,
-        datasetId: string,
-        query: string,
-        config: RetrievalConfig,
-    ): Promise<RetrievalChunk[]> {
+    private async embedQueryOrNull(dataset: Datasets, query: string): Promise<number[] | null> {
+        const embeddingModelId = dataset.embeddingModelId;
+        if (!embeddingModelId) return null;
+
+        const model = await this.aiModelService.findOne({
+            where: { id: embeddingModelId, isActive: true },
+            relations: ["provider"],
+        });
+        if (!model?.provider?.isActive) return null;
+
         try {
-            switch (mode) {
-                case RETRIEVAL_MODE.VECTOR:
-                    return (await this.performVectorSearch(datasetId, query, config)).chunks;
-                case RETRIEVAL_MODE.FULL_TEXT:
-                    return (await this.performFullTextSearch(datasetId, query, config)).chunks;
-                case RETRIEVAL_MODE.HYBRID:
-                    return (await this.performHybridSearch(datasetId, query, config)).chunks;
-                default:
-                    throw HttpErrorFactory.badRequest(`Unsupported retrieval mode: ${mode}`);
-            }
-        } catch (error) {
-            this.logger.error(`Retrieval failed [mode: ${mode}]: ${error.message}`, error.stack);
-            throw error;
+            const providerSecret = await this.secretService.getConfigKeyValuePairs(
+                model.provider.bindSecretId!,
+            );
+            const provider = getProviderForEmbedding(model.provider.provider, {
+                apiKey: getProviderSecret("apiKey", providerSecret),
+                baseURL: getProviderSecret("baseUrl", providerSecret) || undefined,
+            });
+            const embeddingModel = provider(model.model);
+            const input = query.replaceAll("\n", " ").trim() || " ";
+            const result = await embed({ model: embeddingModel.model, value: input });
+            return result.embedding;
+        } catch (err) {
+            this.logger.warn(
+                `Embed query failed: ${err instanceof Error ? err.message : String(err)}`,
+            );
+            return null;
         }
     }
 
-    /**
-     * Performs vector search using embeddings
-     */
-    private async performVectorSearch(
+    private async semanticSearch(
         datasetId: string,
         query: string,
-        config: RetrievalConfig,
-    ): Promise<VectorSearchResult> {
-        const { topK, scoreThreshold, scoreThresholdEnabled, rerankConfig } =
-            this.normalizeConfig(config);
+        queryEmbedding: number[],
+        topK: number,
+    ): Promise<Candidate[]> {
+        const segments = await this.segmentsRepository.find({
+            where: {
+                datasetId,
+                status: PROCESSING_STATUS.COMPLETED,
+                enabled: 1,
+            },
+            select: ["id", "content", "embedding", "chunkIndex", "contentLength", "documentId"],
+            relations: ["document"],
+            relationLoadStrategy: "query",
+        });
 
-        const dataset = await this.validateDataset(datasetId);
-        const queryEmbedding = await this.embeddingHelper.generateEmbedding(
-            query,
-            dataset.embeddingModelId,
-        );
-
-        let queryBuilder = this.buildBaseQuery(datasetId)
-            .addSelect(
-                "1 - (segment.embedding::vector <=> CAST(:queryEmbedding AS vector)) AS score",
-            )
-            .andWhere("segment.embedding IS NOT NULL")
-            .orderBy("score", "DESC")
-            .limit(topK)
-            .setParameter("queryEmbedding", JSON.stringify(queryEmbedding));
-
-        if (scoreThresholdEnabled) {
-            queryBuilder = queryBuilder.andWhere(
-                "(1 - (segment.embedding::vector <=> CAST(:queryEmbedding AS vector))) >= :scoreThreshold",
-                { scoreThreshold },
-            );
-        }
-
-        let dbResults: DbQueryResult[];
-        try {
-            dbResults = await queryBuilder.getRawMany();
-        } catch (error) {
-            this.logger.error("Vector search failed", error);
-            throw new Error(
-                "Vector search service unavailable, please ensure pgvector extension is properly installed",
-            );
-        }
-
-        let chunks = this.mapDbResultsToChunks(
-            dbResults,
-            RAG_SERVICE_CONSTANTS.VECTOR_SCORE_MULTIPLIER,
-        );
-        const rerankUsed = rerankConfig?.enabled && rerankConfig.modelId;
-
-        if (rerankUsed) {
-            chunks = await this.rerankHelper.rerank({
-                query,
-                chunks,
-                modelId: rerankConfig.modelId,
-                topK,
-                scoreThreshold,
-                scoreThresholdEnabled,
+        const scored: Candidate[] = [];
+        for (const s of segments) {
+            if (!Array.isArray(s.embedding) || s.embedding.length === 0) continue;
+            const semanticScore = cosineSimilarity(queryEmbedding, s.embedding);
+            const doc = s.document;
+            scored.push({
+                segmentId: s.id,
+                documentId: s.documentId,
+                embedding: s.embedding,
+                semanticScore,
+                chunk: {
+                    id: s.id,
+                    content: s.content,
+                    score: semanticScore,
+                    chunkIndex: s.chunkIndex,
+                    contentLength: s.contentLength,
+                    fileName: doc?.fileName,
+                    metadata:
+                        doc != null
+                            ? {
+                                  fileType: doc.fileType,
+                                  fileUrl: doc.fileUrl ?? undefined,
+                              }
+                            : undefined,
+                },
             });
         }
 
-        return {
-            chunks,
-            info: { topK, scoreThreshold, rerankUsed: !!rerankUsed },
-        };
+        scored.sort((a, b) => (b.chunk.score ?? 0) - (a.chunk.score ?? 0));
+        return scored.slice(0, topK);
     }
 
-    /**
-     * Performs full-text search using PostgreSQL text search
-     */
-    private async performFullTextSearch(
+    private async fullTextSearch(
         datasetId: string,
         query: string,
-        config: RetrievalConfig,
-    ): Promise<FullTextSearchResult> {
-        const topK = config.topK || RAG_SERVICE_CONSTANTS.DEFAULT_TOP_K;
+        topK: number,
+    ): Promise<Candidate[]> {
+        const preprocessed = this.queryPreprocessor.segmentForFullTextSearch(query, 5);
+        if (!preprocessed) return [];
 
-        const processedQuery = this.queryPreprocessor.preprocessForFullText(query);
-        this.logger.debug(`[Full-text Search] "${query}" -> "${processedQuery}"`);
+        const headlineOpts =
+            "StartSel=<mark>, StopSel=</mark>, MaxFragments=2, MinWords=5, MaxWords=25, FragmentDelimiter= … ";
 
-        const sql = `
-            SELECT 
-                segment.id AS segment_id,
-                segment.document_id AS document_id,
-                segment.content AS segment_content,
-                segment.metadata AS segment_metadata,
-                segment.chunk_index AS chunk_index,
-                segment.content_length AS content_length,
-                document.file_name AS document_name,
-                ts_rank(to_tsvector('chinese_zh', coalesce(segment.content, '')), to_tsquery('chinese_zh', $3)) AS score
-            FROM datasets_segments segment
-            LEFT JOIN datasets_documents document ON document.id = segment.document_id
-            WHERE segment.dataset_id = $1 
-                AND segment.status = $2
-                AND segment.enabled = 1
-                AND to_tsvector('chinese_zh', coalesce(segment.content, '')) @@ to_tsquery('chinese_zh', $3)
-            ORDER BY score DESC
-            LIMIT ${topK}
-        `;
-
-        const dbResults = await this.segmentsRepository.query(sql, [
+        const rows = await this.tryTsFullTextSearch({
             datasetId,
-            "completed",
-            processedQuery,
-        ]);
+            query: this.queryPreprocessor.escapeQueryForSearch(query),
+            topK,
+            headlineOpts,
+        });
 
-        this.logger.debug(`[Full-text Search] Query results: ${dbResults.length} items`);
-
-        const chunks = this.mapDbResultsToChunks(
-            dbResults,
-            RAG_SERVICE_CONSTANTS.FULLTEXT_SCORE_MULTIPLIER,
-        );
-
-        return {
-            chunks,
-            info: { topK, rerankUsed: false },
-        };
-    }
-
-    /**
-     * Performs hybrid search with weighted or rerank strategy
-     */
-    private async performHybridSearch(
-        datasetId: string,
-        query: string,
-        config: RetrievalConfig,
-    ): Promise<HybridSearchResult> {
-        const strategy = config.strategy || "weighted_score";
-        const topK = config.topK || RAG_SERVICE_CONSTANTS.DEFAULT_TOP_K;
-
-        const candidateConfig = {
-            ...config,
-            topK: Math.max(
-                topK * RAG_SERVICE_CONSTANTS.HYBRID_CANDIDATE_MULTIPLIER,
-                RAG_SERVICE_CONSTANTS.HYBRID_MIN_CANDIDATES,
-            ),
-        };
-
-        if (strategy === "weighted_score") {
-            return this.performWeightedHybridSearch(
-                datasetId,
-                query,
-                config.weightConfig,
-                candidateConfig,
-                topK,
-            );
-        } else if (strategy === "rerank") {
-            return this.performRerankHybridSearch(
-                datasetId,
-                query,
-                config.rerankConfig,
-                candidateConfig,
-                topK,
-            );
-        } else {
-            throw HttpErrorFactory.badRequest(`Unsupported hybrid retrieval strategy: ${strategy}`);
-        }
-    }
-
-    /**
-     * Performs weighted hybrid search
-     */
-    private async performWeightedHybridSearch(
-        datasetId: string,
-        query: string,
-        weightConfig: WeightConfig | undefined,
-        candidateConfig: RetrievalConfig,
-        finalTopK: number,
-    ): Promise<HybridSearchResult> {
-        const semanticWeight =
-            weightConfig?.semanticWeight ?? RAG_SERVICE_CONSTANTS.DEFAULT_SEMANTIC_WEIGHT;
-        const keywordWeight =
-            weightConfig?.keywordWeight ?? RAG_SERVICE_CONSTANTS.DEFAULT_KEYWORD_WEIGHT;
-
-        const totalWeight = semanticWeight + keywordWeight;
-        const normalizedSemanticWeight = semanticWeight / totalWeight;
-        const normalizedKeywordWeight = keywordWeight / totalWeight;
-
-        const [vectorResult, fullTextResult] = await Promise.all([
-            this.performVectorSearch(datasetId, query, candidateConfig),
-            this.performFullTextSearch(datasetId, query, candidateConfig),
-        ]);
-
-        const vectorScores = vectorResult.chunks.map((c) => c.score);
-        const fullTextScores = fullTextResult.chunks.map((c) => c.score);
-        const vectorMax = Math.max(...vectorScores, 0.01);
-        const fullTextMax = Math.max(...fullTextScores, 0.01);
-
-        const combinedChunks = new Map<
-            string,
-            RetrievalChunk & {
-                _normalizedVectorScore: number;
-                _normalizedFullTextScore: number;
-            }
-        >();
-
-        vectorResult.chunks.forEach((chunk) => {
-            combinedChunks.set(chunk.id, {
-                ...chunk,
-                _normalizedVectorScore: chunk.score / vectorMax,
-                _normalizedFullTextScore: 0,
+        if (rows.length > 0) {
+            return rows.map((r) => {
+                const fullTextScore = Number(r.score ?? 0) || 0;
+                return {
+                    segmentId: r.segment_id,
+                    documentId: r.document_id,
+                    embedding: Array.isArray(r.embedding) ? r.embedding : undefined,
+                    fullTextScore,
+                    chunk: {
+                        id: r.segment_id,
+                        content: r.content ?? "",
+                        score: fullTextScore,
+                        chunkIndex: r.chunk_index ?? undefined,
+                        contentLength: r.content_length ?? undefined,
+                        fileName: r.file_name ?? undefined,
+                        highlight: r.highlight ?? undefined,
+                        metadata: {
+                            fileType: r.file_type ?? undefined,
+                            fileUrl: r.file_url ?? undefined,
+                        },
+                    },
+                };
             });
-        });
+        }
 
-        fullTextResult.chunks.forEach((chunk) => {
-            const normalizedScore = chunk.score / fullTextMax;
-            if (combinedChunks.has(chunk.id)) {
-                const existing = combinedChunks.get(chunk.id)!;
-                existing._normalizedFullTextScore = normalizedScore;
-            } else {
-                combinedChunks.set(chunk.id, {
-                    ...chunk,
-                    _normalizedVectorScore: 0,
-                    _normalizedFullTextScore: normalizedScore,
-                });
-            }
-        });
+        const tokens = Array.from(
+            new Set(
+                preprocessed
+                    .split(/\s+/)
+                    .map((t) => t.trim())
+                    .filter(Boolean),
+            ),
+        ).slice(0, 8);
+        if (tokens.length === 0) return [];
 
-        const finalChunks = Array.from(combinedChunks.values())
-            .map((chunk) => ({
-                ...chunk,
-                score:
-                    chunk._normalizedVectorScore * normalizedSemanticWeight +
-                    chunk._normalizedFullTextScore * normalizedKeywordWeight,
-            }))
-            .sort((a, b) => b.score - a.score)
-            .slice(0, finalTopK)
-            .map(({ _normalizedVectorScore, _normalizedFullTextScore, ...rest }) => rest);
+        const expr = tokens
+            .map((_, i) => `CASE WHEN s.content ILIKE :p${i} THEN 1 ELSE 0 END`)
+            .join(" + ");
+        const orExpr = tokens.map((_, i) => `s.content ILIKE :p${i}`).join(" OR ");
 
-        return {
-            chunks: finalChunks,
-            info: {
-                strategy: "weighted_score",
-                semanticWeight: normalizedSemanticWeight,
-                keywordWeight: normalizedKeywordWeight,
-                topK: finalTopK,
-            },
-        };
+        const qb2 = this.segmentsRepository
+            .createQueryBuilder("s")
+            .innerJoin("s.document", "d")
+            .where("s.dataset_id = :datasetId", { datasetId })
+            .andWhere("s.status = :status", { status: PROCESSING_STATUS.COMPLETED })
+            .andWhere("s.enabled = 1")
+            .andWhere(`(${orExpr})`)
+            .select([
+                "s.id AS segment_id",
+                "s.document_id AS document_id",
+                "s.content AS content",
+                "s.chunk_index AS chunk_index",
+                "s.content_length AS content_length",
+                "s.embedding AS embedding",
+                "d.file_name AS file_name",
+                "d.file_type AS file_type",
+                "d.file_url AS file_url",
+            ])
+            .addSelect(`(${expr})`, "score")
+            .orderBy("score", "DESC")
+            .limit(topK);
+
+        for (let i = 0; i < tokens.length; i++) {
+            qb2.setParameter(`p${i}`, `%${tokens[i]}%`);
+        }
+
+        const rows2 = (await qb2.getRawMany()) as Array<{
+            segment_id: string;
+            document_id: string;
+            content: string;
+            chunk_index: number | null;
+            content_length: number | null;
+            embedding: number[] | null;
+            file_name: string | null;
+            file_type: string | null;
+            file_url: string | null;
+            score: string | number | null;
+        }>;
+
+        return rows2
+            .map((r) => {
+                const fullTextScore = Number(r.score ?? 0) || 0;
+                const content = r.content ?? "";
+                return {
+                    segmentId: r.segment_id,
+                    documentId: r.document_id,
+                    embedding: Array.isArray(r.embedding) ? r.embedding : undefined,
+                    fullTextScore,
+                    chunk: {
+                        id: r.segment_id,
+                        content,
+                        score: fullTextScore,
+                        chunkIndex: r.chunk_index ?? undefined,
+                        contentLength: r.content_length ?? undefined,
+                        fileName: r.file_name ?? undefined,
+                        highlight: this.highlightContent(content, tokens),
+                        metadata: {
+                            fileType: r.file_type ?? undefined,
+                            fileUrl: r.file_url ?? undefined,
+                        },
+                    },
+                };
+            })
+            .filter((x) => (x.chunk.score ?? 0) > 0);
     }
 
-    /**
-     * Performs rerank-based hybrid search
-     */
-    private async performRerankHybridSearch(
+    private async tryTsFullTextSearch(args: {
+        datasetId: string;
+        query: string;
+        topK: number;
+        headlineOpts: string;
+    }): Promise<
+        Array<{
+            segment_id: string;
+            document_id: string;
+            content: string;
+            chunk_index: number | null;
+            content_length: number | null;
+            embedding: number[] | null;
+            file_name: string | null;
+            file_type: string | null;
+            file_url: string | null;
+            score: string | number | null;
+            highlight: string | null;
+        }>
+    > {
+        const base = this.segmentsRepository
+            .createQueryBuilder("s")
+            .innerJoin("s.document", "d")
+            .where("s.dataset_id = :datasetId", { datasetId: args.datasetId })
+            .andWhere("s.status = :status", { status: PROCESSING_STATUS.COMPLETED })
+            .andWhere("s.enabled = 1")
+            .select([
+                "s.id AS segment_id",
+                "s.document_id AS document_id",
+                "s.content AS content",
+                "s.chunk_index AS chunk_index",
+                "s.content_length AS content_length",
+                "s.embedding AS embedding",
+                "d.file_name AS file_name",
+                "d.file_type AS file_type",
+                "d.file_url AS file_url",
+            ])
+            .setParameter("q", args.query)
+            .setParameter("opts", args.headlineOpts)
+            .limit(args.topK);
+
+        const zhCfg = "zhcfg";
+        try {
+            const qb = base
+                .andWhere(
+                    `to_tsvector('${zhCfg}', s.content) @@ websearch_to_tsquery('${zhCfg}', :q)`,
+                )
+                .addSelect(
+                    `ts_rank_cd(to_tsvector('${zhCfg}', s.content), websearch_to_tsquery('${zhCfg}', :q))`,
+                    "score",
+                )
+                .addSelect(
+                    `ts_headline('${zhCfg}', s.content, websearch_to_tsquery('${zhCfg}', :q), :opts)`,
+                    "highlight",
+                )
+                .orderBy("score", "DESC");
+            return (await qb.getRawMany()) as any;
+        } catch (err) {
+            this.logger.warn(
+                `zhparser fulltext unavailable: ${err instanceof Error ? err.message : String(err)}`,
+            );
+        }
+
+        try {
+            const qb = base
+                .andWhere("to_tsvector('simple', s.content) @@ websearch_to_tsquery('simple', :q)")
+                .addSelect(
+                    "ts_rank_cd(to_tsvector('simple', s.content), websearch_to_tsquery('simple', :q))",
+                    "score",
+                )
+                .addSelect(
+                    "ts_headline('simple', s.content, websearch_to_tsquery('simple', :q), :opts)",
+                    "highlight",
+                )
+                .orderBy("score", "DESC");
+            return (await qb.getRawMany()) as any;
+        } catch (err) {
+            this.logger.warn(
+                `fulltext websearch unavailable: ${err instanceof Error ? err.message : String(err)}`,
+            );
+        }
+
+        const qb = base
+            .andWhere("to_tsvector('simple', s.content) @@ plainto_tsquery('simple', :q)")
+            .addSelect(
+                "ts_rank(to_tsvector('simple', s.content), plainto_tsquery('simple', :q))",
+                "score",
+            )
+            .addSelect(
+                "ts_headline('simple', s.content, plainto_tsquery('simple', :q), :opts)",
+                "highlight",
+            )
+            .orderBy("score", "DESC");
+        return (await qb.getRawMany()) as any;
+    }
+
+    private highlightContent(content: string, tokens: string[]): string | undefined {
+        const unique = Array.from(new Set(tokens.map((t) => t.trim()).filter(Boolean)));
+        if (unique.length === 0) return undefined;
+        const ordered = unique.sort((a, b) => b.length - a.length).slice(0, 20);
+        const escaped = ordered.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+        const re = new RegExp(escaped.join("|"), "gi");
+        const marked = content.replace(re, (m) => `<mark>${m}</mark>`);
+        return marked === content ? undefined : marked;
+    }
+
+    private async keywordSearch(
         datasetId: string,
         query: string,
-        rerankConfig: RerankConfig | undefined,
-        candidateConfig: RetrievalConfig,
-        finalTopK: number,
-    ): Promise<HybridSearchResult> {
-        const { scoreThreshold, scoreThresholdEnabled } = this.normalizeConfig(candidateConfig);
+        topK: number,
+    ): Promise<Candidate[]> {
+        const tokens = this.queryPreprocessor
+            .tokenize(query)
+            .map((t) => t.trim())
+            .filter(Boolean);
+        const unique = Array.from(new Set(tokens)).slice(0, 8);
+        if (unique.length === 0) return [];
 
-        const [vectorResult, fullTextResult] = await Promise.all([
-            this.performVectorSearch(datasetId, query, candidateConfig),
-            this.performFullTextSearch(datasetId, query, candidateConfig),
-        ]);
+        const expr = unique
+            .map((_, i) => `CASE WHEN s.content ILIKE :p${i} THEN 1 ELSE 0 END`)
+            .join(" + ");
 
-        const candidateChunks = new Map<string, RetrievalChunk>();
-        [...vectorResult.chunks, ...fullTextResult.chunks].forEach((chunk) => {
-            const existing = candidateChunks.get(chunk.id);
-            if (!existing || chunk.score > existing.score) {
-                candidateChunks.set(chunk.id, chunk);
-            }
-        });
+        const qb = this.segmentsRepository
+            .createQueryBuilder("s")
+            .innerJoin("s.document", "d")
+            .where("s.dataset_id = :datasetId", { datasetId })
+            .andWhere("s.status = :status", { status: PROCESSING_STATUS.COMPLETED })
+            .andWhere("s.enabled = 1")
+            .select([
+                "s.id AS segment_id",
+                "s.document_id AS document_id",
+                "s.content AS content",
+                "s.chunk_index AS chunk_index",
+                "s.content_length AS content_length",
+                "s.embedding AS embedding",
+                "d.file_name AS file_name",
+                "d.file_type AS file_type",
+                "d.file_url AS file_url",
+            ])
+            .addSelect(`(${expr})`, "score")
+            .orderBy("score", "DESC")
+            .limit(topK);
 
-        const candidates = Array.from(candidateChunks.values());
-        const finalChunks =
-            rerankConfig?.enabled && rerankConfig.modelId
-                ? await this.rerankHelper.rerank({
-                      query,
-                      chunks: candidates,
-                      modelId: rerankConfig.modelId,
-                      topK: finalTopK,
-                      scoreThreshold,
-                      scoreThresholdEnabled,
-                  })
-                : candidates
-                      .filter((chunk) => !scoreThresholdEnabled || chunk.score >= scoreThreshold)
-                      .sort((a, b) => b.score - a.score)
-                      .slice(0, finalTopK);
+        for (let i = 0; i < unique.length; i++) {
+            qb.setParameter(`p${i}`, `%${unique[i]}%`);
+        }
 
-        return {
-            chunks: finalChunks,
-            info: {
-                strategy: "rerank",
-                topK: finalTopK,
-                scoreThreshold,
-                rerankUsed: !!rerankConfig?.enabled,
-            },
-        };
+        const rows = (await qb.getRawMany()) as Array<{
+            segment_id: string;
+            document_id: string;
+            content: string;
+            chunk_index: number | null;
+            content_length: number | null;
+            embedding: number[] | null;
+            file_name: string | null;
+            file_type: string | null;
+            file_url: string | null;
+            score: string | number | null;
+        }>;
+
+        return rows
+            .map((r) => {
+                const s = Number(r.score ?? 0) || 0;
+                return {
+                    segmentId: r.segment_id,
+                    documentId: r.document_id,
+                    embedding: Array.isArray(r.embedding) ? r.embedding : undefined,
+                    chunk: {
+                        id: r.segment_id,
+                        content: r.content ?? "",
+                        score: s,
+                        chunkIndex: r.chunk_index ?? undefined,
+                        contentLength: r.content_length ?? undefined,
+                        fileName: r.file_name ?? undefined,
+                        metadata: {
+                            fileType: r.file_type ?? undefined,
+                            fileUrl: r.file_url ?? undefined,
+                        },
+                    },
+                } satisfies Candidate;
+            })
+            .filter((x) => (x.chunk.score ?? 0) > 0);
     }
 
-    /**
-     * Normalizes retrieval configuration with defaults
-     */
-    private normalizeConfig(config: RetrievalConfig) {
-        return {
-            topK: config.topK ?? RAG_SERVICE_CONSTANTS.DEFAULT_TOP_K,
-            scoreThreshold: config.scoreThreshold ?? RAG_SERVICE_CONSTANTS.DEFAULT_SCORE_THRESHOLD,
-            scoreThresholdEnabled: config.scoreThresholdEnabled ?? false,
-            rerankConfig: config.rerankConfig,
-            weightConfig: config.weightConfig,
-        };
+    private deduplicate(items: Candidate[]): Candidate[] {
+        const seen = new Map<string, Candidate>();
+        const order: string[] = [];
+        for (const item of items) {
+            const key = item.segmentId || item.chunk.id;
+            const existing = seen.get(key);
+            if (!existing) {
+                seen.set(key, item);
+                order.push(key);
+                continue;
+            }
+            const a = existing.chunk.score ?? 0;
+            const b = item.chunk.score ?? 0;
+            if (b > a) seen.set(key, item);
+        }
+        return order.map((k) => seen.get(k)!).filter(Boolean);
+    }
+
+    private applyThreshold(items: Candidate[], threshold?: number): Candidate[] {
+        if (threshold == null) return items;
+        const t = Number(threshold);
+        if (!Number.isFinite(t)) return items;
+        return items.filter((x) => (x.chunk.score ?? 0) >= t);
+    }
+
+    private weightedScore(
+        query: string,
+        items: Candidate[],
+        queryEmbedding: number[] | null,
+        config: RetrievalConfig,
+    ): Candidate[] {
+        const semanticWeight = Number(config.weightConfig?.semanticWeight ?? 0);
+        const keywordWeight = Number(config.weightConfig?.keywordWeight ?? 0);
+
+        let sw = Number.isFinite(semanticWeight) ? semanticWeight : 0;
+        let kw = Number.isFinite(keywordWeight) ? keywordWeight : 0;
+        if (sw === 0 && kw === 0) sw = 1;
+
+        const queryTokens = this.queryPreprocessor.tokenize(query);
+        const docTokens = items.map((x) => this.queryPreprocessor.tokenize(x.chunk.content));
+        const keywordScores = this.computeTfIdfCosineScores(queryTokens, docTokens);
+
+        const out = items.map((x, i) => {
+            const semantic =
+                x.semanticScore ??
+                (queryEmbedding && x.embedding ? cosineSimilarity(queryEmbedding, x.embedding) : 0);
+            const keyword = keywordScores[i] ?? 0;
+            const score = sw * semantic + kw * keyword;
+            return {
+                ...x,
+                semanticScore: semantic,
+                chunk: { ...x.chunk, score },
+            };
+        });
+
+        out.sort((a, b) => (b.chunk.score ?? 0) - (a.chunk.score ?? 0));
+        return out;
+    }
+
+    private computeTfIdfCosineScores(queryTokens: string[], docsTokens: string[][]): number[] {
+        const N = docsTokens.length;
+        if (N === 0) return [];
+
+        const df = new Map<string, number>();
+        const docTfs = docsTokens.map((tokens) => {
+            const tf = new Map<string, number>();
+            for (const tok of tokens) tf.set(tok, (tf.get(tok) ?? 0) + 1);
+            for (const tok of new Set(tokens)) df.set(tok, (df.get(tok) ?? 0) + 1);
+            return tf;
+        });
+
+        const qtf = new Map<string, number>();
+        for (const tok of queryTokens) qtf.set(tok, (qtf.get(tok) ?? 0) + 1);
+
+        const idf = (term: string) => Math.log((N + 1) / ((df.get(term) ?? 0) + 1)) + 1;
+
+        const qWeights = new Map<string, number>();
+        let qNorm = 0;
+        for (const [term, tf] of qtf) {
+            const w = tf * idf(term);
+            qWeights.set(term, w);
+            qNorm += w * w;
+        }
+        qNorm = Math.sqrt(qNorm);
+        if (qNorm === 0) return Array.from({ length: N }, () => 0);
+
+        return docTfs.map((tf) => {
+            let dot = 0;
+            let dNorm = 0;
+            for (const [term, dtf] of tf) {
+                const w = dtf * idf(term);
+                dNorm += w * w;
+                const qw = qWeights.get(term);
+                if (qw) dot += qw * w;
+            }
+            dNorm = Math.sqrt(dNorm);
+            if (dNorm === 0) return 0;
+            return dot / (qNorm * dNorm);
+        });
+    }
+
+    private async maybeRerank(
+        query: string,
+        items: Candidate[],
+        config: RetrievalConfig,
+        topK: number,
+    ): Promise<Candidate[]> {
+        const modelId = config.rerankConfig?.enabled
+            ? String(config.rerankConfig?.modelId ?? "")
+            : "";
+        if (!modelId.trim()) {
+            return items.sort((a, b) => (b.chunk.score ?? 0) - (a.chunk.score ?? 0));
+        }
+
+        const model = await this.aiModelService.findOne({
+            where: { id: modelId.trim(), isActive: true },
+            relations: ["provider"],
+        });
+        if (!model?.provider?.isActive) return items;
+
+        try {
+            const providerSecret = await this.secretService.getConfigKeyValuePairs(
+                model.provider.bindSecretId!,
+            );
+            const provider = getProviderForRerank(model.provider.provider, {
+                apiKey: getProviderSecret("apiKey", providerSecret),
+                baseURL: getProviderSecret("baseUrl", providerSecret) || undefined,
+            });
+            const rerankModel = provider(model.model).model;
+            const docs = items.map((x) => x.chunk.content);
+            const result = await rerankV3({
+                model: rerankModel,
+                query,
+                documents: docs,
+                topN: Math.min(Math.max(1, topK), docs.length),
+            });
+            const ranked = result.ranking
+                .map((r) => {
+                    const item = items[r.originalIndex];
+                    if (!item) return null;
+                    return { ...item, chunk: { ...item.chunk, score: r.score } };
+                })
+                .filter(Boolean) as Candidate[];
+            return ranked.length ? ranked : items;
+        } catch (err) {
+            this.logger.warn(`Rerank failed: ${err instanceof Error ? err.message : String(err)}`);
+            return items;
+        }
     }
 }

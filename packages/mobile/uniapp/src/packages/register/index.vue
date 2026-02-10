@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { SystemRegisrerAccountParams } from "@buildingai/service/webapi/user";
+import type { SystemRegisrerAccountParams } from "@buildingai/services/webapi/user";
 import type { UniForms } from "@uni-helper/uni-types";
 
 import BdModal from "@/components/bd-modal.vue?async";

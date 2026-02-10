@@ -1,5 +1,5 @@
-import type { OrderParams } from "@buildingai/service/webapi/recharge-center";
-import type { OrderInfo } from "@buildingai/service/webapi/recharge-center";
+import type { OrderParams } from "@buildingai/services/webapi/recharge-center";
+import type { OrderInfo } from "@buildingai/services/webapi/recharge-center";
 /**
  * Submit recharge order
  * @description Submit a recharge order with selected rule and payment method

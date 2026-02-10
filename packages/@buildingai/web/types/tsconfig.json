@@ -1,0 +1,10 @@
+{
+  "extends": "@buildingai/typescript-config/base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+  },
+  "include": [
+    "src/**/*"
+  ]
+}

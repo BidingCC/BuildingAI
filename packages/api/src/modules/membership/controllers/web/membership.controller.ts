@@ -4,6 +4,7 @@ import { BuildFileUrl, Playground, Public } from "@buildingai/decorators";
 import { PaginationDto } from "@buildingai/dto/pagination.dto";
 import { WebController } from "@common/decorators/controller.decorator";
 import { QueryPlansDto } from "@modules/membership/dto/query-plans.dto";
+import { QueryUserOrderListsDto } from "@modules/membership/dto/query-user-order-lists.dto";
 import { SubmitMembershipOrderDto } from "@modules/membership/dto/submit-order.dto";
 import { LevelsService } from "@modules/membership/services/levels.service";
 import { MembershipOrderService } from "@modules/membership/services/order.service";
@@ -79,7 +80,7 @@ export class MembershipWebController extends BaseController {
      * @returns 订阅记录列表
      */
     @Get("order/lists")
-    async orderLists(@Query() query: PaginationDto, @Playground() user: UserPlayground) {
+    async orderLists(@Query() query: QueryUserOrderListsDto, @Playground() user: UserPlayground) {
         return this.membershipOrderService.userOrderLists(user.id, query);
     }
 

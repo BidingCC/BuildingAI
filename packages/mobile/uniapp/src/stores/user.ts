@@ -7,7 +7,7 @@
  */
 
 import { STORAGE_KEYS } from "@buildingai/constants/web";
-import type { UserInfo } from "@buildingai/service/webapi/user";
+import type { UserInfo } from "@buildingai/services/webapi/user";
 import { defineStore } from "pinia";
 import { getCurrentPageMeta } from "virtual:pages-meta";
 import { pages } from "virtual:uni-pages";

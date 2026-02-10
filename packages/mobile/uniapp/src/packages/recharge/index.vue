@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { RechargeCenterInfo } from "@buildingai/service/webapi/recharge-center";
+import type { RechargeCenterInfo } from "@buildingai/services/webapi/recharge-center";
 
 import { useLockFn } from "@/hooks/use-lock-fn";
 import { apiGetRechargeCenterInfo } from "@/service/user";

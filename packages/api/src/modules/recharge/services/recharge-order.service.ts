@@ -22,6 +22,7 @@ import { RefundService } from "@common/modules/refund/services/refund.service";
 import { PayService } from "@modules/pay/services/pay.service";
 import { QueryRechargeOrderDto } from "@modules/recharge/dto/query-recharge-order.dto";
 import { Injectable } from "@nestjs/common";
+import { bignumber, subtract } from "mathjs";
 import { LessThanOrEqual } from "typeorm";
 
 @Injectable()
@@ -115,7 +116,11 @@ export class RechargeOrderService extends BaseService<RechargeOrder> {
             (await this.RechargeOrderRepository.sum("orderAmount", {
                 refundStatus: RefundStatus.SUCCESS,
             })) || 0;
-        const totalIncome = totalAmount - totalRefundAmount;
+        // Use BigNumber to avoid floating-point precision
+        const totalIncome = Number(
+            subtract(bignumber(totalAmount), bignumber(totalRefundAmount)).toString(),
+        );
+        console.log(totalAmount, totalRefundAmount, totalIncome);
         const statistics = {
             totalOrder,
             totalAmount,

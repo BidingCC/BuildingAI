@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { SystemLoginAccountParams } from "@buildingai/service/webapi/user";
+import type { SystemLoginAccountParams } from "@buildingai/services/webapi/user";
 import type { UniForms } from "@uni-helper/uni-types";
 
 const { t } = useI18n();

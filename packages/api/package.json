@@ -27,7 +27,7 @@
     },
     "dependencies": {
         "@buildingai/ai-sdk": "workspace:*",
-        "@buildingai/alipay-sdk": "workspace:*",
+        "@buildingai/ai-sdk-new": "workspace:*",
         "@buildingai/base": "workspace:*",
         "@buildingai/cache": "workspace:*",
         "@buildingai/config": "workspace:*",
@@ -39,6 +39,7 @@
         "@buildingai/dict": "workspace:*",
         "@buildingai/dto": "workspace:*",
         "@buildingai/errors": "workspace:*",
+        "@buildingai/llm-file-parser": "workspace:*",
         "@buildingai/logger": "workspace:*",
         "@buildingai/pipe": "workspace:*",
         "@buildingai/upgrade": "workspace:*",
@@ -73,6 +74,7 @@
         "glob": "7.1.2",
         "js-yaml": "^4.1.0",
         "mammoth": "^1.10.0",
+        "mathjs": "^15.1.0",
         "node-machine-id": "^1.1.12",
         "miniprogram-ci": "^2.1.26",
         "node-segment": "^0.0.2",
@@ -88,6 +90,7 @@
         "xlsx": "^0.18.5"
     },
     "devDependencies": {
+        "@buildingai/alipay-sdk": "workspace:*",
         "@buildingai/eslint-config": "workspace:*",
         "@buildingai/types": "workspace:*",
         "@buildingai/typescript-config": "workspace:*",
@@ -106,7 +109,7 @@
         "@types/supertest": "^6.0.2",
         "eslint-config-prettier": "^10.0.1",
         "eslint-plugin-prettier": "^5.2.2",
-        "globals": "^16.0.0",
+        "globals": "catalog:",
         "jest": "^30.0.0",
         "nodemon": "^3.1.9",
         "source-map-support": "^0.5.21",

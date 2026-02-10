@@ -79,6 +79,17 @@ export interface UserOrderListItem {
     refundStatus: number;
     /** 创建时间 */
     createdAt: Date;
+    /** 订单来源 */
+    source: number;
+    /** 订单来源描述 */
+    sourceDesc: string;
+    /** 等级快照 */
+    levelSnap?: {
+        id: string;
+        name: string;
+        icon?: string | null;
+        level: number;
+    };
 }
 
 @Injectable()
@@ -650,10 +661,18 @@ export class MembershipOrderService extends BaseService<MembershipOrder> {
      * @param paginationDto 分页参数
      * @returns 订阅记录列表
      */
-    async userOrderLists(userId: string, paginationDto: { page?: number; pageSize?: number }) {
+    async userOrderLists(
+        userId: string,
+        paginationDto: { page?: number; pageSize?: number; levelId?: string },
+    ) {
         const queryBuilder = this.membershipOrderRepository.createQueryBuilder("membership-order");
         queryBuilder.where("membership-order.userId = :userId", { userId });
         queryBuilder.andWhere("membership-order.payState = :payState", { payState: 1 });
+        if (paginationDto.levelId) {
+            queryBuilder.andWhere("membership-order.levelId = :levelId", {
+                levelId: paginationDto.levelId,
+            });
+        }
         queryBuilder.select([
             "membership-order.id",
             "membership-order.orderNo",
@@ -664,6 +683,7 @@ export class MembershipOrderService extends BaseService<MembershipOrder> {
             "membership-order.duration",
             "membership-order.orderAmount",
             "membership-order.createdAt",
+            "membership-order.source",
         ]);
         queryBuilder.orderBy("membership-order.createdAt", "DESC");
 
@@ -684,9 +704,19 @@ export class MembershipOrderService extends BaseService<MembershipOrder> {
                 duration: order.duration,
                 orderAmount: order.orderAmount,
                 payType: order.payType,
-                payTypeDesc,
+                payTypeDesc: payTypeDesc || "-",
                 refundStatus: order.refundStatus,
                 createdAt: order.createdAt,
+                source: order.source,
+                sourceDesc: SUBSCRIPTION_SOURCE_DESC[order.source] ?? "未知来源",
+                levelSnap: levelSnap
+                    ? {
+                          id: levelSnap.id,
+                          name: levelSnap.name,
+                          icon: levelSnap.icon,
+                          level: levelSnap.level,
+                      }
+                    : undefined,
             };
         });
 
@@ -697,11 +727,11 @@ export class MembershipOrderService extends BaseService<MembershipOrder> {
     }
 
     /**
-     * 获取用户订阅列表
-     * @description 获取当前用户的所有订阅记录（包含会员等级、有效期等信息）
+     * 获取用户订阅列表（同一等级只显示一条）
+     * @description 按会员等级分组：同一等级的多条订阅（系统赠送/订单购买）合并为一条，开通时间取最早、到期时间取最晚
      * @param userId 用户ID
      * @param paginationDto 分页参数
-     * @returns 用户订阅列表
+     * @returns 按等级去重后的订阅列表，无订阅时返回空列表
      */
     async userSubscriptionLists(
         userId: string,
@@ -710,120 +740,127 @@ export class MembershipOrderService extends BaseService<MembershipOrder> {
         const page = paginationDto.page || 1;
         const pageSize = paginationDto.pageSize || 10;
 
-        const queryBuilder = this.userSubscriptionRepository.createQueryBuilder("subscription");
-        queryBuilder.where("subscription.userId = :userId", { userId });
-        queryBuilder.leftJoinAndSelect("subscription.level", "level");
-        queryBuilder.select([
-            "subscription.id",
-            "subscription.startTime",
-            "subscription.endTime",
-            "subscription.source",
-            "subscription.orderId",
-            "subscription.createdAt",
-            "level.id",
-            "level.name",
-            "level.icon",
-            "level.level",
-        ]);
-        // 添加计算字段用于排序：未过期的在前面
-        queryBuilder.addSelect(
-            `CASE WHEN subscription.end_time > NOW() THEN 0 ELSE 1 END`,
-            "is_expired_sort",
-        );
-        // 排序：未过期的在前面，同状态下按创建时间倒序
-        queryBuilder.orderBy("is_expired_sort", "ASC");
-        queryBuilder.addOrderBy("subscription.createdAt", "DESC");
-        queryBuilder.skip((page - 1) * pageSize);
-        queryBuilder.take(pageSize);
+        const subscriptions = await this.userSubscriptionRepository.find({
+            where: { userId },
+            relations: ["level"],
+            select: ["id", "startTime", "endTime", "source", "orderId", "createdAt"],
+            order: { createdAt: "ASC" },
+        });
 
-        const [subscriptions, total] = await queryBuilder.getManyAndCount();
+        if (subscriptions.length === 0) {
+            return {
+                items: [],
+                total: 0,
+                page,
+                pageSize,
+            };
+        }
 
-        // 收集所有订单ID用于批量查询
-        const orderIds = subscriptions
-            .filter((item) => item.orderId)
-            .map((item) => item.orderId) as string[];
+        const now = new Date();
 
-        // 批量查询订单信息获取订阅时长和退款状态
+        // 按 levelId 分组，同一等级只保留一条（开通时间最早、到期时间最晚）
+        const groupByLevelId = new Map<
+            string,
+            {
+                subs: (typeof subscriptions)[0][];
+            }
+        >();
+        for (const sub of subscriptions) {
+            const key = sub.level?.id ?? sub.levelId ?? "__null__";
+            if (!groupByLevelId.has(key)) {
+                groupByLevelId.set(key, { subs: [] });
+            }
+            groupByLevelId.get(key)!.subs.push(sub);
+        }
+
+        const orderIds = subscriptions.filter((s) => s.orderId).map((s) => s.orderId) as string[];
         const orderMap = new Map<string, { duration: string; refundStatus: number }>();
         if (orderIds.length > 0) {
             const orders = await this.membershipOrderRepository.find({
                 where: { id: In(orderIds) },
                 select: ["id", "duration", "refundStatus"],
             });
-            orders.forEach((order) => {
-                orderMap.set(order.id, {
-                    duration: order.duration,
-                    refundStatus: order.refundStatus,
-                });
-            });
-        }
-
-        const now = new Date();
-
-        // 找出所有未过期的订阅
-        const validSubscriptions = subscriptions.filter((sub) => sub.endTime > now);
-
-        // 确定生效中的订阅ID
-        let activeSubscriptionId: string | null = null;
-
-        if (validSubscriptions.length > 0) {
-            // 找出最高等级
-            const maxLevel = Math.max(...validSubscriptions.map((sub) => sub.level?.level ?? 0));
-
-            // 筛选出最高等级的未过期订阅
-            const highestLevelSubscriptions = validSubscriptions.filter(
-                (sub) => (sub.level?.level ?? 0) === maxLevel,
+            orders.forEach((o) =>
+                orderMap.set(o.id, { duration: o.duration, refundStatus: o.refundStatus ?? 0 }),
             );
-
-            // 在最高等级中，取最早订阅的那条（按 startTime 升序）
-            const activeSubscription = highestLevelSubscriptions.sort(
-                (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
-            )[0];
-
-            activeSubscriptionId = activeSubscription?.id ?? null;
         }
 
-        const items = subscriptions
-            .map((subscription) => {
-                const isExpired = subscription.endTime < now;
-                const isActive = subscription.id === activeSubscriptionId;
-                // 如果 level 为 null，显示为"系统调整"，否则根据 source 显示
-                let sourceDesc: string;
-                if (!subscription.level) {
-                    sourceDesc = "系统调整";
-                } else {
-                    sourceDesc = SUBSCRIPTION_SOURCE_DESC[subscription.source] || "未知来源";
-                }
-                const orderInfo = subscription.orderId ? orderMap.get(subscription.orderId) : null;
-                const duration = orderInfo?.duration || null;
-                const refundStatus = orderInfo?.refundStatus ?? 0;
+        const items: Array<{
+            id: string;
+            level: (typeof subscriptions)[0]["level"];
+            startTime: Date;
+            endTime: Date;
+            source: number;
+            sourceDesc: string;
+            duration: string | null;
+            refundStatus: number;
+            isExpired: boolean;
+            isActive: boolean;
+            createdAt: Date;
+        }> = [];
 
-                return {
-                    id: subscription.id,
-                    level: subscription.level,
-                    startTime: subscription.startTime,
-                    endTime: subscription.endTime,
-                    source: subscription.source,
-                    sourceDesc,
-                    duration,
-                    refundStatus,
-                    isExpired,
-                    isActive,
-                    createdAt: subscription.createdAt,
-                };
-            })
-            // 排序：生效中 > 未过期 > 已过期，同状态下按创建时间倒序
-            .sort((a, b) => {
-                // 生效中的最先
-                if (a.isActive !== b.isActive) return a.isActive ? -1 : 1;
-                // 未过期的在已过期前面
-                if (a.isExpired !== b.isExpired) return a.isExpired ? 1 : -1;
-                // 同状态按创建时间倒序
-                return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        for (const [, { subs }] of groupByLevelId) {
+            const startTime = subs.reduce(
+                (min, s) => (new Date(s.startTime) < new Date(min) ? s.startTime : min),
+                subs[0].startTime,
+            );
+            const endTime = subs.reduce(
+                (max, s) => (new Date(s.endTime) > new Date(max) ? s.endTime : max),
+                subs[0].endTime,
+            );
+            const createdAt = subs.reduce(
+                (min, s) => (new Date(s.createdAt) < new Date(min) ? s.createdAt : min),
+                subs[0].createdAt,
+            );
+            // 代表该等级的订阅：取 endTime 最晚的那条用于 id / source / orderId
+            const representative = subs.reduce((best, s) =>
+                new Date(s.endTime) > new Date(best.endTime) ? s : best,
+            );
+            const level = representative.level;
+            const sourceSet = new Set(subs.map((s) => s.source));
+            let sourceDesc: string;
+            if (!level) {
+                sourceDesc = "系统调整";
+            } else if (sourceSet.size > 1) {
+                sourceDesc = "混合";
+            } else {
+                sourceDesc = SUBSCRIPTION_SOURCE_DESC[representative.source] ?? "未知来源";
+            }
+            const orderInfo = representative.orderId ? orderMap.get(representative.orderId) : null;
+            const duration = orderInfo?.duration ?? null;
+            const refundStatus = orderInfo?.refundStatus ?? 0;
+            const isExpired = new Date(endTime) < now;
+
+            items.push({
+                id: representative.id,
+                level,
+                startTime,
+                endTime,
+                source: representative.source,
+                sourceDesc,
+                duration,
+                refundStatus,
+                isExpired,
+                isActive: !isExpired,
+                createdAt,
             });
+        }
+
+        // 排序：未过期在前，同状态按等级降序，再按创建时间倒序
+        items.sort((a, b) => {
+            if (a.isExpired !== b.isExpired) return a.isExpired ? 1 : -1;
+            const levelA = a.level?.level ?? 0;
+            const levelB = b.level?.level ?? 0;
+            if (levelA !== levelB) return levelB - levelA;
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        });
+
+        const total = items.length;
+        const start = (page - 1) * pageSize;
+        const pagedItems = items.slice(start, start + pageSize);
 
         return {
-            items,
+            items: pagedItems,
             total,
             page,
             pageSize,

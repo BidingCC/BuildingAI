@@ -45,6 +45,7 @@ import { RoleModule } from "./role/role.module";
 import { ScheduleModule } from "./schedule/schedule.module";
 import { SystemModule } from "./system/system.module";
 import { TagModule } from "./tag/tag.module";
+import { TestModule } from "./test/test.module";
 import { UploadModule } from "./upload/upload.module";
 import { UserModule } from "./user/user.module";
 
@@ -105,6 +106,7 @@ export class AppModule {
                 RoleModule,
                 SystemModule,
                 TagModule,
+                TestModule,
                 CoreUploadModule,
                 UploadModule,
                 AnalyseModule,

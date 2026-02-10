@@ -6,7 +6,7 @@
  * @author BuildingAI Teams
  */
 
-import type { LoginSettings, SiteConfig } from "@buildingai/service/common";
+import type { LoginSettings, SiteConfig } from "@buildingai/services/common";
 import { defineStore } from "pinia";
 
 import { apiGetLoginSettings, apiGetSiteConfig } from "@/service/common";

@@ -5,13 +5,10 @@ import { Repository } from "@buildingai/db/typeorm";
 import { PaginationDto } from "@buildingai/dto/pagination.dto";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { Injectable } from "@nestjs/common";
+import { validate as isUUID } from "uuid";
 
 import { CreateMessageDto, UpdateMessageDto } from "../dto/ai-chat-record.dto";
 
-/**
- * AI消息服务
- * 提供消息的完整CRUD操作，继承BaseService获得通用功能
- */
 @Injectable()
 export class AiChatsMessageService extends BaseService<AiChatMessage> {
     constructor(
@@ -21,82 +18,107 @@ export class AiChatsMessageService extends BaseService<AiChatMessage> {
         super(messageRepository);
     }
 
-    /**
-     * 创建消息
-     * @param dto 创建消息DTO
-     */
     async createMessage(dto: CreateMessageDto): Promise<AiChatMessage> {
         try {
-            // 获取下一个序号
             const lastMessage = await this.findOne({
                 where: { conversationId: dto.conversationId },
                 order: { sequence: "DESC" },
             });
 
-            const sequence = (lastMessage?.sequence || 0) + 1;
+            let resolvedParentId = dto.parentId;
+            if (dto.parentId && !isUUID(dto.parentId)) {
+                const parentMessage = await this.findByFrontendId(dto.conversationId, dto.parentId);
+                resolvedParentId = parentMessage?.id ?? null;
+            }
+
+            const frontendId = dto.message?.id || null;
 
             const messageData = {
-                ...dto,
-                sequence,
+                conversationId: dto.conversationId,
+                modelId: dto.modelId,
+                sequence: (lastMessage?.sequence || 0) + 1,
+                parentId: resolvedParentId,
+                frontendId,
+                message: dto.message,
                 status: "completed" as const,
+                errorMessage: dto.errorMessage,
+                usage: dto.tokens
+                    ? {
+                          inputTokens: dto.tokens.inputTokens,
+                          outputTokens: dto.tokens.outputTokens,
+                          totalTokens: dto.tokens.totalTokens,
+                          inputTokenDetails: dto.tokens.inputTokenDetails,
+                          outputTokenDetails: dto.tokens.outputTokenDetails,
+                          reasoningTokens: dto.tokens.reasoningTokens,
+                          cachedInputTokens: dto.tokens.cachedInputTokens,
+                          raw: dto.tokens.raw,
+                      }
+                    : undefined,
+                userConsumedPower: dto.userConsumedPower,
             };
 
-            // 使用 BaseService 的 create 方法
-            const result = await this.create(messageData);
-            return result as AiChatMessage;
+            return (await this.create(messageData)) as AiChatMessage;
         } catch (error) {
             this.logger.error(`创建消息失败: ${error.message}`, error.stack);
             throw HttpErrorFactory.badRequest("Failed to create message.");
         }
     }
 
-    /**
-     * 分页查询消息
-     * @param paginationDto 分页参数
-     * @param queryDto 查询条件
-     */
+    async findByFrontendId(
+        conversationId: string,
+        frontendId: string,
+    ): Promise<AiChatMessage | null> {
+        return this.messageRepository.findOne({
+            where: { conversationId, frontendId },
+        });
+    }
+
+    async findByFrontendIdOnly(frontendId: string, userId?: string): Promise<AiChatMessage | null> {
+        const queryBuilder = this.messageRepository
+            .createQueryBuilder("message")
+            .where("message.frontendId = :frontendId", { frontendId });
+
+        if (userId) {
+            queryBuilder
+                .innerJoin("message.conversation", "conversation")
+                .andWhere("conversation.userId = :userId", { userId });
+        }
+
+        return queryBuilder.getOne();
+    }
+
     async findMessages(paginationDto: PaginationDto, queryDto?: { conversationId?: string }) {
-        // 构建查询选项
-        const options = {
-            relations: ["conversation", "model"],
+        return this.paginate(paginationDto, {
+            relations: ["conversation", "model", "model.provider"],
             order: { sequence: "DESC" as const },
             ...(queryDto?.conversationId && {
                 where: { conversationId: queryDto.conversationId },
             }),
-        };
-
-        // 使用 BaseService 的 paginate 方法
-        return this.paginate(paginationDto, options);
+            includeFields: [
+                "model.name",
+                "model.modelType",
+                "model.features",
+                "model.billingRule",
+                "model.provider.provider",
+                "model.provider.name",
+                "model.provider.iconUrl",
+            ],
+        });
     }
 
-    /**
-     * 获取对话的消息列表
-     * @param conversationId 对话ID
-     * @param paginationDto 分页参数
-     */
     async getConversationMessages(conversationId: string, paginationDto: PaginationDto) {
-        return await this.findMessages(paginationDto, { conversationId });
+        return this.findMessages(paginationDto, { conversationId });
     }
 
-    /**
-     * 更新消息
-     * @param messageId 消息ID
-     * @param dto 更新数据
-     */
     async updateMessage(messageId: string, dto: UpdateMessageDto): Promise<AiChatMessage> {
         try {
-            const result = await this.updateById(messageId, dto);
-            return result as AiChatMessage;
+            return (await this.updateById(messageId, dto)) as AiChatMessage;
         } catch (error) {
             this.logger.error(`更新消息失败: ${error.message}`, error.stack);
             throw HttpErrorFactory.badRequest("Failed to update message.");
         }
     }
 
-    /**
-     * 删除消息
-     * @param messageId 消息ID
-     */
     async deleteMessage(messageId: string): Promise<void> {
         try {
             await this.delete(messageId);
@@ -106,29 +128,20 @@ export class AiChatsMessageService extends BaseService<AiChatMessage> {
         }
     }
 
-    /**
-     * 根据对话ID获取消息统计信息
-     * @param conversationId 对话ID
-     */
     async getMessageStats(conversationId: string): Promise<{
         messageCount: number;
         totalTokens: number;
         totalPower: number;
     }> {
-        // 使用BaseService的count方法获取消息数量
         const messageCount = await this.count({
             where: { conversationId },
         });
 
-        // Token统计仍需要使用QueryBuilder，因为涉及JSON字段聚合
-        // 计算总Token数和总Power消耗
         const tokenStats = await this.repository
             .createQueryBuilder("message")
-            .select("COALESCE(SUM((tokens->>'total_tokens')::int), 0)", "totalTokens")
+            .select("COALESCE(SUM((usage->>'totalTokens')::int), 0)", "totalTokens")
             .addSelect("COALESCE(SUM(message.user_consumed_power), 0)", "totalPower")
-            .where("message.conversation_id = :conversationId", {
-                conversationId,
-            })
+            .where("message.conversation_id = :conversationId", { conversationId })
             .getRawOne();
 
         return {
@@ -136,5 +149,13 @@ export class AiChatsMessageService extends BaseService<AiChatMessage> {
             totalTokens: parseInt(tokenStats.totalTokens) || 0,
             totalPower: parseInt(tokenStats.totalPower) || 0,
         };
+    }
+
+    async getMessageVersions(parentId: string): Promise<AiChatMessage[]> {
+        return this.findAll({
+            where: { parentId },
+            order: { createdAt: "ASC" },
+            relations: ["conversation", "model"],
+        });
     }
 }

@@ -15,7 +15,7 @@ export class McpServerSSE {
         // Initialize MCP transport layer with custom headers support
         this.transport = new SSEClientTransport(new URL(options.url), {
             requestInit: {
-                headers: options.customHeaders || {},
+                headers: options.headers || {},
             },
         });
 
@@ -56,7 +56,7 @@ export class McpServerSSE {
         try {
             const response = await this.client.listTools();
 
-            this.tools = response.tools.map((tool) => ({
+            this.tools = response.tools.map((tool: any) => ({
                 name: tool.name,
                 description: tool.description || "",
                 inputSchema: tool.inputSchema,
@@ -138,7 +138,7 @@ export class McpServerSSE {
             // Create new transport and client
             this.transport = new SSEClientTransport(new URL(this.options.url), {
                 requestInit: {
-                    headers: this.options.customHeaders || {},
+                    headers: this.options.headers || {},
                 },
             });
 

@@ -14,7 +14,7 @@
     },
     "dependencies": {
         "@buildingai/constants": "workspace:*",
-        "@buildingai/service": "workspace:*",
+        "@buildingai/services": "workspace:*",
         "@dcloudio/uni-app": "3.0.0-4080720251210001",
         "@dcloudio/uni-app-harmony": "3.0.0-4080720251210001",
         "@dcloudio/uni-app-plus": "3.0.0-4080720251210001",

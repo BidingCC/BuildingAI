@@ -6,9 +6,9 @@
  * @author BuildingAI Teams
  */
 
-import type { SiteConfig } from "@buildingai/service/common";
-import type { LoginSettings } from "@buildingai/service/consoleapi/login-settings";
-import type { WebsiteConfig } from "@buildingai/service/consoleapi/website";
+import type { SiteConfig } from "@buildingai/services/common";
+import type { LoginSettings } from "@buildingai/services/consoleapi/login-settings";
+import type { WebsiteConfig } from "@buildingai/services/consoleapi/website";
 
 import { wechatH5 } from "@/utils/wechat";
 // ==================== File Upload Type Definitions ====================

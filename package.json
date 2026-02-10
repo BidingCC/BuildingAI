@@ -49,6 +49,7 @@
         "typecheck": "turbo run check-types",
         "clean": "rimraf ./.turbo && turbo run clean",
         "sync-env": "node scripts/sync-env.mjs",
+        "skills": "node scripts/sync-skills.mjs",
         "buildingai": "node packages/cli/bin/cli.js",
         "pm2:start": "node packages/cli/bin/cli.js pm2:start",
         "pm2:reset": "rimraf logs/pm2 && pnpm delete && pnpm start",
@@ -91,13 +92,9 @@
         "@nestjs/serve-static": "catalog:api",
         "@nestjs/terminus": "catalog:api",
         "@nestjs/typeorm": "catalog:api",
-        "@nuxt/image": "catalog:web",
-        "@nuxt/kit": "^4.2.1",
-        "@nuxt/ui": "catalog:web",
-        "@nuxtjs/color-mode": "catalog:web",
-        "@nuxtjs/i18n": "catalog:web",
-        "@pinia/nuxt": "catalog:web",
         "@tailwindcss/vite": "catalog:web",
+        "@tanstack/react-query": "^5.90.16",
+        "@tanstack/react-query-devtools": "^5.91.2",
         "@tanstack/table-core": "^8.21.3",
         "@tiptap/extension-color": "catalog:web",
         "@tiptap/extension-highlight": "catalog:web",
@@ -110,10 +107,10 @@
         "@tiptap/starter-kit": "catalog:web",
         "@tiptap/vue-3": "catalog:web",
         "@types/fs-extra": "^11.0.4",
-        "@vite-pwa/nuxt": "catalog:web",
         "@vueuse/core": "catalog:web",
         "@vueuse/motion": "catalog:web",
-        "@vueuse/nuxt": "catalog:web",
+        "@xyflow/react": "^12.10.0",
+        "ai": "^6.0.5",
         "axios": "catalog:",
         "bing-translate-api": "^4.1.0",
         "buildingai": "link:packages/cli",
@@ -131,8 +128,7 @@
         "glob": "^11.0.3",
         "motion-v": "catalog:web",
         "multer": "^2.0.2",
-        "nuxt": "catalog:web",
-        "nuxt-svgo": "catalog:web",
+        "nanoid": "^5.1.6",
         "openai": "^5.23.2",
         "panzoom": "catalog:web",
         "pinia": "catalog:web",
@@ -142,6 +138,7 @@
         "rimraf": "^6.1.0",
         "sass": "catalog:web",
         "semver": "^7.7.3",
+        "sonner": "^2.0.7",
         "tailwind-merge": "catalog:web",
         "tailwindcss": "catalog:web",
         "tailwindcss-animate": "catalog:web",
@@ -155,7 +152,8 @@
         "markstream-vue": "catalog:web",
         "vue-router": "catalog:web",
         "vuedraggable": "catalog:web",
-        "yup": "catalog:web"
+        "yup": "catalog:web",
+        "zod": "^4.2.1"
     },
     "devDependencies": {
         "@buildingai/vite-plugins": "workspace:*",
@@ -164,8 +162,6 @@
         "@nestjs/cli": "catalog:api",
         "@nestjs/schematics": "catalog:api",
         "@nestjs/testing": "catalog:api",
-        "@nuxt/devtools": "catalog:web",
-        "@nuxt/eslint": "catalog:web",
         "@types/body-parser": "^1.19.6",
         "@types/express": "catalog:api",
         "@types/multer": "^1.4.13",
@@ -180,6 +176,7 @@
         "eslint": "catalog:dev",
         "eslint-plugin-format": "catalog:dev",
         "eslint-plugin-vue": "catalog:dev",
+        "globals": "^16.5.0",
         "mime-types": "3.0.1",
         "miniprogram-api-typings": "catalog:mobile",
         "prettier": "catalog:dev",
@@ -201,25 +198,19 @@
     "pnpm": {
         "overrides": {
             "cron": "catalog:api",
-            "vite": "catalog:dev",
+            "vite": "npm:rolldown-vite@7.3.0",
             "@buildingai/buildingai-mobile>vite": "6.3.4",
-            "@nuxt/kit": "catalog:web",
             "buildingai": "link:packages/cli",
             "glob": "^11.0.3",
             "miniprogram-ci>glob": "7.1.2",
             "source-map": "^0.7.4",
             "superagent": "^10.2.3",
+            "zod": "^4.2.1",
             "@intlify/shared": "11.2.1",
             "unconfig": "7.3.2"
         },
         "peerDependencyRules": {
-            "ignoreMissing": [
-                "@storybook-vue/nuxt>nuxt",
-                "@storybook-vue/nuxt>storybook",
-                "@vite-pwa/nuxt>vite-plugin-pwa>vite"
-            ],
             "allowedVersions": {
-                "nuxt": "4",
                 "storybook": "9",
                 "magicast": "0.5.1"
             }
@@ -286,7 +277,18 @@
                     "vite": "6.3.4"
                 }
             }
-        }
+        },
+        "onlyBuiltDependencies": [
+            "@nestjs/core",
+            "@parcel/watcher",
+            "@swc/core",
+            "@tailwindcss/oxide",
+            "esbuild",
+            "msgpackr-extract",
+            "msw",
+            "unrs-resolver",
+            "vue-demi"
+        ]
     },
     "engines": {
         "node": ">=22.20.x <23"

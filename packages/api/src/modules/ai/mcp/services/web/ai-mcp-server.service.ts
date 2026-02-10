@@ -169,7 +169,7 @@ export class WebAiMcpServerWebService extends BaseService<AiMcpServer> {
                         type: McpServerType.USER,
                         url,
                         creatorId,
-                        customHeaders: config.customHeaders,
+                        headers: config.headers || {},
                         description: `MCP server imported from JSON: ${name}`,
                         icon: "",
                         sortOrder: 0,
@@ -241,14 +241,14 @@ export class WebAiMcpServerWebService extends BaseService<AiMcpServer> {
                     url: mcpServer.url,
                     name: mcpServer.name,
                     description: mcpServer.description,
-                    customHeaders: mcpServer.customHeaders,
+                    headers: mcpServer.headers,
                 });
             } else {
                 mcpClient = new McpServerHttp({
                     url: mcpServer.url,
                     name: mcpServer.name,
                     description: mcpServer.description,
-                    customHeaders: mcpServer.customHeaders,
+                    headers: mcpServer.headers,
                 });
             }
 

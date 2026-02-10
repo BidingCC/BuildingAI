@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { Agent } from "@buildingai/service/consoleapi/ai-agent";
-import type { QueryPublicAgentParams } from "@buildingai/service/webapi/ai-agent";
+import type { Agent } from "@buildingai/services/consoleapi/ai-agent";
+import type { QueryPublicAgentParams } from "@buildingai/services/webapi/ai-agent";
 import type { UniPopupInstance } from "@uni-helper/uni-ui-types";
 
 import BdNavbar from "@/components/bd-navbar.vue?async";

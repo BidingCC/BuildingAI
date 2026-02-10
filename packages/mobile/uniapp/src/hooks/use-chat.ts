@@ -1,5 +1,5 @@
-import type { McpToolCall } from "@buildingai/service/consoleapi/mcp-server";
-import type { AiMessage, FilesList } from "@buildingai/service/models/message";
+import type { McpToolCall } from "@buildingai/services/consoleapi/mcp-server";
+import type { AiMessage, FilesList } from "@buildingai/services/models/message";
 
 import { getBaseUrl } from "@/hooks/use-request";
 import { useUserStore } from "@/stores/user";

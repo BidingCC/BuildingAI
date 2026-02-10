@@ -71,7 +71,7 @@ services:
             - /buildingai/packages/web/@buildingai/i18n-config/node_modules
             - /buildingai/packages/web/@buildingai/layouts/node_modules
             - /buildingai/packages/web/@buildingai/nuxt/node_modules
-            - /buildingai/packages/web/@buildingai/service/node_modules
+            - /buildingai/packages/web/@buildingai/services/node_modules
             - /buildingai/packages/web/@buildingai/stores/node_modules
             - /buildingai/packages/web/@buildingai/storybook/node_modules
             - /buildingai/packages/web/@buildingai/ui/node_modules

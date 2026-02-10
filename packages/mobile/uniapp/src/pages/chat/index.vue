@@ -7,7 +7,7 @@ definePage({
     },
 });
 
-import type { AiMessage } from "@buildingai/service/models/message";
+import type { AiMessage } from "@buildingai/services/models/message";
 import type { MessageContentPart } from "@buildingai/types";
 
 // #ifdef H5
