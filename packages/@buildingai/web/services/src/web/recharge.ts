@@ -1,3 +1,4 @@
+import { BooleanNumber } from "@buildingai/constants/shared/status-codes.constant";
 import type { MutationOptionsUtil, QueryOptionsUtil } from "@buildingai/web-types";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
@@ -22,7 +23,12 @@ export type RechargeCenterResponse = {
     rechargeStatus: boolean;
     rechargeExplain: string;
     rechargeRule: RechargeRuleItem[];
-    payWayList: { name: string; payType: number; logo: string | null }[];
+    payWayList: {
+        name: string;
+        payType: number;
+        logo: string | null;
+        isDefault: typeof BooleanNumber.YES | typeof BooleanNumber.NO;
+    }[];
 };
 
 export type SubmitRechargeParams = {

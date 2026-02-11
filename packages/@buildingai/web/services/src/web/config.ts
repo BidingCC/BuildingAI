@@ -21,3 +21,17 @@ export function useAgreementConfigQuery(options?: QueryOptionsUtil<AgreementConf
         ...options,
     });
 }
+
+export type DatasetsSquarePublishConfig = {
+    squarePublishSkipReview: boolean;
+};
+
+export function useDatasetsSquarePublishConfigQuery(
+    options?: QueryOptionsUtil<DatasetsSquarePublishConfig>,
+) {
+    return useQuery<DatasetsSquarePublishConfig>({
+        queryKey: ["config", "datasets"],
+        queryFn: () => apiHttpClient.get<DatasetsSquarePublishConfig>("/config/datasets"),
+        ...options,
+    });
+}

@@ -74,6 +74,11 @@ export interface HttpHooks {
      * Return true to indicate refresh succeeded and request should be retried.
      */
     refreshAccessToken?: () => boolean | Promise<boolean>;
+    /**
+     * Called when a request fails (after all retries).
+     * Receives the normalized HttpError. Skipped for aborted requests and silent requests.
+     */
+    onError?: (error: HttpError) => void;
 }
 
 export interface HttpClientOptions {

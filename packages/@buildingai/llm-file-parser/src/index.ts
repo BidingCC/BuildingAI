@@ -1,34 +1,18 @@
-/**
- * @fileoverview LLM File Parser
- * @description A comprehensive document parser that extracts structured text from various file formats
- *              Designed specifically for LLM consumption with clean, well-organized output
- */
-
 import { StructuredFormatter } from "./formatters/structured.formatter";
 import { getParser } from "./parsers";
 import { UnstructuredParser } from "./parsers/unstructured.parser";
 import type {
     ParseOptions,
     ParseResult,
-    ParseStream,
     ParseStreamWithResult,
     StructuredTextBlock,
 } from "./types";
 import { downloadFile } from "./utils/file-downloader";
 import { createParseStream } from "./utils/stream-parser";
 
-/**
- * Main document parser class
- */
 export class LLMFileParser {
     private formatter = new StructuredFormatter();
 
-    /**
-     * Parse document from URL
-     * @param url HTTP/HTTPS URL to the document
-     * @param options Parsing options
-     * @returns Structured parse result
-     */
     async parseFromUrl(url: string, options: ParseOptions = {}): Promise<ParseResult> {
         // Download file
         const file = await downloadFile(url, options);
@@ -342,7 +326,6 @@ export {
     SUPPORTED_FILE_EXTENSIONS,
     SUPPORTED_FORMATS_DISPLAY,
 } from "./supported-formats";
-
 export type {
     ElementType,
     ParseOptions,

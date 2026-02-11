@@ -8,7 +8,9 @@ export interface OpenRouterReasoningOptions {
 /**
  * Generate OpenAI-compatible provider options for reasoning/thinking mode
  */
-export function openrouterReasoning(options: OpenRouterReasoningOptions): Record<string, JSONObject> {
+export function openrouterReasoning(
+    options: OpenRouterReasoningOptions,
+): Record<string, JSONObject> {
     if (!options.thinking) {
         return {};
     }

@@ -26,9 +26,9 @@ import {
   SelectValue,
 } from "@buildingai/ui/components/ui/select";
 import { Skeleton } from "@buildingai/ui/components/ui/skeleton";
+import { StatusBadge } from "@buildingai/ui/components/ui/status-badge";
 import { Switch } from "@buildingai/ui/components/ui/switch";
 import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog";
-import { IconCircleCheckFilled, IconXboxXFilled } from "@tabler/icons-react";
 import {
   ClockPlus,
   Copy,
@@ -48,26 +48,6 @@ import { PageContainer } from "@/layouts/console/_components/page-container";
 import { UserFormDialog } from "./_components/user-form-dialog";
 
 const PAGE_SIZE = 25;
-
-type StatusBadgeProps = {
-  isActive: boolean;
-};
-
-/**
- * Reusable status badge component
- */
-const StatusBadge = ({ isActive }: StatusBadgeProps) =>
-  isActive ? (
-    <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
-      <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
-      正常
-    </Badge>
-  ) : (
-    <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
-      <IconXboxXFilled className="fill-destructive" />
-      已禁用
-    </Badge>
-  );
 
 const UserListIndexPage = () => {
   const { copy, isCopying } = useCopy();
@@ -151,7 +131,7 @@ const UserListIndexPage = () => {
   return (
     <PageContainer>
       <div className="flex flex-1 flex-col gap-4">
-        <div className="bg-background sticky top-0 z-1 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+        <div className="bg-background sticky top-0 z-2 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
           <Input
             placeholder="搜索用户名、昵称或邮箱"
             className="text-sm"
@@ -172,7 +152,7 @@ const UserListIndexPage = () => {
         <div className="flex-1">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
             <div
-              className="flex cursor-pointer flex-col gap-4 rounded-lg border border-dashed p-4 hover:border-solid"
+              className="bg-card flex cursor-pointer flex-col gap-4 rounded-lg border border-dashed p-4 hover:border-solid"
               onClick={() => {
                 setEditingUser(null);
                 setFormDialogOpen(true);
@@ -288,7 +268,7 @@ const UserListIndexPage = () => {
                     </DropdownMenu>
                   </div>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <StatusBadge isActive={user.status === BooleanNumber.YES} />
+                    <StatusBadge active={user.status === BooleanNumber.YES} activeText="正常" />
                     {user.role && <Badge variant="secondary">{user.role.name}</Badge>}
                     {user.isRoot === BooleanNumber.YES && (
                       <Badge variant="default">超级管理员</Badge>
@@ -314,7 +294,7 @@ const UserListIndexPage = () => {
           </div>
         </div>
 
-        <div className="bg-background sticky bottom-0 flex py-2">
+        <div className="bg-background sticky bottom-0 z-2 flex py-2">
           <PaginationComponent className="mx-0 w-fit" />
         </div>
       </div>

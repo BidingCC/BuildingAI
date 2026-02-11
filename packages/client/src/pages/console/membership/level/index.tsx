@@ -34,12 +34,7 @@ import {
   TableHeader,
   TableRow,
 } from "@buildingai/ui/components/ui/table";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@buildingai/ui/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@buildingai/ui/components/ui/tooltip";
 import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog";
 import {
   EditIcon,
@@ -197,16 +192,14 @@ const MembershipLevelIndexPage = () => {
                   <TableHead>
                     <div className="flex items-center gap-1.5">
                       <span>等级</span>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <HelpCircle className="text-muted-foreground size-3.5 cursor-help" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>等级数值越大表示等级越高</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="text-muted-foreground size-3.5 cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>等级数值越大表示等级越高</p>
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
                   </TableHead>
                   <TableHead>等级图标</TableHead>
@@ -294,7 +287,7 @@ const MembershipLevelIndexPage = () => {
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
         </div>
-        <div className="bg-background sticky bottom-0 flex py-2">
+        <div className="bg-background sticky bottom-0 z-2 flex py-2">
           <PaginationComponent className="mx-0 w-fit" />
         </div>
       </div>

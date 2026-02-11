@@ -1,7 +1,3 @@
-/**
- * @fileoverview PDF parser
- */
-
 import pdf from "pdf-parse";
 
 import type { ParseOptions, ParseResult, StructuredTextBlock } from "../types";
@@ -15,13 +11,12 @@ export class PdfParser extends BaseParser {
     async parse(
         buffer: Buffer,
         filename: string,
-        options: ParseOptions = {},
+        _options: ParseOptions = {},
     ): Promise<ParseResult> {
         try {
             const data = await pdf(buffer);
             const text = data.text || "";
 
-            // Convert to structured blocks
             const blocks = this.textToStructuredBlocks(text, data.numpages);
 
             return {
@@ -41,7 +36,7 @@ export class PdfParser extends BaseParser {
         }
     }
 
-    private textToStructuredBlocks(text: string, pages?: number): StructuredTextBlock[] {
+    private textToStructuredBlocks(text: string, _pages?: number): StructuredTextBlock[] {
         const blocks: StructuredTextBlock[] = [];
         const lines = text.split("\n").filter((line) => line.trim());
 
@@ -50,9 +45,7 @@ export class PdfParser extends BaseParser {
         for (const line of lines) {
             const trimmed = line.trim();
 
-            // Detect headings (lines that are short and end without punctuation)
             if (trimmed.length < 100 && !trimmed.match(/[.!?]$/) && trimmed.length > 0) {
-                // Flush current paragraph
                 if (currentParagraph.length > 0) {
                     blocks.push({
                         type: "paragraph",
@@ -61,7 +54,6 @@ export class PdfParser extends BaseParser {
                     currentParagraph = [];
                 }
 
-                // Add as heading
                 const level = this.detectHeadingLevel(trimmed);
                 blocks.push({
                     type: "heading",
@@ -73,7 +65,6 @@ export class PdfParser extends BaseParser {
             }
         }
 
-        // Flush remaining paragraph
         if (currentParagraph.length > 0) {
             blocks.push({
                 type: "paragraph",
@@ -85,7 +76,6 @@ export class PdfParser extends BaseParser {
     }
 
     private detectHeadingLevel(text: string): number {
-        // Simple heuristic: shorter text = higher level heading
         if (text.length < 30) return 1;
         if (text.length < 50) return 2;
         if (text.length < 70) return 3;

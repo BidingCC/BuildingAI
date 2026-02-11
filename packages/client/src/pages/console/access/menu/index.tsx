@@ -620,7 +620,7 @@ const AccessMenuIndexPage = () => {
   return (
     <PageContainer>
       <div className="flex flex-1 flex-col gap-4">
-        <div className="bg-background sticky top-0 z-1 flex items-center gap-4 pt-1 pb-2">
+        <div className="bg-background sticky top-0 z-2 flex items-center gap-4 pt-1 pb-2">
           <Input
             placeholder="搜索菜单名称或编码"
             className="max-w-xs text-sm"

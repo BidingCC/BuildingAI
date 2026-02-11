@@ -3,9 +3,11 @@
 Custom decorators for controllers and parameters.
 
 ## Location
+
 `packages/@buildingai/decorators/`
 
 ## Exports
+
 - `@Playground()` - Get current user from request
 - `@BuildFileUrl([...fields])` - Auto-build file URLs
 - `@Public()` - Skip authentication

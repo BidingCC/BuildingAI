@@ -105,7 +105,8 @@ export class RechargeService extends BaseService<Dict> {
         });
         const payWayList = await this.payconfigRepository.find({
             where: { isEnable: BooleanNumber.YES },
-            select: ["name", "payType", "logo"],
+            select: ["name", "payType", "logo", "isDefault"],
+            order: { sort: "DESC" },
         });
 
         return {

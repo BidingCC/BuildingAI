@@ -16,8 +16,10 @@ import NotFoundPage from "../components/exception/not-found-page";
 import AuthGuard from "../components/guard/auth-guard";
 import ConsoleLayout from "../layouts/console";
 import MainLayout from "../layouts/main";
-import IndexPage from "../pages";
+import DynamicHomePage from "../pages";
+import ChatPage from "../pages/chat";
 import { LoginPage } from "../pages/login";
+import { OAuthCallbackPage } from "../pages/login/oauth-callback";
 
 export const router = createBrowserRouter([
   {
@@ -27,6 +29,10 @@ export const router = createBrowserRouter([
       {
         path: "/login",
         element: <LoginPage />,
+      },
+      {
+        path: "/login/oauth-callback",
+        element: <OAuthCallbackPage />,
       },
       {
         path: "/install",
@@ -45,12 +51,17 @@ export const router = createBrowserRouter([
         ),
         children: [
           {
-            index: true,
-            element: <IndexPage />,
-          },
-          {
-            path: "/c/:id",
-            element: <IndexPage />,
+            element: <DynamicHomePage />,
+            children: [
+              {
+                index: true,
+                element: <ChatPage />,
+              },
+              {
+                path: "/c/:id",
+                element: <ChatPage />,
+              },
+            ],
           },
           {
             path: "/apps",
@@ -68,9 +79,14 @@ export const router = createBrowserRouter([
                 index: true,
                 element: <DatasetsIndexPage />,
               },
+
               {
                 path: "/datasets/:id",
-                element: <DatasetsDetailPage />,
+                element: (
+                  <AuthGuard>
+                    <DatasetsDetailPage />
+                  </AuthGuard>
+                ),
               },
             ],
           },

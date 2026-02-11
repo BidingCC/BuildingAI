@@ -1,3 +1,4 @@
+import { definePageMeta } from "@buildingai/hooks";
 import { Avatar, AvatarFallback, AvatarImage } from "@buildingai/ui/components/ui/avatar";
 import { Badge } from "@buildingai/ui/components/ui/badge";
 import { Button } from "@buildingai/ui/components/ui/button";
@@ -18,6 +19,12 @@ import { ScrollArea } from "@buildingai/ui/components/ui/scroll-area";
 import { SidebarTrigger } from "@buildingai/ui/components/ui/sidebar";
 import { ChevronRight, Plus, Search, Workflow } from "lucide-react";
 import { Link } from "react-router-dom";
+
+export const meta = definePageMeta({
+  title: "工作流广场",
+  description: "挑选适合您的工作流应用",
+  icon: "workflow",
+});
 
 const WorkflowIndexPage = () => {
   return (

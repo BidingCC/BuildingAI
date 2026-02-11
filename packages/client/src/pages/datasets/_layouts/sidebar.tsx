@@ -1,4 +1,5 @@
 import {
+  useDatasetDetail,
   useMyCreatedDatasetsInfiniteQuery,
   useTeamDatasetsInfiniteQuery,
 } from "@buildingai/services/web";
@@ -21,45 +22,40 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@buildingai/ui/components/ui/sidebar";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@buildingai/ui/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@buildingai/ui/components/ui/tooltip";
 import { cn } from "@buildingai/ui/lib/utils";
-import {
-  BookCopy,
-  ChevronDown,
-  ChevronRight,
-  LibraryBig,
-  Loader2,
-  Plus,
-  Users,
-} from "lucide-react";
+import { BookCopy, ChevronRight, LibraryBig, Loader2, Plus, Users } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 import { DatasetEditDialog } from "../detail/_components/dialogs/dataset-edit-dialog";
 
-const SIDEBAR_PAGE_SIZE = 20;
+const SIDEBAR_PAGE_SIZE = 10;
 
 type SidebarItem = {
   id: string;
   title: string;
   path: string;
   squarePublishStatus?: string;
+  publishedToSquare?: boolean;
+  pendingJoin?: boolean;
 };
 
 export function DatasetsSidebar() {
   return <DatasetsSidebarMain />;
 }
 
-const toSidebarItem = (d: { id: string; name: string; squarePublishStatus?: string }) => ({
+const toSidebarItem = (d: {
+  id: string;
+  name: string;
+  squarePublishStatus?: string;
+  publishedToSquare?: boolean;
+}) => ({
   id: d.id,
   title: d.name,
   path: `/datasets/${d.id}`,
   squarePublishStatus: d.squarePublishStatus,
+  publishedToSquare: d.publishedToSquare,
 });
 
 export function DatasetsSidebarMain({ className }: { className?: string }) {
@@ -69,6 +65,15 @@ export function DatasetsSidebarMain({ className }: { className?: string }) {
   const myQuery = useMyCreatedDatasetsInfiniteQuery(SIDEBAR_PAGE_SIZE);
   const teamQuery = useTeamDatasetsInfiniteQuery(SIDEBAR_PAGE_SIZE);
 
+  const currentDatasetId = useMemo(() => {
+    const match = pathname.match(/^\/datasets\/([^/]+)$/);
+    return match?.[1] ?? null;
+  }, [pathname]);
+
+  const { data: currentDataset } = useDatasetDetail(currentDatasetId ?? undefined, {
+    enabled: !!currentDatasetId,
+  });
+
   const myDatasetsItems = useMemo(
     () => myQuery.data?.pages.flatMap((p) => p.items).map(toSidebarItem) ?? [],
     [myQuery.data?.pages],
@@ -77,6 +82,24 @@ export function DatasetsSidebarMain({ className }: { className?: string }) {
     () => teamQuery.data?.pages.flatMap((p) => p.items).map(toSidebarItem) ?? [],
     [teamQuery.data?.pages],
   );
+
+  const joinedDatasetsWithPending = useMemo(() => {
+    if (!currentDataset) return joinedDatasetsItems;
+    const existsInMy = myDatasetsItems.some((item) => item.id === currentDataset.id);
+    const existsInJoined = joinedDatasetsItems.some((item) => item.id === currentDataset.id);
+    const isDetailPage = pathname.startsWith("/datasets/") && pathname !== "/datasets";
+    const isMember = currentDataset.isOwner || currentDataset.isMember;
+    if (!isDetailPage || existsInMy || existsInJoined || isMember) return joinedDatasetsItems;
+    const pendingItem: SidebarItem = {
+      id: currentDataset.id,
+      title: currentDataset.name,
+      path: `/datasets/${currentDataset.id}`,
+      squarePublishStatus: currentDataset.squarePublishStatus,
+      publishedToSquare: currentDataset.publishedToSquare,
+      pendingJoin: true,
+    };
+    return [pendingItem, ...joinedDatasetsItems];
+  }, [currentDataset, joinedDatasetsItems, myDatasetsItems, pathname]);
 
   const loading = myQuery.isLoading;
   const loadingJoined = teamQuery.isLoading;
@@ -122,7 +145,7 @@ export function DatasetsSidebarMain({ className }: { className?: string }) {
         title: "团队知识库",
         path: "",
         icon: Users,
-        items: joinedDatasetsItems,
+        items: joinedDatasetsWithPending,
         hasMore: hasMoreJoined,
         loadMore: loadMoreJoined,
         loadingMore: loadingMoreJoined,
@@ -131,6 +154,7 @@ export function DatasetsSidebarMain({ className }: { className?: string }) {
     [
       myDatasetsItems,
       joinedDatasetsItems,
+      joinedDatasetsWithPending,
       hasMoreMy,
       hasMoreJoined,
       loadMoreMy,
@@ -173,7 +197,7 @@ export function DatasetsSidebarMain({ className }: { className?: string }) {
 
           if (isCollapsible) {
             return (
-              <Collapsible key={item.id} asChild defaultOpen className="group/collapsible">
+              <Collapsible key={item.id} asChild defaultOpen className="group/collapsible block">
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton
@@ -213,6 +237,13 @@ export function DatasetsSidebarMain({ className }: { className?: string }) {
                         <>
                           {item.items?.map((subItem) => {
                             const isPendingReview = subItem.squarePublishStatus === "pending";
+                            const isPublished =
+                              subItem.publishedToSquare ||
+                              subItem.squarePublishStatus === "approved";
+                            const isRejected = subItem.squarePublishStatus === "rejected";
+                            const isPendingJoin = subItem.pendingJoin;
+                            const showPublishedBadge =
+                              isPublished && !isPendingReview && item.id !== "datasets-joined";
                             return (
                               <SidebarMenuSubItem key={subItem.id}>
                                 <SidebarMenuSubButton
@@ -227,26 +258,51 @@ export function DatasetsSidebarMain({ className }: { className?: string }) {
                                     <span className="line-clamp-1 min-w-0 flex-1">
                                       {subItem.title}
                                     </span>
+                                    {isPendingJoin && (
+                                      <Button
+                                        variant="secondary"
+                                        size="xs"
+                                        className="pointer-events-none"
+                                      >
+                                        待加入
+                                      </Button>
+                                    )}
                                     {isPendingReview && (
-                                      <TooltipProvider delayDuration={200}>
-                                        <Tooltip>
-                                          <TooltipTrigger asChild>
-                                            <Button
-                                              variant="secondary"
-                                              size="xs"
-                                              onClick={(e) => {
-                                                e.preventDefault();
-                                                e.stopPropagation();
-                                              }}
-                                            >
-                                              审核中
-                                            </Button>
-                                          </TooltipTrigger>
-                                          <TooltipContent className="max-w-xs">
-                                            正在审核中，审核通过后该知识库可在知识广场被发现
-                                          </TooltipContent>
-                                        </Tooltip>
-                                      </TooltipProvider>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <Button
+                                            variant="secondary"
+                                            size="xs"
+                                            onClick={(e) => {
+                                              e.preventDefault();
+                                              e.stopPropagation();
+                                            }}
+                                          >
+                                            审核中
+                                          </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent className="max-w-xs">
+                                          正在审核中，审核通过后该知识库可在知识广场被发现
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    )}
+                                    {isRejected && !isPendingReview && !isPublished && (
+                                      <Button
+                                        variant="secondary"
+                                        size="xs"
+                                        className="text-destructive pointer-events-none"
+                                      >
+                                        审核未通过
+                                      </Button>
+                                    )}
+                                    {showPublishedBadge && (
+                                      <Button
+                                        variant="secondary"
+                                        size="xs"
+                                        className="pointer-events-none"
+                                      >
+                                        已发布
+                                      </Button>
                                     )}
                                   </Link>
                                 </SidebarMenuSubButton>
@@ -258,7 +314,7 @@ export function DatasetsSidebarMain({ className }: { className?: string }) {
                               <SidebarMenuSubButton asChild>
                                 <button
                                   type="button"
-                                  className="text-muted-foreground h-9"
+                                  className="text-muted-foreground h-9 w-full"
                                   onClick={item.loadMore}
                                   disabled={item.loadingMore}
                                 >
@@ -269,7 +325,6 @@ export function DatasetsSidebarMain({ className }: { className?: string }) {
                                     </>
                                   ) : (
                                     <>
-                                      <ChevronDown className="size-4" />
                                       <span className="text-sm">加载更多</span>
                                     </>
                                   )}
@@ -287,7 +342,7 @@ export function DatasetsSidebarMain({ className }: { className?: string }) {
           }
 
           return (
-            <SidebarMenuItem key={item.id}>
+            <SidebarMenuItem key={item.id} className="block">
               <SidebarMenuButton className="group/link-menu-item h-9" isActive={isActive} asChild>
                 <Link to={item.path || "/"}>
                   {item.icon && <item.icon className="shrink-0" strokeWidth={isActive ? 2.5 : 2} />}

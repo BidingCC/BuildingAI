@@ -1,7 +1,3 @@
-/**
- * @fileoverview DOCX parser
- */
-
 import mammoth from "mammoth";
 
 import type { ParseOptions, ParseResult, StructuredTextBlock } from "../types";
@@ -19,14 +15,12 @@ export class DocxParser extends BaseParser {
     async parse(
         buffer: Buffer,
         filename: string,
-        options: ParseOptions = {},
+        _options: ParseOptions = {},
     ): Promise<ParseResult> {
         try {
-            // Extract raw text first
             const rawResult = await mammoth.extractRawText({ buffer });
             const text = rawResult.value || "";
 
-            // Extract with formatting to get structure
             const htmlResult = await mammoth.convertToHtml({ buffer });
             const blocks = this.htmlToStructuredBlocks(htmlResult.value, text);
 
@@ -49,7 +43,6 @@ export class DocxParser extends BaseParser {
     private htmlToStructuredBlocks(html: string, fallbackText: string): StructuredTextBlock[] {
         const blocks: StructuredTextBlock[] = [];
 
-        // Extract headings (h1-h6)
         const headingRegex = /<h([1-6])[^>]*>(.*?)<\/h[1-6]>/gi;
         let match;
         const headingMatches: Array<{ level: number; text: string; index: number }> = [];
@@ -60,7 +53,6 @@ export class DocxParser extends BaseParser {
             headingMatches.push({ level, text, index: match.index });
         }
 
-        // Extract paragraphs
         const paragraphRegex = /<p[^>]*>(.*?)<\/p>/gi;
         const paragraphs: string[] = [];
 
@@ -68,7 +60,6 @@ export class DocxParser extends BaseParser {
             paragraphs.push(this.stripHtml(match[1]));
         }
 
-        // Extract lists
         const listRegex = /<ul[^>]*>(.*?)<\/ul>|<ol[^>]*>(.*?)<\/ol>/gi;
         const lists: string[][] = [];
 
@@ -78,7 +69,6 @@ export class DocxParser extends BaseParser {
             lists.push(items.map((item) => this.stripHtml(item)));
         }
 
-        // Build structured blocks
         headingMatches.forEach((heading) => {
             blocks.push({
                 type: "heading",
@@ -106,7 +96,6 @@ export class DocxParser extends BaseParser {
             }
         });
 
-        // Fallback to simple text blocks if no structure found
         if (blocks.length === 0 && fallbackText) {
             const lines = fallbackText.split("\n").filter((line) => line.trim());
             lines.forEach((line) => {

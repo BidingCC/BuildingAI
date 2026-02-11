@@ -1,8 +1,3 @@
-/**
- * @fileoverview HTML parser
- * @description Extracts structured content from HTML documents
- */
-
 import * as cheerio from "cheerio";
 
 import type { ParseOptions, ParseResult, StructuredTextBlock } from "../types";
@@ -23,18 +18,16 @@ export class HtmlParser extends BaseParser {
     async parse(
         buffer: Buffer,
         filename: string,
-        options: ParseOptions = {},
+        _options: ParseOptions = {},
     ): Promise<ParseResult> {
         try {
             const html = buffer.toString("utf-8");
             const $ = cheerio.load(html);
 
-            // Remove script and style tags
             $("script, style, noscript").remove();
 
             const blocks: StructuredTextBlock[] = [];
 
-            // Extract title
             const title = $("title").text().trim();
             if (title) {
                 blocks.push({
@@ -44,10 +37,8 @@ export class HtmlParser extends BaseParser {
                 });
             }
 
-            // Extract main content
             const mainContent = $("main, article, .content, #content, body");
 
-            // Process headings
             mainContent.find("h1, h2, h3, h4, h5, h6").each((_, element) => {
                 const $el = $(element);
                 const level = this.getHeadingLevel(element.tagName);
@@ -62,7 +53,6 @@ export class HtmlParser extends BaseParser {
                 }
             });
 
-            // Process paragraphs
             mainContent.find("p").each((_, element) => {
                 const $el = $(element);
                 const text = $el.text().trim();
@@ -75,7 +65,6 @@ export class HtmlParser extends BaseParser {
                 }
             });
 
-            // Process lists
             mainContent.find("ul, ol").each((_, element) => {
                 const $el = $(element);
                 const items: string[] = [];
@@ -96,7 +85,6 @@ export class HtmlParser extends BaseParser {
                 }
             });
 
-            // Process blockquotes
             mainContent.find("blockquote").each((_, element) => {
                 const $el = $(element);
                 const text = $el.text().trim();
@@ -109,13 +97,11 @@ export class HtmlParser extends BaseParser {
                 }
             });
 
-            // Process code blocks
             mainContent.find("pre, code").each((_, element) => {
                 const $el = $(element);
                 const text = $el.text().trim();
 
                 if (text && text.length > 10) {
-                    // Only add if it's substantial code
                     blocks.push({
                         type: "code",
                         content: text,
@@ -123,10 +109,8 @@ export class HtmlParser extends BaseParser {
                 }
             });
 
-            // Extract plain text as fallback
             const plainText = mainContent.text().trim();
 
-            // If no structured blocks found, create paragraph blocks from plain text
             if (blocks.length === 0 && plainText) {
                 const lines = plainText.split("\n").filter((line) => line.trim());
                 lines.forEach((line) => {

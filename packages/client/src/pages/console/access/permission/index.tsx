@@ -88,7 +88,7 @@ const AccessPermissionIndexPage = () => {
   return (
     <PageContainer>
       <div className="flex flex-1 flex-col gap-4">
-        <div className="bg-background sticky top-0 z-1 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+        <div className="bg-background sticky top-0 z-2 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
           <Input
             placeholder="搜索权限名称"
             className="text-sm"

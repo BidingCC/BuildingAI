@@ -6,6 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@buildingai/ui/components/ui/dialog";
+import { Input } from "@buildingai/ui/components/ui/input";
 import { cn } from "@buildingai/ui/lib/utils";
 import { ArrowUp } from "lucide-react";
 import { useCallback, useState } from "react";
@@ -14,10 +15,12 @@ export interface UploadDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onUpload?: (files: File[]) => void;
+  onUploadUrl?: (url: string) => void;
 }
 
-export function UploadDialog({ open, onOpenChange, onUpload }: UploadDialogProps) {
+export function UploadDialog({ open, onOpenChange, onUpload, onUploadUrl }: UploadDialogProps) {
   const [isDragging, setIsDragging] = useState(false);
+  const [url, setUrl] = useState("");
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -50,12 +53,22 @@ export function UploadDialog({ open, onOpenChange, onUpload }: UploadDialogProps
     [onUpload, onOpenChange],
   );
 
+  const handleUploadUrl = useCallback(() => {
+    const value = url.trim();
+    if (!value) return;
+    onUploadUrl?.(value);
+    setUrl("");
+    onOpenChange(false);
+  }, [url, onUploadUrl, onOpenChange]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="border-0 shadow-none sm:max-w-md">
         <DialogHeader>
           <DialogTitle>上传文件</DialogTitle>
-          <DialogDescription>支持文件、视频、音频、图片等62种格式</DialogDescription>
+          <DialogDescription>
+            支持常用 .pdf、.docx、.pptx、.xlsx、.csv、.txt 等各种格式
+          </DialogDescription>
         </DialogHeader>
 
         <div
@@ -87,6 +100,17 @@ export function UploadDialog({ open, onOpenChange, onUpload }: UploadDialogProps
               <span>选择文件</span>
             </Button>
           </label>
+        </div>
+
+        <div className="mt-4 flex items-center gap-2">
+          <Input
+            placeholder="输入在线文件链接，例如 https://..."
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+          />
+          <Button variant="outline" onClick={handleUploadUrl} disabled={!url.trim()}>
+            确认
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

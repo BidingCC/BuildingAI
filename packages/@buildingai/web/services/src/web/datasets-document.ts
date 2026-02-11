@@ -4,8 +4,13 @@ import type {
     PaginatedResponse,
     QueryOptionsUtil,
 } from "@buildingai/web-types";
-import type { UseMutationResult, UseQueryResult } from "@tanstack/react-query";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type {
+    InfiniteData,
+    UseInfiniteQueryResult,
+    UseMutationResult,
+    UseQueryResult,
+} from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { apiHttpClient } from "../base";
 
@@ -16,10 +21,13 @@ export type CreateDocumentParams = {
 
 export type DocumentSortBy = "name" | "size" | "uploadTime";
 
+export type DocumentFileTypeFilter = "all" | "text" | "table" | "image";
+
 export type ListDocumentsParams = {
     page?: number;
     pageSize?: number;
     sortBy?: DocumentSortBy;
+    fileType?: DocumentFileTypeFilter;
     keyword?: string;
 };
 
@@ -57,16 +65,18 @@ export async function listDatasetsDocuments(
     datasetId: string,
     params?: ListDocumentsParams,
 ): Promise<PaginatedResponse<DatasetsDocument>> {
-    const { page, pageSize, sortBy, keyword } = {
+    const { page, pageSize, sortBy, fileType, keyword } = {
         page: 1,
         pageSize: 20,
         sortBy: "uploadTime" as DocumentSortBy,
+        fileType: "all" as DocumentFileTypeFilter,
         ...params,
     };
     const queryParams = {
         page,
         pageSize,
         sortBy,
+        ...(fileType && fileType !== "all" && { fileType }),
         ...(keyword?.trim() && { keyword: keyword.trim() }),
     };
     return apiHttpClient.get<PaginatedResponse<DatasetsDocument>>(
@@ -204,6 +214,60 @@ export function useDatasetsDocumentsQuery(
     });
 }
 
+const DOCUMENTS_INFINITE_LIST_KEY = ["datasets", "documents-infinite"] as const;
+
+function hasPollingDocument(
+    data: InfiniteData<PaginatedResponse<DatasetsDocument>> | undefined,
+): boolean {
+    const items = data?.pages.flatMap((p) => p.items) ?? [];
+    return items.some(
+        (d) => d.status === "pending" || d.status === "processing" || d.summaryGenerating,
+    );
+}
+
+export function useDatasetsDocumentsInfiniteQuery(
+    datasetId: string,
+    params: {
+        pageSize?: number;
+        sortBy?: DocumentSortBy;
+        fileType?: DocumentFileTypeFilter;
+        keyword?: string;
+    },
+    options?: { enabled?: boolean },
+): UseInfiniteQueryResult<InfiniteData<PaginatedResponse<DatasetsDocument>>, unknown> {
+    const { pageSize = 20, sortBy = "uploadTime", fileType = "all", keyword } = params;
+    const { isLogin } = useAuthStore((state) => state.authActions);
+    return useInfiniteQuery<PaginatedResponse<DatasetsDocument>>({
+        queryKey: [
+            ...DOCUMENTS_INFINITE_LIST_KEY,
+            datasetId,
+            pageSize,
+            sortBy,
+            fileType,
+            keyword ?? "",
+        ],
+        queryFn: ({ pageParam }) =>
+            listDatasetsDocuments(datasetId, {
+                page: pageParam as number,
+                pageSize,
+                sortBy,
+                fileType,
+                keyword: keyword?.trim() || undefined,
+            }),
+        initialPageParam: 1,
+        getNextPageParam: (lastPage) =>
+            lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined,
+        enabled: !!datasetId && isLogin() && options?.enabled !== false,
+        refetchInterval: (query) =>
+            hasPollingDocument(
+                query.state.data as InfiniteData<PaginatedResponse<DatasetsDocument>> | undefined,
+            )
+                ? 2000
+                : false,
+        ...options,
+    });
+}
+
 export function useDatasetsDocumentQuery(
     datasetId: string,
     documentId: string,
@@ -218,17 +282,18 @@ export function useDatasetsDocumentQuery(
     });
 }
 
+function invalidateDatasetDocuments(queryClient: ReturnType<typeof useQueryClient>, id: string) {
+    queryClient.invalidateQueries({ queryKey: ["datasets", id, "documents"] });
+    queryClient.invalidateQueries({ queryKey: [...DOCUMENTS_INFINITE_LIST_KEY, id] });
+}
+
 export function useCreateDatasetsDocument(
     datasetId: string,
 ): UseMutationResult<DatasetsDocument, unknown, CreateDocumentParams, unknown> {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (params) => createDatasetsDocument(datasetId, params),
-        onSuccess: () => {
-            queryClient.invalidateQueries({
-                queryKey: ["datasets", datasetId, "documents"],
-            });
-        },
+        onSuccess: () => invalidateDatasetDocuments(queryClient, datasetId),
     });
 }
 
@@ -238,11 +303,7 @@ export function useDeleteDatasetsDocument(
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (documentId: string) => deleteDatasetsDocument(datasetId, documentId),
-        onSuccess: () => {
-            queryClient.invalidateQueries({
-                queryKey: ["datasets", datasetId, "documents"],
-            });
-        },
+        onSuccess: () => invalidateDatasetDocuments(queryClient, datasetId),
     });
 }
 
@@ -253,11 +314,7 @@ export function useBatchDeleteDatasetsDocuments(
     return useMutation({
         mutationFn: (documentIds: string[]) =>
             batchDeleteDatasetsDocuments(datasetId, { documentIds }),
-        onSuccess: () => {
-            queryClient.invalidateQueries({
-                queryKey: ["datasets", datasetId, "documents"],
-            });
-        },
+        onSuccess: () => invalidateDatasetDocuments(queryClient, datasetId),
     });
 }
 
@@ -268,9 +325,7 @@ export function useRetryDocumentVectorization(
     return useMutation({
         mutationFn: (documentId: string) => retryDocumentVectorization(datasetId, documentId),
         onSuccess: (_, documentId) => {
-            queryClient.invalidateQueries({
-                queryKey: ["datasets", datasetId, "documents"],
-            });
+            invalidateDatasetDocuments(queryClient, datasetId);
             queryClient.invalidateQueries({
                 queryKey: ["datasets", datasetId, "document", documentId],
             });
@@ -285,11 +340,7 @@ export function useBatchAddTagsDatasetsDocuments(
     return useMutation({
         mutationFn: (params: BatchAddTagsParams) =>
             batchAddTagsDatasetsDocuments(datasetId, params),
-        onSuccess: () => {
-            queryClient.invalidateQueries({
-                queryKey: ["datasets", datasetId, "documents"],
-            });
-        },
+        onSuccess: () => invalidateDatasetDocuments(queryClient, datasetId),
     });
 }
 
@@ -301,12 +352,8 @@ export function useBatchMoveDatasetsDocuments(
         mutationFn: (params: BatchMoveDocumentsParams) =>
             batchMoveDatasetsDocuments(datasetId, params),
         onSuccess: (_, params) => {
-            queryClient.invalidateQueries({
-                queryKey: ["datasets", datasetId, "documents"],
-            });
-            queryClient.invalidateQueries({
-                queryKey: ["datasets", params.targetDatasetId, "documents"],
-            });
+            invalidateDatasetDocuments(queryClient, datasetId);
+            invalidateDatasetDocuments(queryClient, params.targetDatasetId);
         },
     });
 }
@@ -319,12 +366,8 @@ export function useBatchCopyDatasetsDocuments(
         mutationFn: (params: BatchCopyDocumentsParams) =>
             batchCopyDatasetsDocuments(datasetId, params),
         onSuccess: (_, params) => {
-            queryClient.invalidateQueries({
-                queryKey: ["datasets", datasetId, "documents"],
-            });
-            queryClient.invalidateQueries({
-                queryKey: ["datasets", params.targetDatasetId, "documents"],
-            });
+            invalidateDatasetDocuments(queryClient, datasetId);
+            invalidateDatasetDocuments(queryClient, params.targetDatasetId);
         },
     });
 }
@@ -337,9 +380,7 @@ export function useUpdateDocumentTags(
         mutationFn: ({ documentId, tags }: { documentId: string; tags: string[] }) =>
             updateDocumentTags(datasetId, documentId, { tags }),
         onSuccess: (_, { documentId }) => {
-            queryClient.invalidateQueries({
-                queryKey: ["datasets", datasetId, "documents"],
-            });
+            invalidateDatasetDocuments(queryClient, datasetId);
             queryClient.invalidateQueries({
                 queryKey: ["datasets", datasetId, "document", documentId],
             });

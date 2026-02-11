@@ -4,7 +4,8 @@
 
 ## 特性
 
-- 📄 **多格式支持**：PDF、DOCX、PPTX、XLSX、XLS、TXT、MD、CSV、RTF、HTML、JSON、XML，以及常见代码文件（JS、TS、PY、Java、Go、Rust、Vue、CSS、YAML、SQL 等）
+- 📄
+  **多格式支持**：PDF、DOCX、PPTX、XLSX、XLS、TXT、MD、CSV、RTF、HTML、JSON、XML，以及常见代码文件（JS、TS、PY、Java、Go、Rust、Vue、CSS、YAML、SQL 等）
 - 🔗 **HTTP/HTTPS URL**：支持从 URL 下载并解析文件
 - 🎯 **结构化输出**：段落、标题、列表层级清晰
 - 🤖 **适配 LLM**：输出格式便于模型理解
@@ -111,7 +112,8 @@ if (isSupportedExtension(file.name)) {
 }
 ```
 
-- **`SUPPORTED_FILE_EXTENSIONS`**：`readonly string[]`，带点号扩展名，大小写各一份（如 `.pdf`、`.PDF`、`.docx`、`.DOCX` 等）
+- **`SUPPORTED_FILE_EXTENSIONS`**：`readonly string[]`，带点号扩展名，大小写各一份（如
+  `.pdf`、`.PDF`、`.docx`、`.DOCX` 等）
 - **`SUPPORTED_FORMATS_DISPLAY`**：`string`，逗号分隔的展示用字符串
 - **`SUPPORTED_EXTENSIONS_LOWER`**：`readonly string[]`，仅小写扩展名
 - **`isSupportedExtension(filename: string)`**：`boolean`，判断文件名是否为支持格式
@@ -142,7 +144,9 @@ console.log("Complete document:", finalResult);
 ```typescript
 import { llmFileParser } from "@buildingai/llm-file-parser";
 
-for await (const textChunk of llmFileParser.streamParseAndFormat("https://example.com/document.pdf")) {
+for await (const textChunk of llmFileParser.streamParseAndFormat(
+    "https://example.com/document.pdf",
+)) {
     console.log(textChunk);
 }
 ```

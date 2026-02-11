@@ -20,12 +20,13 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@buildingai/ui/components/ui/alert";
 import type { ReasoningUIPart, UIMessage } from "ai";
 import { AlertCircleIcon } from "lucide-react";
-import { memo, type ReactNode, useState } from "react";
+import { memo, type ReactNode, useMemo, useState } from "react";
 
 import { useSmoothText } from "../../hooks/use-smooth-text";
 import { convertUIMessageToMessage } from "../../libs/message-converter";
+import { InlineCitation } from "../tools/inline-citation";
+import type { KnowledgeReferenceItem } from "../tools/knowledge-references";
 import { FileParseQueue } from "./file-parse-queue";
-import { KnowledgeReferences } from "./knowledge-references";
 import { MessageActions } from "./message-actions";
 import { MessageBranch } from "./message-branch";
 import { FeedbackCard, MessageFeedback } from "./message-feedback";
@@ -109,10 +110,43 @@ export const Message = memo(function Message({
   const showStreamingIndicator = isAssistant && isProcessing && isEmpty && !hasReasoning;
   const sources = messageData.sources;
 
+  const knowledgeRefs = useMemo(() => {
+    if (!message.parts) return [];
+    const refs: KnowledgeReferenceItem[] = [];
+    for (const p of message.parts) {
+      if (p.type !== "tool-searchKnowledgeBase") continue;
+      const output = (p as { output?: { found?: boolean; results?: KnowledgeReferenceItem[] } })
+        .output;
+      if (output?.found && Array.isArray(output.results)) {
+        for (const r of output.results) {
+          if (r && (r.title || r.source)) refs.push(r);
+        }
+      }
+    }
+    return refs;
+  }, [message.parts]);
+
   const { text: smoothContent } = useSmoothText(content, {
     smooth: isAssistant && isStreaming,
     id: message.id,
   });
+
+  const citationContent = useMemo(() => {
+    if (knowledgeRefs.length === 0) return smoothContent;
+    return smoothContent.replace(/\[\^(\d+)\]/g, "<sup>$1</sup>");
+  }, [smoothContent, knowledgeRefs.length]);
+
+  const citationComponents = useMemo(() => {
+    if (knowledgeRefs.length === 0) return undefined;
+    return {
+      sup: ({ children }: { children?: React.ReactNode }) => {
+        const text = String(children ?? "");
+        const num = Number.parseInt(text, 10);
+        if (Number.isNaN(num)) return <sup>{children}</sup>;
+        return <InlineCitation index={num} references={knowledgeRefs} />;
+      },
+    };
+  }, [knowledgeRefs]);
 
   const handleEditMessage = (newContent: string) => {
     const files = attachments?.map((att) => ({
@@ -147,7 +181,6 @@ export const Message = memo(function Message({
             </Reasoning>
           ))}
 
-      {isAssistant && <KnowledgeReferences parts={message.parts} />}
       {isAssistant && sources && sources.length > 0 && (
         <Sources>
           <SourcesTrigger count={sources.length} />
@@ -204,8 +237,11 @@ export const Message = memo(function Message({
             {showStreamingIndicator ? (
               <StreamingIndicator />
             ) : (
-              <AIMessageResponse isAnimating={isStreaming && message.role === "assistant"}>
-                {smoothContent}
+              <AIMessageResponse
+                isAnimating={isStreaming && message.role === "assistant"}
+                components={citationComponents}
+              >
+                {citationContent}
               </AIMessageResponse>
             )}
           </AIMessageContent>

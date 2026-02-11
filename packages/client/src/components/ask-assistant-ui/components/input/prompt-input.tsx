@@ -132,14 +132,8 @@ const PromptInputInner = memo(
     const { handleFileSelect, uploadFilesIfNeeded, availableFileTypes, hasImageSupport } =
       useFileUpload(multiple, selectedModel?.features);
 
-    const featureMenuItems: FeatureMenuItemConfig[] = useMemo(
-      () => [
-        {
-          id: "thinking",
-          icon: <IconBulb className="size-4 scale-130 transform" />,
-          label: "思考",
-          featureKey: "thinking",
-        },
+    const featureMenuItems: FeatureMenuItemConfig[] = useMemo(() => {
+      const items: FeatureMenuItemConfig[] = [
         {
           id: "generateImage",
           icon: <ImagesIcon className="size-4 scale-110 transform" />,
@@ -152,9 +146,20 @@ const PromptInputInner = memo(
           label: "网页搜索",
           featureKey: "search",
         },
-      ],
-      [],
-    );
+      ];
+
+      console.log("featureMenuItems", selectedModel);
+      if (selectedModel?.thinking) {
+        items.unshift({
+          id: "thinking",
+          icon: <IconBulb className="size-4 scale-130 transform" />,
+          label: "思考",
+          featureKey: "thinking",
+        });
+      }
+
+      return items;
+    }, [selectedModel?.thinking]);
 
     const handleFeatureMenuItemClick = useCallback(
       (item: FeatureMenuItemConfig) => {

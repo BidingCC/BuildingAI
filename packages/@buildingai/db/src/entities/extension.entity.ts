@@ -51,6 +51,18 @@ export class Extension extends BaseEntity {
     aliasShow?: boolean;
 
     /**
+     * 应用中心排序（数值越小越靠前）
+     */
+    @Column({ type: "int", nullable: true, default: 0, comment: "应用中心排序" })
+    appCenterSort?: number;
+
+    /**
+     * 应用中心标签ID列表
+     */
+    @Column({ type: "jsonb", nullable: true, comment: "应用中心标签ID列表" })
+    appCenterTagIds?: string[];
+
+    /**
      * 应用标识符
      */
     @Column({ length: 100, unique: true, comment: "应用标识符" })

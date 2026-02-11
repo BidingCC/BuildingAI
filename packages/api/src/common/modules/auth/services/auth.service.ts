@@ -40,12 +40,14 @@ export class AuthService extends BaseService<User> {
     }
 
     async checkAccount(account: string) {
-        let res = {
+        const res = {
             hasAccount: false,
             type: "",
+            hasPassword: false,
         };
         const accountData = await this.userRepository.findOne({
             where: [{ username: account }, { email: account }, { phone: account }],
+            select: ["username", "email", "phone", "password"],
         });
         if (!accountData) {
             return res;
@@ -61,6 +63,7 @@ export class AuthService extends BaseService<User> {
             res.type = "username";
         }
         res.hasAccount = true;
+        res.hasPassword = !!accountData.password;
 
         return res;
     }
@@ -459,7 +462,7 @@ export class AuthService extends BaseService<User> {
             lastLoginAt: new Date(),
         });
 
-        const { password: _pwd, openid: _openid, ...userInfo } = user;
+        const { password: _pwd, openid: _openid, googleId: _googleId, ...userInfo } = user;
 
         return {
             expiresAt: tokenResult.expiresAt,
@@ -470,6 +473,55 @@ export class AuthService extends BaseService<User> {
                 permissions,
             },
         };
+    }
+
+    async findOrCreateByGoogle(
+        googleId: string,
+        email: string | null,
+        displayName: string | null,
+        picture: string | null,
+        terminal: UserTerminalType = UserTerminal.PC,
+        ipAddress?: string,
+        userAgent?: string,
+    ) {
+        let user = await this.findOne({ where: { googleId } });
+        if (user) {
+            return this.loginByUser(user, terminal, ipAddress, userAgent);
+        }
+        if (email) {
+            user = await this.findOne({ where: { email } });
+            if (user) {
+                await this.updateById(user.id, { googleId });
+                return this.loginByUser(
+                    (await this.findOne({ where: { id: user.id } })) as User,
+                    terminal,
+                    ipAddress,
+                    userAgent,
+                );
+            }
+        }
+        const randomSuffix = Math.random().toString(36).substring(2, 10);
+        const username = email
+            ? email.split("@")[0] + "_" + randomSuffix
+            : "google_" + randomSuffix;
+        const randomAvatarIndex = Math.floor(Math.random() * 36) + 1;
+        const nickname = displayName || username;
+        const savedUser = await this.create(
+            {
+                googleId,
+                username,
+                password: "",
+                email: email || undefined,
+                nickname,
+                status: BooleanNumber.YES,
+                source: UserCreateSource.GOOGLE,
+                avatar: picture || `/static/avatars/${randomAvatarIndex}.png`,
+            },
+            { excludeFields: ["password", "googleId"] },
+        );
+        const fullUser = await this.findOne({ where: { id: savedUser.id } });
+        if (!fullUser) throw HttpErrorFactory.badRequest("用户创建失败");
+        return this.loginByUser(fullUser, terminal, ipAddress, userAgent);
     }
 
     /**
@@ -518,6 +570,9 @@ export class AuthService extends BaseService<User> {
         await this.updateById(userId, {
             password: hashedPassword,
         });
+
+        // 清除用户所有 token，强制重新登录
+        await this.userTokenService.revokeAllTokens(userId);
 
         return null;
     }

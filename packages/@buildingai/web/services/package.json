@@ -30,13 +30,13 @@
         }
     },
     "dependencies": {
+        "@buildingai/ai-sdk-new": "workspace:*",
         "@buildingai/constants": "workspace:*",
         "@buildingai/db": "workspace:*",
-        "@buildingai/types": "workspace:*",
         "@buildingai/http": "workspace:*",
         "@buildingai/stores": "workspace:*",
-        "@tanstack/react-query": "^5.62.16",
-        "@buildingai/ai-sdk-new": "workspace:*"
+        "@buildingai/types": "workspace:*",
+        "@tanstack/react-query": "^5.62.16"
     },
     "devDependencies": {
         "@buildingai/eslint-config": "workspace:*",

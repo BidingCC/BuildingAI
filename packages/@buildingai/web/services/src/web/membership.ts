@@ -1,3 +1,4 @@
+import { BooleanNumber } from "@buildingai/constants/shared/status-codes.constant";
 import type { MutationOptionsUtil, QueryOptionsUtil } from "@buildingai/web-types";
 import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 
@@ -42,6 +43,7 @@ export type PayWayItem = {
     name: string;
     payType: number;
     logo: string | null;
+    isDefault: typeof BooleanNumber.YES | typeof BooleanNumber.NO;
 };
 
 export type MembershipCenterResponse = {
@@ -82,7 +84,7 @@ export type PrepayParams = {
 };
 
 export type PrepayResponse = {
-    qrCode: string;
+    qrCode: { code_url: string };
     payType: number;
 };
 

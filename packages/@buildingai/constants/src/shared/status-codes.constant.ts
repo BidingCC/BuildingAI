@@ -17,6 +17,7 @@ export const UserCreateSource = {
     WECHAT: 2,
     EMAIL: 3,
     USERNAME: 4,
+    GOOGLE: 5,
 } as const;
 export type UserCreateSourceType = (typeof UserCreateSource)[keyof typeof UserCreateSource];
 export type UserCreateSourceKey = keyof typeof UserCreateSource;

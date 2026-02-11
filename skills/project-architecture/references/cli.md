@@ -3,6 +3,7 @@
 CLI tooling for BuildingAI operations.
 
 ## Location
+
 `packages/cli/`
 
 ## Commands

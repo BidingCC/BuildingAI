@@ -3,9 +3,11 @@
 Dependency injection utilities.
 
 ## Location
+
 `packages/@buildingai/di/`
 
 ## Exports
+
 - `Container`, `Service` - DI container and service decorator
 - `getGlobalContainer()`, `setGlobalContainer()` - Global container management
 - `getService()` - Get service from container

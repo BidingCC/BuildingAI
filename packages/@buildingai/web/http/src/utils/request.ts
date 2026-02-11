@@ -7,6 +7,8 @@ export interface RequestConfig extends AxiosRequestConfig {
     requestId?: string;
     /** AbortSignal for cancellation */
     signal?: AbortSignal;
+    /** When true, skip the global onError hook */
+    silent?: boolean;
 }
 
 export function withQuery(url: string, query?: Query): string {

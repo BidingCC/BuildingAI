@@ -3,7 +3,7 @@ import { PROCESSING_STATUS } from "@buildingai/constants/shared/datasets.constan
 import { type UserPlayground } from "@buildingai/db";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
 import { Datasets, DatasetsDocument, DatasetsSegments } from "@buildingai/db/entities";
-import { ILike, In, Raw, Repository } from "@buildingai/db/typeorm";
+import { Brackets, In, Repository } from "@buildingai/db/typeorm";
 import { PaginationDto } from "@buildingai/dto/pagination.dto";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { llmFileParser } from "@buildingai/llm-file-parser";
@@ -241,28 +241,57 @@ export class DatasetsDocumentService extends BaseService<DatasetsDocument> {
         uploadTime: { createdAt: "DESC" },
     };
 
+    private static fileTypeCondition(fileType: "text" | "table" | "image"): string {
+        const tableCondition = `(document.file_type ILIKE '%spreadsheetml%' OR document.file_type ILIKE '%ms-excel%' OR document.file_type ILIKE '%csv%')`;
+        const imageCondition = `document.file_type ILIKE 'image/%'`;
+        switch (fileType) {
+            case "text":
+                return `(NOT (${tableCondition}) AND NOT (${imageCondition}))`;
+            case "table":
+                return tableCondition;
+            case "image":
+                return imageCondition;
+            default:
+                return "1=1";
+        }
+    }
+
     async listByDataset(datasetId: string, paginationDto: ListDocumentsDto | PaginationDto) {
         const listDto = paginationDto as ListDocumentsDto;
         const keyword = listDto?.keyword?.trim();
         const sortBy = listDto?.sortBy ?? "uploadTime";
-
-        const where = keyword
-            ? ([
-                  { datasetId, fileName: ILike(`%${keyword}%`) },
-                  { datasetId, summary: ILike(`%${keyword}%`) },
-                  {
-                      datasetId,
-                      tags: Raw((alias) => `array_to_string(${alias}, ' ') ILIKE :kw`, {
-                          kw: `%${keyword}%`,
-                      }),
-                  },
-              ] as any)
-            : { datasetId };
+        const fileType = listDto?.fileType ?? "all";
 
         const order =
             DatasetsDocumentService.LIST_ORDER[sortBy] ??
             DatasetsDocumentService.LIST_ORDER.uploadTime;
+        const orderKey = Object.keys(order)[0] as keyof DatasetsDocument;
+        const orderDir = order[orderKey] as "ASC" | "DESC";
 
+        if (fileType !== "all" || keyword) {
+            const qb = this.documentRepository
+                .createQueryBuilder("document")
+                .where("document.dataset_id = :datasetId", { datasetId });
+            if (keyword) {
+                qb.andWhere(
+                    new Brackets((b) =>
+                        b
+                            .where("document.file_name ILIKE :keyword", { keyword: `%${keyword}%` })
+                            .orWhere("document.summary ILIKE :keyword", { keyword: `%${keyword}%` })
+                            .orWhere("array_to_string(document.tags, ' ') ILIKE :keyword", {
+                                keyword: `%${keyword}%`,
+                            }),
+                    ),
+                );
+            }
+            if (fileType !== "all") {
+                qb.andWhere(DatasetsDocumentService.fileTypeCondition(fileType));
+            }
+            qb.orderBy(`document.${orderKey}`, orderDir);
+            return this.paginateQueryBuilder(qb, paginationDto);
+        }
+
+        const where = { datasetId };
         return this.paginate(paginationDto, { where, order });
     }
 
@@ -283,6 +312,7 @@ export class DatasetsDocumentService extends BaseService<DatasetsDocument> {
         await this.documentRepository.remove(doc);
         await this.updateDatasetCounts(datasetId, -1, -segmentCount, -fileSize);
         this.logger.log(`Document deleted: ${documentId}`);
+        await this.vectorizationTrigger.removeDocumentJobs([documentId]);
         return true;
     }
 
@@ -323,6 +353,8 @@ export class DatasetsDocumentService extends BaseService<DatasetsDocument> {
         }
         await this.updateDatasetCounts(datasetId, -docs.length, -chunkDelta, -storageDelta);
         this.logger.log(`Batch deleted ${docs.length} documents from dataset ${datasetId}`);
+        const documentIds = docs.map((d) => d.id);
+        await this.vectorizationTrigger.removeDocumentJobs(documentIds);
         return { deleted: docs.length };
     }
 

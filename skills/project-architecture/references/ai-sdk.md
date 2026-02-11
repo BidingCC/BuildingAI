@@ -3,6 +3,7 @@
 AI SDK packages for chat completions, embeddings, and provider integrations.
 
 ## Location
+
 - `packages/@buildingai/ai-sdk/` - Legacy AI SDK
 - `packages/@buildingai/ai-sdk-new/` - Vercel AI SDK 6.x based
 
@@ -50,4 +51,5 @@ const result = await generateObject({
 
 ## Supported Providers
 
-OpenAI, Anthropic, Google, DeepSeek, Moonshot, Tongyi, Wenxin, ZhipuAI, Hunyuan, VolcEngine, SiliconFlow, X, Ollama, etc.
+OpenAI, Anthropic, Google, DeepSeek, Moonshot, Tongyi, Wenxin, ZhipuAI, Hunyuan, VolcEngine,
+SiliconFlow, X, Ollama, etc.

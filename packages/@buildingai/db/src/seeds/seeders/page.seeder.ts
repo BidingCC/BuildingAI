@@ -1,6 +1,9 @@
+import { Dict } from "../../entities/dict.entity";
 import { DataSource } from "../../typeorm";
-import { DecoratePageEntity } from "./../../entities/decorate-page.entity";
 import { BaseSeeder } from "./base.seeder";
+
+const DICT_GROUP = "decorate";
+const DICT_KEY = "menu-config";
 
 /**
  * Page configuration seeder
@@ -12,67 +15,139 @@ export class PageSeeder extends BaseSeeder {
     readonly priority = 40;
 
     async run(dataSource: DataSource): Promise<void> {
-        const repository = dataSource.getRepository(DecoratePageEntity);
+        const dictRepository = dataSource.getRepository(Dict);
 
         try {
-            // Check whether the page configuration already exists
-            const existingPage = await repository.findOne({
-                where: { name: "web" },
+            // Check whether the menu configuration already exists
+            const existing = await dictRepository.findOne({
+                where: { key: DICT_KEY, group: DICT_GROUP },
             });
 
-            if (existingPage) {
-                this.logInfo("Page configuration already exists, skipping initialization");
+            if (existing) {
+                this.logInfo("Menu configuration already exists, skipping initialization");
                 return;
             }
 
             // Create frontend home page menu configuration
-            const homeMenus = {
+            const menuConfig = {
                 menus: [
                     {
-                        id: "menu_1755512044425_a2764bd6-6ee5-4134-9844-6f952371e9e3",
-                        icon: "i-lucide-message-square-quote",
+                        id: "menu_home_fixed",
+                        icon: "square-pen",
+                        title: "新对话",
                         link: {
-                            name: "menu.chat",
+                            label: "新对话",
                             path: "/",
                             type: "system",
                             query: {},
+                            component: "/src/pages/chat/index.tsx",
+                            target: "_self",
                         },
-                        title: "对话",
                     },
                     {
-                        id: "menu_1755255556893_4574a410-9f08-4c41-b73a-4a07236be704",
-                        icon: "i-lucide-bot-message-square",
+                        id: "menu_app-center",
+                        icon: "layout-grid",
+                        title: "应用",
                         link: {
-                            name: "menu.agent",
-                            path: "/public/agent/square",
-                            type: "system",
-                            query: {},
-                        },
-                        title: "智能体",
-                    },
-                    {
-                        id: "menu_1764936950052-28ca0576-854a-4272-8e26-7c1dc1159ca1",
-                        icon: "i-tabler-apps",
-                        link: {
-                            name: "menu.apps",
+                            label: "应用",
                             path: "/apps",
                             type: "system",
                             query: {},
+                            component: "/src/pages/apps/index.tsx",
+                            target: "_self",
                         },
-                        title: "应用中心",
+                    },
+                    {
+                        id: "menu_agent-center",
+                        icon: "bot",
+                        title: "智能体",
+                        link: {
+                            label: "智能体",
+                            path: "/agents",
+                            type: "system",
+                            query: {},
+                            component: "/src/pages/agents/index.tsx",
+                            target: "_self",
+                        },
+                    },
+                    {
+                        id: "menu_datasets",
+                        icon: "book-open-check",
+                        title: "知识库",
+                        link: {
+                            label: "知识库",
+                            path: "/datasets",
+                            type: "system",
+                            query: {},
+                            component: "/src/pages/datasets/index.tsx",
+                            target: "_self",
+                        },
+                    },
+                    {
+                        id: "menu_workflow",
+                        icon: "workflow",
+                        title: "工作流",
+                        link: {
+                            label: "工作流",
+                            path: "/workflow",
+                            type: "system",
+                            query: {},
+                            component: "/src/pages/workflow/index.tsx",
+                            target: "_self",
+                        },
+                    },
+                    {
+                        id: "menu_history_fixed",
+                        icon: "folder-clock",
+                        title: "历史记录",
+                        link: {
+                            label: "历史记录",
+                            path: "",
+                            type: "button",
+                            query: {},
+                            component: null,
+                            target: "_self",
+                        },
                     },
                 ],
-                layout: "layout-5",
+                groups: [
+                    {
+                        id: "group_default_apps",
+                        title: "应用",
+                        items: [
+                            {
+                                id: "menu_group_extension_demo",
+                                icon: "puzzle",
+                                title: "扩展示例",
+                                link: {
+                                    label: "扩展示例",
+                                    path: "#",
+                                    type: "extension",
+                                    query: {},
+                                    component: null,
+                                    target: "_self",
+                                },
+                            },
+                        ],
+                    },
+                ],
+                layout: "default",
             };
 
-            await repository.save({
-                name: "web",
-                data: homeMenus,
+            const config = dictRepository.create({
+                key: DICT_KEY,
+                value: JSON.stringify(menuConfig),
+                group: DICT_GROUP,
+                description: "前台菜单配置",
+                isEnabled: true,
+                sort: 0,
             });
 
-            this.logSuccess("Page configuration initialized successfully");
+            await dictRepository.save(config);
+
+            this.logSuccess("Menu configuration initialized successfully");
         } catch (error) {
-            this.logError(`Page configuration initialization failed: ${error.message}`);
+            this.logError(`Menu configuration initialization failed: ${error.message}`);
             throw error;
         }
     }

@@ -22,7 +22,7 @@ import {
 import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog";
 import { ChevronsUpDown, LogOut, Settings, User } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { useSettingsDialog } from "@/components/settings-dialog";
 
@@ -32,6 +32,7 @@ export function NavUser() {
   const { logout, isLogin } = useAuthStore((state) => state.authActions);
 
   const settingsDialog = useSettingsDialog();
+  const location = useLocation();
   const navigate = useNavigate();
   const { confirm } = useAlertDialog();
 
@@ -87,7 +88,11 @@ export function NavUser() {
                   description: "确定要退出登录吗？",
                 });
                 logout();
-                navigate("/login");
+                const redirect = encodeURIComponent(location.pathname + location.search);
+                navigate(`/login?redirect=${redirect}`, {
+                  replace: true,
+                  state: { redirect: location.pathname },
+                });
               }}
             >
               <LogOut />

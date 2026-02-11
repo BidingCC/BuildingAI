@@ -23,23 +23,16 @@ export function useDatasetDocumentUpload(datasetId: string | undefined) {
 
       setIsUploading(true);
       try {
-        // 1. 上传文件到服务器，获取 fileId
         const results = await uploadFiles(files);
-
-        // 2. 为每个上传成功的文件创建知识库文档
         const createPromises = results.map((result) =>
-          createDatasetsDocument(datasetId, { fileId: result.id }),
+          createDatasetsDocument(datasetId, { url: result.url }),
         );
 
         await Promise.all(createPromises);
 
-        // 3. 刷新文档列表和知识库详情
-        queryClient.invalidateQueries({
-          queryKey: ["datasets", datasetId, "documents"],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["datasets", datasetId],
-        });
+        queryClient.invalidateQueries({ queryKey: ["datasets", datasetId, "documents"] });
+        queryClient.invalidateQueries({ queryKey: ["datasets", "documents-infinite", datasetId] });
+        queryClient.invalidateQueries({ queryKey: ["datasets", datasetId] });
 
         toast.success(`已成功上传 ${results.length} 个文件`);
       } catch (error) {
@@ -54,6 +47,29 @@ export function useDatasetDocumentUpload(datasetId: string | undefined) {
 
   return {
     uploadDocuments,
+    uploadDocumentFromUrl: useCallback(
+      async (url: string) => {
+        if (!datasetId) return;
+        const value = url.trim();
+        if (!value) return;
+        setIsUploading(true);
+        try {
+          await createDatasetsDocument(datasetId, { url: value });
+          queryClient.invalidateQueries({ queryKey: ["datasets", datasetId, "documents"] });
+          queryClient.invalidateQueries({
+            queryKey: ["datasets", "documents-infinite", datasetId],
+          });
+          queryClient.invalidateQueries({ queryKey: ["datasets", datasetId] });
+          toast.success("已成功添加在线文档");
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "上传失败";
+          toast.error(message);
+        } finally {
+          setIsUploading(false);
+        }
+      },
+      [datasetId, queryClient],
+    ),
     isUploading,
   };
 }

@@ -197,6 +197,15 @@ export class VectorizationRunnerService {
                     }
                 }
             } catch (err: any) {
+                console.log("Embedding batch error", {
+                    documentId,
+                    datasetId,
+                    provider: model.provider.provider,
+                    model: model.model,
+                    batchRange: `${i}-${i + batch.length - 1}/${total}`,
+                    segmentIds: batch.map((s) => s.id),
+                    error: err?.message ?? "Unknown",
+                });
                 this.logger.error(
                     [
                         `Batch embedding threw error`,

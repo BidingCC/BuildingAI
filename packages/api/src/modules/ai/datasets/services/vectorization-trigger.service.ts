@@ -56,4 +56,50 @@ export class VectorizationTriggerService {
         this.logger.log(`Dataset vectorization: ${added} document jobs queued for ${datasetId}`);
         return added;
     }
+
+    async removeDocumentJobs(documentIds: string[]): Promise<number> {
+        if (documentIds.length === 0) return 0;
+        const jobs = await this.queueService.getQueueJobs("vectorization");
+        const all = [...jobs.waiting, ...jobs.active, ...jobs.completed, ...jobs.failed];
+        const idSet = new Set(documentIds);
+        let removed = 0;
+        for (const job of all) {
+            const data = job.data;
+            const params = data?.params;
+            if (data?.type !== "document") continue;
+            if (!params?.documentId) continue;
+            if (!idSet.has(params.documentId)) continue;
+            const ok = await this.queueService.removeJob("vectorization", String(job.id));
+            if (ok) {
+                removed++;
+            }
+        }
+        if (removed > 0) {
+            this.logger.log(
+                `Removed ${removed} vectorization jobs for documents: ${documentIds.join(",")}`,
+            );
+        }
+        return removed;
+    }
+
+    async removeDatasetJobs(datasetId: string): Promise<number> {
+        const jobs = await this.queueService.getQueueJobs("vectorization");
+        const all = [...jobs.waiting, ...jobs.active, ...jobs.completed, ...jobs.failed];
+        let removed = 0;
+        for (const job of all) {
+            const data = job.data;
+            const params = data?.params;
+            if (data?.type !== "document") continue;
+            if (!params?.datasetId) continue;
+            if (params.datasetId !== datasetId) continue;
+            const ok = await this.queueService.removeJob("vectorization", String(job.id));
+            if (ok) {
+                removed++;
+            }
+        }
+        if (removed > 0) {
+            this.logger.log(`Removed ${removed} vectorization jobs for dataset: ${datasetId}`);
+        }
+        return removed;
+    }
 }

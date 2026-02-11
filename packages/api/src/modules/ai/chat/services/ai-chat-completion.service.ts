@@ -11,6 +11,14 @@ import {
     normalizeChatUsage,
     withEstimatedUsage,
 } from "@buildingai/ai-sdk-new";
+import { GENERATE_TITLE_PROMPT } from "@buildingai/ai-toolkit/prompts";
+import {
+    createDalle2ImageGenerationTool,
+    createDalle3ImageGenerationTool,
+    createDeepResearchTool,
+    createGptImageGenerationTool,
+    getWeather,
+} from "@buildingai/ai-toolkit/tools";
 import { SecretService } from "@buildingai/core/modules";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { llmFileParser } from "@buildingai/llm-file-parser";
@@ -32,13 +40,6 @@ import { validate as isUUID } from "uuid";
 
 import { AiMcpServerService } from "../../mcp/services/ai-mcp-server.service";
 import { AiModelService } from "../../model/services/ai-model.service";
-import {
-    createDalle2ImageGenerationTool,
-    createDalle3ImageGenerationTool,
-    createGptImageGenerationTool,
-} from "../tools/openai-image.tools";
-import { createDeepResearchTool } from "../tools/openai-research.tools";
-import { getWeather } from "../tools/weather.tools";
 import type { ChatCompletionParams, UIMessage } from "../types/chat.types";
 import { AiChatsMessageService } from "./ai-chat-message.service";
 import { AiChatRecordService } from "./ai-chat-record.service";
@@ -485,16 +486,7 @@ export class ChatCompletionService {
 
         const result = await generateText({
             model,
-            prompt: `请为以下对话内容生成一个简洁的标题。要求：
-1. 标题要简洁明了，不超过10个字
-2. 标题要使用相关关键词，不要使用对话内容中的具体内容
-3. 使用与对话内容相同的语言
-4. 只输出标题，不要包含任何其他文字、标点或说明
-
-对话内容：
-${input}
-
-标题：`,
+            prompt: GENERATE_TITLE_PROMPT(input),
             providerOptions: getReasoningOptions(providerId, { thinking: false }),
         });
 

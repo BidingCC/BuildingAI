@@ -3,15 +3,18 @@
 Base controller and service classes.
 
 ## Location
+
 `packages/@buildingai/base/`
 
 ## Exports
+
 - `BaseController` - Base controller with `paginationResult()` method
 - `BaseService<T>` - Generic service with CRUD operations
 
 ## BaseService<T>
 
 ### Methods
+
 - `findOne(options?)`, `findOneById(id, options?)`, `findAll(options?)`
 - `paginate(paginationDto, options?)` - Returns `{items, total, page, pageSize, totalPages}`
 - `paginateQueryBuilder(queryBuilder, paginationDto, ...)` - Advanced pagination with QueryBuilder
@@ -21,12 +24,15 @@ Base controller and service classes.
 - `count(options?)` - Count records
 
 ### Features
-- Field filtering: `excludeFields: ["password"]` or `includeFields: ["id", "name"]` (supports nested paths)
+
+- Field filtering: `excludeFields: ["password"]` or `includeFields: ["id", "name"]` (supports nested
+  paths)
 - Lock support: `lock: { type: LockType.OPTIMISTIC/PESSIMISTIC_WRITE, ... }`
 - Transaction: `withTransaction(async (manager) => {...})`
 - PostgreSQL helpers: `ilike()`, `textSearch()`, `jsonQuery()`, `arrayContains()`
 
 ### Usage
+
 ```typescript
 import { BaseService } from "@buildingai/base";
 import { User } from "@buildingai/db/entities";

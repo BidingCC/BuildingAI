@@ -1,3 +1,4 @@
+import type { TagTypeType } from "@buildingai/constants";
 import {
   type ConsoleDatasetItem,
   type QueryConsoleDatasetsDto,
@@ -30,13 +31,25 @@ import {
 } from "@buildingai/ui/components/ui/table";
 import { TimeText } from "@buildingai/ui/components/ui/time-text";
 import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog";
-import { BookOpen, EllipsisVertical, FileCheck, Info, Layers, Trash2, User } from "lucide-react";
+import {
+  BookOpen,
+  EllipsisVertical,
+  FileCheck,
+  FileText,
+  Info,
+  Layers,
+  Trash2,
+  Users,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { TagSelect } from "@/components/tags";
 import { usePagination } from "@/hooks/use-pagination";
 import { PageContainer } from "@/layouts/console/_components/page-container";
 
+import { DocumentDialog } from "./_components/document-dialog";
+import { MemberDialog } from "./_components/member-dialog";
 import { ReviewDialog } from "./_components/review-dialog";
 import { VectorConfigDialog } from "./_components/vector-config-dialog";
 
@@ -104,6 +117,10 @@ const DatasetsIndexPage = () => {
   const [reviewOpen, setReviewOpen] = useState(false);
   const [vectorDataset, setVectorDataset] = useState<ConsoleDatasetItem | null>(null);
   const [vectorOpen, setVectorOpen] = useState(false);
+  const [documentDataset, setDocumentDataset] = useState<ConsoleDatasetItem | null>(null);
+  const [documentOpen, setDocumentOpen] = useState(false);
+  const [memberDataset, setMemberDataset] = useState<ConsoleDatasetItem | null>(null);
+  const [memberOpen, setMemberOpen] = useState(false);
   const { confirm: alertConfirm } = useAlertDialog();
   const { data, isLoading, refetch } = useConsoleDatasetsListQuery(queryParams);
   const deleteMutation = useDeleteDatasetMutation({
@@ -138,9 +155,14 @@ const DatasetsIndexPage = () => {
     }));
   };
 
-  const handleDetail = (row: ConsoleDatasetItem) => {
-    console.log("detail", row.id);
+  const handleTagIdsChange = (ids: string[]) => {
+    setQueryParams((prev) => ({
+      ...prev,
+      tagId: ids[0],
+      page: 1,
+    }));
   };
+
   const handleReview = (row: ConsoleDatasetItem) => {
     setReviewDataset(row);
     setReviewOpen(true);
@@ -170,11 +192,19 @@ const DatasetsIndexPage = () => {
     setVectorDataset(row);
     setVectorOpen(true);
   };
+  const handleDocument = (row: ConsoleDatasetItem) => {
+    setDocumentDataset(row);
+    setDocumentOpen(true);
+  };
+  const handleMember = (row: ConsoleDatasetItem) => {
+    setMemberDataset(row);
+    setMemberOpen(true);
+  };
 
   return (
     <PageContainer>
       <div className="flex flex-1 flex-col gap-4">
-        <div className="bg-background sticky top-0 z-1 mb-1 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="bg-background sticky top-0 z-2 mb-1 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Input
             placeholder="请输入知识库名称"
             className="text-sm"
@@ -182,7 +212,7 @@ const DatasetsIndexPage = () => {
             onChange={handleNameChange}
           />
           <Select value={queryParams.status ?? "all"} onValueChange={handleStatusChange}>
-            <SelectTrigger className="w-full sm:w-[140px]">
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="全部" />
             </SelectTrigger>
             <SelectContent>
@@ -193,6 +223,12 @@ const DatasetsIndexPage = () => {
               ))}
             </SelectContent>
           </Select>
+          <TagSelect
+            type={"dataset" as TagTypeType}
+            value={queryParams.tagId ? [queryParams.tagId] : []}
+            onChange={handleTagIdsChange}
+            placeholder="搜索分类"
+          />
         </div>
 
         <div className="flex-1 overflow-auto rounded-lg border">
@@ -201,6 +237,7 @@ const DatasetsIndexPage = () => {
               <TableRow>
                 <TableHead>知识库</TableHead>
                 <TableHead>创建人</TableHead>
+                <TableHead>标签</TableHead>
                 <TableHead className="text-center">文档数量</TableHead>
                 <TableHead>存储空间</TableHead>
                 <TableHead>状态</TableHead>
@@ -212,13 +249,13 @@ const DatasetsIndexPage = () => {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-muted-foreground h-32 text-center">
+                  <TableCell colSpan={10} className="text-muted-foreground h-32 text-center">
                     加载中...
                   </TableCell>
                 </TableRow>
               ) : !data?.items?.length ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-muted-foreground h-32 text-center">
+                  <TableCell colSpan={10} className="text-muted-foreground h-32 text-center">
                     暂无知识库数据
                   </TableCell>
                 </TableRow>
@@ -235,6 +272,23 @@ const DatasetsIndexPage = () => {
                     </TableCell>
                     <TableCell className="text-muted-foreground truncate">
                       {row.creatorName}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex max-w-[120px] flex-wrap gap-1">
+                        {(row.tags ?? []).length > 0 ? (
+                          (row.tags ?? []).map((t) => (
+                            <Badge
+                              key={t.id}
+                              variant="secondary"
+                              className="truncate text-xs font-normal"
+                            >
+                              {t.name}
+                            </Badge>
+                          ))
+                        ) : (
+                          <span className="text-muted-foreground text-xs">-</span>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell className="text-center">{row.documentCount}</TableCell>
                     <TableCell>{row.storageSizeFormatted}</TableCell>
@@ -260,9 +314,13 @@ const DatasetsIndexPage = () => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onSelect={() => handleDetail(row)}>
-                            <User className="mr-2 size-4" />
-                            详情
+                          <DropdownMenuItem onSelect={() => handleDocument(row)}>
+                            <FileText className="mr-2 size-4" />
+                            文档
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onSelect={() => handleMember(row)}>
+                            <Users className="mr-2 size-4" />
+                            成员
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             disabled={row.squarePublishStatus !== "pending"}
@@ -310,6 +368,22 @@ const DatasetsIndexPage = () => {
         datasetName={vectorDataset?.name ?? ""}
         onSuccess={() => refetch()}
       />
+      {documentOpen && documentDataset && (
+        <DocumentDialog
+          open={documentOpen}
+          onOpenChange={setDocumentOpen}
+          datasetId={documentDataset.id}
+          datasetName={documentDataset.name}
+        />
+      )}
+      {memberOpen && memberDataset && (
+        <MemberDialog
+          open={memberOpen}
+          onOpenChange={setMemberOpen}
+          datasetId={memberDataset.id}
+          datasetName={memberDataset.name}
+        />
+      )}
     </PageContainer>
   );
 };

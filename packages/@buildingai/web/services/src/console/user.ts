@@ -289,3 +289,31 @@ export function useSetLoginSettingsMutation(
         ...options,
     });
 }
+
+export type GoogleOaConfigResponse = {
+    clientId?: string;
+    clientSecretConfigured: boolean;
+    redirectUri: string;
+};
+
+export type SetGoogleOaConfigDto = {
+    clientId: string;
+    clientSecret?: string;
+};
+
+export function useGoogleOaConfigQuery(options?: QueryOptionsUtil<GoogleOaConfigResponse>) {
+    return useQuery<GoogleOaConfigResponse>({
+        queryKey: ["channel", "google-oa"],
+        queryFn: () => consoleHttpClient.get<GoogleOaConfigResponse>("/google-oa"),
+        ...options,
+    });
+}
+
+export function useSetGoogleOaConfigMutation(
+    options?: MutationOptionsUtil<{ success: boolean }, SetGoogleOaConfigDto>,
+) {
+    return useMutation<{ success: boolean }, Error, SetGoogleOaConfigDto>({
+        mutationFn: (dto) => consoleHttpClient.patch<{ success: boolean }>("/google-oa", dto),
+        ...options,
+    });
+}

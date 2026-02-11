@@ -1,8 +1,3 @@
-/**
- * @fileoverview JSON/XML parser
- * @description Extracts structured content from JSON and XML files
- */
-
 import { parseString } from "xml2js";
 
 import type { ParseOptions, ParseResult, StructuredTextBlock } from "../types";
@@ -25,7 +20,7 @@ export class JsonXmlParser extends BaseParser {
     async parse(
         buffer: Buffer,
         filename: string,
-        options: ParseOptions = {},
+        _options: ParseOptions = {},
     ): Promise<ParseResult> {
         try {
             const lowerFilename = filename.toLowerCase();
@@ -77,9 +72,6 @@ export class JsonXmlParser extends BaseParser {
         }
     }
 
-    /**
-     * Parse JSON content
-     */
     private parseJson(
         content: string,
         isJsonl: boolean,
@@ -87,7 +79,6 @@ export class JsonXmlParser extends BaseParser {
         const blocks: StructuredTextBlock[] = [];
 
         if (isJsonl) {
-            // JSONL format - one JSON object per line
             const lines = content.split("\n").filter((line) => line.trim());
             const items: string[] = [];
 
@@ -96,7 +87,7 @@ export class JsonXmlParser extends BaseParser {
                     const obj = JSON.parse(line);
                     items.push(JSON.stringify(obj, null, 2));
                 } catch {
-                    // Skip invalid lines
+                    continue;
                 }
             }
 
@@ -113,19 +104,16 @@ export class JsonXmlParser extends BaseParser {
             };
         }
 
-        // Regular JSON
         try {
             const parsed = JSON.parse(content);
             const formatted = JSON.stringify(parsed, null, 2);
 
-            // Create structured representation
             blocks.push({
                 type: "heading",
                 level: 1,
                 content: "JSON Document",
             });
 
-            // If it's an object, extract key-value pairs
             if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) {
                 const entries = Object.entries(parsed);
                 for (const [key, value] of entries) {
@@ -136,7 +124,6 @@ export class JsonXmlParser extends BaseParser {
                     });
                 }
             } else {
-                // For arrays or primitives, show as code
                 blocks.push({
                     type: "code",
                     content: formatted,
@@ -154,9 +141,6 @@ export class JsonXmlParser extends BaseParser {
         }
     }
 
-    /**
-     * Format JSON value for display
-     */
     private formatJsonValue(value: unknown): string {
         if (value === null) return "null";
         if (typeof value === "string") return value;
@@ -166,9 +150,6 @@ export class JsonXmlParser extends BaseParser {
         return String(value);
     }
 
-    /**
-     * Parse XML content
-     */
     private async parseXml(
         content: string,
     ): Promise<{ blocks: StructuredTextBlock[]; text: string }> {
@@ -181,7 +162,6 @@ export class JsonXmlParser extends BaseParser {
 
                 const blocks: StructuredTextBlock[] = [];
 
-                // Extract root element name
                 const rootKey = Object.keys(result)[0];
                 blocks.push({
                     type: "heading",
@@ -189,16 +169,13 @@ export class JsonXmlParser extends BaseParser {
                     content: `XML Document: ${rootKey}`,
                 });
 
-                // Convert XML to structured text
                 const text = this.xmlToText(result, 0);
 
-                // Create code block with formatted XML
                 blocks.push({
                     type: "code",
                     content: this.formatXml(content),
                 });
 
-                // Also create structured blocks from parsed content
                 const structuredBlocks = this.xmlToStructuredBlocks(result);
                 blocks.push(...structuredBlocks);
 
@@ -210,9 +187,6 @@ export class JsonXmlParser extends BaseParser {
         });
     }
 
-    /**
-     * Convert XML object to text
-     */
     private xmlToText(obj: any, depth: number): string {
         const indent = "  ".repeat(depth);
         let text = "";
@@ -234,9 +208,6 @@ export class JsonXmlParser extends BaseParser {
         return text;
     }
 
-    /**
-     * Convert XML object to structured blocks
-     */
     private xmlToStructuredBlocks(obj: any): StructuredTextBlock[] {
         const blocks: StructuredTextBlock[] = [];
 
@@ -283,11 +254,7 @@ export class JsonXmlParser extends BaseParser {
         return blocks;
     }
 
-    /**
-     * Format XML with proper indentation
-     */
     private formatXml(xml: string): string {
-        // Simple XML formatting - can be enhanced with a proper formatter
         return xml
             .replace(/>\s+</g, ">\n<")
             .split("\n")

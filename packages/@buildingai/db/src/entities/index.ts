@@ -23,8 +23,6 @@ export {
     MemberApplicationStatus,
 } from "./datasets-member-application.entity";
 export { DatasetsSegments } from "./datasets-segments.entity";
-export { DecorateMicropageEntity } from "./decorate-micropage.entity";
-export { DecoratePageEntity } from "./decorate-page.entity";
 export { Dict } from "./dict.entity";
 export { Extension } from "./extension.entity";
 export { ExtensionFeature } from "./extension-feature.entity";

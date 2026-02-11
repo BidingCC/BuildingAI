@@ -34,6 +34,7 @@ export type AiProviderModel = {
     maxContext: number;
     modelConfig: ModelConfig[];
     isActive: boolean;
+    thinking: boolean;
     description?: string;
     sortOrder: number;
     billingRule: BillingRule;
@@ -242,6 +243,7 @@ export type CreateAiModelDto = {
     billingRule: BillingRule;
     membershipLevel?: string[];
     isActive?: boolean;
+    thinking?: boolean;
     isDefault?: boolean;
     description?: string;
     sortOrder?: number;

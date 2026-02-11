@@ -3,9 +3,11 @@
 Database layer with TypeORM.
 
 ## Location
+
 `packages/@buildingai/db/`
 
 ## Exports
+
 - Entities from `@buildingai/db/entities`
 - TypeORM from `@buildingai/db/typeorm`
 - `FileUrlModule` - File URL building
@@ -18,7 +20,8 @@ Database layer with TypeORM.
 import { User, Order } from "@buildingai/db/entities";
 ```
 
-Common entities: `User`, `Menu`, `Permission`, `Role`, `AiProvider`, `AiModel`, `AiChatRecord`, `AiChatMessage`, `Datasets`, `AccountLog`, etc.
+Common entities: `User`, `Menu`, `Permission`, `Role`, `AiProvider`, `AiModel`, `AiChatRecord`,
+`AiChatMessage`, `Datasets`, `AccountLog`, etc.
 
 ## Using in Services
 
@@ -31,7 +34,7 @@ import { Repository, DataSource } from "@buildingai/db/typeorm";
 export class UserService extends BaseService<User> {
     constructor(
         @InjectRepository(User) repository: Repository<User>,
-        private dataSource: DataSource
+        private dataSource: DataSource,
     ) {
         super(repository);
     }
@@ -90,11 +93,12 @@ const user = await repo.findOne({ where: { id }, relations: ["orders"] });
 
 // Conditions
 const users = await repo.find({
-    where: { status: In(["active"]), name: ILike(`%${search}%`) }
+    where: { status: In(["active"]), name: ILike(`%${search}%`) },
 });
 
 // QueryBuilder
-const users = await repo.createQueryBuilder("user")
+const users = await repo
+    .createQueryBuilder("user")
     .leftJoinAndSelect("user.orders", "order")
     .where("user.status = :status", { status: "active" })
     .getMany();

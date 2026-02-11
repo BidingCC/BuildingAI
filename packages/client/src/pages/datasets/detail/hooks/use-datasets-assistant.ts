@@ -121,7 +121,10 @@ function useLocalFeedback() {
   return { liked, disliked, onLike, onDislike };
 }
 
-export function useDatasetsAssistant(options: UseDatasetsAssistantOptions): AssistantContextValue {
+export function useDatasetsAssistant(options: UseDatasetsAssistantOptions): {
+  providerValue: AssistantContextValue;
+  setConversationId: (id: string | undefined) => void;
+} {
   const { datasetId, providers, suggestions = [], enableThinking: initialEnableThinking } = options;
 
   const models = useMemo(() => convertProvidersToModels(providers), [providers]);
@@ -284,34 +287,68 @@ export function useDatasetsAssistant(options: UseDatasetsAssistantOptions): Assi
     [getParentId, streamMessages, setMessages, send],
   );
 
-  return {
-    messages: [...repositoryMessages],
-    displayMessages: displayMessages as DisplayMessage[],
-    currentThreadId: currentConversationId,
-    status,
-    streamingMessageId,
-    isLoading: isLoadingMessages,
-    isLoadingMoreMessages,
-    hasMoreMessages,
-    models,
-    selectedModelId,
-    selectedMcpServerIds: [],
-    suggestions,
-    liked,
-    disliked,
-    textareaRef,
-    onSend,
-    onLoadMoreMessages: loadMoreMessages,
-    onStop: stop,
-    onRegenerate,
-    onEditMessage,
-    onSwitchBranch,
-    onSelectModel: handleSelectModel,
-    onSelectMcpServers: () => {},
-    onSetFeature: setFeatureFlag,
-    onLike,
-    onDislike,
-    addToolApprovalResponse,
-    setConversationId,
-  } as AssistantContextValue & { setConversationId: (id: string | undefined) => void };
+  const noopSelectMcpServers = useCallback(() => {}, []);
+
+  const value = useMemo(
+    () =>
+      ({
+        messages: repositoryMessages as UIMessage[],
+        displayMessages: displayMessages as DisplayMessage[],
+        currentThreadId: currentConversationId,
+        status,
+        streamingMessageId,
+        isLoading: isLoadingMessages,
+        isLoadingMoreMessages,
+        hasMoreMessages,
+        models,
+        selectedModelId,
+        selectedMcpServerIds: [] as string[],
+        suggestions,
+        liked,
+        disliked,
+        textareaRef,
+        onSend,
+        onLoadMoreMessages: loadMoreMessages,
+        onStop: stop,
+        onRegenerate,
+        onEditMessage,
+        onSwitchBranch,
+        onSelectModel: handleSelectModel,
+        onSelectMcpServers: noopSelectMcpServers,
+        onSetFeature: setFeatureFlag,
+        onLike,
+        onDislike,
+        addToolApprovalResponse,
+      }) as AssistantContextValue,
+    [
+      repositoryMessages,
+      displayMessages,
+      currentConversationId,
+      status,
+      streamingMessageId,
+      isLoadingMessages,
+      isLoadingMoreMessages,
+      hasMoreMessages,
+      models,
+      selectedModelId,
+      suggestions,
+      liked,
+      disliked,
+      textareaRef,
+      onSend,
+      loadMoreMessages,
+      stop,
+      onRegenerate,
+      onEditMessage,
+      onSwitchBranch,
+      handleSelectModel,
+      noopSelectMcpServers,
+      setFeatureFlag,
+      onLike,
+      onDislike,
+      addToolApprovalResponse,
+    ],
+  );
+
+  return { providerValue: value, setConversationId };
 }

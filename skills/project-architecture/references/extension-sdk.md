@@ -3,9 +3,11 @@
 SDK for developing extensions.
 
 ## Location
+
 `packages/@buildingai/extension-sdk/`
 
 ## Exports
+
 - `AiPublicModule`, `PublicAiModelService` - AI services for extensions
 - `ExtensionBillingModule`, `ExtensionBillingService` - Billing services
 - `PublicUserService` - User service for extensions

@@ -3,9 +3,11 @@
 Error handling utilities.
 
 ## Location
+
 `packages/@buildingai/errors/`
 
 ## Exports
+
 - `HttpErrorFactory` - Error factory methods
 - `HttpError` - Base error class
 - `HttpStatus` - Status code constants

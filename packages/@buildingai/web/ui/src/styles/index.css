@@ -4,8 +4,11 @@
 @import "@fontsource-variable/inter";
 @import "./theme.css";
 
-@source "../components";
 @plugin "@tailwindcss/typography";
+
+@plugin "tailwind-scrollbar-hide";
+@source "../components";
+@source "../../node_modules/streamdown/dist";
 
 @custom-variant dark (&:is(.dark, .dark *));
 
@@ -32,4 +35,101 @@
   [role="button"]:not(:disabled) {
     cursor: pointer;
   }
+}
+
+/* Three-body loader — pseudo-elements & nth-child must stay in CSS */
+.three-body {
+  --uib-speed: 0.8s;
+  animation: three-body-spin calc(var(--uib-speed) * 2.5) infinite linear;
+}
+
+.three-body__dot::after {
+  content: "";
+  @apply absolute h-0 w-full rounded-full;
+  padding-bottom: 100%;
+  background-color: var(--uib-color);
+}
+
+.three-body__dot:nth-child(1) {
+  bottom: 5%;
+  left: 0;
+  transform: rotate(60deg);
+  transform-origin: 50% 85%;
+}
+
+.three-body__dot:nth-child(1)::after {
+  @apply bottom-0 left-0;
+  animation: three-body-wobble1 var(--uib-speed) infinite ease-in-out;
+  animation-delay: calc(var(--uib-speed) * -0.3);
+}
+
+.three-body__dot:nth-child(2) {
+  bottom: 5%;
+  right: 0;
+  transform: rotate(-60deg);
+  transform-origin: 50% 85%;
+}
+
+.three-body__dot:nth-child(2)::after {
+  @apply bottom-0 left-0;
+  animation: three-body-wobble1 var(--uib-speed) infinite calc(var(--uib-speed) * -0.15) ease-in-out;
+}
+
+.three-body__dot:nth-child(3) {
+  bottom: -5%;
+  left: 0;
+  transform: translateX(116.666%);
+}
+
+.three-body__dot:nth-child(3)::after {
+  @apply top-0 left-0;
+  animation: three-body-wobble2 var(--uib-speed) infinite ease-in-out;
+}
+
+@keyframes three-body-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes three-body-wobble1 {
+  0%,
+  100% {
+    transform: translateY(0%) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-66%) scale(0.65);
+    opacity: 0.8;
+  }
+}
+
+@keyframes three-body-wobble2 {
+  0%,
+  100% {
+    transform: translateY(0%) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(66%) scale(0.65);
+    opacity: 0.8;
+  }
+}
+
+:root {
+  --highlight: oklch(0.852 0.199 91.936);
+  --brand: oklch(0.623 0.214 259.815);
+}
+
+.dark {
+  --highlight: oklch(0.852 0.199 91.936);
+  --brand: oklch(0.707 0.165 254.624);
+}
+
+@theme inline {
+  --color-highlight: var(--highlight);
+  --color-brand: var(--brand);
 }

@@ -1,269 +1,631 @@
-import { ExtensionStatus } from "@buildingai/constants/shared/extension.constant";
 import type { Extension } from "@buildingai/services/console";
-import { useExtensionsListQuery, useUpdateExtensionMutation } from "@buildingai/services/console";
+import {
+  useAppsDecorateItemsInfiniteQuery,
+  useAppsDecorateQuery,
+  useBatchUpdateSortMutation,
+  useConsoleTagsQuery,
+  useDeleteConsoleTagMutation,
+  useSetAppsDecorateMutation,
+  useUpdateItemDecorationMutation,
+} from "@buildingai/services/console";
+import { AspectRatio } from "@buildingai/ui/components/ui/aspect-ratio";
 import { Avatar, AvatarFallback, AvatarImage } from "@buildingai/ui/components/ui/avatar";
 import { Badge } from "@buildingai/ui/components/ui/badge";
 import { Button } from "@buildingai/ui/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@buildingai/ui/components/ui/dropdown-menu";
+import { Carousel, CarouselContent, CarouselItem } from "@buildingai/ui/components/ui/carousel";
+import { Empty, EmptyContent, EmptyDescription } from "@buildingai/ui/components/ui/empty";
 import { Input } from "@buildingai/ui/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@buildingai/ui/components/ui/select";
-import { Skeleton } from "@buildingai/ui/components/ui/skeleton";
-import { Switch } from "@buildingai/ui/components/ui/switch";
-import { IconCircleCheckFilled, IconXboxXFilled } from "@tabler/icons-react";
-import { Edit, EllipsisVertical, Eye, EyeOff, Package } from "lucide-react";
-import { useMemo, useState } from "react";
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@buildingai/ui/components/ui/input-group";
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@buildingai/ui/components/ui/item";
+import { SidebarTrigger } from "@buildingai/ui/components/ui/sidebar";
+import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog";
+import { cn } from "@buildingai/ui/lib/utils";
+import {
+  closestCenter,
+  DndContext,
+  type DragEndEvent,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import { arrayMove, rectSortingStrategy, SortableContext, useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  AppWindow,
+  Check,
+  ChevronRight,
+  EyeOff,
+  GripVertical,
+  Loader2,
+  PenLine,
+  Plus,
+  Search,
+  X,
+} from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
-import { usePagination } from "@/hooks/use-pagination";
 import { PageContainer } from "@/layouts/console/_components/page-container";
 
+import { AddTagDialog } from "./_components/add-tag-dialog";
+import type { AppItemEditValues } from "./_components/app-item-edit-dialog";
+import { AppItemEditDialog } from "./_components/app-item-edit-dialog";
 import { DecorateSettingsDialog } from "./_components/decorate-settings-dialog";
 
-/** 列表项：名称为 alias 或 name，描述为 aliasDescription 或 description，展示图标为 aliasIcon 或 icon */
-type AppItem = {
-  id: string;
-  name: string;
-  description: string;
-  icon: string | null;
-  isEnabled: boolean;
-  aliasShow: boolean;
-};
-
-type StatusBadgeProps = { isEnabled: boolean };
-
-const StatusBadge = ({ isEnabled }: StatusBadgeProps) =>
-  isEnabled ? (
-    <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
-      <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
-      启用
-    </Badge>
-  ) : (
-    <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
-      <IconXboxXFilled className="fill-destructive" />
-      禁用
-    </Badge>
-  );
-
-type VisibleBadgeProps = { isVisible: boolean };
-
-const VisibleBadge = ({ isVisible }: VisibleBadgeProps) =>
-  isVisible ? (
-    <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
-      <Eye className="size-3" />
-      显示
-    </Badge>
-  ) : (
-    <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
-      <EyeOff className="size-3" />
-      隐藏
-    </Badge>
-  );
-
-function extensionToAppItem(ext: Extension): AppItem {
+function extToDisplayItem(ext: Extension) {
   return {
     id: ext.id,
-    name: ext.alias?.trim() ? ext.alias : ext.name,
-    description: ext.aliasDescription?.trim() ? ext.aliasDescription : (ext.description ?? ""),
-    icon: ext.aliasIcon ?? ext.icon ?? null,
-    isEnabled: ext.status === ExtensionStatus.ENABLED,
-    aliasShow: ext.aliasShow ?? true,
+    name: ext.name,
+    identifier: ext.identifier,
+    title: ext.alias || ext.name,
+    description: ext.aliasDescription || ext.description || "",
+    avatar: ext.aliasIcon || ext.icon,
+    visible: ext.aliasShow ?? true,
+    sortOrder: ext.appCenterSort ?? 0,
+    tagIds: ext.appCenterTagIds || [],
+    status: ext.status as number,
   };
 }
 
-const PAGE_SIZE = 15;
+type DisplayAppItem = ReturnType<typeof extToDisplayItem>;
+
+function itemToEditValues(item: DisplayAppItem): AppItemEditValues {
+  return {
+    id: item.id,
+    appName: item.name,
+    displayName: item.title,
+    description: item.description,
+    icon: item.avatar ?? "",
+    visible: item.visible,
+    tagIds: item.tagIds,
+  };
+}
+
+const SortableAppItem = ({
+  item,
+  isDragActive,
+  onEdit,
+}: {
+  item: DisplayAppItem;
+  isDragActive: boolean;
+  onEdit: (item: DisplayAppItem) => void;
+}) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: item.id,
+  });
+  const style = useMemo(
+    () => ({
+      transform: CSS.Transform.toString(transform),
+      transition,
+      opacity: isDragging ? 0.6 : 1,
+    }),
+    [transform, transition, isDragging],
+  );
+  return (
+    <div ref={setNodeRef} style={style}>
+      <Item
+        className={cn(
+          "group/apps-item hover:bg-accent cursor-pointer px-0 transition-[padding] hover:px-4",
+          isDragActive && "md:hover:bg-transparent md:hover:px-0",
+          !item.visible && "opacity-50",
+        )}
+      >
+        <ItemMedia>
+          <Avatar className="size-10">
+            <AvatarImage src={item.avatar} />
+            <AvatarFallback>{item.title.slice(0, 2).toUpperCase()}</AvatarFallback>
+          </Avatar>
+        </ItemMedia>
+        <ItemContent>
+          <ItemTitle className="flex items-center gap-2">
+            {item.title}
+            {!item.visible && (
+              <EyeOff className="text-muted-foreground inline-block size-3.5 shrink-0" />
+            )}
+          </ItemTitle>
+          <ItemDescription className="line-clamp-1">{item.description}</ItemDescription>
+        </ItemContent>
+        <ItemActions
+          className={cn(
+            "opacity-100 group-hover/apps-item:opacity-100 md:opacity-0",
+            isDragActive && "md:opacity-0!",
+          )}
+        >
+          <Button
+            size="icon-sm"
+            variant="outline"
+            className="touch-none rounded-full"
+            aria-label="编辑应用"
+            onClick={() => onEdit(item)}
+          >
+            <ChevronRight />
+          </Button>
+          <Button
+            variant="ghost"
+            className={cn(
+              "flex touch-none rounded-full px-0 text-center group-hover/apps-item:flex md:hidden",
+              isDragActive && !isDragging && "md:hidden!",
+            )}
+            aria-label="拖拽排序"
+            {...attributes}
+            {...listeners}
+          >
+            <GripVertical />
+          </Button>
+        </ItemActions>
+      </Item>
+    </div>
+  );
+};
 
 const DecorateAppsIndexPage = () => {
-  const [searchKeyword, setSearchKeyword] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [page, setPage] = useState(1);
+  const [editingField, setEditingField] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
   const [decorateDialogOpen, setDecorateDialogOpen] = useState(false);
+  const [isDragActive, setIsDragActive] = useState(false);
+  const [editingAppItem, setEditingAppItem] = useState<DisplayAppItem | null>(null);
+  const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
+  const [addTagDialogOpen, setAddTagDialogOpen] = useState(false);
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [debouncedKeyword, setDebouncedKeyword] = useState("");
+  const [localTitle, setLocalTitle] = useState("应用中心");
+  const [localDescription, setLocalDescription] = useState(
+    "在 BuildingAI 中与你喜爱的应用进行交互",
+  );
+  const inputRef = useRef<HTMLInputElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const { confirm } = useAlertDialog();
+  const queryClient = useQueryClient();
 
-  const listParams = useMemo(
-    () => ({
-      keyword: searchKeyword.trim() || undefined,
-      status:
-        statusFilter === "all"
-          ? undefined
-          : statusFilter === "enabled"
-            ? ExtensionStatus.ENABLED
-            : ExtensionStatus.DISABLED,
-      page,
-      pageSize: PAGE_SIZE,
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedKeyword(searchKeyword), 300);
+    return () => clearTimeout(timer);
+  }, [searchKeyword]);
+
+  const { data: config, refetch: refetchConfig } = useAppsDecorateQuery();
+  const { data: tags = [], refetch: refetchTags } = useConsoleTagsQuery("app-center" as any);
+
+  const {
+    data: itemsData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: itemsLoading,
+  } = useAppsDecorateItemsInfiniteQuery({
+    keyword: debouncedKeyword || undefined,
+    tagId: selectedTagId || undefined,
+    pageSize: 20,
+  });
+
+  const setConfigMutation = useSetAppsDecorateMutation({
+    onSuccess: () => {
+      toast.success("保存成功");
+      refetchConfig();
+    },
+    onError: (e) => toast.error(`保存失败: ${e.message}`),
+  });
+
+  const updateItemMutation = useUpdateItemDecorationMutation({
+    onSuccess: () => {
+      toast.success("保存成功");
+      queryClient.invalidateQueries({ queryKey: ["apps-decorate", "items-infinite"] });
+      setEditingAppItem(null);
+    },
+    onError: (e) => toast.error(`保存失败: ${e.message}`),
+  });
+
+  const batchSortMutation = useBatchUpdateSortMutation({
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["apps-decorate", "items-infinite"] });
+    },
+    onError: (e) => toast.error(`排序保存失败: ${e.message}`),
+  });
+
+  const deleteTagMutation = useDeleteConsoleTagMutation({
+    onSuccess: () => {
+      toast.success("标签删除成功");
+      refetchTags();
+      if (selectedTagId) {
+        setSelectedTagId(null);
+      }
+    },
+    onError: (error: any) => {
+      toast.error(`删除失败: ${error.message || "未知错误"}`);
+    },
+  });
+
+  useEffect(() => {
+    if (config) {
+      setLocalTitle(config.title || "应用中心");
+      setLocalDescription(config.description || "在 BuildingAI 中与你喜爱的应用进行交互");
+    }
+  }, [config]);
+
+  const allItems = useMemo<DisplayAppItem[]>(() => {
+    if (!itemsData?.pages) return [];
+    return itemsData.pages.flatMap((page) => page.items.map(extToDisplayItem));
+  }, [itemsData]);
+
+  // 本地排序状态（支持拖拽即时反馈）
+  const [localItems, setLocalItems] = useState<DisplayAppItem[]>([]);
+  useEffect(() => {
+    setLocalItems(allItems);
+  }, [allItems]);
+
+  const displayItems = localItems;
+
+  const bannerEnabled = config?.enabled ?? false;
+  const banners = useMemo(() => {
+    if (!config?.enabled) return [];
+    return config.banners?.filter((b) => b.imageUrl) || [];
+  }, [config]);
+
+  useEffect(() => {
+    if (!sentinelRef.current || !hasNextPage) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1 },
+    );
+    observer.observe(sentinelRef.current);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 200, tolerance: 5 },
     }),
-    [searchKeyword, statusFilter, page, PAGE_SIZE],
   );
 
-  const { data, isLoading, refetch } = useExtensionsListQuery(listParams);
+  const handleAppDragStart = useCallback(() => setIsDragActive(true), []);
 
-  const updateExtensionMutation = useUpdateExtensionMutation({
-    onSuccess: () => {
-      toast.success("展示状态已更新");
-      refetch();
+  const handleAppDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      setIsDragActive(false);
+      const { active, over } = event;
+      if (!over || active.id === over.id) return;
+
+      const oldIndex = localItems.findIndex((i) => i.id === active.id);
+      const newIndex = localItems.findIndex((i) => i.id === over.id);
+      if (oldIndex === -1 || newIndex === -1) return;
+
+      const newItems = arrayMove(localItems, oldIndex, newIndex);
+      setLocalItems(newItems); // 乐观更新
+
+      // 批量更新排序
+      const sortItems = newItems.map((item, index) => ({ id: item.id, sort: index }));
+      batchSortMutation.mutate({ items: sortItems });
     },
-    onError: (err) => {
-      toast.error(`更新失败: ${err.message}`);
-    },
-  });
+    [localItems, batchSortMutation],
+  );
 
-  const { PaginationComponent } = usePagination({
-    total: data?.total ?? 0,
-    pageSize: PAGE_SIZE,
-    page,
-    onPageChange: (p) => {
-      setPage(p);
-      refetch();
-    },
-  });
+  const handleStartEdit = useCallback((field: string, currentValue: string) => {
+    setEditingField(field);
+    setEditValue(currentValue || "");
+  }, []);
 
-  const apps = useMemo(() => {
-    const items = (data?.items ?? []) as unknown as Extension[];
-    return items.map((ext) => extensionToAppItem(ext));
-  }, [data?.items]);
+  const handleCancelEdit = useCallback(() => {
+    setEditingField(null);
+    setEditValue("");
+  }, []);
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchKeyword(e.target.value);
-    setPage(1);
-  };
+  const handleSaveEdit = useCallback(() => {
+    if (!config) return;
 
-  const handleStatusChange = (value: string) => {
-    setStatusFilter(value);
-    setPage(1);
-  };
+    const newTitle = editingField === "title" ? editValue : localTitle;
+    const newDescription = editingField === "description" ? editValue : localDescription;
 
-  const handleToggleVisible = (app: AppItem) => {
-    const nextShow = !app.aliasShow;
+    if (editingField === "title") setLocalTitle(newTitle);
+    if (editingField === "description") setLocalDescription(newDescription);
 
-    if (!app.isEnabled) {
-      toast.error("未启用应用不能修改展示状态");
-      return;
-    }
-    updateExtensionMutation.mutate({
-      id: app.id,
-      dto: { aliasShow: nextShow },
+    setConfigMutation.mutate({
+      enabled: config.enabled,
+      title: newTitle,
+      description: newDescription,
+      banners: config.banners,
     });
-  };
+
+    setEditingField(null);
+    setEditValue("");
+  }, [editingField, editValue, config, localTitle, localDescription, setConfigMutation]);
+
+  const handleSaveAppItem = useCallback(
+    (values: AppItemEditValues) => {
+      updateItemMutation.mutate({
+        extensionId: values.id,
+        dto: {
+          alias: values.displayName,
+          aliasDescription: values.description,
+          aliasIcon: values.icon || undefined,
+          aliasShow: values.visible,
+          appCenterTagIds: values.tagIds,
+        },
+      });
+    },
+    [updateItemMutation],
+  );
+
+  useEffect(() => {
+    if (editingField && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [editingField]);
 
   return (
     <PageContainer>
-      <div className="flex flex-col gap-4">
-        <div className="bg-background sticky top-0 z-1 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-          <Input
-            placeholder="搜索应用名称"
-            className="text-sm"
-            value={searchKeyword}
-            onChange={handleSearchChange}
-          />
-          <Select value={statusFilter} onValueChange={handleStatusChange}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="应用状态" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">全部状态</SelectItem>
-              <SelectItem value="enabled">已启用</SelectItem>
-              <SelectItem value="disabled">已禁用</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button
-            className="col-start-1 justify-self-end sm:col-start-2 lg:col-start-3 xl:col-start-4 2xl:col-start-5"
-            variant="ghost"
-            onClick={() => setDecorateDialogOpen(true)}
-          >
-            <Package className="size-4" />
-            设置装修位
-          </Button>
+      <div className="flex w-full flex-col items-center">
+        <div className="flex h-13 w-full items-center px-2">
+          <SidebarTrigger className="md:hidden" />
         </div>
 
-        <DecorateSettingsDialog open={decorateDialogOpen} onOpenChange={setDecorateDialogOpen} />
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-          {isLoading ? (
-            Array.from({ length: 4 }).map((_, index) => (
-              <div key={index} className="bg-card flex h-28 flex-col gap-4 rounded-lg border p-4">
-                <div className="flex gap-3">
-                  <Skeleton className="size-12 rounded-lg" />
-                  <div className="flex h-full flex-1 flex-col justify-between">
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="mt-2 h-4 w-full" />
+        <div className="w-full max-w-4xl px-4 py-8 pt-12 sm:pt-20 md:px-6">
+          <div className="flex flex-col items-center justify-between gap-4 max-sm:items-start sm:flex-row sm:px-3">
+            <div className="flex flex-1 flex-col gap-2">
+              <div className="group/title flex items-center gap-3">
+                {editingField === "title" ? (
+                  <Input
+                    ref={inputRef}
+                    className="h-8 w-full rounded-none border-0 border-none bg-transparent! px-0 text-2xl! shadow-none ring-0 focus-within:ring-0 focus-visible:ring-0"
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleSaveEdit();
+                      if (e.key === "Escape") handleCancelEdit();
+                    }}
+                    disabled={setConfigMutation.isPending}
+                  />
+                ) : (
+                  <h1 className="text-2xl">{localTitle}</h1>
+                )}
+                {editingField === "title" ? (
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      className="size-8"
+                      onClick={handleSaveEdit}
+                      disabled={setConfigMutation.isPending}
+                    >
+                      <Check />
+                    </Button>
+                    <Button variant="ghost" className="size-8" onClick={handleCancelEdit}>
+                      <X />
+                    </Button>
                   </div>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Skeleton className="h-5 w-16 rounded-full" />
-                  <Skeleton className="h-5 w-12 rounded-full" />
-                </div>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    className="size-8 opacity-100 transition-opacity sm:group-hover/title:opacity-100 md:opacity-0"
+                    onClick={() => handleStartEdit("title", localTitle)}
+                  >
+                    <PenLine />
+                  </Button>
+                )}
               </div>
-            ))
-          ) : apps.length > 0 ? (
-            apps.map((app) => (
-              <div
-                key={app.id}
-                className="group/app-item bg-card relative flex flex-col gap-2 rounded-lg border p-4"
-              >
-                <div className="flex items-center gap-3">
-                  <Avatar className="relative size-12 rounded-lg after:rounded-lg">
-                    <AvatarImage src={app.icon ?? ""} alt={app.name} className="rounded-lg" />
-                    <AvatarFallback className="size-12 rounded-lg">
-                      <Package className="size-6" />
-                    </AvatarFallback>
-                    <div className="center absolute inset-0 z-1 rounded-lg bg-black/5 opacity-0 backdrop-blur-xl transition-opacity group-hover/app-item:opacity-100 dark:bg-black/15">
-                      <Switch
-                        checked={app.aliasShow}
-                        onCheckedChange={() => handleToggleVisible(app)}
-                        disabled={updateExtensionMutation.isPending}
-                      />
-                    </div>
-                  </Avatar>
-                  <div className="min-w-0 flex-1 flex-col overflow-hidden">
-                    <span className="line-clamp-1 font-medium">{app.name}</span>
-                    <span className="text-muted-foreground line-clamp-2 text-xs">
-                      {app.description || "暂无描述"}
-                    </span>
+              <div className="group/description flex items-center gap-3">
+                {editingField === "description" ? (
+                  <Input
+                    ref={inputRef}
+                    className="text-muted-foreground h-5 w-full rounded-none border-0 border-none bg-transparent! px-0 shadow-none ring-0 focus-within:ring-0 focus-visible:ring-0"
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleSaveEdit();
+                      if (e.key === "Escape") handleCancelEdit();
+                    }}
+                    disabled={setConfigMutation.isPending}
+                  />
+                ) : (
+                  <p className="text-muted-foreground text-sm">{localDescription}</p>
+                )}
+                {editingField === "description" ? (
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      className="text-muted-foreground size-5"
+                      onClick={handleSaveEdit}
+                      disabled={setConfigMutation.isPending}
+                    >
+                      <Check />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="text-muted-foreground size-5"
+                      onClick={handleCancelEdit}
+                    >
+                      <X />
+                    </Button>
                   </div>
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button className="absolute top-2 right-2" size="icon-sm" variant="ghost">
-                        <EllipsisVertical />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem>
-                        <Edit />
-                        编辑
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-
-                <div className="mt-2 flex flex-wrap items-center gap-2">
-                  <StatusBadge isEnabled={app.isEnabled} />
-                  <VisibleBadge isVisible={app.aliasShow} />
-                </div>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    className="text-muted-foreground size-5 opacity-100 transition-opacity md:opacity-0 md:group-hover/description:opacity-100"
+                    onClick={() => handleStartEdit("description", localDescription)}
+                  >
+                    <PenLine />
+                  </Button>
+                )}
               </div>
-            ))
-          ) : (
-            <div className="col-span-1 flex h-28 items-center justify-center gap-4 sm:col-span-2 lg:col-span-3 xl:col-span-4 2xl:col-span-5">
-              <span className="text-muted-foreground text-sm">
-                {searchKeyword.trim() ? `没有找到与"${searchKeyword}"相关的应用` : "暂无应用数据"}
-              </span>
             </div>
-          )}
-        </div>
+            <div className="max-sm:w-full">
+              <InputGroup className="rounded-full">
+                <InputGroupInput
+                  placeholder="搜索应用"
+                  value={searchKeyword}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setSearchKeyword(e.target.value)
+                  }
+                />
+                <InputGroupAddon>
+                  <Search />
+                </InputGroupAddon>
+              </InputGroup>
+            </div>
+          </div>
 
-        <div className="bg-background sticky bottom-0 flex py-2">
-          <PaginationComponent className="mx-0 w-fit" />
+          <div className="group/carousel relative mt-8 w-full overflow-hidden rounded-2xl sm:rounded-4xl">
+            {bannerEnabled && banners.length > 0 ? (
+              <Carousel className="w-full">
+                <CarouselContent>
+                  {banners.map((banner, index) => (
+                    <CarouselItem key={index}>
+                      <AspectRatio ratio={4 / 1}>
+                        <img
+                          src={banner.imageUrl}
+                          alt={`banner-${index + 1}`}
+                          className="h-full w-full rounded-2xl object-cover"
+                        />
+                      </AspectRatio>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+              </Carousel>
+            ) : (
+              <div className="bg-muted/30 flex aspect-20/5 flex-col items-center justify-center gap-2 rounded-2xl">
+                <p className="text-muted-foreground text-sm">
+                  {!bannerEnabled ? "Banner 广告位未开启" : "暂无 Banner，点击「设置装修位」添加"}
+                </p>
+              </div>
+            )}
+            <Button
+              className="absolute right-5 bottom-5 flex translate-y-2 scale-95 items-center gap-2 rounded-full px-5 opacity-100 transition-all duration-300 ease-out group-hover/carousel:translate-y-0 group-hover/carousel:scale-100 group-hover/carousel:opacity-100 active:scale-90 md:opacity-0"
+              onClick={() => setDecorateDialogOpen(true)}
+            >
+              <span className="flex items-center gap-2">设置装修位</span>
+            </Button>
+          </div>
+
+          <div className="no-scrollbar mt-6 flex flex-nowrap gap-2 overflow-x-auto pt-2 sm:px-3">
+            <div
+              className="group relative inline-flex cursor-pointer"
+              onClick={() => setSelectedTagId(null)}
+            >
+              <Badge
+                variant={selectedTagId === null ? "default" : "secondary"}
+                className="h-9 px-4 font-medium text-nowrap sm:font-normal"
+              >
+                全部
+              </Badge>
+            </div>
+            {tags.map((tag) => (
+              <div
+                key={tag.id}
+                className="group relative inline-flex cursor-pointer"
+                onClick={() => setSelectedTagId(tag.id)}
+              >
+                <Badge
+                  variant={selectedTagId === tag.id ? "default" : "secondary"}
+                  className="h-9 px-4 font-medium text-nowrap sm:font-normal"
+                >
+                  {tag.name}
+                </Badge>
+                <Button
+                  size="icon-xs"
+                  className="bg-muted-foreground text-muted absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full opacity-100 shadow-sm transition-opacity duration-200 group-hover:opacity-100 md:opacity-0"
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    await confirm({
+                      title: "删除标签",
+                      description: `确定要删除标签「${tag.name}」吗？`,
+                      confirmVariant: "destructive",
+                    });
+                    deleteTagMutation.mutate(tag.id);
+                  }}
+                  disabled={deleteTagMutation.isPending}
+                >
+                  <X className="h-2.5 w-2.5" />
+                </Button>
+              </div>
+            ))}
+            <div className="inline-flex">
+              <Button
+                variant="secondary"
+                className="rounded-full"
+                onClick={() => setAddTagDialogOpen(true)}
+              >
+                <Plus />
+              </Button>
+            </div>
+          </div>
+
+          <div className="mt-6 sm:px-3">
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragStart={handleAppDragStart}
+              onDragEnd={handleAppDragEnd}
+              onDragCancel={() => setIsDragActive(false)}
+            >
+              {displayItems.length > 0 ? (
+                <div className="grid gap-x-4 sm:grid-cols-2">
+                  <SortableContext
+                    items={displayItems.map((i) => i.id)}
+                    strategy={rectSortingStrategy}
+                  >
+                    {displayItems.map((item) => (
+                      <SortableAppItem
+                        key={item.id}
+                        item={item}
+                        isDragActive={isDragActive}
+                        onEdit={setEditingAppItem}
+                      />
+                    ))}
+                  </SortableContext>
+                </div>
+              ) : itemsLoading ? null : (
+                <Empty>
+                  <EmptyContent>
+                    <EmptyDescription>暂无应用</EmptyDescription>
+                  </EmptyContent>
+                </Empty>
+              )}
+            </DndContext>
+
+            {/* 滚动加载哨兵 */}
+            <div ref={sentinelRef} className="flex justify-center py-4">
+              {isFetchingNextPage && (
+                <Loader2 className="text-muted-foreground size-5 animate-spin" />
+              )}
+            </div>
+          </div>
         </div>
       </div>
+
+      <DecorateSettingsDialog
+        open={decorateDialogOpen}
+        onOpenChange={setDecorateDialogOpen}
+        onSuccess={() => refetchConfig()}
+      />
+      <AppItemEditDialog
+        open={!!editingAppItem}
+        onOpenChange={(open) => !open && setEditingAppItem(null)}
+        item={editingAppItem ? itemToEditValues(editingAppItem) : null}
+        tags={tags}
+        onSave={handleSaveAppItem}
+        isPending={updateItemMutation.isPending}
+      />
+      <AddTagDialog
+        open={addTagDialogOpen}
+        onOpenChange={setAddTagDialogOpen}
+        onSuccess={() => refetchTags()}
+      />
     </PageContainer>
   );
 };

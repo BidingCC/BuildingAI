@@ -52,12 +52,12 @@ Claude sees: [skill suggestion] + user's prompt
 
 ```json
 {
-  "session_id": "abc-123",
-  "transcript_path": "/path/to/transcript.json",
-  "cwd": "/root/git/your-project",
-  "permission_mode": "normal",
-  "hook_event_name": "UserPromptSubmit",
-  "prompt": "how does the layout system work?"
+    "session_id": "abc-123",
+    "transcript_path": "/path/to/transcript.json",
+    "cwd": "/root/git/your-project",
+    "permission_mode": "normal",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "how does the layout system work?"
 }
 ```
 
@@ -132,17 +132,17 @@ IF ALLOWED:
 
 ```json
 {
-  "session_id": "abc-123",
-  "transcript_path": "/path/to/transcript.json",
-  "cwd": "/root/git/your-project",
-  "permission_mode": "normal",
-  "hook_event_name": "PreToolUse",
-  "tool_name": "Edit",
-  "tool_input": {
-    "file_path": "/root/git/your-project/form/src/services/user.ts",
-    "old_string": "...",
-    "new_string": "..."
-  }
+    "session_id": "abc-123",
+    "transcript_path": "/path/to/transcript.json",
+    "cwd": "/root/git/your-project",
+    "permission_mode": "normal",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Edit",
+    "tool_input": {
+        "file_path": "/root/git/your-project/form/src/services/user.ts",
+        "old_string": "...",
+        "new_string": "..."
+    }
 }
 ```
 
@@ -171,12 +171,12 @@ Claude receives this message and understands it needs to use the skill before re
 
 ### Exit Code Reference Table
 
-| Exit Code | stdout | stderr | Tool Execution | Claude Sees |
-|-----------|--------|--------|----------------|-------------|
-| 0 (UserPromptSubmit) | → Context | → User only | N/A | stdout content |
-| 0 (PreToolUse) | → User only | → User only | **Proceeds** | Nothing |
-| 2 (PreToolUse) | → User only | → **CLAUDE** | **BLOCKED** | stderr content |
-| Other | → User only | → User only | Blocked | Nothing |
+| Exit Code            | stdout      | stderr       | Tool Execution | Claude Sees    |
+| -------------------- | ----------- | ------------ | -------------- | -------------- |
+| 0 (UserPromptSubmit) | → Context   | → User only  | N/A            | stdout content |
+| 0 (PreToolUse)       | → User only | → User only  | **Proceeds**   | Nothing        |
+| 2 (PreToolUse)       | → User only | → **CLAUDE** | **BLOCKED**    | stderr content |
+| Other                | → User only | → User only  | Blocked        | Nothing        |
 
 ### Why Exit Code 2 Matters
 
@@ -222,34 +222,32 @@ Prevent repeated nagging in the same session - once Claude uses a skill, don't b
 
 ```json
 {
-  "skills_used": [
-    "database-verification",
-    "error-tracking"
-  ],
-  "files_verified": []
+    "skills_used": ["database-verification", "error-tracking"],
+    "files_verified": []
 }
 ```
 
 ### How It Works
 
 1. **First edit** of file with Prisma:
-   - Hook blocks with exit code 2
-   - Updates session state: adds "database-verification" to skills_used
-   - Claude sees message, uses skill
+    - Hook blocks with exit code 2
+    - Updates session state: adds "database-verification" to skills_used
+    - Claude sees message, uses skill
 
 2. **Second edit** (same session):
-   - Hook checks session state
-   - Finds "database-verification" in skills_used
-   - Exits with code 0 (allow)
-   - No message to Claude
+    - Hook checks session state
+    - Finds "database-verification" in skills_used
+    - Exits with code 0 (allow)
+    - No message to Claude
 
 3. **Different session**:
-   - New session ID = new state file
-   - Hook blocks again
+    - New session ID = new state file
+    - Hook blocks again
 
 ### Limitation
 
-The hook cannot detect when the skill is *actually* invoked - it just blocks once per session per skill. This means:
+The hook cannot detect when the skill is _actually_ invoked - it just blocks once per session per
+skill. This means:
 
 - If Claude doesn't use the skill but makes a different edit, it won't block again
 - Trust that Claude follows the instruction
@@ -267,40 +265,44 @@ The hook cannot detect when the skill is *actually* invoked - it just blocks onc
 ### Performance Bottlenecks
 
 1. **Loading skill-rules.json** (every execution)
-   - Future: Cache in memory
-   - Future: Watch for changes, reload only when needed
+    - Future: Cache in memory
+    - Future: Watch for changes, reload only when needed
 
 2. **Reading file content** (PreToolUse)
-   - Only when contentPatterns configured
-   - Only if file exists
-   - Can be slow for large files
+    - Only when contentPatterns configured
+    - Only if file exists
+    - Can be slow for large files
 
 3. **Glob matching** (PreToolUse)
-   - Regex compilation for each pattern
-   - Future: Compile once, cache
+    - Regex compilation for each pattern
+    - Future: Compile once, cache
 
 4. **Regex matching** (Both hooks)
-   - Intent patterns (UserPromptSubmit)
-   - Content patterns (PreToolUse)
-   - Future: Lazy compile, cache compiled regexes
+    - Intent patterns (UserPromptSubmit)
+    - Content patterns (PreToolUse)
+    - Future: Lazy compile, cache compiled regexes
 
 ### Optimization Strategies
 
 **Reduce patterns:**
+
 - Use more specific patterns (fewer to check)
 - Combine similar patterns where possible
 
 **File path patterns:**
+
 - More specific = fewer files to check
 - Example: `form/src/services/**` better than `form/**`
 
 **Content patterns:**
+
 - Only add when truly necessary
 - Simpler regex = faster matching
 
 ---
 
 **Related Files:**
+
 - [SKILL.md](SKILL.md) - Main skill guide
 - [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - Debug hook issues
 - [SKILL_RULES_REFERENCE.md](SKILL_RULES_REFERENCE.md) - Configuration reference

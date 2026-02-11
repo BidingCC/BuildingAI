@@ -7,8 +7,8 @@
  * Tag types
  */
 export const TagType = {
-    /** Application tag */
     APP: "app",
+    DATASET: "dataset",
 } as const;
 
 export type TagTypeType = (typeof TagType)[keyof typeof TagType];

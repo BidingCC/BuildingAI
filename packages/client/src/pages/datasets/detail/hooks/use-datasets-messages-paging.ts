@@ -61,11 +61,25 @@ export function useDatasetsMessagesPaging(
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isLoadingMoreMessages, setIsLoadingMoreMessages] = useState(false);
   const [hasMoreMessages, setHasMoreMessages] = useState(false);
+  const prevDatasetIdRef = useRef<string | undefined>(undefined);
   const nextPageRef = useRef(2);
   const loadMoreLockRef = useRef(false);
 
   useEffect(() => {
-    if (!datasetId || !conversationId || !shouldLoadInitial) {
+    const prevDatasetId = prevDatasetIdRef.current;
+    const isDatasetChange = prevDatasetId && prevDatasetId !== datasetId;
+
+    if (isDatasetChange) {
+      setIsLoadingMessages(false);
+      setIsLoadingMoreMessages(false);
+      setHasMoreMessages(false);
+      nextPageRef.current = 2;
+      loadMoreLockRef.current = false;
+    }
+
+    prevDatasetIdRef.current = datasetId;
+
+    if (!datasetId || !conversationId || !shouldLoadInitial || isDatasetChange) {
       if (!conversationId) setHasMoreMessages(false);
       return;
     }

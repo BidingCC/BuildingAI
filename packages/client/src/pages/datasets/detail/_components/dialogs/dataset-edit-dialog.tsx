@@ -15,7 +15,7 @@ import {
 } from "@buildingai/ui/components/ui/input-group";
 import { Label } from "@buildingai/ui/components/ui/label";
 import { Textarea } from "@buildingai/ui/components/ui/textarea";
-import { UploadDropzone, UploadRoot, UploadTrigger } from "@buildingai/ui/components/ui/upload";
+import { UploadDropzone, UploadRoot, UploadTrigger } from "@buildingai/ui/components/upload";
 import { cn } from "@buildingai/ui/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Pencil, UploadIcon, X } from "lucide-react";

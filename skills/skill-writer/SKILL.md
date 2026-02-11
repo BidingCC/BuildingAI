@@ -1,15 +1,20 @@
 ---
 name: skill-writer
-description: Guide users through creating Agent Skills for Claude Code. Use when the user wants to create, write, author, or design a new Skill, or needs help with SKILL.md files, frontmatter, or skill structure.
+description:
+    Guide users through creating Agent Skills for Claude Code. Use when the user wants to create,
+    write, author, or design a new Skill, or needs help with SKILL.md files, frontmatter, or skill
+    structure.
 ---
 
 # Skill Writer
 
-This Skill helps you create well-structured Agent Skills for Claude Code that follow best practices and validation requirements.
+This Skill helps you create well-structured Agent Skills for Claude Code that follow best practices
+and validation requirements.
 
 ## When to use this Skill
 
 Use this Skill when:
+
 - Creating a new Agent Skill
 - Writing or updating SKILL.md files
 - Designing skill structure and frontmatter
@@ -23,25 +28,27 @@ Use this Skill when:
 First, understand what the Skill should do:
 
 1. **Ask clarifying questions**:
-   - What specific capability should this Skill provide?
-   - When should Claude use this Skill?
-   - What tools or resources does it need?
-   - Is this for personal use or team sharing?
+    - What specific capability should this Skill provide?
+    - When should Claude use this Skill?
+    - What tools or resources does it need?
+    - Is this for personal use or team sharing?
 
 2. **Keep it focused**: One Skill = one capability
-   - Good: "PDF form filling", "Excel data analysis"
-   - Too broad: "Document processing", "Data tools"
+    - Good: "PDF form filling", "Excel data analysis"
+    - Too broad: "Document processing", "Data tools"
 
 ### Step 2: Choose Skill location
 
 Determine where to create the Skill:
 
 **Personal Skills** (`~/.claude/skills/`):
+
 - Individual workflows and preferences
 - Experimental Skills
 - Personal productivity tools
 
 **Project Skills** (`.claude/skills/`):
+
 - Team workflows and conventions
 - Project-specific expertise
 - Shared utilities (committed to git)
@@ -59,6 +66,7 @@ mkdir -p .claude/skills/skill-name
 ```
 
 For multi-file Skills:
+
 ```
 skill-name/
 ├── SKILL.md (required)
@@ -84,28 +92,28 @@ description: Brief description of what this does and when to use it
 **Field requirements**:
 
 - **name**:
-  - Lowercase letters, numbers, hyphens only
-  - Max 64 characters
-  - Must match directory name
-  - Good: `pdf-processor`, `git-commit-helper`
-  - Bad: `PDF_Processor`, `Git Commits!`
+    - Lowercase letters, numbers, hyphens only
+    - Max 64 characters
+    - Must match directory name
+    - Good: `pdf-processor`, `git-commit-helper`
+    - Bad: `PDF_Processor`, `Git Commits!`
 
 - **description**:
-  - Max 1024 characters
-  - Include BOTH what it does AND when to use it
-  - Use specific trigger words users would say
-  - Mention file types, operations, and context
+    - Max 1024 characters
+    - Include BOTH what it does AND when to use it
+    - Use specific trigger words users would say
+    - Mention file types, operations, and context
 
 **Optional frontmatter fields**:
 
 - **allowed-tools**: Restrict tool access (comma-separated list)
-  ```yaml
-  allowed-tools: Read, Grep, Glob
-  ```
-  Use for:
-  - Read-only Skills
-  - Security-sensitive workflows
-  - Limited-scope operations
+    ```yaml
+    allowed-tools: Read, Grep, Glob
+    ```
+    Use for:
+    - Read-only Skills
+    - Security-sensitive workflows
+    - Limited-scope operations
 
 ### Step 5: Write effective descriptions
 
@@ -116,22 +124,30 @@ The description is critical for Claude to discover your Skill.
 **Examples**:
 
 ✅ **Good**:
+
 ```yaml
-description: Extract text and tables from PDF files, fill forms, merge documents. Use when working with PDF files or when the user mentions PDFs, forms, or document extraction.
+description:
+    Extract text and tables from PDF files, fill forms, merge documents. Use when working with PDF
+    files or when the user mentions PDFs, forms, or document extraction.
 ```
 
 ✅ **Good**:
+
 ```yaml
-description: Analyze Excel spreadsheets, create pivot tables, and generate charts. Use when working with Excel files, spreadsheets, or analyzing tabular data in .xlsx format.
+description:
+    Analyze Excel spreadsheets, create pivot tables, and generate charts. Use when working with
+    Excel files, spreadsheets, or analyzing tabular data in .xlsx format.
 ```
 
 ❌ **Too vague**:
+
 ```yaml
 description: Helps with documents
 description: For data analysis
 ```
 
 **Tips**:
+
 - Include specific file extensions (.pdf, .xlsx, .json)
 - Mention common user phrases ("analyze", "extract", "generate")
 - List concrete operations (not generic verbs)
@@ -141,7 +157,7 @@ description: For data analysis
 
 Use clear Markdown sections:
 
-```markdown
+````markdown
 # Skill Name
 
 Brief overview of what this Skill does.
@@ -153,6 +169,7 @@ Provide a simple example to get started immediately.
 ## Instructions
 
 Step-by-step guidance for Claude:
+
 1. First step with clear action
 2. Second step with expected outcome
 3. Handle edge cases
@@ -170,14 +187,17 @@ Show concrete usage examples with code or commands.
 ## Requirements
 
 List any dependencies or prerequisites:
+
 ```bash
 pip install package-name
 ```
+````
 
 ## Advanced usage
 
 For complex scenarios, see [reference.md](reference.md).
-```
+
+````
 
 ### Step 7: Add supporting files (optional)
 
@@ -196,17 +216,19 @@ Run the helper script:
 \`\`\`bash
 python scripts/helper.py input.txt
 \`\`\`
-```
+````
 
 ### Step 8: Validate the Skill
 
 Check these requirements:
 
 ✅ **File structure**:
+
 - [ ] SKILL.md exists in correct location
 - [ ] Directory name matches frontmatter `name`
 
 ✅ **YAML frontmatter**:
+
 - [ ] Opening `---` on line 1
 - [ ] Closing `---` before content
 - [ ] Valid YAML (no tabs, correct indentation)
@@ -214,12 +236,14 @@ Check these requirements:
 - [ ] `description` is specific and < 1024 chars
 
 ✅ **Content quality**:
+
 - [ ] Clear instructions for Claude
 - [ ] Concrete examples provided
 - [ ] Edge cases handled
 - [ ] Dependencies listed (if any)
 
 ✅ **Testing**:
+
 - [ ] Description matches user questions
 - [ ] Skill activates on relevant queries
 - [ ] Instructions are clear and actionable
@@ -229,9 +253,10 @@ Check these requirements:
 1. **Restart Claude Code** (if running) to load the Skill
 
 2. **Ask relevant questions** that match the description:
-   ```
-   Can you help me extract text from this PDF?
-   ```
+
+    ```
+    Can you help me extract text from this PDF?
+    ```
 
 3. **Verify activation**: Claude should use the Skill automatically
 
@@ -242,25 +267,27 @@ Check these requirements:
 If Claude doesn't use the Skill:
 
 1. **Make description more specific**:
-   - Add trigger words
-   - Include file types
-   - Mention common user phrases
+    - Add trigger words
+    - Include file types
+    - Mention common user phrases
 
 2. **Check file location**:
-   ```bash
-   ls ~/.claude/skills/skill-name/SKILL.md
-   ls .claude/skills/skill-name/SKILL.md
-   ```
+
+    ```bash
+    ls ~/.claude/skills/skill-name/SKILL.md
+    ls .claude/skills/skill-name/SKILL.md
+    ```
 
 3. **Validate YAML**:
-   ```bash
-   cat SKILL.md | head -n 10
-   ```
+
+    ```bash
+    cat SKILL.md | head -n 10
+    ```
 
 4. **Run debug mode**:
-   ```bash
-   claude --debug
-   ```
+    ```bash
+    claude --debug
+    ```
 
 ## Common patterns
 
@@ -269,7 +296,9 @@ If Claude doesn't use the Skill:
 ```yaml
 ---
 name: code-reader
-description: Read and analyze code without making changes. Use for code review, understanding codebases, or documentation.
+description:
+    Read and analyze code without making changes. Use for code review, understanding codebases, or
+    documentation.
 allowed-tools: Read, Grep, Glob
 ---
 ```
@@ -348,16 +377,19 @@ Before finalizing a Skill, verify:
 ## Troubleshooting
 
 **Skill doesn't activate**:
+
 - Make description more specific with trigger words
 - Include file types and operations in description
 - Add "Use when..." clause with user phrases
 
 **Multiple Skills conflict**:
+
 - Make descriptions more distinct
 - Use different trigger words
 - Narrow the scope of each Skill
 
 **Skill has errors**:
+
 - Check YAML syntax (no tabs, proper indentation)
 - Verify file paths (use forward slashes)
 - Ensure scripts have execute permissions
@@ -366,6 +398,7 @@ Before finalizing a Skill, verify:
 ## Examples
 
 See the documentation for complete examples:
+
 - Simple single-file Skill (commit-helper)
 - Skill with tool permissions (code-reviewer)
 - Multi-file Skill (pdf-processing)

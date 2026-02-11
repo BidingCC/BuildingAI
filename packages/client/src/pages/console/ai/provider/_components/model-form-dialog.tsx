@@ -71,6 +71,7 @@ const formSchema = z.object({
   billingRule: billingRuleSchema,
   membershipLevel: z.array(z.string()).optional(),
   isActive: z.boolean().optional(),
+  thinking: z.boolean().optional(),
   isDefault: z.boolean().optional(),
   description: z.string().max(500, "模型描述长度不能超过500个字符").optional(),
   sortOrder: z.number().int().min(0, "排序权重不能小于0").optional(),
@@ -109,6 +110,7 @@ export const AiModelFormDialog = ({
       billingRule: { power: 1, tokens: 1000 },
       membershipLevel: [],
       isActive: true,
+      thinking: false,
       isDefault: false,
       description: "",
       sortOrder: 0,
@@ -127,6 +129,7 @@ export const AiModelFormDialog = ({
           billingRule: model.billingRule || { power: 1, tokens: 1000 },
           membershipLevel: model.membershipLevel || [],
           isActive: model.isActive,
+          thinking: model.thinking || false,
           isDefault: false,
           description: model.description || "",
           sortOrder: model.sortOrder,
@@ -141,6 +144,7 @@ export const AiModelFormDialog = ({
           billingRule: { power: 1, tokens: 1000 },
           membershipLevel: [],
           isActive: true,
+          thinking: false,
           isDefault: false,
           description: "",
           sortOrder: 0,
@@ -184,6 +188,7 @@ export const AiModelFormDialog = ({
       billingRule: values.billingRule,
       membershipLevel: values.membershipLevel,
       isActive: values.isActive,
+      thinking: values.thinking,
       isDefault: values.isDefault,
       description: values.description || undefined,
       sortOrder: values.sortOrder,
@@ -424,6 +429,19 @@ export const AiModelFormDialog = ({
                         <Switch checked={field.value} onCheckedChange={field.onChange} />
                       </FormControl>
                       <FormLabel className="mt-0!">{field.value ? "已启用" : "已禁用"}</FormLabel>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="thinking"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center gap-2">
+                      <FormControl>
+                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                      </FormControl>
+                      <FormLabel className="mt-0!">允许深度思考</FormLabel>
                     </FormItem>
                   )}
                 />

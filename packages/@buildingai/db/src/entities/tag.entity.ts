@@ -4,6 +4,7 @@ import { AppEntity } from "../decorators/app-entity.decorator";
 import { Column, ManyToMany } from "../typeorm";
 import { Agent } from "./ai-agent.entity";
 import { BaseEntity } from "./base";
+import { Datasets } from "./datasets.entity";
 
 /**
  * Tag entity
@@ -44,6 +45,10 @@ export class Tag extends BaseEntity {
      */
     isAppTag(): boolean {
         return this.type === TagType.APP;
+    }
+
+    isDatasetTag(): boolean {
+        return this.type === TagType.DATASET;
     }
 
     /**
@@ -87,4 +92,7 @@ export class Tag extends BaseEntity {
      */
     @ManyToMany(() => Agent, (agent) => agent.tags)
     agents?: Agent[];
+
+    @ManyToMany(() => Datasets, (dataset) => dataset.tags)
+    datasets?: Datasets[];
 }

@@ -53,6 +53,8 @@ export type UpdateExtensionDto = {
     aliasDescription?: string;
     aliasIcon?: string;
     aliasShow?: boolean;
+    appCenterSort?: number;
+    appCenterTagIds?: string[];
     description?: string;
     type?: ExtensionTypeType;
     author?: {
@@ -88,8 +90,11 @@ export type Extension = {
     aliasShow?: boolean;
     aliasDescription?: string;
     aliasIcon?: string;
+    appCenterSort?: number;
+    appCenterTagIds?: string[];
     identifier: string;
     version: string;
+    engine?: string;
     description?: string;
     icon?: string;
     type: ExtensionTypeType;
@@ -104,12 +109,21 @@ export type Extension = {
     homepage?: string;
     documentation?: string;
     config?: Record<string, any>;
+    content?: string;
     createdAt: string;
     updatedAt: string;
+    purchasedAt?: string;
     isInstalled: boolean;
     isCompatible: boolean;
     latestVersion?: string | null;
     hasUpdate: boolean;
+    appsStatus?: number;
+    typeDesc?: string;
+    terminalDesc?: { label: string; value: number }[];
+    sellPrice?: string;
+    salesNum?: number;
+    categoryName?: string[];
+    versionLists?: ExtensionVersionItem[];
 };
 
 export type ExtensionListStatistics = {
@@ -120,6 +134,15 @@ export type ExtensionListStatistics = {
 
 export type ExtensionsListResponse = PaginatedResponse<Extension> & {
     extend?: { statistics: ExtensionListStatistics };
+};
+
+export type ExtensionVersionItem = {
+    version: string;
+    engine?: string;
+    features?: string;
+    optimize?: string;
+    fixs?: string;
+    createdAt: string;
 };
 
 export type ExtensionVersion = {

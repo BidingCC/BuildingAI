@@ -1,5 +1,5 @@
 import { TypeOrmModule } from "@buildingai/db/@nestjs/typeorm";
-import { Dict } from "@buildingai/db/entities";
+import { Dict, Extension } from "@buildingai/db/entities";
 import { DictService } from "@buildingai/dict";
 import { ChatConfigService } from "@modules/ai/chat/services/chat-config.service";
 import { AgentDecorateConsoleController } from "@modules/config/controllers/console/agent-decorate.controller";
@@ -23,7 +23,7 @@ import { WebsiteService } from "../system/services/website.service";
 @Module({
     imports: [
         // 注册字典实体
-        TypeOrmModule.forFeature([Dict]),
+        TypeOrmModule.forFeature([Dict, Extension]),
     ],
     controllers: [
         ConfigWebController,

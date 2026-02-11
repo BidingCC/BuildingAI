@@ -79,16 +79,7 @@ const WalletSetting = () => {
                     {rule.label}
                   </Badge>
                 )}
-                <span className="font-semibold tabular-nums">
-                  {rule.power.toLocaleString()}
-
-                  {rule.givePower > 0 && (
-                    <span className="text-primary text-xs">
-                      <span className="text-muted-foreground text-xs font-normal">+</span>
-                      {rule.givePower.toLocaleString()}
-                    </span>
-                  )}
-                </span>
+                <span className="font-semibold tabular-nums">{rule.power.toLocaleString()}</span>
                 {rule.givePower > 0 ? (
                   <span className="text-muted-foreground text-xs">
                     赠送 <span className="text-primary">{rule.givePower}</span> 积分

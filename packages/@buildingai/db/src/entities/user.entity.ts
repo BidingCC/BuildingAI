@@ -19,11 +19,11 @@ import { Permission } from "./permission.entity";
  */
 @AppEntity({ name: "user", comment: "用户信息" })
 export class User extends SoftDeleteBaseEntity {
-    /**
-     * 用户openid
-     */
     @Column({ nullable: true })
     openid: string;
+
+    @Column({ nullable: true })
+    googleId: string;
 
     @Column({ nullable: true })
     userNo: string;

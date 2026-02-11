@@ -348,7 +348,8 @@ export function useMessageFeedbackQuery(
 ) {
     return useQuery<FeedbackRecord>({
         queryKey: ["console", "message-feedback", messageId],
-        queryFn: () => consoleHttpClient.get<FeedbackRecord>(`/ai-chat-feedback/message/${messageId}`),
+        queryFn: () =>
+            consoleHttpClient.get<FeedbackRecord>(`/ai-chat-feedback/message/${messageId}`),
         enabled: !!messageId && options?.enabled !== false,
         ...options,
     });

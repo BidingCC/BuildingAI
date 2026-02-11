@@ -1,13 +1,19 @@
 import { useAuthStore } from "@buildingai/stores";
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 
-const AuthGuard = () => {
+const AuthGuard = ({ children }: { children?: React.ReactNode }) => {
+  const location = useLocation();
   const { isLogin } = useAuthStore((state) => state.authActions);
   if (isLogin()) {
-    return <Outlet />;
+    return children || <Outlet />;
   }
-
-  return <Navigate to="/login" replace state={{ redirect: location.pathname }} />;
+  return (
+    <Navigate
+      to={{ pathname: "/login", search: `?redirect=${encodeURIComponent(location.pathname)}` }}
+      replace
+      state={{ redirect: location.pathname }}
+    />
+  );
 };
 
 export default AuthGuard;

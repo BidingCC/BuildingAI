@@ -98,10 +98,15 @@ const AppNavbar = () => {
             {breadcrumbItems.map((item, index) => {
               const isLast = index === breadcrumbItems.length - 1;
               const isClickable = item.type === 2;
+              const isFirstHidden = index === 0 && breadcrumbItems.length > 1;
               return (
                 <Fragment key={item.path}>
-                  {index > 0 && <BreadcrumbSeparator className="hidden md:block" />}
-                  <BreadcrumbItem className={index === 0 ? "hidden md:block" : ""}>
+                  {index >= 1 && (
+                    <BreadcrumbSeparator
+                      className={index === 1 && breadcrumbItems.length > 1 ? "hidden md:flex" : ""}
+                    />
+                  )}
+                  <BreadcrumbItem className={isFirstHidden ? "hidden md:block" : ""}>
                     {isLast || !isClickable ? (
                       <BreadcrumbPage>{item.name}</BreadcrumbPage>
                     ) : (

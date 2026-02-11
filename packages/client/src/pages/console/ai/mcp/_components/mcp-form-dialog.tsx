@@ -23,6 +23,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@buildingai/ui/components/ui/form";
+import { ImageUpload } from "@buildingai/ui/components/ui/image-upload";
 import { Input } from "@buildingai/ui/components/ui/input";
 import { ScrollArea } from "@buildingai/ui/components/ui/scroll-area";
 import {
@@ -59,12 +60,9 @@ const formSchema = z.object({
   alias: z.string().max(100, "别名不能超过100个字符").optional(),
   description: z.string().max(1000, "描述不能超过1000个字符").optional(),
   url: z.string({ message: "服务地址必须填写" }).min(1, "服务地址不能为空").url("请输入有效的URL"),
-  icon: z.string().url("请输入有效的图标URL").optional().or(z.literal("")),
+  icon: z.string().optional(),
   type: z.nativeEnum(McpServerType).optional(),
   communicationType: z.nativeEnum(McpCommunicationType).optional(),
-  providerName: z.string().max(100, "提供商名称不能超过100个字符").optional(),
-  providerUrl: z.string().url("请输入有效的提供商URL").optional().or(z.literal("")),
-  providerIcon: z.string().url("请输入有效的提供商图标URL").optional().or(z.literal("")),
   isDisabled: z.boolean().optional(),
   sortOrder: z.number().min(0, "排序权重不能小于0").optional(),
   headers: z.string().optional(),
@@ -95,9 +93,6 @@ export const McpFormDialog = ({ open, onOpenChange, server, onSuccess }: McpForm
       icon: "",
       type: McpServerType.SYSTEM,
       communicationType: McpCommunicationType.SSE,
-      providerName: "",
-      providerUrl: "",
-      providerIcon: "",
       isDisabled: false,
       sortOrder: 0,
       headers: "",
@@ -115,9 +110,6 @@ export const McpFormDialog = ({ open, onOpenChange, server, onSuccess }: McpForm
           icon: server.icon || "",
           type: server.type,
           communicationType: server.communicationType,
-          providerName: server.providerName || "",
-          providerUrl: server.providerUrl || "",
-          providerIcon: server.providerIcon || "",
           isDisabled: server.isDisabled,
           sortOrder: server.sortOrder,
           headers: server.headers ? JSON.stringify(server.headers, null, 2) : "",
@@ -131,9 +123,6 @@ export const McpFormDialog = ({ open, onOpenChange, server, onSuccess }: McpForm
           icon: "",
           type: McpServerType.SYSTEM,
           communicationType: McpCommunicationType.SSE,
-          providerName: "",
-          providerUrl: "",
-          providerIcon: "",
           isDisabled: false,
           sortOrder: 0,
           headers: "",
@@ -185,9 +174,6 @@ export const McpFormDialog = ({ open, onOpenChange, server, onSuccess }: McpForm
       icon: values.icon || undefined,
       type: values.type,
       communicationType: values.communicationType,
-      providerName: values.providerName || undefined,
-      providerUrl: values.providerUrl || undefined,
-      providerIcon: values.providerIcon || undefined,
       isDisabled: values.isDisabled,
       sortOrder: values.sortOrder,
       headers,
@@ -213,6 +199,46 @@ export const McpFormDialog = ({ open, onOpenChange, server, onSuccess }: McpForm
         <ScrollArea className="max-h-[80vh]">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 p-4 pt-0 pb-17">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="icon"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>图标</FormLabel>
+                      <FormControl>
+                        <ImageUpload
+                          size="sm"
+                          value={field.value}
+                          onChange={(url) => field.onChange(url ?? "")}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="sortOrder"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>排序权重</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min={0}
+                          placeholder="0"
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
               <FormField
                 control={form.control}
                 name="name"
@@ -326,91 +352,6 @@ export const McpFormDialog = ({ open, onOpenChange, server, onSuccess }: McpForm
                   </FormItem>
                 )}
               />
-
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="icon"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>图标URL</FormLabel>
-                      <FormControl>
-                        <Input placeholder="图标地址（可选）" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="sortOrder"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>排序权重</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min={0}
-                          placeholder="0"
-                          {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="rounded-lg border p-3">
-                <p className="text-muted-foreground mb-3 text-sm font-medium">提供商信息（可选）</p>
-                <div className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="providerName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>提供商名称</FormLabel>
-                        <FormControl>
-                          <Input placeholder="例如: GitHub, Slack" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="providerUrl"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>提供商网址</FormLabel>
-                          <FormControl>
-                            <Input placeholder="https://..." {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="providerIcon"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>提供商图标</FormLabel>
-                          <FormControl>
-                            <Input placeholder="https://..." {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-              </div>
 
               <FormField
                 control={form.control}

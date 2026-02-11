@@ -113,6 +113,17 @@ export type BatchCheckConnectionResponse = {
     message: string;
 };
 
+export type CheckConnectionResponse = {
+    connectable: boolean;
+    message: string;
+    toolsInfo?: {
+        created: number;
+        updated: number;
+        deleted: number;
+        total: number;
+    };
+};
+
 export type ToggleActiveBody = {
     isDisabled: boolean;
 };
@@ -247,14 +258,11 @@ export function useSetDefaultQuickMenuMutation(
  * Check MCP server connection
  */
 export function useCheckMcpConnectionMutation(
-    options?: MutationOptionsUtil<
-        { tools: McpTool[]; connectable: boolean; message: string },
-        string
-    >,
+    options?: MutationOptionsUtil<CheckConnectionResponse, string>,
 ) {
-    return useMutation<{ tools: McpTool[]; connectable: boolean; message: string }, Error, string>({
+    return useMutation<CheckConnectionResponse, Error, string>({
         mutationFn: (id) =>
-            consoleHttpClient.post<{ tools: McpTool[]; connectable: boolean; message: string }>(
+            consoleHttpClient.post<CheckConnectionResponse>(
                 `/ai-mcp-servers/${id}/check-connection`,
             ),
         ...options,

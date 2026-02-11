@@ -1,4 +1,4 @@
-import { BooleanNumber } from "@buildingai/constants";
+import { BooleanNumber } from "@buildingai/constants/shared/status-codes.constant";
 import { Type } from "@nestjs/common";
 
 /**

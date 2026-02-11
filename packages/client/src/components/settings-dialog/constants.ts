@@ -1,5 +1,6 @@
 import {
   Bell,
+  BookmarkCheck,
   Hammer,
   Info,
   type LucideIcon,
@@ -36,7 +37,7 @@ export const SETTINGS_NAV: SettingsNavGroup[] = [
     items: [
       { id: "profile", name: "账户", icon: UserCircle },
       { id: "wallet", name: "钱包", icon: Wallet },
-      { id: "subscribe", name: "订阅管理", icon: UserCircle },
+      { id: "subscribe", name: "订阅管理", icon: BookmarkCheck },
     ],
   },
   {

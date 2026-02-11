@@ -1,4 +1,5 @@
 export * from "./ai-provider";
+export * from "./apps-decorate";
 export * from "./auth";
 export * from "./chat";
 export * from "./chat-feedback";
@@ -7,8 +8,9 @@ export * from "./datasets";
 export * from "./datasets-chat";
 export * from "./datasets-document";
 export * from "./datasets-member";
+export * from "./decorate";
 export * from "./mcp";
 export * from "./membership";
 export * from "./recharge";
-export * from "./user";
+export * from "./tag";
 export * from "./user";

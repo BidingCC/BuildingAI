@@ -3,9 +3,11 @@
 Dictionary/configuration management with caching.
 
 ## Location
+
 `packages/@buildingai/dict/`
 
 ## Exports
+
 - `DictModule` - Dictionary module (global)
 - `DictService` - Dictionary CRUD service
 - `DictCacheService` - Dictionary cache service

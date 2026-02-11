@@ -126,6 +126,36 @@ export class PayconfigService extends BaseService<Payconfig> {
         });
     }
 
+    /**
+     * 设置默认支付配置
+     *
+     * @param id 支付配置id
+     * @returns 设置后的支付配置
+     */
+    async setDefaultPayconfig(id: string): Promise<Partial<Payconfig>> {
+        return await this.dataSource.transaction(async (manager) => {
+            const activeConfig = await manager.findOne(Payconfig, {
+                where: { isDefault: BooleanNumber.YES },
+            });
+
+            if (activeConfig && id !== activeConfig.id) {
+                await manager.update(Payconfig, activeConfig.id, { isDefault: BooleanNumber.NO });
+            }
+
+            const payConfig = await manager.findOne(Payconfig, { where: { id } });
+            if (!payConfig) {
+                throw HttpErrorFactory.notFound("支付配置不存在");
+            }
+
+            payConfig.isDefault = BooleanNumber.YES;
+            const result = await manager.save(payConfig);
+
+            this.eventEmitter.emit(PAY_EVENTS.REFRESH, payConfig.payType);
+
+            return result;
+        });
+    }
+
     async getPayconfig(payType: typeof PayConfigPayType.WECHAT): Promise<WeChatPayConfig>;
     async getPayconfig(payType: typeof PayConfigPayType.ALIPAY): Promise<AlipayConfig>;
 

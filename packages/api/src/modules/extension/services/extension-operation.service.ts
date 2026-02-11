@@ -750,11 +750,7 @@ export class ExtensionOperationService {
                 );
             }
 
-            const { url } = await extensionMarketService.downloadApplication(
-                identifier,
-                targetVersion,
-                ExtensionDownload.INSTALL,
-            );
+            const { url } = await extensionMarketService.downloadApplication(identifier);
             await this.download(url, identifier, ExtensionDownload.INSTALL, targetVersion);
 
             const extension = await this.extensionsService.create({
@@ -950,11 +946,7 @@ export class ExtensionOperationService {
             }
 
             // 2. Download latest version with UPGRADE type
-            const { url } = await extensionMarketService.downloadApplication(
-                identifier,
-                latestVersion,
-                ExtensionDownload.UPGRADE,
-            );
+            const { url } = await extensionMarketService.downloadApplication(identifier);
             await this.download(url, identifier, ExtensionDownload.UPGRADE, latestVersion);
 
             // 3. Update extension in database

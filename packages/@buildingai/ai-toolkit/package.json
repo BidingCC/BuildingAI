@@ -1,0 +1,51 @@
+{
+    "name": "@buildingai/ai-toolkit",
+    "version": "0.0.0",
+    "private": true,
+    "license": "MIT",
+    "type": "module",
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "files": [
+        "dist/**/*"
+    ],
+    "exports": {
+        ".": {
+            "require": "./dist/index.js",
+            "import": "./dist/index.js",
+            "types": "./dist/index.d.ts"
+        },
+        "./tools": {
+            "require": "./dist/tools/index.js",
+            "import": "./dist/tools/index.js",
+            "types": "./dist/tools/index.d.ts"
+        },
+        "./prompts": {
+            "require": "./dist/prompts/index.js",
+            "import": "./dist/prompts/index.js",
+            "types": "./dist/prompts/index.d.ts"
+        }
+    },
+    "scripts": {
+        "clean": "rimraf dist .turbo dist/build.tsbuildinfo",
+        "check-types": "tsc --noEmit",
+        "build": "rimraf dist && tsc -p tsconfig.build.json",
+        "dev": "tsc -p tsconfig.build.json --watch",
+        "format": "biome format --write .",
+        "format:check": "biome ci .",
+        "lint": "eslint . --quiet",
+        "lint:fix": "eslint . --fix",
+        "watch": "tsc -p tsconfig.build.json --watch"
+    },
+    "dependencies": {
+        "@buildingai/ai-sdk-new": "workspace:*",
+        "@buildingai/types": "workspace:*",
+        "ai": "^6.0.70",
+        "zod": "^4.3.6"
+    },
+    "devDependencies": {
+        "@buildingai/eslint-config": "workspace:*",
+        "@buildingai/typescript-config": "workspace:*"
+    }
+}

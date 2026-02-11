@@ -1,15 +1,17 @@
 import { useAuthStore, useConfigStore } from "@buildingai/stores";
-import { Navigate } from "react-router-dom";
+import { Navigate, useSearchParams } from "react-router-dom";
 
 import SvgIcons from "../../components/svg-icons";
 import { LoginForm } from "./_components/login-form";
 
 const LoginPage = () => {
+  const [searchParams] = useSearchParams();
   const { isLogin } = useAuthStore((state) => state.authActions);
   const { websiteConfig } = useConfigStore((state) => state.config);
+  const redirect = searchParams.get("redirect") ?? "";
 
   if (isLogin()) {
-    return <Navigate to="/" replace />;
+    return <Navigate to={redirect || "/console/dashboard"} replace />;
   }
   return (
     <div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">

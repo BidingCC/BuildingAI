@@ -15,9 +15,9 @@ import {
   DropdownMenuTrigger,
 } from "@buildingai/ui/components/ui/dropdown-menu";
 import { Skeleton } from "@buildingai/ui/components/ui/skeleton";
+import { StatusBadge } from "@buildingai/ui/components/ui/status-badge";
 import { Switch } from "@buildingai/ui/components/ui/switch";
 import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog";
-import { IconCircleCheckFilled, IconXboxXFilled } from "@tabler/icons-react";
 import { Hammer, Plus, RefreshCw, Settings2, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -42,25 +42,10 @@ const ConnectionStatusBadge = ({ server, isChecking }: ConnectionStatusBadgeProp
   }
 
   if (server.isDisabled) {
-    return (
-      <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
-        <IconXboxXFilled className="fill-muted-foreground" />
-        已禁用
-      </Badge>
-    );
+    return <StatusBadge active={false} inactiveText="已禁用" inactiveVariant="muted" />;
   }
 
-  return server.connectable ? (
-    <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
-      <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
-      可连通
-    </Badge>
-  ) : (
-    <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
-      <IconXboxXFilled className="fill-destructive" />
-      不能连通
-    </Badge>
-  );
+  return <StatusBadge active={server.connectable} activeText="可连通" inactiveText="不能连通" />;
 };
 
 const ToolsSetting = () => {
@@ -210,6 +195,7 @@ const ToolsSetting = () => {
                 <RefreshCw className={checkingServerId === server.id ? "animate-spin" : ""} />
               </SettingItemAction>
               <Switch
+                className="ml-1"
                 checked={!server.isDisabled}
                 onCheckedChange={() => handleToggleStatus(server)}
                 disabled={toggleStatusMutation.isPending}

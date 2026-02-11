@@ -68,7 +68,7 @@ export class TagService extends BaseService<Tag> {
         // Query tag list
         return this.tagRepository.find({
             where,
-            order: { createdAt: "DESC" },
+            order: { createdAt: "ASC" },
         });
     }
 

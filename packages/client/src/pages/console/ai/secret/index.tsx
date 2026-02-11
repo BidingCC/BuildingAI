@@ -7,6 +7,7 @@ import {
   useCreateSecretMutation,
   useDeleteSecretMutation,
   useDeleteSecretTemplateMutation,
+  useImportSecretTemplateJsonMutation,
   useSecretsByTemplateQuery,
   useSetSecretStatusMutation,
   useSetSecretTemplateEnabledMutation,
@@ -19,6 +20,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -40,9 +42,10 @@ import {
   SelectValue,
 } from "@buildingai/ui/components/ui/select";
 import { Skeleton } from "@buildingai/ui/components/ui/skeleton";
+import { StatusBadge } from "@buildingai/ui/components/ui/status-badge";
 import { Switch } from "@buildingai/ui/components/ui/switch";
+import { Textarea } from "@buildingai/ui/components/ui/textarea";
 import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog";
-import { IconCircleCheckFilled, IconXboxXFilled } from "@tabler/icons-react";
 import {
   Check,
   ChevronRight,
@@ -51,6 +54,7 @@ import {
   FileJson2,
   Info,
   KeyRound,
+  Loader2,
   Plus,
   Settings,
   Trash2,
@@ -61,25 +65,7 @@ import { toast } from "sonner";
 
 import { PageContainer } from "@/layouts/console/_components/page-container";
 
-type StatusBadgeProps = {
-  isEnabled: boolean;
-};
-
-/**
- * Reusable status badge component
- */
-const StatusBadge = ({ isEnabled }: StatusBadgeProps) =>
-  isEnabled ? (
-    <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
-      <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
-      启用
-    </Badge>
-  ) : (
-    <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
-      <IconXboxXFilled className="fill-destructive" />
-      禁用
-    </Badge>
-  );
+import { SecretTemplateFormDialog } from "./_components/secret-template-form-dialog";
 
 type SecretsManageDialogProps = {
   template: SecretTemplate;
@@ -526,7 +512,7 @@ const SecretsManageContent = ({ template }: SecretsManageContentProps) => {
             </div>
           </div>
         ) : (
-          <div className="center text-muted-foreground p-8 text-sm">no data</div>
+          <div className="center text-muted-foreground p-8 text-sm">密钥列表为空</div>
         )}
         <div className="mt-4 flex justify-end">
           <Button size="sm" variant="outline" onClick={handleAddRow} disabled={!!newRow}>
@@ -565,6 +551,10 @@ const AiSecretIndexPage = () => {
   const { confirm } = useAlertDialog();
   const [searchKeyword, setSearchKeyword] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [formDialogOpen, setFormDialogOpen] = useState(false);
+  const [editingTemplate, setEditingTemplate] = useState<SecretTemplate | null>(null);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [importJson, setImportJson] = useState("");
 
   const { data: templates, refetch, isLoading } = useAllSecretTemplatesQuery();
 
@@ -600,6 +590,36 @@ const AiSecretIndexPage = () => {
     },
   });
 
+  const importMutation = useImportSecretTemplateJsonMutation({
+    onSuccess: () => {
+      toast.success("模板导入成功");
+      setImportDialogOpen(false);
+      setImportJson("");
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(`导入失败: ${error.message}`);
+    },
+  });
+
+  const handleCreate = () => {
+    setEditingTemplate(null);
+    setFormDialogOpen(true);
+  };
+
+  const handleEdit = (template: SecretTemplate) => {
+    setEditingTemplate(template);
+    setFormDialogOpen(true);
+  };
+
+  const handleImport = () => {
+    if (!importJson.trim()) {
+      toast.error("请输入 JSON 配置");
+      return;
+    }
+    importMutation.mutate({ json: importJson });
+  };
+
   const handleToggleEnabled = async (template: SecretTemplate) => {
     const newStatus =
       template.isEnabled === BooleanNumber.YES ? BooleanNumber.NO : BooleanNumber.YES;
@@ -629,7 +649,7 @@ const AiSecretIndexPage = () => {
   return (
     <PageContainer>
       <div className="flex flex-col gap-4">
-        <div className="bg-background sticky top-0 z-1 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+        <div className="bg-background sticky top-0 z-2 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
           <Input
             placeholder="搜索模板名称或代码"
             className="text-sm"
@@ -648,7 +668,7 @@ const AiSecretIndexPage = () => {
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-          <div className="flex flex-col gap-4 rounded-lg border border-dashed p-4 hover:border-solid">
+          <div className="bg-card flex flex-col gap-4 rounded-lg border border-dashed p-4 hover:border-solid">
             <div className="flex items-center gap-3">
               <Button className="size-12 rounded-lg border-dashed" variant="outline">
                 <Plus />
@@ -662,10 +682,15 @@ const AiSecretIndexPage = () => {
             </div>
 
             <div className="mt-auto flex gap-4">
-              <Button size="xs" className="flex-1" variant="outline">
+              <Button
+                size="xs"
+                className="flex-1"
+                variant="outline"
+                onClick={() => setImportDialogOpen(true)}
+              >
                 <FileJson2 /> 从配置导入
               </Button>
-              <Button size="xs" className="flex-1" variant="outline">
+              <Button size="xs" className="flex-1" variant="outline" onClick={handleCreate}>
                 <Plus /> 手动创建
               </Button>
             </div>
@@ -723,7 +748,7 @@ const AiSecretIndexPage = () => {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                      <DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleEdit(template)}>
                         <Edit />
                         编辑
                       </DropdownMenuItem>
@@ -740,7 +765,11 @@ const AiSecretIndexPage = () => {
                   </DropdownMenu>
                 </div>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
-                  <StatusBadge isEnabled={template.isEnabled === BooleanNumber.YES} />
+                  <StatusBadge
+                    active={template.isEnabled === BooleanNumber.YES}
+                    activeText="启用"
+                    inactiveText="禁用"
+                  />
                   {template.fieldConfig?.map((field) => (
                     <Badge key={field.name} variant="secondary">
                       {field.name}
@@ -758,6 +787,36 @@ const AiSecretIndexPage = () => {
           )}
         </div>
       </div>
+      <SecretTemplateFormDialog
+        open={formDialogOpen}
+        onOpenChange={setFormDialogOpen}
+        template={editingTemplate}
+        onSuccess={refetch}
+      />
+
+      <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>从配置导入</DialogTitle>
+            <DialogDescription>粘贴密钥模板的 JSON 配置来快速导入</DialogDescription>
+          </DialogHeader>
+          <Textarea
+            placeholder='{"name": "OpenAI", "fieldConfig": [{"name": "apiKey", "required": true}]}'
+            className="min-h-[200px] font-mono text-sm"
+            value={importJson}
+            onChange={(e) => setImportJson(e.target.value)}
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setImportDialogOpen(false)}>
+              取消
+            </Button>
+            <Button onClick={handleImport} disabled={importMutation.isPending}>
+              {importMutation.isPending && <Loader2 className="animate-spin" />}
+              导入
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageContainer>
   );
 };

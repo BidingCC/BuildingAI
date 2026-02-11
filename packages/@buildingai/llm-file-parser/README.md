@@ -1,10 +1,12 @@
 # @buildingai/llm-file-parser
 
-A comprehensive document parser designed specifically for LLM consumption. Extracts structured text from various file formats with clean, well-organized output.
+A comprehensive document parser designed specifically for LLM consumption. Extracts structured text
+from various file formats with clean, well-organized output.
 
 ## Features
 
-- 📄 **Multiple Format Support**: PDF, DOCX, PPTX, XLSX, XLS, TXT, MD, CSV, RTF, HTML, JSON, XML, plus common code files (JS, TS, PY, Java, Go, Rust, Vue, CSS, YAML, SQL, etc.)
+- 📄 **Multiple Format Support**: PDF, DOCX, PPTX, XLSX, XLS, TXT, MD, CSV, RTF, HTML, JSON, XML,
+  plus common code files (JS, TS, PY, Java, Go, Rust, Vue, CSS, YAML, SQL, etc.)
 - 🔗 **HTTP/HTTPS URL Support**: Download and parse files directly from URLs
 - 🎯 **Structured Output**: Clean paragraphs, headings, lists with proper hierarchy
 - 🤖 **LLM-Optimized**: Output format designed for optimal LLM understanding
@@ -119,10 +121,12 @@ if (isSupportedExtension(file.name)) {
 }
 ```
 
-- **`SUPPORTED_FILE_EXTENSIONS`**: `readonly string[]` — extensions with dot, both cases (e.g. `.pdf`, `.PDF`, `.docx`, `.DOCX`, …)
+- **`SUPPORTED_FILE_EXTENSIONS`**: `readonly string[]` — extensions with dot, both cases (e.g.
+  `.pdf`, `.PDF`, `.docx`, `.DOCX`, …)
 - **`SUPPORTED_FORMATS_DISPLAY`**: `string` — comma-separated list for display
 - **`SUPPORTED_EXTENSIONS_LOWER`**: `readonly string[]` — lowercase extensions only
-- **`isSupportedExtension(filename: string)`**: `boolean` — whether the filename has a supported extension
+- **`isSupportedExtension(filename: string)`**: `boolean` — whether the filename has a supported
+  extension
 
 ### Stream Parsing (Like AI SDK's streamText)
 
@@ -155,7 +159,9 @@ console.log("Complete document:", finalResult);
 import { llmFileParser } from "@buildingai/llm-file-parser";
 
 // Stream parse and get formatted text chunks
-for await (const textChunk of llmFileParser.streamParseAndFormat("https://example.com/document.pdf")) {
+for await (const textChunk of llmFileParser.streamParseAndFormat(
+    "https://example.com/document.pdf",
+)) {
     console.log(textChunk);
     // Process formatted text chunks as they arrive
 }
@@ -197,13 +203,13 @@ Stream parse and format in one call. Yields formatted text chunks as they are pa
 
 ```typescript
 interface ParseOptions {
-    maxFileSize?: number;              // Max file size in bytes (default: 50MB)
-    preserveFormatting?: boolean;       // Preserve formatting (default: true)
-    includeMetadata?: boolean;          // Include metadata (default: false)
-    unstructuredApiUrl?: string;       // Unstructured API endpoint
-    unstructuredApiKey?: string;       // Unstructured API key
-    useUnstructuredService?: boolean;   // Use unstructured.io (default: false)
-    timeout?: number;                   // Timeout in ms (default: 30000)
+    maxFileSize?: number; // Max file size in bytes (default: 50MB)
+    preserveFormatting?: boolean; // Preserve formatting (default: true)
+    includeMetadata?: boolean; // Include metadata (default: false)
+    unstructuredApiUrl?: string; // Unstructured API endpoint
+    unstructuredApiKey?: string; // Unstructured API key
+    useUnstructuredService?: boolean; // Use unstructured.io (default: false)
+    timeout?: number; // Timeout in ms (default: 30000)
 }
 ```
 
@@ -211,15 +217,16 @@ interface ParseOptions {
 
 ```typescript
 interface ParseResult {
-    blocks: StructuredTextBlock[];       // Structured text blocks
-    text: string;                       // Plain text representation
-    metadata: {                         // Document metadata
+    blocks: StructuredTextBlock[]; // Structured text blocks
+    text: string; // Plain text representation
+    metadata: {
+        // Document metadata
         filename?: string;
         filetype?: string;
         size?: number;
         pages?: number;
     };
-    elements?: UnstructuredElement[];   // Raw unstructured elements (if available)
+    elements?: UnstructuredElement[]; // Raw unstructured elements (if available)
 }
 ```
 
@@ -229,20 +236,20 @@ interface ParseResult {
 interface ParseStream {
     // Async iterator for streaming chunks
     [Symbol.asyncIterator](): AsyncIterator<ParseStreamChunk>;
-    
+
     // Get final parse result (waits for stream to complete)
     finalResult(): Promise<ParseResult>;
-    
+
     // Cancel the parsing process (optional)
     cancel?(): void;
 }
 
 interface ParseStreamChunk {
     type: "block" | "text" | "metadata" | "done";
-    block?: StructuredTextBlock;      // If type is "block"
-    text?: string;                     // If type is "text"
+    block?: StructuredTextBlock; // If type is "block"
+    text?: string; // If type is "text"
     metadata?: ParseResult["metadata"]; // If type is "metadata"
-    result?: ParseResult;              // If type is "done"
+    result?: ParseResult; // If type is "done"
 }
 ```
 
@@ -255,7 +262,10 @@ interface ParseStreamChunk {
 - **Text**: `.txt`, `.md`, `.markdown`, `.rtf`
 - **HTML**: `.html`, `.htm`, `.xhtml`
 - **JSON / XML**: `.json`, `.jsonl`, `.xml`
-- **Code**: `.js`, `.jsx`, `.ts`, `.tsx`, `.mjs`, `.cjs`, `.py`, `.pyw`, `.pyi`, `.java`, `.kt`, `.kts`, `.go`, `.rs`, `.c`, `.h`, `.cpp`, `.hpp`, `.cc`, `.cxx`, `.cs`, `.rb`, `.php`, `.swift`, `.vue`, `.svelte`, `.css`, `.scss`, `.sass`, `.less`, `.sh`, `.bash`, `.zsh`, `.yaml`, `.yml`, `.toml`, `.sql`, `.r`, `.lua`, `.pl`, `.pm`, `.scala`, `.groovy`
+- **Code**: `.js`, `.jsx`, `.ts`, `.tsx`, `.mjs`, `.cjs`, `.py`, `.pyw`, `.pyi`, `.java`, `.kt`,
+  `.kts`, `.go`, `.rs`, `.c`, `.h`, `.cpp`, `.hpp`, `.cc`, `.cxx`, `.cs`, `.rb`, `.php`, `.swift`,
+  `.vue`, `.svelte`, `.css`, `.scss`, `.sass`, `.less`, `.sh`, `.bash`, `.zsh`, `.yaml`, `.yml`,
+  `.toml`, `.sql`, `.r`, `.lua`, `.pl`, `.pm`, `.scala`, `.groovy`
 
 ## Output Format
 

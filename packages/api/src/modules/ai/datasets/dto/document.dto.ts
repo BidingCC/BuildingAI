@@ -16,6 +16,9 @@ import {
 export const DOCUMENT_SORT_BY_VALUES = ["name", "size", "uploadTime"] as const;
 export type DocumentSortBy = (typeof DOCUMENT_SORT_BY_VALUES)[number];
 
+export const DOCUMENT_FILE_TYPE_FILTER_VALUES = ["all", "text", "table", "image"] as const;
+export type DocumentFileTypeFilter = (typeof DOCUMENT_FILE_TYPE_FILTER_VALUES)[number];
+
 export class CreateDocumentDto {
     @ValidateIf((o) => !o.url?.trim())
     @IsUUID("4", { message: "fileId 必须是有效的 UUID" })
@@ -48,6 +51,11 @@ export class ListDocumentsDto {
     @IsString()
     @IsIn(DOCUMENT_SORT_BY_VALUES)
     sortBy?: DocumentSortBy = "uploadTime";
+
+    @IsOptional()
+    @IsString()
+    @IsIn(DOCUMENT_FILE_TYPE_FILTER_VALUES)
+    fileType?: DocumentFileTypeFilter = "all";
 
     @IsOptional()
     @IsString()

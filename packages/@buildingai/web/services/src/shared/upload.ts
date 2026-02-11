@@ -1,3 +1,5 @@
+import type { AxiosProgressEvent } from "axios";
+
 import { apiHttpClient } from "../base";
 
 export type UploadFileResult = {
@@ -14,7 +16,15 @@ export type UploadFileParams = {
     extensionId?: string;
 };
 
-export async function uploadFile(file: File, params?: UploadFileParams): Promise<UploadFileResult> {
+export type UploadRequestOptions = {
+    onUploadProgress?: (event: AxiosProgressEvent) => void;
+};
+
+export async function uploadFile(
+    file: File,
+    params?: UploadFileParams,
+    options?: UploadRequestOptions,
+): Promise<UploadFileResult> {
     const formData = new FormData();
     formData.append("file", file);
     if (params?.description) {
@@ -28,12 +38,14 @@ export async function uploadFile(file: File, params?: UploadFileParams): Promise
         headers: {
             "Content-Type": "multipart/form-data",
         },
+        onUploadProgress: options?.onUploadProgress,
     });
 }
 
 export async function uploadFiles(
     files: File[],
     params?: UploadFileParams,
+    options?: UploadRequestOptions,
 ): Promise<UploadFileResult[]> {
     const formData = new FormData();
     files.forEach((file) => {
@@ -50,6 +62,7 @@ export async function uploadFiles(
         headers: {
             "Content-Type": "multipart/form-data",
         },
+        onUploadProgress: options?.onUploadProgress,
     });
 }
 

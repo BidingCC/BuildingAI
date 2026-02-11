@@ -196,7 +196,7 @@ const ChatRecordIndexPage = () => {
   return (
     <PageContainer>
       <div className="flex h-full flex-col gap-4">
-        <div className="bg-background sticky top-0 z-10 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+        <div className="bg-background sticky top-0 z-20 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
           <Input
             placeholder="搜索对话标题、摘要或用户名"
             value={queryParams.keyword || ""}
@@ -301,7 +301,7 @@ const ChatRecordIndexPage = () => {
           </div>
         </div>
 
-        <div className="bg-background sticky bottom-0 flex py-2">
+        <div className="bg-background sticky bottom-0 z-2 flex py-2">
           <PaginationComponent className="mx-0 w-fit" />
         </div>
 

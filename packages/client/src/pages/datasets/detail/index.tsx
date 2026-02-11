@@ -1,110 +1,300 @@
-import type { DatasetsDocument, DocumentSortBy } from "@buildingai/services/web";
 import {
+  type AiProvider,
   useAiProvidersQuery,
   useDatasetDetail,
-  useDatasetsDocumentsQuery,
+  useDatasetsDocumentsInfiniteQuery,
+  usePublishDatasetToSquare,
+  useUnpublishDatasetFromSquare,
 } from "@buildingai/services/web";
-import type { PaginatedResponse } from "@buildingai/web-types";
-import { useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { memo, useCallback, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
+import { toast } from "sonner";
 
 import { AssistantProvider } from "@/components/ask-assistant-ui";
 
 import { ChatContainer, DEFAULT_SUGGESTIONS } from "./_components/chat";
-import { SidebarContent } from "./_components/sidebar";
+import { DatasetActions } from "./_components/dataset-actions";
+import { DatasetInfo } from "./_components/dataset-info";
+import {
+  DatasetEditDialog,
+  EditTagsDialog,
+  MemberDialog,
+  PublishDialog,
+  TransferDialog,
+  UploadDialog,
+} from "./_components/dialogs";
+import { DocumentList } from "./_components/document-list";
+import { DocumentTabs } from "./_components/document-tabs";
 import { ContentLayout, PageLayout } from "./_layouts";
-import { useDatasetDocumentUpload, useDatasetsAssistant } from "./hooks";
+import type { DatasetDetailContextValue, DocumentTab } from "./context";
+import { DatasetDetailProvider } from "./context";
+import { useDatasetDocumentUpload, useDatasetsAssistant, useDialogManager } from "./hooks";
 
-function documentNeedsPolling(d: DatasetsDocument): boolean {
-  return d.status === "pending" || d.status === "processing" || Boolean(d.summaryGenerating);
-}
-
-function getDocumentItems(data: unknown): DatasetsDocument[] {
-  return (data as PaginatedResponse<DatasetsDocument> | undefined)?.items ?? [];
-}
-
-export default function DatasetDetailPage() {
-  const { id } = useParams<{ id: string }>();
-  const [sortBy, setSortBy] = useState<DocumentSortBy>("uploadTime");
-  const [keyword, setKeyword] = useState("");
-
-  const { data: providers = [] } = useAiProvidersQuery({ supportedModelTypes: "llm" });
-  const { data: dataset } = useDatasetDetail(id);
-  const listParams = useMemo(
-    () => ({
-      page: 1,
-      pageSize: 20,
-      sortBy,
-      keyword: keyword.trim() || undefined,
-    }),
-    [sortBy, keyword],
-  );
-  const { data: documentsPage } = useDatasetsDocumentsQuery(id ?? "", listParams, {
-    refetchInterval: (query) =>
-      getDocumentItems(query.state.data).some(documentNeedsPolling) ? 2000 : false,
-  });
-
-  const { uploadDocuments } = useDatasetDocumentUpload(id);
-
-  const documents = documentsPage?.items ?? [];
-
-  const assistantValue = useDatasetsAssistant({
-    datasetId: id ?? "",
+const ChatPanel = memo(function ChatPanel({
+  datasetId,
+  providers,
+  datasetName,
+  creatorNickname,
+}: {
+  datasetId: string;
+  providers: AiProvider[];
+  datasetName: string;
+  creatorNickname: string;
+}) {
+  const { providerValue, setConversationId } = useDatasetsAssistant({
+    datasetId,
     providers,
     suggestions: DEFAULT_SUGGESTIONS,
   });
 
-  const handleUpload = (files: File[]) => {
-    uploadDocuments(files);
-  };
+  return (
+    <AssistantProvider key={datasetId} {...providerValue}>
+      <ChatContainer
+        datasetId={datasetId}
+        currentConversationId={providerValue.currentThreadId}
+        onSelectConversation={setConversationId}
+        welcomeConfig={{
+          title: datasetName,
+          creator: creatorNickname,
+          instruction: "你可以通过提问了解知识库中的相关内容",
+        }}
+      />
+    </AssistantProvider>
+  );
+});
 
-  const handleDocumentClick = () => {};
+export default function DatasetDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const queryClient = useQueryClient();
+  const [activeTab, setActiveTab] = useState<DocumentTab>("all");
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const dialog = useDialogManager();
 
-  const welcomeMessage = (
-    <div className="text-center">
-      <h2 className="text-2xl font-semibold">{dataset?.name ?? "知识库"}</h2>
-      <p className="text-muted-foreground mt-2">
-        {dataset?.creator?.nickname
-          ? `创建者：${dataset.creator.nickname}`
-          : "你可以通过提问了解知识库中的相关内容"}
-      </p>
-      <p className="text-muted-foreground mt-1">开始对话，或选择一个推荐问题</p>
-    </div>
+  const { data: providers = [] } = useAiProvidersQuery({ supportedModelTypes: "llm" });
+  const { data: dataset } = useDatasetDetail(id);
+  const documentsInfiniteQuery = useDatasetsDocumentsInfiniteQuery(id ?? "", {
+    pageSize: 20,
+    sortBy: "uploadTime",
+    fileType: activeTab,
+  });
+
+  const { uploadDocuments, uploadDocumentFromUrl } = useDatasetDocumentUpload(id);
+
+  const documents = useMemo(
+    () => documentsInfiniteQuery.data?.pages.flatMap((p) => p.items) ?? [],
+    [documentsInfiniteQuery.data?.pages],
   );
 
-  const { setConversationId, ...providerValue } = assistantValue;
+  const setActiveTabWithReset = useCallback((tab: DocumentTab) => {
+    setActiveTab(tab);
+    setSelectedIds([]);
+  }, []);
+
+  const documentsInfinite = useMemo(
+    () => ({
+      hasMore: documentsInfiniteQuery.hasNextPage ?? false,
+      loading: documentsInfiniteQuery.isFetchingNextPage,
+      isFetching: documentsInfiniteQuery.isFetching,
+      onLoadMore: () => documentsInfiniteQuery.fetchNextPage(),
+    }),
+    [
+      documentsInfiniteQuery.hasNextPage,
+      documentsInfiniteQuery.isFetchingNextPage,
+      documentsInfiniteQuery.isFetching,
+      documentsInfiniteQuery.fetchNextPage,
+    ],
+  );
+
+  const selectAll = useCallback((ids: string[]) => setSelectedIds(ids), []);
+  const clearSelection = useCallback(() => setSelectedIds([]), []);
+
+  const publishMutation = usePublishDatasetToSquare(dataset?.id ?? "");
+  const unpublishMutation = useUnpublishDatasetFromSquare(dataset?.id ?? "");
+
+  const handlePublishConfirm = useCallback(
+    (publishToSquare: boolean, tagIds?: string[], memberJoinApprovalRequired?: boolean) => {
+      if (!dataset?.id) return;
+      if (publishToSquare) {
+        publishMutation.mutate(
+          { tagIds: tagIds ?? [], memberJoinApprovalRequired },
+          {
+            onSuccess: (data) => {
+              dialog.close();
+              const published = Boolean(
+                data?.publishedToSquare || data?.squarePublishStatus === "approved",
+              );
+              toast.success(published ? "已发布到知识广场" : "已提交审核，请等待审核结果");
+              queryClient.refetchQueries({ queryKey: ["datasets", dataset.id] });
+            },
+            onError: (error) => {
+              toast.error(error instanceof Error ? error.message : "发布失败");
+            },
+          },
+        );
+      } else {
+        unpublishMutation.mutate(undefined, {
+          onSuccess: () => {
+            dialog.close();
+            toast.success("已从知识广场取消发布");
+            queryClient.refetchQueries({ queryKey: ["datasets", dataset.id] });
+          },
+          onError: (error) => {
+            toast.error(error instanceof Error ? error.message : "取消发布失败");
+          },
+        });
+      }
+    },
+    [dataset?.id, publishMutation, unpublishMutation, queryClient, dialog],
+  );
+
+  const handleUploadFromDialog = useCallback(
+    (files: File[]) => {
+      uploadDocuments(files);
+      dialog.close();
+    },
+    [uploadDocuments, dialog],
+  );
+
+  const handleUploadUrlFromDialog = useCallback(
+    (value: string) => {
+      uploadDocumentFromUrl(value);
+      dialog.close();
+    },
+    [uploadDocumentFromUrl, dialog],
+  );
+
+  const contextValue = useMemo<DatasetDetailContextValue>(
+    () => ({
+      dataset,
+      documents,
+      canManageDocuments: dataset?.canManageDocuments ?? false,
+      isOwner: dataset?.isOwner ?? false,
+      activeTab,
+      setActiveTab: setActiveTabWithReset,
+      uploadDocuments,
+      selectedIds,
+      selectAll,
+      clearSelection,
+      dialog,
+      documentsInfinite,
+    }),
+    [
+      dataset,
+      documents,
+      activeTab,
+      setActiveTabWithReset,
+      uploadDocuments,
+      selectedIds,
+      selectAll,
+      clearSelection,
+      dialog,
+      documentsInfinite,
+    ],
+  );
 
   return (
-    <PageLayout
-      sidebar={
-        <SidebarContent
-          dataset={dataset}
-          documents={documents}
-          sortBy={sortBy}
-          onSortChange={setSortBy}
-          searchKeyword={keyword}
-          onSearchChange={setKeyword}
-          onUpload={handleUpload}
-          onDocumentClick={handleDocumentClick}
-        />
-      }
-    >
-      <ContentLayout dataset={dataset}>
-        <AssistantProvider {...providerValue}>
-          <ChatContainer
-            assistantMode
+    <DatasetDetailProvider value={contextValue}>
+      <PageLayout
+        panel={
+          <ChatPanel
             datasetId={id ?? ""}
-            currentConversationId={assistantValue.currentThreadId}
-            onSelectConversation={setConversationId}
-            welcomeConfig={{
-              title: dataset?.name ?? "",
-              creator: dataset?.creator?.nickname ?? "",
-              instruction: "你可以通过提问了解知识库中的相关内容",
-            }}
-            welcomeMessage={welcomeMessage}
+            providers={providers}
+            datasetName={dataset?.name ?? ""}
+            creatorNickname={dataset?.creator?.nickname ?? ""}
           />
-        </AssistantProvider>
-      </ContentLayout>
-    </PageLayout>
+        }
+      >
+        <ContentLayout>
+          <div className="flex flex-col gap-2 pt-20 pb-10">
+            <div className="flex items-center justify-between">
+              <DatasetInfo />
+              <DatasetActions />
+            </div>
+            <p className="text-muted-foreground mt-2 text-sm">
+              {dataset?.description ?? "快来填写简介吧～"}
+            </p>
+          </div>
+          <DocumentTabs />
+          <DocumentList />
+        </ContentLayout>
+
+        {dialog.current?.type === "upload" && (
+          <UploadDialog
+            open
+            onOpenChange={() => dialog.close()}
+            onUpload={handleUploadFromDialog}
+            onUploadUrl={handleUploadUrlFromDialog}
+          />
+        )}
+
+        {dialog.current?.type === "member" && dataset?.id && (
+          <MemberDialog
+            datasetId={dataset.id}
+            isOwner={dataset.isOwner}
+            open
+            onOpenChange={() => dialog.close()}
+          />
+        )}
+
+        {dialog.current?.type === "publish" && (
+          <PublishDialog
+            open
+            onOpenChange={() => dialog.close()}
+            defaultPublishedToSquare={Boolean(
+              dataset?.publishedToSquare || dataset?.squarePublishStatus === "rejected",
+            )}
+            defaultTagIds={
+              Array.isArray(dataset?.tags) ? dataset.tags.map((t: any) => t.id) : undefined
+            }
+            defaultMemberJoinApprovalRequired={dataset?.memberJoinApprovalRequired ?? true}
+            squarePublishStatus={dataset?.squarePublishStatus ?? "none"}
+            squareRejectReason={dataset?.squareRejectReason ?? null}
+            loading={publishMutation.isPending || unpublishMutation.isPending}
+            onConfirm={handlePublishConfirm}
+          />
+        )}
+
+        {dialog.current?.type === "editDataset" && dataset && (
+          <DatasetEditDialog
+            mode="edit"
+            open
+            onOpenChange={() => dialog.close()}
+            initialValues={{
+              name: dataset.name ?? "",
+              coverUrl: dataset.coverUrl ?? undefined,
+              description: dataset.description ?? "",
+            }}
+          />
+        )}
+
+        {dialog.current?.type === "editTags" && dataset?.id && (
+          <EditTagsDialog
+            open
+            onOpenChange={() => dialog.close()}
+            datasetId={dataset.id}
+            mode={dialog.current.mode}
+            document={dialog.current.document}
+            documentIds={dialog.current.documentIds}
+            onSuccess={() => {
+              if (dialog.current?.type === "editTags" && dialog.current.mode === "batch") {
+                clearSelection();
+              }
+            }}
+          />
+        )}
+
+        {dialog.current?.type === "transfer" && dataset?.id && (
+          <TransferDialog
+            open
+            onOpenChange={() => dialog.close()}
+            mode={dialog.current.mode}
+            sourceDatasetId={dataset.id}
+            documentIds={dialog.current.documentIds}
+            onSuccess={clearSelection}
+          />
+        )}
+      </PageLayout>
+    </DatasetDetailProvider>
   );
 }

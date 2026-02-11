@@ -5,13 +5,14 @@ import {
 import type { RetrievalConfig } from "@buildingai/types/ai/retrieval-config.interface";
 
 import { AppEntity } from "../decorators/app-entity.decorator";
-import { Column, OneToMany, type Relation } from "../typeorm";
+import { Column, JoinTable, ManyToMany, OneToMany, type Relation } from "../typeorm";
 import { BaseEntity } from "./base";
 import { DatasetsChatRecord } from "./datasets-chat-record.entity";
 import { DatasetsDocument } from "./datasets-document.entity";
 import { DatasetMember } from "./datasets-member.entity";
 import { DatasetMemberApplication } from "./datasets-member-application.entity";
 import { DatasetsSegments } from "./datasets-segments.entity";
+import { Tag } from "./tag.entity";
 
 /**
  * 发布到广场的审核状态
@@ -136,6 +137,9 @@ export class Datasets extends BaseEntity {
     @Column({ type: "text", nullable: true, comment: "广场发布拒绝原因" })
     squareRejectReason?: string | null;
 
+    @Column({ type: "boolean", default: true, comment: "成员加入是否需要审核" })
+    memberJoinApprovalRequired: boolean;
+
     /**
      * 知识库下的文档列表
      */
@@ -160,15 +164,16 @@ export class Datasets extends BaseEntity {
     @OneToMany(() => DatasetMemberApplication, (application) => application.dataset)
     memberApplications?: Relation<DatasetMemberApplication[]>;
 
-    /**
-     * 知识库调试对话记录列表（仅用于调试知识库效果）
-     */
     @OneToMany(() => DatasetsChatRecord, (record) => record.dataset)
     chatRecords?: Relation<DatasetsChatRecord[]>;
 
-    /**
-     * 关联应用（智能体）数量
-     * 非持久化字段，仅用于接口返回展示
-     */
+    @ManyToMany(() => Tag, (tag) => tag.datasets)
+    @JoinTable({
+        name: "datasets_tags",
+        joinColumn: { name: "dataset_id", referencedColumnName: "id" },
+        inverseJoinColumn: { name: "tag_id", referencedColumnName: "id" },
+    })
+    tags?: Tag[];
+
     relatedAgentCount?: number;
 }

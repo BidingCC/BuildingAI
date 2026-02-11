@@ -91,7 +91,7 @@ export function useDocumentDrop({
   );
 
   const isOver = dropPhase === "over";
-  const showDropZone = enabled && dropPhase !== "idle";
+  const showDropZone = enabled && dropPhase === "over";
 
   return {
     dropPhase,

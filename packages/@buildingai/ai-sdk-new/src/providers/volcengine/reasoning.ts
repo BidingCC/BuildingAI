@@ -8,7 +8,9 @@ export interface VolcengineReasoningOptions {
 /**
  * Generate OpenAI-compatible provider options for reasoning/thinking mode
  */
-export function volcengineReasoning(options: VolcengineReasoningOptions): Record<string, JSONObject> {
+export function volcengineReasoning(
+    options: VolcengineReasoningOptions,
+): Record<string, JSONObject> {
     if (!options.thinking) {
         return {};
     }

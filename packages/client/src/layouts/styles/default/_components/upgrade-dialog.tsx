@@ -1,8 +1,10 @@
+import { BooleanNumber } from "@buildingai/constants/shared/status-codes.constant";
 import {
   type BillingItem,
   type MembershipPlan,
   type PayConfigType,
   type PayWayItem,
+  type PrepayResponse,
   useMembershipCenterQuery,
   useMembershipSubmitOrderMutation,
   usePayPrepayMutation,
@@ -117,9 +119,13 @@ function PaymentDialog({
   const [open, setOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PayConfigType>(firstPayType as PayConfigType);
   const [qrCode, setQrCode] = useState<string | null>(null);
+  const [qrLoading, setQrLoading] = useState(false);
+  const [qrError, setQrError] = useState<string | null>(null);
   useEffect(() => {
     if (payWayList.length > 0) {
-      setPaymentMethod(payWayList[0].payType as PayConfigType);
+      setPaymentMethod(
+        payWayList.find((item) => item.isDefault === BooleanNumber.YES)?.payType as PayConfigType,
+      );
     }
   }, [payWayList.length, payWayList[0]?.payType]);
   const [orderNo, setOrderNo] = useState<string | null>(null);
@@ -130,26 +136,40 @@ function PaymentDialog({
     if (!next) {
       setQrCode(null);
       setOrderNo(null);
+      setQrLoading(false);
+      setQrError(null);
     }
     setOpen(next);
   };
 
   const handleConfirmPay = async () => {
     try {
+      setQrError(null);
       const order = await submitOrderMutation.mutateAsync({
         planId,
         levelId,
         payType: paymentMethod,
       });
       setOrderNo(order.orderNo);
+      setQrLoading(true);
       const prepay = await prepayMutation.mutateAsync({
         orderId: order.orderId,
         payType: paymentMethod,
         from: "membership",
       });
-      setQrCode(prepay.qrCode || null);
+      const rawQrCode = (prepay as PrepayResponse)?.qrCode?.code_url;
+      if (typeof rawQrCode === "string" && rawQrCode.length > 0) {
+        setQrCode(rawQrCode);
+        setQrLoading(false);
+      } else {
+        setQrCode(null);
+        setQrLoading(false);
+        setQrError("暂未获取到支付二维码，请稍后重试或更换支付方式");
+      }
     } catch (e) {
       console.error(e);
+      setQrLoading(false);
+      setQrError("创建订单或拉起支付失败，请稍后重试");
     }
   };
 
@@ -268,10 +288,29 @@ function PaymentDialog({
                   订单号：<span className="text-foreground font-medium">{orderNo}</span>
                 </p>
               )}
-              {qrCode && (
+              {qrLoading && (
+                <div className="flex flex-col items-center gap-2 py-4">
+                  <div className="bg-muted text-muted-foreground flex size-48 items-center justify-center rounded-lg border border-dashed text-sm">
+                    正在生成支付二维码…
+                  </div>
+                </div>
+              )}
+              {!qrLoading && qrError && (
+                <div className="flex flex-col items-center gap-2 py-4">
+                  <div className="bg-muted text-destructive flex size-48 items-center justify-center rounded-lg border border-dashed px-3 text-center text-sm">
+                    {qrError}
+                  </div>
+                </div>
+              )}
+              {!qrLoading && !qrError && typeof qrCode === "string" && (
                 <div className="flex flex-col items-center gap-2">
                   {qrCode.startsWith("http") || qrCode.startsWith("data:") ? (
-                    <img src={qrCode} alt="支付二维码" className="size-48 object-contain" />
+                    <img
+                      src={qrCode}
+                      alt="支付二维码"
+                      className="size-48 object-contain"
+                      onError={() => setQrError("二维码加载失败，请刷新页面或稍后重试")}
+                    />
                   ) : (
                     <div className="bg-muted flex size-48 items-center justify-center rounded-lg p-2 text-center text-xs break-all">
                       {qrCode}

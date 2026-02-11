@@ -24,6 +24,8 @@ export type SetDatasetVectorConfigDto = {
 
 export type ConsoleDatasetStatus = "all" | "none" | "pending" | "approved" | "rejected";
 
+export type ConsoleDatasetItemTag = { id: string; name: string };
+
 export type ConsoleDatasetItem = {
     id: string;
     name: string;
@@ -35,6 +37,7 @@ export type ConsoleDatasetItem = {
     squareRejectReason?: string | null;
     sort: number;
     updatedAt: string;
+    tags?: ConsoleDatasetItemTag[];
 };
 
 export type QueryConsoleDatasetsDto = {
@@ -42,6 +45,7 @@ export type QueryConsoleDatasetsDto = {
     pageSize?: number;
     name?: string;
     status?: ConsoleDatasetStatus;
+    tagId?: string;
 };
 
 export function useConsoleDatasetsListQuery(
@@ -98,8 +102,7 @@ export function useDeleteDatasetMutation(
     options?: MutationOptionsUtil<{ success: boolean }, string>,
 ) {
     return useMutation<{ success: boolean }, Error, string>({
-        mutationFn: (id) =>
-            consoleHttpClient.delete<{ success: boolean }>(`/datasets/${id}`),
+        mutationFn: (id) => consoleHttpClient.delete<{ success: boolean }>(`/datasets/${id}`),
         ...options,
     });
 }
@@ -116,7 +119,10 @@ export function useSetDatasetVectorConfigMutation(
         { id: string; dto: SetDatasetVectorConfigDto }
     >({
         mutationFn: ({ id, dto }) =>
-            consoleHttpClient.patch<ConsoleDatasetVectorConfig>(`/datasets/${id}/vector-config`, dto),
+            consoleHttpClient.patch<ConsoleDatasetVectorConfig>(
+                `/datasets/${id}/vector-config`,
+                dto,
+            ),
         ...options,
     });
 }

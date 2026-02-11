@@ -70,7 +70,11 @@ function toHttpError(error: unknown): HttpError {
     if (isAxiosError(error)) {
         const status = error.response?.status;
         const code = error.code;
-        const message = error.message || "Request failed";
+        const responseData = error.response?.data as Record<string, unknown> | undefined;
+        const message =
+            (typeof responseData?.message === "string" && responseData.message) ||
+            error.message ||
+            "Request failed";
         return new HttpError({
             name: "HttpRequestError",
             message,
@@ -79,7 +83,7 @@ function toHttpError(error: unknown): HttpError {
             details: {
                 url: error.config?.url,
                 method: error.config?.method,
-                data: error.response?.data,
+                data: responseData,
             },
             cause: error,
         });
@@ -147,6 +151,7 @@ export class HttpClient {
 
     public async request<TResponse>(config: RequestConfig): Promise<TResponse> {
         const method = (config.method?.toUpperCase?.() ?? "GET") as HttpMethod;
+        const silent = config.silent ?? false;
 
         const requestId = config.requestId ?? createRequestId();
         const mergedConfig: AxiosRequestConfig = mergeRequestConfig({}, config);
@@ -194,7 +199,9 @@ export class HttpClient {
                     if (status === 401 && this.options.hooks?.onAuthError) {
                         await this.options.hooks.onAuthError(error);
                     }
-                    throw toHttpError(error);
+                    const httpError = toHttpError(error);
+                    if (!silent) this.options.hooks?.onError?.(httpError);
+                    throw httpError;
                 }
 
                 const factor = this.retry.factor ?? 2;
@@ -204,7 +211,9 @@ export class HttpClient {
             }
         }
 
-        throw toHttpError(lastError);
+        const httpError = toHttpError(lastError);
+        if (!silent) this.options.hooks?.onError?.(httpError);
+        throw httpError;
     }
 
     public get<TResponse>(url: string, config: RequestConfig = {}): Promise<TResponse> {

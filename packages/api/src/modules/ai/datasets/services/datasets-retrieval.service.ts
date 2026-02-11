@@ -81,8 +81,9 @@ export class DatasetsRetrievalService {
             1,
             Math.floor(topK ?? config.topK ?? DATASETS_DEFAULT_CONSTANTS.DEFAULT_TOP_K),
         );
-        const threshold =
-            scoreThreshold ?? (config.scoreThresholdEnabled ? config.scoreThreshold : undefined);
+        const threshold = config.scoreThresholdEnabled
+            ? (scoreThreshold ?? config.scoreThreshold)
+            : undefined;
         const preK = Math.min(50, Math.max(k * 4, k));
 
         const semanticRequired = mode === "vector" || mode === "hybrid";

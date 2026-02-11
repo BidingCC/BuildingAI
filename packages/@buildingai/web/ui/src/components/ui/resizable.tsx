@@ -2,6 +2,8 @@ import { cn } from "@buildingai/ui/lib/utils";
 import * as React from "react";
 import * as ResizablePrimitive from "react-resizable-panels";
 
+export type { ImperativePanelHandle } from "react-resizable-panels";
+
 function ResizablePanelGroup({
   className,
   ...props
@@ -15,9 +17,11 @@ function ResizablePanelGroup({
   );
 }
 
-function ResizablePanel({ ...props }: React.ComponentProps<typeof ResizablePrimitive.Panel>) {
-  return <ResizablePrimitive.Panel data-slot="resizable-panel" {...props} />;
-}
+const ResizablePanel = React.forwardRef<
+  React.ComponentRef<typeof ResizablePrimitive.Panel>,
+  React.ComponentProps<typeof ResizablePrimitive.Panel>
+>((props, ref) => <ResizablePrimitive.Panel data-slot="resizable-panel" {...props} ref={ref} />);
+ResizablePanel.displayName = "ResizablePanel";
 
 function ResizableHandle({
   withHandle,

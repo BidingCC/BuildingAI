@@ -1,3 +1,11 @@
+export interface LoginSettingsConfig {
+    allowedLoginMethods: number[];
+    allowedRegisterMethods: number[];
+    defaultLoginMethod: number;
+    allowMultipleLogin: boolean;
+    showPolicyAgreement: boolean;
+}
+
 export interface WebsiteConfig {
     webinfo: {
         name: string;
@@ -25,6 +33,7 @@ export interface WebsiteConfig {
     statistics: {
         appid: string;
     };
+    loginSettings?: LoginSettingsConfig;
 }
 
 export interface InitializeStatus {

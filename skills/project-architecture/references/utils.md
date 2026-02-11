@@ -3,9 +3,11 @@
 Utility functions and HTTP client.
 
 ## Location
+
 `packages/@buildingai/utils/`
 
 ## Exports
+
 - `createHttpClient()` - HTTP client factory
 - `defaultHttpClient` - Default HTTP client instance
 - Utility functions: `cn()`, `is()`, `helper()`, `file()`, `security()`, `version()`, etc.

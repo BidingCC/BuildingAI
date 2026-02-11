@@ -111,6 +111,16 @@ export class AiModel extends BaseEntity {
     isActive: boolean;
 
     /**
+     * 是否允许开关深度思考
+     */
+    @Column({
+        type: "boolean",
+        default: false,
+        comment: "是否允许开关深度思考",
+    })
+    thinking: boolean;
+
+    /**
      * 模型描述
      */
     @Column({

@@ -1,18 +1,27 @@
-import type { Dataset } from "@buildingai/services/web";
+import { ScrollArea } from "@buildingai/ui/components/ui/scroll-area";
 import type { ReactNode } from "react";
 
-import { ContentHeader } from "../_components/header";
+import { DocumentDropZone } from "../_components/document-drop-zone";
+import { useDatasetDetailContext } from "../context";
+import { useDocumentDrop } from "../hooks";
 
 export interface ContentLayoutProps {
-  dataset: Dataset | undefined;
   children: ReactNode;
 }
 
-export function ContentLayout({ dataset, children }: ContentLayoutProps) {
+export function ContentLayout({ children }: ContentLayoutProps) {
+  const { canManageDocuments, uploadDocuments } = useDatasetDetailContext();
+  const { zoneRef, isOver, showDropZone, handlers } = useDocumentDrop({
+    enabled: canManageDocuments,
+    onDrop: uploadDocuments,
+  });
+
   return (
-    <div className="flex h-full min-h-0 flex-col">
-      <ContentHeader dataset={dataset} />
-      <div className="min-h-0 flex-1 overflow-hidden">{children}</div>
+    <div ref={zoneRef} className="relative flex h-full min-h-0 flex-col" {...handlers}>
+      <ScrollArea className="min-h-0 flex-1">
+        <div className="@container mx-auto w-full max-w-4xl px-6 pb-6">{children}</div>
+      </ScrollArea>
+      {canManageDocuments && <DocumentDropZone isOver={isOver} visible={showDropZone} />}
     </div>
   );
 }

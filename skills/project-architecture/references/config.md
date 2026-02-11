@@ -3,9 +3,11 @@
 Configuration management and environment variable handling.
 
 ## Location
+
 `packages/@buildingai/config/`
 
 ## Exports
+
 - `createDataSourceConfig()` - Database configuration factory
 - Environment utilities from `@buildingai/config/utils/env`
 

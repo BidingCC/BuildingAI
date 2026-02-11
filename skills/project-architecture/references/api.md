@@ -3,6 +3,7 @@
 Main NestJS API application.
 
 ## Location
+
 `packages/api/`
 
 ## Structure
@@ -51,19 +52,20 @@ src/modules/{module-name}/
 ```typescript
 import { ConsoleController, WebController } from "@common/decorators/controller.decorator";
 
-@ConsoleController("users", "User Management")  // Auto auth + permissions
+@ConsoleController("users", "User Management") // Auto auth + permissions
 export class UserController {}
 
-@WebController("posts")  // Requires auth by default
+@WebController("posts") // Requires auth by default
 export class PostController {}
 
-@WebController("public", { skipAuth: true })  // Skip auth
+@WebController("public", { skipAuth: true }) // Skip auth
 export class PublicController {}
 ```
 
 ## Guards
 
-Execution order: `DemoGuard` → `AuthGuard` → `ExtensionGuard` → `PermissionsGuard` → `SuperAdminGuard`
+Execution order: `DemoGuard` → `AuthGuard` → `ExtensionGuard` → `PermissionsGuard` →
+`SuperAdminGuard`
 
 ```typescript
 import { AuthGuard } from "@common/guards/auth.guard";

@@ -85,4 +85,20 @@ export class PayconfigConsoleController extends BaseController {
     async updatePayConfig(@Body() dto: UpdatePayConfigDto) {
         return await this.payconfigService.updatePayconfig(dto.id, dto);
     }
+
+    /**
+     * 设置默认支付配置
+     *
+     * @param id 支付配置id
+     * @returns 设置后的支付配置
+     */
+    @Patch("setDefault/:id")
+    @Permissions({
+        code: "setDefault",
+        name: "设置默认支付配置",
+        description: "设置默认支付配置",
+    })
+    async setDefaultPayconfig(@Param("id", UUIDValidationPipe) id: string) {
+        return await this.payconfigService.setDefaultPayconfig(id);
+    }
 }

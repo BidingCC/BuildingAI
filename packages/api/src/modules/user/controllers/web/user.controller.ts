@@ -1,6 +1,6 @@
 import { BaseService } from "@buildingai/base";
 import { BaseController } from "@buildingai/base";
-import { ACCOUNT_LOG_TYPE, LOGIN_TYPE } from "@buildingai/constants";
+import { ACCOUNT_LOG_TYPE } from "@buildingai/constants";
 import {
     ACCOUNT_LOG_SOURCE,
     ACCOUNT_LOG_TYPE_DESCRIPTION,
@@ -360,39 +360,6 @@ export class UserWebController extends BaseController {
                 membershipGiftPower,
                 rechargePower: userInfo.power - membershipGiftPower,
             },
-        };
-    }
-
-    /**
-     * 获取登录设置
-     *
-     * @returns 当前的登录设置配置
-     */
-    @Public()
-    @Get("login-settings")
-    async getLoginSettings() {
-        // 从字典服务获取登录设置配置
-        const config = await this.dictService.get(
-            "login_settings",
-            this.getDefaultLoginSettings(),
-            "auth",
-        );
-
-        return config;
-    }
-
-    /**
-     * 获取默认登录设置
-     *
-     * @returns 默认的登录设置配置
-     */
-    private getDefaultLoginSettings() {
-        return {
-            allowedLoginMethods: [LOGIN_TYPE.ACCOUNT, LOGIN_TYPE.WECHAT],
-            allowedRegisterMethods: [LOGIN_TYPE.ACCOUNT, LOGIN_TYPE.WECHAT],
-            defaultLoginMethod: LOGIN_TYPE.ACCOUNT,
-            allowMultipleLogin: false,
-            showPolicyAgreement: true,
         };
     }
 

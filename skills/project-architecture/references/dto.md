@@ -3,9 +3,11 @@
 Shared data transfer objects.
 
 ## Location
+
 `packages/@buildingai/dto/`
 
 ## Exports
+
 - `PaginationDto` - Pagination parameters
 - `IndexingSegmentsDto` - Indexing segments DTO
 
@@ -30,7 +32,7 @@ async list(@Query() query: QueryUserDto) {
 
 ```typescript
 class PaginationDto {
-    page?: number = 1;      // Page number (starts from 1)
+    page?: number = 1; // Page number (starts from 1)
     pageSize?: number = 15; // Items per page
 }
 ```

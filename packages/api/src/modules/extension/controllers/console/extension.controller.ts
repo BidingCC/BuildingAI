@@ -10,6 +10,8 @@ import {
     CreateExtensionDto,
     ExtensionConfigService,
     ExtensionsService,
+    getExtensionEnabledStatus,
+    isExtensionCompatible,
     PlatformInfo,
     QueryExtensionDto,
     UpdateExtensionDto,
@@ -380,7 +382,24 @@ export class ExtensionConsoleController extends BaseController {
         if (!extension) {
             throw HttpErrorFactory.notFound("Extension does not exist");
         }
-        return extension;
+
+        const compatible = await isExtensionCompatible(identifier);
+        const enabledStatus = await getExtensionEnabledStatus(identifier);
+        const status =
+            enabledStatus === null
+                ? extension.status
+                : enabledStatus
+                  ? ExtensionStatus.ENABLED
+                  : ExtensionStatus.DISABLED;
+
+        return {
+            ...extension,
+            status,
+            isInstalled: true,
+            isCompatible: compatible,
+            latestVersion: null,
+            hasUpdate: false,
+        };
     }
 
     /**
@@ -396,11 +415,42 @@ export class ExtensionConsoleController extends BaseController {
         name: "查看应用详情",
     })
     async getByIdentifier(@Param("identifier") identifier: string) {
-        const extension = await this.extensionMarketService.getApplicationDetail(identifier);
-        if (!extension) {
+        const marketDetail = await this.extensionMarketService.getApplicationDetail(identifier);
+        if (!marketDetail) {
             throw HttpErrorFactory.notFound("Extension does not exist");
         }
-        return extension;
+
+        const localExtension = await this.extensionsService.findByIdentifier(identifier);
+        const compatible = await isExtensionCompatible(identifier);
+
+        if (localExtension) {
+            const enabledStatus = await getExtensionEnabledStatus(identifier);
+            const status =
+                enabledStatus === null
+                    ? localExtension.status
+                    : enabledStatus
+                      ? ExtensionStatus.ENABLED
+                      : ExtensionStatus.DISABLED;
+
+            return {
+                ...marketDetail,
+                ...localExtension,
+                status,
+                isInstalled: true,
+                isCompatible: compatible,
+                latestVersion:
+                    marketDetail.version !== localExtension.version ? marketDetail.version : null,
+                hasUpdate: marketDetail.version !== localExtension.version,
+            };
+        }
+
+        return {
+            ...marketDetail,
+            isInstalled: false,
+            isCompatible: compatible,
+            latestVersion: null,
+            hasUpdate: false,
+        };
     }
 
     /**

@@ -14,7 +14,6 @@ export interface DatasetsConfigDto {
     embeddingModelId: string;
     textModelId: string;
     defaultRetrievalConfig: RetrievalConfig;
-    /** 发布到广场免审核：true 时发布直接上架，false 时需管理员审核 */
     squarePublishSkipReview: boolean;
 }
 
@@ -137,7 +136,7 @@ export class DatasetsConfigService {
     private normalizeRetrievalConfig(raw: RetrievalConfig): RetrievalConfig {
         const D = DATASETS_CONFIG_DEFAULT_RETRIEVAL;
         return {
-            retrievalMode: raw.retrievalMode ?? RETRIEVAL_MODE.HYBRID,
+            retrievalMode: raw.retrievalMode ?? RETRIEVAL_MODE.VECTOR,
             strategy: raw.strategy ?? "weighted_score",
             topK: raw.topK ?? D.TOP_K,
             scoreThreshold: raw.scoreThreshold ?? D.SCORE_THRESHOLD,
@@ -156,7 +155,7 @@ export class DatasetsConfigService {
     private buildDefaultRetrievalConfig(): RetrievalConfig {
         const D = DATASETS_CONFIG_DEFAULT_RETRIEVAL;
         return {
-            retrievalMode: RETRIEVAL_MODE.HYBRID,
+            retrievalMode: RETRIEVAL_MODE.VECTOR,
             strategy: "weighted_score",
             topK: D.TOP_K,
             scoreThreshold: D.SCORE_THRESHOLD,

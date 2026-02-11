@@ -1,6 +1,6 @@
 import { type UserPlayground } from "@buildingai/db";
 import { Datasets, SquarePublishStatus } from "@buildingai/db/entities";
-import { type FindOptionsWhere, ILike, In } from "@buildingai/db/typeorm";
+import { In } from "@buildingai/db/typeorm";
 import { Playground } from "@buildingai/decorators/playground.decorator";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { bytesToReadable } from "@buildingai/utils";
@@ -24,17 +24,10 @@ export class DatasetsConsoleController {
     @Get()
     @Permissions({ code: "list", name: "知识库列表", description: "分页查询知识库列表" })
     async list(@Query() dto: ListConsoleDatasetsDto) {
-        const { page = 1, pageSize = 20, name, status } = dto;
-        const where: FindOptionsWhere<Datasets> = {};
-        if (name?.trim()) {
-            where.name = ILike(`%${name.trim()}%`);
-        }
-        if (status && status !== "all") {
-            where.squarePublishStatus = status as SquarePublishStatus;
-        }
-        const result = await this.datasetsService.paginate(
+        const { page = 1, pageSize = 20, name, status, tagId } = dto;
+        const result = await this.datasetsService.listForConsole(
             { page, pageSize },
-            { where: Object.keys(where).length ? where : undefined, order: { updatedAt: "DESC" } },
+            { name: name?.trim(), status, tagId },
         );
         const creatorIds = [...new Set((result.items as Datasets[]).map((d) => d.createdBy))];
         const users =
@@ -45,7 +38,9 @@ export class DatasetsConsoleController {
                   })
                 : [];
         const creatorMap = new Map(users.map((u) => [u.id, u.nickname ?? "-"]));
-        const items = (result.items as Datasets[]).map((d) => ({
+        const items = (
+            result.items as (Datasets & { tags?: { id: string; name: string }[] })[]
+        ).map((d) => ({
             id: d.id,
             name: d.name,
             creatorName: creatorMap.get(d.createdBy) ?? "-",
@@ -56,6 +51,7 @@ export class DatasetsConsoleController {
             squareRejectReason: d.squareRejectReason ?? null,
             sort: 0,
             updatedAt: d.updatedAt,
+            tags: (d.tags ?? []).map((t) => ({ id: t.id, name: t.name })),
         }));
         return {
             items,
@@ -111,7 +107,11 @@ export class DatasetsConsoleController {
     }
 
     @Delete(":id")
-    @Permissions({ code: "delete", name: "删除知识库", description: "删除指定知识库及其文档与数据" })
+    @Permissions({
+        code: "delete",
+        name: "删除知识库",
+        description: "删除指定知识库及其文档与数据",
+    })
     async remove(@Param("id") datasetId: string) {
         return this.datasetsService.deleteDatasetForConsole(datasetId);
     }

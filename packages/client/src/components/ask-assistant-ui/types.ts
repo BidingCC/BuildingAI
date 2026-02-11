@@ -68,6 +68,7 @@ export interface Model {
   chefSlug: string;
   providers: string[];
   features?: string[];
+  thinking?: boolean;
   billingRule?: {
     power: number;
     tokens: number;

@@ -305,7 +305,8 @@ export class PlansService extends BaseService<MembershipPlans> {
             where: {
                 isEnable: BooleanNumber.YES,
             },
-            select: ["name", "payType", "logo"],
+            select: ["name", "payType", "logo", "isDefault"],
+            order: { sort: "DESC" },
         });
 
         return {

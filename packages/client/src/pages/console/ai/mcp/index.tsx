@@ -25,9 +25,9 @@ import {
   SelectValue,
 } from "@buildingai/ui/components/ui/select";
 import { Skeleton } from "@buildingai/ui/components/ui/skeleton";
+import { StatusBadge } from "@buildingai/ui/components/ui/status-badge";
 import { Switch } from "@buildingai/ui/components/ui/switch";
 import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog";
-import { IconCircleCheckFilled, IconXboxXFilled } from "@tabler/icons-react";
 import {
   ChevronRight,
   Edit,
@@ -36,8 +36,6 @@ import {
   Hammer,
   Link2,
   Plus,
-  Power,
-  PowerOff,
   RefreshCw,
   Trash2,
 } from "lucide-react";
@@ -49,32 +47,14 @@ import { PageContainer } from "@/layouts/console/_components/page-container";
 
 import { McpFormDialog } from "./_components/mcp-form-dialog";
 import { McpImportDialog } from "./_components/mcp-import-dialog";
-
-type StatusBadgeProps = {
-  isActive: boolean;
-};
-
-/**
- * Reusable status badge component
- */
-const StatusBadge = ({ isActive }: StatusBadgeProps) =>
-  isActive ? (
-    <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
-      <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
-      已启用
-    </Badge>
-  ) : (
-    <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
-      <IconXboxXFilled className="fill-destructive" />
-      已禁用
-    </Badge>
-  );
+import { McpToolsDialog } from "./_components/mcp-tools-dialog";
 
 const AiMcpIndexPage = () => {
   const [queryParams, setQueryParams] = useState<QueryAiMcpServerDto>({});
   const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [editingServer, setEditingServer] = useState<McpServer | null>(null);
+  const [toolsDialogServer, setToolsDialogServer] = useState<McpServer | null>(null);
 
   const { data, refetch, isLoading } = useMcpServersListQuery(queryParams);
   const { confirm } = useAlertDialog();
@@ -102,9 +82,16 @@ const AiMcpIndexPage = () => {
   const checkConnectionMutation = useCheckMcpConnectionMutation({
     onSuccess: (data) => {
       if (data.connectable) {
-        toast.success(`连接成功，发现 ${data.tools?.length || 0} 个工具`);
+        const { created, updated, deleted, total } = data.toolsInfo ?? {};
+        const parts = [
+          created && `新增 ${created} 个`,
+          updated && `更新 ${updated} 个`,
+          deleted && `删除 ${deleted} 个`,
+        ].filter(Boolean);
+        const toolsSummary = parts.length ? parts.join("、") + "工具" : `共 ${total ?? 0} 个工具`;
+        toast.success(`连通正常，${toolsSummary}`);
       } else {
-        toast.error(`连接失败: ${data.message}`);
+        toast.error(data.message || "连接失败");
       }
       refetch();
     },
@@ -165,7 +152,7 @@ const AiMcpIndexPage = () => {
   return (
     <PageContainer>
       <div className="flex flex-col gap-4">
-        <div className="bg-background sticky top-0 z-1 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+        <div className="bg-background sticky top-0 z-2 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
           <Input placeholder="搜索MCP服务名称" className="text-sm" onChange={handleSearchChange} />
           <Select onValueChange={handleStatusChange}>
             <SelectTrigger className="w-full">
@@ -180,7 +167,7 @@ const AiMcpIndexPage = () => {
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-          <div className="flex flex-col gap-4 rounded-lg border border-dashed p-4 hover:border-solid">
+          <div className="bg-card flex flex-col gap-4 rounded-lg border border-dashed p-4 hover:border-solid">
             <div className="flex cursor-pointer items-center gap-3" onClick={handleCreate}>
               <Button className="size-12 rounded-lg border-dashed" variant="outline">
                 <Plus />
@@ -246,6 +233,7 @@ const AiMcpIndexPage = () => {
                       variant="ghost"
                       size="xs"
                       className="text-muted-foreground px-0 hover:px-2"
+                      onClick={() => setToolsDialogServer(server)}
                     >
                       <Hammer />
                       查看工具({server.toolsCount || 0})
@@ -262,21 +250,13 @@ const AiMcpIndexPage = () => {
                     <DropdownMenuContent>
                       <DropdownMenuItem onClick={() => handleCheckConnection(server)}>
                         <RefreshCw />
-                        检测连接
+                        连通测试
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleEdit(server)}>
                         <Edit />
                         编辑
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        variant={server.isDisabled ? "default" : "warning"}
-                        onClick={() => handleToggleStatus(server)}
-                        disabled={toggleActiveMutation.isPending}
-                      >
-                        {server.isDisabled ? <Power /> : <PowerOff />}
-                        {server.isDisabled ? "启用" : "禁用"}
-                      </DropdownMenuItem>
                       <DropdownMenuItem
                         variant="destructive"
                         onClick={() => handleDelete(server)}
@@ -290,7 +270,7 @@ const AiMcpIndexPage = () => {
                 </div>
 
                 <div className="flex min-h-12 flex-wrap gap-2">
-                  <StatusBadge isActive={!server.isDisabled} />
+                  <StatusBadge active={!server.isDisabled} />
                   <Badge variant="secondary">{server.communicationType}</Badge>
 
                   {server.url && (
@@ -327,6 +307,12 @@ const AiMcpIndexPage = () => {
         open={importDialogOpen}
         onOpenChange={setImportDialogOpen}
         onSuccess={refetch}
+      />
+
+      <McpToolsDialog
+        open={!!toolsDialogServer}
+        onOpenChange={(open) => !open && setToolsDialogServer(null)}
+        server={toolsDialogServer}
       />
     </PageContainer>
   );

@@ -1,6 +1,5 @@
 "use client";
 
-import { useControllableState } from "@radix-ui/react-use-controllable-state";
 import {
   Command,
   CommandDialog,
@@ -19,6 +18,7 @@ import {
   DialogTrigger,
 } from "@buildingai/ui/components/ui/dialog";
 import { cn } from "@buildingai/ui/lib/utils";
+import { useControllableState } from "@radix-ui/react-use-controllable-state";
 import {
   CircleSmallIcon,
   MarsIcon,

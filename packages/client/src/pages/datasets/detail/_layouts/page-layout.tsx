@@ -1,68 +1,123 @@
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@buildingai/ui/components/ui/sheet";
+import {
+  type ImperativePanelHandle,
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@buildingai/ui/components/ui/resizable";
+import { Tabs, TabsList, TabsTrigger } from "@buildingai/ui/components/ui/tabs";
+import { cn } from "@buildingai/ui/lib/utils";
 import type { ReactNode } from "react";
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
-const SIDEBAR_COLLAPSED_BREAKPOINT = 1200;
+const SMALL_BREAKPOINT = 768;
 
-function useSidebarCollapsed() {
-  const [collapsed, setCollapsed] = useState(() =>
-    typeof window !== "undefined" ? window.innerWidth < SIDEBAR_COLLAPSED_BREAKPOINT : true,
+function useSmallScreen() {
+  const [small, setSmall] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth < SMALL_BREAKPOINT : false,
   );
   useEffect(() => {
-    const mql = window.matchMedia(`(max-width: ${SIDEBAR_COLLAPSED_BREAKPOINT - 1}px)`);
-    const onChange = () => setCollapsed(window.innerWidth < SIDEBAR_COLLAPSED_BREAKPOINT);
+    const mql = window.matchMedia(`(max-width: ${SMALL_BREAKPOINT - 1}px)`);
+    const onChange = () => setSmall(mql.matches);
     mql.addEventListener("change", onChange);
-    setCollapsed(window.innerWidth < SIDEBAR_COLLAPSED_BREAKPOINT);
+    setSmall(mql.matches);
     return () => mql.removeEventListener("change", onChange);
   }, []);
-  return collapsed;
+  return small;
+}
+
+interface ChatPanelContextValue {
+  chatOpen: boolean;
+  toggleChatPanel: () => void;
+}
+
+const ChatPanelContext = createContext<ChatPanelContextValue>({
+  chatOpen: false,
+  toggleChatPanel: () => {},
+});
+
+export function useChatPanel() {
+  return useContext(ChatPanelContext);
 }
 
 export interface PageLayoutProps {
-  sidebar: ReactNode;
+  panel: ReactNode;
   children: ReactNode;
 }
 
-type DocSidebarContextValue = { openDocSidebar: () => void };
+type MobileView = "chat" | "documents";
 
-const DocSidebarContext = createContext<DocSidebarContextValue | null>(null);
+export function PageLayout({ panel, children }: PageLayoutProps) {
+  const isSmallScreen = useSmallScreen();
+  const [chatOpen, setChatOpen] = useState(false);
+  const [mobileView, setMobileView] = useState<MobileView>("chat");
+  const chatPanelRef = useRef<ImperativePanelHandle>(null);
 
-// eslint-disable-next-line react-refresh/only-export-components
-export function useDocSidebar() {
-  return useContext(DocSidebarContext);
-}
+  const toggleChatPanel = useCallback(() => {
+    if (isSmallScreen) {
+      setMobileView((prev) => (prev === "chat" ? "documents" : "chat"));
+    } else {
+      const api = chatPanelRef.current;
+      if (!api) return;
+      if (api.isCollapsed()) api.expand();
+      else api.collapse();
+    }
+  }, [isSmallScreen]);
 
-export function PageLayout({ sidebar, children }: PageLayoutProps) {
-  const sidebarCollapsed = useSidebarCollapsed();
-  const [sheetOpen, setSheetOpen] = useState(false);
-  const openDocSidebar = useCallback(() => setSheetOpen(true), []);
+  const chatVisible = isSmallScreen ? mobileView === "chat" : chatOpen;
+  const contextValue = useMemo(
+    () => ({ chatOpen: chatVisible, toggleChatPanel }),
+    [chatVisible, toggleChatPanel],
+  );
 
-  if (!sidebarCollapsed) {
+  if (isSmallScreen) {
     return (
-      <div className="flex h-full overflow-hidden">
-        <div className="w-96 shrink-0 border-r">{sidebar}</div>
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col">{children}</div>
-      </div>
+      <ChatPanelContext.Provider value={contextValue}>
+        <div className="flex h-full flex-col overflow-hidden">
+          <div className="shrink-0 border-b px-4">
+            <Tabs value={mobileView} onValueChange={(v) => setMobileView(v as MobileView)}>
+              <TabsList variant="line">
+                <TabsTrigger value="chat">AI 对话</TabsTrigger>
+                <TabsTrigger value="documents">文档</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+          <div className={cn("min-h-0 flex-1", mobileView !== "chat" && "hidden")}>{panel}</div>
+          <div className={cn("min-h-0 flex-1", mobileView !== "documents" && "hidden")}>
+            {children}
+          </div>
+        </div>
+      </ChatPanelContext.Provider>
     );
   }
 
   return (
-    <DocSidebarContext.Provider value={{ openDocSidebar }}>
-      <div className="flex h-full flex-col overflow-hidden">
-        <div className="min-h-0 min-w-0 flex-1">{children}</div>
-      </div>
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent
-          side="left"
-          className="h-dvh max-w-full p-0 data-[side=left]:w-full! **:data-[slot=sheet-close]:top-auto **:data-[slot=sheet-close]:right-4 **:data-[slot=sheet-close]:bottom-4"
-          aria-describedby={undefined}
+    <ChatPanelContext.Provider value={contextValue}>
+      <ResizablePanelGroup direction="horizontal" className="h-full overflow-hidden">
+        <ResizablePanel defaultSize={100} minSize={30}>
+          <div className="flex h-full min-h-0 min-w-0 flex-col">{children}</div>
+        </ResizablePanel>
+        <ResizableHandle withHandle={chatOpen} />
+        <ResizablePanel
+          ref={chatPanelRef}
+          collapsible
+          collapsedSize={0}
+          defaultSize={0}
+          minSize={20}
+          maxSize={60}
+          onCollapse={() => setChatOpen(false)}
+          onExpand={() => setChatOpen(true)}
         >
-          <SheetHeader className="sr-only">
-            <SheetTitle>文档列表</SheetTitle>
-          </SheetHeader>
-          <div className="flex h-full flex-col overflow-hidden">{sidebar}</div>
-        </SheetContent>
-      </Sheet>
-    </DocSidebarContext.Provider>
+          <div className="flex h-full flex-col overflow-hidden">{panel}</div>
+        </ResizablePanel>
+      </ResizablePanelGroup>
+    </ChatPanelContext.Provider>
   );
 }

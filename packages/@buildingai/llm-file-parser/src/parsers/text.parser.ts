@@ -1,7 +1,3 @@
-/**
- * @fileoverview Text parser (TXT, MD, RTF, code files)
- */
-
 import { CODE_EXTENSIONS } from "../supported-formats";
 import type { ParseOptions, ParseResult, StructuredTextBlock } from "../types";
 import { BaseParser } from "./base.parser";
@@ -68,12 +64,10 @@ export class TextParser extends BaseParser {
 
             let text = buffer.toString("utf-8");
 
-            // Handle RTF format
             if (isRtf) {
                 text = this.parseRtf(text);
             }
 
-            // Convert to structured blocks
             const blocks = isMarkdown
                 ? this.markdownToStructuredBlocks(text)
                 : this.textToStructuredBlocks(text);
@@ -105,7 +99,6 @@ export class TextParser extends BaseParser {
     }
 
     private parseRtf(rtfContent: string): string {
-        // Remove RTF formatting codes and extract plain text
         return rtfContent
             .replace(/\\[a-z]+\d*\s?/g, "") // Remove RTF control words
             .replace(/[{}]/g, "") // Remove braces
@@ -124,9 +117,7 @@ export class TextParser extends BaseParser {
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i].trim();
 
-            // Detect headings
             if (line.startsWith("#")) {
-                // Flush current paragraph/list
                 if (currentParagraph.length > 0) {
                     blocks.push({
                         type: "paragraph",
@@ -144,7 +135,6 @@ export class TextParser extends BaseParser {
                     inList = false;
                 }
 
-                // Extract heading level and content
                 const match = line.match(/^(#{1,6})\s+(.+)$/);
                 if (match) {
                     const level = match[1].length;
@@ -158,7 +148,6 @@ export class TextParser extends BaseParser {
                 continue;
             }
 
-            // Detect list items
             if (line.match(/^[-*+]\s+/) || line.match(/^\d+\.\s+/)) {
                 if (!inList && currentParagraph.length > 0) {
                     blocks.push({
@@ -173,7 +162,6 @@ export class TextParser extends BaseParser {
                 continue;
             }
 
-            // Detect code blocks
             if (line.startsWith("```")) {
                 if (currentParagraph.length > 0) {
                     blocks.push({
@@ -192,9 +180,8 @@ export class TextParser extends BaseParser {
                     inList = false;
                 }
 
-                // Extract code block
                 const codeLines: string[] = [];
-                i++; // Skip opening ```
+                i++;
                 while (i < lines.length && !lines[i].trim().startsWith("```")) {
                     codeLines.push(lines[i]);
                     i++;
@@ -206,10 +193,8 @@ export class TextParser extends BaseParser {
                 continue;
             }
 
-            // Regular paragraph text
             if (line) {
                 if (inList) {
-                    // Flush list
                     blocks.push({
                         type: "list",
                         content: currentList.join("\n"),
@@ -220,7 +205,6 @@ export class TextParser extends BaseParser {
                 }
                 currentParagraph.push(line);
             } else {
-                // Empty line - flush current paragraph
                 if (currentParagraph.length > 0) {
                     blocks.push({
                         type: "paragraph",
@@ -231,7 +215,6 @@ export class TextParser extends BaseParser {
             }
         }
 
-        // Flush remaining content
         if (currentParagraph.length > 0) {
             blocks.push({
                 type: "paragraph",
@@ -258,7 +241,6 @@ export class TextParser extends BaseParser {
         for (const line of lines) {
             const trimmed = line.trim();
 
-            // Detect potential headings (short lines without punctuation)
             if (
                 trimmed.length < 100 &&
                 !trimmed.match(/[.!?]$/) &&
@@ -274,7 +256,6 @@ export class TextParser extends BaseParser {
                 currentParagraph.push(trimmed);
             }
 
-            // Flush paragraph on empty line or when it gets too long
             if (trimmed === "" || currentParagraph.length > 5) {
                 if (currentParagraph.length > 0) {
                     blocks.push({
@@ -286,7 +267,6 @@ export class TextParser extends BaseParser {
             }
         }
 
-        // Flush remaining paragraph
         if (currentParagraph.length > 0) {
             blocks.push({
                 type: "paragraph",

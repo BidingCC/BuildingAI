@@ -37,9 +37,9 @@ import {
   SelectValue,
 } from "@buildingai/ui/components/ui/select";
 import { Skeleton } from "@buildingai/ui/components/ui/skeleton";
+import { StatusBadge } from "@buildingai/ui/components/ui/status-badge";
 import { Switch } from "@buildingai/ui/components/ui/switch";
 import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog";
-import { IconCircleCheckFilled, IconXboxXFilled } from "@tabler/icons-react";
 import {
   Activity,
   Brain,
@@ -259,7 +259,7 @@ const AiProviderIndexPage = () => {
   return (
     <PageContainer>
       <div className="flex flex-col gap-4">
-        <div className="bg-background sticky top-0 z-1 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+        <div className="bg-background sticky top-0 z-2 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
           <Input
             placeholder="搜索供应商名称或厂商标识"
             className="text-sm"
@@ -278,7 +278,7 @@ const AiProviderIndexPage = () => {
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-          <div className="flex flex-col gap-4 rounded-lg border border-dashed p-4 hover:border-solid">
+          <div className="bg-card flex flex-col gap-4 rounded-lg border border-dashed p-4 hover:border-solid">
             <div className="flex items-center gap-3">
               <Button className="size-12 rounded-lg border-dashed" variant="outline">
                 <Plus />
@@ -383,17 +383,7 @@ const AiProviderIndexPage = () => {
                 </div>
 
                 <div className="flex min-h-12 flex-wrap gap-2">
-                  {provider.isActive ? (
-                    <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
-                      <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
-                      已启用
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
-                      <IconXboxXFilled className="fill-destructive" />
-                      已禁用
-                    </Badge>
-                  )}
+                  <StatusBadge active={provider.isActive} />
                   {provider.supportedModelTypes.map((type) => (
                     <Badge key={type} variant="secondary">
                       {type.replace("-", " ").toUpperCase()}
@@ -414,7 +404,7 @@ const AiProviderIndexPage = () => {
         </div>
         <CommandDialog
           open={modelsDialogOpen}
-          className="sm:max-w-3xl"
+          className="max-sm:h-full max-sm:max-w-full max-sm:rounded-none! sm:max-w-3xl"
           onOpenChange={setModelsDialogOpen}
         >
           <Command>

@@ -25,6 +25,7 @@ export type AiModel = {
     maxContext?: number;
     modelConfig?: Record<string, any> | AiModelConfig[];
     isActive: boolean;
+    thinking: boolean;
     description?: string;
     sortOrder: number;
     billingRule: {

@@ -77,4 +77,3 @@ export async function extractImagesFromPdf(buffer: Buffer): Promise<ExtractedIma
     // TODO: Implement PDF image extraction using pdf-lib or pdfjs-dist
     return [];
 }
-

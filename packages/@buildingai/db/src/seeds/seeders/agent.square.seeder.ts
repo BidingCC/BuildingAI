@@ -150,7 +150,7 @@ export class AgentSquareSeeder extends BaseSeeder {
                     this.logInfo(`Created agent: ${agent.name}`);
                     createdCount++;
                 } else {
-                    await repository.update(agent.id, agentData);
+                    await repository.update(agent.id, agentData as Record<string, unknown>);
                     this.logInfo(`Updated agent: ${agent.name}`);
                     updatedCount++;
                 }

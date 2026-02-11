@@ -140,7 +140,7 @@ export function useChatStream(options: UseChatStreamOptions): UseChatStreamRetur
         conversationIdRef.current = newConversationId;
 
         if (isNewConversation) {
-          navigate(`/c/${newConversationId}`);
+          navigate(`/c/${newConversationId}`, { replace: true });
           queryClient.invalidateQueries({ queryKey: ["conversations"] });
         }
         onThreadCreated?.();

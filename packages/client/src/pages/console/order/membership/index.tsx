@@ -390,7 +390,7 @@ const OrderMembershipIndexPage = () => {
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
         </div>
-        <div className="bg-background sticky bottom-0 flex py-2">
+        <div className="bg-background sticky bottom-0 z-2 flex py-2">
           <PaginationComponent className="mx-0 w-fit" />
         </div>
 

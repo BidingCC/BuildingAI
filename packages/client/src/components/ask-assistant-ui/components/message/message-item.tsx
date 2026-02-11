@@ -95,15 +95,14 @@ export const MessageItem = memo(
             return `source-url:${sp.url || ""}:${sp.title || ""}`;
           }
           if (typeof type === "string" && type.startsWith("tool-")) {
-            const tp = p as {
-              toolCallId?: string;
-              state?: string;
-              input?: unknown;
-              output?: unknown;
-            };
-            return `${type}:${tp.toolCallId || ""}:${tp.state || ""}:${JSON.stringify(tp.input || {})}:${JSON.stringify(tp.output || {})}`;
+            const tp = p as { toolCallId?: string; state?: string };
+            return `${type}:${tp.toolCallId || ""}:${tp.state || ""}`;
           }
-          return `${type}:${JSON.stringify(p)}`;
+          if (type === "dynamic-tool") {
+            const tp = p as { toolCallId?: string; state?: string; toolName?: string };
+            return `dynamic-tool:${tp.toolName || ""}:${tp.toolCallId || ""}:${tp.state || ""}`;
+          }
+          return String(type);
         })
         .join("|") || "";
 

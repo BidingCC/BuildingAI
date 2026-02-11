@@ -1,4 +1,6 @@
-import { useConversationsQuery } from "@buildingai/services/web";
+import type { DecorateMenuItem } from "@buildingai/services/web";
+import { useConversationsQuery, useDecorateMenuQuery } from "@buildingai/services/web";
+import { useAuthStore } from "@buildingai/stores";
 import {
   Sidebar,
   SidebarContent,
@@ -10,26 +12,15 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@buildingai/ui/components/ui/sidebar";
-import {
-  ArrowUpRight,
-  BookSearch,
-  Bot,
-  Brush,
-  Edit,
-  FolderClock,
-  LayoutDashboard,
-  LayoutGrid,
-  PenLineIcon,
-  Video,
-  Workflow,
-} from "lucide-react";
+import { isEnabled } from "@buildingai/utils/is";
+import { ArrowUpRight, LayoutDashboard } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import * as React from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-import { DefaultNavApps } from "./default-apps";
+import { DefaultNavGroup } from "./default-group";
 import { DefaultLogo } from "./default-logo";
-import { DefaultNavMain } from "./default-nav-main";
+import { DefaultNavMain, type NavItem } from "./default-nav-main";
 import { DefaultNavUser } from "./default-nav-user";
 
 /**
@@ -68,124 +59,112 @@ function KeyboardShortcut({
   return <span className={className}>{label}</span>;
 }
 
-const data = {
-  projects: [
-    {
-      name: "AI绘图",
-      path: "#",
-      icon: Brush,
-    },
-    {
-      name: "AI视频",
-      path: "#",
-      icon: Video,
-    },
-    {
-      name: "AI写作",
-      path: "#",
-      icon: PenLineIcon,
-    },
-  ],
-};
+const MENU_HOME_FIXED = "menu_home_fixed";
+const MENU_HISTORY_FIXED = "menu_history_fixed";
+
+/**
+ * Default chat component path used to identify if home page is the chat page.
+ */
+const DEFAULT_CHAT_COMPONENT = "/src/pages/index.tsx";
+
+/**
+ * Convert DecorateMenuItem to NavItem format used by DefaultNavMain.
+ * Handles special menu_history_fixed item by injecting conversation sub-items.
+ */
+function useMenuItems(
+  menus: DecorateMenuItem[],
+  conversationItems: { id: string; title: string; path: string }[],
+  homeAction?: React.ReactNode,
+): NavItem[] {
+  return useMemo(() => {
+    return menus
+      .filter((menu) => !menu.isHidden)
+      .map((menu): NavItem => {
+        if (menu.id === MENU_HISTORY_FIXED) {
+          return {
+            id: menu.id,
+            title: menu.title,
+            icon: menu.icon,
+            isActive: true,
+            items: conversationItems,
+          };
+        }
+
+        return {
+          id: menu.id,
+          title: menu.title,
+          path: menu.link.path,
+          icon: menu.icon,
+          target: menu.link.target,
+          ...(menu.id === MENU_HOME_FIXED && homeAction ? { action: homeAction } : {}),
+        };
+      });
+  }, [menus, conversationItems, homeAction]);
+}
 
 export function DefaultAppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const navigate = useNavigate();
-
+  const { userInfo } = useAuthStore((state) => state.auth);
+  const { data: menuConfig, isLoading: isMenuLoading } = useDecorateMenuQuery();
   const { data: conversationsData } = useConversationsQuery(
-    {
-      page: 1,
-      pageSize: 6,
-    },
-    {
-      refetchOnWindowFocus: false,
-    },
+    { page: 1, pageSize: 6 },
+    { refetchOnWindowFocus: false },
   );
 
-  const navMain = useMemo(() => {
-    const baseItems = [
-      {
-        id: "new-chat",
-        title: "新聊天",
-        path: "/",
-        icon: Edit,
-        action: (
-          <KeyboardShortcut
-            keys={{ meta: true, key: "k" }}
-            onTrigger={() => navigate("/")}
-            className="text-muted-foreground/70 opacity-0 group-hover/link-menu-item:opacity-100"
-          />
-        ),
-      },
-      {
-        id: "app-center",
-        title: "应用",
-        path: "/apps",
-        icon: LayoutGrid,
-      },
-      {
-        id: "agent-center",
-        title: "智能体",
-        path: "/agents",
-        icon: Bot,
-      },
-      {
-        id: "datasets",
-        title: "知识库",
-        path: "/datasets",
-        icon: BookSearch,
-      },
-      {
-        id: "workflow",
-        title: "工作流",
-        path: "/workflow",
-        icon: Workflow,
-      },
-    ];
-
-    const conversationItems =
+  const conversationItems = useMemo(
+    () =>
       conversationsData?.items?.map((conversation) => ({
         id: `conversation-${conversation.id}`,
         title: conversation.title || "新对话",
         path: `/c/${conversation.id}`,
-      })) || [];
+      })) || [],
+    [conversationsData],
+  );
 
-    return [
-      ...baseItems,
-      {
-        id: "chat-history",
-        title: "历史记录",
-        icon: FolderClock,
-        isActive: true,
-        items: conversationItems,
-      },
-    ];
-  }, [conversationsData]);
+  const homeMenu = menuConfig?.menus?.find((m) => m.id === MENU_HOME_FIXED);
+  const isChatHome = homeMenu?.link?.component === DEFAULT_CHAT_COMPONENT;
 
+  const homeAction = isChatHome ? (
+    <KeyboardShortcut
+      keys={{ meta: true, key: "k" }}
+      onTrigger={() => navigate("/")}
+      className="text-muted-foreground/70 opacity-0 group-hover/link-menu-item:opacity-100"
+    />
+  ) : undefined;
+
+  const navMain = useMenuItems(menuConfig?.menus ?? [], conversationItems, homeAction);
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader className="flex flex-row items-center">
         <DefaultLogo />
       </SidebarHeader>
       <SidebarContent>
-        <DefaultNavMain items={navMain} />
-        <DefaultNavApps projects={data.projects} />
+        <DefaultNavMain items={navMain} isLoading={isMenuLoading} />
+        {(menuConfig?.groups ?? [])
+          .filter((group) => !group.isHidden)
+          .map((group) => (
+            <DefaultNavGroup key={group.id} group={group} />
+          ))}
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton className="h-9" asChild>
-              <Link to="/console/dashboard">
-                <LayoutDashboard />
-                <span className="whitespace-nowrap">工作台</span>
-                <SidebarMenuAction asChild>
-                  <div>
-                    <ArrowUpRight />
-                    <span className="sr-only">Toggle</span>
-                  </div>
-                </SidebarMenuAction>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          {(userInfo?.permissions && userInfo.permissions.length > 0) ||
+            (isEnabled(userInfo?.isRoot) && (
+              <SidebarMenuItem>
+                <SidebarMenuButton className="h-9" asChild>
+                  <Link to="/console/dashboard">
+                    <LayoutDashboard />
+                    <span className="whitespace-nowrap">工作台</span>
+                    <SidebarMenuAction asChild>
+                      <div>
+                        <ArrowUpRight />
+                        <span className="sr-only">Toggle</span>
+                      </div>
+                    </SidebarMenuAction>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
         </SidebarMenu>
         <DefaultNavUser />
       </SidebarFooter>

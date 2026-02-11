@@ -1,3 +1,4 @@
+import { definePageMeta } from "@buildingai/hooks";
 import { Avatar, AvatarFallback, AvatarImage } from "@buildingai/ui/components/ui/avatar";
 import { Badge } from "@buildingai/ui/components/ui/badge";
 import { Button } from "@buildingai/ui/components/ui/button";
@@ -19,6 +20,12 @@ import { ScrollArea } from "@buildingai/ui/components/ui/scroll-area";
 import { SidebarTrigger } from "@buildingai/ui/components/ui/sidebar";
 import { Bot, ChevronRight, Search, User } from "lucide-react";
 import { Link } from "react-router-dom";
+
+export const meta = definePageMeta({
+  title: "智能体广场",
+  description: "选择你想要的智能体",
+  icon: "bot",
+});
 
 const AgentsIndexPage = () => {
   return (

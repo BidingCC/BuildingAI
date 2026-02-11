@@ -1,35 +1,18 @@
 import { ExtensionStatus } from "@buildingai/constants/shared/extension.constant";
 import {
     AiModel,
-    DecoratePageEntity,
     Extension,
     MembershipLevels,
     MembershipPlans,
-    Menu,
-    MenuSourceType,
-    MenuType,
     Permission,
     PermissionType,
 } from "@buildingai/db/entities";
-import { DataSource, MoreThan, Repository } from "@buildingai/db/typeorm";
+import { DataSource, MoreThan } from "@buildingai/db/typeorm";
 import { checkVersionCompatibility, ExtensionEngine } from "@buildingai/utils";
 import * as fs from "fs";
 import * as path from "path";
 
 import { BaseUpgradeScript, UpgradeContext } from "../../index";
-
-/** Menu configuration for batch creation */
-interface MenuConfig {
-    name: string;
-    code: string;
-    path: string;
-    icon?: string;
-    component: string;
-    permissionCode?: string;
-    sort: number;
-    isHidden: 0 | 1;
-    type: MenuType;
-}
 
 /**
  * Upgrade script 25.1.0
@@ -44,48 +27,16 @@ export class Upgrade extends BaseUpgradeScript {
             const { dataSource } = context;
 
             await this.addPermissions(dataSource);
-            await this.addMembershipMenus(dataSource);
-            await this.addMembershipOrderMenu(dataSource);
-            await this.addAppsCenterMenu(dataSource);
-            await this.addWebAppsMenuItem(dataSource);
             await this.seedMembershipLevels(dataSource);
             await this.seedMembershipPlans(dataSource);
             await this.disableAllExtensions(dataSource);
             await this.fixAiModelConfig(dataSource);
-            await this.fixWebAppsMenu(dataSource);
 
             this.success("Upgrade to version 25.1.0 completed.");
         } catch (error) {
             this.error("Upgrade to version 25.1.0 failed.", error);
             throw error;
         }
-    }
-
-    /**
-     * Create or find a menu by code.
-     */
-    private async findOrCreateMenu(
-        repo: Repository<Menu>,
-        code: string,
-        config: MenuConfig,
-        parentId: string,
-    ): Promise<Menu> {
-        const existing = await repo.findOne({ where: { code } });
-        if (existing) {
-            this.log(`Menu ${code} already exists, skipping creation.`);
-            return existing;
-        }
-
-        const menu = repo.create({
-            ...config,
-            icon: config.icon ?? "",
-            parentId,
-            sourceType: MenuSourceType.SYSTEM,
-        } as Partial<Menu>);
-
-        await repo.save(menu);
-        this.log(`Menu ${code} created successfully.`);
-        return menu;
     }
 
     private async addPermissions(dataSource: DataSource): Promise<void> {
@@ -132,171 +83,6 @@ export class Upgrade extends BaseUpgradeScript {
         permissions
             .filter((p) => existingCodes.has(p.code))
             .forEach((p) => this.log(`Permission ${p.code} already exists, skipping.`));
-    }
-
-    private async addMembershipMenus(dataSource: DataSource): Promise<void> {
-        const repo = dataSource.getRepository(Menu);
-
-        const systemManageMenu = await repo.findOne({ where: { code: "system-manage" } });
-        if (!systemManageMenu) {
-            this.log("Parent menu system-manage not found, skipping membership menu creation.");
-            return;
-        }
-
-        const membershipMenu = await this.findOrCreateMenu(
-            repo,
-            "membership",
-            {
-                name: "console-menu.membershipManagement.title",
-                code: "membership",
-                path: "membership",
-                icon: "i-lucide-crown",
-                component: "",
-                sort: 650,
-                isHidden: 0,
-                type: MenuType.DIRECTORY,
-            },
-            systemManageMenu.id,
-        );
-
-        await this.addResourceMenus(repo, membershipMenu.id, "levels", "levelsList");
-        await this.addResourceMenus(repo, membershipMenu.id, "plans", "plansList");
-    }
-
-    /**
-     * Add resource menus (list, update, add) for a given resource type.
-     */
-    private async addResourceMenus(
-        repo: Repository<Menu>,
-        parentId: string,
-        resource: "levels" | "plans",
-        i18nKey: string,
-    ): Promise<void> {
-        const listMenu = await this.findOrCreateMenu(
-            repo,
-            `${resource}-list`,
-            {
-                name: `console-menu.membershipManagement.${i18nKey}`,
-                code: `${resource}-list`,
-                path: resource,
-                component: `/console/membership/${resource}/list`,
-                permissionCode: `${resource}:list`,
-                sort: 0,
-                isHidden: 0,
-                type: MenuType.MENU,
-            },
-            parentId,
-        );
-
-        const subMenus: MenuConfig[] = [
-            {
-                name: "console-common.edit",
-                code: `${resource}-list-update`,
-                path: `${resource}/edit`,
-                component: `/console/membership/${resource}/edit`,
-                permissionCode: `${resource}:update`,
-                sort: 0,
-                isHidden: 1,
-                type: MenuType.MENU,
-            },
-            {
-                name: "console-common.add",
-                code: `${resource}-list-add`,
-                path: `${resource}/add`,
-                component: `/console/membership/${resource}/add`,
-                permissionCode: `${resource}:create`,
-                sort: 0,
-                isHidden: 1,
-                type: MenuType.MENU,
-            },
-        ];
-
-        for (const config of subMenus) {
-            await this.findOrCreateMenu(repo, config.code, config, listMenu.id);
-        }
-    }
-
-    private async addMembershipOrderMenu(dataSource: DataSource): Promise<void> {
-        const repo = dataSource.getRepository(Menu);
-
-        const orderMenu = await repo.findOne({
-            where: { path: "order", type: MenuType.DIRECTORY },
-        });
-
-        if (!orderMenu) {
-            this.log("Parent menu order not found, skipping membership order menu creation.");
-            return;
-        }
-
-        await this.findOrCreateMenu(
-            repo,
-            "membership-order",
-            {
-                name: "console-menu.financial.orderMembership",
-                code: "membership-order",
-                path: "order-membership",
-                component: "/console/order/order-membership",
-                permissionCode: "membership-order:list",
-                sort: 1,
-                isHidden: 0,
-                type: MenuType.MENU,
-            },
-            orderMenu.id,
-        );
-    }
-
-    private async addAppsCenterMenu(dataSource: DataSource): Promise<void> {
-        const repo = dataSource.getRepository(Menu);
-
-        const diyCenterMenu = await repo.findOne({ where: { code: "diy-center" } });
-        if (!diyCenterMenu) {
-            this.log("Parent menu diy-center not found, skipping apps center menu creation.");
-            return;
-        }
-
-        await this.findOrCreateMenu(
-            repo,
-            "apps-center",
-            {
-                name: "console-menu.diyCenter.appCenter",
-                code: "apps-center",
-                path: "apps",
-                component: "/console/decorate/apps/list",
-                permissionCode: "extensions:list",
-                sort: 2,
-                isHidden: 0,
-                type: MenuType.MENU,
-            },
-            diyCenterMenu.id,
-        );
-    }
-
-    private async addWebAppsMenuItem(dataSource: DataSource): Promise<void> {
-        const repo: Repository<DecoratePageEntity> = dataSource.getRepository(DecoratePageEntity);
-        const webPage = await repo.findOne({ where: { name: "web" } });
-
-        if (!webPage) {
-            this.log("Web page configuration not found, skipping apps menu item creation.");
-            return;
-        }
-
-        const data = webPage.data as { menus?: any[]; layout?: string };
-        const menus = data?.menus ?? [];
-
-        if (menus.some((m: any) => m.link?.path === "/apps" || m.link?.name === "menu.apps")) {
-            this.log("Apps menu item already exists, skipping creation.");
-            return;
-        }
-
-        menus.push({
-            id: "menu_1764936950052-28ca0576-854a-4272-8e26-7c1dc1159ca1",
-            icon: "i-tabler-apps",
-            link: { name: "menu.apps", path: "/apps", type: "system", query: {} },
-            title: "应用中心",
-        });
-
-        await repo.update(webPage.id, { data: { ...data, menus } } as any);
-        this.log("Apps menu item added to web homepage configuration.");
     }
 
     private async seedMembershipLevels(dataSource: DataSource): Promise<void> {
@@ -528,42 +314,6 @@ export class Upgrade extends BaseUpgradeScript {
         const result = await repo.update({ maxContext: MoreThan(99) }, { maxContext: 5 });
 
         this.log(`Fixed ${result.affected || 0} AI model(s) with invalid maxContext values.`);
-    }
-
-    private async fixWebAppsMenu(dataSource: DataSource): Promise<void> {
-        const repo = dataSource.getRepository(DecoratePageEntity);
-
-        // Find all records with name = 'web'
-        const webPages = await repo.find({ where: { name: "web" } });
-
-        let updatedCount = 0;
-
-        for (const page of webPages) {
-            if (!page.data || typeof page.data !== "object") continue;
-
-            const pageData = page.data as { menus?: Array<any>; layout?: string };
-            if (!Array.isArray(pageData.menus)) continue;
-
-            let hasChanges = false;
-
-            for (const menu of pageData.menus) {
-                // Check if type is 'plugin' and path starts with '/extensions/'
-                if (menu.link?.type === "plugin" && menu.link?.path?.startsWith("/extensions/")) {
-                    menu.link.path = menu.link.path.replace(
-                        /^\/extensions\//,
-                        "/buildingai/extension/",
-                    );
-                    hasChanges = true;
-                }
-            }
-
-            if (hasChanges) {
-                await repo.update({ id: page.id }, { data: pageData } as any);
-                updatedCount++;
-            }
-        }
-
-        this.log(`Fixed ${updatedCount} web app menu(s) with old extension paths.`);
     }
 }
 

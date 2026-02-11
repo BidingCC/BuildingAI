@@ -31,9 +31,10 @@ import {
   SelectValue,
 } from "@buildingai/ui/components/ui/select";
 import { Skeleton } from "@buildingai/ui/components/ui/skeleton";
+import { StatusBadge } from "@buildingai/ui/components/ui/status-badge";
 import { Switch } from "@buildingai/ui/components/ui/switch";
 import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog";
-import { IconCircleCheckFilled, IconPuzzle, IconXboxXFilled } from "@tabler/icons-react";
+import { IconPuzzle, IconXboxXFilled } from "@tabler/icons-react";
 import {
   CircleFadingArrowUp,
   Edit,
@@ -43,7 +44,6 @@ import {
   Info,
   Plus,
   Power,
-  PowerOff,
   Settings,
   Trash2,
   User,
@@ -52,6 +52,9 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { PageContainer } from "@/layouts/console/_components/page-container";
+
+import { ExtensionDetailSheet } from "./_components/extension-detail-sheet";
+import { ExtensionFormDialog } from "./_components/extension-form-dialog";
 
 /**
  * Terminal type label mapping
@@ -64,28 +67,17 @@ const TERMINAL_LABEL_MAP: Record<ExtensionSupportTerminalType, string> = {
   [ExtensionSupportTerminal.API]: "API端",
 };
 
-type StatusBadgeProps = {
-  isActive: boolean;
-};
-
-/**
- * Reusable status badge component
- */
-const StatusBadge = ({ isActive }: StatusBadgeProps) =>
-  isActive ? (
-    <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
-      <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
-      已启用
-    </Badge>
-  ) : (
-    <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
-      <IconXboxXFilled className="fill-destructive" />
-      已禁用
-    </Badge>
-  );
-
 const ExtensionIndexPage = () => {
   const [queryParams, setQueryParams] = useState<QueryExtensionDto>({});
+  const [formDialogOpen, setFormDialogOpen] = useState(false);
+  const [editingExtension, setEditingExtension] = useState<Extension | null>(null);
+  const [detailSheetOpen, setDetailSheetOpen] = useState(false);
+  const [detailTarget, setDetailTarget] = useState<{
+    id: string;
+    identifier: string;
+    isLocal: boolean;
+  } | null>(null);
+  const [detailDefaultTab, setDetailDefaultTab] = useState<"overview" | "changelog">("overview");
   const { data, refetch, isLoading } = useExtensionsListQuery(queryParams);
   const { confirm } = useAlertDialog();
 
@@ -182,7 +174,7 @@ const ExtensionIndexPage = () => {
   return (
     <PageContainer>
       <div className="flex flex-col gap-4">
-        <div className="bg-background sticky top-0 z-1 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+        <div className="bg-background sticky top-0 z-2 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
           <Input
             placeholder="搜索应用名称或标识符"
             className="text-sm"
@@ -211,7 +203,7 @@ const ExtensionIndexPage = () => {
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-          <div className="flex flex-col rounded-lg border border-dashed p-4 hover:border-solid">
+          <div className="bg-card flex flex-col rounded-lg border border-dashed p-4 hover:border-solid">
             <div className="flex items-center gap-3">
               <Button className="size-12 rounded-lg border-dashed" variant="outline">
                 <Plus />
@@ -300,31 +292,48 @@ const ExtensionIndexPage = () => {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                      <DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setDetailTarget({
+                            id: extension.id,
+                            identifier: extension.identifier,
+                            isLocal: extension.isLocal,
+                          });
+                          setDetailDefaultTab("overview");
+                          setDetailSheetOpen(true);
+                        }}
+                      >
                         <Info />
                         详情
                       </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <FileText />
-                        更新日志
-                      </DropdownMenuItem>
+                      {!extension.isLocal && (
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setDetailTarget({
+                              id: extension.id,
+                              identifier: extension.identifier,
+                              isLocal: extension.isLocal,
+                            });
+                            setDetailDefaultTab("changelog");
+                            setDetailSheetOpen(true);
+                          }}
+                        >
+                          <FileText />
+                          更新日志
+                        </DropdownMenuItem>
+                      )}
                       {extension.isLocal && (
-                        <DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setEditingExtension(extension);
+                            setFormDialogOpen(true);
+                          }}
+                        >
                           <Edit />
                           编辑
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        variant={
-                          extension.status === ExtensionStatus.ENABLED ? "warning" : "default"
-                        }
-                        onClick={() => handleToggleStatus(extension)}
-                        disabled={enableMutation.isPending || disableMutation.isPending}
-                      >
-                        {extension.status === ExtensionStatus.ENABLED ? <PowerOff /> : <Power />}
-                        {extension.status === ExtensionStatus.ENABLED ? "禁用" : "启用"}
-                      </DropdownMenuItem>
                       <DropdownMenuItem
                         variant="destructive"
                         onClick={() => handleUninstall(extension)}
@@ -341,7 +350,7 @@ const ExtensionIndexPage = () => {
                   <div className="flex min-h-12 flex-wrap gap-2">
                     <Badge variant="secondary">v{extension.version}</Badge>
 
-                    <StatusBadge isActive={extension.status === ExtensionStatus.ENABLED} />
+                    <StatusBadge active={extension.status === ExtensionStatus.ENABLED} />
 
                     {extension.supportTerminal?.map((terminal) => (
                       <Badge key={terminal} variant="secondary">
@@ -406,6 +415,18 @@ const ExtensionIndexPage = () => {
           )}
         </div>
       </div>
+      <ExtensionDetailSheet
+        open={detailSheetOpen}
+        onOpenChange={setDetailSheetOpen}
+        target={detailTarget}
+        defaultTab={detailDefaultTab}
+      />
+      <ExtensionFormDialog
+        open={formDialogOpen}
+        onOpenChange={setFormDialogOpen}
+        extension={editingExtension}
+        onSuccess={refetch}
+      />
     </PageContainer>
   );
 };

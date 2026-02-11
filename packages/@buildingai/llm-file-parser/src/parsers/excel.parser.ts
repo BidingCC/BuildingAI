@@ -1,7 +1,3 @@
-/**
- * @fileoverview Excel parser (XLSX, XLS, CSV)
- */
-
 import * as XLSX from "xlsx";
 
 import type { ParseOptions, ParseResult, StructuredTextBlock } from "../types";
@@ -23,7 +19,7 @@ export class ExcelParser extends BaseParser {
     async parse(
         buffer: Buffer,
         filename: string,
-        options: ParseOptions = {},
+        _options: ParseOptions = {},
     ): Promise<ParseResult> {
         try {
             const lowerFilename = filename.toLowerCase();
@@ -32,14 +28,12 @@ export class ExcelParser extends BaseParser {
             let workbook: XLSX.WorkBook;
 
             if (isCsv) {
-                // Parse CSV
                 const csvContent = buffer.toString("utf-8");
                 workbook = XLSX.read(csvContent, {
                     type: "string",
                     raw: false,
                 });
             } else {
-                // Parse Excel
                 workbook = XLSX.read(buffer, {
                     type: "buffer",
                     cellText: false,
@@ -55,7 +49,6 @@ export class ExcelParser extends BaseParser {
                 const sheet = workbook.Sheets[sheetName];
                 if (!sheet) return;
 
-                // Convert sheet to JSON first, then format as text
                 const jsonData = XLSX.utils.sheet_to_json(sheet, {
                     header: 1,
                     defval: "",
@@ -63,19 +56,16 @@ export class ExcelParser extends BaseParser {
                 });
 
                 if (jsonData && jsonData.length > 0) {
-                    // Convert JSON array to readable text format
                     const textData = (jsonData as any[][])
                         .map((row: any[]) => row.join("\t"))
                         .join("\n");
 
-                    // Add sheet as heading
                     blocks.push({
                         type: "heading",
                         level: 2,
                         content: `Sheet: ${sheetName}`,
                     });
 
-                    // Add table content
                     blocks.push({
                         type: "table",
                         content: textData,

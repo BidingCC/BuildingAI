@@ -6,12 +6,7 @@ import {
 } from "@buildingai/services/console";
 import { InfiniteScrollTop } from "@buildingai/ui/components/infinite-scroll-top";
 import { Badge } from "@buildingai/ui/components/ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@buildingai/ui/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@buildingai/ui/components/ui/tooltip";
 import { cn } from "@buildingai/ui/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import type { UIMessage } from "ai";
@@ -46,37 +41,35 @@ const MessageFeedbackBadge = memo(function MessageFeedbackBadge({
   const intensity = confidenceScore > 0.7 ? "high" : confidenceScore > 0.4 ? "medium" : "low";
 
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Badge
-            variant="destructive"
-            className="gap-1"
-            style={{
-              opacity,
-              backgroundColor: `rgba(239, 68, 68, ${opacity})`,
-            }}
-          >
-            <ThumbsDown className="size-3" />
-            <span>踩</span>
-            {intensity === "high" && <AlertTriangle className="size-3" />}
-          </Badge>
-        </TooltipTrigger>
-        <TooltipContent className="max-w-xs">
-          <div className="space-y-1">
-            {dislikeReason && (
-              <div>
-                <div className="font-semibold">原因：</div>
-                <div className="text-sm">{dislikeReason}</div>
-              </div>
-            )}
-            <div className="text-muted-foreground text-xs">
-              置信度: {(confidenceScore * 100).toFixed(0)}%
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Badge
+          variant="destructive"
+          className="gap-1"
+          style={{
+            opacity,
+            backgroundColor: `rgba(239, 68, 68, ${opacity})`,
+          }}
+        >
+          <ThumbsDown className="size-3" />
+          <span>踩</span>
+          {intensity === "high" && <AlertTriangle className="size-3" />}
+        </Badge>
+      </TooltipTrigger>
+      <TooltipContent className="max-w-xs">
+        <div className="space-y-1">
+          {dislikeReason && (
+            <div>
+              <div className="font-semibold">原因：</div>
+              <div className="text-sm">{dislikeReason}</div>
             </div>
+          )}
+          <div className="text-muted-foreground text-xs">
+            置信度: {(confidenceScore * 100).toFixed(0)}%
           </div>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+        </div>
+      </TooltipContent>
+    </Tooltip>
   );
 });
 

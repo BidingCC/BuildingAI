@@ -16,6 +16,18 @@ export type LoginResponse = {
     expiresAt: string;
 };
 
+export type RegisterRequest = {
+    username: string;
+    password: string;
+    confirmPassword: string;
+    terminal: UserTerminalType;
+    nickname?: string;
+    email?: string;
+    phone?: string;
+};
+
+export type RegisterResponse = LoginResponse;
+
 export type CheckAccountRequest = {
     account: string;
 };
@@ -23,32 +35,41 @@ export type CheckAccountRequest = {
 export type CheckAccountResponse = {
     hasAccount: boolean;
     type: string;
+    hasPassword: boolean;
 };
 
-/**
- * Login mutation hook.
- * Use this for user-triggered login actions.
- */
-export function useLoginMutation(
-    data: LoginRequest,
-    options?: MutationOptionsUtil<LoginResponse, LoginRequest>,
-) {
+export function useLoginMutation(options?: MutationOptionsUtil<LoginResponse, LoginRequest>) {
     return useMutation<LoginResponse, Error, LoginRequest>({
-        mutationFn: () => apiHttpClient.post<LoginResponse>("/auth/login", data),
+        mutationFn: (vars) => apiHttpClient.post<LoginResponse>("/auth/login", vars),
         ...options,
     });
 }
 
-/**
- * Check account mutation hook.
- * Use this when you need to check account on-demand (e.g., form validation).
- */
+export function useRegisterMutation(
+    options?: MutationOptionsUtil<RegisterResponse, RegisterRequest>,
+) {
+    return useMutation<RegisterResponse, Error, RegisterRequest>({
+        mutationFn: (vars) => apiHttpClient.post<RegisterResponse>("/auth/register", vars),
+        ...options,
+    });
+}
+
 export function useCheckAccountMutation(
-    data: CheckAccountRequest,
     options?: MutationOptionsUtil<CheckAccountResponse, CheckAccountRequest>,
 ) {
     return useMutation<CheckAccountResponse, Error, CheckAccountRequest>({
-        mutationFn: () => apiHttpClient.post<CheckAccountResponse>("/auth/check-account", data),
+        mutationFn: (vars) => apiHttpClient.post<CheckAccountResponse>("/auth/check-account", vars),
         ...options,
+    });
+}
+
+export type OAuthSessionResponse = {
+    token: string;
+    user: UserInfo;
+};
+
+export function exchangeOAuthCode(code: string) {
+    return apiHttpClient.get<OAuthSessionResponse>("/auth/oauth/session", {
+        params: { code },
     });
 }

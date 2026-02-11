@@ -3,9 +3,11 @@
 Logging utilities.
 
 ## Location
+
 `packages/@buildingai/logger/`
 
 ## Exports
+
 - `TerminalLogger` - Terminal-based logger
 
 ## Usage

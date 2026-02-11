@@ -3,7 +3,15 @@ import {
     type ExtensionStatusType,
 } from "@buildingai/constants/shared/extension.constant";
 import { PartialType } from "@nestjs/mapped-types";
-import { ArrayNotEmpty, IsArray, IsBoolean, IsEnum, IsOptional, IsString } from "class-validator";
+import {
+    ArrayNotEmpty,
+    IsArray,
+    IsBoolean,
+    IsEnum,
+    IsNumber,
+    IsOptional,
+    IsString,
+} from "class-validator";
 
 import { CreateExtensionDto } from "./create-extension.dto";
 
@@ -38,6 +46,21 @@ export class UpdateExtensionDto extends PartialType(CreateExtensionDto) {
     @IsBoolean({ message: "alias show must be a boolean" })
     @IsOptional()
     aliasShow?: boolean;
+
+    /**
+     * 应用中心排序
+     */
+    @IsNumber({}, { message: "appCenterSort must be a number" })
+    @IsOptional()
+    appCenterSort?: number;
+
+    /**
+     * 应用中心标签ID列表
+     */
+    @IsArray({ message: "appCenterTagIds must be an array" })
+    @IsString({ each: true, message: "Each tag id must be a string" })
+    @IsOptional()
+    appCenterTagIds?: string[];
 }
 
 /**

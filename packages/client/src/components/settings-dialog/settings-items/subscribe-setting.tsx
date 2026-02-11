@@ -158,7 +158,6 @@ const SubscribeSetting = () => {
               <div className="flex flex-col gap-6">
                 {/* 订阅基本信息 */}
                 <div className="flex flex-col gap-3 px-1">
-                  <h3 className="text-sm font-medium">订阅信息</h3>
                   <div className="flex flex-col gap-2">
                     <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                       <span className="text-muted-foreground text-xs">等级名称</span>

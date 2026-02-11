@@ -3,9 +3,11 @@
 WeChat integration SDK for Official Account (OA) and Payment.
 
 ## Location
+
 `packages/@buildingai/wechat-sdk/`
 
 ## Exports
+
 - `WechatOaClient` - WeChat Official Account client
 - `WechatPayService` - WeChat Pay service
 

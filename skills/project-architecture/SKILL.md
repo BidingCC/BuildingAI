@@ -1,6 +1,11 @@
 ---
 name: project-architecture
-description: BuildingAI monorepo project structure and architecture guide. Use when AI needs to understand project organization, locate files, understand package relationships, find where specific functionality is implemented, or navigate the codebase structure. Essential for any development task that requires understanding the project layout, import patterns, module organization, or cross-package dependencies.
+description:
+    BuildingAI monorepo project structure and architecture guide. Use when AI needs to understand
+    project organization, locate files, understand package relationships, find where specific
+    functionality is implemented, or navigate the codebase structure. Essential for any development
+    task that requires understanding the project layout, import patterns, module organization, or
+    cross-package dependencies.
 ---
 
 # BuildingAI Project Architecture
@@ -10,6 +15,7 @@ Comprehensive guide to BuildingAI monorepo structure, packages, and development 
 ## When to Use
 
 Use this skill when you need to:
+
 - Locate where specific functionality is implemented
 - Understand package relationships and dependencies
 - Find the correct import paths and patterns
@@ -68,9 +74,11 @@ buildingai/
 
 ### Using Reference Files
 
-For detailed information about each package, consult the corresponding reference file in `references/`:
+For detailed information about each package, consult the corresponding reference file in
+`references/`:
 
 **@buildingai Packages:**
+
 - `references/base.md` - BaseController, BaseService
 - `references/cache.md` - CacheService, RedisService
 - `references/config.md` - Configuration management
@@ -92,16 +100,19 @@ For detailed information about each package, consult the corresponding reference
 - `references/wechat-sdk.md` - WeChat integration SDK
 
 **Main Packages:**
+
 - `references/api.md` - Main NestJS API application
 - `references/core.md` - Reusable business logic
 - `references/cli.md` - CLI tooling
 - `references/client.md` - Desktop client
 
-Load these reference files when you need detailed information about a specific package's exports, usage patterns, or implementation details.
+Load these reference files when you need detailed information about a specific package's exports,
+usage patterns, or implementation details.
 
 ### Import Patterns
 
 **Backend (API/Core) Import Order:**
+
 1. `@buildingai/*` packages
 2. `@nestjs/*` packages
 3. `@common/*` (API only)
@@ -111,6 +122,7 @@ Load these reference files when you need detailed information about a specific p
 7. Relative paths
 
 **Path Aliases (API):**
+
 - `@common/*` → `src/common/*`
 - `@modules/*` → `src/modules/*`
 - `@core/*` → `src/core/*`
@@ -119,21 +131,24 @@ Load these reference files when you need detailed information about a specific p
 ### Development Patterns
 
 **Service Pattern:**
+
 - Extend `BaseService<Entity>` from `@buildingai/base` for CRUD operations
 - Use dependency injection with `@InjectRepository()` for repositories
 - See `references/base.md` for available methods and features
 
 **Controller Pattern:**
+
 - Use `@ConsoleController(path, groupName)` for admin APIs (auto auth + permissions)
 - Use `@WebController(path)` for frontend APIs (requires auth by default)
 - Use `@Playground()` decorator to get current user
 - See `references/decorators.md` and `references/api.md` for details
 
-**Module Structure: `src/modules/{module-name}/` with controllers, services, and DTOs
+\*\*Module Structure: `src/modules/{module-name}/` with controllers, services, and DTOs
 
 ### Quick Navigation
 
 When implementing features, reference the appropriate package:
+
 - **Authentication**: `references/decorators.md` (`@Playground()`), `references/api.md` (guards)
 - **Database**: `references/db.md` (entities), `references/base.md` (BaseService CRUD)
 - **Error Handling**: `references/errors.md` (HttpErrorFactory)
@@ -145,8 +160,10 @@ When implementing features, reference the appropriate package:
 ### Skills Integration
 
 This skill works with other skills:
+
 - **`postgresql-table-design`** - For database schema design
 - **`frontend-design`** - For frontend UI development
 - **`ai-sdk`** - For AI functionality implementation
 
-When implementing features, reference the appropriate package reference file to understand what's available and how to use it.
+When implementing features, reference the appropriate package reference file to understand what's
+available and how to use it.

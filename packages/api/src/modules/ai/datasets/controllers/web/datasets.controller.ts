@@ -3,8 +3,10 @@ import { TEAM_ROLE_PERMISSIONS } from "@buildingai/constants/shared/team-role.co
 import { type UserPlayground } from "@buildingai/db";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
 import { Datasets, User } from "@buildingai/db/entities";
-import { Repository } from "@buildingai/db/typeorm";
+import { In, Repository } from "@buildingai/db/typeorm";
+import { BuildFileUrl } from "@buildingai/decorators";
 import { Playground } from "@buildingai/decorators/playground.decorator";
+import { Public } from "@buildingai/decorators/public.decorator";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { isEnabled } from "@buildingai/utils";
 import { WebController } from "@common/decorators/controller.decorator";
@@ -12,8 +14,9 @@ import { Body, Delete, Get, Param, Patch, Post, Query } from "@nestjs/common";
 
 import { CreateEmptyDatasetDto } from "../../dto/create-empty-dataset.dto";
 import { ListDatasetsDto } from "../../dto/list-datasets.dto";
+import { ListSquareDatasetsDto } from "../../dto/list-square-datasets.dto";
 import { RetrieveDto } from "../../dto/retrieval.dto";
-import { RejectSquarePublishDto } from "../../dto/square-publish.dto";
+import { PublishToSquareDto, RejectSquarePublishDto } from "../../dto/square-publish.dto";
 import { UpdateDatasetDto } from "../../dto/update-dataset.dto";
 import { DatasetPermission } from "../../guards/datasets-permission.guard";
 import { DatasetsService } from "../../services/datasets.service";
@@ -46,7 +49,39 @@ export class DatasetsWebController {
         return this.datasetsService.listTeam(user.id, query);
     }
 
+    @Get("square")
+    @Public()
+    async listSquare(@Query() query: ListSquareDatasetsDto): Promise<
+        PaginationResult<
+            Datasets & {
+                creator: { id: string; nickname: string | null; avatar: string | null } | null;
+            }
+        >
+    > {
+        const result = await this.datasetsService.listSquare(query);
+        const creatorIds = [...new Set(result.items.map((d) => d.createdBy))];
+        if (creatorIds.length === 0) {
+            return { ...result, items: result.items.map((d) => ({ ...d, creator: null })) };
+        }
+        const users = await this.userRepository.find({
+            where: { id: In(creatorIds) },
+            select: { id: true, nickname: true, avatar: true },
+        });
+        const creatorMap = new Map(
+            users.map((u) => [
+                u.id,
+                { id: u.id, nickname: u.nickname ?? null, avatar: u.avatar ?? null },
+            ]),
+        );
+        const items = result.items.map((d) => ({
+            ...d,
+            creator: creatorMap.get(d.createdBy) ?? null,
+        }));
+        return { ...result, items };
+    }
+
     @Get(":datasetId")
+    @BuildFileUrl(["**.avatar"])
     @DatasetPermission({ permission: "canViewAll", datasetIdParam: "datasetId" })
     async getDetail(
         @Param("datasetId") datasetId: string,
@@ -55,20 +90,26 @@ export class DatasetsWebController {
         Datasets & {
             memberCount: number;
             isOwner: boolean;
+            isMember: boolean;
             canManageDocuments: boolean;
             creator: { id: string; nickname: string | null; avatar: string | null } | null;
         }
     > {
-        const dataset = await this.datasetsService.findOneById(datasetId);
+        const dataset = await this.datasetsService.findOne({
+            where: { id: datasetId },
+            relations: { tags: true },
+        });
         if (!dataset) throw HttpErrorFactory.notFound("知识库不存在");
         const memberCount = await this.datasetMemberService.countMembers(datasetId);
         const isOwner = (dataset as Datasets).createdBy === user.id;
         let canManageDocuments = false;
+        let isMember = false;
         if (isEnabled(user.isRoot)) {
             canManageDocuments = TEAM_ROLE_PERMISSIONS.owner.canManageDocuments === true;
         } else {
             const role = await this.datasetMemberService.getMemberRole(datasetId, user.id);
             canManageDocuments = (role && TEAM_ROLE_PERMISSIONS[role]?.canManageDocuments) === true;
+            isMember = role !== null;
         }
         const creatorUser = await this.userRepository.findOne({
             where: { id: (dataset as Datasets).createdBy },
@@ -82,7 +123,17 @@ export class DatasetsWebController {
                       nickname: creatorUser.nickname ?? null,
                       avatar: creatorUser.avatar ?? null,
                   };
-        return { ...(dataset as Datasets), memberCount, isOwner, canManageDocuments, creator };
+        if (isEnabled(user.isRoot)) {
+            isMember = true;
+        }
+        return {
+            ...(dataset as Datasets),
+            memberCount,
+            isOwner,
+            isMember,
+            canManageDocuments,
+            creator,
+        };
     }
 
     @Post("create-empty")
@@ -113,9 +164,15 @@ export class DatasetsWebController {
     @DatasetPermission({ permission: "canManageDataset", datasetIdParam: "datasetId" })
     async publishToSquare(
         @Param("datasetId") datasetId: string,
+        @Body() dto: PublishToSquareDto,
         @Playground() user: UserPlayground,
     ): Promise<Datasets> {
-        return this.datasetsService.publishToSquare(datasetId, user.id);
+        return this.datasetsService.publishToSquare(
+            datasetId,
+            user.id,
+            dto.tagIds,
+            dto.memberJoinApprovalRequired,
+        );
     }
 
     @Post(":datasetId/unpublish-from-square")

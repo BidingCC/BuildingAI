@@ -1,4 +1,7 @@
-import type { SquarePublishStatus } from "@buildingai/services/web";
+import {
+  type SquarePublishStatus,
+  useDatasetsSquarePublishConfigQuery,
+} from "@buildingai/services/web";
 import { Button } from "@buildingai/ui/components/ui/button";
 import {
   Dialog,
@@ -7,41 +10,62 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@buildingai/ui/components/ui/dialog";
+import { Label } from "@buildingai/ui/components/ui/label";
 import { Switch } from "@buildingai/ui/components/ui/switch";
 import { useEffect, useRef, useState } from "react";
+
+import { TagSelect } from "@/components/tags";
 
 export interface PublishDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   defaultPublishedToSquare?: boolean;
+  defaultTagIds?: string[];
   squarePublishStatus?: SquarePublishStatus;
   squareRejectReason?: string | null;
   loading?: boolean;
-  onConfirm?: (publishToSquare: boolean) => void;
+  onConfirm?: (
+    publishToSquare: boolean,
+    tagIds?: string[],
+    memberJoinApprovalRequired?: boolean,
+  ) => void;
+  defaultMemberJoinApprovalRequired?: boolean;
 }
 
 export function PublishDialog({
   open,
   onOpenChange,
   defaultPublishedToSquare = false,
+  defaultTagIds,
   squarePublishStatus = "none",
   squareRejectReason,
   loading = false,
   onConfirm,
+  defaultMemberJoinApprovalRequired = true,
 }: PublishDialogProps) {
+  const configQuery = useDatasetsSquarePublishConfigQuery({ enabled: open });
+  const skipReview = configQuery.data?.squarePublishSkipReview === true;
   const [publishToSquare, setPublishToSquare] = useState(defaultPublishedToSquare);
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>(defaultTagIds ?? []);
+  const [memberJoinApprovalRequired, setMemberJoinApprovalRequired] = useState(
+    defaultMemberJoinApprovalRequired,
+  );
   const [reasonDialogOpen, setReasonDialogOpen] = useState(false);
   const initialPublishedToSquareRef = useRef(defaultPublishedToSquare);
   const isPending = squarePublishStatus === "pending";
   const isRejected = squarePublishStatus === "rejected";
+  const canSubmit = !publishToSquare || selectedTagIds.length > 0;
+  const canResubmit = selectedTagIds.length > 0;
 
   useEffect(() => {
     if (open) {
       const initial = defaultPublishedToSquare;
       initialPublishedToSquareRef.current = initial;
       setPublishToSquare(initial);
+      setSelectedTagIds(defaultTagIds ?? []);
+      setMemberJoinApprovalRequired(defaultMemberJoinApprovalRequired);
     }
-  }, [open, defaultPublishedToSquare]);
+  }, [open, defaultPublishedToSquare, defaultTagIds, defaultMemberJoinApprovalRequired]);
 
   const handleConfirm = () => {
     const initial = initialPublishedToSquareRef.current;
@@ -49,12 +73,21 @@ export function PublishDialog({
       onOpenChange(false);
       return;
     }
-    onConfirm?.(publishToSquare);
-    // 不在此处关闭弹窗，由父组件在接口成功后再关闭
+    if (!canSubmit) return;
+    onConfirm?.(
+      publishToSquare,
+      publishToSquare ? selectedTagIds : undefined,
+      memberJoinApprovalRequired,
+    );
   };
 
   const handleCancel = () => {
     onOpenChange(false);
+  };
+
+  const handleResubmit = () => {
+    if (!canResubmit) return;
+    onConfirm?.(true, selectedTagIds, memberJoinApprovalRequired);
   };
 
   return (
@@ -70,7 +103,9 @@ export function PublishDialog({
               <div className="min-w-0 flex-1 space-y-1">
                 <p className="text-sm font-medium">是否发布到知识广场</p>
                 <p className="text-muted-foreground text-xs leading-relaxed">
-                  确认发布后需管理员审核，审核通过后知识广场将展示此知识库
+                  {skipReview
+                    ? "确认发布后将直接上架，知识广场将展示此知识库"
+                    : "确认发布后需管理员审核，审核通过后知识广场将展示此知识库"}
                 </p>
               </div>
               <Switch
@@ -80,6 +115,35 @@ export function PublishDialog({
                 disabled={isPending}
               />
             </div>
+            {publishToSquare && !isPending && (
+              <div className="flex justify-between space-y-2 pt-2">
+                <Label className="text-sm font-medium">
+                  分类 <span className="text-destructive">*</span>
+                </Label>
+
+                <TagSelect
+                  tagsSource="web"
+                  value={selectedTagIds}
+                  onChange={setSelectedTagIds}
+                  placeholder="搜索分类"
+                />
+              </div>
+            )}
+            {publishToSquare && (
+              <div className="flex items-start justify-between gap-4 pt-2">
+                <div className="min-w-0 flex-1 space-y-1">
+                  <p className="text-sm font-medium">成员加入是否需要确认</p>
+                  <p className="text-muted-foreground text-xs leading-relaxed">
+                    关闭后，访问该知识库的用户可直接加入成为成员，无需创建者审核。
+                  </p>
+                </div>
+                <Switch
+                  checked={memberJoinApprovalRequired}
+                  onCheckedChange={setMemberJoinApprovalRequired}
+                  className="shrink-0"
+                />
+              </div>
+            )}
             {isPending && (
               <p className="text-muted-foreground text-xs">当前状态：待审核，请等待管理员审核。</p>
             )}
@@ -102,16 +166,19 @@ export function PublishDialog({
             <Button variant="outline" onClick={handleCancel} disabled={loading}>
               {isPending ? "关闭" : "取消"}
             </Button>
-            {!isPending && (
-              <Button onClick={handleConfirm} disabled={loading}>
+            {isRejected ? (
+              <Button onClick={handleResubmit} disabled={loading || !canResubmit}>
+                {loading ? "提交中…" : "重新提交"}
+              </Button>
+            ) : !isPending ? (
+              <Button onClick={handleConfirm} disabled={loading || !canSubmit}>
                 {loading ? "提交中…" : "确定"}
               </Button>
-            )}
+            ) : null}
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* 拒绝原因弹窗（与主弹窗平级，避免嵌套） */}
       <Dialog open={reasonDialogOpen} onOpenChange={setReasonDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>

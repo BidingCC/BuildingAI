@@ -1,19 +1,8 @@
-/**
- * @fileoverview Unstructured.io service parser
- * @description Integrates with unstructured.io API for advanced document parsing
- */
-
-import type {
-    ParseOptions,
-    ParseResult,
-    StructuredTextBlock,
-    UnstructuredElement,
-} from "../types";
+import type { ParseOptions, ParseResult, StructuredTextBlock, UnstructuredElement } from "../types";
 import { BaseParser } from "./base.parser";
 
 export class UnstructuredParser extends BaseParser {
     canParse(_mimeType: string, _filename: string): boolean {
-        // Can parse any file type if unstructured service is available
         return true;
     }
 
@@ -29,7 +18,6 @@ export class UnstructuredParser extends BaseParser {
         }
 
         try {
-            // Call unstructured.io API
             const formData = new FormData();
             const blob = new Blob([new Uint8Array(buffer)], { type: "application/octet-stream" });
             formData.append("files", blob, filename);
@@ -54,7 +42,6 @@ export class UnstructuredParser extends BaseParser {
 
             const elements: UnstructuredElement[] = await response.json();
 
-            // Convert unstructured elements to structured blocks
             const blocks = this.elementsToBlocks(elements);
             const text = this.blocksToText(blocks);
 

@@ -15,7 +15,8 @@
             "@buildingai/ui/*": [
                 "./src/*"
             ]
-        }
+        },
+        "strict": false
     },
     "include": [
         "src"

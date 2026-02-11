@@ -11,6 +11,7 @@ import {
     DatasetMemberApplication,
     Datasets,
     MemberApplicationStatus,
+    SquarePublishStatus,
 } from "@buildingai/db/entities";
 import { Repository } from "@buildingai/db/typeorm";
 import { HttpErrorFactory } from "@buildingai/errors";
@@ -90,6 +91,16 @@ export class DatasetMemberService extends BaseService<DatasetMember> {
         user: Pick<UserPlayground, "id" | "isRoot">,
         permission: keyof (typeof TEAM_ROLE_PERMISSIONS)[keyof typeof TEAM_ROLE_PERMISSIONS],
     ): Promise<void> {
+        const dataset = await this.getDatasetOrThrow(datasetId);
+
+        if (
+            permission === "canViewAll" &&
+            dataset.publishedToSquare === true &&
+            dataset.squarePublishStatus === SquarePublishStatus.APPROVED
+        ) {
+            return;
+        }
+
         if (isEnabled(user.isRoot)) {
             const ownerPermissions = TEAM_ROLE_PERMISSIONS[TEAM_ROLE.OWNER];
             if (!ownerPermissions[permission]) {
@@ -148,8 +159,8 @@ export class DatasetMemberService extends BaseService<DatasetMember> {
         datasetId: string,
         user: UserPlayground,
         dto: ApplyToDatasetDto,
-    ): Promise<DatasetMemberApplication> {
-        await this.getDatasetOrThrow(datasetId);
+    ): Promise<DatasetMemberApplication | DatasetMember> {
+        const dataset = await this.getDatasetOrThrow(datasetId);
 
         const alreadyMember = await this.datasetMemberRepository.findOne({
             where: { datasetId, userId: user.id, isActive: true },
@@ -168,6 +179,17 @@ export class DatasetMemberService extends BaseService<DatasetMember> {
         const appliedRole = dto.appliedRole ?? TEAM_ROLE.VIEWER;
         if (appliedRole === TEAM_ROLE.OWNER)
             throw HttpErrorFactory.badRequest("不能申请成为所有者");
+
+        if (dataset.memberJoinApprovalRequired === false) {
+            const member = this.datasetMemberRepository.create({
+                datasetId,
+                userId: user.id,
+                role: appliedRole,
+                isActive: true,
+                invitedBy: user.id,
+            });
+            return this.datasetMemberRepository.save(member);
+        }
 
         const application = this.applicationRepository.create({
             datasetId,

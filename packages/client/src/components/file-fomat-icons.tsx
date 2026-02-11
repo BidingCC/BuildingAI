@@ -1,6 +1,5 @@
 import React from "react";
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const fileFormatIconsMap: Record<string, React.ReactNode> = {
   docx: (
     <svg

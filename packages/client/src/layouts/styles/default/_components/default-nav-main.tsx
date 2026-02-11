@@ -8,6 +8,10 @@ import {
 } from "@buildingai/services/web";
 import { useAuthStore } from "@buildingai/stores";
 import { InfiniteScroll } from "@buildingai/ui/components/infinite-scroll";
+import {
+  type IconName,
+  LucideIcon as LucideIconDynamic,
+} from "@buildingai/ui/components/lucide-icon";
 import { Button } from "@buildingai/ui/components/ui/button";
 import {
   Collapsible,
@@ -50,6 +54,7 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from "@buildingai/ui/components/ui/sidebar";
+import { Skeleton } from "@buildingai/ui/components/ui/skeleton";
 import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog";
 import { cn } from "@buildingai/ui/lib/utils";
 import {
@@ -57,6 +62,7 @@ import {
   Check,
   ChevronRight,
   EllipsisVertical,
+  ExternalLink,
   type LucideIcon,
   PenLine,
   Trash2,
@@ -78,14 +84,32 @@ interface NavSubItem {
   path?: string;
 }
 
-interface NavItem {
+export interface NavItem {
   id: string;
   title: string;
   path?: string;
-  icon?: LucideIcon;
+  icon?: LucideIcon | string;
   isActive?: boolean;
   action?: React.ReactNode;
   items?: NavSubItem[];
+  target?: "_self" | "_blank";
+}
+
+/**
+ * Render icon from LucideIcon component or dynamic icon name string.
+ */
+function NavIcon({ icon, isActive }: { icon: LucideIcon | string; isActive?: boolean }) {
+  if (typeof icon === "string") {
+    return (
+      <LucideIconDynamic
+        name={icon as IconName}
+        className="shrink-0"
+        strokeWidth={isActive ? 2.5 : 2}
+      />
+    );
+  }
+  const Icon = icon;
+  return <Icon className="shrink-0" strokeWidth={isActive ? 2.5 : 2} />;
 }
 
 /**
@@ -442,15 +466,23 @@ function ChatHistoryMenuItem({
                     className="center hover:bg-sidebar-accent-foreground/5 right-auto left-2 shrink-0"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <item.icon
-                      className="block group-hover/history-chat-icon:hidden"
-                      strokeWidth={isActive ? 2.5 : 2}
-                    />
+                    {typeof item.icon === "string" ? (
+                      <LucideIconDynamic
+                        name={item.icon as IconName}
+                        className="block group-hover/history-chat-icon:hidden"
+                        strokeWidth={isActive ? 2.5 : 2}
+                      />
+                    ) : (
+                      <item.icon
+                        className="block group-hover/history-chat-icon:hidden"
+                        strokeWidth={isActive ? 2.5 : 2}
+                      />
+                    )}
                     <ChevronRight className="hidden transition-transform duration-200 group-hover/history-chat-icon:block group-data-[state=open]/collapsible:rotate-90" />
                   </SidebarMenuAction>
                 </CollapsibleTrigger>
               ) : (
-                <item.icon strokeWidth={isActive ? 2.5 : 2} />
+                <NavIcon icon={item.icon} isActive={isActive} />
               )}
             </>
           )}
@@ -506,7 +538,7 @@ function CollapsibleMenuItem({ item, isActive }: { item: NavItem; isActive: bool
     <SidebarMenuItem>
       <CollapsibleTrigger asChild className="group/collapsible">
         <SidebarMenuButton isActive={isActive} tooltip={item.title} className="h-9">
-          {item.icon && <item.icon strokeWidth={isActive ? 2.5 : 2} />}
+          {item.icon && <NavIcon icon={item.icon} isActive={isActive} />}
           <span>{item.title}</span>
           <SidebarMenuAction>
             <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
@@ -533,9 +565,23 @@ function CollapsibleMenuItem({ item, isActive }: { item: NavItem; isActive: bool
 }
 
 /**
- * Simple link menu item without sub-items
+ * Simple link menu item without sub-items.
+ * Uses <a> for external links (target="_blank") and <Link> for internal navigation.
  */
 function LinkMenuItem({ item, isActive }: { item: NavItem; isActive: boolean }) {
+  const isExternal = item.target === "_blank";
+
+  const content = (
+    <>
+      {item.icon && <NavIcon icon={item.icon} isActive={isActive} />}
+      <span className="mr-auto line-clamp-1 flex-1 whitespace-nowrap">{item.title}</span>
+      {item.action}
+      {isExternal && (
+        <ExternalLink className="text-muted-foreground size-3.5 shrink-0 opacity-0 transition-opacity group-hover/link-menu-item:opacity-100" />
+      )}
+    </>
+  );
+
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
@@ -544,17 +590,25 @@ function LinkMenuItem({ item, isActive }: { item: NavItem; isActive: boolean }) 
         isActive={isActive}
         asChild
       >
-        <Link to={item.path || ""}>
-          {item.icon && <item.icon className="shrink-0" strokeWidth={isActive ? 2.5 : 2} />}
-          <span className="mr-auto flex-1 whitespace-nowrap">{item.title}</span>
-          {item.action}
-        </Link>
+        {isExternal ? (
+          <a href={item.path || ""} target="_blank" rel="noopener noreferrer">
+            {content}
+          </a>
+        ) : (
+          <Link to={item.path || ""}>{content}</Link>
+        )}
       </SidebarMenuButton>
     </SidebarMenuItem>
   );
 }
 
-export function DefaultNavMain({ items }: { items: NavItem[] }) {
+export function DefaultNavMain({
+  items,
+  isLoading: isMenuLoading,
+}: {
+  items: NavItem[];
+  isLoading?: boolean;
+}) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { isLogin } = useAuthStore((state) => state.authActions);
@@ -657,7 +711,7 @@ export function DefaultNavMain({ items }: { items: NavItem[] }) {
 
   const renderMenuItem = (item: NavItem) => {
     const hasItems = item.items && item.items.length > 0;
-    const isChatHistory = item.id === "chat-history";
+    const isChatHistory = item.id === "menu_history_fixed";
 
     if (isChatHistory) {
       return (
@@ -714,16 +768,22 @@ export function DefaultNavMain({ items }: { items: NavItem[] }) {
     <>
       <SidebarGroup>
         <SidebarMenu className="gap-1">
-          {items.map((item) => (
-            <Collapsible
-              key={item.id}
-              asChild
-              defaultOpen={item.isActive}
-              className="group/collapsible"
-            >
-              {renderMenuItem(item)}
-            </Collapsible>
-          ))}
+          {isMenuLoading
+            ? Array.from({ length: 6 }).map((_, i) => (
+                <SidebarMenuItem key={i}>
+                  <Skeleton className="h-9 w-full rounded-md" />
+                </SidebarMenuItem>
+              ))
+            : items.map((item) => (
+                <Collapsible
+                  key={item.id}
+                  asChild
+                  defaultOpen={item.isActive}
+                  className="group/collapsible"
+                >
+                  {renderMenuItem(item)}
+                </Collapsible>
+              ))}
         </SidebarMenu>
       </SidebarGroup>
       <CommandDialog open={open} onOpenChange={setOpen}>

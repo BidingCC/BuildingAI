@@ -60,7 +60,7 @@ const GeneralSetting = () => {
                 <ChevronsUpDown className="text-muted-foreground ml-1 size-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="w-40">
               <DropdownMenuLabel>选择配色 ({THEME_COLORS.length})</DropdownMenuLabel>
               <ScrollArea className="h-72">
                 {THEME_COLORS.map((t) => (
@@ -83,7 +83,7 @@ const GeneralSetting = () => {
                         <Check className="text-primary-foreground size-2" />
                       )}
                     </div>
-                    {t.label}
+                    <span>{t.label}</span>
                   </DropdownMenuItem>
                 ))}
               </ScrollArea>

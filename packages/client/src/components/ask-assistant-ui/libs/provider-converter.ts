@@ -31,6 +31,7 @@ export function convertProvidersToModels(providers: AiProvider[]): Model[] {
           chefSlug: provider.provider,
           providers: [provider.provider],
           features: model.features,
+          thinking: model.thinking,
           billingRule: model.billingRule,
         };
         modelMap.set(modelKey, newModel);

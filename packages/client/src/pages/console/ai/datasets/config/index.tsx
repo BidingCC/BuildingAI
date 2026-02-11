@@ -160,7 +160,7 @@ const DatasetsConfigPage = () => {
 
         <RetrievalConfigSection value={retrieval} onChange={setRetrieval} />
 
-        <div className="bg-background sticky bottom-0 flex justify-start py-4">
+        <div className="bg-background sticky bottom-0 z-2 flex justify-start py-4">
           <Button onClick={handleSave} disabled={setConfigMutation.isPending}>
             {setConfigMutation.isPending ? "保存中..." : "保存"}
           </Button>

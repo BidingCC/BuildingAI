@@ -7,6 +7,8 @@ import {
   type CarouselApi,
   CarouselContent,
   CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
 } from "@buildingai/ui/components/ui/carousel";
 import {
   Dialog,
@@ -26,9 +28,14 @@ type BannerItem = { imageUrl: string; linkUrl: string };
 type DecorateSettingsDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 };
 
-export function DecorateSettingsDialog({ open, onOpenChange }: DecorateSettingsDialogProps) {
+export function DecorateSettingsDialog({
+  open,
+  onOpenChange,
+  onSuccess,
+}: DecorateSettingsDialogProps) {
   const [enabled, setEnabled] = useState(false);
   const [banners, setBanners] = useState<BannerItem[]>([{ imageUrl: "", linkUrl: "" }]);
   const [api, setApi] = useState<CarouselApi>();
@@ -40,6 +47,7 @@ export function DecorateSettingsDialog({ open, onOpenChange }: DecorateSettingsD
     onSuccess: () => {
       toast.success("保存成功");
       onOpenChange(false);
+      onSuccess?.();
     },
     onError: (e) => {
       toast.error(`保存失败: ${e.message}`);
@@ -49,7 +57,17 @@ export function DecorateSettingsDialog({ open, onOpenChange }: DecorateSettingsD
   useEffect(() => {
     if (!open || !config) return;
     setEnabled(config.enabled);
-    if (config.heroImageUrl || config.link?.path) {
+
+    // 优先使用 banners 字段，如果没有则使用 heroImageUrl（向后兼容）
+    if (config.banners && config.banners.length > 0) {
+      setBanners(
+        config.banners.map((banner) => ({
+          imageUrl: banner.imageUrl || "",
+          linkUrl: banner.linkUrl || "",
+        })),
+      );
+    } else if (config.heroImageUrl || config.link?.path) {
+      // 向后兼容：从 heroImageUrl 和 link 转换
       setBanners([
         {
           imageUrl: config.heroImageUrl ?? "",
@@ -82,26 +100,37 @@ export function DecorateSettingsDialog({ open, onOpenChange }: DecorateSettingsD
   };
 
   const handleSave = () => {
-    const first = banners[0];
-    if (!first) return;
-    setMutation.mutate({
-      enabled,
-      title: "",
-      link: { path: first.linkUrl || undefined },
-      heroImageUrl: first.imageUrl,
-    });
-    if (banners.length > 1) {
-      toast.info("当前仅保存第一条 Banner，多轮播需后端支持后可扩展");
+    // 过滤出有效的 banner（有图片URL的）
+    const validBanners = banners
+      .filter((banner) => banner.imageUrl.trim())
+      .map((banner) => ({
+        imageUrl: banner.imageUrl.trim(),
+        linkUrl: banner.linkUrl.trim() || undefined,
+      }));
+
+    if (validBanners.length === 0) {
+      toast.error("请至少添加一张有效的 Banner 图片");
+      return;
     }
+
+    // 构建提交数据，保留现有 title 和 description
+    const dto = {
+      enabled,
+      title: config?.title ?? "",
+      description: config?.description ?? "",
+      banners: validBanners,
+    };
+
+    setMutation.mutate(dto);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl">
+      <DialogContent className="flex max-w-xl flex-col">
         <DialogHeader>
           <DialogTitle>设置装修位</DialogTitle>
         </DialogHeader>
-        <div className="flex flex-col gap-6 py-4">
+        <div className="flex min-h-0 flex-1 flex-col gap-6 py-4">
           <div className="flex items-center justify-between gap-4">
             <Label htmlFor="ad-enabled" className="flex-1">
               启用广告位
@@ -122,17 +151,17 @@ export function DecorateSettingsDialog({ open, onOpenChange }: DecorateSettingsD
                 variant="outline"
                 size="sm"
                 onClick={handleAddBanner}
-                disabled={isLoading}
+                disabled={isLoading || count >= 5}
               >
                 <Plus className="size-4" />
                 添加
               </Button>
             </div>
-            <Carousel setApi={setApi} opts={{ align: "start" }} className="w-full">
-              <CarouselContent className="-ml-2">
+            <Carousel setApi={setApi} opts={{ align: "start" }} className="mx-auto w-[79%]">
+              <CarouselContent>
                 {banners.map((banner, index) => (
-                  <CarouselItem key={index} className="basis-full pl-2">
-                    <div className="border-border flex flex-col gap-3 rounded-lg border p-3">
+                  <CarouselItem key={index} className="basis-full">
+                    <div className="border-border flex min-w-0 flex-col gap-3 rounded-lg border p-3">
                       <div className="flex items-center justify-end">
                         <Button
                           type="button"
@@ -159,28 +188,32 @@ export function DecorateSettingsDialog({ open, onOpenChange }: DecorateSettingsD
                           />
                         ) : null}
                       </div>
-                      <div className="grid gap-2">
+                      <div className="grid min-w-0 gap-2">
                         <Label className="text-xs">图片地址</Label>
                         <Input
                           placeholder="请输入图片 URL"
                           value={banner.imageUrl}
                           onChange={(e) => handleBannerChange(index, "imageUrl", e.target.value)}
                           disabled={isLoading}
+                          className="min-w-0"
                         />
                       </div>
-                      <div className="grid gap-2">
+                      <div className="grid min-w-0 gap-2">
                         <Label className="text-xs">跳转链接</Label>
                         <Input
                           placeholder="如 /apps/xxx 或 https://..."
                           value={banner.linkUrl}
                           onChange={(e) => handleBannerChange(index, "linkUrl", e.target.value)}
                           disabled={isLoading}
+                          className="min-w-0"
                         />
                       </div>
                     </div>
                   </CarouselItem>
                 ))}
               </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
             </Carousel>
             <div className="text-muted-foreground py-2 text-center text-sm">
               {current}/{count}

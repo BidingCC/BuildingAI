@@ -348,6 +348,18 @@
                         "isHidden": 0,
                         "type": 2,
                         "sourceType": 1
+                    },
+                    {
+                        "name": "谷歌配置",
+                        "code": "channel-google-oa",
+                        "path": "google-oa",
+                        "icon": "",
+                        "component": "/console/channel/google-oa/index",
+                        "permissionCode": "google-oa:get-config",
+                        "sort": 0,
+                        "isHidden": 0,
+                        "type": 2,
+                        "sourceType": 1
                     }
                 ]
             },

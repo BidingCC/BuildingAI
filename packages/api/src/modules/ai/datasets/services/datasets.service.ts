@@ -1,5 +1,6 @@
 import { BaseService } from "@buildingai/base";
 import { RETRIEVAL_MODE } from "@buildingai/constants/shared/datasets.constants";
+import { TagType } from "@buildingai/constants/shared/tag.constant";
 import { type UserPlayground } from "@buildingai/db";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
 import {
@@ -11,17 +12,20 @@ import {
     DatasetsDocument,
     DatasetsSegments,
     SquarePublishStatus,
+    Tag,
 } from "@buildingai/db/entities";
-import { In, Repository } from "@buildingai/db/typeorm";
+import { ILike, In, Repository } from "@buildingai/db/typeorm";
 import { PaginationDto } from "@buildingai/dto/pagination.dto";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { DatasetsConfigService } from "@modules/config/services/datasets-config.service";
 import { Injectable, Logger } from "@nestjs/common";
 
 import { CreateEmptyDatasetDto } from "../dto/create-empty-dataset.dto";
+import type { ListSquareDatasetsDto } from "../dto/list-square-datasets.dto";
 import type { SetDatasetVectorConfigDto } from "../dto/set-dataset-vector-config.dto";
 import { UpdateDatasetDto } from "../dto/update-dataset.dto";
 import { DatasetMemberService } from "./datasets-member.service";
+import { VectorizationTriggerService } from "./vectorization-trigger.service";
 
 /**
  * 知识库服务
@@ -47,8 +51,11 @@ export class DatasetsService extends BaseService<Datasets> {
         private readonly applicationRepository: Repository<DatasetMemberApplication>,
         @InjectRepository(DatasetMember)
         private readonly datasetMemberRepository: Repository<DatasetMember>,
+        @InjectRepository(Tag)
+        private readonly tagRepository: Repository<Tag>,
         private readonly datasetMemberService: DatasetMemberService,
         private readonly datasetsConfigService: DatasetsConfigService,
+        private readonly vectorizationTrigger: VectorizationTriggerService,
     ) {
         super(datasetsRepository);
     }
@@ -108,10 +115,7 @@ export class DatasetsService extends BaseService<Datasets> {
         return this.findOneById(datasetId) as Promise<Datasets>;
     }
 
-    async updateVectorConfig(
-        datasetId: string,
-        dto: SetDatasetVectorConfigDto,
-    ): Promise<Datasets> {
+    async updateVectorConfig(datasetId: string, dto: SetDatasetVectorConfigDto): Promise<Datasets> {
         await this.datasetMemberService.getDatasetOrThrow(datasetId);
         const payload: Record<string, unknown> = {};
         if (dto.embeddingModelId !== undefined) payload.embeddingModelId = dto.embeddingModelId;
@@ -124,7 +128,12 @@ export class DatasetsService extends BaseService<Datasets> {
         return this.findOneById(datasetId) as Promise<Datasets>;
     }
 
-    async publishToSquare(datasetId: string, userId: string): Promise<Datasets> {
+    async publishToSquare(
+        datasetId: string,
+        userId: string,
+        tagIds?: string[],
+        memberJoinApprovalRequired?: boolean,
+    ): Promise<Datasets> {
         const dataset = await this.datasetMemberService.getDatasetOrThrow(datasetId);
         await this.datasetMemberService.requireCreator(datasetId, userId);
         const status = (dataset as Datasets).squarePublishStatus ?? SquarePublishStatus.NONE;
@@ -135,16 +144,30 @@ export class DatasetsService extends BaseService<Datasets> {
             throw HttpErrorFactory.badRequest("该知识库已发布到广场");
         }
         const skipReview = await this.datasetsConfigService.getSquarePublishSkipReview();
+        const updatePayload: Partial<Datasets> = {};
+        if (memberJoinApprovalRequired !== undefined) {
+            updatePayload.memberJoinApprovalRequired = memberJoinApprovalRequired;
+        }
         if (skipReview) {
-            await this.datasetsRepository.update(datasetId, {
-                squarePublishStatus: SquarePublishStatus.APPROVED,
-                publishedToSquare: true,
-                publishedAt: new Date(),
-            });
+            updatePayload.squarePublishStatus = SquarePublishStatus.APPROVED;
+            updatePayload.publishedToSquare = true;
+            updatePayload.publishedAt = new Date();
         } else {
-            await this.datasetsRepository.update(datasetId, {
-                squarePublishStatus: SquarePublishStatus.PENDING,
-            });
+            updatePayload.squarePublishStatus = SquarePublishStatus.PENDING;
+        }
+        await this.datasetsRepository.update(datasetId, updatePayload);
+        const ids = Array.isArray(tagIds) ? tagIds.filter(Boolean) : [];
+        if (ids.length === 0) throw HttpErrorFactory.badRequest("请选择分类");
+        const tags = await this.tagRepository.find({
+            where: { id: In(ids), type: TagType.DATASET },
+        });
+        const entity = await this.datasetsRepository.findOne({
+            where: { id: datasetId },
+            relations: { tags: true },
+        });
+        if (entity) {
+            entity.tags = tags;
+            await this.datasetsRepository.save(entity);
         }
         return this.findOneById(datasetId) as Promise<Datasets>;
     }
@@ -203,6 +226,37 @@ export class DatasetsService extends BaseService<Datasets> {
         return this.findOneById(datasetId) as Promise<Datasets>;
     }
 
+    async listForConsole(
+        paginationDto: PaginationDto,
+        filters: { name?: string; status?: string; tagId?: string },
+    ) {
+        const { name, status, tagId } = filters;
+        if (tagId) {
+            const qb = this.datasetsRepository
+                .createQueryBuilder("d")
+                .leftJoinAndSelect("d.tags", "tags")
+                .innerJoin("datasets_tags", "dt", "dt.dataset_id = d.id AND dt.tag_id = :tagId", {
+                    tagId,
+                })
+                .orderBy("d.updatedAt", "DESC");
+            if (name) {
+                qb.andWhere("d.name ILIKE :name", { name: `%${name}%` });
+            }
+            if (status && status !== "all") {
+                qb.andWhere("d.square_publish_status = :status", { status });
+            }
+            return this.paginateQueryBuilder(qb, paginationDto);
+        }
+        const where: Record<string, unknown> = {};
+        if (name) (where as any).name = ILike(`%${name}%`);
+        if (status && status !== "all") (where as any).squarePublishStatus = status;
+        return this.paginate(paginationDto, {
+            where: Object.keys(where).length ? where : undefined,
+            order: { updatedAt: "DESC" },
+            relations: { tags: true },
+        });
+    }
+
     async listMyCreated(userId: string, paginationDto: PaginationDto) {
         return this.paginate(paginationDto, {
             where: { createdBy: userId },
@@ -222,6 +276,33 @@ export class DatasetsService extends BaseService<Datasets> {
             .where("d.createdBy != :userId", { userId })
             .orderBy("d.updatedAt", "DESC");
 
+        return this.paginateQueryBuilder(qb, paginationDto);
+    }
+
+    async listSquare(dto: ListSquareDatasetsDto) {
+        const { keyword, tagIds, ...paginationDto } = dto;
+        const qb = this.datasetsRepository
+            .createQueryBuilder("d")
+            .leftJoinAndSelect("d.tags", "tags")
+            .where("d.publishedToSquare = :published", { published: true })
+            .andWhere("d.squarePublishStatus = :status", { status: SquarePublishStatus.APPROVED })
+            .orderBy("d.updatedAt", "DESC");
+
+        if (keyword?.trim()) {
+            qb.andWhere("(d.name ILIKE :keyword OR d.description ILIKE :keyword)", {
+                keyword: `%${keyword.trim()}%`,
+            });
+        }
+        if (tagIds?.length) {
+            qb.innerJoin(
+                "datasets_tags",
+                "dt",
+                "dt.dataset_id = d.id AND dt.tag_id IN (:...tagIds)",
+                {
+                    tagIds,
+                },
+            );
+        }
         return this.paginateQueryBuilder(qb, paginationDto);
     }
 
@@ -247,6 +328,7 @@ export class DatasetsService extends BaseService<Datasets> {
             await manager.getRepository(Datasets).delete({ id: datasetId });
         });
 
+        await this.vectorizationTrigger.removeDatasetJobs(datasetId);
         this.logger.log(`[+] Deleted dataset: ${datasetId}`);
         return { success: true };
     }
@@ -270,6 +352,7 @@ export class DatasetsService extends BaseService<Datasets> {
             await manager.getRepository(DatasetMember).delete({ datasetId });
             await manager.getRepository(Datasets).delete({ id: datasetId });
         });
+        await this.vectorizationTrigger.removeDatasetJobs(datasetId);
         this.logger.log(`[+] Console deleted dataset: ${datasetId}`);
         return { success: true };
     }

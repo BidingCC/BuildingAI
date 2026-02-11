@@ -26,7 +26,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@buildingai/ui/components/ui/form";
+import { ImageUpload } from "@buildingai/ui/components/ui/image-upload";
 import { Input } from "@buildingai/ui/components/ui/input";
+import { RadioGroup, RadioGroupItem } from "@buildingai/ui/components/ui/radio-group";
 import { ScrollArea } from "@buildingai/ui/components/ui/scroll-area";
 import {
   Select,
@@ -35,7 +37,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@buildingai/ui/components/ui/select";
-import { Switch } from "@buildingai/ui/components/ui/switch";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
@@ -53,12 +54,12 @@ const formSchema = z
     nickname: z.string().max(50, "昵称不能超过50个字符").optional(),
     email: z.string().email("请输入有效的邮箱地址").optional().or(z.literal("")),
     phone: z.string().max(20, "手机号不能超过20个字符").optional(),
-    avatar: z.string().url("请输入有效的URL地址").optional().or(z.literal("")),
+    avatar: z.string().optional(),
     roleId: z.string().optional(),
     status: z.boolean().optional(),
   })
   .refine(
-    (data) => {
+    () => {
       // Password is required only for create mode (when there's no existing user)
       return true;
     },
@@ -191,6 +192,53 @@ export const UserFormDialog = ({ open, onOpenChange, user, onSuccess }: UserForm
         <ScrollArea className="max-h-[80vh]">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 p-4 pt-0 pb-17">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="avatar"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>头像</FormLabel>
+                      <FormControl>
+                        <ImageUpload
+                          size="sm"
+                          value={field.value}
+                          onChange={(url) => field.onChange(url ?? "")}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>启用状态</FormLabel>
+                      <FormControl>
+                        <RadioGroup
+                          className="flex gap-4"
+                          value={field.value ? "true" : "false"}
+                          onValueChange={(v) => field.onChange(v === "true")}
+                        >
+                          <label className="flex items-center gap-2 text-sm">
+                            <RadioGroupItem value="true" />
+                            启用
+                          </label>
+                          <label className="flex items-center gap-2 text-sm">
+                            <RadioGroupItem value="false" />
+                            禁用
+                          </label>
+                        </RadioGroup>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
               <FormField
                 control={form.control}
                 name="username"
@@ -198,7 +246,12 @@ export const UserFormDialog = ({ open, onOpenChange, user, onSuccess }: UserForm
                   <FormItem>
                     <FormLabel>用户名</FormLabel>
                     <FormControl>
-                      <Input placeholder="请输入用户名" {...field} disabled={isEditMode} />
+                      <Input
+                        placeholder="请输入用户名"
+                        autoComplete="off"
+                        {...field}
+                        disabled={isEditMode}
+                      />
                     </FormControl>
                     <FormDescription>用户登录时使用的账号名，创建后不可修改</FormDescription>
                     <FormMessage />
@@ -214,7 +267,12 @@ export const UserFormDialog = ({ open, onOpenChange, user, onSuccess }: UserForm
                     <FormItem>
                       <FormLabel>密码</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="请输入密码" {...field} />
+                        <Input
+                          type="password"
+                          placeholder="请输入密码"
+                          autoComplete="new-password"
+                          {...field}
+                        />
                       </FormControl>
                       <FormDescription>用户登录时使用的密码</FormDescription>
                       <FormMessage />
@@ -269,20 +327,6 @@ export const UserFormDialog = ({ open, onOpenChange, user, onSuccess }: UserForm
 
               <FormField
                 control={form.control}
-                name="avatar"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>头像URL</FormLabel>
-                    <FormControl>
-                      <Input placeholder="请输入头像地址（可选）" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
                 name="roleId"
                 render={({ field }) => (
                   <FormItem>
@@ -306,25 +350,6 @@ export const UserFormDialog = ({ open, onOpenChange, user, onSuccess }: UserForm
                         ))}
                       </SelectContent>
                     </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col justify-center">
-                    <FormLabel>启用状态</FormLabel>
-                    <div className="flex items-center gap-2">
-                      <FormControl>
-                        <Switch checked={field.value} onCheckedChange={field.onChange} />
-                      </FormControl>
-                      <span className="text-muted-foreground text-sm">
-                        {field.value ? "已启用" : "已禁用"}
-                      </span>
-                    </div>
                     <FormMessage />
                   </FormItem>
                 )}

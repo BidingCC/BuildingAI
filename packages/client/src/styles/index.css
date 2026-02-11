@@ -50,6 +50,11 @@ body {
   scrollbar-gutter: stable;
 }
 
+
+.datasets-chat-scroll > div {
+  @apply overflow-y-auto px-3! sm:px-0!;
+}
+
 [data-streamdown="code-block"] {
   content-visibility: visible !important;
 }

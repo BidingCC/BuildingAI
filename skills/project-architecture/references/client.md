@@ -3,6 +3,7 @@
 Desktop client application (Tauri + React).
 
 ## Location
+
 `packages/client/`
 
 ## Structure
@@ -32,19 +33,23 @@ src-tauri/                    # Tauri backend (Rust)
 ## Directory Structure
 
 ### pages/
+
 - **`pages/console/*`** - Admin management pages
 - **`pages/*`** (root level) - Frontend pages
 
 ### layouts/
+
 - **`layouts/console/`** - Admin layout with sidebar and navbar
 - **`layouts/main/`** - Main frontend layout
 
 ### components/
+
 - **`components/ask-assistant-ui/`** - AI assistant UI components
 - **`components/exception/`** - Error pages (400, 401, 403, 404, 500, etc.)
 - **`components/guard/`** - Route guards
 
 ### hooks/
+
 - **`hooks/use-head.tsx`** - Document head management
 - **`hooks/use-pagination.tsx`** - Pagination hook (see usage below)
 
@@ -53,6 +58,7 @@ src-tauri/                    # Tauri backend (Rust)
 Controlled pagination hook that provides pagination state and a ready-to-use component.
 
 **Usage:**
+
 ```typescript
 import { usePagination } from "@/hooks/use-pagination";
 
@@ -85,6 +91,7 @@ const MyPage = () => {
 ```
 
 **Features:**
+
 - Fully controlled - parent manages page state
 - Returns ready-to-use `PaginationComponent`
 - Automatic ellipsis handling for large page counts

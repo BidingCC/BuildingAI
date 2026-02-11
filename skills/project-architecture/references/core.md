@@ -3,6 +3,7 @@
 Reusable business logic modules.
 
 ## Location
+
 `packages/core/`
 
 ## Exports
@@ -16,11 +17,7 @@ Reusable business logic modules.
 ## Usage
 
 ```typescript
-import {
-    BillingModule,
-    SecretModule,
-    UploadModule,
-} from "@buildingai/core/modules";
+import { BillingModule, SecretModule, UploadModule } from "@buildingai/core/modules";
 
 @Module({
     imports: [BillingModule, SecretModule, UploadModule],

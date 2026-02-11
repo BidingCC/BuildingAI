@@ -6,6 +6,8 @@ import {
     normalizeChatUsage,
     withEstimatedUsage,
 } from "@buildingai/ai-sdk-new";
+import { DATASETS_SYSTEM_PROMPT, GENERATE_TITLE_PROMPT } from "@buildingai/ai-toolkit/prompts";
+import { createDatasetsSearchTool } from "@buildingai/ai-toolkit/tools";
 import { SecretService } from "@buildingai/core/modules";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { getProviderSecret } from "@buildingai/utils";
@@ -20,12 +22,10 @@ import {
     generateText,
     pipeUIMessageStreamToResponse,
     stepCountIs,
-    tool,
     ToolLoopAgent,
 } from "ai";
 import type { ServerResponse } from "http";
 import { validate as isUUID } from "uuid";
-import { z } from "zod";
 
 import type { DatasetsChatCompletionParams } from "../dto/datasets-chat.dto";
 import { DatasetsChatMessageService } from "./datasets-chat-message.service";
@@ -46,12 +46,6 @@ const VALID_PART_TYPES = new Set([
     "step-finish",
 ]);
 
-/**
- * 知识库 RAG 对话流式完成服务
- *
- * 参考 modules/ai/chat 的 ChatCompletionService，使用 getInformation 工具从知识库检索后再回答。
- * 仅支持文本消息，不处理文件解析与 MCP。
- */
 @Injectable()
 export class DatasetsChatCompletionService {
     private readonly logger = new Logger(DatasetsChatCompletionService.name);
@@ -108,41 +102,17 @@ export class DatasetsChatCompletionService {
 
             const cleaned = this.clean(params.messages);
             const modelMsgs = await convertToModelMessages(cleaned);
-            const systemPrompt = `You are a helpful assistant. Check your knowledge base before answering any questions.
-Only respond to questions using information from tool calls.
-If no relevant information is found in the tool calls, respond "Sorry, I don't know."`;
             const finalMessages = [
-                { role: "system" as const, content: systemPrompt },
+                { role: "system" as const, content: DATASETS_SYSTEM_PROMPT },
                 ...modelMsgs,
             ];
             const promptText = formatMessagesForTokenCount(finalMessages);
 
-            const getInformationTool = tool({
-                description: "Get information from the knowledge base to answer questions.",
-                inputSchema: z.object({
-                    question: z.string().describe("The user's question"),
-                }),
-                execute: async ({ question }) => {
-                    const result = await this.datasetsRetrievalService.retrieve(
-                        params.datasetId,
-                        question,
-                        4,
-                        0.5,
-                    );
-                    const meta = result.chunks.map((chunk) => {
-                        const fileName = chunk.fileName ?? "";
-                        const fileType = (chunk.metadata?.fileType as string) ?? "";
-                        const fileUrl = (chunk.metadata?.fileUrl as string) ?? "";
+            const hasTools = model.features?.some((f) => f.includes("tool"));
 
-                        return {
-                            title: fileName || chunk.content.slice(0, 80),
-                            format: fileType,
-                            href: fileUrl || undefined,
-                            content: chunk.content,
-                        };
-                    });
-                    return meta;
-                },
+            const searchKnowledgeBase = createDatasetsSearchTool({
+                retrieve: (query) =>
+                    this.datasetsRetrievalService.retrieve(params.datasetId, query),
             });
 
             const agent = new ToolLoopAgent({
@@ -150,8 +120,8 @@ If no relevant information is found in the tool calls, respond "Sorry, I don't k
                 providerOptions: getReasoningOptions(model.provider.provider, {
                     thinking: params.feature?.thinking ?? false,
                 }),
-                tools: { getInformation: getInformationTool },
-                stopWhen: stepCountIs(5),
+                ...(hasTools && { tools: { searchKnowledgeBase } }),
+                stopWhen: stepCountIs(3),
             });
 
             const stream = createUIMessageStream({
@@ -351,14 +321,7 @@ If no relevant information is found in the tool calls, respond "Sorry, I don't k
 
         const result = await generateText({
             model,
-            prompt: `请为以下对话内容生成一个简洁的标题。要求：
-1. 标题要简洁明了，不超过10个字
-2. 只输出标题，不要包含任何其他文字、标点或说明
-
-对话内容：
-${input}
-
-标题：`,
+            prompt: GENERATE_TITLE_PROMPT(input),
             providerOptions: getReasoningOptions(providerId, { thinking: false }),
         });
 

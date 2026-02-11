@@ -1,6 +1,7 @@
 # MCP 客户端工具
 
-提供通用的 MCP (Model Context Protocol) 客户端管理功能，支持多种传输方式，可扩展支持自定义客户端（如 tuari）。
+提供通用的 MCP (Model Context
+Protocol) 客户端管理功能，支持多种传输方式，可扩展支持自定义客户端（如 tuari）。
 
 ## 功能特性
 
@@ -252,6 +253,7 @@ interface McpClient {
 创建 MCP 客户端实例。
 
 **参数：**
+
 - `options.transport`: 传输配置
 - `options.name?`: 客户端名称（可选）
 - `options.version?`: 客户端版本（可选）
@@ -263,6 +265,7 @@ interface McpClient {
 从服务器配置创建单个客户端。
 
 **参数：**
+
 - `config`: MCP 服务器配置
 - `options?`: 可选的客户端选项
 
@@ -273,6 +276,7 @@ interface McpClient {
 批量从服务器配置创建客户端。
 
 **参数：**
+
 - `configs`: MCP 服务器配置数组
 - `options?`: 可选的客户端选项
 
@@ -283,6 +287,7 @@ interface McpClient {
 合并多个客户端的工具。
 
 **参数：**
+
 - `clients`: MCP 客户端数组
 
 **返回：** `Promise<Record<string, unknown>>`
@@ -294,6 +299,7 @@ interface McpClient {
 批量关闭客户端连接。
 
 **参数：**
+
 - `clients`: MCP 客户端数组
 
 **返回：** `Promise<void>`
@@ -303,6 +309,7 @@ interface McpClient {
 将服务器配置转换为传输配置。
 
 **参数：**
+
 - `config`: MCP 服务器配置
 
 **返回：** `McpTransportConfig`
@@ -312,6 +319,7 @@ interface McpClient {
 创建 StdIO 传输配置。
 
 **参数：**
+
 - `command`: 命令
 - `args?`: 命令参数（可选）
 - `env?`: 环境变量（可选）
@@ -323,6 +331,7 @@ interface McpClient {
 创建自定义传输配置。
 
 **参数：**
+
 - `transport`: 自定义传输实例（如 tuari 客户端）
 
 **返回：** `McpTransportConfig`
@@ -341,10 +350,10 @@ interface McpClient {
 2. **工具命名冲突**：合并工具时，同名工具会被覆盖，使用时需要注意
 3. **错误处理**：创建和关闭客户端时应该处理可能的错误
 4. **传输选择**：
-   - **SSE**：适用于实时流式场景
-   - **HTTP**：适用于标准 HTTP 服务器
-   - **StdIO**：仅适用于本地进程
-   - **Custom**：用于特殊场景或第三方客户端
+    - **SSE**：适用于实时流式场景
+    - **HTTP**：适用于标准 HTTP 服务器
+    - **StdIO**：仅适用于本地进程
+    - **Custom**：用于特殊场景或第三方客户端
 
 ## 依赖
 

@@ -1,8 +1,3 @@
-/**
- * @fileoverview PowerPoint (PPTX) parser
- * @description Enhanced PPTX parser that extracts structured content from PowerPoint presentations
- */
-
 import AdmZip from "adm-zip";
 
 import type { ParseOptions, ParseResult, StructuredTextBlock } from "../types";
@@ -20,7 +15,7 @@ export class PptxParser extends BaseParser {
     async parse(
         buffer: Buffer,
         filename: string,
-        options: ParseOptions = {},
+        _options: ParseOptions = {},
     ): Promise<ParseResult> {
         try {
             const zip = new AdmZip(buffer);
@@ -29,7 +24,6 @@ export class PptxParser extends BaseParser {
             const blocks: StructuredTextBlock[] = [];
             const slides: string[] = [];
 
-            // Extract slide content
             for (const entry of zipEntries) {
                 if (
                     entry.entryName.startsWith("ppt/slides/slide") &&
@@ -41,14 +35,12 @@ export class PptxParser extends BaseParser {
                     if (slideText.trim()) {
                         const slideNumber = this.extractSlideNumber(entry.entryName);
 
-                        // Add slide as heading
                         blocks.push({
                             type: "heading",
                             level: 1,
                             content: `Slide ${slideNumber}`,
                         });
 
-                        // Add slide content as structured blocks
                         const slideBlocks = this.textToStructuredBlocks(slideText);
                         blocks.push(...slideBlocks);
 
@@ -76,13 +68,9 @@ export class PptxParser extends BaseParser {
         }
     }
 
-    /**
-     * Extract text from slide XML content
-     */
     private extractTextFromSlide(xmlContent: string): string {
         const textParts: string[] = [];
 
-        // Extract text from <a:t> tags (text runs)
         const textRegex = /<a:t[^>]*>([^<]*)<\/a:t>/gi;
         let match;
 
@@ -101,7 +89,6 @@ export class PptxParser extends BaseParser {
             }
         }
 
-        // Also extract from <p:txBody> paragraphs
         const paragraphRegex = /<a:p[^>]*>(.*?)<\/a:p>/gi;
         while ((match = paragraphRegex.exec(xmlContent)) !== null) {
             const paraContent = match[1];
@@ -114,11 +101,7 @@ export class PptxParser extends BaseParser {
         return textParts.join("\n");
     }
 
-    /**
-     * Extract text from XML content recursively
-     */
     private extractTextFromXml(xml: string): string {
-        // Remove all XML tags and decode entities
         return xml
             .replace(/<[^>]+>/g, "")
             .replace(/&amp;/g, "&")
@@ -131,17 +114,11 @@ export class PptxParser extends BaseParser {
             .trim();
     }
 
-    /**
-     * Extract slide number from entry name
-     */
     private extractSlideNumber(entryName: string): number {
         const match = entryName.match(/slide(\d+)\.xml/);
         return match ? parseInt(match[1], 10) : 0;
     }
 
-    /**
-     * Convert text to structured blocks
-     */
     private textToStructuredBlocks(text: string): StructuredTextBlock[] {
         const blocks: StructuredTextBlock[] = [];
         const lines = text.split("\n").filter((line) => line.trim());
@@ -151,7 +128,6 @@ export class PptxParser extends BaseParser {
         for (const line of lines) {
             const trimmed = line.trim();
 
-            // Detect potential headings (short lines)
             if (trimmed.length < 80 && trimmed.length > 0 && currentParagraph.length === 0) {
                 blocks.push({
                     type: "heading",
@@ -162,7 +138,6 @@ export class PptxParser extends BaseParser {
                 currentParagraph.push(trimmed);
             }
 
-            // Flush paragraph on empty line
             if (trimmed === "" && currentParagraph.length > 0) {
                 blocks.push({
                     type: "paragraph",
@@ -172,7 +147,6 @@ export class PptxParser extends BaseParser {
             }
         }
 
-        // Flush remaining paragraph
         if (currentParagraph.length > 0) {
             blocks.push({
                 type: "paragraph",

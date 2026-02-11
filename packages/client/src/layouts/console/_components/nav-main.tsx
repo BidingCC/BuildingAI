@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuthStore } from "@buildingai/stores";
+import { LucideIcon } from "@buildingai/ui/components/lucide-icon";
 import {
   Collapsible,
   CollapsibleContent,
@@ -24,12 +25,10 @@ import {
   useSidebar,
 } from "@buildingai/ui/components/ui/sidebar";
 import type { MenuItem } from "@buildingai/web-types";
-import { Annoyed, ChevronRight } from "lucide-react";
-// import dynamicIconImports from "lucide-react/dynamicIconImports";
+import { ChevronRight } from "lucide-react";
+import dynamicIconImports from "lucide-react/dynamicIconImports";
 import { useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
-
-// import { LucideIcon } from "@/components/lucide-icon";
 
 /**
  * Filter visible menu items (type !== 3 && isHidden !== 1)
@@ -75,11 +74,9 @@ function NavMenuItem({ menu, basePath = "" }: { menu: MenuItem; basePath?: strin
           <HoverCard openDelay={0} closeDelay={0}>
             <HoverCardTrigger asChild>
               <SidebarMenuButton isActive={isActive}>
-                {/* TODO: 这里临时注释掉动态图标 */}
-                {/* <LucideIcon
+                <LucideIcon
                   name={menu.icon.replace("i-lucide-", "") as keyof typeof dynamicIconImports}
-                /> */}
-                <Annoyed />
+                />
                 <span>{menu.name}</span>
               </SidebarMenuButton>
             </HoverCardTrigger>
@@ -113,11 +110,9 @@ function NavMenuItem({ menu, basePath = "" }: { menu: MenuItem; basePath?: strin
         <SidebarMenuItem>
           <CollapsibleTrigger asChild>
             <SidebarMenuButton tooltip={menu.name}>
-              {/* TODO: 这里临时注释掉动态图标 */}
-              {/* <LucideIcon
+              <LucideIcon
                 name={menu.icon.replace("i-lucide-", "") as keyof typeof dynamicIconImports}
-              /> */}
-              <Annoyed />
+              />
               <span>{menu.name}</span>
               <SidebarMenuAction asChild className="[[data-state=open]_>_&]:rotate-90">
                 <div>
@@ -152,11 +147,9 @@ function NavMenuItem({ menu, basePath = "" }: { menu: MenuItem; basePath?: strin
     <SidebarMenuItem>
       <SidebarMenuButton asChild tooltip={menu.name} isActive={location.pathname === fullPath}>
         <Link to={fullPath} onClick={handleLinkClick}>
-          {/* TODO: 这里临时注释掉动态图标 */}
-          {/* <LucideIcon
+          <LucideIcon
             name={menu.icon.replace("i-lucide-", "") as keyof typeof dynamicIconImports}
-          /> */}
-          <Annoyed />
+          />
           <span>{menu.name}</span>
         </Link>
       </SidebarMenuButton>

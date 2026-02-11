@@ -1,9 +1,14 @@
 import { BaseController } from "@buildingai/base";
+import { CacheService } from "@buildingai/cache";
+import { LOGIN_TYPE } from "@buildingai/constants";
 import { UserTerminal } from "@buildingai/constants/shared/status-codes.constant";
 import { type UserPlayground } from "@buildingai/db";
 import { BuildFileUrl } from "@buildingai/decorators/file-url.decorator";
 import { Playground } from "@buildingai/decorators/playground.decorator";
 import { Public } from "@buildingai/decorators/public.decorator";
+import { DictService } from "@buildingai/dict";
+import { HttpErrorFactory } from "@buildingai/errors";
+import { isDevelopment } from "@buildingai/utils";
 import { WebController } from "@common/decorators";
 import { ChangePasswordDto } from "@common/modules/auth/dto/change-password.dto";
 import { LoginDto } from "@common/modules/auth/dto/login.dto";
@@ -11,17 +16,22 @@ import { RegisterDto } from "@common/modules/auth/dto/register.dto";
 import { AuthService } from "@common/modules/auth/services/auth.service";
 import { WechatOaService } from "@common/modules/wechat/services/wechatoa.service";
 import { Body, Get, Headers, Param, Post, Query, Req, Res } from "@nestjs/common";
+import { randomBytes } from "crypto";
 import type { Request, Response } from "express";
-/**
- * 用户认证控制器
- *
- * 处理用户登录、注册和修改密码等认证相关功能
- */
+
+const GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
+const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
+const GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v2/userinfo";
+const OAUTH_SESSION_PREFIX = "oauth:session:";
+const OAUTH_SESSION_TTL = 120;
+
 @WebController("auth")
 export class AuthWebController extends BaseController {
     constructor(
         private authService: AuthService,
         private wechatOaService: WechatOaService,
+        private dictService: DictService,
+        private cacheService: CacheService,
     ) {
         super();
     }
@@ -263,5 +273,136 @@ export class AuthWebController extends BaseController {
     @Get("wechat-qrcode-status/:scene_str")
     async getWechatQrcodeStatus(@Param("scene_str") scene_str: string) {
         return this.wechatOaService.getQrCodeStatus(scene_str);
+    }
+
+    @Public()
+    @Get("google")
+    async googleLogin(@Res() res: Response, @Query("redirect") redirect?: string) {
+        const loginSettings = await this.dictService.get<{ allowedLoginMethods?: number[] }>(
+            "login_settings",
+            {},
+            "auth",
+        );
+        if (!loginSettings?.allowedLoginMethods?.includes(LOGIN_TYPE.GOOGLE)) {
+            throw HttpErrorFactory.forbidden("谷歌登录未开启");
+        }
+        const config = await this.getGoogleOaConfig();
+        if (!config?.clientId || !config?.clientSecret) {
+            throw HttpErrorFactory.badRequest("请先在后台配置谷歌登录 Client ID 与 Secret");
+        }
+        const redirectUri = this.getGoogleRedirectUri();
+        const scope = encodeURIComponent("openid email profile");
+        const state = redirect ? encodeURIComponent(redirect) : "";
+        const stateParam = state ? `&state=${state}` : "";
+        const url = `${GOOGLE_AUTH_URL}?client_id=${config.clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}${stateParam}`;
+        res.redirect(url);
+    }
+
+    @Public()
+    @Get("google/callback")
+    async googleCallback(
+        @Res() res: Response,
+        @Query("code") code: string,
+        @Query("state") state?: string,
+        @Headers("user-agent") userAgent?: string,
+        @Headers("x-real-ip") ipAddress?: string,
+    ) {
+        if (!code) return this.redirectOAuthCallback(res, "missing_code", state);
+        const config = await this.getGoogleOaConfig();
+        if (!config?.clientId || !config?.clientSecret)
+            return this.redirectOAuthCallback(res, "config", state);
+        const redirectUri = this.getGoogleRedirectUri();
+        const tokenRes = await fetch(GOOGLE_TOKEN_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({
+                client_id: config.clientId,
+                client_secret: config.clientSecret,
+                code,
+                redirect_uri: redirectUri,
+                grant_type: "authorization_code",
+            }),
+        });
+        if (!tokenRes.ok) return this.redirectOAuthCallback(res, "token_exchange", state);
+        const tokenData = (await tokenRes.json()) as { access_token?: string };
+        const accessToken = tokenData.access_token;
+        if (!accessToken) return this.redirectOAuthCallback(res, "no_access_token", state);
+        const userRes = await fetch(GOOGLE_USERINFO_URL, {
+            headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        if (!userRes.ok) return this.redirectOAuthCallback(res, "userinfo", state);
+        const profile = (await userRes.json()) as {
+            id: string;
+            email?: string;
+            name?: string;
+            picture?: string;
+        };
+        const result = await this.authService.findOrCreateByGoogle(
+            profile.id,
+            profile.email ?? null,
+            profile.name ?? null,
+            profile.picture ?? null,
+            UserTerminal.PC,
+            ipAddress,
+            userAgent,
+        );
+        const token = (result.user as { token?: string }).token;
+        const oneTimeCode = randomBytes(24).toString("hex");
+        await this.cacheService.set(
+            OAUTH_SESSION_PREFIX + oneTimeCode,
+            { token, user: result.user },
+            OAUTH_SESSION_TTL,
+        );
+        const redirectPath = state ? decodeURIComponent(state) : "";
+        const baseUrl = this.getFrontendBaseUrl();
+        const params = new URLSearchParams({ code: oneTimeCode });
+        if (redirectPath) params.set("redirect", redirectPath);
+        return res.redirect(`${baseUrl}/login/oauth-callback?${params.toString()}`);
+    }
+
+    @Public()
+    @Get("oauth/session")
+    @BuildFileUrl(["user.avatar"])
+    async oauthSession(@Query("code") code: string) {
+        if (!code) throw HttpErrorFactory.badRequest("missing_code");
+        const key = OAUTH_SESSION_PREFIX + code;
+        const data = await this.cacheService.get<{ token: string; user: unknown }>(key);
+        if (!data) throw HttpErrorFactory.badRequest("invalid_or_expired_code");
+        return { token: data.token, user: data.user };
+    }
+
+    private async getGoogleOaConfig() {
+        const cfg = await this.dictService.get<{ clientId?: string; clientSecret?: string }>(
+            "google_oa_config",
+            {},
+            "auth",
+        );
+        if (cfg?.clientId || cfg?.clientSecret) return cfg;
+        return this.dictService.get<{ clientId?: string; clientSecret?: string }>(
+            "google_oauth_config",
+            {},
+            "auth",
+        );
+    }
+
+    private getGoogleRedirectUri() {
+        const baseUrl = (process.env.APP_DOMAIN || "http://localhost:4090").replace(/\/$/, "");
+        return `${baseUrl}/api/auth/google/callback`;
+    }
+
+    private getFrontendBaseUrl() {
+        return isDevelopment()
+            ? "http://localhost:4091"
+            : (process.env.APP_DOMAIN || "http://localhost:4090").replace(/\/$/, "");
+    }
+
+    private redirectOAuthCallback(res: Response, error?: string, redirectState?: string) {
+        const baseUrl = this.getFrontendBaseUrl();
+        if (error) {
+            const params = new URLSearchParams({ error });
+            if (redirectState) params.set("redirect", redirectState);
+            return res.redirect(`${baseUrl}/login?${params.toString()}`);
+        }
+        return res.redirect(`${baseUrl}/login`);
     }
 }

@@ -3,9 +3,11 @@
 Caching utilities with Redis and memory cache.
 
 ## Location
+
 `packages/@buildingai/cache/`
 
 ## Exports
+
 - `CacheModule` - Memory cache module
 - `CacheService` - Memory cache service
 - `RedisModule` - Redis module
@@ -59,7 +61,7 @@ async getUser(id: string) {
     const key = `user:${id}`;
     const cached = await this.cacheService.get<User>(key);
     if (cached) return cached;
-    
+
     const user = await this.userService.findOneById(id);
     await this.cacheService.set(key, user, 3600);
     return user;

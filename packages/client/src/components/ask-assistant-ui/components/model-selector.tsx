@@ -9,6 +9,7 @@ import {
 } from "@buildingai/ui/components/ai-elements/model-selector";
 import { PromptInputButton as AIPromptInputButton } from "@buildingai/ui/components/ai-elements/prompt-input";
 import { Badge } from "@buildingai/ui/components/ui/badge";
+import { CommandShortcut } from "@buildingai/ui/components/ui/command";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   AudioLinesIcon,
@@ -88,7 +89,9 @@ const ModelRowItem = ({ model, isSelected, onSelect }: ModelRowItemProps) => {
           />
         )}
         <FileIcon aria-label="支持文件处理" className="text-muted-foreground size-3.5" />
-        {isSelected ? <CheckIcon className="size-4" /> : <div className="size-4" />}
+        <CommandShortcut>
+          {isSelected ? <CheckIcon className="size-4" /> : <div className="size-4" />}
+        </CommandShortcut>
       </div>
     </AIModelSelectorItem>
   );

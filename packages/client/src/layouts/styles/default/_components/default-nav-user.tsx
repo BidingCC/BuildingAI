@@ -18,13 +18,13 @@ import {
 import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog";
 import { ChevronsUpDown, LogOut, Settings, Sparkles, User, UserStar, Zap } from "lucide-react";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { useSettingsDialog } from "@/components/settings-dialog";
 
 import { UpgradeDialog } from "./upgrade-dialog";
 
-function UserButton({ isLoggedIn, userInfo }: { isLoggedIn: boolean; userInfo?: any }) {
+export function UserButton({ isLoggedIn, userInfo }: { isLoggedIn: boolean; userInfo?: any }) {
   return (
     <>
       <Avatar className="h-8 w-8 rounded-lg after:rounded-lg">
@@ -58,6 +58,7 @@ export function DefaultNavUser() {
   const { userInfo } = useAuthStore((state) => state.auth);
   const { logout, isLogin } = useAuthStore((state) => state.authActions);
 
+  const location = useLocation();
   const navigate = useNavigate();
   const { confirm } = useAlertDialog();
   const settingsDialog = useSettingsDialog();
@@ -66,11 +67,13 @@ export function DefaultNavUser() {
   const isLoggedIn = isLogin();
 
   if (!isLoggedIn) {
+    const redirect = encodeURIComponent(location.pathname + location.search);
+
     return (
       <SidebarMenu>
         <SidebarMenuItem>
           <SidebarMenuButton size="lg" asChild>
-            <Link to="/login">
+            <Link to={`/login?redirect=${redirect}`} state={{ redirect: location.pathname }}>
               <UserButton isLoggedIn={false} />
             </Link>
           </SidebarMenuButton>
@@ -155,12 +158,13 @@ export function DefaultNavUser() {
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={async () => {
+                const redirect = encodeURIComponent(location.pathname + location.search);
                 await confirm({
                   title: "退出确认",
                   description: "确定要退出登录吗？",
                 });
                 logout();
-                navigate("/login");
+                navigate(`/login?redirect=${redirect}`);
               }}
             >
               <LogOut />
