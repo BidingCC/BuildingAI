@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   type CreateLevelsDto,
   type MembershipLevelListItem,
@@ -45,21 +46,24 @@ const benefitSchema = z.object({
 });
 
 const formSchema = z.object({
-  name: z.string().min(1, "等级名称必须填写").max(64, "等级名称不能超过64个字符"),
+  name: z
+    .string()
+    .min(1, "Level name is required")
+    .max(64, "Level name cannot exceed 64 characters"),
   level: z
     .union([z.number(), z.string()])
     .transform((v) => (typeof v === "string" ? Number(v) : v))
-    .pipe(z.number().int().min(1, "等级级别必须大于等于1")),
+    .pipe(z.number().int().min(1, "Level must be 1 or greater")),
   icon: z.string().optional(),
   givePower: z
     .union([z.number(), z.string()])
     .transform((v) => (typeof v === "string" ? Number(v) : v))
-    .pipe(z.number().int().min(0, "每月赠送积分不能为负数"))
+    .pipe(z.number().int().min(0, "Monthly gifted credits cannot be negative"))
     .optional(),
   storageCapacity: z
     .union([z.number(), z.string()])
     .transform((v) => (typeof v === "string" ? Number(v) : v))
-    .pipe(z.number().int().min(0, "赠送知识库空间不能为负数"))
+    .pipe(z.number().int().min(0, "Gifted knowledge base space cannot be negative"))
     .optional(),
   description: z.string().max(255).optional(),
   benefits: z.array(benefitSchema).optional(),
@@ -77,6 +81,7 @@ type LevelFormDialogProps = {
 const defaultBenefit = { icon: "", content: "" };
 
 export const LevelFormDialog = ({ open, onOpenChange, level, onSuccess }: LevelFormDialogProps) => {
+  const { t } = useI18n();
   const isEditMode = !!level;
 
   const form = useForm<FormValues>({
@@ -127,7 +132,7 @@ export const LevelFormDialog = ({ open, onOpenChange, level, onSuccess }: LevelF
 
   const createMutation = useCreateMembershipLevelMutation({
     onSuccess: () => {
-      toast.success("等级创建成功");
+      toast.success(t("operation.membership.level.levelCreated"));
       onOpenChange(false);
       onSuccess?.();
     },
@@ -135,7 +140,7 @@ export const LevelFormDialog = ({ open, onOpenChange, level, onSuccess }: LevelF
 
   const updateMutation = useUpdateMembershipLevelMutation({
     onSuccess: () => {
-      toast.success("等级更新成功");
+      toast.success(t("operation.membership.level.levelUpdated"));
       onOpenChange(false);
       onSuccess?.();
     },
@@ -168,9 +173,15 @@ export const LevelFormDialog = ({ open, onOpenChange, level, onSuccess }: LevelF
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="gap-0 p-0 sm:max-w-lg">
         <DialogHeader className="p-4">
-          <DialogTitle>{isEditMode ? "编辑等级" : "新增等级"}</DialogTitle>
+          <DialogTitle>
+            {isEditMode
+              ? t("operation.membership.level.edit")
+              : t("operation.membership.level.add")}
+          </DialogTitle>
           <DialogDescription>
-            {isEditMode ? "修改会员等级信息" : "添加一个新的会员等级"}
+            {isEditMode
+              ? t("operation.membership.level.form.editDescription")
+              : t("operation.membership.level.form.createDescription")}
           </DialogDescription>
         </DialogHeader>
 
@@ -182,9 +193,12 @@ export const LevelFormDialog = ({ open, onOpenChange, level, onSuccess }: LevelF
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>等级名称</FormLabel>
+                    <FormLabel>{t("operation.membership.level.form.name")}</FormLabel>
                     <FormControl>
-                      <Input placeholder="请输入等级名称" {...field} />
+                      <Input
+                        placeholder={t("operation.membership.level.form.namePlaceholder")}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -196,11 +210,18 @@ export const LevelFormDialog = ({ open, onOpenChange, level, onSuccess }: LevelF
                 name="level"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>等级级别</FormLabel>
+                    <FormLabel>{t("operation.membership.level.form.level")}</FormLabel>
                     <FormControl>
-                      <Input type="number" min={1} placeholder="数值越大等级越高" {...field} />
+                      <Input
+                        type="number"
+                        min={1}
+                        placeholder={t("operation.membership.level.form.levelPlaceholder")}
+                        {...field}
+                      />
                     </FormControl>
-                    <FormDescription>等级数值越大表示等级越高</FormDescription>
+                    <FormDescription>
+                      {t("operation.membership.level.form.levelDescription")}
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -211,7 +232,7 @@ export const LevelFormDialog = ({ open, onOpenChange, level, onSuccess }: LevelF
                 name="icon"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>等级图标</FormLabel>
+                    <FormLabel>{t("operation.membership.level.form.iconLabel")}</FormLabel>
                     <FormControl>
                       <ImageUpload
                         size="lg"
@@ -219,7 +240,9 @@ export const LevelFormDialog = ({ open, onOpenChange, level, onSuccess }: LevelF
                         onChange={(url) => field.onChange(url ?? "")}
                       />
                     </FormControl>
-                    <FormDescription>推荐尺寸: 100x100px，支持 PNG、JPG、JPEG</FormDescription>
+                    <FormDescription>
+                      {t("operation.membership.level.form.iconDescription")}
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -230,7 +253,7 @@ export const LevelFormDialog = ({ open, onOpenChange, level, onSuccess }: LevelF
                 name="givePower"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>每月赠送积分</FormLabel>
+                    <FormLabel>{t("operation.membership.level.form.givePowerLabel")}</FormLabel>
                     <FormControl>
                       <Input type="number" min={0} placeholder="0" {...field} />
                     </FormControl>
@@ -244,7 +267,9 @@ export const LevelFormDialog = ({ open, onOpenChange, level, onSuccess }: LevelF
                 name="storageCapacity"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>赠送知识库空间</FormLabel>
+                    <FormLabel>
+                      {t("operation.membership.level.form.storageCapacityLabel")}
+                    </FormLabel>
                     <FormControl>
                       <InputGroup>
                         <InputGroupInput
@@ -267,10 +292,10 @@ export const LevelFormDialog = ({ open, onOpenChange, level, onSuccess }: LevelF
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>等级描述</FormLabel>
+                    <FormLabel>{t("operation.membership.level.form.descriptionLabel")}</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="简要描述该等级权益"
+                        placeholder={t("operation.membership.level.form.descriptionPlaceholder")}
                         className="min-h-[80px] resize-none"
                         {...field}
                       />
@@ -282,7 +307,7 @@ export const LevelFormDialog = ({ open, onOpenChange, level, onSuccess }: LevelF
 
               <div className="space-y-3">
                 <div className="bg-background sticky top-0 z-10 flex items-center justify-between">
-                  <FormLabel>会员权益</FormLabel>
+                  <FormLabel>{t("operation.membership.level.form.benefitsLabel")}</FormLabel>
                   <Button
                     type="button"
                     variant="outline"
@@ -291,11 +316,11 @@ export const LevelFormDialog = ({ open, onOpenChange, level, onSuccess }: LevelF
                     onClick={() => append(defaultBenefit)}
                   >
                     <Plus className="mr-1 size-4" />
-                    添加权益
+                    {t("operation.membership.level.form.addBenefit")}
                   </Button>
                 </div>
                 <p className="text-muted-foreground text-sm">
-                  每条权益由图标与文本组成，可添加多条
+                  {t("operation.membership.level.form.benefitsDescription")}
                 </p>
                 <div className="space-y-3">
                   {fields.map((field, index) => (
@@ -308,7 +333,9 @@ export const LevelFormDialog = ({ open, onOpenChange, level, onSuccess }: LevelF
                         name={`benefits.${index}.icon`}
                         render={({ field: iconField }) => (
                           <FormItem>
-                            <FormLabel className="text-xs">图标</FormLabel>
+                            <FormLabel className="text-xs">
+                              {t("operation.membership.level.form.benefitIcon")}
+                            </FormLabel>
                             <FormControl>
                               <ImageUpload
                                 className="h-10 w-10"
@@ -326,9 +353,17 @@ export const LevelFormDialog = ({ open, onOpenChange, level, onSuccess }: LevelF
                         name={`benefits.${index}.content`}
                         render={({ field: contentField }) => (
                           <FormItem className="flex-1">
-                            <FormLabel className="text-xs">权益内容</FormLabel>
+                            <FormLabel className="text-xs">
+                              {t("operation.membership.level.form.benefitContent")}
+                            </FormLabel>
                             <FormControl>
-                              <Input placeholder="权益描述" className="h-10" {...contentField} />
+                              <Input
+                                placeholder={t(
+                                  "operation.membership.level.form.benefitContentPlaceholder",
+                                )}
+                                className="h-10"
+                                {...contentField}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -351,11 +386,11 @@ export const LevelFormDialog = ({ open, onOpenChange, level, onSuccess }: LevelF
 
               <DialogFooter className="bg-background absolute bottom-0 left-0 w-full flex-row justify-end rounded-lg p-4">
                 <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                  取消
+                  {t("common.action.cancel")}
                 </Button>
                 <Button type="submit" disabled={isPending}>
                   {isPending && <Loader2 className="animate-spin" />}
-                  {isEditMode ? "保存" : "新增"}
+                  {isEditMode ? t("common.action.save") : t("common.action.create")}
                 </Button>
               </DialogFooter>
             </form>

@@ -46,50 +46,60 @@ export interface SidebarConfig {
  */
 export const sidebarConfigMap: Record<string, SidebarConfig> = {
   membership: {
-    title: "会员订阅",
-    description: "锁定用户，持续提供专属服务与权益",
+    title: "sidebar.membership.title",
+    description: "sidebar.membership.description",
     backPath: "/console/operation",
     icon: Crown,
     menuItems: [
-      { path: "level", label: "会员等级", icon: Crown, permissions: "levels:list" },
-      { path: "plan", label: "订阅计划", icon: CalendarCheck, permissions: "plans:list" },
+      {
+        path: "level",
+        label: "sidebar.membership.levels",
+        icon: Crown,
+        permissions: "levels:list",
+      },
+      {
+        path: "plan",
+        label: "sidebar.membership.plans",
+        icon: CalendarCheck,
+        permissions: "plans:list",
+      },
     ],
   },
   recharge: {
-    title: "积分充值",
-    description: "提升复购，会员充值可获得奖励",
+    title: "sidebar.recharge.title",
+    description: "sidebar.recharge.description",
     backPath: "/console/operation",
     icon: Wallet,
     menuItems: [
       {
         path: "config",
-        label: "充值管理",
+        label: "sidebar.recharge.rechargeManage",
         icon: Bolt,
         permissions: "recharge-config:getConfig",
       },
     ],
   },
   cdk: {
-    title: "卡密兑换",
-    description: "激活权益，凭卡密兑换对应权益与服务",
+    title: "sidebar.cdk.title",
+    description: "sidebar.cdk.description",
     backPath: "/console/operation",
     icon: CreditCard,
     menuItems: [
       {
         path: "management",
-        label: "卡密管理",
+        label: "sidebar.cdk.cdkManage",
         icon: KeyRound,
         permissions: "card-batch:list",
       },
       {
         path: "records",
-        label: "使用记录",
+        label: "sidebar.cdk.usageRecords",
         icon: History,
         permissions: "card-key:used-list",
       },
       {
         path: "settings",
-        label: "卡密设置",
+        label: "sidebar.cdk.cdkSettings",
         icon: Settings2,
         permissions: "card-setting:get",
       },

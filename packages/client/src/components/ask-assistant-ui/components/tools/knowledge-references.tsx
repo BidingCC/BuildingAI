@@ -6,6 +6,7 @@ import {
   CollapsibleTrigger,
 } from "@buildingai/ui/components/ui/collapsible";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@buildingai/ui/components/ui/tooltip";
+import { useI18n } from "@buildingai/i18n";
 import { cn } from "@buildingai/ui/lib/utils";
 import { ChevronDown, Lightbulb } from "lucide-react";
 import { memo, useMemo } from "react";
@@ -71,6 +72,7 @@ export const KnowledgeReferences = memo(function KnowledgeReferences({
   className,
   defaultOpen = true,
 }: KnowledgeReferencesProps) {
+  const { t } = useI18n();
   const items = useMemo(() => {
     const output = toolPart.output;
     if (!isKnowledgeOutput(output)) return [];
@@ -114,7 +116,7 @@ export const KnowledgeReferences = memo(function KnowledgeReferences({
 
   if (items.length === 0) return null;
 
-  const label = `已在知识库中检索到 ${items.length} 篇资料作为参考`;
+  const label = t("common.askAssistant.foundKnowledgeReferences", { count: items.length });
 
   return (
     <Collapsible defaultOpen={defaultOpen} className={cn("group not-prose", className)}>
@@ -127,7 +129,7 @@ export const KnowledgeReferences = memo(function KnowledgeReferences({
         <ul className="bg-muted/40 mt-2 flex flex-col rounded-xl p-2">
           {items.map((item, index) => {
             const key = item.groupKey;
-            const title = item.title || item.source || "无标题";
+            const title = item.title || item.source || t("common.askAssistant.untitled");
             const rawContent = typeof item.content === "string" ? item.content : "";
             const contentPreview =
               rawContent.length > 100 ? `${rawContent.slice(0, 100)}...` : rawContent;

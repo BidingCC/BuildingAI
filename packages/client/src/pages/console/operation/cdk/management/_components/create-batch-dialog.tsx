@@ -54,7 +54,7 @@ type CreateBatchDialogProps = {
  * 创建卡密批次对话框
  */
 export function CreateBatchDialog({ open, onOpenChange }: CreateBatchDialogProps) {
-  const { locale: currentLocale } = useI18n();
+  const { locale: currentLocale, t } = useI18n();
   const dateFnsLocale = DATE_FNS_LOCALE_MAP[currentLocale] ?? zhCN;
 
   const [name, setName] = useState("");
@@ -64,7 +64,7 @@ export function CreateBatchDialog({ open, onOpenChange }: CreateBatchDialogProps
     MembershipPlanDuration.MONTH,
   );
   const [customValue, setCustomValue] = useState("");
-  const [customUnit, setCustomUnit] = useState("天");
+  const [customUnit, setCustomUnit] = useState("day");
   const [pointsAmount, setPointsAmount] = useState("");
   const [expireAt, setExpireAt] = useState<Date>();
   const [totalCount, setTotalCount] = useState("");
@@ -82,7 +82,7 @@ export function CreateBatchDialog({ open, onOpenChange }: CreateBatchDialogProps
       setLevelId("");
       setMembershipDuration(MembershipPlanDuration.MONTH);
       setCustomValue("");
-      setCustomUnit("天");
+      setCustomUnit("day");
       setPointsAmount("");
       setExpireAt(undefined);
       setTotalCount("");
@@ -96,45 +96,45 @@ export function CreateBatchDialog({ open, onOpenChange }: CreateBatchDialogProps
       setLevelId("");
       setMembershipDuration(MembershipPlanDuration.MONTH);
       setCustomValue("");
-      setCustomUnit("天");
+      setCustomUnit("day");
     }
   }, [membershipEnabled, redeemType]);
 
   const handleSubmit = async () => {
     if (!name.trim()) {
-      toast.error("请输入卡密名称");
+      toast.error(t("operation.cdk.management.pleaseEnterName"));
       return;
     }
 
     if (!expireAt) {
-      toast.error("请选择卡密到期时间");
+      toast.error(t("operation.cdk.management.pleaseSelectExpireTime"));
       return;
     }
 
     if (!totalCount || Number(totalCount) <= 0) {
-      toast.error("请输入有效的生成数量");
+      toast.error(t("operation.cdk.management.pleaseEnterValidCount"));
       return;
     }
 
     if (redeemType === CardRedeemType.MEMBERSHIP) {
       if (!membershipEnabled) {
-        toast.error("会员功能未开启，无法创建会员卡密");
+        toast.error(t("operation.cdk.management.membershipNotEnabled"));
         return;
       }
       if (!levelId) {
-        toast.error("请选择会员等级");
+        toast.error(t("operation.cdk.management.pleaseSelectLevel"));
         return;
       }
       if (
         membershipDuration === MembershipPlanDuration.CUSTOM &&
         (!customValue || Number(customValue) <= 0)
       ) {
-        toast.error("请输入有效的自定义时长");
+        toast.error(t("operation.cdk.management.pleaseEnterValidDuration"));
         return;
       }
     } else if (redeemType === CardRedeemType.POINTS) {
       if (!pointsAmount || Number(pointsAmount) <= 0) {
-        toast.error("请输入有效的积分数量");
+        toast.error(t("operation.cdk.management.pleaseEnterValidPoints"));
         return;
       }
     }
@@ -162,10 +162,10 @@ export function CreateBatchDialog({ open, onOpenChange }: CreateBatchDialogProps
 
     try {
       await createMutation.mutateAsync(body);
-      toast.success("创建成功");
+      toast.success(t("operation.cdk.management.created"));
       onOpenChange(false);
     } catch (error: any) {
-      toast.error(error?.message || "创建失败");
+      toast.error(error?.message || t("operation.cdk.management.createFailed"));
     }
   };
 
@@ -173,18 +173,19 @@ export function CreateBatchDialog({ open, onOpenChange }: CreateBatchDialogProps
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-full overflow-y-auto md:w-md">
         <DialogHeader>
-          <DialogTitle>新增卡密批次</DialogTitle>
-          <DialogDescription>创建一个新的卡密批次，系统将自动生成卡密</DialogDescription>
+          <DialogTitle>{t("operation.cdk.management.createBatch")}</DialogTitle>
+          <DialogDescription>{t("operation.cdk.management.createBatchDesc")}</DialogDescription>
         </DialogHeader>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label>
-              <span className="text-destructive">*</span>卡密名称
+              <span className="text-destructive">*</span>
+              {t("operation.cdk.management.name")}
             </Label>
             <Input
               id="name"
-              placeholder="请输入卡密名称"
+              placeholder={t("operation.cdk.management.namePlaceholder")}
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -192,7 +193,8 @@ export function CreateBatchDialog({ open, onOpenChange }: CreateBatchDialogProps
 
           <div className="space-y-2">
             <Label>
-              <span className="text-destructive">*</span>兑换类型
+              <span className="text-destructive">*</span>
+              {t("operation.cdk.management.redeemType")}
             </Label>
             <Select
               value={String(redeemType)}
@@ -203,9 +205,13 @@ export function CreateBatchDialog({ open, onOpenChange }: CreateBatchDialogProps
               </SelectTrigger>
               <SelectContent>
                 {membershipEnabled && (
-                  <SelectItem value={String(CardRedeemType.MEMBERSHIP)}>订阅会员</SelectItem>
+                  <SelectItem value={String(CardRedeemType.MEMBERSHIP)}>
+                    {t("operation.cdk.management.membership")}
+                  </SelectItem>
                 )}
-                <SelectItem value={String(CardRedeemType.POINTS)}>积分余额</SelectItem>
+                <SelectItem value={String(CardRedeemType.POINTS)}>
+                  {t("operation.cdk.management.points")}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -214,11 +220,12 @@ export function CreateBatchDialog({ open, onOpenChange }: CreateBatchDialogProps
             <>
               <div className="space-y-2">
                 <Label>
-                  <span className="text-destructive">*</span>会员等级
+                  <span className="text-destructive">*</span>
+                  {t("operation.cdk.management.level")}
                 </Label>
                 <Select value={levelId} onValueChange={setLevelId}>
                   <SelectTrigger id="levelId" className="w-full">
-                    <SelectValue placeholder="请选择会员等级" />
+                    <SelectValue placeholder={t("operation.cdk.management.levelPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
                     {levelsData?.items?.map((level) => (
@@ -232,7 +239,8 @@ export function CreateBatchDialog({ open, onOpenChange }: CreateBatchDialogProps
 
               <div className="space-y-2">
                 <Label>
-                  <span className="text-destructive">*</span>会员时长
+                  <span className="text-destructive">*</span>
+                  {t("operation.cdk.management.duration")}
                 </Label>
                 <Select
                   value={String(membershipDuration)}
@@ -244,12 +252,24 @@ export function CreateBatchDialog({ open, onOpenChange }: CreateBatchDialogProps
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value={String(MembershipPlanDuration.MONTH)}>1个月</SelectItem>
-                    <SelectItem value={String(MembershipPlanDuration.QUARTER)}>3个月</SelectItem>
-                    <SelectItem value={String(MembershipPlanDuration.HALF)}>6个月</SelectItem>
-                    <SelectItem value={String(MembershipPlanDuration.YEAR)}>1年</SelectItem>
-                    <SelectItem value={String(MembershipPlanDuration.FOREVER)}>终身</SelectItem>
-                    <SelectItem value={String(MembershipPlanDuration.CUSTOM)}>自定义</SelectItem>
+                    <SelectItem value={String(MembershipPlanDuration.MONTH)}>
+                      {t("operation.cdk.management.durationMonth")}
+                    </SelectItem>
+                    <SelectItem value={String(MembershipPlanDuration.QUARTER)}>
+                      {t("operation.cdk.management.durationQuarter")}
+                    </SelectItem>
+                    <SelectItem value={String(MembershipPlanDuration.HALF)}>
+                      {t("operation.cdk.management.durationHalf")}
+                    </SelectItem>
+                    <SelectItem value={String(MembershipPlanDuration.YEAR)}>
+                      {t("operation.cdk.management.durationYear")}
+                    </SelectItem>
+                    <SelectItem value={String(MembershipPlanDuration.FOREVER)}>
+                      {t("operation.cdk.management.durationForever")}
+                    </SelectItem>
+                    <SelectItem value={String(MembershipPlanDuration.CUSTOM)}>
+                      {t("operation.cdk.management.durationCustom")}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -257,13 +277,14 @@ export function CreateBatchDialog({ open, onOpenChange }: CreateBatchDialogProps
               {membershipDuration === MembershipPlanDuration.CUSTOM && (
                 <div className="space-y-2">
                   <Label>
-                    <span className="text-destructive">*</span>自定义时长
+                    <span className="text-destructive">*</span>
+                    {t("operation.cdk.management.customDuration")}
                   </Label>
                   <InputGroup className="w-full">
                     <InputGroupInput
                       type="number"
                       min={1}
-                      placeholder="如 7"
+                      placeholder={t("operation.cdk.management.customDurationPlaceholder")}
                       value={customValue}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         setCustomValue(e.target.value)
@@ -272,12 +293,18 @@ export function CreateBatchDialog({ open, onOpenChange }: CreateBatchDialogProps
                     <InputGroupAddon align="inline-end" className="pr-1">
                       <Select value={customUnit} onValueChange={setCustomUnit}>
                         <SelectTrigger className="text-muted-foreground h-8 min-w-[72px] border-0 bg-transparent shadow-none focus-visible:ring-0">
-                          <SelectValue placeholder="单位" />
+                          <SelectValue placeholder={t("operation.cdk.management.unit")} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="天">天</SelectItem>
-                          <SelectItem value="月">月</SelectItem>
-                          <SelectItem value="年">年</SelectItem>
+                          <SelectItem value="day">
+                            {t("operation.cdk.management.unitDay")}
+                          </SelectItem>
+                          <SelectItem value="month">
+                            {t("operation.cdk.management.unitMonth")}
+                          </SelectItem>
+                          <SelectItem value="year">
+                            {t("operation.cdk.management.unitYear")}
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </InputGroupAddon>
@@ -290,13 +317,14 @@ export function CreateBatchDialog({ open, onOpenChange }: CreateBatchDialogProps
           {redeemType === CardRedeemType.POINTS && (
             <div className="space-y-2">
               <Label>
-                <span className="text-destructive">*</span>积分数量
+                <span className="text-destructive">*</span>
+                {t("operation.cdk.management.pointsAmount")}
               </Label>
               <Input
                 id="pointsAmount"
                 type="number"
                 min="1"
-                placeholder="请输入积分数量"
+                placeholder={t("operation.cdk.management.pointsAmountPlaceholder")}
                 value={pointsAmount}
                 onChange={(e) => setPointsAmount(e.target.value)}
               />
@@ -305,13 +333,14 @@ export function CreateBatchDialog({ open, onOpenChange }: CreateBatchDialogProps
 
           <div className="space-y-2">
             <Label>
-              <span className="text-destructive">*</span>生成数量
+              <span className="text-destructive">*</span>
+              {t("operation.cdk.management.totalCount")}
             </Label>
             <Input
               id="totalCount"
               type="number"
               min="1"
-              placeholder="请输入生成数量"
+              placeholder={t("operation.cdk.management.totalCountPlaceholder")}
               value={totalCount}
               onChange={(e) => setTotalCount(e.target.value)}
             />
@@ -327,7 +356,8 @@ export function CreateBatchDialog({ open, onOpenChange }: CreateBatchDialogProps
             )}
           >
             <Label>
-              <span className="text-destructive">*</span>卡密到期时间
+              <span className="text-destructive">*</span>
+              {t("operation.cdk.management.expireTime")}
             </Label>
             <Popover>
               <PopoverTrigger asChild>
@@ -342,7 +372,7 @@ export function CreateBatchDialog({ open, onOpenChange }: CreateBatchDialogProps
                   {expireAt ? (
                     format(expireAt, "PPP", { locale: dateFnsLocale })
                   ) : (
-                    <span>选择卡密到期时间</span>
+                    <span>{t("operation.cdk.management.selectExpireTime")}</span>
                   )}
                 </Button>
               </PopoverTrigger>
@@ -353,10 +383,10 @@ export function CreateBatchDialog({ open, onOpenChange }: CreateBatchDialogProps
           </div>
 
           <div className="col-span-1 space-y-2 sm:col-span-2">
-            <Label htmlFor="remark">备注</Label>
+            <Label htmlFor="remark">{t("operation.cdk.management.remark")}</Label>
             <Textarea
               id="remark"
-              placeholder="请输入备注信息（可选）"
+              placeholder={t("operation.cdk.management.remarkPlaceholder")}
               value={remark}
               onChange={(e) => setRemark(e.target.value)}
               rows={3}
@@ -366,10 +396,10 @@ export function CreateBatchDialog({ open, onOpenChange }: CreateBatchDialogProps
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            取消
+            {t("operation.cdk.management.cancel")}
           </Button>
           <Button onClick={handleSubmit} loading={createMutation.isPending}>
-            创建
+            {t("operation.cdk.management.create")}
           </Button>
         </DialogFooter>
       </DialogContent>

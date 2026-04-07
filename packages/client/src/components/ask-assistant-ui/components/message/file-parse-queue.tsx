@@ -8,6 +8,7 @@ import {
   TaskTrigger,
 } from "@buildingai/ui/components/ai-elements/task";
 import { cn } from "@buildingai/ui/lib/utils";
+import { useI18n } from "@buildingai/i18n";
 import type { UIMessage } from "ai";
 import { ChevronDownIcon, FileSearchCornerIcon, FileTextIcon, LoaderIcon } from "lucide-react";
 
@@ -81,6 +82,7 @@ const toMetadataParts = (parts?: UIMessage["parts"]): FileParseMetadataPart[] =>
   (parts ?? []).filter(isFileParseMetadataPart);
 
 export const FileParseQueue = ({ messageId, parts, isStreaming }: FileParseQueueProps) => {
+  const { t } = useI18n();
   const progressParts = toProgressParts(parts);
   const metadataParts = toMetadataParts(parts);
   const latestMetadata = metadataParts.at(-1)?.data;
@@ -106,7 +108,7 @@ export const FileParseQueue = ({ messageId, parts, isStreaming }: FileParseQueue
   };
 
   const progressPercentage = getProgressPercentage(latestProgress);
-  const title = progressPercentage !== undefined ? `文件解析完成` : "文件解析中";
+  const title = progressPercentage !== undefined ? t("action.fileParsingComplete") : t("action.fileParsing");
   const Icon = hasCompleted ? FileSearchCornerIcon : LoaderIcon;
 
   return (
@@ -145,7 +147,7 @@ export const FileParseQueue = ({ messageId, parts, isStreaming }: FileParseQueue
         {progressParts.length > 0 &&
           progressParts.map((part, index) => {
             const progress = part.data;
-            const message = progress?.message?.trim() || progress?.stage || "处理中";
+            const message = progress?.message?.trim() || progress?.stage || t("action.processing");
             const percentage = getProgressPercentage(progress);
 
             // Remove percentage from message if it's already in the format

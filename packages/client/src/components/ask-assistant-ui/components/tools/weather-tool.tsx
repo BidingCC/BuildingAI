@@ -4,6 +4,7 @@ import {
   ToolHeader,
   ToolInput,
 } from "@buildingai/ui/components/ai-elements/tool";
+import { useI18n } from "@buildingai/i18n";
 import { memo } from "react";
 
 import { Weather } from "./weather";
@@ -26,6 +27,7 @@ export const WeatherTool = memo(function WeatherTool({
   toolPart,
   addToolApprovalResponse,
 }: WeatherToolProps) {
+  const { t } = useI18n();
   const { state, approval, input, output, errorText } = toolPart;
   const approvalId = approval?.id;
   const isDenied =
@@ -58,7 +60,7 @@ export const WeatherTool = memo(function WeatherTool({
   if (errorText || (output as { error?: string })?.error) {
     return (
       <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-500 dark:bg-red-950/50">
-        错误: {String(errorText || (output as { error?: string })?.error)}
+        {t("common.askAssistant.error", { message: String(errorText || (output as { error?: string })?.error) })}
       </div>
     );
   }
@@ -84,14 +86,14 @@ export const WeatherTool = memo(function WeatherTool({
                 }
                 type="button"
               >
-                Deny
+                {t("common.askAssistant.deny")}
               </button>
               <button
                 className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-3 py-1.5 text-sm transition-colors"
                 onClick={() => addToolApprovalResponse({ id: approvalId, approved: true })}
                 type="button"
               >
-                Allow
+                {t("common.askAssistant.allow")}
               </button>
             </div>
           )}

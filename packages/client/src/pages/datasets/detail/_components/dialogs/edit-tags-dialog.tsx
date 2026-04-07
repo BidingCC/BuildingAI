@@ -42,6 +42,7 @@ export function EditTagsDialog({
   documentIds = [],
   onSuccess,
 }: EditTagsDialogProps) {
+  const { t } = useI18n();
   const isSingle = mode === "single";
   const initialTags = isSingle ? (document?.tags ?? []).filter(Boolean) : [];
   const [tags, setTags] = useState<string[]>(initialTags);
@@ -124,11 +125,15 @@ export function EditTagsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{isSingle ? "编辑标签" : "批量添加标签"}</DialogTitle>
+          <DialogTitle>
+            {isSingle
+              ? t("dataset.dialogs.editTags.title")
+              : t("dataset.dialogs.editTags.batchTitle")}
+          </DialogTitle>
           <DialogDescription>
             {isSingle
-              ? "为当前文档设置标签，输入后按回车或点击添加。"
-              : `为选中的 ${documentIds.length} 个文档添加标签，输入后按回车或点击添加。`}
+              ? t("dataset.dialogs.editTags.singleDesc")
+              : t("dataset.dialogs.editTags.batchDesc", { count: documentIds.length })}
           </DialogDescription>
         </DialogHeader>
 
@@ -151,21 +156,23 @@ export function EditTagsDialog({
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="输入标签，多个用逗号或空格分隔"
+              placeholder={t("dataset.dialogs.editTags.inputHint")}
               className="h-7 min-w-[120px] flex-1 border-0 shadow-none focus-visible:ring-0"
             />
           </div>
           <Button type="button" variant="outline" size="sm" onClick={addFromInput}>
-            添加
+            {t("dataset.dialogs.editTags.add")}
           </Button>
         </div>
 
         <DialogFooter>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-            取消
+            {t("dataset.dialogs.editTags.cancel")}
           </Button>
           <Button type="button" onClick={handleSubmit} disabled={pending || !canSubmit}>
-            {pending ? "提交中…" : "确定"}
+            {pending
+              ? t("dataset.dialogs.editTags.submitting")
+              : t("dataset.dialogs.editTags.confirm")}
           </Button>
         </DialogFooter>
       </DialogContent>

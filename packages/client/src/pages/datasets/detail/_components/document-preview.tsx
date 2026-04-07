@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { Button } from "@buildingai/ui/components/ui/button";
 import { ArrowLeft, Maximize2, Minimize2 } from "lucide-react";
 import { useState } from "react";
@@ -11,6 +12,7 @@ export interface DocumentPreviewProps {
 }
 
 export function DocumentPreview({ fileUrl, fileName, onBack }: DocumentPreviewProps) {
+  const { t } = useI18n();
   const [fullscreen, setFullscreen] = useState(false);
   const viewerUrl = `${OFFICE_VIEWER_BASE}?src=${encodeURIComponent(fileUrl)}`;
 
@@ -36,7 +38,7 @@ export function DocumentPreview({ fileUrl, fileName, onBack }: DocumentPreviewPr
           className="-ml-2 gap-2"
         >
           <ArrowLeft className="size-4" />
-          {fullscreen ? "退出预览" : "返回列表"}
+          {fullscreen ? t("dataset.document.exitPreview") : t("dataset.document.backToList")}
         </Button>
         <span className="text-muted-foreground truncate text-sm" title={fileName}>
           {fileName}

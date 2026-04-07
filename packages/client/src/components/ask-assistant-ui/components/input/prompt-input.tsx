@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { useMcpServerQuickMenuQuery, useMcpServersAllQuery } from "@buildingai/services/web";
 import {
   PromptInputAttachment as AIPromptInputAttachment,
@@ -153,6 +154,7 @@ const PromptInputInner = memo(
     children,
   }: PromptInputProps) => {
     const context = useContext(AssistantContext);
+    const { t } = useI18n();
     const models = modelsProp ?? context?.models ?? [];
     const selectedModelId = selectedModelIdProp ?? context?.selectedModelId ?? "";
     const selectedMcpServerIds = selectedMcpServerIdsProp ?? context?.selectedMcpServerIds ?? [];
@@ -223,7 +225,7 @@ const PromptInputInner = memo(
 
         if (invalidFiles.length > 0) {
           const typeText = unsupportedTypeLabels.join("、");
-          toast.error(`当前模型不支持${typeText}类型`);
+          toast.error(t("ai:askAssistant.promptInput.modelNotSupportType", { type: typeText }));
         }
 
         // Always prevent default to take full control of file handling
@@ -257,7 +259,7 @@ const PromptInputInner = memo(
         items.unshift({
           id: "thinking",
           icon: <SvgIcons.bulb className="size-4 scale-130 transform" />,
-          label: "思考",
+          label: t("ai:askAssistant.promptInput.thinking"),
           featureKey: "thinking",
         });
       }
@@ -345,14 +347,14 @@ const PromptInputInner = memo(
                         </DropdownMenuTrigger>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>更多操作</p>
+                        <p>{t("ai:askAssistant.promptInput.moreActions")}</p>
                       </TooltipContent>
                     </Tooltip>
                     <DropdownMenuContent className="w-38">
                       {showFile && (
                         <DropdownMenuItem onSelect={handleFileSelect}>
                           <PaperclipIcon className="size-4 scale-110 transform" />
-                          {hasImageSupport ? "选择照片和文件" : "选择文件"}
+                          {hasImageSupport ? t("ai:askAssistant.promptInput.selectPhotosAndFiles") : t("ai:askAssistant.promptInput.selectFiles")}
                         </DropdownMenuItem>
                       )}
                       {showFeatureItems.map((item) => (
@@ -367,7 +369,7 @@ const PromptInputInner = memo(
                       {showExploreApps && (
                         <DropdownMenuItem onSelect={handleExploreApps}>
                           <LayoutGridIcon className="size-4" />
-                          全部应用
+                          {t("ai:askAssistant.promptInput.allApps")}
                         </DropdownMenuItem>
                       )}
                     </DropdownMenuContent>
@@ -420,7 +422,7 @@ const PromptInputInner = memo(
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>语音输入</p>
+                  <p>{t("ai:askAssistant.promptInput.voiceInput")}</p>
                 </TooltipContent>
               </Tooltip>
             ) : null}

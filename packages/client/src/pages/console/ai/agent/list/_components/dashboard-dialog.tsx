@@ -8,6 +8,7 @@ import {
 } from "@buildingai/ui/components/ui/dialog";
 import { ScrollArea } from "@buildingai/ui/components/ui/scroll-area";
 
+import { useI18n } from "@buildingai/i18n";
 import { AgentDashboardPanel } from "@/pages/console/ai/agent/list/_components/agent-dashboard-panel";
 
 type DashboardDialogProps = {
@@ -17,12 +18,17 @@ type DashboardDialogProps = {
 };
 
 export function DashboardDialog({ open, onOpenChange, agent }: DashboardDialogProps) {
+  const { t } = useI18n();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-6xl!">
         <DialogHeader className="px-6 pt-6 pb-0">
-          <DialogTitle>{agent ? `${agent.name} · 数据统计` : "数据统计"}</DialogTitle>
-          <DialogDescription>查看当前智能体的对话、Token、反馈与标注等监控数据。</DialogDescription>
+          <DialogTitle>
+            {agent
+              ? `${agent.name} · ${t("ai.agent.dashboard.title")}`
+              : t("ai.agent.dashboard.title")}
+          </DialogTitle>
+          <DialogDescription>{t("ai.agent.dashboard.description")}</DialogDescription>
         </DialogHeader>
         {open && agent ? (
           <ScrollArea className="max-h-[70vh] min-h-0 flex-1 pb-2">

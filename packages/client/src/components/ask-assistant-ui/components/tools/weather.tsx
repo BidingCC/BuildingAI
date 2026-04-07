@@ -2,6 +2,7 @@
 
 import { cn } from "@buildingai/ui/lib/utils";
 import { format, isWithinInterval } from "date-fns";
+import { useI18n } from "@buildingai/i18n";
 import { useEffect, useState } from "react";
 
 const SunIcon = ({ size = 40 }: { size?: number }) => (
@@ -227,6 +228,7 @@ function n(num: number): number {
 }
 
 export function Weather({ weatherAtLocation = SAMPLE }: { weatherAtLocation?: WeatherAtLocation }) {
+  const { t } = useI18n();
   if (
     !weatherAtLocation ||
     !weatherAtLocation.current ||
@@ -235,7 +237,7 @@ export function Weather({ weatherAtLocation = SAMPLE }: { weatherAtLocation?: We
   ) {
     return (
       <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-500 dark:bg-red-950/50">
-        天气数据格式错误或缺失
+        {t("common.askAssistant.weatherDataError")}
       </div>
     );
   }

@@ -1,4 +1,5 @@
 import type { TagTypeType } from "@buildingai/constants";
+import { useI18n } from "@buildingai/i18n";
 import {
   type ConsoleDatasetItem,
   type QueryConsoleDatasetsDto,
@@ -63,22 +64,22 @@ import { VectorConfigDialog } from "./_components/vector-config-dialog";
 
 const PAGE_SIZE = 30;
 
-const STATUS_OPTIONS: { value: QueryConsoleDatasetsDto["status"]; label: string }[] = [
-  { value: "all", label: "全部" },
-  { value: "pending", label: "待审核" },
-  { value: "rejected", label: "审核失败" },
-  { value: "none", label: "私有" },
-  { value: "approved", label: "审核通过" },
-  { value: "published", label: "已公开" },
-  { value: "unpublished", label: "已下架" },
+const STATUS_OPTIONS: { value: QueryConsoleDatasetsDto["status"]; labelKey: string }[] = [
+  { value: "all", labelKey: "ai.dataset.list.status.all" },
+  { value: "pending", labelKey: "ai.dataset.list.status.pending" },
+  { value: "rejected", labelKey: "ai.dataset.list.status.rejected" },
+  { value: "none", labelKey: "ai.dataset.list.status.none" },
+  { value: "approved", labelKey: "ai.dataset.list.status.approved" },
+  { value: "published", labelKey: "ai.dataset.list.status.published" },
+  { value: "unpublished", labelKey: "ai.dataset.list.status.unpublished" },
 ];
 
-const statusLabelMap: Record<string, string> = {
-  pending: "待审核",
-  rejected: "审核失败",
-  none: "私有",
-  published: "已公开",
-  unpublished: "已下架",
+const statusLabelKeys: Record<string, string> = {
+  pending: "ai.dataset.list.status.pending",
+  rejected: "ai.dataset.list.status.rejected",
+  none: "ai.dataset.list.status.none",
+  published: "ai.dataset.list.status.published",
+  unpublished: "ai.dataset.list.status.unpublished",
 };
 
 const statusVariantMap: Record<
@@ -117,8 +118,9 @@ function StatusBadge({
   row: Pick<ConsoleDatasetItem, "squarePublishStatus" | "publishedToSquare">;
   onRejectReasonClick?: () => void;
 }) {
+  const { t } = useI18n();
   const status = getDatasetDisplayStatus(row);
-  const label = statusLabelMap[status] ?? status;
+  const label = t(statusLabelKeys[status] ?? status);
   const variant = statusVariantMap[status] ?? "secondary";
 
   if (status === "rejected" && onRejectReasonClick) {
@@ -144,6 +146,7 @@ function StatusBadge({
 }
 
 const DatasetsIndexPage = () => {
+  const { t } = useI18n();
   const [name, setName] = useState("");
   const [debouncedName] = useDebounceValue(name.trim(), 300);
   const [queryParams, setQueryParams] = useState<QueryConsoleDatasetsDto>({
@@ -163,20 +166,20 @@ const DatasetsIndexPage = () => {
   const { data, isLoading, refetch } = useConsoleDatasetsListQuery(queryParams);
   const deleteMutation = useDeleteDatasetMutation({
     onSuccess: () => {
-      toast.success("已删除");
+      toast.success(t("ai.dataset.list.actions.delete"));
       refetch();
     },
-    onError: (e) => toast.error(`删除失败: ${e.message}`),
+    onError: (e) => toast.error(`${t("ai.dataset.list.actions.delete")} failed: ${e.message}`),
   });
   const publishMutation = usePublishDatasetSquareMutation({
     onSuccess: () => {
-      toast.success("已上架");
+      toast.success(t("ai.dataset.list.actions.publishBtn"));
       refetch();
     },
   });
   const unpublishMutation = useUnpublishDatasetSquareMutation({
     onSuccess: () => {
-      toast.success("已下架");
+      toast.success(t("ai.dataset.list.actions.unpublishBtn"));
       refetch();
     },
   });
@@ -225,17 +228,17 @@ const DatasetsIndexPage = () => {
 
   const handleRejectReasonClick = (reason: string | null | undefined) => {
     alertConfirm({
-      title: "拒绝原因",
-      description: reason?.trim() ? reason : "未填写拒绝原因",
-      confirmText: "确定",
+      title: t("ai.dataset.list.confirm.rejectTitle"),
+      description: reason?.trim() ? reason : t("ai.dataset.list.confirm.rejectDesc"),
+      confirmText: t("ai.dataset.list.confirm.rejectConfirm"),
     }).catch(() => {});
   };
   const handleDelete = async (row: ConsoleDatasetItem) => {
     try {
       await alertConfirm({
-        title: "删除知识库",
-        description: `确定要删除「${row.name}」吗？将同时删除其下所有文档与对话记录，此操作不可恢复。`,
-        confirmText: "删除",
+        title: t("ai.dataset.list.confirm.deleteTitle"),
+        description: t("ai.dataset.list.confirm.deleteDesc", { name: row.name }),
+        confirmText: t("ai.dataset.list.actions.deleteBtn"),
         confirmVariant: "destructive",
       });
       deleteMutation.mutate(row.id);
@@ -246,9 +249,9 @@ const DatasetsIndexPage = () => {
   const handlePublish = async (row: ConsoleDatasetItem) => {
     try {
       await alertConfirm({
-        title: "上架知识库",
-        description: `确定要上架「${row.name}」吗？上架后将在知识库广场中展示。`,
-        confirmText: "上架",
+        title: t("ai.dataset.list.confirm.publishTitle"),
+        description: t("ai.dataset.list.confirm.publishDesc", { name: row.name }),
+        confirmText: t("ai.dataset.list.actions.publishBtn"),
       });
       publishMutation.mutate(row.id);
     } catch {
@@ -258,9 +261,9 @@ const DatasetsIndexPage = () => {
   const handleUnpublish = async (row: ConsoleDatasetItem) => {
     try {
       await alertConfirm({
-        title: "下架知识库",
-        description: `确定要下架「${row.name}」吗？下架后将不再在知识库广场中展示。`,
-        confirmText: "下架",
+        title: t("ai.dataset.list.confirm.unpublishTitle"),
+        description: t("ai.dataset.list.confirm.unpublishDesc", { name: row.name }),
+        confirmText: t("ai.dataset.list.actions.unpublishBtn"),
       });
       unpublishMutation.mutate(row.id);
     } catch {
@@ -286,40 +289,50 @@ const DatasetsIndexPage = () => {
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
           <div className="bg-card rounded-lg border p-4 text-center">
             <div className="text-2xl font-bold">{data?.extend?.total ?? 0}</div>
-            <div className="text-muted-foreground text-xs">总知识库</div>
+            <div className="text-muted-foreground text-xs">
+              {t("ai.dataset.list.stat.totalDatasets")}
+            </div>
           </div>
           <div className="bg-card rounded-lg border p-4 text-center">
             <div className="text-2xl font-bold">{data?.extend?.pending ?? 0}</div>
-            <div className="text-muted-foreground text-xs">待审核</div>
+            <div className="text-muted-foreground text-xs">
+              {t("ai.dataset.list.stat.pendingReview")}
+            </div>
           </div>
           <div className="bg-card rounded-lg border p-4 text-center">
             <div className="text-2xl font-bold">{data?.extend?.published ?? 0}</div>
-            <div className="text-muted-foreground text-xs">已公开</div>
+            <div className="text-muted-foreground text-xs">
+              {t("ai.dataset.list.stat.publishedDatasets")}
+            </div>
           </div>
           <div className="bg-card rounded-lg border p-4 text-center">
             <div className="text-2xl font-bold">{data?.extend?.private ?? 0}</div>
-            <div className="text-muted-foreground text-xs">私有</div>
+            <div className="text-muted-foreground text-xs">
+              {t("ai.dataset.list.stat.privateDatasets")}
+            </div>
           </div>
           <div className="bg-card rounded-lg border p-4 text-center">
             <div className="text-2xl font-bold">{data?.extend?.unpublished ?? 0}</div>
-            <div className="text-muted-foreground text-xs">已下架</div>
+            <div className="text-muted-foreground text-xs">
+              {t("ai.dataset.list.stat.offlineDatasets")}
+            </div>
           </div>
         </div>
         <div className="bg-background sticky top-0 z-2 mb-1 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Input
-            placeholder="请输入创建人/知识库名称"
+            placeholder={t("ai.dataset.list.searchPlaceholder")}
             className="text-sm"
             value={name}
             onChange={handleNameChange}
           />
           <Select value={queryParams.status ?? "all"} onValueChange={handleStatusChange}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="全部" />
+              <SelectValue placeholder={t("ai.dataset.list.status.all")} />
             </SelectTrigger>
             <SelectContent>
               {STATUS_OPTIONS.map((opt) => (
                 <SelectItem key={opt.value ?? "all"} value={opt.value ?? "all"}>
-                  {opt.label}
+                  {t(opt.labelKey)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -328,7 +341,7 @@ const DatasetsIndexPage = () => {
             type={"dataset" as TagTypeType}
             value={queryParams.tagId ? [queryParams.tagId] : []}
             onChange={handleTagIdsChange}
-            placeholder="搜索标签"
+            placeholder={t("dataset.list.searchTags")}
           />
         </div>
 
@@ -336,14 +349,16 @@ const DatasetsIndexPage = () => {
           <Table>
             <TableHeader className="bg-muted/50">
               <TableRow>
-                <TableHead>知识库</TableHead>
-                <TableHead>创建人</TableHead>
-                <TableHead>标签</TableHead>
-                <TableHead className="text-center">文档数量</TableHead>
-                <TableHead>存储空间</TableHead>
-                <TableHead>状态</TableHead>
-                <TableHead className="text-center">排序</TableHead>
-                <TableHead>最近编辑</TableHead>
+                <TableHead>{t("ai.dataset.list.table.dataset")}</TableHead>
+                <TableHead>{t("ai.dataset.list.table.creator")}</TableHead>
+                <TableHead>{t("ai.dataset.list.table.tags")}</TableHead>
+                <TableHead className="text-center">
+                  {t("ai.dataset.list.table.documents")}
+                </TableHead>
+                <TableHead>{t("ai.dataset.list.table.storage")}</TableHead>
+                <TableHead>{t("ai.dataset.list.table.status")}</TableHead>
+                <TableHead className="text-center">{t("ai.dataset.list.table.sort")}</TableHead>
+                <TableHead>{t("ai.dataset.list.table.lastEdited")}</TableHead>
                 <PermissionGuard
                   permissions={[
                     "datasets-documents:list",
@@ -356,7 +371,7 @@ const DatasetsIndexPage = () => {
                   ]}
                   any
                 >
-                  <TableHead>操作</TableHead>
+                  <TableHead>{t("ai.dataset.list.table.action")}</TableHead>
                 </PermissionGuard>
               </TableRow>
             </TableHeader>
@@ -364,13 +379,13 @@ const DatasetsIndexPage = () => {
               {isLoading ? (
                 <TableRow>
                   <TableCell colSpan={10} className="text-muted-foreground h-32 text-center">
-                    加载中...
+                    {t("ai.dataset.list.empty.loading")}
                   </TableCell>
                 </TableRow>
               ) : !data?.items?.length ? (
                 <TableRow>
                   <TableCell colSpan={10} className="text-muted-foreground h-32 text-center">
-                    暂无知识库数据
+                    {t("ai.dataset.list.empty.noData")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -446,20 +461,20 @@ const DatasetsIndexPage = () => {
                             <PermissionGuard permissions="datasets-documents:list">
                               <DropdownMenuItem onSelect={() => handleDocument(row)}>
                                 <FileText className="mr-2 size-4" />
-                                文档
+                                {t("ai.dataset.list.actions.documents")}
                               </DropdownMenuItem>
                             </PermissionGuard>
                             <PermissionGuard permissions="datasets-members:list">
                               <DropdownMenuItem onSelect={() => handleMember(row)}>
                                 <Users className="mr-2 size-4" />
-                                成员
+                                {t("ai.dataset.list.actions.members")}
                               </DropdownMenuItem>
                             </PermissionGuard>
                             <PermissionGuard permissions="datasets:review">
                               {row.squarePublishStatus === "pending" && (
                                 <DropdownMenuItem onSelect={() => handleReview(row)}>
                                   <FileCheck className="mr-2 size-4" />
-                                  审核
+                                  {t("ai.dataset.list.actions.review")}
                                 </DropdownMenuItem>
                               )}
                             </PermissionGuard>
@@ -467,7 +482,7 @@ const DatasetsIndexPage = () => {
                               {row.squarePublishStatus === "approved" && !row.publishedToSquare && (
                                 <DropdownMenuItem onSelect={() => handlePublish(row)}>
                                   <ArrowUpToLine className="mr-2 size-4" />
-                                  上架
+                                  {t("ai.dataset.list.actions.online")}
                                 </DropdownMenuItem>
                               )}
                             </PermissionGuard>
@@ -475,7 +490,7 @@ const DatasetsIndexPage = () => {
                               {row.squarePublishStatus === "approved" && row.publishedToSquare && (
                                 <DropdownMenuItem onSelect={() => handleUnpublish(row)}>
                                   <ArrowDownToLine className="mr-2 size-4" />
-                                  下架
+                                  {t("ai.dataset.list.actions.offline")}
                                 </DropdownMenuItem>
                               )}
                             </PermissionGuard>
@@ -490,13 +505,13 @@ const DatasetsIndexPage = () => {
                                 onSelect={() => handleDelete(row)}
                               >
                                 <Trash2 className="mr-2 size-4" />
-                                删除
+                                {t("ai.dataset.list.actions.delete")}
                               </DropdownMenuItem>
                             </PermissionGuard>
                             <PermissionGuard permissions="datasets:vector-config">
                               <DropdownMenuItem onSelect={() => handleVector(row)}>
                                 <Layers className="mr-2 size-4" />
-                                向量
+                                {t("ai.dataset.list.actions.vector")}
                               </DropdownMenuItem>
                             </PermissionGuard>
                           </DropdownMenuContent>

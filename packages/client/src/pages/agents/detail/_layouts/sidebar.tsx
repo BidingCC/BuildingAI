@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { useAgentDetailQuery } from "@buildingai/services/web";
 import { Button } from "@buildingai/ui/components/ui/button";
 import { Separator } from "@buildingai/ui/components/ui/separator";
@@ -28,6 +29,7 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { AgentModal } from "@/pages/agents/_components/agent-modal";
 
 export function OrchestrationSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams();
@@ -43,10 +45,14 @@ export function OrchestrationSidebar({ ...props }: React.ComponentProps<typeof S
   const description = agent?.description ?? "";
 
   const menuItems = [
-    { path: "configuration", label: "编排", icon: SlidersHorizontal },
-    { path: "publish", label: "发布", icon: Send },
-    { path: "logs", label: "日志与标注", icon: FileText },
-    { path: "monitoring", label: "监测", icon: Activity },
+    {
+      path: "configuration",
+      label: t("agent.detail.sidebar.orchestration"),
+      icon: SlidersHorizontal,
+    },
+    { path: "publish", label: t("agent.detail.sidebar.publish"), icon: Send },
+    { path: "logs", label: t("agent.detail.sidebar.logs"), icon: FileText },
+    { path: "monitoring", label: t("agent.detail.sidebar.monitoring"), icon: Activity },
   ];
 
   return (
@@ -92,9 +98,11 @@ export function OrchestrationSidebar({ ...props }: React.ComponentProps<typeof S
           ) : (
             <>
               <div className="flex w-full min-w-0 flex-col">
-                <span className="truncate text-sm font-medium">{title || "智能体"}</span>
+                <span className="truncate text-sm font-medium">
+                  {title || t("agent.square.title")}
+                </span>
                 <span className="text-muted-foreground line-clamp-2 text-xs">
-                  {description || "暂无简介"}
+                  {description || t("agent.detail.sidebar.documentation")}
                 </span>
               </div>
             </>
@@ -138,7 +146,7 @@ export function OrchestrationSidebar({ ...props }: React.ComponentProps<typeof S
             <SidebarMenuButton className="h-9" asChild>
               <Link to="/console/dashboard">
                 <FileText />
-                <span className="whitespace-nowrap">说明文档</span>
+                <span className="whitespace-nowrap">{t("agent.detail.sidebar.documentation")}</span>
                 <SidebarMenuAction asChild>
                   <div>
                     <ExternalLink />

@@ -4,6 +4,7 @@ import {
   useConsoleTagsQuery,
   useCreateConsoleTagMutation,
 } from "@buildingai/services/console";
+import { useI18n } from "@buildingai/i18n";
 import { Button } from "@buildingai/ui/components/ui/button";
 import { Input } from "@buildingai/ui/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@buildingai/ui/components/ui/popover";
@@ -30,6 +31,7 @@ export function TagCreate({
   searchOrCreatePlaceholder = "搜索或创建",
   "data-testid": dataTestId,
 }: TagCreateProps) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
@@ -95,9 +97,9 @@ export function TagCreate({
             <span className="flex min-w-0 flex-1 items-center gap-2">
               <Tag className="size-4 shrink-0" />
               {value.length > 0 ? (
-                <span className="truncate text-sm">{value.length} 个标签</span>
+                <span className="truncate text-sm">{t("common.tags.selectedCount", { count: value.length })}</span>
               ) : (
-                <span className="text-muted-foreground truncate text-sm">全部标签</span>
+                <span className="text-muted-foreground truncate text-sm">{t("common.tags.noTags")}</span>
               )}
             </span>
             <ChevronDown className="text-muted-foreground size-4 shrink-0" />
@@ -122,7 +124,7 @@ export function TagCreate({
                     disabled={createMutation.isPending}
                   >
                     <Plus className="size-4" />
-                    创建标签「{inputValue.trim()}」
+                    {t("common.tags.createTag", { name: inputValue.trim() })}
                   </Button>
                   {filteredTags.length > 0 && (
                     <Separator className="border-border my-1 h-0! border-t border-dashed bg-transparent" />
@@ -145,7 +147,7 @@ export function TagCreate({
               ) : !canCreate && !inputValue ? (
                 <div className="text-muted-foreground flex h-20 flex-col items-center justify-center gap-2 text-sm">
                   <Tags className="size-5" />
-                  <span>暂无标签</span>
+                  <span>{t("common.tags.noTags")}</span>
                 </div>
               ) : null}
             </div>
@@ -160,7 +162,7 @@ export function TagCreate({
               }}
             >
               <Tags className="size-4" />
-              管理标签
+              {t("common.tags.manageTags")}
             </Button>
           </div>
         </PopoverContent>

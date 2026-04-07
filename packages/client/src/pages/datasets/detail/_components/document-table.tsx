@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import type { DatasetsDocument } from "@buildingai/services/web";
 import { Badge } from "@buildingai/ui/components/ui/badge";
 import { Button } from "@buildingai/ui/components/ui/button";
@@ -44,14 +45,19 @@ function DocumentTableHeadRow({
   canManageDocuments: boolean;
   firstCell: React.ReactNode;
 }) {
+  const { t } = useI18n();
   return (
     <TableHeader>
       <TableRow className="border-0! hover:bg-transparent [&_th]:py-4">
         <TableHead className={canManageDocuments ? "w-2 pr-0!" : "pr-0!"}>{firstCell}</TableHead>
-        <TableHead className="w-[240px]">文件名</TableHead>
-        <TableHead className="hidden w-1/2 @xl:table-cell">摘要</TableHead>
-        <TableHead className="hidden w-28 @lg:table-cell">最后编辑</TableHead>
-        <TableHead className="w-12 text-center">操作</TableHead>
+        <TableHead className="w-[240px]">{t("dataset.document.fileName")}</TableHead>
+        <TableHead className="hidden w-1/2 @xl:table-cell">
+          {t("dataset.document.summary")}
+        </TableHead>
+        <TableHead className="hidden w-28 @lg:table-cell">
+          {t("dataset.document.lastEdited")}
+        </TableHead>
+        <TableHead className="w-12 text-center">{t("dataset.document.actions")}</TableHead>
       </TableRow>
     </TableHeader>
   );
@@ -177,7 +183,7 @@ export function DocumentTable({
             <Checkbox
               checked={allSelected}
               onCheckedChange={(v) => handleSelectAll(v === true)}
-              aria-label="全选"
+              aria-label={t("dataset.document.selectAll")}
             />
           ) : null
         }
@@ -277,7 +283,7 @@ const DocumentTableRow = memo(function DocumentTableRow({
           <Checkbox
             checked={selected}
             onCheckedChange={(v) => onSelectChange(document.id, v === true)}
-            aria-label={`选择 ${document.fileName}`}
+            aria-label={`${t("dataset.document.selectAll")} ${document.fileName}`}
           />
         ) : (
           <div className="w-2" />
@@ -323,7 +329,9 @@ const DocumentTableRow = memo(function DocumentTableRow({
               onMouseLeave={handleHoverLeave}
             >
               {summaryGenerating ? (
-                <span className="text-muted-foreground text-xs italic">生成中...</span>
+                <span className="text-muted-foreground text-xs italic">
+                  {t("dataset.document.generating")}
+                </span>
               ) : summaryText ? (
                 <p className="text-muted-foreground max-w-90 truncate text-sm">{summaryText}</p>
               ) : (
@@ -354,15 +362,19 @@ const DocumentTableRow = memo(function DocumentTableRow({
           >
             <div className="flex flex-col gap-3">
               <p className="text-muted-foreground text-xs">
-                上传时间：
+                {t("dataset.document.uploadTime")}
                 <TimeText value={document.createdAt} variant="datetime" />
               </p>
               {summaryGenerating && (
-                <span className="text-muted-foreground text-xs">摘要生成中</span>
+                <span className="text-muted-foreground text-xs">
+                  {t("dataset.document.summaryGenerating")}
+                </span>
               )}
               {!summaryGenerating && summaryText && (
                 <div className="text-muted-foreground text-xs leading-relaxed">
-                  <span className="text-foreground font-medium">摘要：</span>
+                  <span className="text-foreground font-medium">
+                    {t("dataset.document.summaryLabel")}
+                  </span>
                   <span className="whitespace-pre-wrap">{summaryText}</span>
                 </div>
               )}
@@ -400,24 +412,24 @@ const DocumentTableRow = memo(function DocumentTableRow({
               {document.status === "failed" && (
                 <DropdownMenuItem onClick={() => onRetryVectorization?.(document)}>
                   <RotateCcw className="size-4" />
-                  重试
+                  {t("dataset.document.retry")}
                 </DropdownMenuItem>
               )}
               <DropdownMenuItem onClick={() => onEditTags?.(document)}>
                 <Pencil className="size-4" />
-                编辑标签
+                {t("dataset.document.editTags")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => onMove?.(document)}>
                 <ArrowLeftRightIcon className="size-4" />
-                移动
+                {t("dataset.document.move")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => onCopy?.(document)}>
                 <FilesIcon className="size-4" />
-                复制
+                {t("dataset.document.copy")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => onDelete?.(document)} variant="destructive">
                 <TrashIcon className="size-4" />
-                删除
+                {t("dataset.document.delete")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

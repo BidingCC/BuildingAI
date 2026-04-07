@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import type { Extension } from "@buildingai/services/console";
 import {
   useAppsDecorateItemsInfiniteQuery,
@@ -114,6 +115,7 @@ const SortableAppItem = ({
     }),
     [transform, transition, isDragging],
   );
+  const { t } = useI18n();
   return (
     <div ref={setNodeRef} style={style}>
       <Item
@@ -151,7 +153,7 @@ const SortableAppItem = ({
               size="icon-sm"
               variant="outline"
               className="touch-none rounded-full"
-              aria-label="编辑应用"
+              aria-label={t("decorate.apps.item.editApp")}
               onClick={() => onEdit(item)}
             >
               <ChevronRight />
@@ -162,7 +164,7 @@ const SortableAppItem = ({
                 "flex touch-none rounded-full px-0 text-center group-hover/apps-item:flex md:hidden",
                 isDragActive && !isDragging && "md:hidden!",
               )}
-              aria-label="拖拽排序"
+              aria-label={t("decorate.apps.item.dragSort")}
               {...attributes}
               {...listeners}
             >
@@ -176,6 +178,7 @@ const SortableAppItem = ({
 };
 
 const DecorateAppsIndexPage = () => {
+  const { t } = useI18n();
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [decorateDialogOpen, setDecorateDialogOpen] = useState(false);
@@ -185,8 +188,8 @@ const DecorateAppsIndexPage = () => {
   const [addTagDialogOpen, setAddTagDialogOpen] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [debouncedKeyword, setDebouncedKeyword] = useState("");
-  const [localTitle, setLocalTitle] = useState("应用中心");
-  const [localDescription, setLocalDescription] = useState("与你喜爱的应用进行交互");
+  const [localTitle, setLocalTitle] = useState("");
+  const [localDescription, setLocalDescription] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const { confirm } = useAlertDialog();
@@ -214,14 +217,14 @@ const DecorateAppsIndexPage = () => {
 
   const setConfigMutation = useSetAppsDecorateMutation({
     onSuccess: () => {
-      toast.success("保存成功");
+      toast.success(t("decorate.apps.saveSuccess"));
       refetchConfig();
     },
   });
 
   const updateItemMutation = useUpdateItemDecorationMutation({
     onSuccess: () => {
-      toast.success("保存成功");
+      toast.success(t("decorate.apps.saveSuccess"));
       queryClient.invalidateQueries({ queryKey: ["apps-decorate", "items-infinite"] });
       setEditingAppItem(null);
     },
@@ -235,7 +238,7 @@ const DecorateAppsIndexPage = () => {
 
   const deleteTagMutation = useDeleteConsoleTagMutation({
     onSuccess: () => {
-      toast.success("标签删除成功");
+      toast.success(t("decorate.apps.tag.deleteSuccess"));
       refetchTags();
       if (selectedTagId) {
         setSelectedTagId(null);
@@ -245,10 +248,10 @@ const DecorateAppsIndexPage = () => {
 
   useEffect(() => {
     if (config) {
-      setLocalTitle(config.title || "应用中心");
-      setLocalDescription(config.description || "与你喜爱的应用进行交互");
+      setLocalTitle(config.title || t("decorate.apps.title"));
+      setLocalDescription(config.description || t("decorate.apps.description"));
     }
-  }, [config]);
+  }, [config, t]);
 
   const allItems = useMemo<DisplayAppItem[]>(() => {
     if (!itemsData?.pages) return [];
@@ -467,7 +470,7 @@ const DecorateAppsIndexPage = () => {
             <div className="max-sm:w-full">
               <InputGroup className="rounded-full">
                 <InputGroupInput
-                  placeholder="搜索应用"
+                  placeholder={t("decorate.apps.searchPlaceholder")}
                   value={searchKeyword}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setSearchKeyword(e.target.value)
@@ -500,7 +503,9 @@ const DecorateAppsIndexPage = () => {
             ) : (
               <div className="bg-muted/30 flex aspect-20/5 flex-col items-center justify-center gap-2 rounded-2xl">
                 <p className="text-muted-foreground text-sm">
-                  {!bannerEnabled ? "Banner 广告位未开启" : "暂无 Banner，点击「设置装修位」添加"}
+                  {!bannerEnabled
+                    ? t("decorate.apps.banner.disabled")
+                    : t("decorate.apps.banner.noBanner")}
                 </p>
               </div>
             )}
@@ -509,7 +514,7 @@ const DecorateAppsIndexPage = () => {
                 className="absolute right-5 bottom-5 flex translate-y-2 scale-95 items-center gap-2 rounded-full px-5 opacity-100 transition-all duration-300 ease-out group-hover/carousel:translate-y-0 group-hover/carousel:scale-100 group-hover/carousel:opacity-100 active:scale-90 md:opacity-0"
                 onClick={() => setDecorateDialogOpen(true)}
               >
-                <span className="flex items-center gap-2">设置装修位</span>
+                <span className="flex items-center gap-2">{t("decorate.apps.configure")}</span>
               </Button>
             </PermissionGuard>
           </div>
@@ -523,7 +528,7 @@ const DecorateAppsIndexPage = () => {
                 variant={selectedTagId === null ? "default" : "secondary"}
                 className="h-9 px-4 font-medium text-nowrap sm:font-normal"
               >
-                全部
+                {t("decorate.apps.tags.all")}
               </Badge>
             </div>
             {tags.map((tag) => (
@@ -545,8 +550,8 @@ const DecorateAppsIndexPage = () => {
                     onClick={async (e) => {
                       e.stopPropagation();
                       await confirm({
-                        title: "删除标签",
-                        description: `确定要删除标签「${tag.name}」吗？`,
+                        title: t("decorate.apps.tag.delete"),
+                        description: t("decorate.apps.tag.confirmDelete", { name: tag.name }),
                         confirmVariant: "destructive",
                       });
                       deleteTagMutation.mutate(tag.id);
@@ -598,7 +603,7 @@ const DecorateAppsIndexPage = () => {
               ) : itemsLoading ? null : (
                 <Empty>
                   <EmptyContent>
-                    <EmptyDescription>暂无应用</EmptyDescription>
+                    <EmptyDescription>{t("decorate.apps.empty")}</EmptyDescription>
                   </EmptyContent>
                 </Empty>
               )}

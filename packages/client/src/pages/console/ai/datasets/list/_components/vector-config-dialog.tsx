@@ -2,6 +2,7 @@ import {
   RETRIEVAL_MODE,
   type RetrievalModeType,
 } from "@buildingai/constants/shared/datasets.constants";
+import { useI18n } from "@buildingai/i18n";
 import {
   type SetDatasetVectorConfigDto,
   useConsoleDatasetDetailQuery,
@@ -42,6 +43,7 @@ export function VectorConfigDialog({
   datasetName,
   onSuccess,
 }: VectorConfigDialogProps) {
+  const { t } = useI18n();
   const [embeddingModelId, setEmbeddingModelId] = useState("");
   const [retrieval, setRetrieval] = useState<RetrievalConfig>(() =>
     buildEmptyRetrievalConfig(RETRIEVAL_MODE.HYBRID),
@@ -50,11 +52,11 @@ export function VectorConfigDialog({
   const { data, isLoading } = useConsoleDatasetDetailQuery(open ? datasetId : null);
   const setConfigMutation = useSetDatasetVectorConfigMutation({
     onSuccess: () => {
-      toast.success("向量配置已保存");
+      toast.success(t("ai.vector.saved"));
       onOpenChange(false);
       onSuccess?.();
     },
-    onError: (e) => toast.error(`保存失败: ${e.message}`),
+    onError: (e) => toast.error(t("ai.vector.saveFailed", { error: e.message })),
   });
 
   useEffect(() => {
@@ -83,7 +85,7 @@ export function VectorConfigDialog({
   const handleSave = () => {
     if (!datasetId) return;
     if (!embeddingModelId?.trim()) {
-      toast.error("请选择向量模型");
+      toast.error(t("ai.vector.selectEmbeddingModel"));
       return;
     }
     const dto: SetDatasetVectorConfigDto = {
@@ -106,7 +108,7 @@ export function VectorConfigDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] w-full overflow-y-auto sm:max-w-[min(32rem,90vw)]">
         <DialogHeader>
-          <DialogTitle>向量配置 · {datasetName}</DialogTitle>
+          <DialogTitle>{t("ai.vector.title", { name: datasetName })}</DialogTitle>
         </DialogHeader>
         {isLoading ? (
           <div className="text-muted-foreground flex items-center justify-center py-8">
@@ -116,13 +118,13 @@ export function VectorConfigDialog({
           <div className="min-w-0 space-y-4 py-2">
             <div className="space-y-2">
               <Label>
-                Embedding 模型 <span className="text-destructive">*</span>
+                {t("ai.vector.embeddingModel")} <span className="text-destructive">*</span>
               </Label>
               <ModelSelector
                 modelType="text-embedding"
                 value={embeddingModelId || undefined}
                 onSelect={setEmbeddingModelId}
-                placeholder="请选择模型"
+                placeholder={t("ai.vector.selectModel")}
                 triggerVariant="button"
                 className="w-full text-left"
               />
@@ -132,11 +134,11 @@ export function VectorConfigDialog({
         )}
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            取消
+            {t("ai.vector.cancel")}
           </Button>
           <Button disabled={isLoading || setConfigMutation.isPending} onClick={handleSave}>
             {setConfigMutation.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
-            保存
+            {t("ai.vector.save")}
           </Button>
         </DialogFooter>
       </DialogContent>

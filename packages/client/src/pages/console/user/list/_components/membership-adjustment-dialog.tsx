@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   type SystemAdjustmentDto,
   useMembershipLevelListQuery,
@@ -45,9 +46,9 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 const CUSTOM_DURATION_UNITS = [
-  { value: "day", label: "天" },
-  { value: "month", label: "月" },
-  { value: "year", label: "年" },
+  { value: "day", label: "Day" },
+  { value: "month", label: "Month" },
+  { value: "year", label: "Year" },
 ] as const;
 
 const formSchema = z
@@ -65,7 +66,7 @@ const formSchema = z
       return true;
     },
     {
-      message: "自定义时长时必须填写数值和单位",
+      message: "user.dialog.membershipAdjustment.duration.customRequired",
       path: ["customValue"],
     },
   );
@@ -80,15 +81,15 @@ type MembershipAdjustmentDialogProps = {
 };
 
 const DURATION_OPTIONS = [
-  { value: "1", label: "1个月" },
-  { value: "3", label: "3个月" },
-  { value: "12", label: "半年" },
-  { value: "forever", label: "永久" },
-  { value: "custom", label: "自定义" },
+  { value: "1", label: "1 month" },
+  { value: "3", label: "3 months" },
+  { value: "12", label: "Half year" },
+  { value: "forever", label: "Forever" },
+  { value: "custom", label: "Custom" },
 ] as const;
 
 /**
- * 会员调整弹框组件
+ * Membership adjustment dialog component
  */
 export const MembershipAdjustmentDialog = ({
   open,
@@ -96,6 +97,7 @@ export const MembershipAdjustmentDialog = ({
   user,
   onSuccess,
 }: MembershipAdjustmentDialogProps) => {
+  const { t } = useI18n();
   const { data: levelsData, isLoading: isLoadingLevels } = useMembershipLevelListQuery(
     {
       pageSize: 100,
@@ -130,12 +132,16 @@ export const MembershipAdjustmentDialog = ({
 
   const adjustmentMutation = useSystemAdjustmentMembershipMutation({
     onSuccess: (data) => {
-      toast.success(data.message || "会员调整成功");
+      toast.success(
+        t("user.dialog.membershipAdjustment.adjustmentSuccess", { message: data.message }),
+      );
       onOpenChange(false);
       onSuccess?.();
     },
     onError: (error) => {
-      toast.error(`调整失败: ${error.message}`);
+      toast.error(
+        t("user.dialog.membershipAdjustment.adjustmentFailed", { message: error.message }),
+      );
     },
   });
 
@@ -159,10 +165,11 @@ export const MembershipAdjustmentDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-full md:max-w-md">
         <DialogHeader className="px-1">
-          <DialogTitle className="flex items-center gap-2 text-xl">调整会员权益</DialogTitle>
+          <DialogTitle className="flex items-center gap-2 text-xl">
+            {t("user.dialog.membershipAdjustment.title")}
+          </DialogTitle>
           <DialogDescription className="text-muted-foreground mt-1.5 text-sm">
-            为用户 <span className="text-foreground font-medium">{user?.username}</span>{" "}
-            调整会员等级和有效期
+            {t("user.dialog.membershipAdjustment.description", { username: user?.username })}
           </DialogDescription>
         </DialogHeader>
 
@@ -172,25 +179,28 @@ export const MembershipAdjustmentDialog = ({
               onSubmit={form.handleSubmit(handleSubmit)}
               className="max-h-[70vh] space-y-4 px-1"
             >
-              {/* 目标等级选择 */}
               <FormField
                 control={form.control}
                 name="levelId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-base font-semibold">会员等级</FormLabel>
+                    <FormLabel className="text-base font-semibold">
+                      {t("user.dialog.membershipAdjustment.level.label")}
+                    </FormLabel>
                     <FormControl>
                       <Select
                         value={field.value || "null"}
                         onValueChange={(v) => field.onChange(v === "null" ? null : v)}
                       >
                         <SelectTrigger className="h-12 w-full">
-                          <SelectValue placeholder="请选择会员等级" />
+                          <SelectValue
+                            placeholder={t("user.dialog.membershipAdjustment.level.placeholder")}
+                          />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="null">
                             <div className="flex items-center gap-2">
-                              <span>普通用户</span>
+                              <span>{t("user.dialog.membershipAdjustment.level.regularUser")}</span>
                             </div>
                           </SelectItem>
                           {isLoadingLevels ? (
@@ -212,21 +222,22 @@ export const MembershipAdjustmentDialog = ({
                       </Select>
                     </FormControl>
                     <FormDescription className="text-muted-foreground text-xs">
-                      选择要调整到的会员等级，选择"普通用户"将取消会员
+                      {t("user.dialog.membershipAdjustment.level.description")}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {/* 选择有效期 - 只在选择了会员等级时显示 */}
               {watchLevelId && (
                 <FormField
                   control={form.control}
                   name="durationType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-base font-semibold">选择有效期</FormLabel>
+                      <FormLabel className="text-base font-semibold">
+                        {t("user.dialog.membershipAdjustment.duration.label")}
+                      </FormLabel>
                       <FormControl>
                         <RadioGroup
                           value={field.value}
@@ -272,7 +283,9 @@ export const MembershipAdjustmentDialog = ({
                           <InputGroupInput
                             type="number"
                             min={1}
-                            placeholder="如 7"
+                            placeholder={t(
+                              "user.dialog.membershipAdjustment.duration.customValuePlaceholder",
+                            )}
                             value={valueField.value ?? ""}
                             onBlur={valueField.onBlur}
                             ref={valueField.ref}
@@ -293,12 +306,18 @@ export const MembershipAdjustmentDialog = ({
                                     onValueChange={unitField.onChange}
                                   >
                                     <SelectTrigger className="text-muted-foreground h-8 min-w-[72px] border-0 bg-transparent shadow-none focus-visible:ring-0">
-                                      <SelectValue placeholder="单位" />
+                                      <SelectValue
+                                        placeholder={t(
+                                          "user.dialog.membershipAdjustment.duration.unit",
+                                        )}
+                                      />
                                     </SelectTrigger>
                                     <SelectContent>
                                       {CUSTOM_DURATION_UNITS.map((u) => (
                                         <SelectItem key={u.value} value={u.value}>
-                                          {u.label}
+                                          {t(
+                                            `user.dialog.membershipAdjustment.duration.${u.value}`,
+                                          )}
                                         </SelectItem>
                                       ))}
                                     </SelectContent>
@@ -317,11 +336,11 @@ export const MembershipAdjustmentDialog = ({
 
               <DialogFooter className="gap-2">
                 <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                  取消
+                  {t("user.dialog.membershipAdjustment.cancel")}
                 </Button>
                 <Button type="submit" disabled={isPending}>
                   {isPending && <Loader2 className="animate-spin" />}
-                  确认调整
+                  {t("user.dialog.membershipAdjustment.confirm")}
                 </Button>
               </DialogFooter>
             </form>

@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import type { DecorateMenuItem } from "@buildingai/services/web";
 import { useConversationsQuery, useDecorateMenuQuery } from "@buildingai/services/web";
 import { useAuthStore } from "@buildingai/stores";
@@ -103,6 +104,7 @@ function useMenuItems(
 }
 
 export function DefaultAppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { userInfo } = useAuthStore((state) => state.auth);
   const { data: menuConfig, isLoading: isMenuLoading } = useDecorateMenuQuery();
@@ -115,7 +117,7 @@ export function DefaultAppSidebar({ ...props }: React.ComponentProps<typeof Side
     () =>
       conversationsData?.items?.map((conversation) => ({
         id: `conversation-${conversation.id}`,
-        title: conversation.title || "新对话",
+        title: conversation.title || t("chat.newConversation"),
         path: `/c/${conversation.id}`,
       })) || [],
     [conversationsData],
@@ -182,7 +184,7 @@ export function DefaultAppSidebar({ ...props }: React.ComponentProps<typeof Side
               <SidebarMenuButton className="h-9" asChild>
                 <Link to={consoleLink}>
                   <LayoutDashboard />
-                  <span className="whitespace-nowrap">工作台</span>
+                  <span className="whitespace-nowrap">{t("common.workspace")}</span>
                   <SidebarMenuAction asChild>
                     <div>
                       <ArrowUpRight />

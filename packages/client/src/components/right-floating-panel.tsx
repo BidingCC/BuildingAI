@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { Button } from "@buildingai/ui/components/ui/button";
 import { X } from "lucide-react";
 import type { ReactNode } from "react";
@@ -16,6 +17,8 @@ export function RightFloatingPanel({
   children: ReactNode;
   footer?: ReactNode;
 }) {
+  const { t } = useI18n();
+
   if (!open) return null;
   return createPortal(
     <>
@@ -40,7 +43,7 @@ export function RightFloatingPanel({
             size="icon"
             className="size-8"
             onClick={() => onOpenChange(false)}
-            aria-label="关闭"
+            aria-label={t("action.close")}
           >
             <X className="size-4" />
           </Button>

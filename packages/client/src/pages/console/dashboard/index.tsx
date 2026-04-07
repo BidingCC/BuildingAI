@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { useDashboardQuery } from "@buildingai/services/console";
 import CountUp from "@buildingai/ui/components/effects/count-up";
 import { Avatar, AvatarFallback } from "@buildingai/ui/components/ui/avatar";
@@ -14,6 +15,7 @@ import DataCard from "./_components/data-card";
 import { AreaChartCard } from "./_components/line-chart";
 
 const DashboardIndexPage = () => {
+  const { t } = useI18n();
   const [userDays, setUserDays] = useState(15);
   const [revenueDays, setRevenueDays] = useState(15);
   const [tokenDays] = useState(15);
@@ -39,8 +41,8 @@ const DashboardIndexPage = () => {
       <div className="flex flex-col gap-4">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           <DataCard
-            title="用户统计"
-            description="用户数据概览"
+            title={t("dashboard.stats.user.title")}
+            description={t("dashboard.stats.user.description")}
             contentClassName="flex flex-col gap-1 px-4 md:gap-2"
             action={
               <div className="flex flex-col items-center justify-center">
@@ -54,8 +56,10 @@ const DashboardIndexPage = () => {
                       <TrendingDown className="text-destructive size-8" />
                     )}
                     <div className="text-muted-foreground text-xs">
-                      同比昨天
-                      {(data?.user.userChange ?? 0) >= 0 ? "增长" : "下降"}
+                      {t("dashboard.stats.user.changeVsYesterday")}
+                      {(data?.user.userChange ?? 0) >= 0
+                        ? t("dashboard.stats.user.increase")
+                        : t("dashboard.stats.user.decrease")}
                       <span
                         className={`mx-1 text-lg font-bold ${(data?.user.userChange ?? 0) >= 0 ? "text-green-600" : "text-destructive"}`}
                       >
@@ -76,19 +80,19 @@ const DashboardIndexPage = () => {
             ) : (
               <>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">用户总数</span>
+                  <span className="text-sm">{t("dashboard.stats.user.totalUsers")}</span>
                   <span className="text-primary text-xl font-bold">
                     <CountUp direction="up" duration={0.05} to={data?.user.totalUsers ?? 0} />
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">活跃用户</span>
+                  <span className="text-sm">{t("dashboard.stats.user.activeUsers")}</span>
                   <span className="text-primary text-xl font-bold">
                     <CountUp direction="up" duration={0.05} to={data?.user.activeUsers ?? 0} />
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">今日新增</span>
+                  <span className="text-sm">{t("dashboard.stats.user.newUsersToday")}</span>
                   <span className="text-primary text-xl font-bold">
                     <CountUp direction="up" duration={0.05} to={data?.user.newUsersToday ?? 0} />
                   </span>
@@ -98,8 +102,8 @@ const DashboardIndexPage = () => {
           </DataCard>
 
           <DataCard
-            title="对话统计"
-            description="对话数据概览"
+            title={t("dashboard.stats.chat.title")}
+            description={t("dashboard.stats.chat.description")}
             contentClassName="flex flex-col gap-1 px-4 md:gap-2"
             action={
               <div className="flex flex-col items-center justify-center">
@@ -113,8 +117,10 @@ const DashboardIndexPage = () => {
                       <TrendingDown className="text-destructive size-8" />
                     )}
                     <div className="text-muted-foreground text-xs">
-                      同比昨天
-                      {(data?.chat.chatChange ?? 0) >= 0 ? "增长" : "下降"}
+                      {t("dashboard.stats.chat.changeVsYesterday")}
+                      {(data?.chat.chatChange ?? 0) >= 0
+                        ? t("dashboard.stats.chat.increase")
+                        : t("dashboard.stats.chat.decrease")}
                       <span
                         className={`mx-1 text-lg font-bold ${(data?.chat.chatChange ?? 0) >= 0 ? "text-blue-600" : "text-destructive"}`}
                       >
@@ -135,7 +141,7 @@ const DashboardIndexPage = () => {
             ) : (
               <>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">对话总数</span>
+                  <span className="text-sm">{t("dashboard.stats.chat.totalConversations")}</span>
                   <span className="text-primary text-xl font-bold">
                     <CountUp
                       direction="up"
@@ -145,13 +151,13 @@ const DashboardIndexPage = () => {
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">Token总数</span>
+                  <span className="text-sm">{t("dashboard.stats.chat.totalTokens")}</span>
                   <span className="text-primary text-xl font-bold">
                     <CountUp direction="up" duration={0.05} to={data?.chat.totalTokens ?? 0} />
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">今日对话</span>
+                  <span className="text-sm">{t("dashboard.stats.chat.conversationsToday")}</span>
                   <span className="text-primary text-xl font-bold">
                     <CountUp
                       direction="up"
@@ -165,8 +171,8 @@ const DashboardIndexPage = () => {
           </DataCard>
 
           <DataCard
-            title="订单统计"
-            description="订单数据概览"
+            title={t("dashboard.stats.order.title")}
+            description={t("dashboard.stats.order.description")}
             contentClassName="flex flex-col gap-1 px-4 md:gap-2"
             action={
               <div className="flex flex-col items-center justify-center">
@@ -180,8 +186,10 @@ const DashboardIndexPage = () => {
                       <TrendingDown className="text-destructive size-8" />
                     )}
                     <div className="text-muted-foreground text-xs">
-                      同比昨天
-                      {(data?.order.orderChange ?? 0) >= 0 ? "增长" : "下降"}
+                      {t("dashboard.stats.order.changeVsYesterday")}
+                      {(data?.order.orderChange ?? 0) >= 0
+                        ? t("dashboard.stats.order.increase")
+                        : t("dashboard.stats.order.decrease")}
                       <span
                         className={`mx-1 text-lg font-bold ${(data?.order.orderChange ?? 0) >= 0 ? "text-green-600" : "text-destructive"}`}
                       >
@@ -202,19 +210,19 @@ const DashboardIndexPage = () => {
             ) : (
               <>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">订单总数</span>
+                  <span className="text-sm">{t("dashboard.stats.order.totalOrders")}</span>
                   <span className="text-primary text-xl font-bold">
                     <CountUp direction="up" duration={0.05} to={data?.order.totalOrders ?? 0} />
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">订单总额</span>
+                  <span className="text-sm">{t("dashboard.stats.order.totalAmount")}</span>
                   <span className="text-primary text-xl font-bold">
                     ¥<CountUp direction="up" duration={0.05} to={data?.order.totalAmount ?? 0} />
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">今日订单</span>
+                  <span className="text-sm">{t("dashboard.stats.order.ordersToday")}</span>
                   <span className="text-primary text-xl font-bold">
                     <CountUp direction="up" duration={0.05} to={data?.order.ordersToday ?? 0} />
                   </span>
@@ -226,20 +234,30 @@ const DashboardIndexPage = () => {
 
         <div className="grid min-h-80 grid-cols-1 gap-4 lg:grid-cols-3">
           <AreaChartCard
-            title="用户趋势"
-            description={`近${userDays}天用户访问与注册趋势`}
+            title={t("dashboard.chart.userTrend.title")}
+            description={t("dashboard.chart.userTrend.description", { days: userDays })}
             xAxisKey="date"
             data={(data?.userDetail.chartData ?? []) as any}
             series={[
-              { dataKey: "visit", label: "访问数", color: "var(--chart-1)", stackId: "a" },
-              { dataKey: "register", label: "注册数", color: "var(--chart-2)", stackId: "a" },
+              {
+                dataKey: "visit",
+                label: t("dashboard.chart.userTrend.visit"),
+                color: "var(--chart-1)",
+                stackId: "a",
+              },
+              {
+                dataKey: "register",
+                label: t("dashboard.chart.userTrend.register"),
+                color: "var(--chart-2)",
+                stackId: "a",
+              },
             ]}
             className="lg:col-span-2"
             onTimeRangeChange={handleUserTimeRangeChange}
           />
           <DataCard
-            title="Token使用排行"
-            description={`近${tokenDays}天Token消耗排行`}
+            title={t("dashboard.chart.tokenRanking.title")}
+            description={t("dashboard.chart.tokenRanking.description", { days: tokenDays })}
             contentClassName="flex flex-col gap-1 px-0 md:gap-2"
             action={
               <Tabs
@@ -247,8 +265,10 @@ const DashboardIndexPage = () => {
                 onValueChange={(value) => setTokenRankingType(value as "model" | "provider")}
               >
                 <TabsList>
-                  <TabsTrigger value="model">模型</TabsTrigger>
-                  <TabsTrigger value="provider">供应商</TabsTrigger>
+                  <TabsTrigger value="model">{t("dashboard.chart.tokenRanking.model")}</TabsTrigger>
+                  <TabsTrigger value="provider">
+                    {t("dashboard.chart.tokenRanking.provider")}
+                  </TabsTrigger>
                 </TabsList>
               </Tabs>
             }
@@ -263,11 +283,17 @@ const DashboardIndexPage = () => {
               ) : (
                 <div className="flex flex-col gap-3">
                   <div className="bg-card sticky top-0 z-1 flex items-center gap-2">
-                    <span className="text-muted-foreground min-w-6 text-xs">排名</span>
-                    <span className="text-muted-foreground text-xs">
-                      {tokenRankingType === "model" ? "模型信息" : "供应商信息"}
+                    <span className="text-muted-foreground min-w-6 text-xs">
+                      {t("dashboard.chart.tokenRanking.rank")}
                     </span>
-                    <div className="text-muted-foreground ml-auto text-xs">消耗</div>
+                    <span className="text-muted-foreground text-xs">
+                      {tokenRankingType === "model"
+                        ? t("dashboard.chart.tokenRanking.modelInfo")
+                        : t("dashboard.chart.tokenRanking.providerInfo")}
+                    </span>
+                    <div className="text-muted-foreground ml-auto text-xs">
+                      {t("dashboard.chart.tokenRanking.consumption")}
+                    </div>
                   </div>
 
                   {tokenRankingType === "model"
@@ -287,7 +313,8 @@ const DashboardIndexPage = () => {
                           <div className="ml-auto text-right">
                             <div>{(item.tokens / 1000).toFixed(1)}k</div>
                             <div className="text-muted-foreground text-xs">
-                              {item.conversations}次
+                              {item.conversations}
+                              {t("dashboard.chart.tokenRanking.conversations")}
                             </div>
                           </div>
                         </div>
@@ -308,7 +335,8 @@ const DashboardIndexPage = () => {
                           <div className="ml-auto text-right">
                             <div>{(item.tokens / 1000).toFixed(1)}k</div>
                             <div className="text-muted-foreground text-xs">
-                              {item.conversations}次
+                              {item.conversations}
+                              {t("dashboard.chart.tokenRanking.conversations")}
                             </div>
                           </div>
                         </div>
@@ -321,20 +349,30 @@ const DashboardIndexPage = () => {
 
         <div className="grid min-h-80 grid-cols-1 gap-4 lg:grid-cols-3">
           <AreaChartCard
-            title="收入趋势"
-            description={`近${revenueDays}天收入与订单趋势`}
+            title={t("dashboard.chart.revenueTrend.title")}
+            description={t("dashboard.chart.revenueTrend.description", { days: revenueDays })}
             xAxisKey="date"
             data={(data?.revenueDetail.chartData ?? []) as any}
             series={[
-              { dataKey: "revenue", label: "收入", color: "var(--chart-3)", stackId: "a" },
-              { dataKey: "orders", label: "订单数", color: "var(--chart-4)", stackId: "a" },
+              {
+                dataKey: "revenue",
+                label: t("dashboard.chart.revenueTrend.revenue"),
+                color: "var(--chart-3)",
+                stackId: "a",
+              },
+              {
+                dataKey: "orders",
+                label: t("dashboard.chart.revenueTrend.orders"),
+                color: "var(--chart-4)",
+                stackId: "a",
+              },
             ]}
             className="lg:col-span-2"
             onTimeRangeChange={handleRevenueTimeRangeChange}
           />
           <DataCard
-            title="应用使用排行"
-            description="应用使用次数统计"
+            title={t("dashboard.chart.appRanking.title")}
+            description={t("dashboard.chart.appRanking.description")}
             contentClassName="flex flex-col gap-1 px-0 md:gap-2"
           >
             <ScrollArea className="h-[300px] px-4">
@@ -347,9 +385,15 @@ const DashboardIndexPage = () => {
               ) : (
                 <div className="flex flex-col gap-3">
                   <div className="bg-card sticky top-0 z-1 flex items-center gap-2">
-                    <span className="text-muted-foreground min-w-6 text-xs">排名</span>
-                    <span className="text-muted-foreground text-xs">应用信息</span>
-                    <div className="text-muted-foreground ml-auto text-xs">使用次数</div>
+                    <span className="text-muted-foreground min-w-6 text-xs">
+                      {t("dashboard.chart.tokenRanking.rank")}
+                    </span>
+                    <span className="text-muted-foreground text-xs">
+                      {t("dashboard.chart.appRanking.appInfo")}
+                    </span>
+                    <div className="text-muted-foreground ml-auto text-xs">
+                      {t("dashboard.chart.appRanking.usageCount")}
+                    </div>
                   </div>
 
                   {data?.extension.usageRanking && data.extension.usageRanking.length > 0 ? (
@@ -362,18 +406,20 @@ const DashboardIndexPage = () => {
                         <div className="flex-1">
                           <div>{item.extensionName}</div>
                           <div className="text-muted-foreground text-xs">
-                            应用ID: {item.extensionId}
+                            {t("dashboard.chart.appRanking.appId")}: {item.extensionId}
                           </div>
                         </div>
                         <div className="ml-auto text-right">
                           <div className="font-bold">{item.usageCount}</div>
-                          <div className="text-muted-foreground text-xs">次</div>
+                          <div className="text-muted-foreground text-xs">
+                            {t("dashboard.chart.appRanking.times")}
+                          </div>
                         </div>
                       </div>
                     ))
                   ) : (
                     <div className="text-muted-foreground flex h-40 items-center justify-center text-sm">
-                      暂无应用使用数据
+                      {t("dashboard.chart.appRanking.noData")}
                     </div>
                   )}
                 </div>

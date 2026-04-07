@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import type { DatasetApplication, DatasetMember } from "@buildingai/services/web";
 import {
   useApproveDatasetApplication,
@@ -21,18 +22,6 @@ import { ScrollArea } from "@buildingai/ui/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@buildingai/ui/components/ui/tabs";
 import { ChevronDownIcon } from "lucide-react";
 
-const ROLE_LABEL: Record<string, string> = {
-  owner: "创建者",
-  manager: "管理员",
-  editor: "编辑者",
-  viewer: "普通成员",
-};
-
-const ROLE_OPTIONS = [
-  { value: "manager" as const, label: "管理员", desc: "可预览、提问、编辑此知识库" },
-  { value: "viewer" as const, label: "普通成员", desc: "可预览、提问此知识库" },
-] as const;
-
 export interface MemberDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -46,6 +35,26 @@ export function MemberDialog({
   datasetId,
   isOwner = false,
 }: MemberDialogProps) {
+  const { t } = useI18n();
+  const ROLE_LABEL: Record<string, string> = {
+    owner: t("dataset.dialogs.member.creator"),
+    manager: t("dataset.dialogs.member.manager"),
+    editor: t("dataset.dialogs.member.editor"),
+    viewer: t("dataset.dialogs.member.viewer"),
+  };
+  const ROLE_OPTIONS = [
+    {
+      value: "manager" as const,
+      label: t("dataset.dialogs.member.managerRole"),
+      desc: t("dataset.dialogs.member.managerRoleDesc"),
+    },
+    {
+      value: "viewer" as const,
+      label: t("dataset.dialogs.member.viewerRole"),
+      desc: t("dataset.dialogs.member.viewerRoleDesc"),
+    },
+  ] as const;
+
   const { members, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useDatasetsMembersInfiniteQuery(datasetId, {
       enabled: open && !!datasetId,
@@ -60,16 +69,16 @@ export function MemberDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="gap-0 p-0 sm:max-w-md">
         <DialogHeader className="px-4 pt-4">
-          <DialogTitle>成员管理</DialogTitle>
+          <DialogTitle>{t("dataset.dialogs.member.title")}</DialogTitle>
         </DialogHeader>
 
         <Tabs defaultValue="members" className="w-full">
           <TabsList className="bg-muted/50 mx-4 mt-4 w-[calc(100%-2rem)] rounded-lg p-[3px]">
             <TabsTrigger value="members" className="flex-1 rounded-md">
-              成员
+              {t("dataset.dialogs.member.members")}
             </TabsTrigger>
             <TabsTrigger value="applications" className="flex-1 rounded-md">
-              申请
+              {t("dataset.dialogs.member.applications")}
             </TabsTrigger>
           </TabsList>
 
@@ -82,7 +91,9 @@ export function MemberDialog({
               onLoadMore={() => fetchNextPage()}
             >
               {members.length === 0 ? (
-                <div className="text-muted-foreground py-8 text-center text-sm">暂无成员</div>
+                <div className="text-muted-foreground py-8 text-center text-sm">
+                  {t("dataset.dialogs.member.noMembers")}
+                </div>
               ) : (
                 members.map((member) => (
                   <MemberRow
@@ -143,7 +154,9 @@ function MemberRow({
           <ListItemAvatar name={displayName} avatar={member.user?.avatar} />
           <span className="truncate text-sm">{displayName}</span>
         </div>
-        <span className="text-muted-foreground shrink-0 text-sm">创建者</span>
+        <span className="text-muted-foreground shrink-0 text-sm">
+          {t("dataset.dialogs.member.creator")}
+        </span>
       </div>
     );
   }
@@ -218,8 +231,10 @@ function MemberRolePopover({ member, datasetId }: { member: DatasetMember; datas
             className="hover:bg-muted/50 flex w-full flex-col items-start gap-0.5 border-t px-3 py-2 text-left"
             onClick={() => handleSelect("remove")}
           >
-            <span className="text-sm font-medium">移除</span>
-            <span className="text-muted-foreground text-xs">移除该成员</span>
+            <span className="text-sm font-medium">{t("dataset.dialogs.member.remove")}</span>
+            <span className="text-muted-foreground text-xs">
+              {t("dataset.dialogs.member.removeMember")}
+            </span>
           </button>
         </div>
       </PopoverContent>
@@ -265,7 +280,7 @@ function ApplicationRow({
               onClick={handleReject}
               disabled={rejectMutation.isPending}
             >
-              拒绝
+              {t("dataset.dialogs.member.reject")}
             </Button>
             <Button
               variant="ghost"
@@ -274,15 +289,21 @@ function ApplicationRow({
               onClick={handleApprove}
               disabled={approveMutation.isPending}
             >
-              通过
+              {t("dataset.dialogs.member.approve")}
             </Button>
           </>
         ) : isPending ? (
-          <span className="text-muted-foreground text-sm">待审核</span>
+          <span className="text-muted-foreground text-sm">
+            {t("dataset.dialogs.member.pending")}
+          </span>
         ) : application.status === "approved" ? (
-          <span className="text-muted-foreground text-sm">已通过</span>
+          <span className="text-muted-foreground text-sm">
+            {t("dataset.dialogs.member.approved")}
+          </span>
         ) : (
-          <span className="text-muted-foreground text-sm">已拒绝</span>
+          <span className="text-muted-foreground text-sm">
+            {t("dataset.dialogs.member.rejected")}
+          </span>
         )}
       </div>
     </div>

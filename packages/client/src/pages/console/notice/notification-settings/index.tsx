@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   type SmsSceneSetting,
   useSmsSceneSettingsQuery,
@@ -43,8 +44,8 @@ import { PageContainer } from "@/layouts/console/_components/page-container";
 
 const sceneSettingSchema = z.object({
   enable: z.boolean(),
-  templateId: z.string().min(1, "请输入模板ID"),
-  content: z.string().min(1, "请输入短信内容"),
+  templateId: z.string().min(1, "Please enter template ID"),
+  content: z.string().min(1, "Please enter SMS content"),
 });
 
 type SceneSettingFormValues = z.infer<typeof sceneSettingSchema>;
@@ -53,6 +54,7 @@ type SceneSettingFormValues = z.infer<typeof sceneSettingSchema>;
  * 通知设置页面（短信场景）。
  */
 const NoticeNotificationSettingsPage = () => {
+  const { t } = useI18n();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingScene, setEditingScene] = useState<SmsSceneSetting | null>(null);
 
@@ -70,13 +72,13 @@ const NoticeNotificationSettingsPage = () => {
 
   const updateMutation = useUpdateSmsSceneSettingMutation(editingScene?.scene ?? 0, {
     onSuccess: () => {
-      toast.success("通知场景配置已更新");
+      toast.success(t("notice.notificationSettings.toast.updated"));
       setDialogOpen(false);
       setEditingScene(null);
       void refetch();
     },
     onError: (error: any) => {
-      toast.error(error?.message || "更新通知场景配置失败");
+      toast.error(error?.message || t("notice.notificationSettings.toast.updateFailed"));
     },
   });
 
@@ -118,18 +120,19 @@ const NoticeNotificationSettingsPage = () => {
   return (
     <PageContainer className="h-inset">
       <div className="space-y-4">
-        <h2 className="text-base font-medium">通知设置</h2>
+        <h2 className="text-base font-medium">{t("notice.notificationSettings.title")}</h2>
 
         <div className="rounded-lg border">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>通知场景</TableHead>
-                <TableHead>通知类型</TableHead>
-                <TableHead>短信通知</TableHead>
-                {/* <TableHead>邮箱通知</TableHead> */}
+                <TableHead>{t("notice.notificationSettings.table.scene")}</TableHead>
+                <TableHead>{t("notice.notificationSettings.table.type")}</TableHead>
+                <TableHead>{t("notice.notificationSettings.table.smsNotification")}</TableHead>
                 <PermissionGuard permissions="notice:sms-scene-settings-update">
-                  <TableHead className="w-[120px]">操作</TableHead>
+                  <TableHead className="w-[120px]">
+                    {t("notice.notificationSettings.table.actions")}
+                  </TableHead>
                 </PermissionGuard>
               </TableRow>
             </TableHeader>
@@ -137,13 +140,13 @@ const NoticeNotificationSettingsPage = () => {
               {isLoading ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-muted-foreground h-24 text-center text-sm">
-                    加载中...
+                    {t("notice.notificationSettings.table.loading")}
                   </TableCell>
                 </TableRow>
               ) : rows.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-muted-foreground h-24 text-center text-sm">
-                    暂无通知场景配置
+                    {t("notice.notificationSettings.table.noData")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -153,22 +156,15 @@ const NoticeNotificationSettingsPage = () => {
                     <TableCell>{row.noticeType}</TableCell>
                     <TableCell>
                       <Badge variant={row.smsEnabled ? "default" : "secondary"}>
-                        {row.smsEnabled ? "开启" : "关闭"}
+                        {row.smsEnabled
+                          ? t("notice.notificationSettings.status.enabled")
+                          : t("notice.notificationSettings.status.disabled")}
                       </Badge>
                     </TableCell>
-                    {/* <TableCell>
-                      {row.emailEnabled === null ? (
-                        <span className="text-muted-foreground">-</span>
-                      ) : (
-                        <Badge variant={row.emailEnabled ? "default" : "secondary"}>
-                          {row.emailEnabled ? "启用" : "禁用"}
-                        </Badge>
-                      )}
-                    </TableCell> */}
                     <PermissionGuard permissions="notice:sms-scene-settings-update">
                       <TableCell>
                         <Button size="sm" variant="outline" onClick={() => handleOpenSetting(row)}>
-                          设置
+                          {t("notice.notificationSettings.button.settings")}
                         </Button>
                       </TableCell>
                     </PermissionGuard>
@@ -183,7 +179,7 @@ const NoticeNotificationSettingsPage = () => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-xl">
           <DialogHeader>
-            <DialogTitle>短信通知设置</DialogTitle>
+            <DialogTitle>{t("notice.notificationSettings.dialog.title")}</DialogTitle>
           </DialogHeader>
 
           <Form {...form}>
@@ -193,11 +189,15 @@ const NoticeNotificationSettingsPage = () => {
                 name="enable"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>开启状态</FormLabel>
+                    <FormLabel>{t("notice.notificationSettings.dialog.enableStatus")}</FormLabel>
                     <FormControl>
                       <div className="flex items-center gap-3">
                         <Switch checked={field.value} onCheckedChange={field.onChange} />
-                        <span className="text-sm">{field.value ? "开启" : "关闭"}</span>
+                        <span className="text-sm">
+                          {field.value
+                            ? t("notice.notificationSettings.status.enabled")
+                            : t("notice.notificationSettings.status.disabled")}
+                        </span>
                       </div>
                     </FormControl>
                     <FormMessage />
@@ -210,9 +210,12 @@ const NoticeNotificationSettingsPage = () => {
                 name="templateId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>模板ID</FormLabel>
+                    <FormLabel>{t("notice.notificationSettings.dialog.templateId")}</FormLabel>
                     <FormControl>
-                      <Input placeholder="例如：SMS_222458159" {...field} />
+                      <Input
+                        placeholder={t("notice.notificationSettings.dialog.placeholder.templateId")}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -224,17 +227,16 @@ const NoticeNotificationSettingsPage = () => {
                 name="content"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>短信内容</FormLabel>
+                    <FormLabel>{t("notice.notificationSettings.dialog.smsContent")}</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="请输入短信内容，支持变量 ${code}"
+                        placeholder={t("notice.notificationSettings.dialog.placeholder.content")}
                         className="min-h-28"
                         {...field}
                       />
                     </FormControl>
                     <p className="text-muted-foreground text-xs">
-                      可选变量：验证码变量 {"${code}"}。示例：您正在登录，验证码 {"${code}"}
-                      ，5分钟内有效。
+                      {t("notice.notificationSettings.dialog.hint.variables")}
                     </p>
                     <FormMessage />
                   </FormItem>
@@ -248,11 +250,11 @@ const NoticeNotificationSettingsPage = () => {
                   onClick={() => setDialogOpen(false)}
                   disabled={updateMutation.isPending}
                 >
-                  取消
+                  {t("notice.notificationSettings.dialog.cancel")}
                 </Button>
                 <Button type="submit" disabled={updateMutation.isPending}>
                   {updateMutation.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
-                  保存
+                  {t("notice.notificationSettings.dialog.save")}
                 </Button>
               </DialogFooter>
             </form>

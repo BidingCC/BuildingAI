@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   type PublishedAgentDetail,
   useAgentConversationsQuery,
@@ -75,6 +76,7 @@ function ChatHeader({
   name?: string | null;
   description?: string | null;
 }) {
+  const { t } = useI18n();
   return (
     <div className="flex w-full max-w-3xl flex-col items-center gap-3 px-4 pb-4">
       <Avatar className="size-14 shrink-0 rounded-full">
@@ -84,7 +86,7 @@ function ChatHeader({
         </AvatarFallback>
       </Avatar>
       <div className="flex flex-col items-center gap-1">
-        <h1 className="text-center text-lg font-semibold">{name ?? "智能体"}</h1>
+        <h1 className="text-center text-lg font-semibold">{name ?? t("agent.name")}</h1>
         {description ? (
           <p className="text-muted-foreground max-w-md text-center text-sm leading-relaxed">
             {description}
@@ -116,6 +118,7 @@ function AgentInfoPanel({
   isLoadingConversations: boolean;
   currentConversationId?: string;
 }) {
+  const { t } = useI18n();
   const copyAgentMutation = useCopyAgentFromSquareMutation(agent?.id ?? "");
   const navigate = useNavigate();
   const [historyCollapsed, setHistoryCollapsed] = useState(false);
@@ -125,7 +128,7 @@ function AgentInfoPanel({
     try {
       const result = await copyAgentMutation.mutateAsync();
       const newId = result?.id;
-      toast.success("已复制到我的智能体");
+      toast.success(t("agent.detail.chat.copiedToMyAgents"));
       if (newId) {
         navigate(`/agents/${newId}/configuration`);
       }
@@ -133,15 +136,15 @@ function AgentInfoPanel({
       const message =
         (error as { message?: string })?.message ||
         (error as { response?: { data?: { message?: string } } })?.response?.data?.message ||
-        "复制失败";
+        t("agent.detail.chat.copyFailed");
       toast.error(message);
     }
-  }, [agent?.id, copyAgentMutation, navigate]);
+  }, [agent?.id, copyAgentMutation, navigate, t]);
 
   const tags = agent?.tags ?? [];
   const conversationCount = agent?.conversationCount ?? 0;
   const messageCount = agent?.messageCount ?? 0;
-  const creatorName = agent?.creator?.nickname ?? "未知用户";
+  const creatorName = agent?.creator?.nickname ?? t("agent.detail.chat.unknownUser");
   const publishedAgent = agent as
     | (PublishedAgentDetail & {
         chatBillingRule?: AgentChatBillingRule;
@@ -152,8 +155,8 @@ function AgentInfoPanel({
     agent?.models?.find((model) => model.role === "chat")?.billingRule;
   const modelConsumptionText =
     !chatModelBillingRule || chatModelBillingRule.power <= 0
-      ? "免费"
-      : `${chatModelBillingRule.power} 积分 / ${formatTokenCount(chatModelBillingRule.tokens)} tokens`;
+      ? t("agent.detail.free")
+      : `${chatModelBillingRule.power} ${t("agent.detail.credits")} / ${formatTokenCount(chatModelBillingRule.tokens)} tokens`;
   return (
     <div className="chat-scroll flex h-full min-h-0 w-80 shrink-0 flex-col">
       <div className="flex h-full min-h-0 flex-col gap-3 px-6 py-3 pr-3!">
@@ -180,7 +183,7 @@ function AgentInfoPanel({
               </Avatar>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-lg font-semibold">{agent?.name ?? "智能体"}</h2>
+              <h2 className="text-lg font-semibold">{agent?.name ?? t("agent.name")}</h2>
               {tags.length > 0 ? (
                 <div className="flex flex-wrap gap-1">
                   {tags.map((tag) => (
@@ -207,7 +210,7 @@ function AgentInfoPanel({
 
             <div className="">
               <div className="text-muted-foreground mb-1 flex items-center justify-between text-xs">
-                <span>智能体消耗</span>
+                <span>{t("agent.detail.chat.agentConsumption")}</span>
               </div>
               <div className="flex flex-wrap items-baseline gap-3 text-xs">
                 <span className="text-foreground text-sm font-semibold">
@@ -222,17 +225,17 @@ function AgentInfoPanel({
                   <span className="text-foreground text-base font-bold">
                     {formatCount(conversationCount)}
                   </span>{" "}
-                  对话
+                  {t("agent.detail.chat.conversations")}
                 </span>
                 <Separator orientation="vertical" className="bg-muted-foreground/60 h-3" />
                 <span>
                   <span className="text-foreground text-base font-bold">
                     {formatCount(messageCount)}
                   </span>{" "}
-                  消息
+                  {t("agent.detail.chat.messages")}
                 </span>
               </div>
-              <div className="text-muted-foreground text-sm">免费复制</div>
+              <div className="text-muted-foreground text-sm">{t("agent.detail.chat.freeCopy")}</div>
             </div>
 
             <div className="flex flex-col gap-2">
@@ -244,7 +247,9 @@ function AgentInfoPanel({
                   onClick={handleCopyAgent}
                   disabled={copyAgentMutation.isPending}
                 >
-                  {copyAgentMutation.isPending ? "复制中..." : "复制到我的智能体"}
+                  {copyAgentMutation.isPending
+                    ? t("agent.detail.chat.copying")
+                    : t("agent.detail.chat.copyToMyAgents")}
                 </Button>
               </div>
               <div className="w-full">
@@ -255,7 +260,7 @@ function AgentInfoPanel({
                   onClick={() => navigate(`/agents/${agent?.id}/chat`)}
                   disabled={!agent?.id}
                 >
-                  新对话
+                  {t("agent.detail.chat.newConversation")}
                 </Button>
               </div>
             </div>
@@ -270,7 +275,9 @@ function AgentInfoPanel({
                 className="flex w-full items-center justify-between py-0.5"
                 onClick={() => setHistoryCollapsed((prev) => !prev)}
               >
-                <span className="text-foreground text-sm font-medium">历史记录</span>
+                <span className="text-foreground text-sm font-medium">
+                  {t("agent.detail.chat.history")}
+                </span>
                 <ChevronDown
                   className={`size-4 transition-transform ${historyCollapsed ? "-rotate-90" : "rotate-0"}`}
                 />
@@ -302,7 +309,9 @@ function AgentInfoPanel({
                     ))}
                   </div>
                 ) : (
-                  <div className="text-muted-foreground mt-2 text-xs">暂无对话记录</div>
+                  <div className="text-muted-foreground mt-2 text-xs">
+                    {t("agent.detail.chat.noConversations")}
+                  </div>
                 ))}
             </div>
           </>
@@ -396,7 +405,7 @@ function ChatContent({
         >
           {isLoading && !hasCurrentMessages ? (
             <div className="flex w-full flex-1 items-center justify-center">
-              <p className="text-muted-foreground text-sm">加载中...</p>
+              <p className="text-muted-foreground text-sm">{t("agent.detail.loading")}</p>
             </div>
           ) : isFirstSession ? (
             <>
@@ -507,6 +516,7 @@ function ChatContent({
 }
 
 const AgentChatPage = () => {
+  const { t } = useI18n();
   const { id, uuid } = useParams<{ id?: string; uuid?: string }>();
   const navigate = useNavigate();
   const agentId = id ?? "";
@@ -576,9 +586,9 @@ const AgentChatPage = () => {
     () =>
       (conversationsData?.items ?? []).map((item) => ({
         id: item.id,
-        title: item.title?.trim() || "新对话",
+        title: item.title?.trim() || t("agent.detail.chat.newConversation"),
       })),
-    [conversationsData?.items],
+    [conversationsData?.items, t],
   );
 
   const handleFormValueChange = useCallback((name: string, value: string) => {
@@ -627,7 +637,11 @@ const AgentChatPage = () => {
             <Button
               size="icon"
               variant="ghost"
-              title={panelExpanded ? "收起侧栏" : "展开侧栏"}
+              title={
+                panelExpanded
+                  ? t("agent.detail.chat.collapsePanel")
+                  : t("agent.detail.chat.expandPanel")
+              }
               onClick={() => setPanelExpanded((v) => !v)}
             >
               {panelExpanded ? (
@@ -639,15 +653,15 @@ const AgentChatPage = () => {
             {hasForm && (
               <Popover open={formPopoverOpen} onOpenChange={setFormPopoverOpen}>
                 <PopoverTrigger asChild>
-                  <Button size="icon" variant="ghost" title="表单变量">
+                  <Button size="icon" variant="ghost" title={t("agent.detail.formVariables")}>
                     <Settings2 className="size-4" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-80" align="end">
                   <div className="space-y-3">
-                    <h4 className="text-sm font-medium">表单变量</h4>
+                    <h4 className="text-sm font-medium">{t("agent.detail.formVariables")}</h4>
                     <p className="text-muted-foreground text-xs">
-                      填写表单变量后，对话中的 {"{{变量}}"} 将被替换为实际值
+                      {t("agent.detail.formVariablesDesc")}
                     </p>
                     <Separator />
                     {formFields.map((field) => (
@@ -660,7 +674,7 @@ const AgentChatPage = () => {
                         </Label>
                         {field.type === "textarea" ? (
                           <Textarea
-                            placeholder={`输入 ${field.label}`}
+                            placeholder={t("agent.detail.inputPlaceholder", { label: field.label })}
                             value={formValues[field.name] ?? ""}
                             onChange={(e) => handleFormValueChange(field.name, e.target.value)}
                             rows={2}
@@ -672,7 +686,7 @@ const AgentChatPage = () => {
                             value={formValues[field.name] ?? ""}
                             onChange={(e) => handleFormValueChange(field.name, e.target.value)}
                           >
-                            <option value="">请选择</option>
+                            <option value="">{t("agent.detail.pleaseSelect")}</option>
                             {getSelectOptions(field).map((opt) => (
                               <option key={opt.value} value={opt.value}>
                                 {opt.label}
@@ -681,7 +695,7 @@ const AgentChatPage = () => {
                           </select>
                         ) : (
                           <Input
-                            placeholder={`输入 ${field.label}`}
+                            placeholder={t("agent.detail.inputPlaceholder", { label: field.label })}
                             value={formValues[field.name] ?? ""}
                             onChange={(e) => handleFormValueChange(field.name, e.target.value)}
                             className="h-8 text-xs"

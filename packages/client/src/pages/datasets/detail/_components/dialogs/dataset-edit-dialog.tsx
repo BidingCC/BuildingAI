@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { createEmptyDataset, updateDataset } from "@buildingai/services/web";
 import { Button } from "@buildingai/ui/components/ui/button";
 import {
@@ -48,6 +49,7 @@ export function DatasetEditDialog({
   initialValues,
   onSuccess,
 }: DatasetEditDialogProps) {
+  const { t } = useI18n();
   const { id: routeId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -92,23 +94,30 @@ export function DatasetEditDialog({
     }
   };
 
-  const submitLabel = mode === "create" ? "创建中..." : "保存中...";
+  const submitLabel =
+    mode === "create"
+      ? t("dataset.dialogs.datasetEdit.creating")
+      : t("dataset.dialogs.datasetEdit.saving");
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="gap-0 p-0 sm:max-w-md">
         <DialogHeader className="px-4 pt-4">
-          <DialogTitle>{mode === "create" ? "创建知识库" : "修改知识库"}</DialogTitle>
+          <DialogTitle>
+            {mode === "create"
+              ? t("dataset.dialogs.datasetEdit.title.create")
+              : t("dataset.dialogs.datasetEdit.title.edit")}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 px-4 pt-6 pb-4">
-          <FormField label="名称" required>
+          <FormField label={t("dataset.dialogs.datasetEdit.name")} required>
             <InputGroup>
               <InputGroupInput
                 id="dataset-name"
                 value={form.name}
                 onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-                placeholder="请输入知识库名称"
+                placeholder={t("dataset.dialogs.datasetEdit.namePlaceholder")}
               />
               {form.name.length > 0 && (
                 <InputGroupAddon align="inline-end">
@@ -126,7 +135,7 @@ export function DatasetEditDialog({
             </InputGroup>
           </FormField>
 
-          <FormField label="封面">
+          <FormField label={t("dataset.dialogs.datasetEdit.cover")}>
             <CoverUpload
               coverUrl={coverUrl}
               isUploading={isCoverUploading}
@@ -140,12 +149,12 @@ export function DatasetEditDialog({
             />
           </FormField>
 
-          <FormField label="描述">
+          <FormField label={t("dataset.dialogs.datasetEdit.description")}>
             <Textarea
               id="dataset-desc"
               value={form.description}
               onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
-              placeholder="为你的知识库填写描述"
+              placeholder={t("dataset.dialogs.datasetEdit.descriptionPlaceholder")}
               className="min-h-24 resize-none"
             />
           </FormField>
@@ -154,7 +163,7 @@ export function DatasetEditDialog({
         <DialogFooter className="px-4 py-4">
           <DialogClose asChild>
             <Button variant="outline" disabled={isSubmitting}>
-              取消
+              {t("dataset.dialogs.datasetEdit.cancel")}
             </Button>
           </DialogClose>
           <Button onClick={handleSubmit} disabled={isSubmitting}>
@@ -164,7 +173,7 @@ export function DatasetEditDialog({
                 {submitLabel}
               </>
             ) : (
-              "确定"
+              t("dataset.dialogs.datasetEdit.confirm")
             )}
           </Button>
         </DialogFooter>
@@ -209,7 +218,7 @@ function CoverUpload({
   onClear: () => void;
 }) {
   const hasCover = Boolean(coverUrl);
-
+  const { t } = useI18n();
   return (
     <UploadRoot
       accept="image/*"
@@ -236,7 +245,9 @@ function CoverUpload({
               ) : (
                 <UploadIcon className="text-muted-foreground size-6" />
               )}
-              <span className="text-muted-foreground text-xs">上传封面</span>
+              <span className="text-muted-foreground text-xs">
+                {t("dataset.dialogs.datasetEdit.uploadCover")}
+              </span>
             </div>
           )}
         </UploadDropzone>

@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   type RechargeConfigData,
   type RechargeRule,
@@ -29,6 +30,7 @@ import { toast } from "sonner";
 import { PageContainer } from "@/layouts/console/_components/page-container";
 
 const UserRechargeIndexPage = () => {
+  const { t } = useI18n();
   const [rechargeStatus, setRechargeStatus] = useState(true);
   const [rechargeExplain, setRechargeExplain] = useState("");
   const [rechargeRules, setRechargeRules] = useState<RechargeRule[]>([]);
@@ -39,11 +41,11 @@ const UserRechargeIndexPage = () => {
 
   const saveMutation = useSaveRechargeConfigMutation({
     onSuccess: () => {
-      toast.success("保存成功");
+      toast.success(t("common.action.saveSuccess"));
       refetch();
     },
     onError: (error) => {
-      toast.error(`保存失败: ${error.message}`);
+      toast.error(t("common.action.saveFailed", { error: error.message }));
     },
   });
 
@@ -133,7 +135,7 @@ const UserRechargeIndexPage = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <span className="text-muted-foreground">加载中...</span>
+        <span className="text-muted-foreground">{t("common.common.loading")}</span>
       </div>
     );
   }
@@ -142,21 +144,29 @@ const UserRechargeIndexPage = () => {
     <PageContainer>
       <div className="space-y-4 pb-6">
         <div className="flex flex-col gap-6">
-          {/* 状态管理 */}
+          {/* Status management */}
           <div>
             <div className="mb-4 flex flex-col gap-1">
-              <div className="text-md text-base font-bold">充值状态</div>
-              <div className="text-muted-foreground text-xs">控制充值功能的开启和关闭</div>
+              <div className="text-md text-base font-bold">
+                {t("operation.recharge.statusTitle")}
+              </div>
+              <div className="text-muted-foreground text-xs">
+                {t("operation.recharge.statusDesc")}
+              </div>
             </div>
             <Switch checked={rechargeStatus} onCheckedChange={setRechargeStatus} />
           </div>
 
-          {/* 充值说明 */}
+          {/* Recharge instructions */}
           {rechargeStatus && (
             <div>
               <div className="mb-4 flex flex-col gap-1">
-                <div className="text-md text-base font-bold">充值说明</div>
-                <div className="text-muted-foreground text-xs">显示在充值页面的说明文字</div>
+                <div className="text-md text-base font-bold">
+                  {t("operation.recharge.explainTitle")}
+                </div>
+                <div className="text-muted-foreground text-xs">
+                  {t("operation.recharge.explainDesc")}
+                </div>
               </div>
               <div className="w-full text-sm">
                 <Textarea
@@ -164,20 +174,22 @@ const UserRechargeIndexPage = () => {
                   value={rechargeExplain}
                   onChange={(e) => setRechargeExplain(e.target.value)}
                   rows={6}
-                  placeholder="请输入套餐充值说明..."
+                  placeholder={t("operation.recharge.placeholder.explain")}
                 />
               </div>
             </div>
           )}
 
-          {/* 充值规则表格 */}
+          {/* Recharge rules table */}
           <div className="flex-1">
             <div className="flex w-full items-center justify-between">
-              <div className="text-md text-base font-bold">充值规则</div>
+              <div className="text-md text-base font-bold">
+                {t("operation.recharge.rulesTitle")}
+              </div>
               <div className="flex items-center justify-between gap-2 px-4">
                 <Button variant="outline" onClick={handleAddRow}>
                   <Plus className="mr-2 size-4" />
-                  新增
+                  {t("operation.recharge.addRule")}
                 </Button>
               </div>
             </div>
@@ -185,19 +197,23 @@ const UserRechargeIndexPage = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[60px]">#</TableHead>
-                    <TableHead>充值额度</TableHead>
-                    <TableHead>赠送额度</TableHead>
-                    <TableHead>价格</TableHead>
-                    <TableHead>标签</TableHead>
-                    <TableHead className="w-[80px]">操作</TableHead>
+                    <TableHead className="w-[60px]">
+                      {t("operation.recharge.table.index")}
+                    </TableHead>
+                    <TableHead>{t("operation.recharge.table.power")}</TableHead>
+                    <TableHead>{t("operation.recharge.table.givePower")}</TableHead>
+                    <TableHead>{t("operation.recharge.table.price")}</TableHead>
+                    <TableHead>{t("operation.recharge.table.label")}</TableHead>
+                    <TableHead className="w-[80px]">
+                      {t("operation.recharge.table.actions")}
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {rechargeRules.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={6} className="text-muted-foreground text-center">
-                        暂无充值规则，请点击"新增"添加
+                        {t("operation.recharge.emptyRules")}
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -267,14 +283,14 @@ const UserRechargeIndexPage = () => {
             </div>
           </div>
 
-          {/* 保存按钮 */}
+          {/* Save button */}
           <div className="flex justify-end">
             <Button
               onClick={handleSave}
               disabled={!hasChanges || saveMutation.isPending}
               className="w-16"
             >
-              {saveMutation.isPending ? "保存中..." : "保存"}
+              {saveMutation.isPending ? t("common.action.saving") : t("common.action.save")}
             </Button>
           </div>
         </div>

@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   useAliyunSmsConfigQuery,
   useUpdateAliyunSmsConfigMutation,
@@ -25,17 +26,15 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 const aliyunSchema = z.object({
-  sign: z.string().min(1, "请输入短信签名"),
-  accessKeyId: z.string().min(1, "请输入阿里云accessKey ID"),
-  accessKeySecret: z.string().min(1, "请输入阿里云AccessKey Secret"),
+  sign: z.string().min(1, "Please enter SMS sign"),
+  accessKeyId: z.string().min(1, "Please enter Aliyun AccessKey ID"),
+  accessKeySecret: z.string().min(1, "Please enter Aliyun AccessKey Secret"),
 });
 
 type AliyunFormValues = z.infer<typeof aliyunSchema>;
 
-/**
- * 阿里云短信配置表单组件。
- */
 const AliyunSms = () => {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const [saving, setSaving] = useState(false);
   const [enabled, setEnabled] = useState(false);
@@ -53,22 +52,22 @@ const AliyunSms = () => {
   const updateStatusMutation = useUpdateSmsConfigStatusMutation("aliyun", {
     onSuccess: (result: any) => {
       setEnabled(Boolean((result as any).enable));
-      toast.success("阿里云短信已启用");
+      toast.success(t("notice.aliyunSms.toast.enabled"));
       void queryClient.invalidateQueries({ queryKey: ["notice", "sms-config"] });
       void refetch();
     },
     onError: (error: any) => {
-      toast.error(error.message || "启用阿里云短信失败");
+      toast.error(error.message || t("notice.aliyunSms.toast.enableFailed"));
     },
   });
   const updateMutation = useUpdateAliyunSmsConfigMutation({
     onSuccess: (result: any) => {
-      toast.success("阿里云短信配置已保存");
+      toast.success(t("notice.aliyunSms.toast.saved"));
       setEnabled(Boolean(result.enable));
       void refetch();
     },
     onError: (error: any) => {
-      toast.error(error.message || "保存阿里云短信配置失败");
+      toast.error(error.message || t("notice.aliyunSms.toast.saveFailed"));
     },
   });
 
@@ -134,7 +133,7 @@ const AliyunSms = () => {
                 <MessageSquare className="text-primary size-5" />
               </div>
               <div className="flex flex-col gap-1">
-                <span className="text-sm font-medium">阿里云短信</span>
+                <span className="text-sm font-medium">{t("notice.aliyunSms.title")}</span>
               </div>
             </div>
             <PermissionGuard permissions="notice:sms-config-update-status">
@@ -146,7 +145,7 @@ const AliyunSms = () => {
                 onClick={handleEnable}
               >
                 {saving && !enabled && <Loader2 className="mr-2 size-4 animate-spin" />}
-                {enabled ? "已启用" : "启用"}
+                {enabled ? t("notice.aliyunSms.enabled") : t("notice.aliyunSms.enable")}
               </Button>
             </PermissionGuard>
           </CardContent>
@@ -159,10 +158,11 @@ const AliyunSms = () => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                <span className="text-destructive">*</span>短信签名
+                <span className="text-destructive">*</span>
+                {t("notice.aliyunSms.sign")}
               </FormLabel>
               <FormControl>
-                <Input placeholder="请输入短信签名" {...field} />
+                <Input placeholder={t("notice.aliyunSms.sign")} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -176,14 +176,11 @@ const AliyunSms = () => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                <span className="text-destructive">*</span>AccessKey ID
+                <span className="text-destructive">*</span>
+                {t("notice.aliyunSms.accessKeyId")}
               </FormLabel>
               <FormControl>
-                <Input
-                  placeholder="请输入阿里云 AccessKey ID
-"
-                  {...field}
-                />
+                <Input placeholder={t("notice.aliyunSms.accessKeyId")} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -197,10 +194,11 @@ const AliyunSms = () => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                <span className="text-destructive">*</span>AccessKey Secret
+                <span className="text-destructive">*</span>
+                {t("notice.aliyunSms.accessKeySecret")}
               </FormLabel>
               <FormControl>
-                <Input placeholder="请输入阿里云 AccessKey Secret" {...field} />
+                <Input placeholder={t("notice.aliyunSms.accessKeySecret")} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -211,12 +209,14 @@ const AliyunSms = () => {
           <PermissionGuard permissions="notice:sms-config-update-aliyun">
             <Button type="submit" disabled={saving}>
               {saving && <Loader2 className="mr-2 size-4 animate-spin" />}
-              保存设置
+              {t("notice.aliyunSms.saveSettings")}
             </Button>
           </PermissionGuard>
           <PermissionGuard permissions="notice:sms-scene-settings-detail">
             <Button asChild type="button" variant="outline">
-              <Link to="/console/notice/notification-settings">通知设置</Link>
+              <Link to="/console/notice/notification-settings">
+                {t("notice.aliyunSms.notificationSettings")}
+              </Link>
             </Button>
           </PermissionGuard>
           <Button
@@ -230,7 +230,7 @@ const AliyunSms = () => {
               })
             }
           >
-            重置设置
+            {t("notice.aliyunSms.resetSettings")}
           </Button>
         </div>
       </form>

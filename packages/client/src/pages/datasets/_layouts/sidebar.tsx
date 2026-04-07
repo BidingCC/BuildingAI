@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   useDatasetDetail,
   useMyCreatedDatasetsInfiniteQuery,
@@ -62,6 +63,7 @@ const toSidebarItem = (d: {
 });
 
 export function DatasetsSidebarMain({ className }: { className?: string }) {
+  const { t } = useI18n();
   const { pathname } = useLocation();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
@@ -131,13 +133,13 @@ export function DatasetsSidebarMain({ className }: { className?: string }) {
     () => [
       {
         id: "datasets",
-        title: "知识广场",
+        title: t("dataset.list.knowledgeSquare"),
         path: "/datasets",
         icon: LibraryBig,
       },
       {
         id: "datasets-my",
-        title: "我的知识库",
+        title: t("dataset.sidebar.myDatasets"),
         path: "",
         icon: BookCopy,
         items: myDatasetsItems,
@@ -147,7 +149,7 @@ export function DatasetsSidebarMain({ className }: { className?: string }) {
       },
       {
         id: "datasets-joined",
-        title: "团队知识库",
+        title: t("dataset.sidebar.teamDatasets"),
         path: "",
         icon: Users,
         items: joinedDatasetsWithPending,
@@ -183,7 +185,7 @@ export function DatasetsSidebarMain({ className }: { className?: string }) {
       <SidebarHeader className="flex flex-row items-center gap-1">
         <Button className="w-full" variant="outline" onClick={() => setCreateDialogOpen(true)}>
           <Plus />
-          创建知识库
+          {t("dataset.list.createDataset")}
         </Button>
         {createDialogOpen && (
           <DatasetEditDialog
@@ -227,13 +229,17 @@ export function DatasetsSidebarMain({ className }: { className?: string }) {
                       {item.id === "datasets-my" && loading ? (
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton className="h-9">
-                            <span className="text-muted-foreground text-sm">加载中...</span>
+                            <span className="text-muted-foreground text-sm">
+                              {t("dataset.sidebar.loading")}
+                            </span>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       ) : item.id === "datasets-joined" && loadingJoined ? (
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton className="h-9">
-                            <span className="text-muted-foreground text-sm">加载中...</span>
+                            <span className="text-muted-foreground text-sm">
+                              {t("dataset.sidebar.loading")}
+                            </span>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       ) : (item.items?.length ?? 0) === 0 ? (
@@ -269,7 +275,7 @@ export function DatasetsSidebarMain({ className }: { className?: string }) {
                                         size="xs"
                                         className="pointer-events-none"
                                       >
-                                        待加入
+                                        {t("dataset.sidebar.pendingJoin")}
                                       </Button>
                                     )}
                                     {isPendingReview && (
@@ -283,11 +289,11 @@ export function DatasetsSidebarMain({ className }: { className?: string }) {
                                               e.stopPropagation();
                                             }}
                                           >
-                                            审核中
+                                            {t("dataset.sidebar.underReview")}
                                           </Button>
                                         </TooltipTrigger>
                                         <TooltipContent className="max-w-xs">
-                                          正在审核中，审核通过后该知识库可在知识广场被发现
+                                          {t("dataset.sidebar.reviewTip")}
                                         </TooltipContent>
                                       </Tooltip>
                                     )}
@@ -297,7 +303,7 @@ export function DatasetsSidebarMain({ className }: { className?: string }) {
                                         size="xs"
                                         className="text-destructive pointer-events-none"
                                       >
-                                        审核未通过
+                                        {t("dataset.sidebar.reviewRejected")}
                                       </Button>
                                     )}
                                     {showPublishedBadge && (
@@ -306,7 +312,7 @@ export function DatasetsSidebarMain({ className }: { className?: string }) {
                                         size="xs"
                                         className="pointer-events-none"
                                       >
-                                        已发布
+                                        {t("dataset.sidebar.published")}
                                       </Button>
                                     )}
                                   </Link>
@@ -326,11 +332,15 @@ export function DatasetsSidebarMain({ className }: { className?: string }) {
                                   {item.loadingMore ? (
                                     <>
                                       <Loader2 className="size-4 animate-spin" />
-                                      <span className="text-sm">加载中...</span>
+                                      <span className="text-sm">
+                                        {t("dataset.sidebar.loading")}
+                                      </span>
                                     </>
                                   ) : (
                                     <>
-                                      <span className="text-sm">加载更多</span>
+                                      <span className="text-sm">
+                                        {t("dataset.sidebar.loadMore")}
+                                      </span>
                                     </>
                                   )}
                                 </button>
@@ -363,8 +373,10 @@ export function DatasetsSidebarMain({ className }: { className?: string }) {
           <SidebarMenuItem className="flex flex-col gap-2">
             <div className="flex w-full items-center justify-between">
               <span className="text-muted-foreground text-[11px] leading-none">
-                已用 {storageInfo ? bytesToReadable(storageInfo.usedStorage) : "0 B"} /{" "}
-                {storageInfo ? bytesToReadable(storageInfo.totalStorage, 0) : "0 B"}
+                {t("dataset.sidebar.storageUsed", {
+                  used: storageInfo ? bytesToReadable(storageInfo.usedStorage) : "0 B",
+                  total: storageInfo ? bytesToReadable(storageInfo.totalStorage, 0) : "0 B",
+                })}
               </span>
               <Button
                 variant="ghost"
@@ -374,7 +386,7 @@ export function DatasetsSidebarMain({ className }: { className?: string }) {
                   setUpgradeDialogOpen(true);
                 }}
               >
-                扩容
+                {t("dataset.sidebar.expandStorage")}
                 <ChevronRight />
               </Button>
             </div>

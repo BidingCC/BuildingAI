@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from "@buildingai/i18n";
 import { useCreateConsoleTagMutation } from "@buildingai/services/console";
 import { Button } from "@buildingai/ui/components/ui/button";
 import {
@@ -21,16 +22,19 @@ export type AddTagDialogProps = {
 };
 
 export function AddTagDialog({ open, onOpenChange, onSuccess }: AddTagDialogProps) {
+  const { t } = useI18n();
   const [tagName, setTagName] = useState("");
   const createMutation = useCreateConsoleTagMutation("app-center" as any, {
     onSuccess: () => {
-      toast.success("标签创建成功");
+      toast.success(t("decorate.apps.addTag.createSuccess"));
       setTagName("");
       onOpenChange(false);
       onSuccess();
     },
     onError: (error: any) => {
-      toast.error(`创建失败: ${error.message || "未知错误"}`);
+      toast.error(
+        t("decorate.apps.addTag.createFailed", { message: error.message || "Unknown error" }),
+      );
     },
   });
 
@@ -38,7 +42,7 @@ export function AddTagDialog({ open, onOpenChange, onSuccess }: AddTagDialogProp
     e.preventDefault();
     const name = tagName.trim();
     if (!name) {
-      toast.error("标签名称不能为空");
+      toast.error(t("decorate.apps.addTag.nameRequired"));
       return;
     }
     createMutation.mutate({ name });
@@ -48,16 +52,16 @@ export function AddTagDialog({ open, onOpenChange, onSuccess }: AddTagDialogProp
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex max-w-md flex-col">
         <DialogHeader>
-          <DialogTitle>添加标签</DialogTitle>
+          <DialogTitle>{t("decorate.apps.addTag.title")}</DialogTitle>
         </DialogHeader>
         <form className="flex flex-col gap-5 py-2" onSubmit={handleSubmit}>
           <div className="grid gap-2">
-            <Label htmlFor="tag-name">标签名称</Label>
+            <Label htmlFor="tag-name">{t("decorate.apps.addTag.name")}</Label>
             <Input
               id="tag-name"
               value={tagName}
               onChange={(e) => setTagName(e.target.value)}
-              placeholder="请输入标签名称"
+              placeholder={t("decorate.apps.addTag.namePlaceholder")}
               disabled={createMutation.isPending}
             />
           </div>
@@ -71,10 +75,12 @@ export function AddTagDialog({ open, onOpenChange, onSuccess }: AddTagDialogProp
               }}
               disabled={createMutation.isPending}
             >
-              取消
+              {t("decorate.apps.addTag.cancel")}
             </Button>
             <Button type="submit" disabled={createMutation.isPending || !tagName.trim()}>
-              {createMutation.isPending ? "创建中…" : "创建"}
+              {createMutation.isPending
+                ? t("decorate.apps.addTag.creating")
+                : t("decorate.apps.addTag.create")}
             </Button>
           </DialogFooter>
         </form>

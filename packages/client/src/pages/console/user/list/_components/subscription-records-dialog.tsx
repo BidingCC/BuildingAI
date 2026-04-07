@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { useUserSubscriptionsQuery } from "@buildingai/services/console";
 import { Avatar, AvatarFallback, AvatarImage } from "@buildingai/ui/components/ui/avatar";
 import { Badge } from "@buildingai/ui/components/ui/badge";
@@ -30,17 +31,17 @@ type SubscriptionRecordsDialogProps = {
 /**
  * Get refund status badge
  */
-function RefundStatusBadge({ status }: { status: number }) {
+function RefundStatusBadge({ status, t }: { status: number; t: (key: string) => string }) {
   if (status === 1) {
     return (
       <Badge variant="destructive" className="gap-1">
-        已退款
+        {t("user.dialog.subscriptionRecords.refunded")}
       </Badge>
     );
   }
   return (
     <Badge variant="secondary" className="gap-1">
-      未退款
+      {t("user.dialog.subscriptionRecords.notRefunded")}
     </Badge>
   );
 }
@@ -51,6 +52,7 @@ export function SubscriptionRecordsDialog({
   userId,
   userName,
 }: SubscriptionRecordsDialogProps) {
+  const { t } = useI18n();
   const pageSize = 10;
   const [page, setPage] = useState(1);
 
@@ -75,7 +77,7 @@ export function SubscriptionRecordsDialog({
       <DialogContent className="flex max-h-[90vh] max-w-5xl! flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            订阅记录
+            {t("user.dialog.subscriptionRecords.title")}
             {userName && <span className="text-muted-foreground text-sm">- {userName}</span>}
           </DialogTitle>
         </DialogHeader>
@@ -83,23 +85,25 @@ export function SubscriptionRecordsDialog({
         <div className="-mx-6 flex-1 overflow-auto px-6">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="text-muted-foreground">加载中...</div>
+              <div className="text-muted-foreground">
+                {t("user.dialog.subscriptionRecords.loading")}
+              </div>
             </div>
           ) : records.length === 0 ? (
             <div className="text-muted-foreground flex flex-col items-center justify-center py-12">
-              <p>暂无订阅记录</p>
+              <p>{t("user.dialog.subscriptionRecords.noRecords")}</p>
             </div>
           ) : (
             <div className="rounded-lg border">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>会员等级</TableHead>
-                    <TableHead>订阅时长</TableHead>
-                    <TableHead>会员有效期</TableHead>
-                    <TableHead>来源</TableHead>
-                    <TableHead>创建时间</TableHead>
-                    <TableHead>退款状态</TableHead>
+                    <TableHead>{t("user.dialog.subscriptionRecords.level")}</TableHead>
+                    <TableHead>{t("user.dialog.subscriptionRecords.duration")}</TableHead>
+                    <TableHead>{t("user.dialog.subscriptionRecords.validPeriod")}</TableHead>
+                    <TableHead>{t("user.dialog.subscriptionRecords.source")}</TableHead>
+                    <TableHead>{t("user.dialog.subscriptionRecords.createdAt")}</TableHead>
+                    <TableHead>{t("user.dialog.subscriptionRecords.refundStatus")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -141,7 +145,7 @@ export function SubscriptionRecordsDialog({
                         </span>
                       </TableCell>
                       <TableCell>
-                        <RefundStatusBadge status={record.refundStatus} />
+                        <RefundStatusBadge status={record.refundStatus} t={t} />
                       </TableCell>
                     </TableRow>
                   ))}

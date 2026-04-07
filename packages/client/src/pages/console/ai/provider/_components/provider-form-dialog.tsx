@@ -1,4 +1,5 @@
 import { MODEL_TYPE_DESCRIPTIONS, type ModelType } from "@buildingai/ai-sdk/interfaces";
+import { useI18n } from "@buildingai/i18n";
 import {
   type AiProvider,
   type CreateAiProviderDto,
@@ -59,19 +60,21 @@ const MODEL_TYPES = Object.keys(MODEL_TYPE_DESCRIPTIONS) as ModelType[];
 
 const formSchema = z.object({
   provider: z
-    .string({ message: "供应商标识参数必须传递" })
-    .min(1, "供应商标识不能为空")
-    .max(50, "供应商标识不能超过50个字符"),
+    .string({ message: "Provider identifier is required" })
+    .min(1, "Provider identifier is required")
+    .max(50, "Provider identifier cannot exceed 50 characters"),
   name: z
-    .string({ message: "供应商名称参数必须传递" })
-    .min(1, "供应商名称不能为空")
-    .max(100, "供应商名称不能超过100个字符"),
-  description: z.string().max(1000, "供应商描述不能超过1000个字符").optional(),
-  bindSecretId: z.string({ message: "绑定的密钥配置必须选择" }).min(1, "请绑定一个密钥"),
-  supportedModelTypes: z.array(z.string()).min(1, "至少选择一种类型").optional(),
+    .string({ message: "Provider name is required" })
+    .min(1, "Provider name is required")
+    .max(100, "Provider name cannot exceed 100 characters"),
+  description: z.string().max(1000, "Description cannot exceed 1000 characters").optional(),
+  bindSecretId: z
+    .string({ message: "Please select a secret key" })
+    .min(1, "Please bind a secret key"),
+  supportedModelTypes: z.array(z.string()).min(1, "Please select at least one type").optional(),
   iconUrl: z.string().optional(),
   isActive: z.boolean().optional(),
-  sortOrder: z.number().min(0, "排序权重不能小于0").optional(),
+  sortOrder: z.number().min(0, "Sort weight cannot be less than 0").optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -94,6 +97,7 @@ export const AiProviderFormDialog = ({
   provider,
   onSuccess,
 }: AiProviderFormDialogProps) => {
+  const { t } = useI18n();
   const isEditMode = !!provider;
 
   const { data: secretTemplates } = useAllSecretTemplatesQuery();
@@ -162,23 +166,23 @@ export const AiProviderFormDialog = ({
 
   const createMutation = useCreateAiProviderMutation({
     onSuccess: () => {
-      toast.success("供应商创建成功");
+      toast.success(t("ai.provider.toast.createSuccess"));
       onOpenChange(false);
       onSuccess?.();
     },
     onError: (error) => {
-      toast.error(`创建失败: ${error.message}`);
+      toast.error(t("ai.provider.toast.createFailed", { error: error.message }));
     },
   });
 
   const updateMutation = useUpdateAiProviderMutation({
     onSuccess: () => {
-      toast.success("供应商更新成功");
+      toast.success(t("ai.provider.toast.updateSuccess"));
       onOpenChange(false);
       onSuccess?.();
     },
     onError: (error) => {
-      toast.error(`更新失败: ${error.message}`);
+      toast.error(t("ai.provider.toast.updateFailed", { error: error.message }));
     },
   });
 
@@ -212,9 +216,13 @@ export const AiProviderFormDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent ref={setContainer} className="gap-0 p-0 sm:max-w-lg">
         <DialogHeader className="p-4">
-          <DialogTitle>{isEditMode ? "编辑供应商" : "新增供应商"}</DialogTitle>
+          <DialogTitle>
+            {isEditMode ? t("ai.provider.dialog.editTitle") : t("ai.provider.dialog.createTitle")}
+          </DialogTitle>
           <DialogDescription>
-            {isEditMode ? "修改AI供应商的配置信息" : "添加一个新的AI模型供应商"}
+            {isEditMode
+              ? t("ai.provider.dialog.editDescription")
+              : t("ai.provider.dialog.createDescription")}
           </DialogDescription>
         </DialogHeader>
 
@@ -227,7 +235,7 @@ export const AiProviderFormDialog = ({
                   name="iconUrl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>图标</FormLabel>
+                      <FormLabel>{t("ai.provider.form.icon")}</FormLabel>
                       <FormControl>
                         <ImageUpload
                           value={field.value}
@@ -243,7 +251,7 @@ export const AiProviderFormDialog = ({
                   name="isActive"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel required>启用状态</FormLabel>
+                      <FormLabel required>{t("ai.provider.form.status")}</FormLabel>
                       <FormControl>
                         <RadioGroup
                           className="flex gap-4"
@@ -252,17 +260,17 @@ export const AiProviderFormDialog = ({
                         >
                           <label className="flex items-center gap-2 text-sm">
                             <RadioGroupItem value="true" disabled={!canEnable} />
-                            启用
+                            {t("common.action.enable")}
                           </label>
                           <label className="flex items-center gap-2 text-sm">
                             <RadioGroupItem value="false" />
-                            禁用
+                            {t("common.action.disable")}
                           </label>
                         </RadioGroup>
                       </FormControl>
                       {!isEditMode && !bindSecretId && (
                         <FormDescription className="text-xs">
-                          请先选择密钥配置才能启用供应商
+                          {t("ai.provider.form.statusHint")}
                         </FormDescription>
                       )}
                       <FormMessage />
@@ -276,15 +284,15 @@ export const AiProviderFormDialog = ({
                 name="provider"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>供应商标识</FormLabel>
+                    <FormLabel required>{t("ai.provider.form.provider")}</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="例如: openai, deepseek, doubao"
+                        placeholder={t("ai.provider.form.providerPlaceholder")}
                         {...field}
                         disabled={isEditMode}
                       />
                     </FormControl>
-                    <FormDescription>唯一标识符，创建后不可修改</FormDescription>
+                    <FormDescription>{t("ai.provider.form.providerDescription")}</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -295,9 +303,9 @@ export const AiProviderFormDialog = ({
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>供应商名称</FormLabel>
+                    <FormLabel required>{t("ai.provider.form.name")}</FormLabel>
                     <FormControl>
-                      <Input placeholder="例如: OpenAI, DeepSeek, 字节豆包" {...field} />
+                      <Input placeholder={t("ai.provider.form.namePlaceholder")} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -309,10 +317,10 @@ export const AiProviderFormDialog = ({
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>描述</FormLabel>
+                    <FormLabel>{t("ai.provider.form.description")}</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="供应商描述信息（可选）"
+                        placeholder={t("ai.provider.form.descriptionPlaceholder")}
                         className="resize-none"
                         rows={2}
                         {...field}
@@ -329,7 +337,7 @@ export const AiProviderFormDialog = ({
                 render={({ field }) => (
                   <FormItem>
                     <div className="flex items-center justify-between">
-                      <FormLabel required>绑定密钥</FormLabel>
+                      <FormLabel required>{t("ai.provider.form.bindSecret")}</FormLabel>
                       <Button
                         size="xs"
                         variant="secondary"
@@ -337,13 +345,15 @@ export const AiProviderFormDialog = ({
                         type="button"
                       >
                         <FolderKey />
-                        管理密钥
+                        {t("ai.provider.form.manageSecret")}
                       </Button>
                     </div>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder="选择密钥配置" />
+                          <SelectValue
+                            placeholder={t("ai.provider.form.selectSecretPlaceholder")}
+                          />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -367,7 +377,7 @@ export const AiProviderFormDialog = ({
                 name="supportedModelTypes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>支持的模型类型</FormLabel>
+                    <FormLabel required>{t("ai.provider.form.supportedModelTypes")}</FormLabel>
                     <FormControl>
                       <Combobox
                         multiple
@@ -385,13 +395,15 @@ export const AiProviderFormDialog = ({
                                     {MODEL_TYPE_DESCRIPTIONS[value as ModelType]?.nameEn || value}
                                   </ComboboxChip>
                                 ))}
-                                <ComboboxChipsInput placeholder="选择模型类型..." />
+                                <ComboboxChipsInput
+                                  placeholder={t("ai.provider.form.selectModelTypePlaceholder")}
+                                />
                               </React.Fragment>
                             )}
                           </ComboboxValue>
                         </ComboboxChips>
                         <ComboboxContent anchor={modelTypeAnchor} container={container}>
-                          <ComboboxEmpty>未找到匹配的类型</ComboboxEmpty>
+                          <ComboboxEmpty>{t("ai.provider.form.noMatch")}</ComboboxEmpty>
                           <ComboboxList>
                             {(item: string) => (
                               <ComboboxItem key={item} value={item}>
@@ -412,7 +424,7 @@ export const AiProviderFormDialog = ({
                 name="sortOrder"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>排序权重</FormLabel>
+                    <FormLabel>{t("ai.provider.form.sortOrder")}</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -429,11 +441,11 @@ export const AiProviderFormDialog = ({
 
               <DialogFooter className="bg-background absolute bottom-0 left-0 w-full flex-row justify-end rounded-lg p-4">
                 <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                  取消
+                  {t("common.action.cancel")}
                 </Button>
                 <Button type="submit" disabled={isPending}>
                   {isPending && <Loader2 className="animate-spin" />}
-                  {isEditMode ? "保存" : "创建"}
+                  {isEditMode ? t("common.action.save") : t("common.action.create")}
                 </Button>
               </DialogFooter>
             </form>

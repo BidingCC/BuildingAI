@@ -1,6 +1,7 @@
 import { Popover, PopoverContent, PopoverTrigger } from "@buildingai/ui/components/ui/popover";
 import { Tabs, TabsList, TabsTrigger } from "@buildingai/ui/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@buildingai/ui/components/ui/tooltip";
+import { useI18n } from "@buildingai/i18n";
 import { BarChart3Icon } from "lucide-react";
 import { memo, useRef, useState } from "react";
 
@@ -39,6 +40,7 @@ export const MessageUsage = memo(function MessageUsage({
   provider,
   modelName,
 }: MessageUsageProps) {
+  const { t } = useI18n();
   const [viewMode, setViewMode] = useState<ViewMode>("token");
   const popoverRef = useRef<HTMLDivElement>(null);
   const inputTokens = usage?.inputTokens ?? 0;
@@ -65,7 +67,7 @@ export const MessageUsage = memo(function MessageUsage({
           </PopoverTrigger>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Token用量</p>
+          <p>{t("message.tokenUsage")}</p>
         </TooltipContent>
       </Tooltip>
       <PopoverContent ref={popoverRef} className="w-62" align="center" side="top">
@@ -86,7 +88,7 @@ export const MessageUsage = memo(function MessageUsage({
                 </Tooltip>
               ) : (
                 <div className="text-sm font-semibold">
-                  {viewMode === "token" ? "Token用量" : "积分消耗"}
+                  {viewMode === "token" ? t("message.tokenUsage") : t("message.powerConsumption")}
                 </div>
               )}
             </div>
@@ -104,7 +106,7 @@ export const MessageUsage = memo(function MessageUsage({
                   Token
                 </TabsTrigger>
                 <TabsTrigger value="power" className="text-xs">
-                  积分
+                  {t("action.credits")}
                 </TabsTrigger>
               </TabsList>
             </Tabs>
@@ -113,48 +115,48 @@ export const MessageUsage = memo(function MessageUsage({
             <>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <div className="text-muted-foreground text-xs">输入</div>
+                  <div className="text-muted-foreground text-xs">{t("message.input")}</div>
                   <div className="text-lg font-semibold">{inputTokens.toLocaleString()}</div>
                 </div>
                 <div className="space-y-1">
-                  <div className="text-muted-foreground text-xs">输出</div>
+                  <div className="text-muted-foreground text-xs">{t("message.output")}</div>
                   <div className="text-lg font-semibold">{outputTokens.toLocaleString()}</div>
                 </div>
               </div>
               <div className="border-t pt-3">
                 <div className="space-y-1">
-                  <div className="text-muted-foreground text-xs">总计</div>
+                  <div className="text-muted-foreground text-xs">{t("message.total")}</div>
                   <div className="text-xl font-bold">{totalTokens.toLocaleString()}</div>
                 </div>
                 {extraTokens > 0 && (
                   <div className="mt-1 grid grid-cols-2 gap-2 text-xs">
-                    <div className="text-muted-foreground">额外模型 Tokens</div>
+                    <div className="text-muted-foreground">{t("message.extraModelTokens")}</div>
                     <div className="text-right font-medium">{extraTokens.toLocaleString()}</div>
                   </div>
                 )}
                 <div className="mt-3 space-y-2">
                   <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="text-muted-foreground">文本 Tokens</div>
+                    <div className="text-muted-foreground">{t("message.textTokens")}</div>
                     <div className="text-right font-medium">
                       {(outputDetails?.textTokens ?? outputTokens).toLocaleString()}
                     </div>
-                    <div className="text-muted-foreground">思考 Tokens</div>
+                    <div className="text-muted-foreground">{t("message.reasoningTokens")}</div>
                     <div className="text-right font-medium">{reasoningTokens.toLocaleString()}</div>
                   </div>
                   {inputDetails && (
                     <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className="text-muted-foreground">非缓存输入</div>
+                      <div className="text-muted-foreground">{t("message.nonCacheInput")}</div>
                       <div className="text-right font-medium">
                         {(inputDetails.noCacheTokens ?? inputTokens).toLocaleString()}
                       </div>
-                      <div className="text-muted-foreground">缓存命中</div>
+                      <div className="text-muted-foreground">{t("message.cacheHit")}</div>
                       <div className="text-right font-medium">
                         {(inputDetails.cacheReadTokens ?? cachedInputTokens).toLocaleString()}
                       </div>
                     </div>
                   )}
                   <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="text-muted-foreground">缓存输入 Tokens</div>
+                    <div className="text-muted-foreground">{t("message.cacheInputTokens")}</div>
                     <div className="text-right font-medium">
                       {cachedInputTokens.toLocaleString()}
                     </div>
@@ -165,7 +167,7 @@ export const MessageUsage = memo(function MessageUsage({
           ) : (
             <div className="space-y-3">
               <div className="space-y-1">
-                <div className="text-muted-foreground text-xs">消耗积分</div>
+                <div className="text-muted-foreground text-xs">{t("message.consumedPower")}</div>
                 <div className="text-2xl font-bold">{consumedPower.toLocaleString()}</div>
               </div>
             </div>

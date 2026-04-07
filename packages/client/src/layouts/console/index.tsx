@@ -18,6 +18,7 @@ import DatasetsIndexPage from "@/pages/console/ai/datasets/list";
 import AiMcpIndexPage from "@/pages/console/ai/mcp";
 import AiProviderIndexPage from "@/pages/console/ai/provider";
 import AiSecretIndexPage from "@/pages/console/ai/secret";
+import ChannelGoogleIndexPage from "@/pages/console/channel/google";
 import ChannelWechatOaIndexPage from "@/pages/console/channel/wechat-oa";
 import ChatConfigIndexPage from "@/pages/console/chat/config";
 import ChatRecordIndexPage from "@/pages/console/chat/record";
@@ -55,21 +56,24 @@ const modules = import.meta.glob<{ default: ComponentType }>(
   { eager: true },
 );
 
+type RouteObjectItem = RouteObject & { code?: string };
+
 /**
  * Convert menu items to react-router RouteObject.
  */
-function generateRoutes(menus: MenuItem[]): RouteObject[] {
+function generateRoutes(menus: MenuItem[]): RouteObjectItem[] {
   return menus
     .filter((menu) => menu.component)
     .flatMap((menu) => {
       const module = modules[`/src/pages${menu.component}`];
       const Component = module?.default;
 
-      const routes: RouteObject[] = [];
+      const routes: RouteObjectItem[] = [];
 
       if (Component) {
         routes.push({
           path: menu.path,
+          code: menu.code,
           element: <Component />,
         });
       }
@@ -200,6 +204,10 @@ function ConsoleRoutes() {
           {
             path: "wechat-oa",
             element: <ChannelWechatOaIndexPage />,
+          },
+          {
+            path: "google",
+            element: <ChannelGoogleIndexPage />,
           },
         ],
       },

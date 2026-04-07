@@ -1,4 +1,5 @@
 import { useDocumentHead } from "@buildingai/hooks";
+import { useI18n } from "@buildingai/i18n";
 import { useDeleteAgentMutation, useMyAgentsInfiniteQuery } from "@buildingai/services/web";
 import { InfiniteScroll } from "@buildingai/ui/components/infinite-scroll";
 import { Avatar, AvatarFallback, AvatarImage } from "@buildingai/ui/components/ui/avatar";
@@ -54,24 +55,24 @@ type AgentWorkspaceStatusConfig = {
 
 const statusConfigMap: Record<AgentWorkspaceStatus, AgentWorkspaceStatusConfig> = {
   pending: {
-    label: "待审核",
+    label: "status.pending",
     variant: "secondary",
   },
   rejected: {
-    label: "审核失败",
+    label: "status.rejected",
     variant: "destructive",
   },
   none: {
-    label: "私有",
+    label: "status.private",
     variant: "outline",
   },
   published: {
-    label: "已公开",
+    label: "status.published",
     variant: "secondary",
     className: "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300",
   },
   unpublished: {
-    label: "已下架",
+    label: "status.unpublished",
     variant: "secondary",
     className: "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300",
   },
@@ -93,6 +94,7 @@ function getAgentWorkspaceStatusConfig(
 }
 
 const AgentsWorkspacePage = () => {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const [keyword, setKeyword] = useState("");
   const [status, setStatus] = useState<StatusFilter>("all");
@@ -100,7 +102,7 @@ const AgentsWorkspacePage = () => {
   const { confirm: alertConfirm } = useAlertDialog();
 
   useDocumentHead({
-    title: "我的智能体",
+    title: t("agent.workspace.myAgents"),
   });
 
   const handleCreateSuccess = (agent: unknown) => {
@@ -130,10 +132,10 @@ const AgentsWorkspacePage = () => {
   const handleDeleteAgent = async (agent: { id: string; name: string }) => {
     try {
       await alertConfirm({
-        title: "删除确认",
-        description: `确定要删除智能体"${agent.name}"吗？此操作不可恢复。`,
-        confirmText: "删除",
-        cancelText: "取消",
+        title: t("agent.workspace.deleteConfirm"),
+        description: t("agent.workspace.deleteAgentConfirm", { name: agent.name }),
+        confirmText: t("agent.workspace.delete"),
+        cancelText: t("agent.workspace.cancel"),
         confirmVariant: "destructive",
       });
     } catch {
@@ -142,11 +144,11 @@ const AgentsWorkspacePage = () => {
 
     try {
       await deleteAgentMutation.mutateAsync(agent.id);
-      toast.success("删除成功");
+      toast.success(t("agent.workspace.deleteSuccess"));
       myAgentsQuery.refetch();
     } catch (error) {
-      const message = error instanceof Error ? error.message : "删除失败";
-      toast.error(message || "删除失败");
+      const message = error instanceof Error ? error.message : t("agent.workspace.deleteFailed");
+      toast.error(message || t("agent.workspace.deleteFailed"));
     }
   };
 
@@ -164,7 +166,7 @@ const AgentsWorkspacePage = () => {
           <Button variant="ghost" size="sm" className="ml-auto" asChild>
             <Link to="/agents">
               <Bot />
-              智能体广场
+              {t("agent.square.title")}
             </Link>
           </Button>
         </div>
@@ -173,13 +175,13 @@ const AgentsWorkspacePage = () => {
       <div className="w-full max-w-4xl px-4 py-8 pt-12 sm:pt-20 md:px-6">
         <div className="flex flex-col items-center justify-between gap-4 max-sm:items-start sm:flex-row">
           <div className="flex flex-col gap-2">
-            <h1 className="text-2xl">我的智能体</h1>
-            <p className="text-muted-foreground text-sm">管理我的智能体应用</p>
+            <h1 className="text-2xl">{t("agent.workspace.title")}</h1>
+            <p className="text-muted-foreground text-sm">{t("agent.workspace.description")}</p>
           </div>
           <div className="max-sm:w-full">
             <InputGroup className="rounded-full">
               <InputGroupInput
-                placeholder="搜索智能体"
+                placeholder={t("agent.workspace.searchPlaceholder")}
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
               />
@@ -193,24 +195,24 @@ const AgentsWorkspacePage = () => {
         <div className="mt-8 flex items-center justify-between">
           <div className="flex gap-2">
             <Badge className={badgeClass(status === "all")} onClick={() => setStatus("all")}>
-              全部
+              {t("agent.workspace.all")}
             </Badge>
             <Badge
               className={badgeClass(status === "published")}
               onClick={() => setStatus("published")}
             >
-              已公开
+              {t("agent.workspace.published")}
             </Badge>
             <Badge
               className={badgeClass(status === "unpublished")}
               onClick={() => setStatus("unpublished")}
             >
-              私有
+              {t("agent.workspace.private")}
             </Badge>
           </div>
           <Button className="ml-auto rounded-full" onClick={() => setIsModalOpen(true)}>
             <Plus />
-            创建智能体
+            {t("agent.workspace.createAgent")}
           </Button>
         </div>
 
@@ -227,7 +229,9 @@ const AgentsWorkspacePage = () => {
               <Loader2 className="text-muted-foreground size-8 animate-spin" />
             </div>
           ) : items.length === 0 ? (
-            <p className="text-muted-foreground py-12 text-center text-sm">暂无智能体</p>
+            <p className="text-muted-foreground py-12 text-center text-sm">
+              {t("agent.workspace.noAgents")}
+            </p>
           ) : (
             <InfiniteScroll
               loading={isFetchingNextPage}
@@ -260,12 +264,12 @@ const AgentsWorkspacePage = () => {
                               variant={statusConfig.variant}
                               className={statusConfig.className}
                             >
-                              {statusConfig.label}
+                              {t(statusConfig.label)}
                             </Badge>
                           )}
                         </ItemTitle>
                         <ItemDescription>
-                          {agent.description?.toString().trim() || "暂无描述"}
+                          {agent.description?.toString().trim() || t("agent.square.noDescription")}
                         </ItemDescription>
                       </ItemContent>
                       <ItemActions className="opacity-0 group-hover/apps-item:opacity-100">
@@ -273,7 +277,7 @@ const AgentsWorkspacePage = () => {
                           size="icon-sm"
                           variant="ghost"
                           className="text-destructive hover:bg-destructive/10 hover:text-destructive rounded-full"
-                          aria-label="删除"
+                          aria-label={t("common.action.delete")}
                           disabled={deleteAgentMutation.isPending}
                           onClick={(e) => {
                             e.stopPropagation();
@@ -286,7 +290,7 @@ const AgentsWorkspacePage = () => {
                           size="icon-sm"
                           variant="outline"
                           className="rounded-full"
-                          aria-label="进入"
+                          aria-label={t("agent.workspace.enter")}
                           onClick={(e) => {
                             e.stopPropagation();
                             navigate(`/agents/${agent.id}/configuration`);

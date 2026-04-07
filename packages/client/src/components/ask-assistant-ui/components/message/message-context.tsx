@@ -6,6 +6,7 @@ import {
 } from "@buildingai/ui/components/ui/dialog";
 import { ScrollArea } from "@buildingai/ui/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@buildingai/ui/components/ui/tooltip";
+import { useI18n } from "@buildingai/i18n";
 import { ListChecks } from "lucide-react";
 import { memo, useState } from "react";
 
@@ -14,12 +15,13 @@ export interface MessageContextProps {
 }
 
 const roleLabel: Record<string, string> = {
-  system: "系统",
-  user: "用户",
-  assistant: "助手",
+  system: "roles.system",
+  user: "roles.user",
+  assistant: "roles.assistant",
 };
 
 export const MessageContext = memo(function MessageContext({ messages }: MessageContextProps) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
 
   if (!messages?.length) return null;
@@ -37,26 +39,26 @@ export const MessageContext = memo(function MessageContext({ messages }: Message
           </button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>查看对话上下文</p>
+          <p>{t("action.viewConversationContext")}</p>
         </TooltipContent>
       </Tooltip>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="flex max-w-2xl flex-col">
           <DialogHeader>
-            <DialogTitle>对话上下文</DialogTitle>
+            <DialogTitle>{t("message.conversationContext")}</DialogTitle>
           </DialogHeader>
           <p className="text-muted-foreground text-sm">
-            发送给模型的完整上下文（含 system、截断历史与当前轮）
+            {t("message.fullContextSentToModel")}
           </p>
           <ScrollArea className="h-[400px] rounded-md border p-2 text-sm">
             <div className="space-y-3 pr-2">
               {messages.map((msg, i) => (
                 <div key={i} className="space-y-1">
                   <span className="text-muted-foreground font-medium">
-                    {roleLabel[msg.role] ?? msg.role}
+                    {t(`message.${roleLabel[msg.role]}`) ?? msg.role}
                   </span>
                   <pre className="bg-muted/50 rounded p-2 text-xs wrap-break-word whitespace-pre-wrap">
-                    {msg.content || "(无文本)"}
+                    {msg.content || t("action.noContent")}
                   </pre>
                 </div>
               ))}

@@ -6,6 +6,7 @@ import {
 } from "@buildingai/ui/components/ai-elements/message";
 import { Button } from "@buildingai/ui/components/ui/button";
 import { Textarea } from "@buildingai/ui/components/ui/textarea";
+import { useI18n } from "@buildingai/i18n";
 import { CopyIcon, PencilIcon } from "lucide-react";
 import { memo, useEffect, useState } from "react";
 
@@ -38,6 +39,7 @@ export const UserMessageActions = memo(function UserMessageActions({
   onSwitchBranch,
   disabled = false,
 }: UserMessageActionsProps) {
+  const { t } = useI18n();
   const [internalIsEditing, setInternalIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(content);
 
@@ -85,10 +87,10 @@ export const UserMessageActions = memo(function UserMessageActions({
           />
           <div className="flex items-center justify-end gap-2">
             <Button variant="ghost" size="sm" onClick={handleCancel}>
-              取消
+              {t("action.cancel")}
             </Button>
             <Button size="sm" onClick={handleSend}>
-              发送
+              {t("action.send")}
             </Button>
           </div>
         </div>
@@ -102,11 +104,11 @@ export const UserMessageActions = memo(function UserMessageActions({
       <AIMessageToolbar className="mt-2 flex min-w-0 justify-end">
         <AIMessageActions className="opacity-0 transition-opacity group-hover:opacity-100">
           {onSend && (
-            <AIMessageAction label="Edit" onClick={handleEdit} tooltip="编辑">
+            <AIMessageAction label={t("action.edit")} onClick={handleEdit} tooltip={t("action.edit")}>
               <PencilIcon className="size-4" />
             </AIMessageAction>
           )}
-          <AIMessageAction label="Copy" onClick={handleCopy} tooltip="复制">
+          <AIMessageAction label={t("action.copy")} onClick={handleCopy} tooltip={t("action.copy")}>
             <CopyIcon className="size-4" />
           </AIMessageAction>
           {onSwitchBranch && (

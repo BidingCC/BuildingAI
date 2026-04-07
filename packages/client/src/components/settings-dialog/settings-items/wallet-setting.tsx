@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from "@buildingai/i18n";
 import { type RechargeRuleItem, useRechargeCenterQuery } from "@buildingai/services/web";
 import { useAuthStore } from "@buildingai/stores";
 import { Badge } from "@buildingai/ui/components/ui/badge";
@@ -15,6 +16,7 @@ function formatPrice(amount: number) {
 }
 
 const WalletSetting = () => {
+  const { t } = useI18n();
   const { userInfo } = useAuthStore((state) => state.auth);
   const { data: center, isLoading } = useRechargeCenterQuery();
   const [detailOpen, setDetailOpen] = useState(false);
@@ -36,7 +38,7 @@ const WalletSetting = () => {
     <div>
       <div className="bg-primary relative overflow-hidden rounded-xl p-6">
         <div className="flex flex-col gap-1">
-          <span className="text-primary-foreground/70 text-sm">钱包余额</span>
+          <span className="text-primary-foreground/70 text-sm">{t("common.walletBalance")}</span>
           <span className="text-primary-foreground flex items-end leading-none">
             <span className="text-3xl leading-none font-bold">{userInfo?.power}</span>
           </span>
@@ -49,7 +51,7 @@ const WalletSetting = () => {
             onClick={() => setPowerDetailOpen(true)}
           >
             <Info />
-            积分明细
+            {t("common.creditDetails")}
             <ChevronRight />
           </Button>
         </div>
@@ -57,10 +59,10 @@ const WalletSetting = () => {
       </div>
 
       <div className="mt-4 space-y-4">
-        <h1 className="text-sm font-bold">积分购买</h1>
-        {isLoading && <div className="text-muted-foreground py-6 text-center text-sm">加载中…</div>}
+        <h1 className="text-sm font-bold">{t("common.creditsPurchase")}</h1>
+        {isLoading && <div className="text-muted-foreground py-6 text-center text-sm">{t("common.loading")}</div>}
         {!rechargeStatus && !isLoading && (
-          <div className="text-muted-foreground py-6 text-center text-sm">积分充值暂未开放</div>
+          <div className="text-muted-foreground py-6 text-center text-sm">{t("common.creditsNotAvailable")}</div>
         )}
         {rechargeStatus && !isLoading && (
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
@@ -82,10 +84,10 @@ const WalletSetting = () => {
                 <span className="font-semibold tabular-nums">{rule.power.toLocaleString()}</span>
                 {rule.givePower > 0 ? (
                   <span className="text-muted-foreground text-xs">
-                    赠送 <span className="text-primary">{rule.givePower}</span> 积分
+                    {t("common.give")} <span className="text-primary">{rule.givePower}</span> {t("common.credits")}
                   </span>
                 ) : (
-                  <span className="text-muted-foreground text-xs">无赠送积分</span>
+                  <span className="text-muted-foreground text-xs">{t("common.noBonusCredits")}</span>
                 )}
                 <span className="mt-2 text-right font-bold">{formatPrice(rule.sellPrice)}</span>
               </button>

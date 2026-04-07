@@ -1,4 +1,5 @@
 import { BooleanNumber } from "@buildingai/constants/shared/status-codes.constant";
+import { useI18n } from "@buildingai/i18n";
 import {
   type Secret,
   type SecretFieldValue,
@@ -93,6 +94,7 @@ type NewSecretRow = {
 };
 
 const SecretsManageContent = ({ template, onSecretChanged }: SecretsManageContentProps) => {
+  const { t } = useI18n();
   const { confirm } = useAlertDialog();
   const [editingField, setEditingField] = useState<EditingField | null>(null);
   const [hasError, setHasError] = useState(false);
@@ -103,20 +105,24 @@ const SecretsManageContent = ({ template, onSecretChanged }: SecretsManageConten
 
   const updateSecretMutation = useUpdateSecretMutation({
     onSuccess: () => {
-      toast.success("密钥已更新");
+      toast.success(t("ai.secret.manage.toast.updateSuccess"));
       setEditingField(null);
       setHasError(false);
       refetch();
       onSecretChanged?.();
     },
     onError: (error) => {
-      toast.error(`更新失败: ${error.message}`);
+      toast.error(t("ai.secret.manage.toast.updateFailed", { error: error.message }));
     },
   });
 
   const setStatusMutation = useSetSecretStatusMutation({
     onSuccess: (_, variables) => {
-      toast.success(variables.status === BooleanNumber.YES ? "密钥已启用" : "密钥已禁用");
+      toast.success(
+        variables.status === BooleanNumber.YES
+          ? t("ai.secret.manage.toast.secretEnabled")
+          : t("ai.secret.manage.toast.secretDisabled"),
+      );
       refetch();
       onSecretChanged?.();
     },
@@ -124,24 +130,24 @@ const SecretsManageContent = ({ template, onSecretChanged }: SecretsManageConten
 
   const deleteMutation = useDeleteSecretMutation({
     onSuccess: () => {
-      toast.success("密钥已删除");
+      toast.success(t("ai.secret.manage.toast.deleteSuccess"));
       refetch();
       onSecretChanged?.();
     },
     onError: (error) => {
-      toast.error(`删除失败: ${error.message}`);
+      toast.error(t("ai.secret.manage.toast.deleteFailed", { error: error.message }));
     },
   });
 
   const createSecretMutation = useCreateSecretMutation({
     onSuccess: () => {
-      toast.success("密钥已创建");
+      toast.success(t("ai.secret.manage.toast.createSuccess"));
       setNewRow(null);
       refetch();
       onSecretChanged?.();
     },
     onError: (error) => {
-      toast.error(`创建失败: ${error.message}`);
+      toast.error(t("ai.secret.manage.toast.createFailed", { error: error.message }));
     },
   });
 
@@ -171,7 +177,7 @@ const SecretsManageContent = ({ template, onSecretChanged }: SecretsManageConten
     });
     if (errors.size > 0) {
       setNewRowErrors(errors);
-      toast.error("请填写必填项");
+      toast.error(t("ai.secret.manage.form.fillRequired"));
       return;
     }
     setNewRowErrors(new Set());
@@ -219,7 +225,7 @@ const SecretsManageContent = ({ template, onSecretChanged }: SecretsManageConten
     }
     const fieldConfig = template.fieldConfig?.find((f) => f.name === editingField.fieldName);
     if (fieldConfig?.required && !editingField.value.trim()) {
-      toast.error(`${editingField.fieldName} 为必填项`);
+      toast.error(t("ai.secret.manage.form.fieldRequired", { field: editingField.fieldName }));
       setHasError(true);
       return;
     }
@@ -257,7 +263,7 @@ const SecretsManageContent = ({ template, onSecretChanged }: SecretsManageConten
       return;
     }
     if (!editingField.value.trim()) {
-      toast.error("名称为必填项");
+      toast.error(t("ai.secret.manage.form.nameRequired"));
       setHasError(true);
       return;
     }
@@ -277,16 +283,21 @@ const SecretsManageContent = ({ template, onSecretChanged }: SecretsManageConten
   const handleToggleStatus = async (secret: Secret) => {
     const newStatus = secret.status === BooleanNumber.YES ? BooleanNumber.NO : BooleanNumber.YES;
     await confirm({
-      title: "密钥状态",
-      description: `确定要${newStatus === BooleanNumber.YES ? "启用" : "禁用"}该密钥吗？`,
+      title: t("ai.secret.manage.confirm.statusTitle"),
+      description: t("ai.secret.manage.confirm.statusDesc", {
+        action:
+          newStatus === BooleanNumber.YES
+            ? t("ai.secret.manage.confirm.enable")
+            : t("ai.secret.manage.confirm.disable"),
+      }),
     });
     setStatusMutation.mutate({ id: secret.id, status: newStatus });
   };
 
   const handleDelete = async (secret: Secret) => {
     await confirm({
-      title: "删除密钥",
-      description: "确定要删除该密钥配置吗？此操作不可恢复。",
+      title: t("ai.secret.manage.confirm.deleteTitle"),
+      description: t("ai.secret.manage.confirm.deleteDesc"),
     });
     deleteMutation.mutate(secret.id);
   };
@@ -295,22 +306,26 @@ const SecretsManageContent = ({ template, onSecretChanged }: SecretsManageConten
     <>
       <DialogHeader>
         <DialogTitle>
-          {template.name} - 密钥列表({secrets?.length}个)
+          {t("ai.secret.manage.dialog.title", {
+            name: template.name,
+            count: secrets?.length || 0,
+          })}
         </DialogTitle>
 
         <DialogDescription className="flex items-center text-xs">
           <Info className="size-3" />
-          点击字段项进行修改
+          {t("ai.secret.manage.dialog.clickToEdit")}
         </DialogDescription>
       </DialogHeader>
       <ScrollArea className="max-h-96">
         {isLoading ? (
-          <div>加载中...</div>
+          <div>{t("ai.secret.manage.dialog.loading")}</div>
         ) : (secrets && secrets.length > 0) || newRow ? (
           <div className="flex gap-1">
             <div className="flex w-[100px] flex-col">
               <span className="text-muted-foreground mb-2 px-2 text-xs">
-                名称<span className="text-destructive">*</span>
+                {t("ai.secret.manage.column.name")}
+                <span className="text-destructive">*</span>
               </span>
               {secrets?.map((secret) => {
                 const isEditingName =
@@ -369,7 +384,7 @@ const SecretsManageContent = ({ template, onSecretChanged }: SecretsManageConten
                 >
                   <Input
                     value={newRow.name}
-                    placeholder="请输入密钥名"
+                    placeholder={t("ai.secret.manage.form.secretNamePlaceholder")}
                     className="h-full w-full border-0 border-none bg-transparent! px-0 shadow-none ring-0 focus-within:ring-0 focus-visible:ring-0"
                     onChange={(e) => {
                       setNewRow({ ...newRow, name: e.target.value });
@@ -413,7 +428,12 @@ const SecretsManageContent = ({ template, onSecretChanged }: SecretsManageConten
                         <PermissionGuard permissions="secret:update" blockOnly>
                           <Input
                             value={isEditing ? editingField.value : currentValue}
-                            placeholder={fieldConfig.placeholder || `请输入${fieldConfig.name}`}
+                            placeholder={
+                              fieldConfig.placeholder ||
+                              t("ai.secret.manage.placeholder.inputField", {
+                                field: fieldConfig.name,
+                              })
+                            }
                             className="h-full w-full border-0 border-none bg-transparent! px-0 shadow-none ring-0 focus-within:ring-0 focus-visible:ring-0"
                             onFocus={() => handleFieldFocus(secret, fieldConfig.name, currentValue)}
                             onChange={(e) => handleFieldChange(e.target.value)}
@@ -485,7 +505,9 @@ const SecretsManageContent = ({ template, onSecretChanged }: SecretsManageConten
               )}
             </div>
             <div className="flex w-12 flex-col">
-              <span className="text-muted-foreground mb-2 text-xs">状态</span>
+              <span className="text-muted-foreground mb-2 text-xs">
+                {t("ai.secret.manage.column.status")}
+              </span>
               {secrets?.map((secret) => (
                 <div key={secret.id} className="flex h-9 items-center">
                   <PermissionGuard permissions="secret:update-status" blockOnly>
@@ -500,7 +522,9 @@ const SecretsManageContent = ({ template, onSecretChanged }: SecretsManageConten
               {newRow && <div className="flex h-9 items-center" />}
             </div>
             <div className="flex w-16 flex-col">
-              <span className="text-muted-foreground end mb-2 text-xs">操作</span>
+              <span className="text-muted-foreground end mb-2 text-xs">
+                {t("ai.secret.manage.column.action")}
+              </span>
               {secrets?.map((secret) => (
                 <div key={secret.id} className="end flex h-9 items-center">
                   <Button
@@ -533,13 +557,15 @@ const SecretsManageContent = ({ template, onSecretChanged }: SecretsManageConten
             </div>
           </div>
         ) : (
-          <div className="center text-muted-foreground p-8 text-sm">密钥列表为空</div>
+          <div className="center text-muted-foreground p-8 text-sm">
+            {t("ai.secret.manage.dialog.empty")}
+          </div>
         )}
         <div className="mt-4 flex justify-end">
           <PermissionGuard permissions="secret:create">
             <Button size="sm" variant="outline" onClick={handleAddRow} disabled={!!newRow}>
               <Plus className="size-4" />
-              添加
+              {t("ai.secret.manage.dialog.add")}
             </Button>
           </PermissionGuard>
         </div>
@@ -553,14 +579,14 @@ const SecretsManageContent = ({ template, onSecretChanged }: SecretsManageConten
  */
 const SecretsManageDialog = ({ template, onSecretChanged }: SecretsManageDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
-
+  const { t } = useI18n();
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <PermissionGuard permissions="secret:list-by-template">
         <DialogTrigger asChild>
           <Button variant="ghost" size="xs" className="text-muted-foreground px-0 hover:px-2">
             <Settings />
-            管理密钥({template.Secrets?.length || 0})
+            {t("ai.secret.manage.actions.manageSecrets", { count: template.Secrets?.length || 0 })}
             <ChevronRight />
           </Button>
         </DialogTrigger>
@@ -573,6 +599,7 @@ const SecretsManageDialog = ({ template, onSecretChanged }: SecretsManageDialogP
 };
 
 const AiSecretTemplateManage = () => {
+  const { t } = useI18n();
   const { confirm } = useAlertDialog();
   const [searchKeyword, setSearchKeyword] = useState("");
   const [debouncedSearchKeyword] = useDebounceValue(searchKeyword.trim(), 300);
@@ -599,30 +626,34 @@ const AiSecretTemplateManage = () => {
 
   const setEnabledMutation = useSetSecretTemplateEnabledMutation({
     onSuccess: (_, variables) => {
-      toast.success(variables.isEnabled === BooleanNumber.YES ? "模板已启用" : "模板已禁用");
+      toast.success(
+        variables.isEnabled === BooleanNumber.YES
+          ? t("ai.secret.manage.templateToast.enabled")
+          : t("ai.secret.manage.templateToast.disabled"),
+      );
       refetch();
     },
   });
 
   const deleteMutation = useDeleteSecretTemplateMutation({
     onSuccess: () => {
-      toast.success("模板已删除");
+      toast.success(t("ai.secret.manage.templateToast.deleted"));
       refetch();
     },
     onError: (error) => {
-      toast.error(`删除失败: ${error.message}`);
+      toast.error(t("ai.secret.manage.toast.deleteFailed", { error: error.message }));
     },
   });
 
   const importMutation = useImportSecretTemplateJsonMutation({
     onSuccess: () => {
-      toast.success("模板导入成功");
+      toast.success(t("ai.secret.manage.templateToast.importSuccess"));
       setImportDialogOpen(false);
       setImportJson("");
       refetch();
     },
     onError: (error) => {
-      toast.error(`导入失败: ${error.message}`);
+      toast.error(t("ai.secret.manage.templateToast.importFailed", { error: error.message }));
     },
   });
 
@@ -638,7 +669,7 @@ const AiSecretTemplateManage = () => {
 
   const handleImport = () => {
     if (!importJson.trim()) {
-      toast.error("请输入 JSON 配置");
+      toast.error(t("ai.secret.manage.form.fillRequired"));
       return;
     }
     importMutation.mutate({ json: importJson });
@@ -648,16 +679,21 @@ const AiSecretTemplateManage = () => {
     const newStatus =
       template.isEnabled === BooleanNumber.YES ? BooleanNumber.NO : BooleanNumber.YES;
     await confirm({
-      title: "模板状态",
-      description: `确定要${newStatus === BooleanNumber.YES ? "启用" : "禁用"}该模板吗？`,
+      title: t("ai.secret.manage.templateConfirm.statusTitle"),
+      description: t("ai.secret.manage.templateConfirm.statusDesc", {
+        action:
+          newStatus === BooleanNumber.YES
+            ? t("ai.secret.manage.confirm.enable")
+            : t("ai.secret.manage.confirm.disable"),
+      }),
     });
     setEnabledMutation.mutate({ id: template.id, isEnabled: newStatus });
   };
 
   const handleDelete = async (template: SecretTemplate) => {
     await confirm({
-      title: "删除模板",
-      description: "确定要删除该密钥模板吗？此操作不可恢复。",
+      title: t("ai.secret.manage.templateConfirm.deleteTitle"),
+      description: t("ai.secret.manage.templateConfirm.deleteDesc"),
     });
     deleteMutation.mutate(template.id);
   };
@@ -675,19 +711,21 @@ const AiSecretTemplateManage = () => {
       <div className="flex flex-col gap-4">
         <div className="bg-background sticky top-0 z-2 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 in-[.secret-index-page]:2xl:grid-cols-5">
           <Input
-            placeholder="搜索模板名称或代码"
+            placeholder={t("ai.secret.manage.searchPlaceholder")}
             className="text-sm"
             value={searchKeyword}
             onChange={handleSearchChange}
           />
           <Select onValueChange={handleStatusChange}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="模板状态" />
+              <SelectValue placeholder={t("ai.secret.manage.statusOptions.all")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">全部状态</SelectItem>
-              <SelectItem value="enabled">已启用</SelectItem>
-              <SelectItem value="disabled">已禁用</SelectItem>
+              <SelectItem value="all">{t("ai.secret.manage.statusOptions.all")}</SelectItem>
+              <SelectItem value="enabled">{t("ai.secret.manage.statusOptions.enabled")}</SelectItem>
+              <SelectItem value="disabled">
+                {t("ai.secret.manage.statusOptions.disabled")}
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -700,9 +738,9 @@ const AiSecretTemplateManage = () => {
                   <Plus />
                 </Button>
                 <div className="flex flex-col">
-                  <span>新增密钥模板</span>
+                  <span>{t("ai.secret.manage.actions.addTemplate")}</span>
                   <span className="text-muted-foreground py-1 text-xs font-medium">
-                    添加新的密钥模板
+                    {t("ai.secret.manage.actions.addTemplateDesc")}
                   </span>
                 </div>
               </div>
@@ -715,12 +753,12 @@ const AiSecretTemplateManage = () => {
                     variant="outline"
                     onClick={() => setImportDialogOpen(true)}
                   >
-                    <FileJson2 /> 从配置导入
+                    <FileJson2 /> {t("ai.secret.manage.actions.importConfig")}
                   </Button>
                 </PermissionGuard>
                 <PermissionGuard permissions="secret-templates:create">
                   <Button size="xs" className="flex-1" variant="outline" onClick={handleCreate}>
-                    <Plus /> 手动创建
+                    <Plus /> {t("ai.secret.manage.actions.manualCreate")}
                   </Button>
                 </PermissionGuard>
               </div>
@@ -787,7 +825,7 @@ const AiSecretTemplateManage = () => {
                         <PermissionGuard permissions="secret-templates:update">
                           <DropdownMenuItem onClick={() => handleEdit(template)}>
                             <Edit />
-                            编辑
+                            {t("ai.secret.manage.actions.edit")}
                           </DropdownMenuItem>
                         </PermissionGuard>
                         <DropdownMenuSeparator />
@@ -798,7 +836,7 @@ const AiSecretTemplateManage = () => {
                             disabled={deleteMutation.isPending}
                           >
                             <Trash2 />
-                            删除
+                            {t("ai.secret.manage.actions.delete")}
                           </DropdownMenuItem>
                         </PermissionGuard>
                       </DropdownMenuContent>
@@ -808,8 +846,8 @@ const AiSecretTemplateManage = () => {
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <StatusBadge
                     active={template.isEnabled === BooleanNumber.YES}
-                    activeText="启用"
-                    inactiveText="禁用"
+                    activeText={t("ai.secret.manage.statusBadge.enabled")}
+                    inactiveText={t("ai.secret.manage.statusBadge.disabled")}
                   />
                   {template.fieldConfig?.map((field) => (
                     <Badge key={field.name} variant="secondary">
@@ -822,7 +860,9 @@ const AiSecretTemplateManage = () => {
           ) : (
             <div className="col-span-1 flex h-28 items-center justify-center gap-4 sm:col-span-2 lg:col-span-3 xl:col-span-4 2xl:col-span-5">
               <span className="text-muted-foreground text-sm">
-                {searchKeyword ? `没有找到与"${searchKeyword}"相关的模板` : "暂无密钥模板数据"}
+                {searchKeyword
+                  ? t("ai.secret.manage.empty.noResults", { keyword: searchKeyword })
+                  : t("ai.secret.manage.empty.noData")}
               </span>
             </div>
           )}
@@ -839,23 +879,23 @@ const AiSecretTemplateManage = () => {
       <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>从配置导入</DialogTitle>
-            <DialogDescription>粘贴密钥模板的 JSON 配置来快速导入</DialogDescription>
+            <DialogTitle>{t("ai.secret.manage.importDialog.title")}</DialogTitle>
+            <DialogDescription>{t("ai.secret.manage.importDialog.description")}</DialogDescription>
           </DialogHeader>
           <Textarea
-            placeholder='{"name": "OpenAI", "fieldConfig": [{"name": "apiKey", "required": true}]}'
+            placeholder={t("ai.secret.manage.importDialog.placeholder")}
             className="min-h-[200px] font-mono text-sm"
             value={importJson}
             onChange={(e) => setImportJson(e.target.value)}
           />
           <DialogFooter>
             <Button variant="outline" onClick={() => setImportDialogOpen(false)}>
-              取消
+              {t("ai.secret.manage.importDialog.cancel")}
             </Button>
             <PermissionGuard permissions="secret-templates:import-json">
               <Button onClick={handleImport} disabled={importMutation.isPending}>
                 {importMutation.isPending && <Loader2 className="animate-spin" />}
-                导入
+                {t("ai.secret.manage.importDialog.import")}
               </Button>
             </PermissionGuard>
           </DialogFooter>

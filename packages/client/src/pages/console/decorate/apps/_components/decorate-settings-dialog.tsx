@@ -1,6 +1,7 @@
 "use client";
 
 import { type PagePathInfo, parsePageModules } from "@buildingai/hooks";
+import { useI18n } from "@buildingai/i18n";
 import { useAppsDecorateQuery, useSetAppsDecorateMutation } from "@buildingai/services/console";
 import { Button } from "@buildingai/ui/components/ui/button";
 import {
@@ -63,6 +64,7 @@ export function DecorateSettingsDialog({
   onOpenChange,
   onSuccess,
 }: DecorateSettingsDialogProps) {
+  const { t } = useI18n();
   const [enabled, setEnabled] = useState(false);
   const [banners, setBanners] = useState<BannerItem[]>([
     { imageUrl: "", linkUrl: "", linkType: "custom", linkComponent: null },
@@ -75,12 +77,12 @@ export function DecorateSettingsDialog({
   const { data: config, isLoading } = useAppsDecorateQuery({ enabled: open });
   const setMutation = useSetAppsDecorateMutation({
     onSuccess: () => {
-      toast.success("保存成功");
+      toast.success(t("decorate.apps.saveSuccess"));
       onOpenChange(false);
       onSuccess?.();
     },
     onError: (e) => {
-      toast.error(`保存失败: ${e.message}`);
+      toast.error(t("decorate.apps.saveFailed", { message: e.message }));
     },
   });
 
@@ -155,7 +157,7 @@ export function DecorateSettingsDialog({
       }));
 
     if (validBanners.length === 0) {
-      toast.error("请至少添加一张有效的 Banner 图片");
+      toast.error(t("decorate.apps.addBannerError"));
       return;
     }
 
@@ -174,12 +176,12 @@ export function DecorateSettingsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex max-w-xl flex-col">
         <DialogHeader>
-          <DialogTitle>设置装修位</DialogTitle>
+          <DialogTitle>{t("decorate.apps.bannerSettings")}</DialogTitle>
         </DialogHeader>
         <div ref={setContainer} className="flex min-h-0 flex-1 flex-col gap-6 py-4">
           <div className="flex items-center justify-between gap-4">
             <Label htmlFor="ad-enabled" className="flex-1">
-              启用广告位
+              {t("decorate.apps.enableAd")}
             </Label>
             <Switch
               id="ad-enabled"
@@ -191,7 +193,7 @@ export function DecorateSettingsDialog({
 
           <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
-              <Label>轮播图 Banner 设置</Label>
+              <Label>{t("decorate.apps.bannerSettings")}</Label>
               <Button
                 type="button"
                 variant="outline"
@@ -200,7 +202,7 @@ export function DecorateSettingsDialog({
                 disabled={isLoading || count >= 5}
               >
                 <Plus className="size-4" />
-                添加
+                {t("decorate.apps.addBanner")}
               </Button>
             </div>
             <Carousel setApi={setApi} opts={{ align: "start" }} className="mx-auto w-[74%]">
@@ -226,7 +228,7 @@ export function DecorateSettingsDialog({
                         disabled={isLoading}
                       />
                       <div className="grid min-w-0 gap-2">
-                        <Label className="text-xs">跳转类型</Label>
+                        <Label className="text-xs">{t("decorate.apps.linkType")}</Label>
                         <Select
                           value={banner.linkType}
                           onValueChange={(v) => {
@@ -239,17 +241,17 @@ export function DecorateSettingsDialog({
                           disabled={isLoading}
                         >
                           <SelectTrigger className="w-full">
-                            <SelectValue placeholder="选择跳转类型" />
+                            <SelectValue placeholder={t("decorate.apps.linkType")} />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="system">系统页面</SelectItem>
-                            <SelectItem value="custom">自定义链接</SelectItem>
+                            <SelectItem value="system">{t("decorate.apps.systemPage")}</SelectItem>
+                            <SelectItem value="custom">{t("decorate.apps.customLink")}</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                       {banner.linkType === "system" && (
                         <div className="grid min-w-0 gap-2">
-                          <Label className="text-xs">组件路径</Label>
+                          <Label className="text-xs">{t("decorate.apps.componentPath")}</Label>
                           <Combobox<PagePathInfo>
                             value={
                               pagePaths.find((p) => p.component === banner.linkComponent) ?? null
@@ -264,12 +266,12 @@ export function DecorateSettingsDialog({
                             itemToStringValue={(item) => item.label}
                           >
                             <ComboboxInput
-                              placeholder="搜索或选择组件路径..."
+                              placeholder={t("decorate.apps.searchPath")}
                               className="w-full min-w-0"
                               disabled={isLoading}
                             />
                             <ComboboxContent container={container}>
-                              <ComboboxEmpty>未找到匹配的组件路径</ComboboxEmpty>
+                              <ComboboxEmpty>{t("decorate.apps.noMatchPath")}</ComboboxEmpty>
                               <ComboboxList>
                                 {(item) => (
                                   <ComboboxItem key={item.component} value={item}>
@@ -283,9 +285,9 @@ export function DecorateSettingsDialog({
                       )}
                       {banner.linkType === "custom" && (
                         <div className="grid min-w-0 gap-2">
-                          <Label className="text-xs">路径</Label>
+                          <Label className="text-xs">{t("decorate.apps.path")}</Label>
                           <Input
-                            placeholder="菜单跳转路径，如 https://www.example.com"
+                            placeholder={t("decorate.apps.pathPlaceholder")}
                             value={banner.linkUrl}
                             onChange={(e) => handleBannerChange(index, { linkUrl: e.target.value })}
                             disabled={isLoading}
@@ -307,10 +309,10 @@ export function DecorateSettingsDialog({
 
           <div className="flex justify-end gap-2 pt-4">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
-              取消
+              {t("decorate.apps.cancel")}
             </Button>
             <Button onClick={handleSave} disabled={setMutation.isPending || isLoading}>
-              {setMutation.isPending ? "保存中…" : "保存"}
+              {setMutation.isPending ? t("decorate.apps.saving") : t("decorate.apps.save")}
             </Button>
           </div>
         </div>

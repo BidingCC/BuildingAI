@@ -1,5 +1,6 @@
 import type { LoginType } from "@buildingai/constants";
 import { LOGIN_TYPE } from "@buildingai/constants/shared/auth";
+import { useI18n } from "@buildingai/i18n";
 import { useLoginSettingsQuery, useSetLoginSettingsMutation } from "@buildingai/services/console";
 import { PermissionGuard } from "@buildingai/ui/components/auth/permission-guard";
 import { Button } from "@buildingai/ui/components/ui/button";
@@ -19,10 +20,11 @@ import { toast } from "sonner";
 
 import { PageContainer } from "@/layouts/console/_components/page-container";
 
-const LOGIN_TYPE_OPTIONS: { value: LoginType; label: string }[] = [
-  { value: LOGIN_TYPE.ACCOUNT as LoginType, label: "账号" },
-  { value: LOGIN_TYPE.WECHAT as LoginType, label: "微信" },
-  { value: LOGIN_TYPE.PHONE as LoginType, label: "手机号" },
+const LOGIN_TYPE_OPTIONS: { value: LoginType; labelKey: string }[] = [
+  { value: LOGIN_TYPE.ACCOUNT as LoginType, labelKey: "system.loginConfig.registerMethod.account" },
+  { value: LOGIN_TYPE.WECHAT as LoginType, labelKey: "system.loginConfig.registerMethod.wechat" },
+  { value: LOGIN_TYPE.PHONE as LoginType, labelKey: "system.loginConfig.registerMethod.phone" },
+  { value: LOGIN_TYPE.GOOGLE as LoginType, labelKey: "system.loginConfig.registerMethod.google" },
 ];
 
 const defaultConfig = {
@@ -33,13 +35,14 @@ const defaultConfig = {
 };
 
 const SystemLoginConfigIndexPage = () => {
+  const { t } = useI18n();
   const { data, isLoading } = useLoginSettingsQuery();
   const setMutation = useSetLoginSettingsMutation({
     onSuccess: () => {
-      toast.success("保存成功");
+      toast.success(t("system.loginConfig.saveSuccess"));
     },
     onError: (e) => {
-      toast.error(`保存失败: ${e.message}`);
+      toast.error(t("system.loginConfig.saveFailed", { message: e.message }));
     },
   });
 
@@ -90,7 +93,7 @@ const SystemLoginConfigIndexPage = () => {
 
   const handleSave = () => {
     if (allowedLoginMethods.length === 0) {
-      toast.error("至少保留一种登录方式");
+      toast.error(t("system.loginConfig.atLeastOneMethod"));
       return;
     }
     setMutation.mutate({
@@ -107,7 +110,7 @@ const SystemLoginConfigIndexPage = () => {
     setAllowedRegisterMethods(initialData.allowedRegisterMethods);
     setAllowMultipleLogin(initialData.allowMultipleLogin);
     setShowPolicyAgreement(initialData.showPolicyAgreement);
-    toast.success("已重置为当前保存的配置");
+    toast.success(t("system.loginConfig.resetSuccess"));
   };
 
   if (isLoading) {
@@ -124,10 +127,10 @@ const SystemLoginConfigIndexPage = () => {
     <PageContainer>
       <PermissionGuard permissions="users:get-login-settings">
         <div className="space-y-6 px-3">
-          <h1 className="text-2xl font-semibold">登录设置</h1>
+          <h1 className="text-2xl font-semibold">{t("system.loginConfig.title")}</h1>
 
           <FieldGroup>
-            <FieldLabel>注册方式</FieldLabel>
+            <FieldLabel>{t("system.loginConfig.registerMethod.label")}</FieldLabel>
             <div className="flex flex-wrap gap-6">
               {LOGIN_TYPE_OPTIONS.map((opt) => (
                 <div key={opt.value} className="flex items-center gap-2">
@@ -137,17 +140,20 @@ const SystemLoginConfigIndexPage = () => {
                     onCheckedChange={() => toggleRegister(opt.value)}
                   />
                   <Label htmlFor={`register-${opt.value}`} className="cursor-pointer font-normal">
-                    {opt.label}注册
+                    {t(opt.labelKey)}
                   </Label>
                 </div>
               ))}
             </div>
-            <FieldDescription>不选择任何方式时，前台将关闭注册入口与自动注册能力</FieldDescription>
+            <FieldDescription>
+              {t("system.loginConfig.registerMethod.description")}
+            </FieldDescription>
           </FieldGroup>
 
           <FieldGroup>
             <FieldLabel>
-              <span className="text-destructive">*</span> 登录方式
+              <span className="text-destructive">*</span>{" "}
+              {t("system.loginConfig.loginMethod.label")}
             </FieldLabel>
             <div className="flex flex-wrap gap-6">
               {LOGIN_TYPE_OPTIONS.map((opt) => (
@@ -158,20 +164,22 @@ const SystemLoginConfigIndexPage = () => {
                     onCheckedChange={() => toggleLogin(opt.value)}
                   />
                   <Label htmlFor={`login-${opt.value}`} className="cursor-pointer font-normal">
-                    {opt.label}登录
+                    {t(opt.labelKey.replace("registerMethod", "loginMethod"))}
                   </Label>
                 </div>
               ))}
             </div>
-            <FieldDescription>至少保留一种登录方式</FieldDescription>
+            <FieldDescription>{t("system.loginConfig.loginMethod.required")}</FieldDescription>
           </FieldGroup>
 
           <FieldGroup>
             <Field>
               <div className="flex max-w-sm items-center justify-between gap-4">
                 <div>
-                  <FieldLabel>多处登录</FieldLabel>
-                  <FieldDescription>是否允许多处同时登录</FieldDescription>
+                  <FieldLabel>{t("system.loginConfig.multiLogin.label")}</FieldLabel>
+                  <FieldDescription>
+                    {t("system.loginConfig.multiLogin.description")}
+                  </FieldDescription>
                 </div>
                 <Switch checked={allowMultipleLogin} onCheckedChange={setAllowMultipleLogin} />
               </div>
@@ -179,18 +187,21 @@ const SystemLoginConfigIndexPage = () => {
             <Field>
               <div className="flex max-w-sm items-center justify-between gap-4">
                 <div>
-                  <FieldLabel>是否开启协议</FieldLabel>
-                  <FieldDescription>用户登录/注册时，是否显示服务协议和隐私政策</FieldDescription>
+                  <FieldLabel>{t("system.loginConfig.policy.label")}</FieldLabel>
+                  <FieldDescription>{t("system.loginConfig.policy.description")}</FieldDescription>
                 </div>
                 <Switch checked={showPolicyAgreement} onCheckedChange={setShowPolicyAgreement} />
               </div>
             </Field>
             <FieldDescription>
-              微信登录凭证请在{" "}
+              {t("system.loginConfig.channelLinks.wechatConfig")}{" "}
               <Link to="/console/channel/wechat-oa" className="text-primary">
-                渠道 - 微信公众号配置
+                {t("system.loginConfig.channelLinks.wechatConfig")}
               </Link>{" "}
-              中设置
+              {t("system.loginConfig.channelLinks.googleConfig")}{" "}
+              <Link to="/console/channel/google" className="text-primary">
+                {t("system.loginConfig.channelLinks.googleConfig")}
+              </Link>
             </FieldDescription>
           </FieldGroup>
 
@@ -198,11 +209,11 @@ const SystemLoginConfigIndexPage = () => {
             <PermissionGuard permissions="users:set-login-settings">
               <Button onClick={handleSave} disabled={setMutation.isPending}>
                 {setMutation.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
-                保存设置
+                {t("system.loginConfig.save")}
               </Button>
 
               <Button variant="outline" onClick={handleReset} disabled={!initialData}>
-                重置设置
+                {t("system.loginConfig.reset")}
               </Button>
             </PermissionGuard>
           </div>

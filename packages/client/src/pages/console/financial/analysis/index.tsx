@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { type FinanceCenterResponse, useFinanceCenterQuery } from "@buildingai/services/console";
 import { Card, CardContent, CardHeader } from "@buildingai/ui/components/ui/card";
 import { Skeleton } from "@buildingai/ui/components/ui/skeleton";
@@ -5,7 +6,6 @@ import { cn } from "@buildingai/ui/lib/utils";
 
 import { PageContainer } from "@/layouts/console/_components/page-container";
 
-/** 金额格式（保留两位小数） */
 function formatAmount(value: number): string {
   return new Intl.NumberFormat("zh-CN", {
     minimumFractionDigits: 2,
@@ -13,7 +13,6 @@ function formatAmount(value: number): string {
   }).format(value);
 }
 
-/** 整数格式 */
 function formatInteger(value: number): string {
   return new Intl.NumberFormat("zh-CN").format(value);
 }
@@ -70,7 +69,7 @@ function Block({
 
 const FinancialAnalysisIndexPage = () => {
   const { data, isLoading } = useFinanceCenterQuery();
-
+  const { t } = useI18n();
   if (isLoading) {
     return (
       <PageContainer>
@@ -89,7 +88,7 @@ const FinancialAnalysisIndexPage = () => {
     return (
       <PageContainer>
         <div className="text-muted-foreground flex min-h-70 items-center justify-center text-sm">
-          暂无数据
+          {t("financial.analysis.noData")}
         </div>
       </PageContainer>
     );
@@ -104,12 +103,11 @@ const FinancialAnalysisIndexPage = () => {
   return (
     <PageContainer>
       <div className="flex flex-col gap-6">
-        {/* 经营概况：摘要带，净收入为主视觉 */}
         <Card>
           <CardContent className="flex flex-wrap items-end justify-between gap-6 py-5">
             <div>
               <p className="text-muted-foreground mb-1 text-sm tracking-wider uppercase">
-                累计净收入
+                {t("financial.analysis.totalNetIncome")}
               </p>
               <p className="text-foreground text-3xl font-semibold tracking-tight tabular-nums">
                 ¥{formatAmount(finance.totalNetIncome)}
@@ -117,23 +115,23 @@ const FinancialAnalysisIndexPage = () => {
             </div>
             <div className="flex flex-wrap gap-x-8 gap-y-4 sm:gap-x-10">
               <StatItem
-                label="累计收入金额"
+                label={t("financial.analysis.totalIncomeAmount")}
                 value={formatAmount(finance.totalIncomeAmount)}
                 variant="muted"
               />
               <StatItem
-                label="累计订单数"
+                label={t("financial.analysis.totalOrders")}
                 value={formatInteger(finance.totalIncomeNum)}
-                unit="笔"
+                unit={t("financial.analysis.orders")}
                 variant="muted"
               />
               <StatItem
-                label="累计退款金额"
+                label={t("financial.analysis.totalRefundAmount")}
                 value={formatAmount(finance.totalRefundAmount)}
                 variant="muted"
               />
               <StatItem
-                label="累计退款订单"
+                label={t("financial.analysis.totalRefundOrders")}
                 value={formatInteger(finance.totalRefundNum)}
                 variant="muted"
               />
@@ -141,57 +139,107 @@ const FinancialAnalysisIndexPage = () => {
           </CardContent>
         </Card>
 
-        {/* 订单概况 + 用户概况：双栏 */}
         <div className="grid gap-4 lg:grid-cols-2">
-          <Block title="订单概况">
+          <Block title={t("financial.analysis.orderOverview")}>
             <div className="space-y-5">
               <div>
                 <p className="text-muted-foreground mb-3 text-sm font-medium tracking-wider uppercase">
-                  充值
+                  {t("financial.analysis.recharge")}
                 </p>
                 <div className="grid grid-cols-2 gap-4 xl:grid-cols-3 2xl:grid-cols-5">
-                  <StatItem label="累计充值收入" value={formatAmount(recharge.rechargeAmount)} />
-                  <StatItem label="充值订单数" value={formatInteger(recharge.rechargeNum)} />
                   <StatItem
-                    label="累计退款金额"
+                    label={t("financial.analysis.rechargeIncome")}
+                    value={formatAmount(recharge.rechargeAmount)}
+                  />
+                  <StatItem
+                    label={t("financial.analysis.rechargeOrders")}
+                    value={formatInteger(recharge.rechargeNum)}
+                  />
+                  <StatItem
+                    label={t("financial.analysis.totalRefundAmount")}
                     value={formatAmount(recharge.rechargeRefundAmount)}
                   />
-                  <StatItem label="退款订单" value={formatInteger(recharge.rechargeRefundNum)} />
-                  <StatItem label="充值净收入" value={formatAmount(recharge.rechargeNetIncome)} />
+                  <StatItem
+                    label={t("financial.analysis.rechargeRefundOrders")}
+                    value={formatInteger(recharge.rechargeRefundNum)}
+                  />
+                  <StatItem
+                    label={t("financial.analysis.rechargeNetIncome")}
+                    value={formatAmount(recharge.rechargeNetIncome)}
+                  />
                 </div>
               </div>
               <div className="border-border/40 border-t pt-4">
                 <p className="text-muted-foreground mb-3 text-sm font-medium tracking-wider uppercase">
-                  会员
+                  {t("financial.analysis.member")}
                 </p>
                 <div className="grid grid-cols-2 gap-4 xl:grid-cols-3 2xl:grid-cols-5">
-                  <StatItem label="开通会员收入" value={formatAmount(member.memberAmount)} />
-                  <StatItem label="会员订单数" value={formatInteger(member.memberOrderNum)} />
-                  <StatItem label="累计退款金额" value={formatAmount(member.memberRefundAmount)} />
-                  <StatItem label="退款订单" value={formatInteger(member.memberRefundNum)} />
-                  <StatItem label="会员净收入" value={formatAmount(member.memberNetIncome)} />
+                  <StatItem
+                    label={t("financial.analysis.memberIncome")}
+                    value={formatAmount(member.memberAmount)}
+                  />
+                  <StatItem
+                    label={t("financial.analysis.memberOrders")}
+                    value={formatInteger(member.memberOrderNum)}
+                  />
+                  <StatItem
+                    label={t("financial.analysis.totalRefundAmount")}
+                    value={formatAmount(member.memberRefundAmount)}
+                  />
+                  <StatItem
+                    label={t("financial.analysis.rechargeRefundOrders")}
+                    value={formatInteger(member.memberRefundNum)}
+                  />
+                  <StatItem
+                    label={t("financial.analysis.memberNetIncome")}
+                    value={formatAmount(member.memberNetIncome)}
+                  />
                 </div>
               </div>
             </div>
           </Block>
 
-          <Block title="用户概况">
+          <Block title={t("financial.analysis.userOverview")}>
             <div className="space-y-5">
               <div className="grid grid-cols-2 gap-4 xl:grid-cols-3 2xl:grid-cols-5">
-                <StatItem label="用户总人数" value={formatInteger(user.totalUserNum)} />
-                <StatItem label="累计充值人数" value={formatInteger(user.totalRechargeNum)} />
-                <StatItem label="开通会员人数" value={formatInteger(user.totalMemberUserNum)} />
-                <StatItem label="用户累计消费金额" value={formatAmount(user.totalRechargeAmount)} />
-                <StatItem label="用户累计提问次数" value={formatInteger(user.totalChatNum)} />
+                <StatItem
+                  label={t("financial.analysis.totalUsers")}
+                  value={formatInteger(user.totalUserNum)}
+                />
+                <StatItem
+                  label={t("financial.analysis.totalRechargeUsers")}
+                  value={formatInteger(user.totalRechargeNum)}
+                />
+                <StatItem
+                  label={t("financial.analysis.totalMemberUsers")}
+                  value={formatInteger(user.totalMemberUserNum)}
+                />
+                <StatItem
+                  label={t("financial.analysis.totalUserSpending")}
+                  value={formatAmount(user.totalRechargeAmount)}
+                />
+                <StatItem
+                  label={t("financial.analysis.totalUserChats")}
+                  value={formatInteger(user.totalChatNum)}
+                />
               </div>
               <div className="border-border/40 border-t pt-4">
                 <p className="text-muted-foreground mb-3 text-[11px] font-medium tracking-wider uppercase">
-                  积分
+                  {t("financial.analysis.points")}
                 </p>
                 <div className="grid grid-cols-3 gap-4">
-                  <StatItem label="累计发放积分" value={formatInteger(pointsIssued)} />
-                  <StatItem label="用户消耗积分" value={formatInteger(pointsConsumed)} />
-                  <StatItem label="用户剩余积分" value={formatInteger(pointsRemaining)} />
+                  <StatItem
+                    label={t("financial.analysis.totalIssuedPoints")}
+                    value={formatInteger(pointsIssued)}
+                  />
+                  <StatItem
+                    label={t("financial.analysis.consumedPoints")}
+                    value={formatInteger(pointsConsumed)}
+                  />
+                  <StatItem
+                    label={t("financial.analysis.remainingPoints")}
+                    value={formatInteger(pointsRemaining)}
+                  />
                 </div>
               </div>
             </div>

@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { Button } from "@buildingai/ui/components/ui/button";
 import {
   Dialog,
@@ -19,6 +20,7 @@ export interface UploadDialogProps {
 }
 
 export function UploadDialog({ open, onOpenChange, onUpload, onUploadUrl }: UploadDialogProps) {
+  const { t } = useI18n();
   const [isDragging, setIsDragging] = useState(false);
   const [url, setUrl] = useState("");
 
@@ -65,10 +67,8 @@ export function UploadDialog({ open, onOpenChange, onUpload, onUploadUrl }: Uplo
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="border-0 shadow-none sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>上传文件</DialogTitle>
-          <DialogDescription>
-            支持常用 .pdf、.docx、.pptx、.xlsx、.csv、.txt 等各种格式
-          </DialogDescription>
+          <DialogTitle>{t("dataset.dialogs.upload.title")}</DialogTitle>
+          <DialogDescription>{t("dataset.dialogs.upload.supportedFormats")}</DialogDescription>
         </DialogHeader>
 
         <div
@@ -95,21 +95,21 @@ export function UploadDialog({ open, onOpenChange, onUpload, onUploadUrl }: Uplo
             <div className="bg-muted rounded-full p-4">
               <ArrowUp className="text-muted-foreground size-6" />
             </div>
-            <div className="text-sm font-semibold">拖入文件或从本地上传</div>
+            <div className="text-sm font-semibold">{t("dataset.dialogs.upload.dragOrSelect")}</div>
             <Button variant="ghost" size="sm" asChild>
-              <span>选择文件</span>
+              <span>{t("dataset.dialogs.upload.selectFiles")}</span>
             </Button>
           </label>
         </div>
 
         <div className="mt-4 flex items-center gap-2">
           <Input
-            placeholder="输入在线文件链接，例如 https://..."
+            placeholder={t("dataset.dialogs.upload.urlPlaceholder")}
             value={url}
             onChange={(e) => setUrl(e.target.value)}
           />
           <Button variant="outline" onClick={handleUploadUrl} disabled={!url.trim()}>
-            确认
+            {t("dataset.dialogs.upload.confirm")}
           </Button>
         </div>
       </DialogContent>

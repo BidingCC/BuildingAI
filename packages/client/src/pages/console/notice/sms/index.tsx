@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@buildingai/ui/components/ui/tabs";
 import { useMemo, useState } from "react";
 
@@ -7,10 +8,11 @@ import AliyunSms from "./_components/aliyunSms.tsx";
 import TencentSms from "./_components/tencentSms.tsx";
 
 const NoticeSmsPage = () => {
+  const { t } = useI18n();
   const tabs = useMemo(
     () => [
-      { name: "aliyun", label: "阿里云" },
-      { name: "tencent", label: "腾讯云" },
+      { name: "aliyun", labelKey: "notice.sms.aliyun" },
+      { name: "tencent", labelKey: "notice.sms.tencent" },
     ],
     [],
   );
@@ -26,7 +28,7 @@ const NoticeSmsPage = () => {
         <TabsList>
           {tabs.map((tab) => (
             <TabsTrigger key={tab.name} value={tab.name}>
-              {tab.label}
+              {t(tab.labelKey)}
             </TabsTrigger>
           ))}
         </TabsList>

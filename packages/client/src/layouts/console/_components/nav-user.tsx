@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { useAuthStore } from "@buildingai/stores";
 import { Avatar, AvatarFallback, AvatarImage } from "@buildingai/ui/components/ui/avatar";
 import {
@@ -28,6 +29,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useSettingsDialog } from "@/components/settings-dialog";
 
 export function NavUser() {
+  const { t } = useI18n();
   const { isMobile } = useSidebar();
   const { userInfo } = useAuthStore((state) => state.auth);
   const { logout, isLogin } = useAuthStore((state) => state.authActions);
@@ -61,13 +63,13 @@ export function NavUser() {
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{userInfo?.nickname || "未登录"}</span>
+                <span className="truncate font-medium">{userInfo?.nickname || t("common.notLoggedIn")}</span>
                 <span className="text-muted-foreground truncate text-xs">
                   {isLogin()
                     ? isEnabled(userInfo?.isRoot)
-                      ? "超级管理员"
-                      : userInfo?.role?.name || "未设置角色"
-                    : "请先登录后使用"}
+                      ? t("common.superAdmin")
+                      : userInfo?.role?.name || t("common.noRole")
+                    : t("common.pleaseLoginFirst")}
                 </span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
@@ -81,7 +83,7 @@ export function NavUser() {
           >
             <DropdownMenuItem onClick={() => settingsDialog.open("general")}>
               <Settings />
-              设置
+              {t("common.settings")}
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />
@@ -89,8 +91,10 @@ export function NavUser() {
             <DropdownMenuItem
               onClick={async () => {
                 await confirm({
-                  title: "退出确认",
-                  description: "确定要退出登录吗？",
+                  title: t("common.logoutConfirm"),
+                  description: t("common.logoutConfirmDesc"),
+                  confirmText: t("common.action.confirm"),
+                  cancelText: t("common.action.cancel"),
                 });
                 await logout();
                 const redirect = encodeURIComponent(location.pathname + location.search);
@@ -101,7 +105,7 @@ export function NavUser() {
               }}
             >
               <LogOut />
-              退出登录
+              {t("common.logout")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -109,9 +113,9 @@ export function NavUser() {
       <Dialog open={versionInfoOpen} onOpenChange={setVersionInfoOpen}>
         <DialogContent className="sm:max-w-xs">
           <DialogHeader>
-            <DialogTitle>关于BuildingAI</DialogTitle>
+            <DialogTitle>{t("common.aboutBuildingAI")}</DialogTitle>
             <div className="mt-4 flex items-center gap-1">
-              <span className="text-muted-foreground">版本：</span>
+              <span className="text-muted-foreground">{t("common.version")}：</span>
               <span>1.0.0</span>
             </div>
           </DialogHeader>

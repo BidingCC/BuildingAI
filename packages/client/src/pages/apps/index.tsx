@@ -1,4 +1,5 @@
 import { definePageMeta, useDocumentHead } from "@buildingai/hooks";
+import { useI18n } from "@buildingai/i18n";
 import type { Extension } from "@buildingai/services/console";
 import type { Tag } from "@buildingai/services/web";
 import {
@@ -34,8 +35,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
 export const meta = definePageMeta({
-  title: "应用中心",
-  description: "选择你想要的应用",
+  title: "app.title",
+  description: "app.description",
   icon: "layout-grid",
 });
 
@@ -54,6 +55,7 @@ function extToDisplayItem(ext: Extension) {
 type DisplayAppItem = ReturnType<typeof extToDisplayItem>;
 
 const AppItem = ({ item }: { item: DisplayAppItem }) => {
+  const { t } = useI18n();
   return (
     <Item className="group/apps-item hover:bg-accent cursor-pointer px-0 transition-[padding] hover:px-4">
       <ItemMedia>
@@ -69,7 +71,13 @@ const AppItem = ({ item }: { item: DisplayAppItem }) => {
         <ItemDescription className="line-clamp-1">{item.description}</ItemDescription>
       </ItemContent>
       <ItemActions className="opacity-0 group-hover/apps-item:opacity-100">
-        <Button size="icon-sm" variant="outline" className="rounded-full" aria-label="查看" asChild>
+        <Button
+          size="icon-sm"
+          variant="outline"
+          className="rounded-full"
+          aria-label={t("apps.view")}
+          asChild
+        >
           <Link to={`/apps/${item.identifier}`}>
             <ChevronRight />
           </Link>
@@ -80,15 +88,16 @@ const AppItem = ({ item }: { item: DisplayAppItem }) => {
 };
 
 const AppsIndexPage = () => {
+  const { t } = useI18n();
   const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [debouncedKeyword, setDebouncedKeyword] = useState("");
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   useDocumentHead({
-    title: "应用",
+    title: t("app.title"),
   });
-
+  console.log(' t("chat.page.newConversation")', t("app.title"))
   // 搜索防抖
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedKeyword(searchKeyword), 300);
@@ -118,8 +127,8 @@ const AppsIndexPage = () => {
   });
 
   // 配置数据
-  const pageTitle = config?.title || "应用中心";
-  const pageDescription = config?.description || "与你喜爱的应用进行交互";
+  const pageTitle = config?.title || t("app.title");
+  const pageDescription = config?.description || t("app.description");
   const bannerEnabled = config?.enabled ?? false;
   const banners = useMemo(() => {
     if (!config?.enabled) return [];
@@ -165,7 +174,7 @@ const AppsIndexPage = () => {
             <div className="max-sm:w-full">
               <InputGroup className="rounded-full">
                 <InputGroupInput
-                  placeholder="搜索应用"
+                  placeholder={t("app.searchPlaceholder")}
                   value={searchKeyword}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setSearchKeyword(e.target.value)
@@ -217,7 +226,7 @@ const AppsIndexPage = () => {
                 className="h-9 cursor-pointer px-4 font-medium text-nowrap sm:font-normal"
                 onClick={() => setSelectedTagId(null)}
               >
-                全部
+                {t("app.all")}
               </Badge>
               {tags.map((tag) => (
                 <Badge
@@ -242,7 +251,7 @@ const AppsIndexPage = () => {
             ) : itemsLoading ? null : (
               <Empty>
                 <EmptyContent>
-                  <EmptyDescription>暂无应用</EmptyDescription>
+                  <EmptyDescription>{t("app.empty")}</EmptyDescription>
                 </EmptyContent>
               </Empty>
             )}

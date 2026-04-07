@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { uploadFilesAuto } from "@buildingai/services/shared";
 import { createDatasetsDocument } from "@buildingai/services/web";
 import { useQueryClient } from "@tanstack/react-query";
@@ -14,6 +15,7 @@ import { toast } from "sonner";
  * 流程：先调用 uploadFiles 上传文件获取 fileId，再调用 createDatasetsDocument 创建文档
  */
 export function useDatasetDocumentUpload(datasetId: string | undefined) {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const [isUploading, setIsUploading] = useState(false);
 
@@ -35,7 +37,7 @@ export function useDatasetDocumentUpload(datasetId: string | undefined) {
         queryClient.invalidateQueries({ queryKey: ["datasets", datasetId] });
         queryClient.invalidateQueries({ queryKey: ["user", "storage"] });
 
-        toast.success(`已成功上传 ${results.length} 个文件`);
+        toast.success(t("dataset.document.uploadSuccess", { count: results.length }));
       } catch (error) {
         const message = error instanceof Error ? error.message : "上传失败";
         toast.error(message);
@@ -62,7 +64,7 @@ export function useDatasetDocumentUpload(datasetId: string | undefined) {
           });
           queryClient.invalidateQueries({ queryKey: ["datasets", datasetId] });
           queryClient.invalidateQueries({ queryKey: ["user", "storage"] });
-          toast.success("已成功添加在线文档");
+          toast.success(t("dataset.document.addUrlDocumentSuccess"));
         } catch (error) {
           const message = error instanceof Error ? error.message : "上传失败";
           toast.error(message);

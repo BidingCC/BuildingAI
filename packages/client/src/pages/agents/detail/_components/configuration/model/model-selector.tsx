@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import type { ModelRouting } from "@buildingai/types";
 import { Button } from "@buildingai/ui/components/ui/button";
 import { Input } from "@buildingai/ui/components/ui/input";
@@ -22,50 +23,44 @@ const MEMORY_MAX = 200;
 
 type ModelSlot = {
   key: keyof ModelRouting | "chat";
-  title: string;
-  description: string;
-  tooltip: string;
+  titleKey: string;
+  descriptionKey: string;
+  tooltipKey: string;
   modelType?: "llm" | "text-embedding" | "rerank";
 };
 
-const MODEL_SLOTS: ModelSlot[] = [
-  {
-    key: "chat",
-    title: "主对话模型 (LLM)",
-    description: "智能体对话的核心模型",
-    tooltip: "用于与用户对话的主模型，必选。",
-    modelType: "llm",
-  },
-  {
-    key: "memoryModel",
-    title: "记忆提取模型",
-    description: "用于提取长期记忆，可选用低成本模型",
-    tooltip:
-      "用于从对话中提取并写入长期记忆（用户全局记忆与智能体专属记忆）。不配置则不会读写长期记忆。",
-    modelType: "llm",
-  },
-  {
-    key: "planningModel",
-    title: "目标规划模型",
-    description: "用于复杂任务的规划与分解",
-    tooltip: "用于对复杂任务做目标评估与执行计划分解，再逐步执行。不配置则不做目标规划，直接回复。",
-    modelType: "llm",
-  },
-  //   {
-  //     key: "reflectionModel",
-  //     title: "反思模型",
-  //     description: "用于回复质量自评",
-  //     tooltip: "用于在输出最终回答前对回复质量做自我检查。不配置则不做反思。",
-  //     modelType: "llm",
-  //   },
-  {
-    key: "titleModel",
-    title: "追问建议模型",
-    description: "用于回复后自动生成追问建议，可选用低成本模型",
-    tooltip: "用于在智能体回复后自动生成 3 条追问建议供用户快速选择。不配置则不会生成追问建议。",
-    modelType: "llm",
-  },
-];
+function createModelSlots(t: (key: string) => string): ModelSlot[] {
+  return [
+    {
+      key: "chat",
+      titleKey: "agent.detail.model.chatModel",
+      descriptionKey: "agent.detail.model.chatModelDesc",
+      tooltipKey: "agent.detail.model.chatModelTooltip",
+      modelType: "llm",
+    },
+    {
+      key: "memoryModel",
+      titleKey: "agent.detail.model.memoryExtractionModel",
+      descriptionKey: "agent.detail.model.memoryExtractionModelDesc",
+      tooltipKey: "agent.detail.model.memoryModelTooltip",
+      modelType: "llm",
+    },
+    {
+      key: "planningModel",
+      titleKey: "agent.detail.model.planningModel",
+      descriptionKey: "agent.detail.model.planningModelDesc",
+      tooltipKey: "agent.detail.model.planningModelTooltip",
+      modelType: "llm",
+    },
+    {
+      key: "titleModel",
+      titleKey: "agent.detail.model.titleModel",
+      descriptionKey: "agent.detail.model.titleModelDesc",
+      tooltipKey: "agent.detail.model.titleModelTooltip",
+      modelType: "llm",
+    },
+  ];
+}
 
 interface ModelSelectorPanelProps {
   chatModelId?: string;
@@ -85,6 +80,9 @@ export const ModelSelector = memo(
     onModelRoutingChange,
     onMemoryConfigChange,
   }: ModelSelectorPanelProps) => {
+    const { t } = useI18n();
+    const MODEL_SLOTS = useMemo(() => createModelSlots(t), [t]);
+
     const getSlotValue = useCallback(
       (key: ModelSlot["key"]): string => {
         if (key === "chat") return chatModelId ?? "";
@@ -128,9 +126,9 @@ export const ModelSelector = memo(
     return (
       <div className="space-y-3">
         <div className="space-y-2">
-          <h3 className="text-sm font-medium">模型路由</h3>
+          <h3 className="text-sm font-medium">{t("agent.detail.model.modelRouting")}</h3>
           <p className="text-muted-foreground text-xs">
-            为不同功能模块指定独立模型，未配置时功能将不起作用。
+            {t("agent.detail.model.modelRoutingDesc")}
           </p>
         </div>
 
@@ -141,23 +139,23 @@ export const ModelSelector = memo(
           >
             <div className="flex min-w-0 flex-col">
               <div className="flex items-center gap-1.5">
-                <Label className="text-sm font-medium">{slot.title}</Label>
+                <Label className="text-sm font-medium">{t(slot.titleKey)}</Label>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
                       type="button"
                       className="text-muted-foreground hover:text-foreground focus-visible:ring-ring inline-flex shrink-0 rounded p-0.5 transition-colors focus-visible:ring-2 focus-visible:outline-none"
-                      aria-label="说明"
+                      aria-label={t("common.help")}
                     >
                       <HelpCircle className="text-muted-foreground h-4 w-4" />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="top" className="max-w-xs text-xs">
-                    {slot.tooltip}
+                    {t(slot.tooltipKey)}
                   </TooltipContent>
                 </Tooltip>
               </div>
-              <p className="text-muted-foreground mt-0.5 text-xs">{slot.description}</p>
+              <p className="text-muted-foreground mt-0.5 text-xs">{t(slot.descriptionKey)}</p>
             </div>
             <div className="ml-4 flex shrink-0 items-center gap-2">
               {slot.key === "memoryModel" && onMemoryConfigChange && (
@@ -170,23 +168,27 @@ export const ModelSelector = memo(
                           variant="ghost"
                           size="icon"
                           className="hover:bg-primary/10 hover:text-primary h-8 w-8"
-                          aria-label="记忆配置"
+                          aria-label={t("agent.detail.model.memoryConfig")}
                         >
                           <Settings2 className="h-4 w-4" />
                         </Button>
                       </PopoverTrigger>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <div className="text-background text-xs">记忆配置</div>
+                      <div className="text-background text-xs">
+                        {t("agent.detail.model.memoryConfig")}
+                      </div>
                     </TooltipContent>
                   </Tooltip>
                   <PopoverContent align="end" className="w-64">
                     <PopoverHeader>
-                      <PopoverTitle className="text-sm">记忆配置</PopoverTitle>
+                      <PopoverTitle className="text-sm">
+                        {t("agent.detail.model.memoryConfig")}
+                      </PopoverTitle>
                     </PopoverHeader>
                     <div className="grid gap-3">
                       <div className="grid gap-1.5">
-                        <Label className="text-xs">最大用户全局记忆条数</Label>
+                        <Label className="text-xs">{t("agent.detail.model.maxUserMemories")}</Label>
                         <Input
                           type="number"
                           min={MEMORY_MIN}
@@ -202,7 +204,9 @@ export const ModelSelector = memo(
                         />
                       </div>
                       <div className="grid gap-1.5">
-                        <Label className="text-xs">最大智能体专属记忆条数</Label>
+                        <Label className="text-xs">
+                          {t("agent.detail.model.maxAgentMemories")}
+                        </Label>
                         <Input
                           type="number"
                           min={MEMORY_MIN}
@@ -227,7 +231,11 @@ export const ModelSelector = memo(
                   value={getSlotValue(slot.key)}
                   onSelect={(id) => handleSlotChange(slot.key, id)}
                   triggerVariant="button"
-                  placeholder={slot.key === "chat" ? "选择模型" : "不启用"}
+                  placeholder={
+                    slot.key === "chat"
+                      ? t("agent.detail.model.selectModel")
+                      : t("agent.detail.model.notEnabled")
+                  }
                   className="w-full"
                 />
               </div>

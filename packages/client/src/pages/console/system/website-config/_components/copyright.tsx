@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   useSetWebsiteConfigMutation,
   useWebsiteConfigQuery,
@@ -39,12 +40,13 @@ const defaultValues: CopyrightFormValues = {
 };
 
 export default function Copyright() {
+  const { t } = useI18n();
   const { data: rawData, isLoading } = useWebsiteConfigQuery();
   const data = rawData as WebsiteConfigResponse | undefined;
   const setMutation = useSetWebsiteConfigMutation({
-    onSuccess: () => toast.success("保存成功"),
+    onSuccess: () => toast.success(t("system.websiteConfig.copyright.saveSuccess")),
     onError: (e) => {
-      console.log(`保存失败: ${e.message}`);
+      console.log(`${t("system.websiteConfig.copyright.saveFailed", { message: e.message })}`);
     },
   });
 
@@ -81,15 +83,18 @@ export default function Copyright() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <h4 className="text-lg font-bold">备案信息</h4>
+        <h4 className="text-lg font-bold">{t("system.websiteConfig.copyright.filingInfo")}</h4>
         <FormField
           control={form.control}
           name="displayName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>备案信息</FormLabel>
+              <FormLabel>{t("system.websiteConfig.copyright.displayName.label")}</FormLabel>
               <FormControl>
-                <Input placeholder="请输入备案信息" {...field} />
+                <Input
+                  placeholder={t("system.websiteConfig.copyright.displayName.placeholder")}
+                  {...field}
+                />
               </FormControl>
             </FormItem>
           )}
@@ -99,7 +104,7 @@ export default function Copyright() {
           name="iconUrl"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>备案图标</FormLabel>
+              <FormLabel>{t("system.websiteConfig.copyright.iconUrl.label")}</FormLabel>
               <FormControl>
                 <ImageUpload
                   size="lg"
@@ -115,16 +120,19 @@ export default function Copyright() {
           name="url"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>备案跳转链接</FormLabel>
+              <FormLabel>{t("system.websiteConfig.copyright.url.label")}</FormLabel>
               <FormControl>
-                <Input placeholder="请输入备案跳转链接" {...field} />
+                <Input
+                  placeholder={t("system.websiteConfig.copyright.url.placeholder")}
+                  {...field}
+                />
               </FormControl>
             </FormItem>
           )}
         />
-        <h4 className="text-lg font-bold">版权信息</h4>
+        <h4 className="text-lg font-bold">{t("system.websiteConfig.copyright.copyrightInfo")}</h4>
         <div className="flex w-full flex-col gap-2">
-          <FormLabel>版权信息</FormLabel>
+          <FormLabel>{t("system.websiteConfig.copyright.copyrightInfo")}</FormLabel>
           <div className="flex w-full gap-4">
             <FormField
               control={form.control}
@@ -132,7 +140,10 @@ export default function Copyright() {
               render={({ field }) => (
                 <FormItem className="flex-1">
                   <FormControl>
-                    <Input {...field} placeholder="请输入版权信息，如 © 2024" />
+                    <Input
+                      {...field}
+                      placeholder={t("system.websiteConfig.copyright.copyrightText.placeholder")}
+                    />
                   </FormControl>
                 </FormItem>
               )}
@@ -143,7 +154,10 @@ export default function Copyright() {
               render={({ field }) => (
                 <FormItem className="flex-1">
                   <FormControl>
-                    <Input {...field} placeholder="请输入品牌/公司名称" />
+                    <Input
+                      {...field}
+                      placeholder={t("system.websiteConfig.copyright.copyrightBrand.placeholder")}
+                    />
                   </FormControl>
                 </FormItem>
               )}
@@ -155,9 +169,12 @@ export default function Copyright() {
           name="copyrightUrl"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>跳转链接</FormLabel>
+              <FormLabel>{t("system.websiteConfig.copyright.copyrightUrl.label")}</FormLabel>
               <FormControl>
-                <Input placeholder="请输入跳转链接" {...field} />
+                <Input
+                  placeholder={t("system.websiteConfig.copyright.copyrightUrl.placeholder")}
+                  {...field}
+                />
               </FormControl>
             </FormItem>
           )}
@@ -166,7 +183,7 @@ export default function Copyright() {
           <PermissionGuard permissions="system-website:setConfig">
             <Button type="submit" disabled={setMutation.isPending}>
               {setMutation.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
-              保存设置
+              {t("system.websiteConfig.copyright.save")}
             </Button>
 
             <Button
@@ -184,7 +201,7 @@ export default function Copyright() {
                 })
               }
             >
-              重置设置
+              {t("system.websiteConfig.copyright.reset")}
             </Button>
           </PermissionGuard>
         </div>

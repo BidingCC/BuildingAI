@@ -1,4 +1,5 @@
 import { definePageMeta, useDocumentHead } from "@buildingai/hooks";
+import { useI18n } from "@buildingai/i18n";
 import { useDatasetTags, useSquareDatasetsInfiniteQuery } from "@buildingai/services/web";
 import { InfiniteScroll } from "@buildingai/ui/components/infinite-scroll";
 import { Avatar, AvatarFallback, AvatarImage } from "@buildingai/ui/components/ui/avatar";
@@ -27,12 +28,13 @@ import { useDebounceValue } from "usehooks-ts";
 const PAGE_SIZE = 20;
 
 export const meta = definePageMeta({
-  title: "知识库广场",
-  description: "选择你想要的知识库",
+  title: "Knowledge Square",
+  description: "Choose the knowledge base you want",
   icon: "book-search",
 });
 
 const KnowledgeIndexPage = () => {
+  const { t } = useI18n();
   const [keyword, setKeyword] = useState("");
   const [debouncedKeyword] = useDebounceValue(keyword.trim(), 300);
   const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
@@ -41,7 +43,7 @@ const KnowledgeIndexPage = () => {
   const [canScrollTagsRight, setCanScrollTagsRight] = useState(false);
 
   useDocumentHead({
-    title: "知识库广场",
+    title: t("dataset.list.knowledgeSquare"),
   });
 
   const { data: tagsData } = useDatasetTags();
@@ -135,13 +137,13 @@ const KnowledgeIndexPage = () => {
           <div className="bg-background sticky top-0 z-20 py-4">
             <div className="flex flex-col items-center justify-between gap-4 max-sm:items-start sm:flex-row sm:px-3">
               <div className="flex flex-col gap-2">
-                <h1 className="text-2xl">知识库广场</h1>
-                <p className="text-muted-foreground text-sm">加入你喜爱的知识库进行交互</p>
+                <h1 className="text-2xl">{t("dataset.list.knowledgeSquare")}</h1>
+                <p className="text-muted-foreground text-sm">{t("dataset.list.joinTip")}</p>
               </div>
               <div className="max-sm:w-full">
                 <InputGroup className="rounded-full">
                   <InputGroupInput
-                    placeholder="搜索知识库"
+                    placeholder={t("dataset.list.searchDatasets")}
                     value={keyword}
                     onChange={(e) => setKeyword(e.target.value)}
                   />
@@ -191,7 +193,7 @@ const KnowledgeIndexPage = () => {
                     className={badgeClass(selectedTagId === null)}
                     onClick={() => setSelectedTagId(null)}
                   >
-                    全部
+                    {t("dataset.list.all")}
                   </Badge>
                   {tags.map((tag) => (
                     <Badge
@@ -213,7 +215,9 @@ const KnowledgeIndexPage = () => {
                 <Loader2 className="text-muted-foreground size-8 animate-spin" />
               </div>
             ) : items.length === 0 ? (
-              <p className="text-muted-foreground py-12 text-center text-sm">暂无知识库</p>
+              <p className="text-muted-foreground py-12 text-center text-sm">
+                {t("dataset.list.noDatasets")}
+              </p>
             ) : (
               <InfiniteScroll
                 loading={isFetchingNextPage}
@@ -233,9 +237,10 @@ const KnowledgeIndexPage = () => {
                         } | null;
                       }
                     )?.creator;
-                    const displayName = dataset.name ?? creator?.nickname ?? "未知用户";
+                    const displayName =
+                      dataset.name ?? creator?.nickname ?? t("common.unknownUser");
                     const initial = displayName.slice(0, 1).toUpperCase();
-                    const creatorLabel = creator?.nickname ?? "匿名";
+                    const creatorLabel = creator?.nickname ?? t("common.anonymous");
                     const creatorInitial = creatorLabel.slice(0, 1).toUpperCase();
                     return (
                       <Item
@@ -256,7 +261,7 @@ const KnowledgeIndexPage = () => {
                           <ItemContent>
                             <ItemTitle>{dataset.name}</ItemTitle>
                             <ItemDescription className="line-clamp-1">
-                              {dataset.description?.trim() || "暂无描述"}
+                              {dataset.description?.trim() || t("common.noDescription")}
                             </ItemDescription>
                             <div className="text-muted-foreground mt-2 flex flex-wrap items-center justify-between gap-2 text-xs">
                               <div className="flex flex-wrap items-center gap-3">
@@ -285,7 +290,7 @@ const KnowledgeIndexPage = () => {
                               size="icon-sm"
                               variant="outline"
                               className="rounded-full"
-                              aria-label="进入"
+                              aria-label={t("dataset.list.enter")}
                             >
                               <ChevronRight />
                             </Button>

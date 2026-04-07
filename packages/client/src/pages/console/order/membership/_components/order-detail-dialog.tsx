@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import type { MembershipOrderDetailData } from "@buildingai/services/console";
 import { useMembershipOrderDetailQuery } from "@buildingai/services/console";
 import { Button } from "@buildingai/ui/components/ui/button";
@@ -35,6 +36,7 @@ export const OrderDetailDialog = ({
   onOpenChange,
   onRefundSuccess,
 }: OrderDetailDialogProps) => {
+  const { t } = useI18n();
   const lastOrderRef = useRef<MembershipOrderDetailData | null>(null);
   const { confirm } = useAlertDialog();
 
@@ -62,8 +64,8 @@ export const OrderDetailDialog = ({
   const handleRefund = async () => {
     if (!orderId) return;
     await confirm({
-      title: "退款确认",
-      description: "确定要对该订单申请退款吗？退款后无法撤销。",
+      title: t("financial.order.refundConfirmTitle"),
+      description: t("financial.order.refundConfirmDescription"),
       confirmVariant: "destructive",
     });
     onRefundSuccess();
@@ -76,16 +78,16 @@ export const OrderDetailDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-lg">
         <DialogHeader className="px-6 pt-6 pb-0">
-          <DialogTitle>订单详情</DialogTitle>
+          <DialogTitle>{t("financial.order.orderDetails")}</DialogTitle>
         </DialogHeader>
         {isLoading && !!orderId && (
           <div className="text-muted-foreground flex items-center justify-center py-16 text-sm">
-            加载中...
+            {t("financial.order.loadingTable")}
           </div>
         )}
         {isError && !!orderId && (
           <div className="text-destructive flex items-center justify-center py-16 text-sm">
-            加载失败，请稍后重试
+            {t("financial.order.loadError")}
           </div>
         )}
         {displayOrder && (
@@ -111,43 +113,54 @@ export const OrderDetailDialog = ({
               </div>
               <h2 className="text-foreground mt-4 text-xl font-semibold">
                 {headerStatus === "paid"
-                  ? "支付已完成"
+                  ? t("financial.order.paymentCompleted")
                   : headerStatus === "refunded"
-                    ? "已退款"
-                    : "待支付"}
+                    ? t("financial.order.status.refunded")
+                    : t("financial.order.pending")}
               </h2>
               <p className="text-muted-foreground mt-1.5 text-sm">
-                订单号: <span className="text-foreground font-medium">{displayOrder.orderNo}</span>
+                {t("financial.order.table.orderNo")}:{" "}
+                <span className="text-foreground font-medium">{displayOrder.orderNo}</span>
               </p>
             </div>
 
             <div className="bg-muted/30 grid grid-cols-2 gap-x-6 gap-y-4 px-6 py-4">
               <div className="space-y-1">
-                <div className="text-muted-foreground text-xs">用户名</div>
+                <div className="text-muted-foreground text-xs">{t("financial.order.username")}</div>
                 <div className="text-sm font-medium">
                   {displayOrder.user?.nickname || displayOrder.user?.username || "-"}
                 </div>
               </div>
               <div className="space-y-1">
-                <div className="text-muted-foreground text-xs">订单来源</div>
+                <div className="text-muted-foreground text-xs">
+                  {t("financial.order.orderSource")}
+                </div>
                 <div className="text-sm font-medium">{displayOrder.terminalDesc}</div>
               </div>
               <div className="space-y-1">
-                <div className="text-muted-foreground text-xs">订单类型</div>
+                <div className="text-muted-foreground text-xs">
+                  {t("financial.order.orderType")}
+                </div>
                 <div className="text-sm font-medium">{displayOrder.orderType}</div>
               </div>
               <div className="space-y-1">
-                <div className="text-muted-foreground text-xs">支付方式</div>
+                <div className="text-muted-foreground text-xs">
+                  {t("financial.order.paymentMethod")}
+                </div>
                 <div className="text-sm font-medium">{displayOrder.payTypeDesc || "-"}</div>
               </div>
               <div className="space-y-1">
-                <div className="text-muted-foreground text-xs">下单时间</div>
+                <div className="text-muted-foreground text-xs">
+                  {t("financial.order.orderTime")}
+                </div>
                 <div className="text-sm font-medium">
                   <TimeText value={displayOrder.createdAt} variant="datetime" />
                 </div>
               </div>
               <div className="space-y-1">
-                <div className="text-muted-foreground text-xs">支付时间</div>
+                <div className="text-muted-foreground text-xs">
+                  {t("financial.order.paymentTime")}
+                </div>
                 <div className="text-sm font-medium">
                   {isPaid && displayOrder.payTime ? (
                     <TimeText value={displayOrder.payTime} variant="datetime" />
@@ -158,7 +171,9 @@ export const OrderDetailDialog = ({
               </div>
               {displayOrder.refundNo && (
                 <div className="space-y-1">
-                  <div className="text-muted-foreground text-xs">流水单号</div>
+                  <div className="text-muted-foreground text-xs">
+                    {t("financial.order.refundNo")}
+                  </div>
                   <div className="text-sm font-medium">{displayOrder.refundNo}</div>
                 </div>
               )}
@@ -167,20 +182,26 @@ export const OrderDetailDialog = ({
             <div className="bg-card m-4 rounded-lg border p-4">
               <div className="space-y-3 text-sm">
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">会员套餐</span>
+                  <span className="text-muted-foreground">
+                    {t("financial.order.table.memberPackage")}
+                  </span>
                   <span className="font-medium">{planSnap?.name || "-"}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">会员等级</span>
+                  <span className="text-muted-foreground">
+                    {t("financial.order.table.memberLevel")}
+                  </span>
                   <span className="font-medium">{levelSnap?.name || "-"}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">会员时长</span>
+                  <span className="text-muted-foreground">
+                    {t("financial.order.table.memberDuration")}
+                  </span>
                   <span className="font-medium">{displayOrder.duration || "-"}</span>
                 </div>
                 {levelSnap?.givePower && levelSnap.givePower > 0 && (
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">赠送积分</span>
+                    <span className="text-muted-foreground">{t("financial.order.givePoints")}</span>
                     <span className="font-medium text-green-600 tabular-nums dark:text-green-400">
                       + {levelSnap.givePower}
                     </span>
@@ -188,7 +209,9 @@ export const OrderDetailDialog = ({
                 )}
                 <div className="border-border mt-3 border-t border-dashed pt-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">实付金额</span>
+                    <span className="text-muted-foreground">
+                      {t("financial.order.table.paidAmount")}
+                    </span>
                     <span className="text-primary text-lg font-semibold tabular-nums">
                       ¥ {formatAmount(displayOrder.orderAmount)}
                     </span>
@@ -200,12 +223,12 @@ export const OrderDetailDialog = ({
             <DialogFooter className="p-4 pt-0">
               {isPaid && displayOrder.refundStatus !== 1 && (
                 <Button type="button" variant="destructive" onClick={handleRefund}>
-                  申请退款
+                  {t("financial.order.applyRefund")}
                 </Button>
               )}
               <DialogClose asChild>
                 <Button type="button" variant="outline">
-                  关闭
+                  {t("financial.order.close")}
                 </Button>
               </DialogClose>
             </DialogFooter>

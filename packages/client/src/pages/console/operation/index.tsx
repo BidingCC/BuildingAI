@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { useAuthStore } from "@buildingai/stores";
 import { PermissionGuard } from "@buildingai/ui/components/auth/permission-guard";
 import { Card, CardContent, CardDescription, CardTitle } from "@buildingai/ui/components/ui/card";
@@ -13,6 +14,7 @@ import { sidebarConfigMap } from "./_config/sidebar-config";
  * 动态展示所有配置的营销工具
  */
 export default function Operation() {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { userInfo } = useAuthStore((state) => state.auth);
 
@@ -37,7 +39,7 @@ export default function Operation() {
   return (
     <PageContainer>
       <div className="space-y-4 px-4">
-        <h1 className="text-lg font-semibold">营销工具</h1>
+        <h1 className="text-lg font-semibold">{t("operation.title")}</h1>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
           {Object.entries(sidebarConfigMap).map(([toolKey, config]) => {
             const permissions = config.menuItems.flatMap((item) =>
@@ -55,8 +57,8 @@ export default function Operation() {
                       <config.icon className="text-primary size-8" />
                     </div>
                     <div>
-                      <CardTitle>{config.title}</CardTitle>
-                      <CardDescription>{config.description}</CardDescription>
+                      <CardTitle>{t(config.title)}</CardTitle>
+                      <CardDescription>{t(config.description)}</CardDescription>
                     </div>
                   </CardContent>
                 </Card>

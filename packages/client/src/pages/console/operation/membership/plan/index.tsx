@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   type MembershipPlanConfigItem,
   useDeleteMembershipPlanMutation,
@@ -46,39 +47,48 @@ import { PageContainer } from "@/layouts/console/_components/page-container";
 
 import { PlanFormDialog } from "./_components/plan-form-dialog";
 
-const DURATION_LABELS: Record<number, string> = {
-  1: "1个月",
-  2: "3个月",
-  3: "6个月",
-  4: "12个月",
-  5: "终身",
-  6: "自定义",
-};
 
-function getDurationLabel(plan: MembershipPlanConfigItem): string {
+interface DurationLabelProps {
+  plan: MembershipPlanConfigItem;
+}
+
+const DurationLabel: React.FC<DurationLabelProps> = ({ plan }) => {
+  const { t } = useI18n();
+  
+  const durationLabels: Record<number, string> = {
+    1: t("operation.membership.plan.durationLabels.1"),
+    2: t("operation.membership.plan.durationLabels.2"),
+    3: t("operation.membership.plan.durationLabels.3"),
+    4: t("operation.membership.plan.durationLabels.4"),
+    5: t("operation.membership.plan.durationLabels.5"),
+    6: t("operation.membership.plan.durationLabels.6"),
+  };
+  
   // 仅当订阅时长为「自定义」且存在有效 duration 时显示自定义时长
   if (plan.durationConfig === 6 && plan.duration?.value != null && plan.duration?.unit) {
     const unitMap: Record<string, string> = {
-      day: "天",
-      天: "天",
-      month: "月",
-      月: "月",
-      year: "年",
-      年: "年",
+      day: t("operation.membership.plan.unitDay"),
+      天: t("operation.membership.plan.unitDay"),
+      month: t("operation.membership.plan.unitMonth"),
+      月: t("operation.membership.plan.unitMonth"),
+      year: t("operation.membership.plan.unitYear"),
+      年: t("operation.membership.plan.unitYear"),
     };
     const u = unitMap[plan.duration.unit] || plan.duration.unit;
-    return `${plan.duration.value}${u}`;
+    return <>{`${plan.duration.value}${u}`}</>;
   }
-  return DURATION_LABELS[plan.durationConfig] ?? "—";
-}
-
-const statusOptions = [
-  { label: "启用", value: "true" },
-  { label: "禁用", value: "false" },
-];
+  
+  return <>{durationLabels[plan.durationConfig] ?? "—"}</>;
+};
 
 const MembershipPlanIndexPage = () => {
+  const { t } = useI18n();
   const { confirm } = useAlertDialog();
+
+  const statusOptions = [
+    { label: t("operation.membership.plan.enable"), value: "true" },
+    { label: t("operation.membership.plan.disable"), value: "false" },
+  ];
   const [searchKeyword, setSearchKeyword] = useState("");
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
   const [formDialogOpen, setFormDialogOpen] = useState(false);
@@ -111,21 +121,29 @@ const MembershipPlanIndexPage = () => {
 
   const setStatusMutation = useSetMembershipPlanStatusMutation({
     onSuccess: (_, variables) => {
-      toast.success(variables.status ? "计划已启用" : "计划已禁用");
+      toast.success(
+        variables.status
+          ? t("operation.membership.plan.planEnabled")
+          : t("operation.membership.plan.planDisabled"),
+      );
       refetch();
     },
   });
 
   const setMembershipConfigMutation = useSetMembershipConfigMutation({
     onSuccess: (_, variables) => {
-      toast.success(variables.status ? "会员功能已启用" : "会员功能已禁用");
+      toast.success(
+        variables.status
+          ? t("operation.membership.plan.membershipEnabled")
+          : t("operation.membership.plan.membershipDisabled"),
+      );
       refetch();
     },
   });
 
   const deleteMutation = useDeleteMembershipPlanMutation({
     onSuccess: () => {
-      toast.success("计划已删除");
+      toast.success(t("operation.membership.plan.planDeleted"));
       refetch();
     },
   });
@@ -140,8 +158,8 @@ const MembershipPlanIndexPage = () => {
 
   const handleDelete = async (plan: MembershipPlanConfigItem) => {
     await confirm({
-      title: "删除计划",
-      description: `确定要删除计划「${plan.name}」吗？此操作不可恢复。`,
+      title: t("operation.membership.plan.deleteConfirm"),
+      description: t("operation.membership.plan.deleteConfirmDesc", { name: plan.name }),
       confirmVariant: "destructive",
     });
     deleteMutation.mutate(plan.id);
@@ -163,13 +181,15 @@ const MembershipPlanIndexPage = () => {
         {/* 会员功能总开关 */}
         <div className="pt-0">
           <div className="space-y-2">
-            <div className="font-medium">功能状态</div>
+            <div className="font-medium">{t("operation.membership.plan.featureStatus")}</div>
             <Switch
               checked={membershipStatus}
               onCheckedChange={handleToggleMembershipStatus}
               disabled={setMembershipConfigMutation.isPending}
             />
-            <div className="text-muted-foreground text-sm">开启后，用户可以购买和使用会员服务</div>
+            <div className="text-muted-foreground text-sm">
+              {t("operation.membership.plan.featureDesc")}
+            </div>
           </div>
         </div>
 
@@ -177,13 +197,13 @@ const MembershipPlanIndexPage = () => {
           <div className="flex items-center justify-between">
             <div className="flex flex-wrap items-center gap-2">
               <Input
-                placeholder="搜索计划名称"
+                placeholder={t("operation.membership.plan.searchPlaceholder")}
                 value={searchKeyword}
                 onChange={(e) => setSearchKeyword(e.target.value)}
                 className="h-8 w-[200px]"
               />
               <DataTableFacetedFilter
-                title="启用状态"
+                title={t("operation.membership.plan.statusFilter")}
                 options={statusOptions}
                 selectedValue={statusFilter}
                 onSelectionChange={setStatusFilter}
@@ -194,19 +214,23 @@ const MembershipPlanIndexPage = () => {
                   <AlertDialogTrigger asChild>
                     <Button variant="outline" size="sm" className="h-8 border-dashed">
                       <RotateCcwIcon className="mr-2 size-4" />
-                      清除筛选
+                      {t("operation.membership.plan.clearFilters")}
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent className="sm:max-w-sm">
                     <AlertDialogHeader>
-                      <AlertDialogTitle>清除所有筛选？</AlertDialogTitle>
+                      <AlertDialogTitle>
+                        {t("operation.membership.plan.clearFiltersConfirm")}
+                      </AlertDialogTitle>
                       <AlertDialogDescription>
-                        这将清除所有已设置的筛选条件，包括搜索输入和筛选选项。
+                        {t("operation.membership.plan.clearFiltersDesc")}
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel>取消</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleResetFilters}>清除</AlertDialogAction>
+                      <AlertDialogCancel>{t("common.action.cancel")}</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleResetFilters}>
+                        {t("common.action.clearFilters")}
+                      </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
@@ -214,41 +238,41 @@ const MembershipPlanIndexPage = () => {
             </div>
             <Button size="sm" className="h-8" onClick={handleAdd}>
               <PlusIcon className="mr-2 size-4" />
-              新增
+              {t("common.action.add")}
             </Button>
           </div>
           <ScrollArea className="flex h-full flex-1 rounded-lg">
             <Table className="h-full">
               <TableHeader className="bg-muted sticky top-0 z-10">
                 <TableRow>
-                  <TableHead>计划名称</TableHead>
-                  <TableHead>订阅时长</TableHead>
-                  <TableHead>会员等级</TableHead>
-                  <TableHead>状态</TableHead>
-                  <TableHead>排序</TableHead>
-                  <TableHead>操作</TableHead>
+                  <TableHead>{t("operation.membership.plan.table.name")}</TableHead>
+                  <TableHead>{t("operation.membership.plan.table.duration")}</TableHead>
+                  <TableHead>{t("operation.membership.plan.table.level")}</TableHead>
+                  <TableHead>{t("operation.membership.plan.table.status")}</TableHead>
+                  <TableHead>{t("operation.membership.plan.table.sort")}</TableHead>
+                  <TableHead>{t("operation.membership.plan.table.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-muted-foreground h-32 text-center">
-                      加载中...
+                      {t("common.common.loading")}
                     </TableCell>
                   </TableRow>
                 ) : filteredPlans.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-muted-foreground h-32 text-center">
                       {hasActiveFilters
-                        ? "没有找到符合条件的计划，请尝试调整筛选条件"
-                        : "暂无订阅计划"}
+                        ? t("operation.membership.plan.noResults")
+                        : t("operation.membership.plan.noData")}
                     </TableCell>
                   </TableRow>
                 ) : (
                   filteredPlans.map((plan) => (
                     <TableRow key={plan.id}>
                       <TableCell className="font-medium">{plan.name}</TableCell>
-                      <TableCell>{getDurationLabel(plan)}</TableCell>
+                      <TableCell><DurationLabel plan={plan} /></TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
                           {plan.levels?.filter(Boolean).length ? (
@@ -280,7 +304,7 @@ const MembershipPlanIndexPage = () => {
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onSelect={() => handleEdit(plan)}>
                               <EditIcon className="mr-2 size-4" />
-                              编辑
+                              {t("operation.membership.plan.edit")}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
@@ -289,7 +313,7 @@ const MembershipPlanIndexPage = () => {
                               disabled={deleteMutation.isPending}
                             >
                               <Trash2Icon className="mr-2 size-4" />
-                              删除
+                              {t("operation.membership.plan.delete")}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>

@@ -26,18 +26,7 @@ import { StatusBadge } from "@buildingai/ui/components/ui/status-badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@buildingai/ui/components/ui/tabs";
 import { ExternalLink, Info, Loader2, Package, User } from "lucide-react";
 
-const TERMINAL_LABEL_MAP: Record<ExtensionSupportTerminalType, string> = {
-  [ExtensionSupportTerminal.WEB]: "Web端",
-  [ExtensionSupportTerminal.WEIXIN]: "公众号",
-  [ExtensionSupportTerminal.H5]: "H5",
-  [ExtensionSupportTerminal.MP]: "小程序",
-  [ExtensionSupportTerminal.API]: "API端",
-};
-
-const TYPE_LABEL_MAP: Record<ExtensionTypeType, string> = {
-  [ExtensionType.APPLICATION]: "应用插件",
-  [ExtensionType.FUNCTIONAL]: "功能插件",
-};
+import { useI18n } from "@buildingai/i18n";
 
 type ExtensionDetailTarget = {
   id: string;
@@ -68,6 +57,7 @@ export const ExtensionDetailSheet = ({
   target,
   defaultTab = "overview",
 }: ExtensionDetailSheetProps) => {
+  const { t } = useI18n();
   const { data: localExtension, isLoading: localLoading } = useExtensionDetailQuery(
     target?.identifier ?? "",
     { enabled: open && !!target?.isLocal },
@@ -132,52 +122,68 @@ export const ExtensionDetailSheet = ({
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-1">
                     <Info className="size-3" />
-                    <span className="text-xs">应用描述</span>
+                    <span className="text-xs">{t("extension.detail.description")}</span>
                   </div>
-                  <div className="text-foreground">{extension.description || "暂无描述"}</div>
+                  <div className="text-foreground">
+                    {extension.description || t("extension.status.noDescription")}
+                  </div>
                 </div>
               </SheetDescription>
             </SheetHeader>
 
             <Tabs defaultValue={defaultTab} className="flex flex-1 flex-col overflow-hidden px-4">
               <TabsList variant="line">
-                <TabsTrigger value="overview">详情</TabsTrigger>
-                {!isLocal && <TabsTrigger value="changelog">更新日志</TabsTrigger>}
+                <TabsTrigger value="overview">{t("extension.detail.overview")}</TabsTrigger>
+                {!isLocal && (
+                  <TabsTrigger value="changelog">{t("extension.actions.changelog")}</TabsTrigger>
+                )}
               </TabsList>
 
               <TabsContent value="overview" className="flex-1 overflow-hidden">
                 <ScrollArea className="h-full">
                   <div className="grid grid-cols-2 gap-4 py-4">
-                    <DetailField label="标识符">{extension.identifier}</DetailField>
-                    <DetailField label="当前版本">v{extension.version}</DetailField>
-                    <DetailField label="应用类型">
-                      {extension.typeDesc || TYPE_LABEL_MAP[extension.type] || "未知"}
+                    <DetailField label={t("extension.detail.identifier")}>
+                      {extension.identifier}
                     </DetailField>
-                    <DetailField label="应用来源">
-                      {extension.isLocal ? "本地" : "应用市场"}
+                    <DetailField label={t("extension.detail.currentVersion")}>
+                      v{extension.version}
+                    </DetailField>
+                    <DetailField label={t("extension.detail.appType")}>
+                      {extension.typeDesc || t("extension.type.unknown")}
+                    </DetailField>
+                    <DetailField label={t("extension.detail.appSource")}>
+                      {extension.isLocal
+                        ? t("extension.sourceOptions.local")
+                        : t("extension.sourceOptions.market")}
                     </DetailField>
                     {extension.engine && (
-                      <DetailField label="引擎要求">{extension.engine}</DetailField>
+                      <DetailField label={t("extension.detail.engine")}>
+                        {extension.engine}
+                      </DetailField>
                     )}
-                    <DetailField label="兼容性">
+                    <DetailField label={t("extension.detail.compatibility")}>
                       <span
                         className={extension.isCompatible ? "text-green-600" : "text-destructive"}
                       >
-                        {extension.isCompatible ? "兼容" : "不兼容"}
+                        {extension.isCompatible
+                          ? t("extension.detail.compatible")
+                          : t("extension.detail.incompatible")}
                       </span>
                     </DetailField>
                     {extension.hasUpdate && extension.latestVersion && (
-                      <DetailField label="最新版本">
+                      <DetailField label={t("extension.detail.latestVersion")}>
                         <span className="text-blue-600">v{extension.latestVersion}</span>
                       </DetailField>
                     )}
 
-                    <DetailField label="支持终端">
+                    <DetailField label={t("extension.detail.supportedTerminals")}>
                       <div className="flex flex-wrap gap-1">
                         {extension.supportTerminal?.length ? (
                           extension.supportTerminal.map((terminal) => (
                             <Badge key={terminal} variant="secondary">
-                              {TERMINAL_LABEL_MAP[terminal] || "未知"}
+                              {t(
+                                `extension.terminalLabels.${terminal === ExtensionSupportTerminal.WEB ? "web" : terminal === ExtensionSupportTerminal.WEIXIN ? "weixin" : terminal === ExtensionSupportTerminal.H5 ? "h5" : terminal === ExtensionSupportTerminal.MP ? "mp" : "api"}`,
+                              ) || t("extension.terminalLabels.unknown")}
                             </Badge>
                           ))
                         ) : (
@@ -186,7 +192,7 @@ export const ExtensionDetailSheet = ({
                       </div>
                     </DetailField>
 
-                    <DetailField label="作者">
+                    <DetailField label={t("extension.detail.author")}>
                       <div className="flex items-center gap-1.5">
                         <Avatar className="size-5">
                           <AvatarImage src={extension.author?.avatar} />
@@ -194,11 +200,11 @@ export const ExtensionDetailSheet = ({
                             <User className="size-3" />
                           </AvatarFallback>
                         </Avatar>
-                        <span>{extension.author?.name || "未知作者"}</span>
+                        <span>{extension.author?.name || t("extension.status.author")}</span>
                       </div>
                     </DetailField>
 
-                    <DetailField label="主页">
+                    <DetailField label={t("extension.detail.homepage")}>
                       {extension.homepage ? (
                         <a
                           href={extension.homepage}
@@ -214,10 +220,10 @@ export const ExtensionDetailSheet = ({
                       )}
                     </DetailField>
 
-                    <DetailField label="安装时间">
+                    <DetailField label={t("extension.detail.installTime")}>
                       {new Date(extension.createdAt).toLocaleString()}
                     </DetailField>
-                    <DetailField label="更新时间">
+                    <DetailField label={t("extension.detail.updateTime")}>
                       {new Date(extension.updatedAt).toLocaleString()}
                     </DetailField>
                   </div>
@@ -240,26 +246,32 @@ export const ExtensionDetailSheet = ({
                             )}
                             {index === 0 && (
                               <Badge variant="secondary" className="text-xs">
-                                最新
+                                {t("extension.status.latest")}
                               </Badge>
                             )}
                           </div>
                           <div className="flex flex-col gap-1 pl-6">
                             {ver.features && (
                               <p className="text-muted-foreground text-sm">
-                                <span className="text-foreground font-medium">新功能：</span>
+                                <span className="text-foreground font-medium">
+                                  {t("extension.status.newFeatures")}
+                                </span>
                                 {ver.features}
                               </p>
                             )}
                             {ver.optimize && (
                               <p className="text-muted-foreground text-sm">
-                                <span className="text-foreground font-medium">优化：</span>
+                                <span className="text-foreground font-medium">
+                                  {t("extension.status.optimize")}
+                                </span>
                                 {ver.optimize}
                               </p>
                             )}
                             {ver.fixs && (
                               <p className="text-muted-foreground text-sm">
-                                <span className="text-foreground font-medium">修复：</span>
+                                <span className="text-foreground font-medium">
+                                  {t("extension.status.fix")}
+                                </span>
                                 {ver.fixs}
                               </p>
                             )}
@@ -274,7 +286,7 @@ export const ExtensionDetailSheet = ({
                       ))
                     ) : (
                       <div className="text-muted-foreground flex flex-col items-center justify-center gap-2 py-8 text-sm">
-                        暂无更新日志
+                        {t("extension.empty.noChangelog")}
                       </div>
                     )}
                   </div>

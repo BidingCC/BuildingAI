@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { useConfigStore } from "@buildingai/stores";
 import {
   Dialog,
@@ -13,6 +14,7 @@ import { AgreementDialog, type AgreementType } from "@/components/agreement-dial
 import { SettingItem, SettingItemAction, SettingItemGroup } from "../setting-item";
 
 const AboutSetting = () => {
+  const { t } = useI18n();
   const [agreementOpen, setAgreementOpen] = useState(false);
   const [customerServiceOpen, setCustomerServiceOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<AgreementType>("service");
@@ -22,15 +24,15 @@ const AboutSetting = () => {
   return (
     <>
       <div className="flex flex-col gap-4">
-        <SettingItemGroup label="系统信息">
+        <SettingItemGroup label={t("settings.about.systemInfo")}>
           <SettingItem
-            title="系统版本"
+            title={t("settings.about.systemVersion")}
             description={`v${websiteConfig?.webinfo.version || "26.0.0"}`}
           />
         </SettingItemGroup>
 
-        <SettingItemGroup label="政策协议">
-          <SettingItem title="用户协议">
+        <SettingItemGroup label={t("settings.about.policyAgreement")}>
+          <SettingItem title={t("settings.about.userAgreement")}>
             <SettingItemAction
               onClick={() => {
                 setActiveTab("service");
@@ -40,7 +42,7 @@ const AboutSetting = () => {
               <ChevronRight />
             </SettingItemAction>
           </SettingItem>
-          <SettingItem title="隐私政策">
+          <SettingItem title={t("settings.about.privacyPolicy")}>
             <SettingItemAction
               onClick={() => {
                 setActiveTab("privacy");
@@ -52,8 +54,8 @@ const AboutSetting = () => {
           </SettingItem>
         </SettingItemGroup>
 
-        <SettingItemGroup label="联系我们">
-          <SettingItem title="联系客服" onClick={() => setCustomerServiceOpen(true)}>
+        <SettingItemGroup label={t("settings.about.contactUs")}>
+          <SettingItem title={t("settings.about.contactCustomerService")} onClick={() => setCustomerServiceOpen(true)}>
             <SettingItemAction>
               <ChevronRight />
             </SettingItemAction>
@@ -66,18 +68,18 @@ const AboutSetting = () => {
       <Dialog open={customerServiceOpen} onOpenChange={setCustomerServiceOpen}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>联系客服</DialogTitle>
+            <DialogTitle>{t("settings.about.contactCustomerService")}</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col items-center gap-4 py-4">
             <div className="bg-muted flex size-52 items-center justify-center overflow-hidden rounded-lg border">
               {customerServiceQrcode ? (
                 <img
                   src={customerServiceQrcode}
-                  alt="客服二维码"
+                  alt={t("settings.about.customerServiceQrcode")}
                   className="size-full object-contain"
                 />
               ) : (
-                <span className="text-muted-foreground text-sm">暂未配置二维码</span>
+                <span className="text-muted-foreground text-sm">{t("settings.about.qrcodeNotConfigured")}</span>
               )}
             </div>
           </div>

@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   Editor,
   EditorContainer,
@@ -72,6 +73,7 @@ export const QuickCommands = memo(
       }[],
     ) => void;
   }) => {
+    const { t } = useI18n();
     const { confirm } = useAlertDialog();
 
     const [quickCommands, setQuickCommands] = useState<QuickCommand[]>(() => {
@@ -147,9 +149,9 @@ export const QuickCommands = memo(
       async (cmd: QuickCommand) => {
         try {
           await confirm({
-            title: "删除快捷指令",
-            description: "确定要删除该快捷指令吗？",
-            confirmText: "删除",
+            title: t("agent.detail.interface.deleteQuickCommand"),
+            description: t("agent.detail.interface.confirmDeleteQuickCommand"),
+            confirmText: t("common.delete"),
             confirmVariant: "destructive",
           });
         } catch {
@@ -176,14 +178,14 @@ export const QuickCommands = memo(
           className={cn("flex items-center justify-between", quickCommands.length !== 0 && "mb-2")}
         >
           <div className="flex items-center gap-1">
-            <h3 className="text-sm font-medium">快捷指令</h3>
+            <h3 className="text-sm font-medium">{t("agent.detail.interface.quickCommands")}</h3>
             <Tooltip>
               <TooltipTrigger>
                 <HelpCircle className="text-muted-foreground h-4 w-4" />
               </TooltipTrigger>
               <TooltipContent>
                 <div className="text-background text-xs">
-                  展示在对话框上方的指令按钮，用户可快速发起预设对话或指令
+                  {t("agent.detail.interface.quickCommandsDesc")}
                 </div>
               </TooltipContent>
             </Tooltip>
@@ -195,7 +197,7 @@ export const QuickCommands = memo(
             onClick={openCreateQuickCommand}
           >
             <Plus className="h-4 w-4" />
-            <span>添加</span>
+            <span>{t("common.add")}</span>
           </Button>
         </div>
 
@@ -211,7 +213,9 @@ export const QuickCommands = memo(
                   variant="outline"
                   className="opacity-100 transition-opacity group-hover/quick-command:opacity-0"
                 >
-                  {cmd.replyMode === "custom" ? "自定义回复" : "模型回复"}
+                  {cmd.replyMode === "custom"
+                    ? t("agent.detail.interface.customReply")
+                    : t("agent.detail.interface.modelReply")}
                 </Badge>
                 <div className="absolute right-0 flex items-center opacity-0 transition-opacity group-hover/quick-command:opacity-100">
                   <Button
@@ -250,18 +254,23 @@ export const QuickCommands = memo(
         >
           <DialogContent className="flex max-h-[80vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-lg">
             <DialogHeader className="shrink-0 px-4 pt-4">
-              <DialogTitle>{editingQuickCommandId ? "编辑快捷指令" : "添加快捷指令"}</DialogTitle>
+              <DialogTitle>
+                {editingQuickCommandId
+                  ? t("agent.detail.interface.editQuickCommand")
+                  : t("agent.detail.interface.addQuickCommand")}
+              </DialogTitle>
             </DialogHeader>
 
             <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-6">
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label className="text-sm">
-                    指令名称<span className="text-destructive">*</span>
+                    {t("agent.detail.interface.instructionName")}
+                    <span className="text-destructive">*</span>
                   </Label>
                   <Input
                     value={quickCommandDraft?.name ?? ""}
-                    placeholder="请输入指令名称"
+                    placeholder={t("agent.detail.interface.inputInstructionName")}
                     onChange={(e) =>
                       setQuickCommandDraft((prev) =>
                         prev ? { ...prev, name: e.target.value } : prev,
@@ -272,11 +281,12 @@ export const QuickCommands = memo(
 
                 <div className="space-y-2">
                   <Label className="text-sm">
-                    发送指令内容<span className="text-destructive">*</span>
+                    {t("agent.detail.interface.sendInstructionContent")}
+                    <span className="text-destructive">*</span>
                   </Label>
                   <Textarea
                     value={quickCommandDraft?.prompt ?? ""}
-                    placeholder="请输入发送指令内容"
+                    placeholder={t("agent.detail.interface.inputInstructionContent")}
                     className="bg-background resize-none"
                     rows={4}
                     onChange={(e) =>
@@ -289,7 +299,8 @@ export const QuickCommands = memo(
 
                 <div className="space-y-2">
                   <Label className="text-sm">
-                    回答方式<span className="text-destructive">*</span>
+                    {t("agent.detail.interface.replyMethod")}
+                    <span className="text-destructive">*</span>
                   </Label>
                   <div className="flex items-center gap-3">
                     <Button
@@ -307,7 +318,7 @@ export const QuickCommands = memo(
                         )
                       }
                     >
-                      自定义回复
+                      {t("agent.detail.interface.customReply")}
                     </Button>
                     <Button
                       type="button"
@@ -324,7 +335,7 @@ export const QuickCommands = memo(
                         )
                       }
                     >
-                      模型回复
+                      {t("agent.detail.interface.modelReply")}
                     </Button>
                   </div>
                 </div>
@@ -332,7 +343,8 @@ export const QuickCommands = memo(
                 {quickCommandDraft?.replyMode === "custom" && (
                   <div className="space-y-2">
                     <Label className="text-sm">
-                      回答内容<span className="text-destructive">*</span>
+                      {t("agent.detail.interface.replyContent")}
+                      <span className="text-destructive">*</span>
                     </Label>
                     <Plate
                       key={quickCommandDraft?.id ?? "empty"}
@@ -359,7 +371,7 @@ export const QuickCommands = memo(
 
             <DialogFooter className="shrink-0 px-4 py-4">
               <DialogClose asChild>
-                <Button variant="outline">取消</Button>
+                <Button variant="outline">{t("common.cancel")}</Button>
               </DialogClose>
               <Button
                 onClick={submitQuickCommand}
@@ -369,7 +381,7 @@ export const QuickCommands = memo(
                   (quickCommandDraft?.replyMode === "custom" && !quickCommandDraft?.replyContent)
                 }
               >
-                保存
+                {t("common.save")}
               </Button>
             </DialogFooter>
           </DialogContent>

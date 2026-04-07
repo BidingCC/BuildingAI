@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   useAgentAnnotationDetailQuery,
   useCreateAgentAnnotationMutation,
@@ -92,6 +93,7 @@ function useAnnotationContext(): AnnotationContextValue | null {
 }
 
 function AnnotationActions({ messageId, message }: { messageId: string; message: UIMessage }) {
+  const { t } = useI18n();
   const ctx = useAnnotationContext();
   if (!ctx) return null;
   console.log(message.parts);
@@ -108,7 +110,7 @@ function AnnotationActions({ messageId, message }: { messageId: string; message:
       <AIMessageAction
         label="Edit annotation"
         onClick={() => ctx.onEditAnnotation(annotationId)}
-        tooltip="编辑标注"
+        tooltip={t("agent.detail.debugging.editAnnotation")}
       >
         <PencilLine className="size-4" />
       </AIMessageAction>
@@ -119,7 +121,7 @@ function AnnotationActions({ messageId, message }: { messageId: string; message:
       <AIMessageAction
         label="Add annotation"
         onClick={() => ctx.onAddAnnotation(messageId)}
-        tooltip="添加标注"
+        tooltip={t("agent.detail.debugging.addAnnotation")}
         loading={isAdding}
       >
         {!isAdding && <FilePlusCorner className="size-4" />}
@@ -142,6 +144,7 @@ function AnnotationEditDialog({
   onOpenChange: (open: boolean) => void;
   onSaved: (deletedAnnotationId?: string) => void;
 }) {
+  const { t } = useI18n();
   const [formQuestion, setFormQuestion] = useState("");
   const [formAnswer, setFormAnswer] = useState("");
   const { confirm: alertConfirm } = useAlertDialog();
@@ -166,21 +169,21 @@ function AnnotationEditDialog({
         annotationId,
         params: { question: formQuestion.trim(), answer: formAnswer.trim(), enabled: true },
       });
-      toast.success("已更新");
+      toast.success(t("agent.detail.debugging.updated"));
       onOpenChange(false);
       onSaved();
     } catch {
-      toast.error("更新失败");
+      toast.error(t("agent.detail.debugging.updateFailed"));
     }
-  }, [annotationId, formQuestion, formAnswer, updateMutation, onOpenChange, onSaved]);
+  }, [annotationId, formQuestion, formAnswer, updateMutation, onOpenChange, onSaved, t]);
 
   const handleDelete = useCallback(async () => {
     if (!annotationId) return;
     try {
       await alertConfirm({
-        title: "删除标注",
-        description: "确定要删除此标注吗？",
-        confirmText: "删除",
+        title: t("agent.detail.debugging.deleteAnnotation"),
+        description: t("agent.detail.debugging.confirmDeleteAnnotation"),
+        confirmText: t("agent.detail.debugging.delete"),
         confirmVariant: "destructive",
       });
     } catch {
@@ -189,18 +192,18 @@ function AnnotationEditDialog({
     onOpenChange(false);
     try {
       await deleteMutation.mutateAsync(annotationId);
-      toast.success("已删除");
+      toast.success(t("agent.detail.debugging.deleted"));
       onSaved(annotationId);
     } catch {
-      toast.error("删除失败");
+      toast.error(t("agent.detail.debugging.deleteFailed"));
     }
-  }, [annotationId, alertConfirm, deleteMutation, onOpenChange, onSaved]);
+  }, [annotationId, alertConfirm, deleteMutation, onOpenChange, onSaved, t]);
 
   return (
     <RightFloatingPanel
       open={open}
       onOpenChange={onOpenChange}
-      title="编辑标注回复"
+      title={t("agent.detail.debugging.editAnnotationReply")}
       footer={
         <div className="flex items-center justify-between gap-2">
           <Button
@@ -211,11 +214,11 @@ function AnnotationEditDialog({
             disabled={deleteMutation.isPending || !annotationId}
           >
             <Trash2 className="size-4" />
-            删除此标注
+            {t("agent.detail.debugging.deleteThisAnnotation")}
           </Button>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
-              取消
+              {t("agent.detail.cancel")}
             </Button>
             <Button
               onClick={handleSubmit}
@@ -224,7 +227,7 @@ function AnnotationEditDialog({
               }
               loading={updateMutation.isPending}
             >
-              保存
+              {t("agent.detail.save")}
             </Button>
           </div>
         </div>
@@ -232,18 +235,20 @@ function AnnotationEditDialog({
     >
       <div className="flex flex-col gap-5 px-4 py-4">
         {isLoading ? (
-          <div className="text-muted-foreground py-8 text-center text-sm">加载中…</div>
+          <div className="text-muted-foreground py-8 text-center text-sm">
+            {t("agent.detail.loading")}
+          </div>
         ) : (
           <>
             <div className="grid gap-2">
               <Label className="flex items-center gap-2 text-sm font-medium">
                 <User className="size-4" />
-                提问
+                {t("agent.detail.debugging.question")}
               </Label>
               <Textarea
                 value={formQuestion}
                 onChange={(e) => setFormQuestion(e.target.value)}
-                placeholder="输入提问"
+                placeholder={t("agent.detail.debugging.inputQuestion")}
                 className="bg-muted/30 min-h-[120px] resize-y rounded-lg border"
                 rows={5}
               />
@@ -251,12 +256,12 @@ function AnnotationEditDialog({
             <div className="grid gap-2">
               <Label className="flex items-center gap-2 text-sm font-medium">
                 <MessageSquare className="size-4" />
-                回复
+                {t("agent.detail.debugging.reply")}
               </Label>
               <Textarea
                 value={formAnswer}
                 onChange={(e) => setFormAnswer(e.target.value)}
-                placeholder="输入回复"
+                placeholder={t("agent.detail.debugging.inputReply")}
                 className="bg-muted/30 min-h-[160px] resize-y rounded-lg border"
                 rows={6}
               />
@@ -311,6 +316,7 @@ function DebugPanelContent({
   onOpenPopover: () => void;
   hiddenTools?: PromptInputHiddenTool[];
 }) {
+  const { t } = useI18n();
   const {
     displayMessages,
     streamingMessageId,
@@ -365,13 +371,13 @@ function DebugPanelContent({
     <Card className="flex h-full min-h-0 flex-col gap-0 rounded-r-none! rounded-b-none! border-r-0! border-b-0! p-2">
       <CardHeader className="shrink-0 px-2 pb-4">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">调试与预览</CardTitle>
+          <CardTitle className="text-lg">{t("agent.detail.debugging.title")}</CardTitle>
           <div className="flex items-center gap-1">
             <Button
               size="icon"
               variant="ghost"
               onClick={onClear}
-              title="清空对话"
+              title={t("agent.detail.debugging.clearChat")}
               disabled={isStreaming}
             >
               <RotateCcw className="size-4" />
@@ -379,15 +385,15 @@ function DebugPanelContent({
             {hasFormFields && (
               <Popover open={popoverOpen} onOpenChange={onPopoverOpenChange}>
                 <PopoverTrigger asChild>
-                  <Button size="icon" variant="ghost" title="表单变量">
+                  <Button size="icon" variant="ghost" title={t("agent.detail.formVariables")}>
                     <Settings2 className="size-4" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-full" align="end">
                   <div className="space-y-3">
-                    <h4 className="text-sm font-medium">表单变量</h4>
+                    <h4 className="text-sm font-medium">{t("agent.detail.formVariables")}</h4>
                     <p className="text-muted-foreground text-xs">
-                      填写表单变量后，对话中的 {"{{变量}}"} 将被替换为实际值
+                      {t("agent.detail.formVariablesDesc")}
                     </p>
                     <Separator />
                     {formFields.map((field) => (
@@ -398,7 +404,7 @@ function DebugPanelContent({
                         </Label>
                         {field.type === "paragraph" ? (
                           <Textarea
-                            placeholder={`输入 ${field.label}`}
+                            placeholder={t("agent.detail.inputPlaceholder", { label: field.label })}
                             value={formValues[field.name] ?? ""}
                             onChange={(e) => onFormValueChange(field.name, e.target.value)}
                             rows={2}
@@ -410,7 +416,7 @@ function DebugPanelContent({
                             value={formValues[field.name] ?? ""}
                             onChange={(e) => onFormValueChange(field.name, e.target.value)}
                           >
-                            <option value="">请选择</option>
+                            <option value="">{t("agent.detail.pleaseSelect")}</option>
                             {field.options.map((opt) => (
                               <option key={opt.id} value={opt.label}>
                                 {opt.label}
@@ -419,7 +425,7 @@ function DebugPanelContent({
                           </select>
                         ) : (
                           <Input
-                            placeholder={`输入 ${field.label}`}
+                            placeholder={t("agent.detail.inputPlaceholder", { label: field.label })}
                             value={formValues[field.name] ?? ""}
                             onChange={(e) => onFormValueChange(field.name, e.target.value)}
                             className="h-8 text-xs"
@@ -546,6 +552,7 @@ export default function DebuggingPreview({
   thinkingSupported = false,
   hiddenTools: hiddenToolsProp = [],
 }: DebuggingPreviewProps) {
+  const { t } = useI18n();
   const [formValues, setFormValues] = useState<Record<string, string>>({});
   const [annotationIdOverrides, setAnnotationIdOverrides] = useState<Record<string, string>>({});
   const [editAnnotationId, setEditAnnotationId] = useState<string | null>(null);
@@ -587,7 +594,7 @@ export default function DebuggingPreview({
       const { displayMessages, getDbMessageId } = assistantResult;
       const dbMessageId = getDbMessageId?.(clientMessageId);
       if (!dbMessageId) {
-        toast.error("无法获取消息 ID");
+        toast.error(t("agent.detail.debugging.cannotGetMessageId"));
         return;
       }
       const idx = displayMessages.findIndex((m) => m.id === clientMessageId);
@@ -598,7 +605,7 @@ export default function DebuggingPreview({
       const question = getMessageContent(userMsg);
       const answer = getMessageContent(assistantMsg);
       if (!question.trim() || !answer.trim()) {
-        toast.error("问题或回复为空");
+        toast.error(t("agent.detail.debugging.questionOrAnswerEmpty"));
         return;
       }
       setAddingAnnotationForMessageId(clientMessageId);
@@ -611,16 +618,16 @@ export default function DebuggingPreview({
         })
         .then((created) => {
           setAnnotationIdOverrides((prev) => ({ ...prev, [clientMessageId]: created.id }));
-          toast.success("已添加标注");
+          toast.success(t("agent.detail.debugging.annotationAdded"));
         })
         .catch(() => {
-          toast.error("添加标注失败");
+          toast.error(t("agent.detail.debugging.addAnnotationFailed"));
         })
         .finally(() => {
           setAddingAnnotationForMessageId(null);
         });
     },
-    [assistantResult.displayMessages, assistantResult.getDbMessageId, createAnnotationMutation],
+    [assistantResult.displayMessages, assistantResult.getDbMessageId, createAnnotationMutation, t],
   );
 
   const onEditAnnotation = useCallback((annotationId: string) => {

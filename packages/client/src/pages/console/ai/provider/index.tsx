@@ -1,5 +1,6 @@
 import { MODEL_FEATURE_DESCRIPTIONS, MODEL_FEATURES } from "@buildingai/ai-sdk/interfaces";
 import { useDocumentHead } from "@buildingai/hooks";
+import { useI18n } from "@buildingai/i18n";
 import {
   type AiProvider,
   type AiProviderModel,
@@ -123,6 +124,7 @@ const ModelFeatureBadges = ({ features }: ModelFeatureBadgesProps) => (
 );
 
 const AiProviderIndexPage = () => {
+  const { t } = useI18n();
   const [keyword, setKeyword] = useState("");
   const [debouncedKeyword] = useDebounceValue(keyword.trim(), 300);
   const [queryParams, setQueryParams] = useState<QueryAiProviderDto>({});
@@ -138,7 +140,7 @@ const AiProviderIndexPage = () => {
   const { confirm } = useAlertDialog();
 
   useDocumentHead({
-    title: "模型厂商管理",
+    title: t("ai.provider.meta.title"),
   });
 
   // Update query params when debounced keyword changes
@@ -151,11 +153,11 @@ const AiProviderIndexPage = () => {
 
   const deleteModelMutation = useDeleteAiModelMutation({
     onSuccess: () => {
-      toast.success("模型已删除");
+      toast.success(t("ai.provider.toast.modelDeleted"));
       handleModelFormSuccess();
     },
     onError: (error) => {
-      toast.error(`删除失败: ${error.message}`);
+      toast.error(t("ai.provider.toast.modelDeleteFailed", { error: error.message }));
     },
   });
 
@@ -197,15 +199,19 @@ const AiProviderIndexPage = () => {
 
   const handleDeleteModel = async (model: AiProviderModel) => {
     await confirm({
-      title: "删除模型",
-      description: `确定要删除模型 "${model.model}" 吗？此操作不可恢复。`,
+      title: t("ai.provider.confirm.deleteModelTitle"),
+      description: t("ai.provider.confirm.deleteModelDesc", { name: model.model }),
     });
     deleteModelMutation.mutate(model.id);
   };
 
   const toggleModelActiveMutation = useToggleAiModelActiveMutation({
     onSuccess: (updatedModel, variables) => {
-      toast.success(variables.isActive ? "模型已启用" : "模型已禁用");
+      toast.success(
+        variables.isActive
+          ? t("ai.provider.toast.modelEnabled")
+          : t("ai.provider.toast.modelDisabled"),
+      );
       // Update selectedProvider's models locally
       if (selectedProvider) {
         setSelectedProvider({
@@ -225,37 +231,45 @@ const AiProviderIndexPage = () => {
 
   const toggleActiveMutation = useToggleAiProviderActiveMutation({
     onSuccess: (_, variables) => {
-      toast.success(variables.isActive ? "供应商已启用" : "供应商已禁用");
+      toast.success(
+        variables.isActive
+          ? t("ai.provider.toast.providerEnabled")
+          : t("ai.provider.toast.providerDisabled"),
+      );
       refetch();
     },
   });
 
   const deleteMutation = useDeleteAiProviderMutation({
     onSuccess: () => {
-      toast.success("供应商已删除");
+      toast.success(t("ai.provider.toast.providerDeleted"));
       refetch();
     },
     onError: (error) => {
-      toast.error(`删除失败: ${error.message}`);
+      toast.error(t("ai.provider.toast.modelDeleteFailed", { error: error.message }));
     },
   });
 
   const handleToggleActive = async (provider: AiProvider) => {
     await confirm({
-      title: "供应商状态",
-      description: `确定要${provider.isActive ? "禁用" : "启用"}该供应商吗？`,
+      title: t("ai.provider.confirm.statusTitle"),
+      description: t("ai.provider.confirm.statusDesc", {
+        action: provider.isActive
+          ? t("ai.provider.confirm.disable")
+          : t("ai.provider.confirm.enable"),
+      }),
     });
     toggleActiveMutation.mutate({ id: provider.id, isActive: !provider.isActive });
   };
 
   const handleDelete = async (provider: AiProvider) => {
     if (provider.isBuiltIn) {
-      toast.error("系统内置供应商不允许删除");
+      toast.error(t("ai.provider.toast.builtInProviderError"));
       return;
     }
     await confirm({
-      title: "删除供应商",
-      description: "确定要删除该供应商吗？此操作不可恢复。",
+      title: t("ai.provider.confirm.deleteProviderTitle"),
+      description: t("ai.provider.confirm.deleteProviderDesc"),
     });
     deleteMutation.mutate(provider.id);
   };
@@ -288,19 +302,19 @@ const AiProviderIndexPage = () => {
       <div className="flex flex-col gap-4">
         <div className="bg-background sticky top-0 z-2 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
           <Input
-            placeholder="搜索供应商名称或厂商标识"
+            placeholder={t("ai.provider.searchPlaceholder")}
             className="text-sm"
             value={keyword}
             onChange={handleSearchChange}
           />
           <Select onValueChange={handleStatusChange}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="供应商状态" />
+              <SelectValue placeholder={t("ai.provider.statusOptions.all")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">全部状态</SelectItem>
-              <SelectItem value="active">已启用</SelectItem>
-              <SelectItem value="inactive">已禁用</SelectItem>
+              <SelectItem value="all">{t("ai.provider.statusOptions.all")}</SelectItem>
+              <SelectItem value="active">{t("ai.provider.statusOptions.active")}</SelectItem>
+              <SelectItem value="inactive">{t("ai.provider.statusOptions.inactive")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -316,16 +330,16 @@ const AiProviderIndexPage = () => {
                   <Plus />
                 </Button>
                 <div className="flex flex-col">
-                  <span>新增厂商</span>
+                  <span>{t("ai.provider.actions.addProvider")}</span>
                   <span className="text-muted-foreground py-1 text-xs font-medium">
-                    添加新的自定义模型厂商
+                    {t("ai.provider.actions.addProviderDesc")}
                   </span>
                 </div>
               </div>
 
               <div className="flex min-h-12 flex-1 items-end gap-4">
                 <Button size="xs" className="flex-1" variant="outline" disabled>
-                  <FileJson2 /> 从配置文件导入
+                  <FileJson2 /> {t("ai.provider.actions.importConfig")}
                 </Button>
                 <PermissionGuard permissions="ai-providers:create">
                   <Button
@@ -334,7 +348,7 @@ const AiProviderIndexPage = () => {
                     variant="outline"
                     onClick={handleOpenCreateDialog}
                   >
-                    <Plus /> 手动创建
+                    <Plus /> {t("ai.provider.actions.manualCreate")}
                   </Button>
                 </PermissionGuard>
               </div>
@@ -388,7 +402,9 @@ const AiProviderIndexPage = () => {
                       onClick={() => handleManageModels(provider)}
                     >
                       <Settings />
-                      管理模型({provider.models?.length || 0})
+                      {t("ai.provider.actions.manageModels", {
+                        count: provider.models?.length || 0,
+                      })}
                       <ChevronRight />
                     </Button>
                   </div>
@@ -403,7 +419,7 @@ const AiProviderIndexPage = () => {
                         <PermissionGuard permissions="ai-providers:update">
                           <DropdownMenuItem onClick={() => handleOpenEditDialog(provider)}>
                             <Edit />
-                            编辑
+                            {t("ai.provider.actions.edit")}
                           </DropdownMenuItem>
                         </PermissionGuard>
 
@@ -416,7 +432,7 @@ const AiProviderIndexPage = () => {
                             disabled={deleteMutation.isPending}
                           >
                             <Trash2 />
-                            删除
+                            {t("ai.provider.actions.delete")}
                           </DropdownMenuItem>
                         </PermissionGuard>
                       </DropdownMenuContent>
@@ -438,8 +454,8 @@ const AiProviderIndexPage = () => {
             <div className="col-span-1 flex h-46.5 items-center justify-center gap-4 sm:col-span-2 lg:col-span-3 xl:col-span-4 2xl:col-span-5">
               <span className="text-muted-foreground text-sm">
                 {queryParams.keyword
-                  ? `没有找到与"${queryParams.keyword}"相关的供应商`
-                  : "暂无供应商数据"}
+                  ? t("ai.provider.empty.noResults", { keyword: queryParams.keyword })
+                  : t("ai.provider.empty.noData")}
               </span>
             </div>
           )}
@@ -462,16 +478,23 @@ const AiProviderIndexPage = () => {
                     />
                   </div>
                 )}
-                <CommandInput className="w-full max-w-lg" placeholder="搜索模型名称..." />
+                <CommandInput
+                  className="w-full max-w-lg"
+                  placeholder={t("ai.provider.modelList.searchPlaceholder")}
+                />
                 <div className="p-1 pb-0">
                   <Select value={modelStatus} onValueChange={handleModelStatusChange}>
                     <SelectTrigger className="h-8!">
-                      <SelectValue placeholder="模型状态" />
+                      <SelectValue placeholder={t("ai.provider.modelStatusOptions.all")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">全部状态</SelectItem>
-                      <SelectItem value="active">已启用</SelectItem>
-                      <SelectItem value="inactive">已禁用</SelectItem>
+                      <SelectItem value="all">{t("ai.provider.modelStatusOptions.all")}</SelectItem>
+                      <SelectItem value="active">
+                        {t("ai.provider.modelStatusOptions.active")}
+                      </SelectItem>
+                      <SelectItem value="inactive">
+                        {t("ai.provider.modelStatusOptions.inactive")}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -485,7 +508,7 @@ const AiProviderIndexPage = () => {
                     onClick={handleOpenAddModelDialog}
                   >
                     <PlusCircle />
-                    添加模型
+                    {t("ai.provider.actions.addModel")}
                   </Button>
                 </PermissionGuard>
                 <PermissionGuard permissions="ai-models:create">
@@ -509,9 +532,11 @@ const AiProviderIndexPage = () => {
               </div>
             </div>
             <CommandList className="min-h-96 max-sm:max-h-full sm:max-h-96">
-              <CommandEmpty>未找到模型</CommandEmpty>
+              <CommandEmpty>{t("ai.provider.modelList.noModels")}</CommandEmpty>
               {selectedProvider && filteredModels.length > 0 ? (
-                <CommandGroup heading={`模型列表(${filteredModels.length})`}>
+                <CommandGroup
+                  heading={t("ai.provider.modelList.title", { count: filteredModels.length })}
+                >
                   {filteredModels.map((model) => (
                     <CommandItem
                       key={model.id}
@@ -535,7 +560,11 @@ const AiProviderIndexPage = () => {
                           </Badge>
                           <ModelFeatureBadges features={model.features} />
                           <Badge variant="outline">
-                            {model.billingRule?.power ? `${model.billingRule.power} 积分` : "免费"}
+                            {model.billingRule?.power
+                              ? t("ai.provider.modelFeatures.points", {
+                                  points: model.billingRule.power,
+                                })
+                              : t("ai.provider.modelFeatures.free")}
                           </Badge>
                         </div>
                         <PermissionGuard permissions="ai-models:delete">
@@ -556,7 +585,7 @@ const AiProviderIndexPage = () => {
                             onClick={() => handleOpenEditModelDialog(model)}
                           >
                             <Settings2 />
-                            <span className="max-sm:hidden">配置</span>
+                            <span className="max-sm:hidden">{t("ai.provider.actions.config")}</span>
                           </Button>
                         </PermissionGuard>
                       </div>

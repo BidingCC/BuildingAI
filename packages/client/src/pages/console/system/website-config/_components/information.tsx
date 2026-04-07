@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   useSetWebsiteConfigMutation,
   useWebsiteConfigQuery,
@@ -58,17 +59,18 @@ const defaultValues: InformationFormValues = {
 const WEBSITE_CONFIG_QUERY_KEY = ["config", "website"] as const;
 
 export default function Information() {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const { themeColor, setThemeColor } = useTheme();
   const { data: rawData, isLoading } = useWebsiteConfigQuery();
   const data = rawData as WebsiteConfigResponse | undefined;
   const setMutation = useSetWebsiteConfigMutation({
     onSuccess: () => {
-      toast.success("保存成功");
+      toast.success(t("system.websiteConfig.information.saveSuccess"));
       void queryClient.invalidateQueries({ queryKey: WEBSITE_CONFIG_QUERY_KEY });
     },
     onError: (e) => {
-      console.log(`保存失败: ${e.message}`);
+      console.log(`${t("system.websiteConfig.information.saveFailed", { message: e.message })}`);
     },
   });
 
@@ -117,11 +119,16 @@ export default function Information() {
           name="websiteName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>网站名称</FormLabel>
-              <FormDescription>网站名称将显示在浏览器标签页和系统各处</FormDescription>
+              <FormLabel>{t("system.websiteConfig.information.websiteName.label")}</FormLabel>
+              <FormDescription>
+                {t("system.websiteConfig.information.websiteName.description")}
+              </FormDescription>
               <FormControl>
                 <InputGroup>
-                  <InputGroupInput placeholder="请输入网站名称" {...field} />
+                  <InputGroupInput
+                    placeholder={t("system.websiteConfig.information.websiteName.placeholder")}
+                    {...field}
+                  />
                   <InputGroupAddon>
                     <GlobeIcon />
                   </InputGroupAddon>
@@ -136,12 +143,17 @@ export default function Information() {
           name="websiteDescription"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>网站描述</FormLabel>
+              <FormLabel>
+                {t("system.websiteConfig.information.websiteDescription.label")}
+              </FormLabel>
               <FormControl>
-                <Textarea placeholder="请输入网站描述" {...field} />
+                <Textarea
+                  placeholder={t("system.websiteConfig.information.websiteDescription.placeholder")}
+                  {...field}
+                />
               </FormControl>
               <FormDescription>
-                网站的简短描述，将显示在搜索引擎结果和社交媒体分享中
+                {t("system.websiteConfig.information.websiteDescription.description")}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -152,7 +164,7 @@ export default function Information() {
           name="websiteIcon"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>网站图标</FormLabel>
+              <FormLabel>{t("system.websiteConfig.information.websiteIcon.label")}</FormLabel>
               <FormControl>
                 <ImageUpload
                   size="lg"
@@ -160,7 +172,9 @@ export default function Information() {
                   onChange={(url) => field.onChange(url ?? "")}
                 />
               </FormControl>
-              <FormDescription>推荐尺寸: 100x100px, 支持格式: PNG, ICO, JPG</FormDescription>
+              <FormDescription>
+                {t("system.websiteConfig.information.websiteIcon.description")}
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -170,7 +184,7 @@ export default function Information() {
           name="websiteLogo"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>网站 Logo</FormLabel>
+              <FormLabel>{t("system.websiteConfig.information.websiteLogo.label")}</FormLabel>
               <FormControl>
                 <ImageUpload
                   size="lg"
@@ -178,7 +192,9 @@ export default function Information() {
                   onChange={(url) => field.onChange(url ?? "")}
                 />
               </FormControl>
-              <FormDescription>推荐尺寸: 100x100px, 支持格式: PNG, JPG, JPEG</FormDescription>
+              <FormDescription>
+                {t("system.websiteConfig.information.websiteLogo.description")}
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -188,7 +204,9 @@ export default function Information() {
           name="customerServiceQrcode"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>客服二维码</FormLabel>
+              <FormLabel>
+                {t("system.websiteConfig.information.customerServiceQrcode.label")}
+              </FormLabel>
               <FormControl>
                 <ImageUpload
                   size="lg"
@@ -196,7 +214,9 @@ export default function Information() {
                   onChange={(url) => field.onChange(url ?? "")}
                 />
               </FormControl>
-              <FormDescription>推荐尺寸: 100x100px, 支持格式: PNG, JPG, JPEG</FormDescription>
+              <FormDescription>
+                {t("system.websiteConfig.information.customerServiceQrcode.description")}
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -210,7 +230,7 @@ export default function Information() {
 
             return (
               <FormItem>
-                <FormLabel>主题颜色</FormLabel>
+                <FormLabel>{t("system.websiteConfig.information.themeColor.label")}</FormLabel>
                 <FormControl>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -225,7 +245,9 @@ export default function Information() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="flex w-fit flex-col">
-                      <DropdownMenuLabel>当前主题</DropdownMenuLabel>
+                      <DropdownMenuLabel>
+                        {t("system.websiteConfig.information.themeColor.currentTheme")}
+                      </DropdownMenuLabel>
                       <ScrollThemeItems
                         themeColor={themeColor}
                         onSelect={(t) => {
@@ -236,7 +258,9 @@ export default function Information() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </FormControl>
-                <FormDescription>用户访问站点时的默认主题</FormDescription>
+                <FormDescription>
+                  {t("system.websiteConfig.information.themeColor.description")}
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             );
@@ -246,7 +270,7 @@ export default function Information() {
           <PermissionGuard permissions="system-website:setConfig">
             <Button type="submit" disabled={setMutation.isPending}>
               {setMutation.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
-              保存设置
+              {t("system.websiteConfig.information.save")}
             </Button>
 
             <Button
@@ -264,7 +288,7 @@ export default function Information() {
                 })
               }
             >
-              重置设置
+              {t("system.websiteConfig.information.reset")}
             </Button>
           </PermissionGuard>
         </div>

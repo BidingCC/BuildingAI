@@ -1,5 +1,6 @@
 import { LOGIN_TYPE } from "@buildingai/constants/shared/auth";
 import { SmsScene } from "@buildingai/constants/shared/sms.constant";
+import { useI18n } from "@buildingai/i18n";
 import {
   getWechatQrcode,
   getWechatQrcodeStatus,
@@ -62,62 +63,72 @@ const PageEnum = {
   REGISTER: "register",
 } as const;
 
-const accountSchema = z.object({
-  account: z.string().min(1, { message: "请输入账号/手机号" }),
-});
-
-const loginPasswordSchema = z.object({
-  password: z.string().min(6, { message: "密码至少6位" }),
-});
-
-const verifyCodeSchema = z.object({
-  code: z.string().length(6, { message: "请输入6位验证码" }),
-});
-
-const registerFormSchema = z
-  .object({
-    username: z
-      .string()
-      .min(3, { message: "用户名至少3位" })
-      .max(20, { message: "用户名最多20位" })
-      .regex(/^[a-zA-Z0-9_]+$/, { message: "用户名只能包含字母、数字、下划线" }),
-    password: z.string().min(6, { message: "密码至少6位" }),
-    confirmPassword: z.string().min(6, { message: "确认密码至少6位" }),
-    nickname: z.string().optional(),
-    email: z.string().email({ message: "邮箱格式不正确" }).optional().or(z.literal("")),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "两次密码不一致",
-    path: ["confirmPassword"],
+// Schema factories that accept t() at runtime to support i18n
+const createAccountSchema = (t: (key: string) => string) =>
+  z.object({
+    account: z.string().min(1, { message: t("auth.accountInput") }),
   });
 
-type AccountFormValues = z.infer<typeof accountSchema>;
-type LoginPasswordFormValues = z.infer<typeof loginPasswordSchema>;
-type VerifyCodeFormValues = z.infer<typeof verifyCodeSchema>;
-type RegisterFormValues = z.infer<typeof registerFormSchema>;
+const createLoginPasswordSchema = (t: (key: string) => string) =>
+  z.object({
+    password: z.string().min(6, { message: t("auth.passwordMinLength") }),
+  });
+
+const createVerifyCodeSchema = (t: (key: string) => string) =>
+  z.object({
+    code: z.string().length(6, { message: t("auth.codeLength") }),
+  });
+
+const createRegisterFormSchema = (t: (key: string) => string) =>
+  z
+    .object({
+      username: z
+        .string()
+        .min(3, { message: t("auth.usernameMinLength") })
+        .max(20, { message: t("auth.usernameMaxLength") })
+        .regex(/^[a-zA-Z0-9_]+$/, { message: t("auth.usernamePattern") }),
+      password: z.string().min(6, { message: t("auth.passwordMinLength") }),
+      confirmPassword: z.string().min(6, { message: t("auth.confirmPasswordMinLength") }),
+      nickname: z.string().optional(),
+      email: z
+        .string()
+        .email({ message: t("auth.emailFormat") })
+        .optional()
+        .or(z.literal("")),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: t("auth.passwordMismatch"),
+      path: ["confirmPassword"],
+    });
+
+type AccountFormValues = z.infer<ReturnType<typeof createAccountSchema>>;
+type LoginPasswordFormValues = z.infer<ReturnType<typeof createLoginPasswordSchema>>;
+type VerifyCodeFormValues = z.infer<ReturnType<typeof createVerifyCodeSchema>>;
+type RegisterFormValues = z.infer<ReturnType<typeof createRegisterFormSchema>>;
 
 const MOBILE_REGEX = /^1[3-9]\d{9}$/;
 
 const FormTitle: Record<string, { title: string; description: string }> = {
   [PageEnum.ACCOUNT_INPUT]: {
-    title: "欢迎回来",
-    description: "输入你的用户名、邮箱、手机号登录",
+    title: "auth.welcomeBack",
+    description: "auth.accountInputHint",
   },
   [PageEnum.PASSWORD]: {
-    title: "欢迎回来",
-    description: "输入你的密码",
+    title: "auth.welcomeBack",
+    description: "auth.passwordHint",
   },
   [PageEnum.VERIFICATION_CODE]: {
-    title: "验证码登录",
-    description: "我们将向您的邮箱或手机发送验证码",
+    title: "auth.loginWithCode",
+    description: "auth.sendingCode",
   },
   [PageEnum.REGISTER]: {
-    title: "创建账号",
-    description: "使用用户名和密码注册",
+    title: "auth.registerTitle",
+    description: "auth.registerTitle",
   },
 };
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
+  const { t } = useI18n();
   const [page, setPage] = useState<string>(PageEnum.ACCOUNT_INPUT);
   const [checkResult, setCheckResult] = useState<{
     type: string;
@@ -171,6 +182,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
     loginSettings?.allowedLoginMethods?.includes(LOGIN_TYPE.ACCOUNT) ?? true;
   const allowPhoneLogin = loginSettings?.allowedLoginMethods?.includes(LOGIN_TYPE.PHONE) ?? false;
   const allowWechatLogin = loginSettings?.allowedLoginMethods?.includes(LOGIN_TYPE.WECHAT) ?? true;
+  const allowGoogleLogin = loginSettings?.allowedLoginMethods?.includes(LOGIN_TYPE.GOOGLE) ?? true;
   const allowAccountRegister =
     loginSettings?.allowedRegisterMethods?.includes(LOGIN_TYPE.ACCOUNT) ?? true;
   const allowPhoneRegister =
@@ -178,30 +190,31 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
   const canUseAccountInput = allowAccountLogin || allowPhoneLogin;
   const showPolicyAgreement = loginSettings?.showPolicyAgreement ?? true;
   const loginError = searchParams.get("error");
-  const accountLoginLabel = allowAccountLogin && allowPhoneLogin ? "账号 / 手机号" : "账号";
+  const accountLoginLabel =
+    allowAccountLogin && allowPhoneLogin ? t("auth.accountOrPhone") : t("auth.account");
   const accountLoginPlaceholder = allowAccountLogin
     ? allowPhoneLogin
-      ? "请输入账号或手机号"
-      : "请输入账号"
-    : "请输入手机号";
+      ? t("auth.accountInputHint")
+      : t("auth.accountHint")
+    : t("auth.phoneHint");
 
   const accountForm = useForm<AccountFormValues>({
-    resolver: zodResolver(accountSchema),
+    resolver: zodResolver(createAccountSchema(t)),
     defaultValues: { account: "" },
   });
 
   const passwordForm = useForm<LoginPasswordFormValues>({
-    resolver: zodResolver(loginPasswordSchema),
+    resolver: zodResolver(createLoginPasswordSchema(t)),
     defaultValues: { password: "" },
   });
 
   const verifyCodeForm = useForm<VerifyCodeFormValues>({
-    resolver: zodResolver(verifyCodeSchema),
+    resolver: zodResolver(createVerifyCodeSchema(t)),
     defaultValues: { code: "" },
   });
 
   const registerForm = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerFormSchema),
+    resolver: zodResolver(createRegisterFormSchema(t)),
     defaultValues: {
       username: "",
       password: "",
@@ -242,7 +255,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 
   const renderAgreementTrigger = (checkboxId: string) => (
     <span className="flex flex-wrap items-center gap-1">
-      <Label htmlFor={checkboxId}>我已阅读并同意</Label>
+      <Label htmlFor={checkboxId}>{t("auth.policyAgreement")}</Label>
       <button
         type="button"
         className="text-primary underline-offset-4 hover:underline"
@@ -252,7 +265,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
           handleOpenAgreement("service");
         }}
       >
-        《用户协议》
+        {t("auth.userAgreement")}
       </button>
       <span>和</span>
       <button
@@ -264,7 +277,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
           handleOpenAgreement("privacy");
         }}
       >
-        《隐私政策》
+        {t("auth.privacyPolicy")}
       </button>
     </span>
   );
@@ -273,10 +286,11 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
     if (!showPolicyAgreement || agree) return true;
     try {
       await confirm({
-        title: "服务协议及隐私保护",
+        title: t("auth.serviceAgreement"),
         description: (
           <span>
-            确认即表示你已阅读并同意{websiteConfig?.webinfo.name}的
+            {t("auth.confirmPolicy")}
+            {websiteConfig?.webinfo.name}的
             <button
               type="button"
               className="text-primary inline underline-offset-4 hover:underline"
@@ -286,7 +300,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                 handleOpenAgreement("service");
               }}
             >
-              《用户协议》
+              {t("auth.userAgreement")}
             </button>
             和
             <button
@@ -317,7 +331,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
       if (isMobileAccount && allowPhoneLogin) {
         if (!allowPhoneRegister) {
           accountForm.setError("account", {
-            message: "账号不存在，请先注册",
+            message: t("auth.accountNotExist"),
           });
           return;
         }
@@ -331,20 +345,22 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
       }
 
       accountForm.setError("account", {
-        message: allowAccountRegister ? "账号不存在，请先注册" : "账号不存在",
+        message: allowAccountRegister
+          ? t("auth.accountNotExist")
+          : t("auth.accountNotExistNoRegister"),
       });
       return;
     }
 
     if (res.type === "username" || res.type === "email") {
       if (!allowAccountLogin) {
-        accountForm.setError("account", { message: "账号密码登录未开启" });
+        accountForm.setError("account", { message: t("auth.passwordLoginNotEnabled") });
         return;
       }
     }
 
     if (res.type === "mobile" && !allowAccountLogin && !allowPhoneLogin) {
-      accountForm.setError("account", { message: "手机号登录未开启" });
+      accountForm.setError("account", { message: t("auth.phoneLoginNotEnabled") });
       return;
     }
 
@@ -370,7 +386,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
         setPage(PageEnum.VERIFICATION_CODE);
         return;
       }
-      accountForm.setError("account", { message: "手机号短信登录未开启" });
+      accountForm.setError("account", { message: t("auth.phoneLoginNotEnabled") });
     }
   };
 
@@ -392,7 +408,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
    */
   const onSendSmsCode = async () => {
     if (!checkResult || checkResult.type !== "mobile") {
-      verifyCodeForm.setError("code", { message: "仅支持手机号验证码登录" });
+      verifyCodeForm.setError("code", { message: t("auth.smsLoginNotSupported") });
       return;
     }
 
@@ -410,7 +426,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 
   const onVerifyCodeSubmit = async (values: VerifyCodeFormValues) => {
     if (!checkResult || checkResult.type !== "mobile") {
-      verifyCodeForm.setError("code", { message: "手机号信息缺失，请重新输入" });
+      verifyCodeForm.setError("code", { message: t("auth.phoneInfoMissing") });
       return;
     }
 
@@ -536,12 +552,12 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                 <Dialog open={wechatDialogOpen} onOpenChange={setWechatDialogOpen}>
                   <Button variant="secondary" type="button" onClick={handleWechatLogin}>
                     <SvgIcons.wechat />
-                    微信登录
+                    {t("auth.loginWithWechat")}
                   </Button>
                   <DialogContent className="sm:max-w-xs">
                     <DialogHeader>
-                      <DialogTitle>微信登录</DialogTitle>
-                      <DialogDescription>请扫描二维码登录</DialogDescription>
+                      <DialogTitle>{t("auth.loginWithWechat")}</DialogTitle>
+                      <DialogDescription>{t("auth.scanQrCode")}</DialogDescription>
                     </DialogHeader>
                     <div className="flex w-full flex-col items-center justify-center gap-4 py-2">
                       <div className="relative flex size-52 items-center justify-center overflow-hidden rounded-lg border p-1">
@@ -550,7 +566,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                           <>
                             <img
                               src={wechatQrUrl}
-                              alt="微信登录二维码"
+                              alt={t("auth.loginWithWechat")}
                               className="pointer-events-none size-full object-contain select-none"
                             />
                             {(wechatStatus === "success" ||
@@ -562,7 +578,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                                   <>
                                     <CheckCircle2 className="text-primary mb-2 size-12" />
                                     <p className="text-muted-foreground text-sm">
-                                      登录成功，正在跳转...
+                                      {t("auth.loginSuccessRedirect")}
                                     </p>
                                   </>
                                 )}
@@ -571,15 +587,15 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                                     <AlertCircle className="text-destructive mb-2 size-12" />
                                     <p className="text-muted-foreground mb-3 text-center text-sm">
                                       {wechatStatus === "invalid"
-                                        ? "二维码已过期，请刷新"
-                                        : "登录失败，请重试"}
+                                        ? t("auth.qrCodeExpired")
+                                        : t("auth.loginFailed")}
                                     </p>
                                     <Button
                                       size="sm"
                                       variant="secondary"
                                       onClick={fetchWechatQrCode}
                                     >
-                                      刷新二维码
+                                      {t("auth.refreshQrCode")}
                                     </Button>
                                   </>
                                 )}
@@ -587,14 +603,14 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                                   <>
                                     <AlertCircle className="text-destructive mb-2 size-12" />
                                     <p className="text-muted-foreground mb-3 text-center text-sm">
-                                      获取二维码失败，请重试
+                                      {t("auth.qrCodeFailed")}
                                     </p>
                                     <Button
                                       size="sm"
                                       variant="secondary"
                                       onClick={fetchWechatQrCode}
                                     >
-                                      刷新二维码
+                                      {t("auth.refreshQrCode")}
                                     </Button>
                                   </>
                                 )}
@@ -609,9 +625,21 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
               )}
             </Field>
           )}
+          {allowGoogleLogin && (
+            <Field className="flex flex-wrap gap-2">
+              <Button
+                variant="secondary"
+                type="button"
+                onClick={() => (window.location.href = "/api/auth/google")}
+              >
+                <SvgIcons.google />
+                {t("auth.loginWithGoogle")}
+              </Button>
+            </Field>
+          )}
           {allowWechatLogin && canUseAccountInput && (
             <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
-              或使用账号登录
+              {t("auth.orUseAccountLogin")}
             </FieldSeparator>
           )}
           {canUseAccountInput && (
@@ -621,7 +649,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                 name="account"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{allowAccountLogin ? accountLoginLabel : "手机号"}</FormLabel>
+                    <FormLabel>{allowAccountLogin ? accountLoginLabel : t("auth.phone")}</FormLabel>
                     <FormControl>
                       <Input
                         type="text"
@@ -636,18 +664,19 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
               />
               <Field>
                 <Button type="submit" className="w-full" loading={isCheckPending}>
-                  下一步 <ArrowRight />
+                  {t("auth.next")} <ArrowRight />
                 </Button>
                 <FieldDescription className="text-center">
                   {allowAccountRegister ? (
                     <>
-                      还没有账号？{""}
+                      {t("auth.noAccount")}
+                      {""}
                       <button
                         type="button"
                         className="text-primary underline-offset-4 hover:underline"
                         onClick={() => setPage(PageEnum.REGISTER)}
                       >
-                        注册
+                        {t("auth.register")}
                       </button>
                     </>
                   ) : null}
@@ -672,13 +701,13 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                 className="w-full"
                 onClick={() => setPage(PageEnum.VERIFICATION_CODE)}
               >
-                验证码登录
+                {t("auth.loginWithCode")}
               </Button>
             </Field>
           )}
           {checkResult?.type === "mobile" && allowPhoneLogin && (
             <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
-              或使用密码登录
+              {t("auth.orUsePasswordLogin")}
             </FieldSeparator>
           )}
           <FormField
@@ -686,11 +715,11 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>密码</FormLabel>
+                <FormLabel>{t("auth.password")}</FormLabel>
                 <FormControl>
                   <PasswordInput
                     autoComplete="current-password"
-                    placeholder="请输入密码"
+                    placeholder={t("auth.passwordHint")}
                     {...field}
                   />
                 </FormControl>
@@ -714,7 +743,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
           )}
           <Field>
             <Button type="submit" className="w-full" loading={isLoginPending}>
-              登录 <ArrowRight />
+              {t("auth.login")} <ArrowRight />
             </Button>
             <FieldDescription className="text-center">
               <button
@@ -725,7 +754,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                   setCheckResult(null);
                 }}
               >
-                使用其他账号
+                {t("auth.useOtherAccount")}
               </button>
             </FieldDescription>
           </Field>
@@ -746,13 +775,13 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                 className="w-full"
                 onClick={() => setPage(PageEnum.PASSWORD)}
               >
-                密码登录
+                {t("auth.loginWithPassword")}
               </Button>
             </Field>
           )}
           {checkResult?.hasPassword && (
             <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
-              或使用验证码登录
+              {t("auth.orUseCodeLogin")}
             </FieldSeparator>
           )}
           <FormField
@@ -760,10 +789,15 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
             name="code"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>验证码</FormLabel>
+                <FormLabel>{t("auth.verificationCode")}</FormLabel>
                 <FormControl>
                   <div className="flex gap-2">
-                    <Input type="text" placeholder="请输入验证码" className="flex-1" {...field} />
+                    <Input
+                      type="text"
+                      placeholder={t("auth.codeHint")}
+                      className="flex-1"
+                      {...field}
+                    />
                     <Button
                       type="button"
                       variant="secondary"
@@ -771,7 +805,9 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                       loading={isSendSmsCodePending}
                       disabled={smsCountdown > 0 || isSendSmsCodePending}
                     >
-                      {smsCountdown > 0 ? `${smsCountdown}s` : "获取验证码"}
+                      {smsCountdown > 0
+                        ? t("auth.countdown", { count: smsCountdown })
+                        : t("auth.getCode")}
                     </Button>
                   </div>
                 </FormControl>
@@ -780,7 +816,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
             )}
           />
           <FieldDescription className="text-muted-foreground text-center">
-            验证码将发送至 {checkResult?.account}
+            {t("auth.sendingCode")} {checkResult?.account}
           </FieldDescription>
           {showPolicyAgreement && (
             <Field>
@@ -798,7 +834,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
           )}
           <Field>
             <Button type="submit" className="w-full" loading={isSmsLoginPending}>
-              登录 <ArrowRight />
+              {t("auth.login")} <ArrowRight />
             </Button>
             <FieldDescription className="text-center">
               <button
@@ -806,7 +842,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                 className="text-primary underline-offset-4 hover:underline"
                 onClick={handleBackToAccountInput}
               >
-                使用其他账号
+                {t("auth.useOtherAccount")}
               </button>
             </FieldDescription>
           </Field>
@@ -824,11 +860,11 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
             name="username"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>用户名</FormLabel>
+                <FormLabel>{t("auth.username")}</FormLabel>
                 <FormControl>
                   <Input
                     type="text"
-                    placeholder="3-20位字母、数字、下划线"
+                    placeholder={t("auth.usernameHint")}
                     {...field}
                     autoComplete="username"
                   />
@@ -842,7 +878,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Password</FormLabel>
+                <FormLabel>{t("auth.password")}</FormLabel>
                 <FormControl>
                   <PasswordInput autoComplete="new-password" {...field} />
                 </FormControl>
@@ -855,7 +891,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
             name="confirmPassword"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>确认密码</FormLabel>
+                <FormLabel>{t("auth.confirmPassword")}</FormLabel>
                 <FormControl>
                   <PasswordInput autoComplete="new-password" {...field} />
                 </FormControl>
@@ -868,9 +904,9 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
             name="nickname"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>昵称（选填）</FormLabel>
+                <FormLabel>{t("auth.nickname")}</FormLabel>
                 <FormControl>
-                  <Input type="text" placeholder="昵称" {...field} />
+                  <Input type="text" placeholder={t("auth.nicknameHint")} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -881,9 +917,14 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>邮箱（选填）</FormLabel>
+                <FormLabel>{t("auth.email")}</FormLabel>
                 <FormControl>
-                  <Input type="email" placeholder="m@example.com" {...field} autoComplete="email" />
+                  <Input
+                    type="email"
+                    placeholder={t("auth.emailHint")}
+                    {...field}
+                    autoComplete="email"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -905,16 +946,16 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
           )}
           <Field>
             <Button type="submit" className="w-full" loading={isRegisterPending}>
-              注册 <ArrowRight />
+              {t("auth.register")} <ArrowRight />
             </Button>
             <FieldDescription className="text-center">
-              已有账号？{" "}
+              {t("auth.hasAccount")}{" "}
               <button
                 type="button"
                 className="text-primary underline-offset-4 hover:underline"
                 onClick={() => setPage(PageEnum.ACCOUNT_INPUT)}
               >
-                登录
+                {t("auth.login")}
               </button>
             </FieldDescription>
           </Field>
@@ -930,19 +971,19 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
       <div className={cn("flex flex-col gap-4", className)} {...props}>
         <Card>
           <CardHeader className="text-center">
-            <CardTitle className="text-xl">{titleConfig.title}</CardTitle>
-            <CardDescription>{titleConfig.description}</CardDescription>
+            <CardTitle className="text-xl">{t(titleConfig.title)}</CardTitle>
+            <CardDescription>{t(titleConfig.description)}</CardDescription>
             {loginError && (
               <p className="text-destructive text-sm">
                 {loginError === "missing_code"
-                  ? "授权未完成"
+                  ? t("auth.loginError.missing_code")
                   : loginError === "config"
-                    ? "登录配置异常"
+                    ? t("auth.loginError.config")
                     : loginError === "token_exchange" || loginError === "no_access_token"
-                      ? "授权验证失败"
+                      ? t("auth.loginError.token_exchange")
                       : loginError === "userinfo"
-                        ? "获取用户信息失败"
-                        : "登录失败，请重试"}
+                        ? t("auth.loginError.userinfo")
+                        : t("auth.loginError.default")}
               </p>
             )}
           </CardHeader>

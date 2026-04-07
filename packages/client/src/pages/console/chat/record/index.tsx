@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   type ConversationRecord,
   type QueryConversationsParams,
@@ -71,6 +72,7 @@ interface ConversationCardItemProps {
 }
 
 const ConversationCardItem = ({ conversation, onOpen, onDelete }: ConversationCardItemProps) => {
+  const { t } = useI18n();
   return (
     <PermissionGuard permissions="ai-conversations:get-messages" blockOnly>
       <div
@@ -81,7 +83,7 @@ const ConversationCardItem = ({ conversation, onOpen, onDelete }: ConversationCa
           <Avatar className="relative size-12 rounded-lg after:rounded-lg">
             <AvatarImage
               src={conversation.user?.avatar || ""}
-              alt={conversation.user?.username || "用户"}
+              alt={conversation.user?.username || t("chat.record.user")}
               className="rounded-lg"
             />
             <AvatarFallback className="size-12 rounded-lg">
@@ -89,9 +91,11 @@ const ConversationCardItem = ({ conversation, onOpen, onDelete }: ConversationCa
             </AvatarFallback>
           </Avatar>
           <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-            <span className="line-clamp-1 font-medium">{conversation.title || "未命名对话"}</span>
+            <span className="line-clamp-1 font-medium">
+              {conversation.title || t("chat.record.conversation.unnamed")}
+            </span>
             <span className="text-muted-foreground line-clamp-1 text-xs">
-              {conversation.user?.username || "未知用户"}
+              {conversation.user?.username || t("chat.record.conversation.unknownUser")}
             </span>
           </div>
 
@@ -112,7 +116,7 @@ const ConversationCardItem = ({ conversation, onOpen, onDelete }: ConversationCa
                     }}
                   >
                     <Trash2 className="mr-2 size-4" />
-                    删除
+                    {t("chat.record.delete")}
                   </DropdownMenuItem>
                 </PermissionGuard>
               </DropdownMenuContent>
@@ -127,12 +131,16 @@ const ConversationCardItem = ({ conversation, onOpen, onDelete }: ConversationCa
         <div className="text-muted-foreground flex items-center gap-4 py-3 text-xs">
           <div className="flex items-center gap-1">
             <MessageSquare className="size-3" />
-            <span>{conversation.messageCount || 0} 条消息</span>
+            <span>
+              {conversation.messageCount || 0} {t("chat.record.messages")}
+            </span>
           </div>
           {conversation.totalTokens > 0 && (
             <div className="flex items-center gap-1">
               <Zap className="size-3" />
-              <span>{formatCompactNumber(conversation.totalTokens)} tokens</span>
+              <span>
+                {formatCompactNumber(conversation.totalTokens)} {t("chat.record.tokens")}
+              </span>
             </div>
           )}
         </div>
@@ -152,6 +160,7 @@ const ConversationCardItem = ({ conversation, onOpen, onDelete }: ConversationCa
 };
 
 const ChatRecordIndexPage = () => {
+  const { t } = useI18n();
   const { confirm } = useAlertDialog();
   const [keyword, setKeyword] = useState("");
   const [debouncedKeyword] = useDebounceValue(keyword.trim(), 300);
@@ -186,22 +195,18 @@ const ChatRecordIndexPage = () => {
 
   const deleteMutation = useDeleteConversationMutation({
     onSuccess: () => {
-      toast.success("删除成功", {
-        description: "对话记录已删除",
-      });
+      toast.success(t("chat.record.toast.deleteSuccess"));
       refetch();
     },
     onError: (error: Error) => {
-      toast.error("删除失败", {
-        description: error.message || "删除对话记录时发生错误",
-      });
+      toast.error(t("chat.record.toast.deleteFailed", { error: error.message }));
     },
   });
 
   const handleDelete = async (id: string) => {
     await confirm({
-      title: "删除确认",
-      description: "确定要删除这条对话记录吗？",
+      title: t("chat.record.confirm.deleteTitle"),
+      description: t("chat.record.confirm.deleteDescription"),
       confirmVariant: "destructive",
     });
     deleteMutation.mutate(id);
@@ -224,7 +229,7 @@ const ChatRecordIndexPage = () => {
       <div className="flex h-full flex-col gap-4">
         <div className="bg-background sticky top-0 z-20 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
           <Input
-            placeholder="搜索对话标题、摘要或用户名"
+            placeholder={t("chat.record.searchPlaceholder")}
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
           />
@@ -242,13 +247,17 @@ const ChatRecordIndexPage = () => {
             }}
           >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="反馈筛选" />
+              <SelectValue placeholder={t("chat.record.feedbackFilter")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">全部反馈</SelectItem>
-              <SelectItem value="high-like">高赞率</SelectItem>
-              <SelectItem value="high-dislike">高踩率</SelectItem>
-              <SelectItem value="has-feedback">有反馈</SelectItem>
+              <SelectItem value="all">{t("chat.record.feedbackFilter.all")}</SelectItem>
+              <SelectItem value="high-like">{t("chat.record.feedbackFilter.highLike")}</SelectItem>
+              <SelectItem value="high-dislike">
+                {t("chat.record.feedbackFilter.highDislike")}
+              </SelectItem>
+              <SelectItem value="has-feedback">
+                {t("chat.record.feedbackFilter.hasFeedback")}
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -283,8 +292,8 @@ const ChatRecordIndexPage = () => {
               <div className="col-span-1 flex h-28 items-center justify-center gap-4 sm:col-span-2 lg:col-span-3 xl:col-span-4 2xl:col-span-5">
                 <span className="text-muted-foreground text-sm">
                   {queryParams.keyword
-                    ? `没有找到与"${queryParams.keyword}"相关的对话`
-                    : "暂无对话记录"}
+                    ? t("chat.record.empty.noResults", { keyword: queryParams.keyword })
+                    : t("chat.record.empty.noData")}
                 </span>
               </div>
             ) : (
@@ -311,11 +320,13 @@ const ChatRecordIndexPage = () => {
         >
           <DrawerContent className="h-full w-full max-w-3xl! outline-none">
             <DrawerHeader>
-              <DrawerTitle>{selectedConversation?.title || "未命名对话"}</DrawerTitle>
+              <DrawerTitle>
+                {selectedConversation?.title || t("chat.record.conversation.unnamed")}
+              </DrawerTitle>
               <DrawerDescription className="sr-only">
                 {selectedConversation?.user?.username
-                  ? `对话用户：${selectedConversation.user.username}`
-                  : "对话详情"}
+                  ? `${t("chat.record.drawer.userLabel")}${selectedConversation.user.username}`
+                  : t("chat.record.drawer.title")}
               </DrawerDescription>
               {selectedConversation?.user?.username && (
                 <div className="mt-2 flex items-center gap-2">

@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { type QueryCardKeyDto, useUsedCardKeyListQuery } from "@buildingai/services/console";
 import {
   AlertDialog,
@@ -37,6 +38,7 @@ import { PageContainer } from "@/layouts/console/_components/page-container";
  * 卡密使用记录页面
  */
 export default function CardKeyRecords() {
+  const { t } = useI18n();
   const [page, setPage] = useState(1);
   const [keyCodeSearch, setKeyCodeSearch] = useState("");
   const [userSearch, setUserSearch] = useState("");
@@ -83,7 +85,7 @@ export default function CardKeyRecords() {
       <div className="space-y-4 px-4">
         <div className="flex flex-wrap items-center gap-2">
           <Input
-            placeholder="搜索卡密编号"
+            placeholder={t("operation.cdk.records.searchCode")}
             className="h-8 w-full md:w-50"
             value={keyCodeSearch}
             onChange={(e) => {
@@ -92,7 +94,7 @@ export default function CardKeyRecords() {
             }}
           />
           <Input
-            placeholder="搜索用户ID"
+            placeholder={t("operation.cdk.records.searchUser")}
             className="h-8 w-full md:w-50"
             value={userSearch}
             onChange={(e) => {
@@ -117,7 +119,7 @@ export default function CardKeyRecords() {
                     format(date.from, "LLL dd, y")
                   )
                 ) : (
-                  <span>时间范围选择</span>
+                  <span>{t("operation.cdk.records.dateRangeSelect")}</span>
                 )}
               </Button>
             </PopoverTrigger>
@@ -136,19 +138,23 @@ export default function CardKeyRecords() {
               <AlertDialogTrigger asChild>
                 <Button variant="outline" size="sm" className="h-8 border-dashed">
                   <RotateCcwIcon className="mr-2 size-4" />
-                  清除筛选
+                  {t("operation.cdk.records.clearFilters")}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent className="w-full md:w-md">
                 <AlertDialogHeader>
-                  <AlertDialogTitle>清除所有筛选？</AlertDialogTitle>
+                  <AlertDialogTitle>
+                    {t("operation.cdk.records.clearFiltersConfirm")}
+                  </AlertDialogTitle>
                   <AlertDialogDescription>
-                    这将清除所有已设置的筛选条件，包括搜索输入和筛选选项。此操作无法撤销。
+                    {t("operation.cdk.records.clearFiltersDesc")}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>取消</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleResetFilters}>清除</AlertDialogAction>
+                  <AlertDialogCancel>{t("common.action.cancel")}</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleResetFilters}>
+                    {t("operation.cdk.records.clearFilters")}
+                  </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
@@ -161,19 +167,19 @@ export default function CardKeyRecords() {
           <Table>
             <TableHeader className="bg-muted sticky top-0 z-10">
               <TableRow>
-                <TableHead>批次编号</TableHead>
-                <TableHead>卡密编号</TableHead>
-                <TableHead>使用人</TableHead>
-                <TableHead>兑换类型</TableHead>
-                <TableHead>卡密内容</TableHead>
-                <TableHead>使用时间</TableHead>
+                <TableHead>{t("operation.cdk.records.table.batchNo")}</TableHead>
+                <TableHead>{t("operation.cdk.records.table.code")}</TableHead>
+                <TableHead>{t("operation.cdk.records.table.user")}</TableHead>
+                <TableHead>{t("operation.cdk.records.table.redeemType")}</TableHead>
+                <TableHead>{t("operation.cdk.records.table.content")}</TableHead>
+                <TableHead>{t("operation.cdk.records.table.time")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center">
-                    加载中...
+                    {t("operation.cdk.records.loading")}
                   </TableCell>
                 </TableRow>
               ) : data?.items && data.items.length > 0 ? (
@@ -208,7 +214,7 @@ export default function CardKeyRecords() {
               ) : (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center">
-                    暂无数据
+                    {t("operation.cdk.records.noData")}
                   </TableCell>
                 </TableRow>
               )}

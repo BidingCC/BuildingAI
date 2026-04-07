@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   type AgentDecorateItem,
   useAgentDecorateItemsInfiniteQuery,
@@ -94,7 +95,7 @@ const SortableAgentItem = ({
     }),
     [transform, transition, isDragging],
   );
-
+  const { t } = useI18n();
   return (
     <div ref={setNodeRef} style={style}>
       <Item
@@ -126,7 +127,7 @@ const SortableAgentItem = ({
                 "flex touch-none rounded-full px-0 text-center group-hover/apps-item:flex md:hidden",
                 isDragActive && !isDragging && "md:hidden!",
               )}
-              aria-label="拖拽排序"
+              aria-label={t("decorate.agent.item.dragSort")}
               {...attributes}
               {...listeners}
             >
@@ -143,6 +144,7 @@ const SortableAgentItem = ({
  * 智能体广场装修页。
  */
 const DecorateAgentIndexPage = () => {
+  const { t } = useI18n();
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [decorateDialogOpen, setDecorateDialogOpen] = useState(false);
@@ -151,10 +153,8 @@ const DecorateAgentIndexPage = () => {
   const [addTagDialogOpen, setAddTagDialogOpen] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [debouncedKeyword, setDebouncedKeyword] = useState("");
-  const [localTitle, setLocalTitle] = useState("智能体广场");
-  const [localDescription, setLocalDescription] = useState(
-    "在 BuildingAI 中与你喜爱的智能体进行交互",
-  );
+  const [localTitle, setLocalTitle] = useState("");
+  const [localDescription, setLocalDescription] = useState("");
   const [localItems, setLocalItems] = useState<DisplayAgentItem[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -182,10 +182,10 @@ const DecorateAgentIndexPage = () => {
 
   const setConfigMutation = useSetAgentDecorateMutation({
     onSuccess: () => {
-      toast.success("保存成功");
+      toast.success(t("decorate.agent.saveSuccess"));
       refetchConfig();
     },
-    onError: (e) => toast.error(`保存失败: ${e.message}`),
+    onError: (e) => toast.error(t("decorate.agent.saveFailed", { message: e.message })),
   });
 
   const batchSortMutation = useBatchUpdateAgentDecorateSortMutation({
@@ -193,28 +193,32 @@ const DecorateAgentIndexPage = () => {
       queryClient.invalidateQueries({ queryKey: ["agent-decorate", "items-infinite"] });
       queryClient.invalidateQueries({ queryKey: ["web", "agent-decorate", "items-infinite"] });
     },
-    onError: (e) => toast.error(`排序保存失败: ${e.message}`),
+    onError: (e) => toast.error(t("decorate.agent.sortSaveFailed", { message: e.message })),
   });
 
   const deleteTagMutation = useDeleteConsoleTagMutation({
     onSuccess: () => {
-      toast.success("标签删除成功");
+      toast.success(t("decorate.agent.tag.deleteSuccess"));
       refetchTags();
       if (selectedTagId) {
         setSelectedTagId(null);
       }
     },
     onError: (error: Error) => {
-      toast.error(`删除失败: ${error.message || "未知错误"}`);
+      toast.error(
+        t("decorate.agent.deleteFailed", {
+          message: error.message || t("common.action.unknownError"),
+        }),
+      );
     },
   });
 
   useEffect(() => {
     if (config) {
-      setLocalTitle(config.title || "智能体广场");
-      setLocalDescription(config.description || "选择你想要的智能体");
+      setLocalTitle(config.title || t("decorate.agent.title"));
+      setLocalDescription(config.description || t("decorate.agent.description"));
     }
-  }, [config]);
+  }, [config, t]);
 
   const banners = useMemo(() => {
     if (!config?.enabled) return [];
@@ -425,7 +429,7 @@ const DecorateAgentIndexPage = () => {
             <div className="max-sm:w-full">
               <InputGroup className="rounded-full">
                 <InputGroupInput
-                  placeholder="搜索智能体"
+                  placeholder={t("decorate.agent.searchPlaceholder")}
                   value={searchKeyword}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchKeyword(e.target.value)}
                 />
@@ -445,7 +449,7 @@ const DecorateAgentIndexPage = () => {
                 variant={selectedTagId === null ? "default" : "secondary"}
                 className="h-9 px-4 font-medium text-nowrap sm:font-normal"
               >
-                全部
+                {t("decorate.agent.tags.all")}
               </Badge>
             </div>
             {tags.map((tag) => (
@@ -466,8 +470,8 @@ const DecorateAgentIndexPage = () => {
                   onClick={async (e) => {
                     e.stopPropagation();
                     await confirm({
-                      title: "删除标签",
-                      description: `确定要删除标签「${tag.name}」吗？`,
+                      title: t("decorate.agent.tag.delete"),
+                      description: t("decorate.agent.tag.confirmDelete", { name: tag.name }),
                       confirmVariant: "destructive",
                     });
                     deleteTagMutation.mutate(tag.id);
@@ -516,7 +520,9 @@ const DecorateAgentIndexPage = () => {
             ) : (
               <div className="bg-muted/30 flex aspect-20/5 flex-col items-center justify-center gap-2 rounded-2xl">
                 <p className="text-muted-foreground text-sm">
-                  {!config?.enabled ? "广告位未开启" : "暂无广告图，点击「设置装修位」添加"}
+                  {!config?.enabled
+                    ? t("decorate.agent.banner.disabled")
+                    : t("decorate.agent.banner.noBanner")}
                 </p>
               </div>
             )}
@@ -525,7 +531,7 @@ const DecorateAgentIndexPage = () => {
                 className="absolute right-5 bottom-5 flex translate-y-2 scale-95 items-center gap-2 rounded-full px-5 opacity-100 transition-all duration-300 ease-out group-hover/carousel:translate-y-0 group-hover/carousel:scale-100 group-hover/carousel:opacity-100 active:scale-90 md:opacity-0"
                 onClick={() => setDecorateDialogOpen(true)}
               >
-                <span className="flex items-center gap-2">设置装修位</span>
+                <span className="flex items-center gap-2">{t("decorate.agent.configure")}</span>
               </Button>
             </PermissionGuard>
           </div>
@@ -552,7 +558,7 @@ const DecorateAgentIndexPage = () => {
               ) : itemsLoading ? null : (
                 <Empty>
                   <EmptyContent>
-                    <EmptyDescription>暂无智能体</EmptyDescription>
+                    <EmptyDescription>{t("decorate.agent.empty")}</EmptyDescription>
                   </EmptyContent>
                 </Empty>
               )}

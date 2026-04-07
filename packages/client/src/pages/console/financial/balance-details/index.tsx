@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   type AccountLogListItem,
   type AccountLogListResponse,
@@ -28,6 +29,7 @@ import { PageContainer } from "@/layouts/console/_components/page-container";
 const PAGE_SIZE = 25;
 
 const BalanceDetailsIndexPage = () => {
+  const { t } = useI18n();
   const [keyword, setKeyword] = useState("");
   const [debouncedKeyword] = useDebounceValue(keyword.trim(), 300);
   const [accountTypeFilter, setAccountTypeFilter] = useState<number | undefined>(undefined);
@@ -81,13 +83,13 @@ const BalanceDetailsIndexPage = () => {
         <div className="flex h-full flex-1 flex-col gap-2 overflow-hidden px-4 pt-6">
           <div className="flex flex-wrap items-center gap-2">
             <Input
-              placeholder="搜索用户名/手机号"
+              placeholder={t("financial.balanceDetails.searchPlaceholder")}
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
               className="h-8 w-full md:w-50"
             />
             <DataTableFacetedFilter
-              title="变动类型"
+              title={t("financial.balanceDetails.changeType")}
               options={accountTypeOptions}
               selectedValue={accountTypeFilter != null ? String(accountTypeFilter) : undefined}
               onSelectionChange={(v) => {
@@ -101,7 +103,7 @@ const BalanceDetailsIndexPage = () => {
                 onClick={handleResetFilters}
                 className="text-muted-foreground hover:text-foreground inline-flex h-8 items-center justify-center rounded-md border border-dashed px-3 text-sm"
               >
-                清除筛选
+                {t("financial.balanceDetails.clearFilters")}
               </button>
             )}
           </div>
@@ -112,29 +114,29 @@ const BalanceDetailsIndexPage = () => {
             <Table className="h-full">
               <TableHeader className="bg-muted sticky top-0 z-10">
                 <TableRow>
-                  <TableHead>流水号</TableHead>
-                  <TableHead>用户</TableHead>
-                  <TableHead>变动数量</TableHead>
-                  <TableHead>剩余数量</TableHead>
-                  <TableHead>变动类型</TableHead>
-                  <TableHead>来源/关联</TableHead>
-                  <TableHead>操作人</TableHead>
-                  <TableHead>记录时间</TableHead>
+                  <TableHead>{t("financial.balanceDetails.table.transactionNo")}</TableHead>
+                  <TableHead>{t("financial.balanceDetails.table.user")}</TableHead>
+                  <TableHead>{t("financial.balanceDetails.table.changeAmount")}</TableHead>
+                  <TableHead>{t("financial.balanceDetails.table.remainingAmount")}</TableHead>
+                  <TableHead>{t("financial.balanceDetails.table.changeType")}</TableHead>
+                  <TableHead>{t("financial.balanceDetails.table.source")}</TableHead>
+                  <TableHead>{t("financial.balanceDetails.table.operator")}</TableHead>
+                  <TableHead>{t("financial.balanceDetails.table.recordTime")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-muted-foreground h-32 text-center">
-                      加载中...
+                      {t("financial.balanceDetails.table.loading")}
                     </TableCell>
                   </TableRow>
                 ) : items.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-muted-foreground h-32 text-center">
                       {hasActiveFilters
-                        ? "没有找到符合条件的记录，请尝试调整筛选条件"
-                        : "暂无余额变动记录"}
+                        ? t("financial.balanceDetails.table.noResults")
+                        : t("financial.balanceDetails.table.noData")}
                     </TableCell>
                   </TableRow>
                 ) : (

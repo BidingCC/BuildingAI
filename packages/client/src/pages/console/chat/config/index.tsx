@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { useChatConfigQuery, useUpdateChatConfigMutation } from "@buildingai/services/console";
 import { PermissionGuard } from "@buildingai/ui/components/auth/permission-guard";
 import {
@@ -40,13 +41,13 @@ const suggestionSchema = z.object({
 });
 
 const chatConfigFormSchema = z.object({
-  welcomeTitle: z.string().min(1, "欢迎标题为必填项").trim(),
+  welcomeTitle: z.string().min(1, "Welcome title is required").trim(),
   welcomeDescription: z.string(),
   footerInfo: z.string().optional(),
   attachmentSizeLimit: z
     .union([z.number(), z.string()])
     .transform((v) => (typeof v === "string" ? (v === "" ? 0 : Number(v)) : v))
-    .pipe(z.number().min(1, "对话附件大小限制须为正数（单位：MB）")),
+    .pipe(z.number().min(1, "Attachment size limit must be a positive number (unit: MB)")),
   suggestionsEnabled: z.boolean(),
   suggestions: z.array(suggestionSchema),
   memoryModelId: z.string().optional(),
@@ -101,10 +102,11 @@ interface ChatConfigFormProps {
 }
 
 const ChatConfigForm = ({ apiData }: ChatConfigFormProps) => {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const updateMutation = useUpdateChatConfigMutation({
     onSuccess: () => {
-      toast.success("保存成功");
+      toast.success(t("chat.config.actions.saveSettings"));
       queryClient.invalidateQueries({ queryKey: ["console", "chat-config"] });
     },
   });
@@ -176,7 +178,7 @@ const ChatConfigForm = ({ apiData }: ChatConfigFormProps) => {
     form.reset(initialValues);
     setNewSuggestionText("");
     setResetKey((k) => k + 1);
-    toast.success("已重置为当前保存的配置");
+    toast.success(t("chat.config.actions.resetSuccess"));
   };
 
   const handleAddSuggestion = () => {
@@ -195,16 +197,16 @@ const ChatConfigForm = ({ apiData }: ChatConfigFormProps) => {
               <div className="flex min-w-0 items-center gap-6">
                 <TabsList>
                   <TabsTrigger value="welcome" className="px-3">
-                    欢迎界面
+                    {t("chat.config.tabs.welcome")}
                   </TabsTrigger>
                   <TabsTrigger value="suggestions" className="px-3">
-                    建议选项
+                    {t("chat.config.tabs.suggestions")}
                   </TabsTrigger>
                   <TabsTrigger value="chat" className="px-3">
-                    对话配置
+                    {t("chat.config.tabs.chat")}
                   </TabsTrigger>
                   <TabsTrigger value="model" className="px-3">
-                    模型配置
+                    {t("chat.config.tabs.model")}
                   </TabsTrigger>
                 </TabsList>
               </div>
@@ -212,10 +214,10 @@ const ChatConfigForm = ({ apiData }: ChatConfigFormProps) => {
                 <PermissionGuard permissions="ai-conversations:update-config">
                   <Button type="submit" disabled={updateMutation.isPending}>
                     {updateMutation.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
-                    保存设置
+                    {t("chat.config.actions.saveSettings")}
                   </Button>
                   <Button type="button" variant="outline" onClick={handleReset}>
-                    重置设置
+                    {t("chat.config.actions.resetSettings")}
                   </Button>
                 </PermissionGuard>
               </div>
@@ -223,9 +225,9 @@ const ChatConfigForm = ({ apiData }: ChatConfigFormProps) => {
             <TabsContent value="welcome" className="mt-4">
               <div className="max-w-2xl space-y-6">
                 <div>
-                  <h3 className="text-sm font-medium">欢迎语</h3>
+                  <h3 className="text-sm font-medium">{t("chat.config.welcomeTab.title")}</h3>
                   <p className="text-muted-foreground mt-0.5 text-xs">
-                    对话页首屏展示的标题、描述与页脚
+                    {t("chat.config.welcomeTab.description")}
                   </p>
                 </div>
                 <div className="space-y-4">
@@ -234,11 +236,11 @@ const ChatConfigForm = ({ apiData }: ChatConfigFormProps) => {
                     name="welcomeTitle"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>欢迎标题</FormLabel>
+                        <FormLabel>{t("chat.config.welcomeTab.form.welcomeTitle")}</FormLabel>
                         <FormControl>
                           <Input
                             required
-                            placeholder="例如：👋 Hi, How can I help you?"
+                            placeholder={t("chat.config.welcomeTab.placeholder.welcomeTitle")}
                             className="w-full max-w-2xl"
                             {...field}
                           />
@@ -252,7 +254,7 @@ const ChatConfigForm = ({ apiData }: ChatConfigFormProps) => {
                     name="welcomeDescription"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>欢迎描述</FormLabel>
+                        <FormLabel>{t("chat.config.welcomeTab.form.welcomeDescription")}</FormLabel>
                         <FormControl>
                           <Plate
                             editor={descriptionEditor}
@@ -265,7 +267,7 @@ const ChatConfigForm = ({ apiData }: ChatConfigFormProps) => {
                             </EditorContainer>
                           </Plate>
                         </FormControl>
-                        <FormDescription>欢迎标题下方的说明文案</FormDescription>
+                        <FormDescription>{t("chat.config.welcomeTab.description")}</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -275,15 +277,17 @@ const ChatConfigForm = ({ apiData }: ChatConfigFormProps) => {
                     name="footerInfo"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>页脚信息</FormLabel>
+                        <FormLabel>{t("chat.config.welcomeTab.form.footerInfo")}</FormLabel>
                         <FormControl>
                           <Textarea
-                            placeholder="例如：内容由AI生成，无法确保真实准确，仅供参考。"
+                            placeholder={t("chat.config.welcomeTab.placeholder.footerInfo")}
                             className="min-h-[60px] max-w-2xl resize-y"
                             {...field}
                           />
                         </FormControl>
-                        <FormDescription>对话区域底部的提示文案，选填</FormDescription>
+                        <FormDescription>
+                          {t("chat.config.welcomeTab.form.footerDescription")}
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -295,9 +299,9 @@ const ChatConfigForm = ({ apiData }: ChatConfigFormProps) => {
             <TabsContent value="suggestions" className="mt-4">
               <div className="max-w-2xl space-y-6">
                 <div>
-                  <h3 className="text-sm font-medium">建议选项</h3>
+                  <h3 className="text-sm font-medium">{t("chat.config.tabs.suggestions")}</h3>
                   <p className="text-muted-foreground mt-0.5 text-xs">
-                    是否在对话页展示建议选项供用户快速选择
+                    {t("chat.config.suggestionsTab.description")}
                   </p>
                 </div>
                 <FormField
@@ -307,8 +311,12 @@ const ChatConfigForm = ({ apiData }: ChatConfigFormProps) => {
                     <FormItem>
                       <div className="flex items-center justify-between gap-4">
                         <div>
-                          <FormLabel>启用建议选项</FormLabel>
-                          <FormDescription>展示建议选项供用户快速选择</FormDescription>
+                          <FormLabel>
+                            {t("chat.config.suggestionsTab.form.enableSuggestions")}
+                          </FormLabel>
+                          <FormDescription>
+                            {t("chat.config.suggestionsTab.form.enableDescription")}
+                          </FormDescription>
                         </div>
                         <FormControl>
                           <Switch checked={field.value} onCheckedChange={field.onChange} />
@@ -320,10 +328,12 @@ const ChatConfigForm = ({ apiData }: ChatConfigFormProps) => {
                 />
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <FormLabel className="text-sm">新增建议项</FormLabel>
+                    <FormLabel className="text-sm">
+                      {t("chat.config.suggestionsTab.form.addNew")}
+                    </FormLabel>
                     <div className="flex gap-2">
                       <Input
-                        placeholder="输入文案后点击添加"
+                        placeholder={t("chat.config.suggestionsTab.form.inputPlaceholder")}
                         value={newSuggestionText}
                         onChange={(e) => setNewSuggestionText(e.target.value)}
                         onKeyDown={(e) => {
@@ -340,15 +350,17 @@ const ChatConfigForm = ({ apiData }: ChatConfigFormProps) => {
                         disabled={!newSuggestionText.trim()}
                       >
                         <PlusIcon className="size-4" />
-                        添加
+                        {t("common.action.add")}
                       </Button>
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <FormLabel className="text-sm">已添加的建议项</FormLabel>
+                    <FormLabel className="text-sm">
+                      {t("chat.config.suggestionsTab.form.addedItems")}
+                    </FormLabel>
                     {fields.length === 0 ? (
                       <p className="text-muted-foreground py-6 text-center text-sm">
-                        暂无建议项，在上方输入后点击「添加」
+                        {t("chat.config.suggestionsTab.form.empty")}
                       </p>
                     ) : (
                       <ul className="border-border divide-y rounded-md border">
@@ -358,7 +370,7 @@ const ChatConfigForm = ({ apiData }: ChatConfigFormProps) => {
                             className="flex items-center justify-between gap-3 px-3 py-2.5 text-sm"
                           >
                             <span className="min-w-0 flex-1 truncate">
-                              {form.watch(`suggestions.${index}.text`) || "未填写"}
+                              {form.watch(`suggestions.${index}.text`) || t("chat.config.suggestionsTab.form.notFilled")}
                             </span>
                             <Button
                               type="button"
@@ -366,7 +378,7 @@ const ChatConfigForm = ({ apiData }: ChatConfigFormProps) => {
                               size="icon"
                               className="text-muted-foreground hover:text-destructive h-8 w-8 shrink-0"
                               onClick={() => remove(index)}
-                              aria-label="移除"
+                              aria-label={t("chat.config.suggestionsTab.form.remove")}
                             >
                               <X className="size-4" />
                             </Button>
@@ -382,8 +394,10 @@ const ChatConfigForm = ({ apiData }: ChatConfigFormProps) => {
             <TabsContent value="chat" className="mt-4">
               <div className="max-w-2xl space-y-6">
                 <div>
-                  <h3 className="text-sm font-medium">对话相关</h3>
-                  <p className="text-muted-foreground mt-0.5 text-xs">附件上传与对话行为相关配置</p>
+                  <h3 className="text-sm font-medium">{t("chat.config.chatTab.title")}</h3>
+                  <p className="text-muted-foreground mt-0.5 text-xs">
+                    {t("chat.config.chatTab.description")}
+                  </p>
                 </div>
                 <FormField
                   control={form.control}
@@ -391,7 +405,7 @@ const ChatConfigForm = ({ apiData }: ChatConfigFormProps) => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        <span className="text-destructive">*</span> 对话附件大小限制（MB）
+                        <span className="text-destructive">*</span> {t("chat.config.chatTab.form.attachmentSizeLimit")}
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -407,7 +421,9 @@ const ChatConfigForm = ({ apiData }: ChatConfigFormProps) => {
                           }
                         />
                       </FormControl>
-                      <FormDescription>单次上传附件的最大体积，单位：兆字节（MB）</FormDescription>
+                      <FormDescription>
+                        {t("chat.config.chatTab.form.attachmentSizeDescription")}
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -418,33 +434,35 @@ const ChatConfigForm = ({ apiData }: ChatConfigFormProps) => {
             <TabsContent value="model" className="mt-4">
               <div className="max-w-2xl space-y-6">
                 <div>
-                  <h3 className="text-sm font-medium">模型路由</h3>
+                  <h3 className="text-sm font-medium">{t("chat.config.modelTab.title")}</h3>
                   <p className="text-muted-foreground mt-0.5 text-xs">
-                    为记忆提取、标题生成等功能指定模型，不配置则对应功能不启用
+                    {t("chat.config.modelTab.description")}
                   </p>
                 </div>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between gap-4 rounded-lg px-0 py-2">
                     <div className="flex min-w-0 flex-col">
                       <div className="flex items-center gap-1.5">
-                        <FormLabel className="text-sm font-medium">记忆提取模型</FormLabel>
+                        <FormLabel className="text-sm font-medium">
+                          {t("chat.config.modelTab.form.memoryModel")}
+                        </FormLabel>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <button
                               type="button"
                               className="text-muted-foreground hover:text-foreground focus-visible:ring-ring inline-flex shrink-0 rounded p-0.5 transition-colors focus-visible:ring-2 focus-visible:outline-none"
-                              aria-label="说明"
+                              aria-label={t("chat.config.modelTab.tooltip.help")}
                             >
                               <HelpCircle className="text-muted-foreground h-4 w-4" />
                             </button>
                           </TooltipTrigger>
                           <TooltipContent side="top" className="max-w-xs text-xs">
-                            用于从对话中提取并写入长期记忆。不配置则不会读写长期记忆。
+                            {t("chat.config.modelTab.tooltip.memoryModel")}
                           </TooltipContent>
                         </Tooltip>
                       </div>
                       <p className="text-muted-foreground mt-0.5 text-xs">
-                        用于提取长期记忆，可选用低成本模型
+                        {t("chat.config.modelTab.tooltip.memoryModelHint")}
                       </p>
                     </div>
                     <FormField
@@ -458,7 +476,7 @@ const ChatConfigForm = ({ apiData }: ChatConfigFormProps) => {
                               value={field.value ?? ""}
                               onSelect={field.onChange}
                               triggerVariant="button"
-                              placeholder="不启用"
+                              placeholder={t("chat.config.modelTab.placeholder.notEnabled")}
                               className="w-full"
                             />
                           </FormControl>
@@ -470,24 +488,26 @@ const ChatConfigForm = ({ apiData }: ChatConfigFormProps) => {
                   <div className="flex items-center justify-between gap-4 rounded-lg px-0 py-2">
                     <div className="flex min-w-0 flex-col">
                       <div className="flex items-center gap-1.5">
-                        <FormLabel className="text-sm font-medium">标题生成模型</FormLabel>
+                        <FormLabel className="text-sm font-medium">
+                          {t("chat.config.modelTab.form.titleModel")}
+                        </FormLabel>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <button
                               type="button"
                               className="text-muted-foreground hover:text-foreground focus-visible:ring-ring inline-flex shrink-0 rounded p-0.5 transition-colors focus-visible:ring-2 focus-visible:outline-none"
-                              aria-label="说明"
+                              aria-label={t("chat.config.modelTab.tooltip.help")}
                             >
                               <HelpCircle className="text-muted-foreground h-4 w-4" />
                             </button>
                           </TooltipTrigger>
                           <TooltipContent side="top" className="max-w-xs text-xs">
-                            用于根据对话内容自动生成会话标题与追问建议。不配置则不会自动生成。
+                            {t("chat.config.modelTab.tooltip.titleModel")}
                           </TooltipContent>
                         </Tooltip>
                       </div>
                       <p className="text-muted-foreground mt-0.5 text-xs">
-                        用于自动生成对话标题与追问建议，可选用低成本模型
+                        {t("chat.config.modelTab.tooltip.titleModelHint")}
                       </p>
                     </div>
                     <FormField
@@ -501,7 +521,7 @@ const ChatConfigForm = ({ apiData }: ChatConfigFormProps) => {
                               value={field.value ?? ""}
                               onSelect={field.onChange}
                               triggerVariant="button"
-                              placeholder="不启用"
+                              placeholder={t("chat.config.modelTab.placeholder.notEnabled")}
                               className="w-full"
                             />
                           </FormControl>

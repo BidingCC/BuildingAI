@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import SvgIcons from "@buildingai/ui/components/svg-icons";
 import type { ReactNode } from "react";
 import { memo } from "react";
@@ -10,9 +11,10 @@ interface ChatWelcomeProps {
 }
 
 export const ChatWelcome = memo(function ChatWelcome({ config, fallback }: ChatWelcomeProps) {
-  const title = config?.title ?? "知识库";
+  const { t } = useI18n();
+  const title = config?.title ?? t("dataset.chat.welcomeTitle");
   const creator = config?.creator;
-  const instruction = config?.instruction ?? "你可以通过提问了解知识库中的相关内容";
+  const instruction = config?.instruction ?? t("dataset.chat.welcomeInstruction");
 
   if (!config && fallback) {
     return (
@@ -31,7 +33,11 @@ export const ChatWelcome = memo(function ChatWelcome({ config, fallback }: ChatW
         </div>
         <div className="flex flex-col gap-1">
           <h2 className="text-xl font-semibold">{title}</h2>
-          {creator && <p className="text-muted-foreground text-sm">创建人: {creator}</p>}
+          {creator && (
+            <p className="text-muted-foreground text-sm">
+              {t("dataset.chat.creator", { creator })}
+            </p>
+          )}
           <p className="text-muted-foreground mt-1 text-sm">{instruction}</p>
         </div>
       </div>

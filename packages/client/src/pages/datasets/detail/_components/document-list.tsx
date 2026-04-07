@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import type { DatasetsDocument } from "@buildingai/services/web";
 import {
   useBatchDeleteDatasetsDocuments,
@@ -16,6 +17,7 @@ import { DocumentPreview } from "./document-preview";
 import { DocumentTable, DocumentTableHeader, DocumentTableSkeleton } from "./document-table";
 
 export function DocumentList() {
+  const { t } = useI18n();
   const {
     dataset,
     documents,
@@ -39,9 +41,9 @@ export function DocumentList() {
       if (!datasetId) return;
       try {
         await confirm({
-          title: "确认删除",
-          description: `确定要删除文档「${doc.fileName}」吗？此操作不可撤销。`,
-          confirmText: "删除",
+          title: t("dataset.document.confirmDelete"),
+          description: t("dataset.document.confirmDeleteDesc", { name: doc.fileName }),
+          confirmText: t("dataset.document.deleteDocument"),
           confirmVariant: "destructive",
         });
         deleteDocumentMutation.mutate(doc.id);
@@ -57,9 +59,9 @@ export function DocumentList() {
       if (!datasetId || ids.length === 0) return;
       try {
         await confirm({
-          title: "确认批量删除",
-          description: `确定要删除选中的 ${ids.length} 个文档吗？此操作不可撤销。`,
-          confirmText: "删除",
+          title: t("dataset.document.confirmBatchDelete"),
+          description: t("dataset.document.confirmBatchDeleteDesc", { count: ids.length }),
+          confirmText: t("dataset.document.deleteDocument"),
           confirmVariant: "destructive",
         });
         batchDeleteMutation.mutate(ids, { onSuccess: () => clearSelection() });
@@ -94,8 +96,10 @@ export function DocumentList() {
   const handleRetryVectorization = useCallback(
     (doc: DatasetsDocument) => {
       retryVectorizationMutation.mutate(doc.id, {
-        onSuccess: () => toast.success(`文档「${doc.fileName}」已重新提交向量化`),
-        onError: () => toast.error(`文档「${doc.fileName}」重新向量化失败`),
+        onSuccess: () =>
+          toast.success(t("dataset.document.vectorizationSubmitted", { name: doc.fileName })),
+        onError: () =>
+          toast.error(t("dataset.document.vectorizationFailed", { name: doc.fileName })),
       });
     },
     [retryVectorizationMutation],
@@ -105,7 +109,7 @@ export function DocumentList() {
     if (doc.fileUrl) {
       setPreviewDoc(doc);
     } else {
-      toast.error("该文件暂不支持预览");
+      toast.error(t("dataset.document.filePreviewNotSupported"));
     }
   }, []);
 
@@ -136,7 +140,9 @@ export function DocumentList() {
     <>
       {canManageDocuments && selectedIds.length > 0 && (
         <div className="flex items-center gap-2 py-2">
-          <span className="text-muted-foreground text-sm">已选择 {selectedIds.length} 项</span>
+          <span className="text-muted-foreground text-sm">
+            {t("dataset.document.selectedCount", { count: selectedIds.length })}
+          </span>
           <DocumentBatchActions
             selectedCount={selectedIds.length}
             onEditTags={() =>

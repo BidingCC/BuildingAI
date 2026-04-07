@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { useDatasetsApplicationsQuery } from "@buildingai/services/web";
 import { Button } from "@buildingai/ui/components/ui/button";
 import { Skeleton } from "@buildingai/ui/components/ui/skeleton";
@@ -18,6 +19,7 @@ function DocumentTabsActionsSkeleton() {
 }
 
 export function DocumentTabs() {
+  const { t } = useI18n();
   const { dataset, activeTab, setActiveTab, canManageDocuments, dialog } =
     useDatasetDetailContext();
 
@@ -33,9 +35,9 @@ export function DocumentTabs() {
     <div className="flex items-center justify-between pb-3">
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as DocumentTab)}>
         <TabsList>
-          <TabsTrigger value="all">全部</TabsTrigger>
-          <TabsTrigger value="text">文本</TabsTrigger>
-          <TabsTrigger value="table">表格</TabsTrigger>
+          <TabsTrigger value="all">{t("dataset.document.all")}</TabsTrigger>
+          <TabsTrigger value="text">{t("dataset.document.text")}</TabsTrigger>
+          <TabsTrigger value="table">{t("dataset.document.table")}</TabsTrigger>
         </TabsList>
       </Tabs>
 
@@ -46,7 +48,7 @@ export function DocumentTabs() {
           {canManageDocuments && (
             <Button variant="outline" size="sm" onClick={() => dialog.open({ type: "upload" })}>
               <Upload className="size-4" />
-              上传文件
+              {t("dataset.document.uploadFile")}
             </Button>
           )}
           {canManageMembers && (
@@ -57,7 +59,7 @@ export function DocumentTabs() {
               onClick={() => dialog.open({ type: "member" })}
             >
               <Users className="size-4" />
-              成员
+              {t("dataset.document.members")}
               {dataset.memberCount != null && (
                 <span
                   className={cn("text-muted-foreground ml-1", hasPendingApplications && "mr-1")}
@@ -68,7 +70,7 @@ export function DocumentTabs() {
               {hasPendingApplications && (
                 <span
                   className="bg-destructive absolute top-1 right-1 ml-1 size-1.5 rounded-full"
-                  aria-label="有待审核加入申请"
+                  aria-label={t("dataset.document.hasPendingApplication")}
                 />
               )}
             </Button>

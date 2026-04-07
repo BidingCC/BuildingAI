@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { useAuthStore } from "@buildingai/stores";
 import { ReloadWindow } from "@buildingai/ui/components/reload-windows";
 import {
@@ -21,6 +22,7 @@ interface BreadcrumbTrailItem {
   name: string;
   path: string;
   type: number;
+  code: string;
 }
 
 /**
@@ -36,7 +38,7 @@ function findBreadcrumbTrail(
     const menuPath = basePath ? `${basePath}/${menu.path}`.replace(/\/+/g, "/") : menu.path;
     const fullPath = `/console/${menuPath}`.replace(/\/+/g, "/");
 
-    const currentTrail = [...trail, { name: menu.name, path: fullPath, type: menu.type }];
+    const currentTrail = [...trail, { name: menu.name, path: fullPath, type: menu.type, code: menu.code }];
 
     if (pathname === fullPath) {
       return currentTrail;
@@ -53,6 +55,7 @@ function findBreadcrumbTrail(
 }
 
 const AppNavbar = () => {
+  const { t } = useI18n();
   const { state } = useSidebar();
   const location = useLocation();
   const { userInfo } = useAuthStore((state) => state.auth);
@@ -60,7 +63,10 @@ const AppNavbar = () => {
   const breadcrumbItems = useMemo<BreadcrumbTrailItem[]>(() => {
     if (!userInfo?.menus) return [];
     const trail = findBreadcrumbTrail(userInfo.menus, location.pathname);
-    return trail || [];
+    return (trail || []).map((item) => ({
+      ...item,
+      name: item.name, // Could translate via sidebar code if needed
+    }));
   }, [userInfo?.menus, location.pathname]);
 
   return (
@@ -71,7 +77,7 @@ const AppNavbar = () => {
             <SidebarTrigger className="size-fit bg-transparent p-0 hover:bg-transparent" />
           </TooltipTrigger>
           <TooltipContent>
-            <p>{state === "expanded" ? "收起侧边栏" : "展开侧边栏"}</p>
+            <p>{state === "expanded" ? t("common.collapseSidebar") : t("common.expandSidebar")}</p>
           </TooltipContent>
         </Tooltip>
 
@@ -88,7 +94,7 @@ const AppNavbar = () => {
             </ReloadWindow>
           </TooltipTrigger>
           <TooltipContent>
-            <p>重新加载</p>
+            <p>{t("common.reload")}</p>
           </TooltipContent>
         </Tooltip>
 
@@ -99,6 +105,7 @@ const AppNavbar = () => {
               const isLast = index === breadcrumbItems.length - 1;
               const isClickable = item.type === 2;
               const isFirstHidden = index === 0 && breadcrumbItems.length > 1;
+
               return (
                 <Fragment key={item.path}>
                   {index >= 1 && (
@@ -108,10 +115,10 @@ const AppNavbar = () => {
                   )}
                   <BreadcrumbItem className={isFirstHidden ? "hidden md:block" : ""}>
                     {isLast || !isClickable ? (
-                      <BreadcrumbPage>{item.name}</BreadcrumbPage>
+                      <BreadcrumbPage>{t(`sidebar.${item.code}`)}</BreadcrumbPage>
                     ) : (
                       <BreadcrumbLink asChild>
-                        <Link to={item.path}>{item.name}</Link>
+                        <Link to={item.path}>{t(`sidebar.${item.code}`)}</Link>
                       </BreadcrumbLink>
                     )}
                   </BreadcrumbItem>

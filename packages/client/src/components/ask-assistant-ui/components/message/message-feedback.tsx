@@ -10,31 +10,32 @@ import {
 } from "@buildingai/ui/components/ui/dialog";
 import { Textarea } from "@buildingai/ui/components/ui/textarea";
 import { cn } from "@buildingai/ui/lib/utils";
+import { useI18n } from "@buildingai/i18n";
 import { XIcon } from "lucide-react";
 import { memo, useState } from "react";
 
 const DISLIKE_REASONS = [
-  "回答不准确",
-  "回答不完整",
-  "回答不相关",
-  "回答有偏见",
-  "回答格式不佳",
-  "代码不正确",
-  "不应该使用记忆",
-  "不喜欢此人物",
-  "不喜欢这种风格",
-  "与事实不符",
-  "未完全遵循指令",
-  "其他",
+  "feedbackReasonInaccurate",
+  "feedbackReasonIncomplete",
+  "feedbackReasonIrrelevant",
+  "feedbackReasonBiased",
+  "feedbackReasonPoorFormat",
+  "feedbackReasonCodeIncorrect",
+  "feedbackReasonShouldNotUseMemory",
+  "feedbackReasonDislikePersona",
+  "feedbackReasonDislikeStyle",
+  "feedbackReasonFactuallyIncorrect",
+  "feedbackReasonInstructionNotFollowed",
+  "feedbackReasonOther",
 ];
 
 const FEEDBACK_CARD_REASONS = [
-  "代码不正确",
-  "与事实不符",
-  "回答不准确",
-  "回答不完整",
-  "回答不相关",
-  "未完全遵循指令",
+  "feedbackReasonCodeIncorrect",
+  "feedbackReasonFactuallyIncorrect",
+  "feedbackReasonInaccurate",
+  "feedbackReasonIncomplete",
+  "feedbackReasonIrrelevant",
+  "feedbackReasonInstructionNotFollowed",
 ];
 
 export interface FeedbackCardProps {
@@ -48,6 +49,7 @@ export const FeedbackCard = memo(function FeedbackCard({
   onMore,
   onClose,
 }: FeedbackCardProps) {
+  const { t } = useI18n();
   return (
     <div
       className="mt-2"
@@ -72,7 +74,7 @@ export const FeedbackCard = memo(function FeedbackCard({
       <Card className="w-full py-4">
         <CardContent className="px-4 py-0">
           <div className="flex items-start justify-between">
-            <p className="text-sm font-medium">请与我们分享更多信息:</p>
+            <p className="text-sm font-medium">{t("message.feedbackTitle")}</p>
             <Button variant="ghost" size="icon-sm" onClick={onClose} className="h-6 w-6">
               <XIcon className="size-4" />
             </Button>
@@ -86,7 +88,7 @@ export const FeedbackCard = memo(function FeedbackCard({
                 className="h-auto px-3 py-1.5 text-xs"
                 onClick={() => onSelectReason(reason)}
               >
-                {reason}
+                {t(`message.${reason}`)}
               </Button>
             ))}
             <Button
@@ -95,7 +97,7 @@ export const FeedbackCard = memo(function FeedbackCard({
               className="h-auto px-3 py-1.5 text-xs"
               onClick={onMore}
             >
-              更多...
+              {t("message.more")}
             </Button>
           </div>
         </CardContent>
@@ -117,6 +119,7 @@ export const MessageFeedback = memo(function MessageFeedback({
   onSubmit,
   onCancel,
 }: MessageFeedbackProps) {
+  const { t } = useI18n();
   const [selectedReasons, setSelectedReasons] = useState<string[]>([]);
   const [customReason, setCustomReason] = useState("");
 
@@ -130,12 +133,13 @@ export const MessageFeedback = memo(function MessageFeedback({
   };
 
   const handleSubmit = async () => {
-    const reasons = selectedReasons.filter((r) => r !== "其他");
+    const reasons = selectedReasons.filter((r) => r !== "message.feedbackReasonOther");
+    const translatedReasons = reasons.map((r) => t(r));
     let finalReason: string | undefined;
-    if (reasons.length > 0 && customReason.trim()) {
-      finalReason = `${reasons.join("、")}；${customReason}`;
-    } else if (reasons.length > 0) {
-      finalReason = reasons.join("、");
+    if (translatedReasons.length > 0 && customReason.trim()) {
+      finalReason = `${translatedReasons.join("、")}；${customReason}`;
+    } else if (translatedReasons.length > 0) {
+      finalReason = translatedReasons.join("、");
     } else if (customReason.trim()) {
       finalReason = customReason.trim();
     }
@@ -164,8 +168,8 @@ export const MessageFeedback = memo(function MessageFeedback({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>分享反馈</DialogTitle>
-          <DialogDescription>请选择您不喜欢这条消息的原因（可选）</DialogDescription>
+          <DialogTitle>{t("message.feedbackTitle")}</DialogTitle>
+          <DialogDescription>{t("message.feedbackDescription")}</DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="flex flex-wrap gap-2">
@@ -182,14 +186,14 @@ export const MessageFeedback = memo(function MessageFeedback({
                   )}
                   onClick={() => handleReasonToggle(reason)}
                 >
-                  {reason}
+                  {t(`message.${reason}`)}
                 </Button>
               );
             })}
           </div>
           <div className="space-y-2">
             <Textarea
-              placeholder="分享详细信息 (可选)"
+              placeholder={t("message.feedbackReasonPlaceholder")}
               value={customReason}
               onChange={(e) => setCustomReason(e.target.value)}
               className="min-h-[100px] resize-none"
@@ -197,7 +201,7 @@ export const MessageFeedback = memo(function MessageFeedback({
           </div>
         </div>
         <DialogFooter>
-          <Button onClick={handleSubmit}>提交</Button>
+          <Button onClick={handleSubmit}>{t("action.submit")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

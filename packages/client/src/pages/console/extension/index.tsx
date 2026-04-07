@@ -57,6 +57,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useDebounceValue } from "usehooks-ts";
 
+import { useI18n } from "@buildingai/i18n";
 import { PageContainer } from "@/layouts/console/_components/page-container";
 
 import { ActivationInstallDialog } from "./_components/activation-install-dialog";
@@ -66,13 +67,16 @@ import { ExtensionFormDialog } from "./_components/extension-form-dialog";
 /**
  * Terminal type label mapping
  */
-const TERMINAL_LABEL_MAP: Record<ExtensionSupportTerminalType, string> = {
-  [ExtensionSupportTerminal.WEB]: "Web端",
-  [ExtensionSupportTerminal.WEIXIN]: "公众号",
-  [ExtensionSupportTerminal.H5]: "H5",
-  [ExtensionSupportTerminal.MP]: "小程序",
-  [ExtensionSupportTerminal.API]: "API端",
-};
+function useTerminalLabelMap() {
+  const { t } = useI18n();
+  return {
+    [ExtensionSupportTerminal.WEB]: t("extension.terminalLabels.web"),
+    [ExtensionSupportTerminal.WEIXIN]: t("extension.terminalLabels.weixin"),
+    [ExtensionSupportTerminal.H5]: t("extension.terminalLabels.h5"),
+    [ExtensionSupportTerminal.MP]: t("extension.terminalLabels.mp"),
+    [ExtensionSupportTerminal.API]: t("extension.terminalLabels.api"),
+  } as Record<ExtensionSupportTerminalType, string>;
+}
 
 /**
  * Base URL for opening extension web (dev proxy vs prod same-origin).
@@ -87,6 +91,7 @@ function getWebAppBaseUrl(): string {
  * opens reuse the same data without extra network when still fresh.
  */
 function ExtensionConsoleManageButton({ identifier }: { identifier: string }) {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
 
@@ -100,7 +105,7 @@ function ExtensionConsoleManageButton({ identifier }: { identifier: string }) {
       const href = buildExtensionConsoleManageUrl(getWebAppBaseUrl(), identifier, data.consoleMenu);
       window.open(href, "_blank", "noopener,noreferrer");
     } catch (error) {
-      const message = error instanceof Error ? error.message : "无法获取插件布局";
+      const message = error instanceof Error ? error.message : t("extension.toast.getLayoutFailed");
       toast.error(message);
       const fallback = `${getWebAppBaseUrl().replace(/\/+$/u, "")}/extension/${identifier}/console`;
       window.open(fallback, "_blank", "noopener,noreferrer");
@@ -119,12 +124,14 @@ function ExtensionConsoleManageButton({ identifier }: { identifier: string }) {
       onClick={handleClick}
     >
       {loading ? "" : <Settings />}
-      管理
+      {t("extension.actions.manageAction")}
     </Button>
   );
 }
 
 const ExtensionIndexPage = () => {
+  const { t } = useI18n();
+  const terminalLabelMap = useTerminalLabelMap();
   const [keyword, setKeyword] = useState("");
   const [debouncedKeyword] = useDebounceValue(keyword.trim(), 300);
   const [queryParams, setQueryParams] = useState<QueryExtensionDto>({});
@@ -143,48 +150,53 @@ const ExtensionIndexPage = () => {
 
   const enableMutation = useEnableExtensionMutation({
     onSuccess: () => {
-      toast.success("应用已启用");
+      toast.success(t("extension.toast.enabled"));
       refetch();
     },
     onError: (error) => {
-      toast.error(`启用失败: ${error.message}`);
+      toast.error(t("extension.toast.enableFailed", { error: error.message }));
     },
   });
 
   const disableMutation = useDisableExtensionMutation({
     onSuccess: () => {
-      toast.success("应用已禁用");
+      toast.success(t("extension.toast.disabled"));
       refetch();
     },
     onError: (error) => {
-      toast.error(`禁用失败: ${error.message}`);
+      toast.error(t("extension.toast.disableFailed", { error: error.message }));
     },
   });
 
   const upgradeMutation = useUpgradeExtensionMutation({
     onSuccess: () => {
-      toast.success("应用升级成功");
+      toast.success(t("extension.toast.upgradeSuccess"));
       refetch();
     },
     onError: (error) => {
-      toast.error(`升级失败: ${error.message}`);
+      toast.error(t("extension.toast.upgradeFailed", { error: error.message }));
     },
   });
 
   const uninstallMutation = useDeleteExtensionMutation({
     onSuccess: () => {
-      toast.success("应用已卸载");
+      toast.success(t("extension.toast.uninstalled"));
       refetch();
     },
     onError: (error) => {
-      toast.error(`卸载失败: ${error.message}`);
+      toast.error(t("extension.toast.uninstallFailed", { error: error.message }));
     },
   });
 
   const handleToggleStatus = async (extension: Extension) => {
     await confirm({
-      title: "应用状态",
-      description: `确定要${extension.status === ExtensionStatus.ENABLED ? "禁用" : "启用"}该应用吗？`,
+      title: t("extension.confirm.statusTitle"),
+      description: t("extension.confirm.statusDesc", {
+        action:
+          extension.status === ExtensionStatus.ENABLED
+            ? t("extension.confirm.disable")
+            : t("extension.confirm.enable"),
+      }),
     });
     if (extension.status === ExtensionStatus.ENABLED) {
       disableMutation.mutate(extension.id);
@@ -195,16 +207,16 @@ const ExtensionIndexPage = () => {
 
   const handleUpgrade = async (extension: Extension) => {
     await confirm({
-      title: "升级应用",
-      description: "确定要升级该应用吗？",
+      title: t("extension.confirm.upgradeTitle"),
+      description: t("extension.confirm.upgradeDesc"),
     });
     upgradeMutation.mutate(extension.identifier);
   };
 
   const handleUninstall = async (extension: Extension) => {
     await confirm({
-      title: "卸载应用",
-      description: "确定要卸载该应用吗？",
+      title: t("extension.confirm.uninstallTitle"),
+      description: t("extension.confirm.uninstallDesc"),
     });
     uninstallMutation.mutate(extension.identifier);
   };
@@ -245,29 +257,33 @@ const ExtensionIndexPage = () => {
       <div className="flex flex-col gap-4">
         <div className="bg-background sticky top-0 z-2 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
           <Input
-            placeholder="搜索应用名称或标识符"
+            placeholder={t("extension.searchPlaceholder")}
             className="text-sm"
             value={keyword}
             onChange={handleSearchChange}
           />
           <Select onValueChange={handleStatusChange}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="应用状态" />
+              <SelectValue placeholder={t("extension.statusOptions.all")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">全部状态</SelectItem>
-              <SelectItem value={String(ExtensionStatus.ENABLED)}>已启用</SelectItem>
-              <SelectItem value={String(ExtensionStatus.DISABLED)}>已禁用</SelectItem>
+              <SelectItem value="all">{t("extension.statusOptions.all")}</SelectItem>
+              <SelectItem value={String(ExtensionStatus.ENABLED)}>
+                {t("extension.statusOptions.enabled")}
+              </SelectItem>
+              <SelectItem value={String(ExtensionStatus.DISABLED)}>
+                {t("extension.statusOptions.disabled")}
+              </SelectItem>
             </SelectContent>
           </Select>
           <Select onValueChange={handleSourceChange}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="应用来源" />
+              <SelectValue placeholder={t("extension.sourceOptions.all")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">全部</SelectItem>
-              <SelectItem value="local">本地</SelectItem>
-              <SelectItem value="market">应用市场</SelectItem>
+              <SelectItem value="all">{t("extension.sourceOptions.all")}</SelectItem>
+              <SelectItem value="local">{t("extension.sourceOptions.local")}</SelectItem>
+              <SelectItem value="market">{t("extension.sourceOptions.market")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -284,9 +300,9 @@ const ExtensionIndexPage = () => {
                     <Plus />
                   </Button>
                   <div className="flex flex-col">
-                    <span>安装应用</span>
+                    <span>{t("extension.actions.installApp")}</span>
                     <span className="text-muted-foreground py-1 text-xs font-medium">
-                      使用兑换码安装应用到本地
+                      {t("extension.actions.installDesc")}
                     </span>
                   </div>
                 </div>
@@ -294,7 +310,7 @@ const ExtensionIndexPage = () => {
 
               <div className="flex min-h-26 flex-1 items-end gap-4">
                 <Button size="xs" className="flex-1" variant="outline" onClick={toStore}>
-                  获取兑换码
+                  {t("extension.actions.getActivationCode")}
                   <ExternalLink />
                 </Button>
                 <Button
@@ -306,7 +322,7 @@ const ExtensionIndexPage = () => {
                     setFormDialogOpen(true);
                   }}
                 >
-                  <Plus /> 本地创建
+                  <Plus /> {t("extension.actions.createLocal")}
                 </Button>
               </div>
             </div>
@@ -367,7 +383,7 @@ const ExtensionIndexPage = () => {
                     ) : (
                       <p className="text-destructive line-clamp-1 flex items-center gap-0.5 text-xs">
                         <SvgIcons.circleXFilled className="fill-destructive size-3.5" />
-                        平台版本不兼容
+                        {t("extension.status.incompatible")}
                       </p>
                     )}
                   </div>
@@ -392,7 +408,7 @@ const ExtensionIndexPage = () => {
                           }}
                         >
                           <Info />
-                          详情
+                          {t("extension.actions.details")}
                         </DropdownMenuItem>
                       </PermissionGuard>
                       <PermissionGuard permissions="extensions:extensions:dextensions:detail-by-identifier-from-market">
@@ -409,7 +425,7 @@ const ExtensionIndexPage = () => {
                             }}
                           >
                             <FileText />
-                            更新日志
+                            {t("extension.actions.changelog")}
                           </DropdownMenuItem>
                         )}
                       </PermissionGuard>
@@ -422,7 +438,7 @@ const ExtensionIndexPage = () => {
                             }}
                           >
                             <Edit />
-                            编辑
+                            {t("extension.actions.edit")}
                           </DropdownMenuItem>
                         )}
                       </PermissionGuard>
@@ -434,7 +450,7 @@ const ExtensionIndexPage = () => {
                           disabled={uninstallMutation.isPending}
                         >
                           <Trash2 />
-                          卸载
+                          {t("extension.actions.uninstall")}
                         </DropdownMenuItem>
                       </PermissionGuard>
                     </DropdownMenuContent>
@@ -449,10 +465,12 @@ const ExtensionIndexPage = () => {
 
                     {extension.supportTerminal?.map((terminal) => (
                       <Badge key={terminal} variant="secondary">
-                        {TERMINAL_LABEL_MAP[terminal] || "未知"}
+                        {terminalLabelMap[terminal] || t("extension.terminalLabels.unknown")}
                       </Badge>
                     ))}
-                    {extension.isLocal && <Badge variant="secondary">本地</Badge>}
+                    {extension.isLocal && (
+                      <Badge variant="secondary">{t("extension.sourceOptions.local")}</Badge>
+                    )}
                   </div>
 
                   <div className="flex items-end justify-between gap-2">
@@ -464,7 +482,7 @@ const ExtensionIndexPage = () => {
                         </AvatarFallback>
                       </Avatar>
                       <span className="line-clamp-1 text-xs">
-                        {extension.author?.name || "未知作者"}
+                        {extension.author?.name || t("extension.status.author")}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -479,7 +497,7 @@ const ExtensionIndexPage = () => {
                             disabled={upgradeMutation.isPending}
                           >
                             <CircleFadingArrowUp />
-                            升级
+                            {t("extension.actions.upgrade")}
                           </Button>
                         )}
                       </PermissionGuard>
@@ -493,7 +511,7 @@ const ExtensionIndexPage = () => {
                               disabled={enableMutation.isPending}
                             >
                               <Power />
-                              启用
+                              {t("extension.actions.enable")}
                             </Button>
                           )}
                       </PermissionGuard>
@@ -506,8 +524,8 @@ const ExtensionIndexPage = () => {
             <div className="col-span-1 flex h-46.5 items-center justify-center gap-4 sm:col-span-2 lg:col-span-3 xl:col-span-4 2xl:col-span-5">
               <span className="text-muted-foreground text-sm">
                 {queryParams.keyword
-                  ? `没有找到与“${queryParams.keyword}”相关的应用`
-                  : "暂无应用数据"}
+                  ? t("extension.empty.noResults", { keyword: queryParams.keyword })
+                  : t("extension.empty.noData")}
               </span>
             </div>
           )}

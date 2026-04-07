@@ -1,4 +1,5 @@
 import { useDocumentHead } from "@buildingai/hooks";
+import { useI18n } from "@buildingai/i18n";
 import {
   updateAgentConfig,
   useAgentDetailQuery,
@@ -224,6 +225,7 @@ function fromApiFormFields(input: unknown): FormVariable[] {
 }
 
 export default function Configuration() {
+  const { t } = useI18n();
   const { id } = useParams();
   const agentId = id ?? "";
   const { data: agent, refetch: refetchAgentDetail } = useAgentDetailQuery(id, {
@@ -231,7 +233,7 @@ export default function Configuration() {
   });
 
   useDocumentHead({
-    title: agent?.name || "智能体配置",
+    title: agent?.name || t("agent.detail.configuration.title"),
   });
 
   const [autoSave] = useState(true);
@@ -428,14 +430,16 @@ export default function Configuration() {
       try {
         if (publishToSquare) {
           await publishSquareMutation.mutateAsync({ tagIds: tagIds ?? [] });
-          toast.success("已提交广场审核");
+          toast.success(t("agent.detail.publishDialog.submitted"));
         } else {
           await unpublishSquareMutation.mutateAsync();
-          toast.success("已撤回广场发布");
+          toast.success(t("agent.detail.publishDialog.unpublished"));
         }
         setPublishDialogOpen(false);
       } catch (error) {
-        console.log(`操作失败: ${(error as Error).message}`);
+        console.log(
+          `${t("agent.detail.publishDialog.operationFailed")}: ${(error as Error).message}`,
+        );
       }
     },
     [publishSquareMutation, unpublishSquareMutation],
@@ -451,11 +455,13 @@ export default function Configuration() {
         <Tabs defaultValue="function" className="flex h-full min-h-0 flex-col gap-0">
           <div className="flex items-center justify-between px-6 py-4">
             <div className="flex min-w-0 items-center gap-4">
-              <h1 className="shrink-0 text-lg font-semibold">编排</h1>
+              <h1 className="shrink-0 text-lg font-semibold">{t("agent.detail.orchestration")}</h1>
               <TabsList className="shrink-0">
-                <TabsTrigger value="function">功能配置</TabsTrigger>
-                <TabsTrigger value="interface">界面配置</TabsTrigger>
-                {!isThirdPartyMode && <TabsTrigger value="model">模型配置</TabsTrigger>}
+                <TabsTrigger value="function">{t("agent.detail.functionConfig")}</TabsTrigger>
+                <TabsTrigger value="interface">{t("agent.detail.interfaceConfig")}</TabsTrigger>
+                {!isThirdPartyMode && (
+                  <TabsTrigger value="model">{t("agent.detail.modelConfig")}</TabsTrigger>
+                )}
               </TabsList>
             </div>
             <div className="flex shrink-0 items-center gap-4">
@@ -464,14 +470,16 @@ export default function Configuration() {
                   {isSaving && (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      <span>保存中...</span>
+                      <span>{t("agent.detail.saving")}</span>
                     </>
                   )}
 
-                  {!isSaving && saveError && <span className="text-red-500">保存失败</span>}
+                  {!isSaving && saveError && (
+                    <span className="text-red-500">{t("agent.detail.saveFailed")}</span>
+                  )}
 
                   {!isSaving && !saveError && lastSavedAt && (
-                    <span>草稿已保存于 {formatTime(lastSavedAt)}</span>
+                    <span>{t("agent.detail.draftSavedAt", { time: formatTime(lastSavedAt) })}</span>
                   )}
                 </div>
               </div>
@@ -483,7 +491,11 @@ export default function Configuration() {
                   onClick={() => setPublishDialogOpen(true)}
                   disabled={!agentId}
                 >
-                  <span>{agent?.squarePublishStatus === "rejected" ? "审核失败" : "发布"}</span>
+                  <span>
+                    {agent?.squarePublishStatus === "rejected"
+                      ? t("agent.detail.publishDialog.reviewFailed")
+                      : t("agent.detail.publishDialog.publish")}
+                  </span>
                   {agent?.squarePublishStatus === "rejected" ? <RefreshCcw /> : <ArrowBigUp />}
                 </Button>
               )}

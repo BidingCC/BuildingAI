@@ -1,4 +1,5 @@
 import { BooleanNumber } from "@buildingai/constants/shared/status-codes.constant";
+import { useI18n } from "@buildingai/i18n";
 import {
   type CreateUserDto,
   type Role,
@@ -57,25 +58,24 @@ import { MembershipAdjustmentDialog } from "./membership-adjustment-dialog";
 const formSchema = z
   .object({
     username: z
-      .string({ message: "用户名必须填写" })
-      .min(2, "用户名至少2个字符")
-      .max(50, "用户名不能超过50个字符"),
+      .string({ message: "user.dialog.userForm.username.required" })
+      .min(2, "user.dialog.userForm.username.minLength")
+      .max(50, "user.dialog.userForm.username.maxLength"),
     password: z.string().optional(),
-    nickname: z.string().max(50, "昵称不能超过50个字符").optional(),
-    email: z.string().email("请输入有效的邮箱地址").optional().or(z.literal("")),
-    phone: z.string().max(20, "手机号不能超过20个字符").optional(),
+    nickname: z.string().max(50, "user.dialog.userForm.nickname.maxLength").optional(),
+    email: z.string().email("user.dialog.userForm.email.invalid").optional().or(z.literal("")),
+    phone: z.string().max(20, "user.dialog.userForm.phone.maxLength").optional(),
     avatar: z.string().optional(),
     roleId: z.string().optional(),
     status: z.boolean().optional(),
     power: z.number().optional(),
-    realName: z.string().max(50, "真实姓名不能超过50个字符").optional(),
+    realName: z.string().max(50, "user.dialog.userForm.realName.maxLength").optional(),
   })
   .refine(
     () => {
-      // Password is required only for create mode (when there's no existing user)
       return true;
     },
-    { message: "密码必须填写", path: ["password"] },
+    { message: "user.dialog.userForm.password.required", path: ["password"] },
   );
 
 type FormValues = z.infer<typeof formSchema>;
@@ -91,6 +91,7 @@ type UserFormDialogProps = {
  * User form dialog component for creating and updating users
  */
 export const UserFormDialog = ({ open, onOpenChange, userId, onSuccess }: UserFormDialogProps) => {
+  const { t } = useI18n();
   const isEditMode = !!userId;
   const [balanceDialogOpen, setBalanceDialogOpen] = useState(false);
   const [membershipDialogOpen, setMembershipDialogOpen] = useState(false);
@@ -150,7 +151,7 @@ export const UserFormDialog = ({ open, onOpenChange, userId, onSuccess }: UserFo
 
   const createMutation = useCreateUserMutation({
     onSuccess: () => {
-      toast.success("用户创建成功");
+      toast.success(t("user.dialog.userForm.createSuccess") || "User created successfully");
       onOpenChange(false);
       onSuccess?.();
     },
@@ -158,7 +159,7 @@ export const UserFormDialog = ({ open, onOpenChange, userId, onSuccess }: UserFo
 
   const updateMutation = useUpdateUserMutation({
     onSuccess: () => {
-      toast.success("用户更新成功");
+      toast.success(t("user.dialog.userForm.updateSuccess") || "User updated successfully");
       onOpenChange(false);
       onSuccess?.();
     },
@@ -185,7 +186,7 @@ export const UserFormDialog = ({ open, onOpenChange, userId, onSuccess }: UserFo
       updateMutation.mutate({ id: userId, dto });
     } else {
       if (!submitValues.password) {
-        form.setError("password", { message: "密码必须填写" });
+        form.setError("password", { message: t("user.dialog.userForm.password.required") });
         return;
       }
       const dto: CreateUserDto = {
@@ -210,9 +211,15 @@ export const UserFormDialog = ({ open, onOpenChange, userId, onSuccess }: UserFo
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="gap-0 p-0 sm:max-w-lg">
         <DialogHeader className="p-4">
-          <DialogTitle>{isEditMode ? "编辑用户" : "创建用户"}</DialogTitle>
+          <DialogTitle>
+            {isEditMode
+              ? t("user.dialog.userForm.editTitle")
+              : t("user.dialog.userForm.createTitle")}
+          </DialogTitle>
           <DialogDescription>
-            {isEditMode ? "修改用户的基本信息" : "添加一个新的系统用户"}
+            {isEditMode
+              ? t("user.dialog.userForm.editDescription")
+              : t("user.dialog.userForm.createDescription")}
           </DialogDescription>
         </DialogHeader>
 
@@ -225,7 +232,7 @@ export const UserFormDialog = ({ open, onOpenChange, userId, onSuccess }: UserFo
                   name="avatar"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>头像</FormLabel>
+                      <FormLabel>{t("user.dialog.userForm.avatar")}</FormLabel>
                       <FormControl>
                         <ImageUpload
                           size="sm"
@@ -243,7 +250,7 @@ export const UserFormDialog = ({ open, onOpenChange, userId, onSuccess }: UserFo
                   name="status"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel required>启用状态</FormLabel>
+                      <FormLabel required>{t("user.dialog.userForm.status.label")}</FormLabel>
                       <FormControl>
                         <RadioGroup
                           className="flex gap-4"
@@ -252,11 +259,11 @@ export const UserFormDialog = ({ open, onOpenChange, userId, onSuccess }: UserFo
                         >
                           <label className="flex items-center gap-2 text-sm">
                             <RadioGroupItem value="true" />
-                            启用
+                            {t("user.dialog.userForm.status.enabled")}
                           </label>
                           <label className="flex items-center gap-2 text-sm">
                             <RadioGroupItem value="false" />
-                            禁用
+                            {t("user.dialog.userForm.status.disabled")}
                           </label>
                         </RadioGroup>
                       </FormControl>
@@ -271,16 +278,18 @@ export const UserFormDialog = ({ open, onOpenChange, userId, onSuccess }: UserFo
                 name="username"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>用户名</FormLabel>
+                    <FormLabel required>{t("user.dialog.userForm.username.label")}</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="请输入用户名"
+                        placeholder={t("user.dialog.userForm.username.placeholder")}
                         autoComplete="off"
                         {...field}
                         disabled={isEditMode}
                       />
                     </FormControl>
-                    <FormDescription>用户登录时使用的账号名，创建后不可修改</FormDescription>
+                    <FormDescription>
+                      {t("user.dialog.userForm.username.description")}
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -292,16 +301,18 @@ export const UserFormDialog = ({ open, onOpenChange, userId, onSuccess }: UserFo
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel required>密码</FormLabel>
+                      <FormLabel required>{t("user.dialog.userForm.password.label")}</FormLabel>
                       <FormControl>
                         <Input
                           type="password"
-                          placeholder="请输入密码"
+                          placeholder={t("user.dialog.userForm.password.placeholder")}
                           autoComplete="new-password"
                           {...field}
                         />
                       </FormControl>
-                      <FormDescription>用户登录时使用的密码，须包含数字和字母</FormDescription>
+                      <FormDescription>
+                        {t("user.dialog.userForm.password.description")}
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -313,9 +324,12 @@ export const UserFormDialog = ({ open, onOpenChange, userId, onSuccess }: UserFo
                 name="nickname"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>昵称</FormLabel>
+                    <FormLabel>{t("user.dialog.userForm.nickname.label")}</FormLabel>
                     <FormControl>
-                      <Input placeholder="请输入昵称（可选）" {...field} />
+                      <Input
+                        placeholder={t("user.dialog.userForm.nickname.placeholder")}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -328,15 +342,17 @@ export const UserFormDialog = ({ open, onOpenChange, userId, onSuccess }: UserFo
                   name="roleId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>角色</FormLabel>
+                      <FormLabel>{t("user.dialog.userForm.role.label")}</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className="w-full">
-                            <SelectValue placeholder="选择角色（可选）" />
+                            <SelectValue placeholder={t("user.dialog.userForm.role.placeholder")} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value={"no-role"}>无角色</SelectItem>
+                          <SelectItem value={"no-role"}>
+                            {t("user.dialog.userForm.role.noRole")}
+                          </SelectItem>
                           {roles?.map((role: Role) => (
                             <SelectItem key={role.id} value={role.id}>
                               {role.name}
@@ -359,9 +375,12 @@ export const UserFormDialog = ({ open, onOpenChange, userId, onSuccess }: UserFo
                   name="realName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>备注</FormLabel>
+                      <FormLabel>{t("user.dialog.userForm.realName.label")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="请输入备注" {...field} />
+                        <Input
+                          placeholder={t("user.dialog.userForm.realName.placeholder")}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -375,7 +394,7 @@ export const UserFormDialog = ({ open, onOpenChange, userId, onSuccess }: UserFo
                   name="power"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>积分余额</FormLabel>
+                      <FormLabel>{t("user.dialog.userForm.credits.label")}</FormLabel>
                       <FormControl>
                         <InputGroup className="w-full">
                           <InputGroupInput
@@ -402,9 +421,13 @@ export const UserFormDialog = ({ open, onOpenChange, userId, onSuccess }: UserFo
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>邮箱</FormLabel>
+                      <FormLabel>{t("user.dialog.userForm.email.label")}</FormLabel>
                       <FormControl>
-                        <Input type="email" placeholder="请输入邮箱（可选）" {...field} />
+                        <Input
+                          type="email"
+                          placeholder={t("user.dialog.userForm.email.placeholder")}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -416,9 +439,12 @@ export const UserFormDialog = ({ open, onOpenChange, userId, onSuccess }: UserFo
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>手机号</FormLabel>
+                      <FormLabel>{t("user.dialog.userForm.phone.label")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="请输入手机号（可选）" {...field} />
+                        <Input
+                          placeholder={t("user.dialog.userForm.phone.placeholder")}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -428,7 +454,7 @@ export const UserFormDialog = ({ open, onOpenChange, userId, onSuccess }: UserFo
 
               {isEditMode && (
                 <FormItem>
-                  <FormLabel>订阅会员</FormLabel>
+                  <FormLabel>{t("user.dialog.userForm.membership.label")}</FormLabel>
                   <div className="bg-muted flex items-center justify-between rounded-lg p-3">
                     {userDetail?.membershipLevel ? (
                       <div className="flex items-center justify-between">
@@ -436,7 +462,7 @@ export const UserFormDialog = ({ open, onOpenChange, userId, onSuccess }: UserFo
                           <div>{userDetail.membershipLevel.name}</div>
                           {userDetail.membershipLevel.endTime && (
                             <div className="text-muted-foreground text-sm">
-                              有效期至:{" "}
+                              {t("user.dialog.userForm.membership.validUntil", { date: "" })}{" "}
                               <TimeText
                                 value={userDetail.membershipLevel.endTime}
                                 format="YYYY/MM/DD"
@@ -448,8 +474,10 @@ export const UserFormDialog = ({ open, onOpenChange, userId, onSuccess }: UserFo
                     ) : (
                       <div className="flex items-center justify-between">
                         <div className="space-y-1">
-                          <div>普通用户</div>
-                          <div className="text-muted-foreground text-sm">有效期至: --</div>
+                          <div>{t("user.dialog.userForm.membership.regularUser")}</div>
+                          <div className="text-muted-foreground text-sm">
+                            {t("user.dialog.userForm.membership.validUntil", { date: "--" })}
+                          </div>
                         </div>
                       </div>
                     )}
@@ -466,11 +494,11 @@ export const UserFormDialog = ({ open, onOpenChange, userId, onSuccess }: UserFo
 
               <DialogFooter className="bg-background absolute bottom-0 left-0 w-full flex-row justify-end rounded-lg p-4">
                 <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                  取消
+                  {t("user.dialog.userForm.cancel")}
                 </Button>
                 <Button type="submit" disabled={isPending}>
                   {isPending && <Loader2 className="animate-spin" />}
-                  {isEditMode ? "保存" : "创建"}
+                  {isEditMode ? t("user.dialog.userForm.save") : t("user.dialog.userForm.create")}
                 </Button>
               </DialogFooter>
             </form>
