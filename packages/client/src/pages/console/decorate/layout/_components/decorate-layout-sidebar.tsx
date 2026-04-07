@@ -1,4 +1,5 @@
 import { type PagePathInfo, parsePageModules } from "@buildingai/hooks";
+import { useI18n } from "@buildingai/i18n";
 import {
   type DecorateMenuConfig,
   type DecorateMenuGroup,
@@ -174,8 +175,11 @@ const SortableNavItem = ({
 };
 
 const menuFormSchema = z.object({
-  title: z.string().min(1, "菜单名称必须填写").max(32, "菜单名称不能超过32个字符"),
-  icon: z.string().min(1, "图标必须填写"),
+  title: z
+    .string()
+    .min(1, "Menu name is required")
+    .max(32, "Menu name cannot exceed 32 characters"),
+  icon: z.string().min(1, "Icon is required"),
   link: z.object({
     label: z.string().optional(),
     path: z.string().optional().default(""),
@@ -223,6 +227,7 @@ const MenuFormDialog = ({
   isPending,
   editItem,
 }: MenuFormDialogProps) => {
+  const { t } = useI18n();
   const [container, setContainer] = useState<HTMLElement | null>(null);
   const skipLinkTypeSideEffectsRef = useRef(false);
   const isEditMode = !!editItem;
@@ -276,9 +281,11 @@ const MenuFormDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-sm:p-4 sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{isEditMode ? "编辑菜单" : "新增菜单"}</DialogTitle>
+          <DialogTitle>
+            {isEditMode ? t("decorate.layout.menu.edit") : t("decorate.layout.menu.add")}
+          </DialogTitle>
           <DialogDescription className="sr-only">
-            {isEditMode ? "编辑菜单" : "新增菜单"}
+            {isEditMode ? t("decorate.layout.menu.edit") : t("decorate.layout.menu.add")}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -288,9 +295,9 @@ const MenuFormDialog = ({
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel required>菜单名称</FormLabel>
+                  <FormLabel required>{t("decorate.layout.menu.name")}</FormLabel>
                   <FormControl>
-                    <Input placeholder="请输入菜单名称" {...field} />
+                    <Input placeholder={t("decorate.layout.menu.namePlaceholder")} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -301,12 +308,12 @@ const MenuFormDialog = ({
               name="icon"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel required>图标</FormLabel>
+                  <FormLabel required>{t("decorate.layout.menu.icon")}</FormLabel>
                   <FormControl>
                     <IconPicker
                       value={field.value}
                       onChange={field.onChange}
-                      placeholder="选择图标"
+                      placeholder={t("decorate.layout.menu.iconPlaceholder")}
                       container={container}
                     />
                   </FormControl>
@@ -319,7 +326,7 @@ const MenuFormDialog = ({
               name="link.type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel required>菜单类型</FormLabel>
+                  <FormLabel required>{t("decorate.layout.menu.type")}</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
@@ -327,14 +334,16 @@ const MenuFormDialog = ({
                   >
                     <FormControl>
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="选择菜单类型" />
+                        <SelectValue placeholder={t("decorate.layout.menu.typePlaceholder")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="system">系统页面</SelectItem>
-                      <SelectItem value="extension">扩展页面</SelectItem>
-                      <SelectItem value="custom">自定义链接</SelectItem>
-                      <SelectItem value="button">按钮</SelectItem>
+                      <SelectItem value="system">{t("decorate.layout.menu.typeSystem")}</SelectItem>
+                      <SelectItem value="extension">
+                        {t("decorate.layout.menu.typeExtension")}
+                      </SelectItem>
+                      <SelectItem value="custom">{t("decorate.layout.menu.typeCustom")}</SelectItem>
+                      <SelectItem value="button">{t("decorate.layout.menu.typeButton")}</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -347,10 +356,10 @@ const MenuFormDialog = ({
                 name="link.path"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>路径</FormLabel>
+                    <FormLabel required>{t("decorate.layout.menu.path")}</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="菜单跳转路径，如 https://www.example.com"
+                        placeholder={t("decorate.layout.menu.pathPlaceholder")}
                         disabled={linkType === "system"}
                         {...field}
                       />
@@ -366,11 +375,11 @@ const MenuFormDialog = ({
                 name="link.path"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>选择应用</FormLabel>
+                    <FormLabel required>{t("decorate.layout.menu.selectApp")}</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder="选择应用" />
+                          <SelectValue placeholder={t("decorate.layout.menu.selectApp")} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -392,7 +401,7 @@ const MenuFormDialog = ({
                 name="link.component"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>组件路径</FormLabel>
+                    <FormLabel required>{t("decorate.layout.menu.componentPath")}</FormLabel>
                     <FormControl>
                       <Combobox<PagePathInfo>
                         value={pagePaths.find((p) => p.component === field.value) ?? null}
@@ -405,9 +414,12 @@ const MenuFormDialog = ({
                         items={pagePaths}
                         itemToStringValue={(item) => item.label}
                       >
-                        <ComboboxInput placeholder="搜索或选择组件路径..." className="w-full" />
+                        <ComboboxInput
+                          placeholder={t("decorate.layout.menu.pathPlaceholder")}
+                          className="w-full"
+                        />
                         <ComboboxContent container={container}>
-                          <ComboboxEmpty>未找到匹配的组件路径</ComboboxEmpty>
+                          <ComboboxEmpty>{t("decorate.layout.menu.pathNotFound")}</ComboboxEmpty>
                           <ComboboxList>
                             {(item) => (
                               <ComboboxItem key={item.component} value={item}>
@@ -429,16 +441,20 @@ const MenuFormDialog = ({
                 name="link.target"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>跳转方式</FormLabel>
+                    <FormLabel required>{t("decorate.layout.menu.target")}</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder="选择跳转方式" />
+                          <SelectValue placeholder={t("decorate.layout.menu.targetPlaceholder")} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="_self">站内跳转</SelectItem>
-                        <SelectItem value="_blank">新窗口打开</SelectItem>
+                        <SelectItem value="_self">
+                          {t("decorate.layout.menu.targetSelf")}
+                        </SelectItem>
+                        <SelectItem value="_blank">
+                          {t("decorate.layout.menu.targetBlank")}
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -453,11 +469,11 @@ const MenuFormDialog = ({
                 variant="outline"
                 onClick={() => onOpenChange(false)}
               >
-                取消
+                {t("common.action.cancel")}
               </Button>
               <Button className="max-sm:flex-1" type="submit" disabled={isPending}>
                 {isPending && <Loader2 className="animate-spin" />}
-                {isEditMode ? "保存" : "新增"}
+                {isEditMode ? t("common.action.save") : t("decorate.layout.menu.add")}
               </Button>
             </DialogFooter>
           </form>
@@ -571,6 +587,7 @@ const SortableGroupItem = ({
   onAddItem: (groupId: string) => void;
   onReorderItems: (groupId: string, event: DragEndEvent) => void;
 }) => {
+  const { t } = useI18n();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: group.id,
   });
@@ -654,7 +671,7 @@ const SortableGroupItem = ({
           onClick={() => onAddItem(group.id)}
         >
           <PlusCircle />
-          <span className="whitespace-nowrap">新菜单</span>
+          <span className="whitespace-nowrap">{t("decorate.layout.group.addMenu")}</span>
         </SidebarMenuButton>
       </PermissionGuard>
     </div>
@@ -662,7 +679,10 @@ const SortableGroupItem = ({
 };
 
 const groupFormSchema = z.object({
-  title: z.string().min(1, "分组名称必须填写").max(32, "分组名称不能超过32个字符"),
+  title: z
+    .string()
+    .min(1, "Group name is required")
+    .max(32, "Group name cannot exceed 32 characters"),
 });
 
 type GroupFormValues = z.infer<typeof groupFormSchema>;
@@ -682,6 +702,7 @@ const GroupFormDialog = ({
   isPending,
   editGroup,
 }: GroupFormDialogProps) => {
+  const { t } = useI18n();
   const isEditMode = !!editGroup;
   const form = useForm<GroupFormValues>({
     resolver: zodResolver(groupFormSchema),
@@ -698,9 +719,11 @@ const GroupFormDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{isEditMode ? "编辑分组" : "新增分组"}</DialogTitle>
+          <DialogTitle>
+            {isEditMode ? t("decorate.layout.group.edit") : t("decorate.layout.group.add")}
+          </DialogTitle>
           <DialogDescription className="sr-only">
-            {isEditMode ? "编辑分组" : "新增分组"}
+            {isEditMode ? t("decorate.layout.group.edit") : t("decorate.layout.group.add")}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -710,9 +733,9 @@ const GroupFormDialog = ({
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>分组名称</FormLabel>
+                  <FormLabel>{t("decorate.layout.group.name")}</FormLabel>
                   <FormControl>
-                    <Input placeholder="请输入分组名称" {...field} />
+                    <Input placeholder={t("decorate.layout.group.namePlaceholder")} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -720,11 +743,11 @@ const GroupFormDialog = ({
             />
             <DialogFooter className="mb-0">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                取消
+                {t("common.action.cancel")}
               </Button>
               <Button type="submit" disabled={isPending}>
                 {isPending && <Loader2 className="animate-spin" />}
-                {isEditMode ? "保存" : "新增"}
+                {isEditMode ? t("common.action.save") : t("decorate.layout.group.add")}
               </Button>
             </DialogFooter>
           </form>
@@ -735,6 +758,7 @@ const GroupFormDialog = ({
 };
 
 export const DecorateLayoutSidebar = () => {
+  const { t } = useI18n();
   const { websiteConfig } = useConfigStore((state) => state.config);
   const [menuDialogOpen, setMenuDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<NavItem | null>(null);
@@ -751,12 +775,12 @@ export const DecorateLayoutSidebar = () => {
 
   const setMenuConfigMutation = useSetDecorateMenuConfigMutation({
     onSuccess: () => {
-      toast.success("菜单已更新");
+      toast.success(t("decorate.layout.menu.updated"));
       setMenuDialogOpen(false);
       setGroupDialogOpen(false);
     },
     onError: (error) => {
-      toast.error(`更新失败: ${error.message}`);
+      toast.error(`${t("decorate.layout.menu.updateFailed")}: ${error.message}`);
     },
   });
 
@@ -803,10 +827,10 @@ export const DecorateLayoutSidebar = () => {
   const handleDeleteMenu = async (id: string) => {
     if (isFixedMenu(id)) return;
     await confirm({
-      title: "确认删除",
-      description: "确定要删除这个菜单吗？此操作不可撤销。",
+      title: t("decorate.layout.menu.confirmDelete"),
+      description: t("decorate.layout.menu.confirmDelete"),
       confirmVariant: "destructive",
-      confirmText: "删除",
+      confirmText: t("common.action.delete"),
     });
     const newMenus = localMenus.filter((item) => item.id !== id);
     setLocalMenus(newMenus);
@@ -869,10 +893,10 @@ export const DecorateLayoutSidebar = () => {
 
   const handleDeleteGroup = async (id: string) => {
     await confirm({
-      title: "确认删除",
-      description: "确定要删除这个分组吗？分组内的菜单也会一并删除。",
+      title: t("decorate.layout.group.confirmDelete"),
+      description: t("decorate.layout.group.confirmDelete"),
       confirmVariant: "destructive",
-      confirmText: "删除",
+      confirmText: t("common.action.delete"),
     });
     const newGroups = localGroups.filter((g) => g.id !== id);
     setLocalGroups(newGroups);
@@ -924,10 +948,10 @@ export const DecorateLayoutSidebar = () => {
 
   const handleDeleteGroupItem = async (groupId: string, itemId: string) => {
     await confirm({
-      title: "确认删除",
-      description: "确定要删除这个菜单吗？此操作不可撤销。",
+      title: t("decorate.layout.menu.confirmDelete"),
+      description: t("decorate.layout.menu.confirmDelete"),
       confirmVariant: "destructive",
-      confirmText: "删除",
+      confirmText: t("common.action.delete"),
     });
     const newGroups = localGroups.map((g) =>
       g.id === groupId ? { ...g, items: g.items.filter((i) => i.id !== itemId) } : g,
@@ -1069,7 +1093,9 @@ export const DecorateLayoutSidebar = () => {
                   onClick={handleOpenAddDialog}
                 >
                   <PlusCircle />
-                  <span className="mr-auto flex-1 whitespace-nowrap">新菜单</span>
+                  <span className="mr-auto flex-1 whitespace-nowrap">
+                    {t("decorate.layout.group.addMenu")}
+                  </span>
                 </SidebarMenuButton>
               </PermissionGuard>
             </>
@@ -1110,7 +1136,9 @@ export const DecorateLayoutSidebar = () => {
                 onClick={handleOpenAddGroupDialog}
               >
                 <PlusCircle />
-                <span className="mr-auto flex-1 whitespace-nowrap">新分组</span>
+                <span className="mr-auto flex-1 whitespace-nowrap">
+                  {t("decorate.layout.group.addGroup")}
+                </span>
               </SidebarMenuButton>
             </PermissionGuard>
           </div>

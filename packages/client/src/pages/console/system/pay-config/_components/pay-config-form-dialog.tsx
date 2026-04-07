@@ -5,6 +5,7 @@ import {
   PayVersion,
 } from "@buildingai/constants/shared/payconfig.constant";
 import { BooleanNumber } from "@buildingai/constants/shared/status-codes.constant";
+import { useI18n } from "@buildingai/i18n";
 import {
   PayConfigPayTypeLabels,
   type SystemPayConfigDetail,
@@ -53,28 +54,28 @@ import { z } from "zod";
 const wechatConfigSchema = z.object({
   payVersion: z.enum([PayVersion.V2, PayVersion.V3]),
   merchantType: z.enum([Merchant.ORDINARY, Merchant.CHILD]),
-  mchId: z.string().min(1, "商户号不能为空"),
-  apiKey: z.string().min(1, "商户API密钥不能为空"),
-  paySignKey: z.string().min(1, "微信支付密钥不能为空"),
-  cert: z.string().min(1, "微信支付证书不能为空"),
+  mchId: z.string().min(1, "Merchant ID is required"),
+  apiKey: z.string().min(1, "Merchant API key is required"),
+  paySignKey: z.string().min(1, "WeChat payment key is required"),
+  cert: z.string().min(1, "WeChat payment certificate is required"),
 });
 
 const alipayConfigSchema = z.object({
-  appId: z.string().min(1, "AppID不能为空"),
-  privateKey: z.string().min(1, "应用私钥不能为空"),
+  appId: z.string().min(1, "App ID is required"),
+  privateKey: z.string().min(1, "Private key is required"),
   gateway: z.string().optional(),
-  appCert: z.string().min(1, "应用公钥证书不能为空"),
-  alipayPublicCert: z.string().min(1, "支付宝公钥证书不能为空"),
-  alipayRootCert: z.string().min(1, "支付宝根证书不能为空"),
+  appCert: z.string().min(1, "App public certificate is required"),
+  alipayPublicCert: z.string().min(1, "Alipay public certificate is required"),
+  alipayRootCert: z.string().min(1, "Alipay root certificate is required"),
 });
 
 const formSchema = z
   .object({
-    name: z.string().min(1, "显示名称不能为空"),
-    logo: z.string().min(1, "图标不能为空"),
+    name: z.string().min(1, "Display name is required"),
+    logo: z.string().min(1, "Icon is required"),
     isEnable: z.boolean(),
     isDefault: z.boolean(),
-    sort: z.number().int().min(0, "排序必须大于等于0"),
+    sort: z.number().int().min(0, "Sort must be 0 or greater"),
     payType: z.number(),
     wechatConfig: wechatConfigSchema.optional(),
     alipayConfig: alipayConfigSchema.optional(),
@@ -90,7 +91,7 @@ const formSchema = z
       return false;
     },
     {
-      message: "请填写完整的支付配置",
+      message: "Please fill in complete payment config",
     },
   );
 
@@ -109,6 +110,7 @@ export const PayConfigFormDialog = ({
   configId,
   onSuccess,
 }: PayConfigFormDialogProps) => {
+  const { t } = useI18n();
   const { data: rawDetail, isLoading: isLoadingDetail } = useSystemPayconfigDetailQuery(
     configId || "",
     { enabled: open && !!configId },
@@ -117,12 +119,12 @@ export const PayConfigFormDialog = ({
 
   const updateMutation = useUpdateSystemPayconfigMutation({
     onSuccess: () => {
-      toast.success("支付配置已更新");
+      toast.success(t("system.payConfig.paymentUpdated"));
       onOpenChange(false);
       onSuccess?.();
     },
     onError: (error) => {
-      toast.error(`更新失败: ${error.message}`);
+      toast.error(t("system.payConfig.updateFailed", { message: error.message }));
     },
   });
 
@@ -200,9 +202,11 @@ export const PayConfigFormDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>编辑支付配置</DialogTitle>
+          <DialogTitle>{t("system.payConfig.form.editPaymentConfig")}</DialogTitle>
           <DialogDescription>
-            {payType === PayConfigPayType.WECHAT ? "微信支付配置" : "支付宝支付配置"}
+            {payType === PayConfigPayType.WECHAT
+              ? t("system.payConfig.form.wechatPayConfig")
+              : t("system.payConfig.form.alipayConfig")}
           </DialogDescription>
         </DialogHeader>
 
@@ -221,10 +225,11 @@ export const PayConfigFormDialog = ({
                       name="payType"
                       render={({ field }) => {
                         const displayText =
-                          PayConfigPayTypeLabels[field.value as PayConfigType] ?? "未知支付方式";
+                          PayConfigPayTypeLabels[field.value as PayConfigType] ??
+                          t("system.payConfig.unknownPayment");
                         return (
                           <FormItem>
-                            <FormLabel>支付方式</FormLabel>
+                            <FormLabel>{t("system.payConfig.form.paymentMethod")}</FormLabel>
                             <FormControl>
                               <Input value={displayText} disabled />
                             </FormControl>
@@ -239,10 +244,14 @@ export const PayConfigFormDialog = ({
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>
-                            显示名称<span className="text-destructive">*</span>
+                            {t("system.payConfig.form.displayName")}
+                            <span className="text-destructive">*</span>
                           </FormLabel>
                           <FormControl>
-                            <Input {...field} placeholder="请输入显示名称" />
+                            <Input
+                              {...field}
+                              placeholder={t("system.payConfig.form.displayNamePlaceholder")}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -255,7 +264,7 @@ export const PayConfigFormDialog = ({
                       name="logo"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>图标</FormLabel>
+                          <FormLabel>{t("system.payConfig.form.icon")}</FormLabel>
                           <FormControl>
                             <ImageUpload
                               className="h-16 w-16!"
@@ -274,17 +283,20 @@ export const PayConfigFormDialog = ({
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>
-                            排序权重<span className="text-destructive">*</span>
+                            {t("system.payConfig.form.sortWeight")}
+                            <span className="text-destructive">*</span>
                           </FormLabel>
                           <FormControl>
                             <Input
                               type="number"
                               {...field}
                               onChange={(e) => field.onChange(Number(e.target.value))}
-                              placeholder="请输入排序权重"
+                              placeholder={t("system.payConfig.form.sortWeightPlaceholder")}
                             />
                           </FormControl>
-                          <FormDescription>排序权重越大，显示越靠前</FormDescription>
+                          <FormDescription>
+                            {t("system.payConfig.form.sortWeightDescription")}
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -301,7 +313,8 @@ export const PayConfigFormDialog = ({
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>
-                                微信支付接口版本<span className="text-destructive">*</span>
+                                {t("system.payConfig.form.wechatPayVersion")}
+                                <span className="text-destructive">*</span>
                               </FormLabel>
                               <Select
                                 onValueChange={field.onChange}
@@ -309,14 +322,15 @@ export const PayConfigFormDialog = ({
                               >
                                 <FormControl>
                                   <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="选择支付版本" />
+                                    <SelectValue
+                                      placeholder={t("system.payConfig.form.wechatPayVersion")}
+                                    />
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
                                   <SelectItem value={PayVersion.V3}>V3</SelectItem>
                                 </SelectContent>
                               </Select>
-                              <FormDescription>暂时只支持V3版本</FormDescription>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -328,7 +342,8 @@ export const PayConfigFormDialog = ({
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>
-                                商户类型<span className="text-destructive">*</span>
+                                {t("system.payConfig.form.merchantType")}
+                                <span className="text-destructive">*</span>
                               </FormLabel>
                               <Select
                                 onValueChange={field.onChange}
@@ -336,27 +351,26 @@ export const PayConfigFormDialog = ({
                               >
                                 <FormControl>
                                   <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="选择商户类型" />
+                                    <SelectValue
+                                      placeholder={t("system.payConfig.form.merchantType")}
+                                    />
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
                                   <SelectItem value={Merchant.ORDINARY}>普通商户</SelectItem>
                                 </SelectContent>
                               </Select>
-                              <FormDescription>
-                                暂时只支持普通商户类型，服务商户类型模式暂不支持
-                              </FormDescription>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
                       </div>
                       <FieldDescription>
-                        微信 APPID 请在{" "}
+                        {t("system.payConfig.form.wechatAppidNotice")}{" "}
                         <Link to="/console/channel/wechat-oa" className="text-primary">
-                          渠道 - 微信公众号配置
+                          {t("system.payConfig.form.wechatChannelConfig")}
                         </Link>{" "}
-                        中设置
+                        {t("system.payConfig.form.wechatChannelConfigNotice")}
                       </FieldDescription>
                       <FormField
                         control={form.control}
@@ -364,12 +378,18 @@ export const PayConfigFormDialog = ({
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>
-                              微信商户号<span className="text-destructive">*</span>
+                              {t("system.payConfig.form.wechatMchId")}
+                              <span className="text-destructive">*</span>
                             </FormLabel>
                             <FormControl>
-                              <Input {...field} placeholder="请输入商户号" />
+                              <Input
+                                {...field}
+                                placeholder={t("system.payConfig.form.wechatMchIdPlaceholder")}
+                              />
                             </FormControl>
-                            <FormDescription>微信支付商户号（MCHID）</FormDescription>
+                            <FormDescription>
+                              {t("system.payConfig.form.wechatMchIdDescription")}
+                            </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -380,16 +400,19 @@ export const PayConfigFormDialog = ({
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>
-                              商户API密钥<span className="text-destructive">*</span>
+                              {t("system.payConfig.form.merchantApiKey")}
+                              <span className="text-destructive">*</span>
                             </FormLabel>
                             <FormControl>
                               <Textarea
                                 {...field}
-                                placeholder="请输入商户API密钥"
+                                placeholder={t("system.payConfig.form.merchantApiKeyPlaceholder")}
                                 className="h-24 resize-none font-mono text-sm"
                               />
                             </FormControl>
-                            <FormDescription>微信支付商户API密钥(paySignKey)</FormDescription>
+                            <FormDescription>
+                              {t("system.payConfig.form.merchantApiKeyDescription")}
+                            </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -400,18 +423,19 @@ export const PayConfigFormDialog = ({
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>
-                              微信支付证书<span className="text-destructive">*</span>
+                              {t("system.payConfig.form.wechatPayCert")}
+                              <span className="text-destructive">*</span>
                             </FormLabel>
                             <FormControl>
                               <Textarea
                                 {...field}
                                 rows={5}
-                                placeholder="请输入微信支付证书内容"
+                                placeholder={t("system.payConfig.form.wechatPayCertPlaceholder")}
                                 className="h-24 resize-none font-mono text-sm"
                               />
                             </FormControl>
                             <FormDescription>
-                              微信支付证书（apiclient_cert.pem），前往微信商家平台生成并黏贴至此处
+                              {t("system.payConfig.form.wechatPayCertDescription")}
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
@@ -423,17 +447,18 @@ export const PayConfigFormDialog = ({
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>
-                              微信支付密钥<span className="text-destructive">*</span>
+                              {t("system.payConfig.form.wechatPayKey")}
+                              <span className="text-destructive">*</span>
                             </FormLabel>
                             <FormControl>
                               <Textarea
                                 {...field}
-                                placeholder="请输入微信支付密钥"
+                                placeholder={t("system.payConfig.form.wechatPayKeyPlaceholder")}
                                 className="h-24 resize-none font-mono text-sm"
                               />
                             </FormControl>
                             <FormDescription>
-                              微信支付证书密钥（apiclient_key.pem），前往微信商家平台生成并黏贴至此处
+                              {t("system.payConfig.form.wechatPayKeyDescription")}
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
@@ -451,12 +476,18 @@ export const PayConfigFormDialog = ({
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>
-                              AppID<span className="text-destructive">*</span>
+                              {t("system.payConfig.form.appId")}
+                              <span className="text-destructive">*</span>
                             </FormLabel>
                             <FormControl>
-                              <Input {...field} placeholder="请输入AppID" />
+                              <Input
+                                {...field}
+                                placeholder={t("system.payConfig.form.appIdPlaceholder")}
+                              />
                             </FormControl>
-                            <FormDescription>请填写开发平台申请的应用 ID 信息</FormDescription>
+                            <FormDescription>
+                              {t("system.payConfig.form.appIdDescription")}
+                            </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -466,11 +497,16 @@ export const PayConfigFormDialog = ({
                         name="alipayConfig.gateway"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>网关地址</FormLabel>
+                            <FormLabel>{t("system.payConfig.form.gatewayAddress")}</FormLabel>
                             <FormControl>
-                              <Input {...field} placeholder="请输入网关地址" />
+                              <Input
+                                {...field}
+                                placeholder={t("system.payConfig.form.gatewayAddressPlaceholder")}
+                              />
                             </FormControl>
-                            <FormDescription>支付宝开放平台网关地址</FormDescription>
+                            <FormDescription>
+                              {t("system.payConfig.form.gatewayAddressDescription")}
+                            </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -481,16 +517,19 @@ export const PayConfigFormDialog = ({
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>
-                              应用私钥<span className="text-destructive">*</span>
+                              {t("system.payConfig.form.appPrivateKey")}
+                              <span className="text-destructive">*</span>
                             </FormLabel>
                             <FormControl>
                               <Textarea
                                 {...field}
-                                placeholder="请输入应用私钥"
+                                placeholder={t("system.payConfig.form.appPrivateKeyPlaceholder")}
                                 className="h-24 resize-none font-mono text-sm"
                               />
                             </FormControl>
-                            <FormDescription>应用私钥内容(PKCS8格式)</FormDescription>
+                            <FormDescription>
+                              {t("system.payConfig.form.appPrivateKeyDescription")}
+                            </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -501,16 +540,19 @@ export const PayConfigFormDialog = ({
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>
-                              应用公钥证书<span className="text-destructive">*</span>
+                              {t("system.payConfig.form.appPublicCert")}
+                              <span className="text-destructive">*</span>
                             </FormLabel>
                             <FormControl>
                               <Textarea
                                 {...field}
-                                placeholder="请输入应用公钥证书内容"
+                                placeholder={t("system.payConfig.form.appPublicCertPlaceholder")}
                                 className="h-24 resize-none font-mono text-sm"
                               />
                             </FormControl>
-                            <FormDescription>应用公钥证书内容(appCertPublicKey)</FormDescription>
+                            <FormDescription>
+                              {t("system.payConfig.form.appPublicCertDescription")}
+                            </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -521,17 +563,18 @@ export const PayConfigFormDialog = ({
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>
-                              支付宝公钥证书<span className="text-destructive">*</span>
+                              {t("system.payConfig.form.alipayPublicCert")}
+                              <span className="text-destructive">*</span>
                             </FormLabel>
                             <FormControl>
                               <Textarea
                                 {...field}
-                                placeholder="请输入支付宝公钥证书内容"
+                                placeholder={t("system.payConfig.form.alipayPublicCertPlaceholder")}
                                 className="h-24 resize-none font-mono text-sm"
                               />
                             </FormControl>
                             <FormDescription>
-                              支付宝公钥证书内容(alipayCertPublicKey)
+                              {t("system.payConfig.form.alipayPublicCertDescription")}
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
@@ -543,16 +586,19 @@ export const PayConfigFormDialog = ({
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>
-                              支付宝根证书<span className="text-destructive">*</span>
+                              {t("system.payConfig.form.alipayRootCert")}
+                              <span className="text-destructive">*</span>
                             </FormLabel>
                             <FormControl>
                               <Textarea
                                 {...field}
-                                placeholder="请输入支付宝根证书内容"
+                                placeholder={t("system.payConfig.form.alipayRootCertPlaceholder")}
                                 className="h-24 resize-none font-mono text-sm"
                               />
                             </FormControl>
-                            <FormDescription>支付宝根证书内容(alipayRootCert)</FormDescription>
+                            <FormDescription>
+                              {t("system.payConfig.form.alipayRootCertDescription")}
+                            </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -569,12 +615,12 @@ export const PayConfigFormDialog = ({
                   onClick={() => onOpenChange(false)}
                   disabled={updateMutation.isPending}
                 >
-                  取消
+                  {t("system.payConfig.form.cancel")}
                 </Button>
                 <PermissionGuard permissions="system-payconfig:update">
                   <Button type="submit" disabled={updateMutation.isPending}>
                     {updateMutation.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
-                    保存
+                    {t("system.payConfig.form.save")}
                   </Button>
                 </PermissionGuard>
               </DialogFooter>

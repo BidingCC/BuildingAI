@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { Button } from "@buildingai/ui/components/ui/button";
 import {
   Dialog,
@@ -8,23 +9,25 @@ import {
 import { Copy } from "lucide-react";
 import { useMemo, useState } from "react";
 
-const EMBED_MODES = [
-  {
-    value: "inline",
-    title: "页面内嵌",
-    description: "适合在页面正文区域内完整展示聊天界面",
-  },
-  {
-    value: "float-desktop",
-    title: "桌面悬浮",
-    description: "适合在桌面站右下角悬浮展示聊天入口",
-  },
-  {
-    value: "float-mobile",
-    title: "移动浮窗",
-    description: "适合移动端页面的轻量悬浮入口",
-  },
-] as const;
+function getEmbedModes(t: ReturnType<typeof useI18n>["t"]) {
+  return [
+    {
+      value: "inline",
+      title: t("agent.detail.embed.pageEmbed"),
+      description: t("agent.detail.embed.pageEmbedDesc"),
+    },
+    {
+      value: "float-desktop",
+      title: t("agent.detail.embed.desktopFloat"),
+      description: t("agent.detail.embed.desktopFloatDesc"),
+    },
+    {
+      value: "float-mobile",
+      title: t("agent.detail.embed.mobileFloat"),
+      description: t("agent.detail.embed.mobileFloatDesc"),
+    },
+  ] as const;
+}
 
 type EmbedMode = (typeof EMBED_MODES)[number]["value"];
 
@@ -120,6 +123,8 @@ export function EmbedPublishDialog({
   onPublish,
   onCopy,
 }: EmbedPublishDialogProps) {
+  const { t } = useI18n();
+  const embedModes = getEmbedModes(t);
   const [selectedMode, setSelectedMode] = useState<EmbedMode>("inline");
 
   const currentCode = useMemo(() => {
@@ -130,27 +135,27 @@ export function EmbedPublishDialog({
 
   const currentTitle = useMemo(() => {
     if (selectedMode === "float-desktop") {
-      return "将以下 JavaScript 浮窗代码嵌入到你的网站中";
+      return t("agent.detail.embed.floatDesktopCode");
     }
     if (selectedMode === "float-mobile") {
-      return "将以下移动端浮窗代码嵌入到你的网站中";
+      return t("agent.detail.embed.floatMobileCode");
     }
-    return "将以下 iframe 嵌入到你的网站中的目标位置";
-  }, [selectedMode]);
+    return t("agent.detail.embed.iframeCode");
+  }, [selectedMode, t]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-full gap-0 rounded-[24px] p-0 md:max-w-4xl">
         <DialogHeader className="border-b px-6 py-5">
           <DialogTitle className="flex items-center gap-2 text-2xl font-semibold">
-            <span>嵌入到网站中</span>
+            <span>{t("agent.detail.embed.title")}</span>
           </DialogTitle>
-          <p className="text-muted-foreground text-sm">选择一种方式将聊天应用嵌入到你的网站中</p>
+          <p className="text-muted-foreground text-sm">{t("agent.detail.embed.selectMethod")}</p>
         </DialogHeader>
 
         <div className="max-h-[78vh] space-y-6 overflow-y-auto px-6 py-5">
           <div className="grid gap-3 md:grid-cols-3">
-            {EMBED_MODES.map((item) => {
+            {embedModes.map((item) => {
               const selected = selectedMode === item.value;
               return (
                 <button
@@ -176,7 +181,7 @@ export function EmbedPublishDialog({
               <div>
                 <div className="text-sm font-medium">{currentTitle}</div>
                 <div className="text-muted-foreground mt-1 text-xs break-all">
-                  {publicLink || "发布后显示公开访问链接"}
+                  {publicLink || t("agent.detail.embed.showPublicLink")}
                 </div>
               </div>
               <Button
@@ -184,7 +189,7 @@ export function EmbedPublishDialog({
                 variant="outline"
                 size="icon"
                 className="bg-background size-9 shrink-0"
-                onClick={() => onCopy(currentCode, "嵌入代码已复制")}
+                onClick={() => onCopy(currentCode, t("agent.detail.embed.embedCodeCopied"))}
               >
                 <Copy className="size-4" />
               </Button>
@@ -199,8 +204,8 @@ export function EmbedPublishDialog({
 
           <div className="bg-muted/20 text-muted-foreground rounded-2xl border px-4 py-3 text-xs leading-6">
             {selectedMode === "inline"
-              ? "推荐优先使用 iframe 方式，接入成本最低，兼容性最好。"
-              : "浮窗方式本质上仍然通过 iframe 承载公开页，只是由脚本在页面中动态挂载。"}
+              ? t("agent.detail.embed.recommendIframe")
+              : t("agent.detail.embed.floatNote")}
           </div>
         </div>
       </DialogContent>

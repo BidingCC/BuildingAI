@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import type { ConsoleDatasetItem } from "@buildingai/services/console";
 import {
   useApproveDatasetSquareMutation,
@@ -26,21 +27,22 @@ type ReviewDialogProps = {
 };
 
 export function ReviewDialog({ open, onOpenChange, dataset, onSuccess }: ReviewDialogProps) {
+  const { t } = useI18n();
   const [rejectReason, setRejectReason] = useState("");
   const [showRejectInput, setShowRejectInput] = useState(false);
 
   const approveMutation = useApproveDatasetSquareMutation({
     onSuccess: () => {
-      toast.success("已通过审核");
+      toast.success(t("ai.dataset.review.approved"));
       onOpenChange(false);
       onSuccess?.();
     },
-    onError: (e) => toast.error(`审核失败: ${e.message}`),
+    onError: (e) => toast.error(t("ai.dataset.review.approveFailed", { error: e.message })),
   });
 
   const rejectMutation = useRejectDatasetSquareMutation({
     onSuccess: () => {
-      toast.success("已拒绝发布");
+      toast.success(t("ai.dataset.review.rejected"));
       onOpenChange(false);
       setShowRejectInput(false);
       setRejectReason("");
@@ -76,17 +78,17 @@ export function ReviewDialog({ open, onOpenChange, dataset, onSuccess }: ReviewD
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>审核知识库</DialogTitle>
+          <DialogTitle>{t("ai.dataset.review.title")}</DialogTitle>
           <DialogDescription>
-            {dataset ? `「${dataset.name}」申请发布到广场，请选择通过或拒绝。` : ""}
+            {dataset ? t("ai.dataset.review.applyDesc", { name: dataset.name }) : ""}
           </DialogDescription>
         </DialogHeader>
         {showRejectInput && (
           <div className="grid gap-2 py-2">
-            <Label htmlFor="reject-reason">拒绝原因（选填）</Label>
+            <Label htmlFor="reject-reason">{t("ai.dataset.review.rejectReason")}</Label>
             <Textarea
               id="reject-reason"
-              placeholder="请输入拒绝原因"
+              placeholder={t("ai.dataset.review.enterRejectReason")}
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
               rows={3}
@@ -103,7 +105,7 @@ export function ReviewDialog({ open, onOpenChange, dataset, onSuccess }: ReviewD
                 disabled={pending}
                 onClick={() => setShowRejectInput(false)}
               >
-                返回
+                {t("ai.dataset.review.back")}
               </Button>
               <Button
                 type="button"
@@ -112,7 +114,7 @@ export function ReviewDialog({ open, onOpenChange, dataset, onSuccess }: ReviewD
                 onClick={handleRejectSubmit}
               >
                 {rejectMutation.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
-                确认拒绝
+                {t("ai.dataset.review.confirmReject")}
               </Button>
             </>
           ) : (
@@ -123,7 +125,7 @@ export function ReviewDialog({ open, onOpenChange, dataset, onSuccess }: ReviewD
                 disabled={pending}
                 onClick={() => handleOpenChange(false)}
               >
-                取消
+                {t("ai.dataset.review.cancel")}
               </Button>
               <Button
                 type="button"
@@ -131,11 +133,11 @@ export function ReviewDialog({ open, onOpenChange, dataset, onSuccess }: ReviewD
                 disabled={pending}
                 onClick={handleRejectClick}
               >
-                拒绝
+                {t("ai.dataset.review.reject")}
               </Button>
               <Button type="button" disabled={pending} onClick={handleApprove}>
                 {approveMutation.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
-                通过
+                {t("ai.dataset.review.approve")}
               </Button>
             </>
           )}

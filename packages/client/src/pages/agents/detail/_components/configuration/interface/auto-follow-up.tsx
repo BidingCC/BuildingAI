@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { Button } from "@buildingai/ui/components/ui/button";
 import { Checkbox } from "@buildingai/ui/components/ui/checkbox";
 import {
@@ -29,6 +30,7 @@ export const AutoFollowUp = memo(
     titleModelId?: string;
     onTitleModelChange: (modelId: string) => void;
   }) => {
+    const { t } = useI18n();
     const autoQuestions = value;
     const [dialogOpen, setDialogOpen] = useState(false);
     const [draftModelId, setDraftModelId] = useState(() => titleModelId ?? "");
@@ -101,9 +103,9 @@ export const AutoFollowUp = memo(
         <div className="bg-secondary rounded-lg px-3 py-2.5">
           <div className="flex items-center justify-between">
             <div className="flex flex-col">
-              <h3 className="text-sm font-medium">自动追问</h3>
+              <h3 className="text-sm font-medium">{t("agent.detail.interface.autoFollowUp")}</h3>
               <p className="text-muted-foreground mt-0.5 text-xs">
-                在智能体回复后，自动根据对话内容提供给用户3条问题建议
+                {t("agent.detail.interface.autoFollowUpDesc")}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -121,7 +123,9 @@ export const AutoFollowUp = memo(
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <div className="text-background text-xs">追问建议模型</div>
+                    <div className="text-background text-xs">
+                      {t("agent.detail.interface.titleModel")}
+                    </div>
                   </TooltipContent>
                 </Tooltip>
               )}
@@ -138,14 +142,16 @@ export const AutoFollowUp = memo(
                     checked={autoQuestions.customRuleEnabled}
                     onCheckedChange={(v) => handleCustomRuleEnabledChange(!!v)}
                   />
-                  <Label htmlFor="custom-rule-checkbox">添加自定义规则</Label>
+                  <Label htmlFor="custom-rule-checkbox">
+                    {t("agent.detail.interface.addCustomRule")}
+                  </Label>
                 </Field>
               </FieldGroup>
               {autoQuestions.customRuleEnabled && (
                 <Textarea
                   value={autoQuestions.customRule ?? ""}
                   onChange={(e) => handleCustomRuleChange(e.target.value)}
-                  placeholder="请输入自定义规则"
+                  placeholder={t("agent.detail.interface.customRulePlaceholder")}
                   className="bg-background mt-3 resize-none"
                   rows={4}
                 />
@@ -157,29 +163,29 @@ export const AutoFollowUp = memo(
         <Dialog open={dialogOpen} onOpenChange={closeDialog}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>追问建议模型</DialogTitle>
+              <DialogTitle>{t("agent.detail.interface.titleModel")}</DialogTitle>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label>模型</Label>
+                <Label>{t("agent.detail.model.selectModel")}</Label>
                 <ModelSelector
                   modelType="llm"
                   value={draftModelId || undefined}
                   onSelect={setDraftModelId}
-                  placeholder="不启用"
+                  placeholder={t("agent.detail.model.notEnabled")}
                   triggerVariant="button"
                 />
                 <p className="text-muted-foreground text-xs">
-                  与「模型」页中追问建议模型为同一配置，可选用低成本模型。
+                  {t("agent.detail.interface.titleModelSameConfig")}
                 </p>
               </div>
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => closeDialog(false)}>
-                取消
+                {t("common.cancel")}
               </Button>
               <Button type="button" onClick={saveTitleModel} disabled={!draftModelId.trim()}>
-                确定
+                {t("common.confirm")}
               </Button>
             </DialogFooter>
           </DialogContent>

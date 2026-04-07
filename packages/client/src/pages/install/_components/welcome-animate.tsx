@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import SplitText from "@buildingai/ui/components/effects/split-text";
 import { Button } from "@buildingai/ui/components/ui/button";
 import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog";
@@ -7,6 +8,7 @@ import { Link } from "react-router-dom";
 
 const WelcomeAnimate = ({ step, setStep }: { step: number; setStep: (step: number) => void }) => {
   const { confirm } = useAlertDialog();
+  const { t } = useI18n();
 
   return (
     <div
@@ -60,38 +62,36 @@ const WelcomeAnimate = ({ step, setStep }: { step: number; setStep: (step: numbe
         </div>
       </div>
 
-      <div className="text-muted-foreground px-4 text-center">
-        强大的开源企业智能体搭建平台，点击下方开始安装，快速开始您的智能体之旅
-      </div>
+      <div className="text-muted-foreground px-4 text-center">{t("install.welcome.tagline")}</div>
 
       <div className="flex items-center justify-center gap-4">
         <Button variant="outline" asChild>
           <Link to="https://doc.buildingai.cc/" target="_blank">
-            访问文档
+            {t("install.welcome.visitDocs")}
             <ExternalLink />
           </Link>
         </Button>
         <Button
           onClick={async () => {
             await confirm({
-              title: "政策协议",
+              title: t("install.welcome.policyTitle"),
               description: (
                 <span>
-                  我已认真阅读并同意{" "}
+                  {t("install.welcome.privacyPolicy")}
                   <a
                     className="text-primary hover:underline"
                     href="https://github.com/BidingCC/BuildingAI/blob/master/PRIVACY_NOTICE.md"
                     target="_blank"
                   >
-                    《隐私协议》
+                    {t("install.welcome.privacyPolicy")}
                   </a>
-                  和
+                  {" " + t("install.welcome.openSourceLicense") + " "}
                   <a
                     className="text-primary hover:underline"
                     href="https://github.com/BidingCC/BuildingAI/blob/master/LICENSE"
                     target="_blank"
                   >
-                    《开源协议》
+                    {t("install.welcome.openSourceLicense")}
                   </a>
                 </span>
               ),
@@ -99,7 +99,7 @@ const WelcomeAnimate = ({ step, setStep }: { step: number; setStep: (step: numbe
             setStep(1);
           }}
         >
-          开始安装
+          {t("install.welcome.startInstall")}
           <ArrowRight />
         </Button>
       </div>

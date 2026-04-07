@@ -1,5 +1,6 @@
 import { BooleanNumber } from "@buildingai/constants/shared/status-codes.constant";
 import { useCopy } from "@buildingai/hooks";
+import { useI18n } from "@buildingai/i18n";
 import {
   type QueryUserDto,
   useDeleteUserMutation,
@@ -60,6 +61,7 @@ import { UserFormDialog } from "./_components/user-form-dialog";
 const PAGE_SIZE = 25;
 
 const UserListIndexPage = () => {
+  const { t } = useI18n();
   const { copy, isCopying } = useCopy();
   const { confirm } = useAlertDialog();
   const [keyword, setKeyword] = useState("");
@@ -101,38 +103,45 @@ const UserListIndexPage = () => {
 
   const setStatusMutation = useSetUserStatusMutation({
     onSuccess: (_, variables) => {
-      toast.success(variables.status === BooleanNumber.YES ? "用户已启用" : "用户已禁用");
+      toast.success(
+        variables.status === BooleanNumber.YES
+          ? t("user.toast.userEnabled")
+          : t("user.toast.userDisabled"),
+      );
       refetch();
     },
   });
 
   const deleteMutation = useDeleteUserMutation({
     onSuccess: () => {
-      toast.success("用户已删除");
+      toast.success(t("user.toast.userDeleted"));
       refetch();
     },
     onError: (error) => {
-      toast.error(`删除失败: ${error.message}`);
+      toast.error(t("user.toast.deleteFailed", { message: error.message }));
     },
   });
 
   const handleToggleStatus = async (user: User) => {
     const newStatus = user.status === BooleanNumber.YES ? BooleanNumber.NO : BooleanNumber.YES;
     await confirm({
-      title: "用户状态",
-      description: `确定要${newStatus === BooleanNumber.YES ? "启用" : "禁用"}该用户吗？`,
+      title: t("user.confirm.userStatus"),
+      description:
+        newStatus === BooleanNumber.YES
+          ? t("user.confirm.enableUser")
+          : t("user.confirm.disableUser"),
     });
     setStatusMutation.mutate({ id: user.id, status: newStatus });
   };
 
   const handleDelete = async (user: User) => {
     if (user.isRoot === BooleanNumber.YES) {
-      toast.error("超级管理员不允许删除");
+      toast.error(t("user.toast.superAdminNotAllowed"));
       return;
     }
     await confirm({
-      title: "删除用户",
-      description: "确定要删除该用户吗？此操作不可恢复。",
+      title: t("user.confirm.deleteUser"),
+      description: t("user.confirm.deleteConfirm"),
     });
     deleteMutation.mutate(user.id);
   };
@@ -155,19 +164,23 @@ const UserListIndexPage = () => {
       <div className="flex flex-1 flex-col gap-4">
         <div className="bg-background sticky top-0 z-2 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
           <Input
-            placeholder="通过用户编号/昵称/手机号搜索"
+            placeholder={t("user.listPage.searchPlaceholder")}
             className="text-sm"
             value={keyword}
             onChange={handleSearchChange}
           />
           <Select onValueChange={handleStatusChange}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="用户状态" />
+              <SelectValue placeholder={t("user.search.status.label")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">全部状态</SelectItem>
-              <SelectItem value={String(BooleanNumber.YES)}>正常</SelectItem>
-              <SelectItem value={String(BooleanNumber.NO)}>已禁用</SelectItem>
+              <SelectItem value="all">{t("user.listPage.statusAll")}</SelectItem>
+              <SelectItem value={String(BooleanNumber.YES)}>
+                {t("user.listPage.statusActive")}
+              </SelectItem>
+              <SelectItem value={String(BooleanNumber.NO)}>
+                {t("user.listPage.statusDisabled")}
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -187,9 +200,9 @@ const UserListIndexPage = () => {
                     <Plus />
                   </Button>
                   <div className="flex flex-col">
-                    <span>创建用户</span>
+                    <span>{t("user.listPage.createUser")}</span>
                     <span className="text-muted-foreground py-1 text-xs font-medium">
-                      添加新的用户
+                      {t("user.listPage.addNewUser")}
                     </span>
                   </div>
                 </div>
@@ -288,7 +301,7 @@ const UserListIndexPage = () => {
                               }}
                             >
                               <Edit />
-                              编辑
+                              {t("user.listPage.edit")}
                             </DropdownMenuItem>
                           </PermissionGuard>
                           <PermissionGuard permissions="membership-order:system-adjustment">
@@ -299,7 +312,7 @@ const UserListIndexPage = () => {
                               }}
                             >
                               <Crown />
-                              调整会员
+                              {t("user.listPage.adjustMembership")}
                             </DropdownMenuItem>
                           </PermissionGuard>
                           <PermissionGuard permissions="users:change-balance">
@@ -310,7 +323,7 @@ const UserListIndexPage = () => {
                               }}
                             >
                               <Zap />
-                              调整积分
+                              {t("user.listPage.adjustCredits")}
                             </DropdownMenuItem>
                           </PermissionGuard>
                           <PermissionGuard permissions="users:reset-password">
@@ -321,7 +334,7 @@ const UserListIndexPage = () => {
                               }}
                             >
                               <Key />
-                              重置密码
+                              {t("user.listPage.resetPassword")}
                             </DropdownMenuItem>
                           </PermissionGuard>
                           <PermissionGuard permissions="users:detail">
@@ -332,7 +345,7 @@ const UserListIndexPage = () => {
                               }}
                             >
                               <Sparkles />
-                              订阅记录
+                              {t("user.listPage.subscriptionRecords")}
                             </DropdownMenuItem>
                           </PermissionGuard>
                           <DropdownMenuSeparator />
@@ -345,7 +358,7 @@ const UserListIndexPage = () => {
                               }
                             >
                               <Trash2 />
-                              删除
+                              {t("user.listPage.delete")}
                             </DropdownMenuItem>
                           </PermissionGuard>
                         </DropdownMenuContent>
@@ -353,10 +366,13 @@ const UserListIndexPage = () => {
                     </PermissionGuard>
                   </div>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <StatusBadge active={user.status === BooleanNumber.YES} activeText="正常" />
+                    <StatusBadge
+                      active={user.status === BooleanNumber.YES}
+                      activeText={t("user.listPage.statusActive")}
+                    />
                     {user.role && <Badge variant="secondary">{user.role.name}</Badge>}
                     {user.isRoot === BooleanNumber.YES && (
-                      <Badge variant="default">超级管理员</Badge>
+                      <Badge variant="default">{t("user.listPage.superAdmin")}</Badge>
                     )}
                     {user.membershipLevel && (
                       <Badge variant="secondary">
@@ -368,7 +384,9 @@ const UserListIndexPage = () => {
                   <div>
                     <p className="text-muted-foreground flex items-center gap-1 text-xs">
                       <ClockPlus className="size-3" />
-                      创建于 {new Date(user.createdAt).toLocaleString()}
+                      {t("user.list.createdAt", {
+                        time: new Date(user.createdAt).toLocaleString(),
+                      })}
                     </p>
                   </div>
                 </div>
@@ -377,8 +395,8 @@ const UserListIndexPage = () => {
               <div className="col-span-1 flex h-28 items-center justify-center gap-4 sm:col-span-2 lg:col-span-3 xl:col-span-4 2xl:col-span-5">
                 <span className="text-muted-foreground text-sm">
                   {queryParams.keyword
-                    ? `没有找到与"${queryParams.keyword}"相关的用户`
-                    : "暂无用户数据"}
+                    ? t("user.listPage.noResults", { keyword: queryParams.keyword })
+                    : t("user.listPage.noData")}
                 </span>
               </div>
             )}

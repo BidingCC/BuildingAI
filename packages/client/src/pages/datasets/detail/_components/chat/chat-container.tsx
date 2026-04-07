@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { InfiniteScrollTop } from "@buildingai/ui/components/infinite-scroll-top";
 import { Button } from "@buildingai/ui/components/ui/button";
 import { PanelLeftClose, SquarePen } from "lucide-react";
@@ -24,11 +25,13 @@ export interface Suggestion {
   text: string;
 }
 
-export const DEFAULT_SUGGESTIONS: Suggestion[] = [
-  { id: "1", text: "这个知识库主要包含哪些内容？" },
-  { id: "2", text: "请根据知识库内容回答我的问题" },
-  { id: "3", text: "总结一下知识库中的关键信息" },
-];
+export function getDefaultSuggestions(t: (key: string) => string): Suggestion[] {
+  return [
+    { id: "1", text: t("dataset.chat.suggestion1") },
+    { id: "2", text: t("dataset.chat.suggestion2") },
+    { id: "3", text: t("dataset.chat.suggestion3") },
+  ];
+}
 
 export interface ChatContainerProps {
   welcomeConfig?: WelcomeConfig;
@@ -43,6 +46,7 @@ export function ChatContainer({
   currentConversationId,
   onSelectConversation,
 }: ChatContainerProps) {
+  const { t } = useI18n();
   const { toggleChatPanel } = useChatPanel();
   const {
     displayMessages,
@@ -77,7 +81,13 @@ export function ChatContainer({
   return (
     <div className="flex h-full min-h-0 w-full flex-col">
       <div className="flex shrink-0 items-center gap-0 px-1 py-1">
-        <Button type="button" variant="ghost" size="icon" onClick={toggleChatPanel} title="收起">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={toggleChatPanel}
+          title={t("dataset.chat.collapse")}
+        >
           <PanelLeftClose className="size-4" />
         </Button>
         {onSelectConversation && (
@@ -87,7 +97,7 @@ export function ChatContainer({
               variant="ghost"
               size="icon"
               onClick={handleNewConversation}
-              title="新聊天"
+              title={t("dataset.chat.newChat")}
             >
               <SquarePen className="size-4" />
             </Button>

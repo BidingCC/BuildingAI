@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { addAgentMessageFeedback, removeAgentMessageLikeDislike } from "@buildingai/services/web";
 import type { UIMessage } from "ai";
 import { useCallback, useEffect, useState } from "react";
@@ -19,6 +20,7 @@ export function useAgentFeedback(
   agentId?: string,
   conversationId?: string,
 ) {
+  const { t } = useI18n();
   const [liked, setLiked] = useState<Record<string, boolean>>({});
   const [disliked, setDisliked] = useState<Record<string, boolean>>({});
 
@@ -104,8 +106,9 @@ export function useAgentFeedback(
 
         updateFeedbackState(messageKey, "like", value);
       } catch (error) {
-        toast.error("操作失败", {
-          description: error instanceof Error ? error.message : "未知错误",
+        toast.error(t("agent.detail.feedback.operationFailed"), {
+          description:
+            error instanceof Error ? error.message : t("agent.detail.feedback.unknownError"),
         });
       }
     },
@@ -130,8 +133,9 @@ export function useAgentFeedback(
 
         updateFeedbackState(messageKey, "dislike", value);
       } catch (error) {
-        toast.error("操作失败", {
-          description: error instanceof Error ? error.message : "未知错误",
+        toast.error(t("agent.detail.feedback.operationFailed"), {
+          description:
+            error instanceof Error ? error.message : t("agent.detail.feedback.unknownError"),
         });
       }
     },

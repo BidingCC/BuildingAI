@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   type Dataset,
   listMyCreatedDatasets,
@@ -26,23 +27,6 @@ import { useCallback, useEffect, useState } from "react";
 
 const PAGE_SIZE = 50;
 
-const LABELS = {
-  move: {
-    title: (n: number) => (n > 1 ? "批量移动文档" : "移动文档"),
-    description: (n: number) =>
-      `选择目标知识库（仅可选择自己创建的知识库）。将 ${n} 个文档移动至目标知识库。`,
-    pending: "移动中…",
-    teamTip: "仅支持移动到本人创建的知识库",
-  },
-  copy: {
-    title: (n: number) => (n > 1 ? "批量复制文档" : "复制文档"),
-    description: (n: number) =>
-      `选择目标知识库（仅可选择自己创建的知识库）。将 ${n} 个文档复制至目标知识库，当前知识库中的文档保留不变。`,
-    pending: "复制中…",
-    teamTip: "仅支持复制到本人创建的知识库",
-  },
-} as const;
-
 export interface TransferDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -60,6 +44,7 @@ export function TransferDialog({
   documentIds,
   onSuccess,
 }: TransferDialogProps) {
+  const { t } = useI18n();
   const [myItems, setMyItems] = useState<Dataset[]>([]);
   const [teamItems, setTeamItems] = useState<Dataset[]>([]);
   const [loadingMy, setLoadingMy] = useState(false);
@@ -69,7 +54,27 @@ export function TransferDialog({
   const moveMutation = useBatchMoveDatasetsDocuments(sourceDatasetId);
   const copyMutation = useBatchCopyDatasetsDocuments(sourceDatasetId);
   const mutation = mode === "move" ? moveMutation : copyMutation;
-  const labels = LABELS[mode];
+
+  const labels = {
+    move: {
+      title: (n: number) =>
+        n > 1
+          ? t("dataset.dialogs.transfer.title.moveBatch", { count: n })
+          : t("dataset.dialogs.transfer.title.move"),
+      description: (n: number) => t("dataset.dialogs.transfer.description.move", { count: n }),
+      pending: t("dataset.dialogs.transfer.pending"),
+      teamTip: t("dataset.dialogs.transfer.teamTip"),
+    },
+    copy: {
+      title: (n: number) =>
+        n > 1
+          ? t("dataset.dialogs.transfer.title.copyBatch", { count: n })
+          : t("dataset.dialogs.transfer.title.copy"),
+      description: (n: number) => t("dataset.dialogs.transfer.description.copy", { count: n }),
+      pending: t("dataset.dialogs.transfer.pending"),
+      teamTip: t("dataset.dialogs.transfer.teamTip"),
+    },
+  }[mode];
 
   useEffect(() => {
     if (open) {
@@ -111,16 +116,16 @@ export function TransferDialog({
         <ScrollArea className="h-[320px] rounded-md border">
           <div className="space-y-1 p-2">
             <DatasetGroup
-              label="我的知识库"
+              label={t("dataset.dialogs.transfer.myDatasets")}
               icon={<BookCopy className="size-4 shrink-0" />}
               loading={loadingMy}
               items={selectableMy}
               selectedId={selectedId}
               onSelect={setSelectedId}
-              emptyText="暂无其他知识库，或当前知识库已是唯一"
+              emptyText={t("dataset.dialogs.transfer.noOtherDatasets")}
             />
             <DatasetGroup
-              label="团队知识库"
+              label={t("dataset.dialogs.transfer.teamDatasets")}
               icon={<Users className="size-4 shrink-0" />}
               loading={loadingTeam}
               items={teamItems}
@@ -132,10 +137,10 @@ export function TransferDialog({
 
         <DialogFooter>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-            取消
+            {t("dataset.dialogs.transfer.cancel")}
           </Button>
           <Button type="button" onClick={handleSubmit} disabled={mutation.isPending || !selectedId}>
-            {mutation.isPending ? labels.pending : "确定"}
+            {mutation.isPending ? labels.pending : t("dataset.dialogs.transfer.confirm")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -152,7 +157,7 @@ function DatasetGroup({
   onSelect,
   disabled,
   disabledTip,
-  emptyText = "暂无",
+  emptyText = t("common.noData"),
 }: {
   label: string;
   icon: React.ReactNode;
@@ -181,7 +186,7 @@ function DatasetGroup({
           {loading ? (
             <div className="text-muted-foreground flex items-center gap-2 py-2 text-sm">
               <Loader2 className="size-4 animate-spin" />
-              加载中...
+              {t("common.loading")}
             </div>
           ) : items.length === 0 ? (
             <div className="text-muted-foreground py-2 text-sm">{emptyText}</div>

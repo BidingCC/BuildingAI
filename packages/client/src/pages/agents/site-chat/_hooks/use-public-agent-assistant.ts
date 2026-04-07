@@ -1,4 +1,5 @@
 import { BusinessCode } from "@buildingai/constants/shared/business-code.constant";
+import { useI18n } from "@buildingai/i18n";
 import type { FormFieldConfig } from "@buildingai/types/ai/agent-config.interface";
 import type { UIMessage } from "ai";
 import { startTransition, useCallback, useEffect, useMemo, useRef } from "react";
@@ -92,6 +93,7 @@ export function usePublicAgentAssistant(args: {
   formVariables?: Record<string, string> | undefined;
 }) {
   const { agentId, accessToken, anonymousIdentifier, conversationId, formVariables } = args;
+  const { t } = useI18n();
   const navigate = useNavigate();
 
   const normalizedConversationId = useMemo(() => {
@@ -110,7 +112,7 @@ export function usePublicAgentAssistant(args: {
     isLoading: isLoadingConversations,
     isError: isConversationsError,
     error: conversationsError,
-  } = usePublicConversations(agentId, accessToken, anonymousIdentifier);
+  } = usePublicConversations(agentId, accessToken, anonymousIdentifier, t("chat.newChat"));
 
   const conversationsEmbedAccessDisabled =
     isConversationsError &&

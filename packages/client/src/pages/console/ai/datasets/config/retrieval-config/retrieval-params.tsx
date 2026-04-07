@@ -1,4 +1,5 @@
 import { RETRIEVAL_MODE } from "@buildingai/constants/shared/datasets.constants";
+import { useI18n } from "@buildingai/i18n";
 import { CardContent } from "@buildingai/ui/components/ui/card";
 import { Input } from "@buildingai/ui/components/ui/input";
 import { Label } from "@buildingai/ui/components/ui/label";
@@ -17,48 +18,52 @@ type Props = {
   onChange: (v: RetrievalConfig | ((prev: RetrievalConfig) => RetrievalConfig)) => void;
 };
 
-const TopKField = ({ value, onChange }: Props) => (
-  <div className="space-y-2">
-    <Label>Top K</Label>
-    <div className="flex items-center gap-3">
-      <Slider
-        min={1}
-        max={20}
-        step={1}
-        value={[value.topK ?? 3]}
-        onValueChange={([v]) => onChange((r) => ({ ...r, topK: v }))}
-      />
-      <Input
-        type="number"
-        min={1}
-        max={20}
-        className="w-16"
-        value={value.topK ?? 3}
-        onChange={(e) =>
-          onChange((r) => ({
-            ...r,
-            topK: Math.min(20, Math.max(1, Number(e.target.value) || 1)),
-          }))
-        }
-      />
+const TopKField = ({ value, onChange }: Props) => {
+  const { t } = useI18n();
+  return (
+    <div className="space-y-2">
+      <Label>{t("ai.dataset.retrieval.topK")}</Label>
+      <div className="flex items-center gap-3">
+        <Slider
+          min={1}
+          max={20}
+          step={1}
+          value={[value.topK ?? 3]}
+          onValueChange={([v]) => onChange((r) => ({ ...r, topK: v }))}
+        />
+        <Input
+          type="number"
+          min={1}
+          max={20}
+          className="w-16"
+          value={value.topK ?? 3}
+          onChange={(e) =>
+            onChange((r) => ({
+              ...r,
+              topK: Math.min(20, Math.max(1, Number(e.target.value) || 1)),
+            }))
+          }
+        />
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const ScoreThresholdField = ({ value, onChange }: Props) => {
+  const { t } = useI18n();
   const enabled = value.scoreThresholdEnabled ?? false;
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1">
-          <Label>Score 阈值</Label>
+          <Label>{t("ai.dataset.retrieval.scoreThreshold")}</Label>
           <Tooltip>
             <TooltipTrigger asChild>
               <button type="button" className="text-muted-foreground hover:text-foreground">
                 <HelpCircle className="size-3.5" />
               </button>
             </TooltipTrigger>
-            <TooltipContent>用于设置文本片段筛选的相似度阈值。</TooltipContent>
+            <TooltipContent>{t("ai.dataset.retrieval.scoreThresholdHint")}</TooltipContent>
           </Tooltip>
         </div>
         <Switch
@@ -96,6 +101,7 @@ const ScoreThresholdField = ({ value, onChange }: Props) => {
 };
 
 export function RetrievalParams({ value, onChange }: Props) {
+  const { t } = useI18n();
   const isVector = value.retrievalMode === RETRIEVAL_MODE.VECTOR;
   const isFullText = value.retrievalMode === RETRIEVAL_MODE.FULL_TEXT;
   const isHybrid = value.retrievalMode === RETRIEVAL_MODE.HYBRID;
@@ -106,7 +112,7 @@ export function RetrievalParams({ value, onChange }: Props) {
       {isVector && (
         <>
           <div className="flex items-center justify-between">
-            <Label>Rerank 模型</Label>
+            <Label>{t("ai.dataset.retrieval.rerankModel")}</Label>
             <Switch
               checked={value.rerankConfig?.enabled ?? false}
               onCheckedChange={(v) =>
@@ -131,7 +137,7 @@ export function RetrievalParams({ value, onChange }: Props) {
                   rerankConfig: { ...r.rerankConfig, enabled: true, modelId: v },
                 }))
               }
-              placeholder="请选择模型"
+              placeholder={t("ai.dataset.retrieval.selectModel")}
               triggerVariant="button"
               className="w-full"
             />
@@ -144,7 +150,7 @@ export function RetrievalParams({ value, onChange }: Props) {
       {isFullText && (
         <>
           <div className="flex items-center justify-between">
-            <Label>Rerank 模型</Label>
+            <Label>{t("ai.dataset.retrieval.rerankModel")}</Label>
             <Switch
               checked={value.rerankConfig?.enabled ?? false}
               onCheckedChange={(v) =>
@@ -169,7 +175,7 @@ export function RetrievalParams({ value, onChange }: Props) {
                   rerankConfig: { ...r.rerankConfig, enabled: true, modelId: v },
                 }))
               }
-              placeholder="请选择模型"
+              placeholder={t("ai.dataset.retrieval.selectModel")}
               triggerVariant="button"
               className="w-full"
             />
@@ -195,7 +201,7 @@ export function RetrievalParams({ value, onChange }: Props) {
               }
             >
               <Scale className="size-4" />
-              权重设置
+              {t("ai.dataset.retrieval.weightSettings")}
             </button>
             <button
               type="button"
@@ -211,14 +217,16 @@ export function RetrievalParams({ value, onChange }: Props) {
               }
             >
               <Layers className="size-4" />
-              Rerank 模型
+              {t("ai.dataset.retrieval.rerankModel")}
             </button>
           </div>
           {hybridWeight && (
             <>
-              <p className="text-muted-foreground text-sm">调整语义与关键词权重，控制排序偏向</p>
+              <p className="text-muted-foreground text-sm">
+                {t("ai.dataset.retrieval.adjustWeightHint")}
+              </p>
               <div className="space-y-2">
-                <Label>语义</Label>
+                <Label>{t("ai.dataset.retrieval.semantic")}</Label>
                 <div className="flex items-center gap-3">
                   <Slider
                     min={0}
@@ -253,7 +261,7 @@ export function RetrievalParams({ value, onChange }: Props) {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>关键词</Label>
+                <Label>{t("ai.dataset.retrieval.keyword")}</Label>
                 <div className="flex items-center gap-3">
                   <Slider
                     min={0}
@@ -299,7 +307,7 @@ export function RetrievalParams({ value, onChange }: Props) {
                   rerankConfig: { ...r.rerankConfig, enabled: true, modelId: v },
                 }))
               }
-              placeholder="请选择模型"
+              placeholder={t("ai.dataset.retrieval.selectModel")}
               triggerVariant="button"
               className="w-full"
             />

@@ -1,4 +1,5 @@
 import { useDocumentHead } from "@buildingai/hooks";
+import { useI18n } from "@buildingai/i18n";
 import {
   type McpServer,
   type QueryAiMcpServerDto,
@@ -60,19 +61,21 @@ type ConnectionStatusBadgeProps = {
 };
 
 const ConnectionStatusBadge = ({ server, isChecking }: ConnectionStatusBadgeProps) => {
+  const { t } = useI18n();
   if (isChecking) {
     return (
       <Badge variant="outline" className="text-muted-foreground pr-1.5 pl-1">
         <RefreshCw className="size-3.5 animate-spin" />
-        测试中...
+        {t("mcp.status.testing")}
       </Badge>
     );
   }
 
-  return <StatusBadge active={server.connectable} activeText="可连通" inactiveText="不可连通" />;
+  return <StatusBadge active={server.connectable} activeText={t("mcp.status.connectable")} inactiveText={t("mcp.status.notConnectable")} />;
 };
 
 const AiMcpIndexPage = () => {
+  const { t } = useI18n();
   const [keyword, setKeyword] = useState("");
   const [debouncedKeyword] = useDebounceValue(keyword.trim(), 300);
   const [queryParams, setQueryParams] = useState<QueryAiMcpServerDto>({});
@@ -86,7 +89,7 @@ const AiMcpIndexPage = () => {
   const { confirm } = useAlertDialog();
 
   useDocumentHead({
-    title: "MCP管理",
+    title: t("mcp.pageTitle"),
   });
 
   // Update query params when debounced keyword changes
@@ -106,11 +109,11 @@ const AiMcpIndexPage = () => {
 
   const deleteMutation = useDeleteMcpServerMutation({
     onSuccess: () => {
-      toast.success("MCP服务已删除");
+      toast.success(t("mcp.toast.deleted"));
       refetch();
     },
     onError: (error) => {
-      toast.error(`删除失败: ${error.message}`);
+      toast.error(t("mcp.toast.deleteFailed", { message: error.message }));
     },
   });
 
@@ -118,47 +121,47 @@ const AiMcpIndexPage = () => {
     onSuccess: (data) => {
       if (data.connectable) {
         const { created, updated, deleted, total } = data.toolsInfo ?? {};
-        const parts = [
-          created && `新增 ${created} 个`,
-          updated && `更新 ${updated} 个`,
-          deleted && `删除 ${deleted} 个`,
-        ].filter(Boolean);
-        const toolsSummary = parts.length ? parts.join("、") + "工具" : `共 ${total ?? 0} 个工具`;
-        toast.success(`连通正常，${toolsSummary}`);
+        const toolsSummary = t("mcp.toast.toolsSummary", {
+          created: created ?? 0,
+          updated: updated ?? 0,
+          deleted: deleted ?? 0,
+          total: total ?? 0,
+        });
+        toast.success(t("mcp.toast.connectionSuccess", { summary: toolsSummary }));
       } else {
-        toast.error(data.message || "连接失败");
+        toast.error(data.message || t("mcp.toast.connectionFailed"));
       }
       refetch();
       setCheckingServerId(null);
     },
     onError: (error) => {
-      toast.error(`检测失败: ${error.message}`);
+      toast.error(t("mcp.toast.checkFailed", { message: error.message }));
       setCheckingServerId(null);
     },
   });
 
   const setQuickMenuMutation = useSetDefaultQuickMenuMutation({
     onSuccess: () => {
-      toast.success("快捷菜单设置成功");
+      toast.success(t("mcp.toast.quickMenuSuccess"));
       refetch();
     },
     onError: (error) => {
-      toast.error(`设置失败: ${error.message}`);
+      toast.error(t("mcp.toast.quickMenuFailed", { message: error.message }));
     },
   });
 
   const handleToggleStatus = async (server: McpServer) => {
     await confirm({
-      title: "MCP服务状态",
-      description: `确定要${server.isDisabled ? "启用" : "禁用"}该MCP服务吗？`,
+      title: t("mcp.alert.statusTitle"),
+      description: t("mcp.alert.statusDesc", { action: server.isDisabled ? t("mcp.alert.enable") : t("mcp.alert.disable") }),
     });
     toggleActiveMutation.mutate({ id: server.id, isDisabled: !server.isDisabled });
   };
 
   const handleDelete = async (server: McpServer) => {
     await confirm({
-      title: "删除MCP服务",
-      description: "确定要删除该MCP服务吗？此操作不可恢复。",
+      title: t("mcp.alert.deleteTitle"),
+      description: t("mcp.alert.deleteDesc"),
     });
     deleteMutation.mutate(server.id);
   };
@@ -203,19 +206,19 @@ const AiMcpIndexPage = () => {
       <div className="flex flex-col gap-4">
         <div className="bg-background sticky top-0 z-2 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
           <Input
-            placeholder="搜索MCP服务名称"
+            placeholder={t("mcp.searchPlaceholder")}
             className="text-sm"
             value={keyword}
             onChange={handleSearchChange}
           />
           <Select onValueChange={handleStatusChange}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="服务状态" />
+              <SelectValue placeholder={t("mcp.statusPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">全部状态</SelectItem>
-              <SelectItem value="enabled">已启用</SelectItem>
-              <SelectItem value="disabled">已禁用</SelectItem>
+              <SelectItem value="all">{t("mcp.allStatus")}</SelectItem>
+              <SelectItem value="enabled">{t("mcp.enabled")}</SelectItem>
+              <SelectItem value="disabled">{t("mcp.disabled")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -228,9 +231,9 @@ const AiMcpIndexPage = () => {
                   <Plus />
                 </Button>
                 <div className="flex flex-col">
-                  <span>添加MCP服务</span>
+                  <span>{t("mcp.addService.title")}</span>
                   <span className="text-muted-foreground py-1 text-xs font-medium">
-                    添加新的MCP服务配置
+                    {t("mcp.addService.description")}
                   </span>
                 </div>
               </div>
@@ -238,12 +241,12 @@ const AiMcpIndexPage = () => {
               <div className="flex min-h-6 flex-1 items-end gap-4">
                 <PermissionGuard permissions="ai-mcp-servers:import" blockOnly>
                   <Button size="xs" className="flex-1" variant="outline" onClick={handleImport}>
-                    <FileJson2 /> 从JSON导入
+                    <FileJson2 /> {t("mcp.addService.importFromJson")}
                   </Button>
                 </PermissionGuard>
                 <PermissionGuard permissions="ai-mcp-servers:create">
                   <Button size="xs" className="flex-1" variant="outline" onClick={handleCreate}>
-                    <Plus /> 手动创建
+                    <Plus /> {t("mcp.addService.createManually")}
                   </Button>
                 </PermissionGuard>
               </div>
@@ -299,7 +302,7 @@ const AiMcpIndexPage = () => {
                         onClick={() => setToolsDialogServer(server)}
                       >
                         <Hammer />
-                        查看工具({server.toolsCount || 0})
+                        {t("mcp.table.viewTools", { count: server.toolsCount || 0 })}
                         <ChevronRight />
                       </Button>
                     </PermissionGuard>
@@ -324,7 +327,7 @@ const AiMcpIndexPage = () => {
                         <PermissionGuard permissions="ai-mcp-servers:check-connection">
                           <DropdownMenuItem onClick={() => handleCheckConnection(server)}>
                             <RefreshCw />
-                            连通测试
+                            {t("mcp.dropdown.connectionTest")}
                           </DropdownMenuItem>
                         </PermissionGuard>
                         <PermissionGuard permissions="ai-mcp-servers:quick-menu-set">
@@ -333,13 +336,13 @@ const AiMcpIndexPage = () => {
                             disabled={server.isQuickMenu || setQuickMenuMutation.isPending}
                           >
                             <Star />
-                            快捷菜单
+                            {t("mcp.dropdown.quickMenu")}
                           </DropdownMenuItem>
                         </PermissionGuard>
                         <PermissionGuard permissions="ai-mcp-servers:update">
                           <DropdownMenuItem onClick={() => handleEdit(server)}>
                             <Edit />
-                            编辑
+                            {t("mcp.dropdown.edit")}
                           </DropdownMenuItem>
                         </PermissionGuard>
                         <DropdownMenuSeparator />
@@ -350,7 +353,7 @@ const AiMcpIndexPage = () => {
                             disabled={deleteMutation.isPending}
                           >
                             <Trash2 />
-                            删除
+                            {t("mcp.dropdown.delete")}
                           </DropdownMenuItem>
                         </PermissionGuard>
                       </DropdownMenuContent>
@@ -365,7 +368,7 @@ const AiMcpIndexPage = () => {
                       server={server}
                       isChecking={checkingServerId === server.id}
                     />
-                    {server.isQuickMenu && <Badge variant="outline">快捷菜单</Badge>}
+                    {server.isQuickMenu && <Badge variant="outline">{t("mcp.dropdown.quickMenu")}</Badge>}
                     <Badge variant="secondary">{server.communicationType}</Badge>
                   </div>
                 </div>
@@ -375,8 +378,8 @@ const AiMcpIndexPage = () => {
             <div className="col-span-1 flex h-36.5 items-center justify-center gap-4 sm:col-span-2 lg:col-span-3 xl:col-span-4 2xl:col-span-5">
               <span className="text-muted-foreground text-sm">
                 {queryParams.name
-                  ? `没有找到与"${queryParams.name}"相关的MCP服务`
-                  : "暂无MCP服务数据"}
+                  ? t("mcp.noData.noResults", { keyword: queryParams.name })
+                  : t("mcp.noData.noServices")}
               </span>
             </div>
           )}

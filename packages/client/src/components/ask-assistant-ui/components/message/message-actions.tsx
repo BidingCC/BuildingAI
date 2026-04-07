@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { memo, type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
+import { useI18n } from "@buildingai/i18n";
 import { MessageContext } from "./message-context";
 import { MessageUsage, type MessageUsageProps } from "./message-usage";
 
@@ -55,6 +56,7 @@ export const MessageActions = memo(function MessageActions({
   onSpeak,
   extraActions,
 }: MessageActionsProps) {
+  const { t } = useI18n();
   const [isCopied, setIsCopied] = useState(false);
   const [isTtsLoading, setIsTtsLoading] = useState(false);
   const [isTtsPlaying, setIsTtsPlaying] = useState(false);
@@ -120,18 +122,18 @@ export const MessageActions = memo(function MessageActions({
   return (
     <AIMessageActions>
       {onRetry && (
-        <AIMessageAction label="Retry" onClick={onRetry} tooltip="重新生成">
+        <AIMessageAction label={t("action.regenerate")} onClick={onRetry} tooltip={t("action.regenerate")}>
           <RefreshCcwIcon className="size-4" />
         </AIMessageAction>
       )}
       {hasValidMessageId && onLikeChange && !disliked && (
-        <AIMessageAction label="Like" onClick={handleLike} tooltip="喜欢">
+        <AIMessageAction label={t("action.like")} onClick={handleLike} tooltip={t("action.like")}>
           <ThumbsUpIcon className="size-4" fill={liked ? "currentColor" : "none"} />
         </AIMessageAction>
       )}
       {hasValidMessageId && onDislikeChange && !liked && (
         <AIMessageAction
-          label="Dislike"
+          label={t("action.dislike")}
           onClick={async () => {
             if (disliked) {
               await handleDislike();
@@ -140,19 +142,19 @@ export const MessageActions = memo(function MessageActions({
               onShowFeedbackCard?.(true);
             }
           }}
-          tooltip="不喜欢"
+          tooltip={t("action.dislike")}
         >
           <ThumbsDownIcon className="size-4" fill={disliked ? "currentColor" : "none"} />
         </AIMessageAction>
       )}
-      <AIMessageAction label="Copy" onClick={handleCopy} tooltip={isCopied ? "已复制" : "复制"}>
+      <AIMessageAction label={t("action.copy")} onClick={handleCopy} tooltip={isCopied ? t("action.copied") : t("action.copy")}>
         {isCopied ? <CopyCheck className="size-4" /> : <CopyIcon className="size-4" />}
       </AIMessageAction>
       {onSpeak && content.trim() && (
         <AIMessageAction
-          label={isTtsPlaying ? "停止" : "朗读"}
+          label={isTtsPlaying ? t("action.stopSpeaking") : t("action.speak")}
           onClick={handleSpeakClick}
-          tooltip={isTtsLoading ? "合成中…" : isTtsPlaying ? "停止朗读" : "朗读"}
+          tooltip={isTtsLoading ? t("action.synthesizing") : isTtsPlaying ? t("action.stopSpeaking") : t("action.speak")}
         >
           {isTtsLoading ? (
             <Loader2 className="size-4 animate-spin" />

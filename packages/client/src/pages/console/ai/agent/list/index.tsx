@@ -1,4 +1,5 @@
 import type { TagTypeType } from "@buildingai/constants";
+import { useI18n } from "@buildingai/i18n";
 import type { ConsoleAgentItem, QueryConsoleAgentsDto } from "@buildingai/services/console";
 import {
   useConsoleAgentsListQuery,
@@ -63,30 +64,12 @@ export const AgentCreateMode = {
 } as const;
 
 const CREATE_MODE_MAP: Record<string, string> = {
-  [AgentCreateMode.DIRECT]: "系统智能体",
-  [AgentCreateMode.COZE]: "Coze智能体",
-  [AgentCreateMode.DIFY]: "Dify智能体",
+  [AgentCreateMode.DIRECT]: "",
+  [AgentCreateMode.COZE]: "",
+  [AgentCreateMode.DIFY]: "",
 };
 
 const PAGE_SIZE = 30;
-
-const STATUS_OPTIONS: { value: QueryConsoleAgentsDto["status"]; label: string }[] = [
-  { value: "all", label: "全部" },
-  { value: "pending", label: "待审核" },
-  { value: "rejected", label: "审核失败" },
-  { value: "none", label: "私有" },
-  { value: "approved", label: "审核通过" },
-  { value: "published", label: "已公开" },
-  { value: "unpublished", label: "已下架" },
-];
-
-const statusLabelMap: Record<string, string> = {
-  pending: "待审核",
-  rejected: "审核失败",
-  none: "私有",
-  published: "已公开",
-  unpublished: "已下架",
-};
 
 const statusClassName: Record<string, string> = {
   pending: "",
@@ -124,6 +107,15 @@ function StatusBadge({
   row: Pick<ConsoleAgentItem, "squarePublishStatus" | "publishedToSquare">;
   onRejectReasonClick?: () => void;
 }) {
+  const { t } = useI18n();
+
+  const statusLabelMap: Record<string, string> = {
+    pending: t("ai.agent.list.statusOptions.pending"),
+    rejected: t("ai.agent.list.statusOptions.rejected"),
+    none: t("ai.agent.list.statusOptions.none"),
+    published: t("ai.agent.list.statusOptions.published"),
+    unpublished: t("ai.agent.list.statusOptions.unpublished"),
+  };
   const status = getAgentDisplayStatus(row);
   const label = statusLabelMap[status] ?? status;
   const variant = statusVariantMap[status] ?? "secondary";
@@ -152,6 +144,7 @@ function StatusBadge({
 }
 
 const AgentIndexPage = () => {
+  const { t } = useI18n();
   const [name, setName] = useState("");
   const [debouncedName] = useDebounceValue(name.trim(), 300);
   const [queryParams, setQueryParams] = useState<QueryConsoleAgentsDto>({
@@ -166,23 +159,34 @@ const AgentIndexPage = () => {
   const { data, isLoading, refetch } = useConsoleAgentsListQuery(queryParams);
   const deleteAgentMutation = useDeleteAgentMutation({
     onSuccess: () => {
-      toast.success("已删除");
+      toast.success(t("ai.agent.list.toast.deleteSuccess"));
       refetch();
     },
-    onError: (e) => toast.error(`删除失败: ${e.message}`),
+    onError: (e) => toast.error(t("ai.agent.list.toast.deleteFailed", { error: e.message })),
   });
   const publishMutation = usePublishAgentSquareMutation({
     onSuccess: () => {
-      toast.success("已上架");
+      toast.success(t("ai.agent.list.toast.publishSuccess"));
       refetch();
     },
   });
   const unpublishMutation = useUnpublishAgentSquareMutation({
     onSuccess: () => {
-      toast.success("已下架");
+      toast.success(t("ai.agent.list.toast.unpublishSuccess"));
       refetch();
     },
   });
+
+  const STATUS_OPTIONS: { value: QueryConsoleAgentsDto["status"]; label: string }[] = [
+    { value: "all", label: t("ai.agent.list.statusOptions.all") },
+    { value: "pending", label: t("ai.agent.list.statusOptions.pending") },
+    { value: "rejected", label: t("ai.agent.list.statusOptions.rejected") },
+    { value: "none", label: t("ai.agent.list.statusOptions.none") },
+    { value: "approved", label: t("ai.agent.list.statusOptions.approved") },
+    { value: "published", label: t("ai.agent.list.statusOptions.published") },
+    { value: "unpublished", label: t("ai.agent.list.statusOptions.unpublished") },
+  ];
+
 
   const { PaginationComponent } = usePagination({
     total: data?.total ?? 0,
@@ -233,18 +237,18 @@ const AgentIndexPage = () => {
 
   const handleRejectReasonClick = (reason: string | null | undefined) => {
     alertConfirm({
-      title: "拒绝原因",
-      description: reason?.trim() ? reason : "未填写拒绝原因",
-      confirmText: "确定",
+      title: t("ai.agent.list.confirm.rejectReasonTitle"),
+      description: reason?.trim() ? reason : t("ai.agent.list.confirm.rejectReasonEmpty"),
+      confirmText: t("ai.agent.list.confirm.confirmText"),
     }).catch(() => {});
   };
 
   const handleDelete = (row: ConsoleAgentItem) => {
     alertConfirm({
-      title: "删除确认",
-      description: `确定要删除智能体"${row.name}"吗？此操作不可恢复。`,
-      confirmText: "删除",
-      cancelText: "取消",
+      title: t("ai.agent.list.confirm.deleteTitle"),
+      description: t("ai.agent.list.confirm.deleteDesc", { name: row.name }),
+      confirmText: t("ai.agent.list.confirm.delete"),
+      cancelText: t("ai.agent.list.confirm.cancel"),
       confirmVariant: "destructive",
     })
       .then(() => {
@@ -255,9 +259,9 @@ const AgentIndexPage = () => {
 
   const handlePublish = (row: ConsoleAgentItem) => {
     alertConfirm({
-      title: "上架智能体",
-      description: `确定要上架智能体"${row.name}"吗？上架后将在智能体广场中展示。`,
-      confirmText: "上架",
+      title: t("ai.agent.list.confirm.publishTitle"),
+      description: t("ai.agent.list.confirm.publishDesc", { name: row.name }),
+      confirmText: t("ai.agent.list.confirm.publish"),
     })
       .then(() => {
         publishMutation.mutate(row.id);
@@ -267,9 +271,9 @@ const AgentIndexPage = () => {
 
   const handleUnpublish = (row: ConsoleAgentItem) => {
     alertConfirm({
-      title: "下架智能体",
-      description: `确定要下架智能体"${row.name}"吗？下架后将不再在智能体广场中展示。`,
-      confirmText: "下架",
+      title: t("ai.agent.list.confirm.unpublishTitle"),
+      description: t("ai.agent.list.confirm.unpublishDesc", { name: row.name }),
+      confirmText: t("ai.agent.list.confirm.unpublish"),
     })
       .then(() => {
         unpublishMutation.mutate(row.id);
@@ -283,35 +287,45 @@ const AgentIndexPage = () => {
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
           <div className="bg-card rounded-lg border p-4 text-center">
             <div className="text-2xl font-bold">{data?.extend?.total ?? 0}</div>
-            <div className="text-muted-foreground text-xs">总智能体</div>
+            <div className="text-muted-foreground text-xs">
+              {t("ai.agent.list.stats.totalAgents")}
+            </div>
           </div>
           <div className="bg-card rounded-lg border p-4 text-center">
             <div className="text-2xl font-bold">{data?.extend?.pending ?? 0}</div>
-            <div className="text-muted-foreground text-xs">待审核</div>
+            <div className="text-muted-foreground text-xs">
+              {t("ai.agent.list.stats.pendingAgents")}
+            </div>
           </div>
           <div className="bg-card rounded-lg border p-4 text-center">
             <div className="text-2xl font-bold">{data?.extend?.published ?? 0}</div>
-            <div className="text-muted-foreground text-xs">已公开</div>
+            <div className="text-muted-foreground text-xs">
+              {t("ai.agent.list.stats.publishedAgents")}
+            </div>
           </div>
           <div className="bg-card rounded-lg border p-4 text-center">
             <div className="text-2xl font-bold">{data?.extend?.private ?? 0}</div>
-            <div className="text-muted-foreground text-xs">私有</div>
+            <div className="text-muted-foreground text-xs">
+              {t("ai.agent.list.stats.privateAgents")}
+            </div>
           </div>
           <div className="bg-card rounded-lg border p-4 text-center">
             <div className="text-2xl font-bold">{data?.extend?.unpublished ?? 0}</div>
-            <div className="text-muted-foreground text-xs">已下架</div>
+            <div className="text-muted-foreground text-xs">
+              {t("ai.agent.list.stats.unpublishedAgents")}
+            </div>
           </div>
         </div>
         <div className="bg-background sticky top-0 z-2 mb-1 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Input
-            placeholder="智能体/用户名称搜索"
+            placeholder={t("ai.agent.list.searchPlaceholder")}
             className="text-sm"
             value={name}
             onChange={handleNameChange}
           />
           <Select value={queryParams.status ?? "all"} onValueChange={handleStatusChange}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="全部" />
+              <SelectValue placeholder={t("ai.agent.list.statusOptions.all")} />
             </SelectTrigger>
             <SelectContent>
               {STATUS_OPTIONS.map((opt) => (
@@ -325,7 +339,7 @@ const AgentIndexPage = () => {
             type={"app" as TagTypeType}
             value={queryParams.tagId ? [queryParams.tagId] : []}
             onChange={handleTagIdsChange}
-            placeholder="搜索标签"
+            placeholder={t("ai.agent.list.searchTags")}
           />
         </div>
 
@@ -333,12 +347,12 @@ const AgentIndexPage = () => {
           <Table>
             <TableHeader className="bg-muted/50">
               <TableRow>
-                <TableHead>智能体</TableHead>
-                <TableHead>创建人</TableHead>
-                <TableHead>标签</TableHead>
-                <TableHead className="text-center">智能体类型</TableHead>
-                <TableHead>状态</TableHead>
-                <TableHead>最近编辑</TableHead>
+                <TableHead>{t("ai.agent.list.table.agent")}</TableHead>
+                <TableHead>{t("ai.agent.list.table.creator")}</TableHead>
+                <TableHead>{t("ai.agent.list.table.tags")}</TableHead>
+                <TableHead className="text-center">{t("ai.agent.list.table.type")}</TableHead>
+                <TableHead>{t("ai.agent.list.table.status")}</TableHead>
+                <TableHead>{t("ai.agent.list.table.lastEdited")}</TableHead>
                 <PermissionGuard
                   permissions={[
                     "agents:review",
@@ -349,7 +363,7 @@ const AgentIndexPage = () => {
                   ]}
                   any
                 >
-                  <TableHead>操作</TableHead>
+                  <TableHead>{t("ai.agent.list.table.action")}</TableHead>
                 </PermissionGuard>
               </TableRow>
             </TableHeader>
@@ -357,13 +371,13 @@ const AgentIndexPage = () => {
               {isLoading ? (
                 <TableRow>
                   <TableCell colSpan={8} className="text-muted-foreground h-32 text-center">
-                    加载中...
+                    {t("ai.agent.list.empty.loading")}
                   </TableCell>
                 </TableRow>
               ) : !data?.items?.length ? (
                 <TableRow>
                   <TableCell colSpan={8} className="text-muted-foreground h-32 text-center">
-                    暂无智能体数据
+                    {t("ai.agent.list.empty.noData")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -398,12 +412,13 @@ const AgentIndexPage = () => {
                             </Badge>
                           ))
                         ) : (
-                          <span className="text-muted-foreground text-xs">-</span>
+                          <span className="text-muted-foreground text-xs">--</span>
                         )}
                       </div>
                     </TableCell>
                     <TableCell className="text-center">
-                      {CREATE_MODE_MAP[row.createMode] ?? "未知"}
+                      {t(`ai.agent.list.agentTypeOptions.${row.createMode}` as any) ||
+                        t("ai.agent.list.agentTypeOptions.unknown")}
                     </TableCell>
 
                     <TableCell>
@@ -445,7 +460,7 @@ const AgentIndexPage = () => {
                               {row.squarePublishStatus === "pending" && (
                                 <DropdownMenuItem onSelect={() => handleReview(row)}>
                                   <FileCheck className="mr-2 size-4" />
-                                  审核
+                                  {t("ai.agent.list.actions.review")}
                                 </DropdownMenuItem>
                               )}
                             </PermissionGuard>
@@ -453,7 +468,7 @@ const AgentIndexPage = () => {
                               {row.squarePublishStatus === "approved" && !row.publishedToSquare && (
                                 <DropdownMenuItem onSelect={() => handlePublish(row)}>
                                   <ArrowUpToLine className="mr-2 size-4" />
-                                  上架
+                                  {t("ai.agent.list.actions.publish")}
                                 </DropdownMenuItem>
                               )}
                             </PermissionGuard>
@@ -461,14 +476,14 @@ const AgentIndexPage = () => {
                               {row.squarePublishStatus === "approved" && row.publishedToSquare && (
                                 <DropdownMenuItem onSelect={() => handleUnpublish(row)}>
                                   <ArrowDownToLine className="mr-2 size-4" />
-                                  下架
+                                  {t("ai.agent.list.actions.unpublish")}
                                 </DropdownMenuItem>
                               )}
                             </PermissionGuard>
                             <PermissionGuard permissions="agents:dashboard">
                               <DropdownMenuItem onSelect={() => handleOpenDashboard(row)}>
                                 <ChartLine className="mr-2 size-4" />
-                                数据
+                                {t("ai.agent.list.actions.data")}
                               </DropdownMenuItem>
                             </PermissionGuard>
                             <PermissionGuard permissions="agents:delete">
@@ -482,7 +497,7 @@ const AgentIndexPage = () => {
                                 onSelect={() => handleDelete(row)}
                               >
                                 <Trash2 className="mr-2 size-4" />
-                                删除
+                                {t("ai.agent.list.actions.delete")}
                               </DropdownMenuItem>
                             </PermissionGuard>
                           </DropdownMenuContent>

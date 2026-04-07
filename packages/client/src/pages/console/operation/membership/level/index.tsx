@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   type MembershipLevelListItem,
   type MembershipLevelListResponse,
@@ -54,14 +55,14 @@ import { PageContainer } from "@/layouts/console/_components/page-container";
 
 import { LevelFormDialog } from "./_components/level-form-dialog";
 
-const statusOptions = [
-  { label: "启用", value: "true" },
-  { label: "禁用", value: "false" },
-];
-
 const MembershipLevelIndexPage = () => {
+  const { t } = useI18n();
   const { confirm } = useAlertDialog();
   const [nameSearch, setNameSearch] = useState("");
+  const statusOptions = [
+    { label: t("common.action.enable"), value: "true" },
+    { label: t("common.action.disable"), value: "false" },
+  ];
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
   const [page, setPage] = useState(1);
   const [formDialogOpen, setFormDialogOpen] = useState(false);
@@ -103,28 +104,28 @@ const MembershipLevelIndexPage = () => {
 
   const deleteMutation = useDeleteMembershipLevelMutation({
     onSuccess: () => {
-      toast.success("删除成功");
+      toast.success(t("common.action.deleteSuccess"));
       refetch();
     },
     onError: (error) => {
-      toast.error(`删除失败: ${error.message}`);
+      toast.error(t("common.action.deleteFailed", { error: error.message }));
     },
   });
 
   const updateMutation = useUpdateMembershipLevelMutation({
     onSuccess: () => {
-      toast.success("状态已更新");
+      toast.success(t("operation.membership.level.statusUpdated"));
       refetch();
     },
     onError: (error) => {
-      toast.error(`更新失败: ${error.message}`);
+      toast.error(t("operation.membership.level.updateFailed", { error: error.message }));
     },
   });
 
   const handleDelete = async (item: MembershipLevelListItem) => {
     await confirm({
-      title: "删除等级",
-      description: `确定要删除等级「${item.name}」吗？存在未过期订阅用户时无法删除。`,
+      title: t("operation.membership.level.deleteConfirm"),
+      description: t("operation.membership.level.deleteConfirmDesc", { name: item.name }),
       confirmVariant: "destructive",
     });
     await deleteMutation.mutateAsync(item.id);
@@ -147,13 +148,13 @@ const MembershipLevelIndexPage = () => {
           <div className="flex items-center justify-between">
             <div className="flex flex-wrap items-center gap-2">
               <Input
-                placeholder="搜索等级名称"
+                placeholder={t("operation.membership.level.searchPlaceholder")}
                 value={nameSearch}
                 onChange={(e) => setNameSearch(e.target.value)}
                 className="h-8 w-[200px]"
               />
               <DataTableFacetedFilter
-                title="启用状态"
+                title={t("operation.membership.level.statusFilter")}
                 options={statusOptions}
                 selectedValue={statusFilter}
                 onSelectionChange={setStatusFilter}
@@ -164,19 +165,23 @@ const MembershipLevelIndexPage = () => {
                   <AlertDialogTrigger asChild>
                     <Button variant="outline" size="sm" className="h-8 border-dashed">
                       <RotateCcwIcon className="mr-2 size-4" />
-                      清除筛选
+                      {t("common.action.clearFilters")}
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent className="sm:max-w-sm">
                     <AlertDialogHeader>
-                      <AlertDialogTitle>清除所有筛选？</AlertDialogTitle>
+                      <AlertDialogTitle>
+                        {t("operation.membership.level.clearFiltersConfirm")}
+                      </AlertDialogTitle>
                       <AlertDialogDescription>
-                        这将清除所有已设置的筛选条件，包括搜索输入和筛选选项。
+                        {t("operation.membership.level.clearFiltersDesc")}
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel>取消</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleResetFilters}>清除</AlertDialogAction>
+                      <AlertDialogCancel>{t("common.action.cancel")}</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleResetFilters}>
+                        {t("common.action.clearFilters")}
+                      </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
@@ -184,7 +189,7 @@ const MembershipLevelIndexPage = () => {
             </div>
             <Button size="sm" className="h-8" onClick={handleAdd}>
               <PlusIcon />
-              新增
+              {t("common.action.add")}
             </Button>
           </div>
           <ScrollArea className="flex h-full flex-1 rounded-lg">
@@ -193,39 +198,39 @@ const MembershipLevelIndexPage = () => {
                 <TableRow>
                   <TableHead>
                     <div className="flex items-center gap-1.5">
-                      <span>等级</span>
+                      <span>{t("operation.membership.level.table.level")}</span>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <HelpCircle className="text-muted-foreground size-3.5 cursor-help" />
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>等级数值越大表示等级越高</p>
+                          <p>{t("operation.membership.level.levelTooltip")}</p>
                         </TooltipContent>
                       </Tooltip>
                     </div>
                   </TableHead>
-                  <TableHead>等级图标</TableHead>
-                  <TableHead>等级名称</TableHead>
-                  <TableHead>等级描述</TableHead>
-                  <TableHead>每月赠送积分</TableHead>
-                  <TableHead>用户数量</TableHead>
-                  <TableHead>状态</TableHead>
-                  <TableHead>操作</TableHead>
+                  <TableHead>{t("operation.membership.level.table.icon")}</TableHead>
+                  <TableHead>{t("operation.membership.level.table.name")}</TableHead>
+                  <TableHead>{t("operation.membership.level.table.description")}</TableHead>
+                  <TableHead>{t("operation.membership.level.table.monthlyPoints")}</TableHead>
+                  <TableHead>{t("operation.membership.level.table.users")}</TableHead>
+                  <TableHead>{t("operation.membership.level.table.status")}</TableHead>
+                  <TableHead>{t("operation.membership.level.table.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-muted-foreground h-32 text-center">
-                      加载中...
+                      {t("operation.membership.level.loading")}
                     </TableCell>
                   </TableRow>
                 ) : !data?.items || data.items.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-muted-foreground h-32 text-center">
                       {hasActiveFilters
-                        ? "没有找到符合条件的等级，请尝试调整筛选条件"
-                        : "暂无等级数据"}
+                        ? t("operation.membership.level.noResults")
+                        : t("operation.membership.level.noData")}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -269,14 +274,14 @@ const MembershipLevelIndexPage = () => {
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onSelect={() => handleEdit(item)}>
                               <EditIcon className="mr-2 size-4" />
-                              编辑
+                              {t("common.action.edit")}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               variant="destructive"
                               onSelect={() => handleDelete(item)}
                             >
                               <Trash2Icon className="mr-2 size-4" />
-                              删除
+                              {t("common.action.delete")}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>

@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   Accordion,
   AccordionContent,
@@ -49,6 +50,7 @@ export function ApiPublishDialog({
   docs,
   onCopy,
 }: ApiPublishDialogProps) {
+  const { t } = useI18n();
   const [value, copy] = useCopyToClipboard();
   const methodClassMap: Record<string, string> = {
     GET: "bg-green-50 text-green-700",
@@ -62,15 +64,15 @@ export function ApiPublishDialog({
       <DialogContent className="w-full gap-0 p-0 md:max-w-4xl">
         <DialogHeader className="px-6 py-5">
           <DialogTitle className="flex items-center gap-2 text-xl">
-            <span>API调用</span>
+            <span>{t("agent.detail.api.title")}</span>
           </DialogTitle>
-          <p className="text-muted-foreground text-sm">通过程序化方式调用智能体能力</p>
+          <p className="text-muted-foreground text-sm">{t("agent.detail.api.desc")}</p>
         </DialogHeader>
 
         <div className="max-h-[78vh] space-y-6 overflow-y-auto px-6 py-5">
           <div className="space-y-4">
             <div className="space-y-2">
-              <div className="text-sm font-medium">API Base URL</div>
+              <div className="text-sm font-medium">{t("agent.detail.api.apiBaseUrl")}</div>
               <div className="flex items-center gap-2">
                 <InputGroup>
                   <InputGroupInput placeholder={apiBaseUrl} readOnly />
@@ -91,7 +93,7 @@ export function ApiPublishDialog({
             </div>
 
             <div className="space-y-2">
-              <div className="text-sm font-medium">API密钥</div>
+              <div className="text-sm font-medium">{t("agent.detail.api.apiKey")}</div>
               <div className="flex items-center gap-2">
                 <InputGroup>
                   <InputGroupInput type="password" value={apiKey} readOnly />
@@ -113,7 +115,7 @@ export function ApiPublishDialog({
           </div>
 
           <div className="space-y-3">
-            <div className="text-sm font-medium">可用端点</div>
+            <div className="text-sm font-medium">{t("agent.detail.api.availableEndpoints")}</div>
             <Accordion type="single" collapsible className="space-y-3">
               {docs.map((item, index) => (
                 <AccordionItem
@@ -149,17 +151,22 @@ export function ApiPublishDialog({
                       {item.code ? (
                         <div className="bg-background overflow-hidden rounded-xl border">
                           <div className="flex items-center justify-between border-b px-4 py-3">
-                            <div className="text-sm font-medium">请求示例</div>
+                            <div className="text-sm font-medium">
+                              {t("agent.detail.api.requestExample")}
+                            </div>
                             <Button
                               type="button"
                               variant="ghost"
                               size="sm"
                               onClick={() =>
-                                onCopy(item.code as string, item.copySuccessMessage || "示例已复制")
+                                onCopy(
+                                  item.code as string,
+                                  item.copySuccessMessage || t("agent.detail.api.exampleCopied"),
+                                )
                               }
                             >
                               <Copy className="size-4" />
-                              复制示例
+                              {t("agent.detail.api.copyExample")}
                             </Button>
                           </div>
                           <pre className="overflow-x-auto p-4 text-xs leading-6 whitespace-pre-wrap">

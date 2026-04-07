@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   CardRedeemType,
   type QueryCardBatchDto,
@@ -57,14 +58,15 @@ import { BatchDetailDialog } from "./_components/batch-detail-dialog";
 import { CreateBatchDialog } from "./_components/create-batch-dialog";
 
 const redeemTypeOptions = [
-  { value: String(CardRedeemType.MEMBERSHIP), label: "订阅会员" },
-  { value: String(CardRedeemType.POINTS), label: "积分余额" },
+  { value: String(CardRedeemType.MEMBERSHIP), label: "membership" },
+  { value: String(CardRedeemType.POINTS), label: "points" },
 ];
 
 /**
  * 卡密管理页面
  */
 export default function CardKeyManagement() {
+  const { t } = useI18n();
   const { confirm } = useAlertDialog();
   const [page, setPage] = useState(1);
   const [batchNoSearch, setBatchNoSearch] = useState("");
@@ -121,8 +123,8 @@ export default function CardKeyManagement() {
   const handleDelete = async (id: string, name: string) => {
     try {
       await confirm({
-        title: "确认删除",
-        description: `确定要删除批次「${name}」吗？删除后该批次下的所有卡密都将被删除，此操作不可撤销。`,
+        title: t("operation.cdk.management.deleteConfirm"),
+        description: t("operation.cdk.management.deleteConfirmDesc", { name }),
       });
     } catch {
       return;
@@ -130,10 +132,10 @@ export default function CardKeyManagement() {
 
     try {
       await deleteMutation.mutateAsync({ id });
-      toast.success("删除成功");
+      toast.success(t("operation.cdk.management.deleted"));
       refetch();
     } catch (error: any) {
-      toast.error(error?.message || "删除失败");
+      toast.error(t("operation.cdk.management.deleteFailed"));
     }
   };
 
@@ -142,7 +144,7 @@ export default function CardKeyManagement() {
       <div className="space-y-4 px-4">
         <div className="flex flex-wrap items-center gap-2">
           <Input
-            placeholder="搜索批次编号"
+            placeholder={t("operation.cdk.management.searchBatchNo")}
             className="h-8 w-full md:w-40"
             value={batchNoSearch}
             onChange={(e) => {
@@ -151,7 +153,7 @@ export default function CardKeyManagement() {
             }}
           />
           <Input
-            placeholder="搜索批次名称"
+            placeholder={t("operation.cdk.management.searchBatchName")}
             className="h-8 w-full md:w-40"
             value={nameSearch}
             onChange={(e) => {
@@ -161,7 +163,7 @@ export default function CardKeyManagement() {
           />
           <DataTableFacetedFilter
             className="h-8"
-            title="兑换类型"
+            title={t("operation.cdk.management.redeemTypeFilter")}
             options={redeemTypeOptions}
             selectedValue={redeemTypeFilter}
             onSelectionChange={(value) => {
@@ -186,7 +188,7 @@ export default function CardKeyManagement() {
                     format(date.from, "LLL dd, y")
                   )
                 ) : (
-                  <span>时间范围选择</span>
+                  <span>{t("operation.cdk.management.dateRangeSelect")}</span>
                 )}
               </Button>
             </PopoverTrigger>
@@ -205,19 +207,23 @@ export default function CardKeyManagement() {
               <AlertDialogTrigger asChild>
                 <Button variant="outline" size="sm" className="h-8 border-dashed">
                   <RotateCcwIcon className="mr-2 size-4" />
-                  清除筛选
+                  {t("operation.cdk.management.clearFilters")}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent className="w-full md:w-md">
                 <AlertDialogHeader>
-                  <AlertDialogTitle>清除所有筛选？</AlertDialogTitle>
+                  <AlertDialogTitle>
+                    {t("operation.cdk.management.clearFiltersConfirm")}
+                  </AlertDialogTitle>
                   <AlertDialogDescription>
-                    这将清除所有已设置的筛选条件，包括搜索输入和筛选选项。此操作无法撤销。
+                    {t("operation.cdk.management.clearFiltersDesc")}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>取消</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleResetFilters}>清除</AlertDialogAction>
+                  <AlertDialogCancel>{t("common.action.cancel")}</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleResetFilters}>
+                    {t("operation.cdk.management.clearFilters")}
+                  </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
@@ -229,7 +235,7 @@ export default function CardKeyManagement() {
             onClick={() => setCreateDialogOpen(true)}
           >
             <PlusIcon className="mr-2 size-4" />
-            新增批次
+            {t("operation.cdk.management.addBatch")}
           </Button>
         </div>
         <ScrollArea
@@ -239,22 +245,22 @@ export default function CardKeyManagement() {
           <Table>
             <TableHeader className="bg-muted sticky top-0 z-10">
               <TableRow>
-                <TableHead>批次编号</TableHead>
-                <TableHead>卡密名称</TableHead>
-                <TableHead>兑换类型</TableHead>
-                <TableHead>兑换内容</TableHead>
-                <TableHead>已使用/数量</TableHead>
-                <TableHead>卡密到期时间</TableHead>
-                <TableHead>备注</TableHead>
-                <TableHead>创建时间</TableHead>
-                <TableHead>操作</TableHead>
+                <TableHead>{t("operation.cdk.management.table.batchNo")}</TableHead>
+                <TableHead>{t("operation.cdk.management.table.name")}</TableHead>
+                <TableHead>{t("operation.cdk.management.table.redeemType")}</TableHead>
+                <TableHead>{t("operation.cdk.management.table.content")}</TableHead>
+                <TableHead>{t("operation.cdk.management.table.usedTotal")}</TableHead>
+                <TableHead>{t("operation.cdk.management.table.expireTime")}</TableHead>
+                <TableHead>{t("operation.cdk.management.table.remark")}</TableHead>
+                <TableHead>{t("operation.cdk.management.table.createTime")}</TableHead>
+                <TableHead>{t("operation.cdk.management.table.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
                   <TableCell colSpan={9} className="text-center">
-                    加载中...
+                    {t("operation.cdk.management.loading")}
                   </TableCell>
                 </TableRow>
               ) : data?.items && data.items.length > 0 ? (
@@ -263,7 +269,9 @@ export default function CardKeyManagement() {
                     <TableCell className="font-mono text-sm">{batch.batchNo}</TableCell>
                     <TableCell>{batch.name}</TableCell>
                     <TableCell>
-                      {batch.redeemType === CardRedeemType.MEMBERSHIP ? "订阅会员" : "积分余额"}
+                      {batch.redeemType === CardRedeemType.MEMBERSHIP
+                        ? t("operation.cdk.management.redeemType.membership")
+                        : t("operation.cdk.management.redeemType.points")}
                     </TableCell>
                     <TableCell>{batch.redeemContent}</TableCell>
                     <TableCell>
@@ -288,14 +296,14 @@ export default function CardKeyManagement() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => setDetailBatchId(batch.id)}>
                             <ClipboardListIcon className="mr-2 size-4" />
-                            使用详情
+                            {t("operation.cdk.management.usageDetails")}
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             variant="destructive"
                             onClick={() => handleDelete(batch.id, batch.name)}
                           >
                             <Trash2Icon className="mr-2 size-4" />
-                            删除
+                            {t("operation.cdk.management.delete")}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -305,7 +313,7 @@ export default function CardKeyManagement() {
               ) : (
                 <TableRow>
                   <TableCell colSpan={9} className="text-center">
-                    暂无数据
+                    {t("operation.cdk.management.noData")}
                   </TableCell>
                 </TableRow>
               )}

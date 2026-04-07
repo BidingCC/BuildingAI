@@ -28,11 +28,13 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { useI18n } from "@buildingai/i18n";
+
 const formSchema = z.object({
   activationKey: z
-    .string({ message: "请输入兑换码" })
-    .min(1, "兑换码不能为空")
-    .regex(/^[A-Z0-9]+$/, "兑换码格式不正确"),
+    .string({ message: "Please enter activation code" })
+    .min(1, "Activation code is required")
+    .regex(/^[A-Z0-9]+$/, "Activation code format is incorrect"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -44,13 +46,14 @@ type ActivationInstallDialogProps = {
 };
 
 /**
- * 兑换码安装应用弹框组件
+ * Activation code install dialog component
  */
 export const ActivationInstallDialog = ({
   open,
   onOpenChange,
   onSuccess,
 }: ActivationInstallDialogProps) => {
+  const { t } = useI18n();
   const [step, setStep] = useState<"input" | "confirm">("input");
   const [extensionInfo, setExtensionInfo] = useState<Extension | null>(null);
 
@@ -65,14 +68,14 @@ export const ActivationInstallDialog = ({
 
   const installMutation = useInstallByActivationCodeMutation({
     onSuccess: () => {
-      toast.success("应用安装成功");
+      toast.success(t("extension.activation.installSuccess"));
       handleClose();
       onSuccess?.();
     },
   });
 
   /**
-   * 验证兑换码并获取应用详情
+   * Verify activation code and get extension details
    */
   const handleVerifyActivationKey = async (values: FormValues) => {
     try {
@@ -81,24 +84,24 @@ export const ActivationInstallDialog = ({
       if (extension) {
         setExtensionInfo(extension);
         setStep("confirm");
-        toast.success("兑换码验证成功");
+        toast.success(t("extension.activation.verifySuccess"));
       }
     } catch (error: any) {
-      console.log(`验证失败: ${error.message || "兑换码无效"}`);
+      console.log(`Verification failed: ${error.message || "Invalid activation code"}`);
     }
   };
 
   /**
-   * 确认安装
+   * Confirm installation
    */
   const handleInstall = () => {
     if (!form.getValues("activationKey")) {
-      toast.error("安装失败: 未获取到兑换码，请重新验证兑换码");
+      toast.error(t("extension.activation.installFailedNoCode"));
       setStep("input");
       return;
     }
     if (!extensionInfo?.key) {
-      toast.error("安装失败: 未获取到应用标识符，请重新验证兑换码");
+      toast.error(t("extension.activation.installFailedNoIdentifier"));
       setStep("input");
       return;
     }
@@ -109,7 +112,7 @@ export const ActivationInstallDialog = ({
   };
 
   /**
-   * 关闭弹框并重置状态
+   * Close dialog and reset state
    */
   const handleClose = () => {
     onOpenChange(false);
@@ -126,8 +129,10 @@ export const ActivationInstallDialog = ({
         {step === "input" ? (
           <>
             <DialogHeader>
-              <DialogTitle className="text-2xl font-bold">安装新应用</DialogTitle>
-              <DialogDescription>请输入您的兑换码以验证应用包合法性</DialogDescription>
+              <DialogTitle className="text-2xl font-bold">
+                {t("extension.activation.title")}
+              </DialogTitle>
+              <DialogDescription>{t("extension.activation.description")}</DialogDescription>
             </DialogHeader>
 
             <Form {...form}>
@@ -139,7 +144,7 @@ export const ActivationInstallDialog = ({
                     <FormItem>
                       <FormControl>
                         <Input
-                          placeholder="请输入兑换码"
+                          placeholder={t("extension.activation.placeholder")}
                           className="font-mono text-base tracking-widest"
                           autoComplete="off"
                           {...field}
@@ -156,11 +161,11 @@ export const ActivationInstallDialog = ({
 
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={handleClose}>
-                    取消
+                    {t("extension.activation.cancel")}
                   </Button>
                   <Button type="submit" disabled={verifyMutation.isPending}>
                     {verifyMutation.isPending && <Loader2 className="animate-spin" />}
-                    兑换
+                    {t("extension.activation.redeem")}
                   </Button>
                 </DialogFooter>
               </form>
@@ -169,7 +174,7 @@ export const ActivationInstallDialog = ({
         ) : (
           <>
             <DialogHeader className="items-center space-y-4">
-              {/* 封面图 */}
+              {/* Cover image */}
               <div className="relative w-full">
                 <AspectRatio ratio={16 / 9} className="w-full overflow-hidden rounded-lg">
                   <img
@@ -179,7 +184,7 @@ export const ActivationInstallDialog = ({
                   />
                 </AspectRatio>
 
-                {/* 应用图标 */}
+                {/* App icon */}
                 <div className="bg-muted absolute -bottom-8 left-1/2 flex size-16 -translate-x-1/2 items-center justify-center rounded-lg shadow-lg">
                   <img
                     src={extensionInfo?.icon}
@@ -200,12 +205,12 @@ export const ActivationInstallDialog = ({
 
             <DialogFooter className="flex-col gap-2">
               <Button type="button" variant="secondary" onClick={() => setStep("input")}>
-                返回上一步
+                {t("extension.activation.back")}
               </Button>
               <Button onClick={handleInstall} disabled={installMutation.isPending} size="lg">
                 {installMutation.isPending && <Loader2 className="animate-spin" />}
                 <Download />
-                开始部署安装
+                {t("extension.activation.startDeploy")}
               </Button>
             </DialogFooter>
           </>

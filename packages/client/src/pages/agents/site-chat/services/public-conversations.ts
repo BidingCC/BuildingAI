@@ -20,6 +20,7 @@ export async function getPublicConversations(args: {
   agentId: string;
   accessToken: string;
   anonymousIdentifier?: string;
+  defaultTitle?: string;
 }): Promise<PublicConversation[]> {
   const url = `${getApiBaseUrl()}/v1/conversations?page=1&pageSize=30&sortBy=updatedAt`;
   const data = await fetchPublicJson<PublicConversationListResult>(
@@ -30,7 +31,7 @@ export async function getPublicConversations(args: {
 
   return (data.items ?? []).map((item) => ({
     id: item.id,
-    title: item.title?.trim() || "新对话",
+    title: item.title?.trim() || args.defaultTitle || "Untitled",
   }));
 }
 
@@ -38,6 +39,7 @@ export function usePublicConversations(
   agentId: string | undefined,
   accessToken: string | undefined,
   anonymousIdentifier?: string,
+  defaultTitle?: string,
 ) {
   return useQuery<PublicConversation[]>({
     queryKey: [
@@ -54,6 +56,7 @@ export function usePublicConversations(
         agentId: agentId!,
         accessToken: accessToken!,
         anonymousIdentifier,
+        defaultTitle,
       }),
   });
 }

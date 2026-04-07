@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { Button } from "@buildingai/ui/components/ui/button";
 import { Switch } from "@buildingai/ui/components/ui/switch";
 import {
@@ -28,7 +29,7 @@ const AvatarPreview = memo(({ url, onClear }: { url: string; onClear: () => void
             e.stopPropagation();
             openFileDialog();
           }}
-          aria-label="更换图片"
+          aria-label={t("agent.detail.interface.replaceImage")}
         >
           <Pencil className="h-3.5 w-3.5" />
         </Button>
@@ -40,7 +41,7 @@ const AvatarPreview = memo(({ url, onClear }: { url: string; onClear: () => void
             e.stopPropagation();
             handleDelete();
           }}
-          aria-label="删除图片"
+          aria-label={t("agent.detail.interface.deleteImage")}
         >
           <Trash2 className="h-3.5 w-3.5" />
         </Button>
@@ -62,6 +63,7 @@ export const ChatAvatar = memo(
     onChange: (value: string) => void;
     onEnabledChange: (enabled: boolean) => void;
   }) => {
+    const { t } = useI18n();
     const handleToggle = useCallback(
       (checked: boolean) => {
         onEnabledChange(checked);
@@ -74,9 +76,9 @@ export const ChatAvatar = memo(
       <div className="bg-secondary rounded-lg px-3 py-2.5">
         <div className="flex items-center justify-between">
           <div className="flex flex-col">
-            <h3 className="text-sm font-medium">对话头像</h3>
+            <h3 className="text-sm font-medium">{t("agent.detail.interface.chatAvatar")}</h3>
             <p className="text-muted-foreground mt-0.5 text-xs">
-              自定义对话头像，默认不设置，如需设置，请上传图片
+              {t("agent.detail.interface.chatAvatarDesc")}
             </p>
           </div>
           <Switch checked={enabled} onCheckedChange={handleToggle} />
@@ -89,7 +91,7 @@ export const ChatAvatar = memo(
               maxFiles={1}
               onUploadSuccess={(_file, result) => onChange(result.url)}
               onUploadError={(_file, error) => {
-                console.error("头像上传失败:", error);
+                console.error("[ChatAvatar] Upload failed:", error);
               }}
             >
               <UploadInput />
@@ -98,7 +100,9 @@ export const ChatAvatar = memo(
               ) : (
                 <UploadDropzone className="border-muted-foreground/40 flex h-24 w-24 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed transition-colors">
                   <Plus className="text-muted-foreground h-5 w-5" />
-                  <span className="text-muted-foreground text-xs">添加图片</span>
+                  <span className="text-muted-foreground text-xs">
+                    {t("agent.detail.interface.addImage")}
+                  </span>
                 </UploadDropzone>
               )}
             </UploadRoot>

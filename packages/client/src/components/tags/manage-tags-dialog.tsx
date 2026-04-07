@@ -6,6 +6,7 @@ import {
   useDeleteConsoleTagMutation,
   useUpdateConsoleTagMutation,
 } from "@buildingai/services/console";
+import { useI18n } from "@buildingai/i18n";
 import { Button } from "@buildingai/ui/components/ui/button";
 import {
   Dialog,
@@ -27,6 +28,7 @@ export interface ManageTagsDialogProps {
 }
 
 export function ManageTagsDialog({ open, onOpenChange, type, onClose }: ManageTagsDialogProps) {
+  const { t } = useI18n();
   const [newTagName, setNewTagName] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
@@ -46,7 +48,7 @@ export function ManageTagsDialog({ open, onOpenChange, type, onClose }: ManageTa
         onSuccess: () => {
           setNewTagName("");
           refetch();
-          toast.success("已添加");
+          toast.success(t("common.tags.added"));
         },
         onError: (e) => toast.error(e.message),
       },
@@ -69,7 +71,7 @@ export function ManageTagsDialog({ open, onOpenChange, type, onClose }: ManageTa
             setEditingId(null);
             setEditName("");
             refetch();
-            toast.success("已更新");
+            toast.success(t("tags.updated"));
           },
           onError: (e) => toast.error(e.message),
         },
@@ -82,9 +84,9 @@ export function ManageTagsDialog({ open, onOpenChange, type, onClose }: ManageTa
     async (tag: ConsoleTag) => {
       try {
         await confirm({
-          title: "删除标签",
-          description: "确定要删除该标签吗？",
-          confirmText: "删除",
+          title: t("common.tags.deleteTitle"),
+          description: t("common.tags.deleteConfirm"),
+          confirmText: t("action.delete"),
           confirmVariant: "destructive",
         });
       } catch {
@@ -93,7 +95,7 @@ export function ManageTagsDialog({ open, onOpenChange, type, onClose }: ManageTa
       deleteMutation.mutate(tag.id, {
         onSuccess: () => {
           refetch();
-          toast.success("已删除");
+          toast.success(t("common.tags.deleted"));
         },
         onError: (e) => toast.error(e.message),
       });
@@ -117,12 +119,12 @@ export function ManageTagsDialog({ open, onOpenChange, type, onClose }: ManageTa
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-xl">
         <DialogHeader>
-          <DialogTitle>管理标签</DialogTitle>
+          <DialogTitle>{t("common.tags.manageTags")}</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-4">
           <div className="flex gap-2">
             <Input
-              placeholder="新建标签名称"
+              placeholder={t("common.tags.newTagName")}
               value={newTagName}
               onChange={(e) => setNewTagName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAdd())}
@@ -139,7 +141,7 @@ export function ManageTagsDialog({ open, onOpenChange, type, onClose }: ManageTa
           </div>
           <div className="flex max-h-60 flex-wrap gap-2 overflow-y-auto rounded-md border p-2">
             {tags.length === 0 ? (
-              <p className="text-muted-foreground w-full py-4 text-center text-sm">暂无标签</p>
+              <p className="text-muted-foreground w-full py-4 text-center text-sm">{t("common.tags.noTags")}</p>
             ) : (
               tags.map((tag) =>
                 editingId === tag.id ? (

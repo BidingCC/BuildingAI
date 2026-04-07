@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import type { RoleEntity } from "@buildingai/services/console";
 import { useCreateRoleMutation, useUpdateRoleMutation } from "@buildingai/services/console";
 import { Button } from "@buildingai/ui/components/ui/button";
@@ -26,6 +27,7 @@ interface CreateRoleDialogProps {
  * 创建角色弹框组件
  */
 export const EditRoleDialog = ({ open, onOpenChange, onSuccess, role }: CreateRoleDialogProps) => {
+  const { t } = useI18n();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
@@ -33,7 +35,7 @@ export const EditRoleDialog = ({ open, onOpenChange, onSuccess, role }: CreateRo
 
   const createMutation = useCreateRoleMutation({
     onSuccess: () => {
-      toast.success("创建成功");
+      toast.success(t("access.role.toast.createSuccess"));
       handleClose();
       onSuccess?.();
     },
@@ -41,7 +43,7 @@ export const EditRoleDialog = ({ open, onOpenChange, onSuccess, role }: CreateRo
 
   const updateMutation = useUpdateRoleMutation({
     onSuccess: () => {
-      toast.success("更新成功");
+      toast.success(t("access.role.toast.updateSuccess"));
       handleClose();
       onSuccess?.();
     },
@@ -64,7 +66,7 @@ export const EditRoleDialog = ({ open, onOpenChange, onSuccess, role }: CreateRo
     e.preventDefault();
 
     if (!name.trim()) {
-      toast.error("请输入角色名称");
+      toast.error(t("access.role.validation.nameRequired"));
       return;
     }
 
@@ -91,20 +93,25 @@ export const EditRoleDialog = ({ open, onOpenChange, onSuccess, role }: CreateRo
       <DialogContent className="sm:w-md">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>{isEdit ? "编辑角色" : "新增角色"}</DialogTitle>
+            <DialogTitle>
+              {isEdit ? t("access.menu.form.editTitle") : t("access.menu.form.createTitle")}
+            </DialogTitle>
             <DialogDescription>
-              {isEdit ? "修改角色的名称和描述" : "创建一个新的角色，设置角色名称和描述"}
+              {isEdit
+                ? t("access.role.form.editDescription")
+                : t("access.role.form.createDescription")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="name">
-                <span className="text-destructive">*</span>角色名称
+                <span className="text-destructive">*</span>
+                {t("access.role.form.name")}
               </Label>
               <Input
                 id="name"
-                placeholder="请输入角色名称"
+                placeholder={t("access.role.form.namePlaceholder")}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 maxLength={50}
@@ -113,10 +120,10 @@ export const EditRoleDialog = ({ open, onOpenChange, onSuccess, role }: CreateRo
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="description">角色描述</Label>
+              <Label htmlFor="description">{t("access.role.form.description")}</Label>
               <Textarea
                 id="description"
-                placeholder="请输入角色描述（可选）"
+                placeholder={t("access.role.form.descriptionPlaceholder")}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 maxLength={200}
@@ -127,10 +134,14 @@ export const EditRoleDialog = ({ open, onOpenChange, onSuccess, role }: CreateRo
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={handleClose}>
-              取消
+              {t("access.menu.form.cancel")}
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? (isEdit ? "保存中..." : "创建中...") : "确定"}
+              {isSubmitting
+                ? isEdit
+                  ? t("access.menu.form.saving")
+                  : t("access.role.form.creating")
+                : t("access.menu.form.confirm")}
             </Button>
           </DialogFooter>
         </form>

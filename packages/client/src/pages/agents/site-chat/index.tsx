@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import type { PublishedAgentDetail } from "@buildingai/types";
 import { type FormFieldConfig } from "@buildingai/types/ai/agent-config.interface";
 import type { PromptInputMessage } from "@buildingai/ui/components/ai-elements/prompt-input";
@@ -92,6 +93,7 @@ interface SiteChatSidebarPanelProps {
   openConversation: (id: string) => void;
   onAfterNavigate?: () => void;
   onCompactSidebar?: () => void;
+  t: ReturnType<typeof useI18n>["t"];
 }
 
 function SiteChatSidebarPanel({
@@ -106,6 +108,7 @@ function SiteChatSidebarPanel({
   openConversation,
   onAfterNavigate,
   onCompactSidebar,
+  t,
 }: SiteChatSidebarPanelProps) {
   return (
     <div className="space-y-4 px-1!">
@@ -148,7 +151,7 @@ function SiteChatSidebarPanel({
                 type="button"
                 variant="ghost"
                 size="icon"
-                title="收起侧栏"
+                title={t("chat.collapseSidebar")}
                 className="hover:bg-primary/10 hover:text-primary shrink-0"
                 onClick={() => onCompactSidebar?.()}
               >
@@ -167,12 +170,12 @@ function SiteChatSidebarPanel({
             }}
             disabled={!agentId || !accessToken}
           >
-            新对话
+            {t("chat.newConversation")}
           </Button>
 
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between gap-3">
-              <span className="text-foreground text-sm font-medium">历史记录</span>
+              <span className="text-foreground text-sm font-medium">{t("chat.history")}</span>
             </div>
 
             {isLoadingConversations ? (
@@ -210,7 +213,7 @@ function SiteChatSidebarPanel({
                 })}
               </div>
             ) : (
-              <div className="text-muted-foreground text-xs">暂无对话记录</div>
+              <div className="text-muted-foreground text-xs">{t("chat.noConversations")}</div>
             )}
           </div>
         </>
@@ -220,6 +223,7 @@ function SiteChatSidebarPanel({
 }
 
 export default function PublishChatPage() {
+  const { t } = useI18n();
   const {
     agentId: agentIdParam,
     accessToken: accessTokenParam,
@@ -336,6 +340,7 @@ export default function PublishChatPage() {
     conversations,
     currentConversationId: conversationIdParam,
     openConversation,
+    t,
   };
 
   if (conversationsEmbedAccessDisabled) {
@@ -346,10 +351,8 @@ export default function PublishChatPage() {
             <EmptyMedia variant="icon">
               <ClipboardPenLine className="size-6" />
             </EmptyMedia>
-            <EmptyTitle>网页预览未开启</EmptyTitle>
-            <EmptyDescription>
-              站点嵌入或访问凭证未启用，当前无法使用对话页。请在智能体发布配置中开启网页预览或站点嵌入，并确认访问密钥有效。
-            </EmptyDescription>
+            <EmptyTitle>{t("chat.webPreviewDisabled.title")}</EmptyTitle>
+            <EmptyDescription>{t("chat.webPreviewDisabled.description")}</EmptyDescription>
           </EmptyHeader>
         </Empty>
       </div>
@@ -392,7 +395,7 @@ export default function PublishChatPage() {
                       variant="ghost"
                       size="icon"
                       className="shrink-0 md:hidden"
-                      aria-label="打开菜单"
+                      aria-label={t("chat.openMenu")}
                     >
                       <PanelLeft className="size-4" />
                     </Button>
@@ -401,8 +404,8 @@ export default function PublishChatPage() {
                     type="button"
                     variant="ghost"
                     size="icon"
-                    title="展开侧栏"
-                    aria-label="展开侧栏"
+                    title={t("chat.expandSidebar")}
+                    aria-label={t("chat.expandSidebar")}
                     className={cn("shrink-0", desktopSidebarExpanded ? "hidden" : "hidden md:flex")}
                     onClick={() => setDesktopSidebarExpanded(true)}
                   >
@@ -429,7 +432,7 @@ export default function PublishChatPage() {
                         variant="ghost"
                         size="icon"
                         className="shrink-0 text-xs"
-                        title="表单变量"
+                        title={t("chat.formVariables")}
                       >
                         <ClipboardPenLine className="size-4" />
                       </Button>
@@ -439,9 +442,9 @@ export default function PublishChatPage() {
                       align="end"
                     >
                       <div className="space-y-3">
-                        <h4 className="text-sm font-medium">表单变量</h4>
+                        <h4 className="text-sm font-medium">{t("chat.formVariables")}</h4>
                         <p className="text-muted-foreground text-xs">
-                          对话中的 {"{{变量}}"} 将被替换为实际值
+                          {t("chat.formVariablesDescription")}
                         </p>
                         <Separator />
                         {formFields.map((field) => (
@@ -454,7 +457,7 @@ export default function PublishChatPage() {
                             </Label>
                             {field.type === "textarea" ? (
                               <Textarea
-                                placeholder={`输入 ${field.label}`}
+                                placeholder={`${t("common.input")} ${field.label}`}
                                 value={formValues[field.name] ?? ""}
                                 onChange={(e) => handleFormValueChange(field.name, e.target.value)}
                                 rows={2}
@@ -466,7 +469,7 @@ export default function PublishChatPage() {
                                 value={formValues[field.name] ?? ""}
                                 onChange={(e) => handleFormValueChange(field.name, e.target.value)}
                               >
-                                <option value="">请选择</option>
+                                <option value="">{t("common.select")}</option>
                                 {getSelectOptions(field).map((opt) => (
                                   <option key={opt.value} value={opt.value}>
                                     {opt.label}
@@ -475,7 +478,7 @@ export default function PublishChatPage() {
                               </select>
                             ) : (
                               <Input
-                                placeholder={`输入 ${field.label}`}
+                                placeholder={`${t("common.input")} ${field.label}`}
                                 value={formValues[field.name] ?? ""}
                                 onChange={(e) => handleFormValueChange(field.name, e.target.value)}
                                 className="h-8 text-xs"
@@ -615,8 +618,8 @@ export default function PublishChatPage() {
               className="bg-sidebar flex h-full w-[min(20rem,calc(100vw-1rem))] max-w-[min(20rem,calc(100vw-1rem))] flex-col gap-0 border-r p-0 sm:max-w-sm"
             >
               <SheetHeader className="sr-only">
-                <SheetTitle>对话菜单</SheetTitle>
-                <SheetDescription>智能体与历史对话</SheetDescription>
+                <SheetTitle>{t("chat.chatMenu")}</SheetTitle>
+                <SheetDescription>{t("chat.chatMenuDescription")}</SheetDescription>
               </SheetHeader>
               <div className="chat-scroll flex min-h-0 flex-1 flex-col overflow-y-auto py-2">
                 <SiteChatSidebarPanel

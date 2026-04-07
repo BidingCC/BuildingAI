@@ -1,3 +1,6 @@
+"use client";
+
+import { useI18n } from "@buildingai/i18n";
 import {
   type FeedbackStats,
   type MessageFeedback,
@@ -25,13 +28,14 @@ const MessageFeedbackBadge = memo(function MessageFeedbackBadge({
   dislikeReason?: string | null;
   confidenceScore?: number;
 }) {
+  const { t } = useI18n();
   if (!type) return null;
 
   if (type === "like") {
     return (
       <Badge variant="default" className="gap-1">
         <ThumbsUp className="size-3" />
-        <span>赞</span>
+        <span>{t("chat.record.feedback.thumbsUp")}</span>
       </Badge>
     );
   }
@@ -51,7 +55,7 @@ const MessageFeedbackBadge = memo(function MessageFeedbackBadge({
           }}
         >
           <ThumbsDown className="size-3" />
-          <span>踩</span>
+          <span>{t("chat.record.feedback.thumbsDown")}</span>
           {intensity === "high" && <AlertTriangle className="size-3" />}
         </Badge>
       </TooltipTrigger>
@@ -59,12 +63,12 @@ const MessageFeedbackBadge = memo(function MessageFeedbackBadge({
         <div className="space-y-1">
           {dislikeReason && (
             <div>
-              <div className="font-semibold">原因：</div>
+              <div className="font-semibold">{t("chat.record.feedback.reason")}</div>
               <div className="text-sm">{dislikeReason}</div>
             </div>
           )}
           <div className="text-muted-foreground text-xs">
-            置信度: {(confidenceScore * 100).toFixed(0)}%
+            {t("chat.record.feedback.confidence")} {(confidenceScore * 100).toFixed(0)}%
           </div>
         </div>
       </TooltipContent>
@@ -79,27 +83,28 @@ export const ConversationFeedbackStats = memo(function ConversationFeedbackStats
   stats?: FeedbackStats;
   compact?: boolean;
 }) {
+  const { t } = useI18n();
   const feedbackLabel = useMemo(() => {
     if (!stats || stats.total === 0) {
-      return "暂无踩赞分析";
+      return t("chat.record.feedback.noFeedbackAnalysis");
     }
 
     const likeRate = stats.likeRate;
     const dislikeRate = stats.dislikeRate;
 
     if (likeRate >= 70) {
-      return "高赞率";
+      return t("chat.record.feedback.highLikeRate");
     } else if (dislikeRate >= 50) {
-      return "高踩率";
+      return t("chat.record.feedback.highDislikeRate");
     } else if (likeRate > dislikeRate && likeRate >= 30) {
-      return "赞率较高";
+      return t("chat.record.feedback.likeRateHigh");
     } else if (dislikeRate > likeRate && dislikeRate >= 30) {
-      return "踩率较高";
+      return t("chat.record.feedback.dislikeRateHigh");
     } else if (stats.total > 0) {
-      return "反馈均衡";
+      return t("chat.record.feedback.balancedFeedback");
     }
 
-    return "暂无踩赞分析";
+    return t("chat.record.feedback.noFeedbackAnalysis");
   }, [stats]);
 
   const feedbackVariant = useMemo(() => {
@@ -228,6 +233,7 @@ interface ConversationMessagesDrawerProps {
 export const ConversationMessagesDrawer = memo(function ConversationMessagesDrawer({
   conversationId,
 }: ConversationMessagesDrawerProps) {
+  const { t } = useI18n();
   const [page, setPage] = useState(1);
   const [pageSize] = useState(20);
   const [allMessages, setAllMessages] = useState<MessageRecord[]>([]);
@@ -311,7 +317,7 @@ export const ConversationMessagesDrawer = memo(function ConversationMessagesDraw
   if (isLoading && page === 1 && displayMessages.length === 0 && allMessages.length === 0) {
     return (
       <div className="flex flex-1 items-center justify-center py-12">
-        <div className="text-muted-foreground">加载消息中...</div>
+        <div className="text-muted-foreground">{t("chat.record.feedback.loadingMessages")}</div>
       </div>
     );
   }
@@ -327,7 +333,7 @@ export const ConversationMessagesDrawer = memo(function ConversationMessagesDraw
   ) {
     return (
       <div className="flex flex-1 items-center justify-center py-12">
-        <div className="text-muted-foreground">暂无消息</div>
+        <div className="text-muted-foreground">{t("chat.record.drawer.noMessages")}</div>
       </div>
     );
   }
@@ -340,7 +346,7 @@ export const ConversationMessagesDrawer = memo(function ConversationMessagesDraw
   ) {
     return (
       <div className="flex flex-1 items-center justify-center py-12">
-        <div className="text-muted-foreground">加载消息中...</div>
+        <div className="text-muted-foreground">{t("chat.record.feedback.loadingMessages")}</div>
       </div>
     );
   }

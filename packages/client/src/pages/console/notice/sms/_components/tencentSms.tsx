@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   useTencentSmsConfigQuery,
   useUpdateSmsConfigStatusMutation,
@@ -25,18 +26,16 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 const tencentSchema = z.object({
-  sign: z.string().min(1, "请输入短信签名"),
-  appId: z.string().min(1, "请输入腾讯云 APP KEY"),
-  accessKeyId: z.string().min(1, "请输入腾讯云 SECRET ID"),
-  accessKeySecret: z.string().min(1, "请输入腾讯云 SECRET KEY"),
+  sign: z.string().min(1, "Please enter SMS sign"),
+  appId: z.string().min(1, "Please enter Tencent Cloud APP KEY"),
+  accessKeyId: z.string().min(1, "Please enter Tencent Cloud Secret ID"),
+  accessKeySecret: z.string().min(1, "Please enter Tencent Cloud Secret KEY"),
 });
 
 type TencentFormValues = z.infer<typeof tencentSchema>;
 
-/**
- * 腾讯云短信配置表单组件。
- */
 const TencentSms = () => {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const [saving, setSaving] = useState(false);
   const [enabled, setEnabled] = useState(false);
@@ -55,22 +54,22 @@ const TencentSms = () => {
   const updateStatusMutation = useUpdateSmsConfigStatusMutation("tencent", {
     onSuccess: (result: any) => {
       setEnabled(Boolean((result as any).enable));
-      toast.success("腾讯云短信已启用");
+      toast.success(t("notice.tencentSms.toast.enabled"));
       void queryClient.invalidateQueries({ queryKey: ["notice", "sms-config"] });
       void refetch();
     },
     onError: (error: any) => {
-      toast.error(error.message || "启用腾讯云短信失败");
+      toast.error(error.message || t("notice.tencentSms.toast.enableFailed"));
     },
   });
   const updateMutation = useUpdateTencentSmsConfigMutation({
     onSuccess: (result: any) => {
-      toast.success("腾讯云短信配置已保存");
+      toast.success(t("notice.tencentSms.toast.saved"));
       setEnabled(Boolean(result.enable));
       void refetch();
     },
     onError: (error: any) => {
-      toast.error(error.message || "保存腾讯云短信配置失败");
+      toast.error(error.message || t("notice.tencentSms.toast.saveFailed"));
     },
   });
 
@@ -137,7 +136,7 @@ const TencentSms = () => {
                 <MessageSquare className="text-primary size-5" />
               </div>
               <div className="flex flex-col gap-1">
-                <span className="text-sm font-medium">腾讯云短信</span>
+                <span className="text-sm font-medium">{t("notice.tencentSms.title")}</span>
               </div>
             </div>
             <PermissionGuard permissions="notice:sms-config-update-status">
@@ -149,7 +148,7 @@ const TencentSms = () => {
                 onClick={handleEnable}
               >
                 {saving && !enabled && <Loader2 className="mr-2 size-4 animate-spin" />}
-                {enabled ? "已启用" : "启用"}
+                {enabled ? t("notice.tencentSms.enabled") : t("notice.tencentSms.enable")}
               </Button>
             </PermissionGuard>
           </CardContent>
@@ -162,10 +161,11 @@ const TencentSms = () => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                <span className="text-destructive">*</span>短信签名
+                <span className="text-destructive">*</span>
+                {t("notice.tencentSms.sign")}
               </FormLabel>
               <FormControl>
-                <Input placeholder="请输入短信签名" {...field} />
+                <Input placeholder={t("notice.tencentSms.validation.signRequired")} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -178,10 +178,11 @@ const TencentSms = () => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                <span className="text-destructive">*</span>APP_ID
+                <span className="text-destructive">*</span>
+                {t("notice.tencentSms.appId")}
               </FormLabel>
               <FormControl>
-                <Input placeholder="请输入腾讯云 APP KEY" {...field} />
+                <Input placeholder={t("notice.tencentSms.validation.appIdRequired")} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -194,10 +195,14 @@ const TencentSms = () => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                <span className="text-destructive">*</span>SECRET_ID
+                <span className="text-destructive">*</span>
+                {t("notice.tencentSms.secretId")}
               </FormLabel>
               <FormControl>
-                <Input placeholder="请输入腾讯云 SECRET KEY" {...field} />
+                <Input
+                  placeholder={t("notice.tencentSms.validation.secretIdRequired")}
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -210,10 +215,14 @@ const TencentSms = () => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                <span className="text-destructive">*</span>SECRET_KEY
+                <span className="text-destructive">*</span>
+                {t("notice.tencentSms.secretKey")}
               </FormLabel>
               <FormControl>
-                <Input placeholder="请输入腾讯云 SECRET KEY" {...field} />
+                <Input
+                  placeholder={t("notice.tencentSms.validation.secretIdRequired")}
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -224,12 +233,14 @@ const TencentSms = () => {
           <PermissionGuard permissions="notice:sms-config-update-tencent">
             <Button type="submit" disabled={saving}>
               {saving && <Loader2 className="mr-2 size-4 animate-spin" />}
-              保存设置
+              {t("notice.tencentSms.saveSettings")}
             </Button>
           </PermissionGuard>
           <PermissionGuard permissions="notice:sms-scene-settings-detail">
             <Button asChild type="button" variant="outline">
-              <Link to="/console/notice/notification-settings">通知设置</Link>
+              <Link to="/console/notice/notification-settings">
+                {t("notice.tencentSms.notificationSettings")}
+              </Link>
             </Button>
           </PermissionGuard>
           <Button
@@ -244,7 +255,7 @@ const TencentSms = () => {
               })
             }
           >
-            重置设置
+            {t("notice.tencentSms.resetSettings")}
           </Button>
         </div>
       </form>

@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   useResetPasswordAutoMutation,
   useResetPasswordMutation,
@@ -34,11 +35,13 @@ import { z } from "zod";
 
 const formSchema = z
   .object({
-    password: z.string({ message: "请输入新密码" }).min(6, "密码至少8位以上"),
-    confirmPassword: z.string({ message: "请确认密码" }),
+    password: z
+      .string({ message: "user.dialog.resetPassword.newPassword.required" })
+      .min(6, "user.dialog.resetPassword.newPassword.minLength"),
+    confirmPassword: z.string({ message: "user.dialog.resetPassword.confirmPassword.required" }),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "两次密码输入不一致",
+    message: "user.dialog.resetPassword.confirmPassword.mismatch",
     path: ["confirmPassword"],
   });
 
@@ -53,7 +56,7 @@ type ResetPasswordDialogProps = {
 };
 
 /**
- * 重置密码弹框组件
+ * Reset password dialog component
  */
 export const ResetPasswordDialog = ({
   open,
@@ -62,6 +65,7 @@ export const ResetPasswordDialog = ({
   nickname,
   onSuccess,
 }: ResetPasswordDialogProps) => {
+  const { t } = useI18n();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [generatedPassword, setGeneratedPassword] = useState<string | null>(null);
@@ -79,14 +83,14 @@ export const ResetPasswordDialog = ({
 
   const resetPasswordMutation = useResetPasswordMutation({
     onSuccess: () => {
-      toast.success("密码重置成功");
+      toast.success(t("user.dialog.resetPassword.resetSuccess"));
       onOpenChange(false);
       form.reset();
       setGeneratedPassword(null);
       onSuccess?.();
     },
     onError: (error) => {
-      toast.error(`重置失败: ${error.message}`);
+      toast.error(t("user.dialog.resetPassword.resetFailed", { message: error.message }));
     },
   });
 
@@ -95,10 +99,10 @@ export const ResetPasswordDialog = ({
       setGeneratedPassword(data.password);
       form.setValue("password", data.password);
       form.setValue("confirmPassword", data.password);
-      toast.success("密码生成成功");
+      toast.success(t("user.dialog.resetPassword.generateSuccess"));
     },
     onError: (error) => {
-      toast.error(`生成失败: ${error.message}`);
+      toast.error(t("user.dialog.resetPassword.generateFailed", { message: error.message }));
     },
     onSettled: () => {
       setIsGenerating(false);
@@ -107,7 +111,6 @@ export const ResetPasswordDialog = ({
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
-      // 关闭弹框时重置所有状态
       form.reset();
       setGeneratedPassword(null);
       setShowPassword(false);
@@ -126,8 +129,10 @@ export const ResetPasswordDialog = ({
 
   const handleGeneratePassword = async () => {
     await confirm({
-      title: "随机生成密码",
-      description: `确定要随机生成「${nickname}」的密码吗？`,
+      title: t("user.dialog.resetPassword.randomGenerateTitle"),
+      description: t("user.dialog.resetPassword.randomGenerateConfirm", {
+        nickname: nickname || "",
+      }),
     });
     setIsGenerating(true);
     resetPasswordAutoMutation.mutate(userId);
@@ -136,14 +141,14 @@ export const ResetPasswordDialog = ({
   const handleCopyPassword = async () => {
     const password = form.getValues("password");
     if (!password) {
-      toast.error("请先生成或输入密码");
+      toast.error(t("user.dialog.resetPassword.pleaseGenerateOrInput"));
       return;
     }
     try {
       await navigator.clipboard.writeText(password);
-      toast.success("密码已复制到剪贴板");
+      toast.success(t("user.dialog.resetPassword.copiedToClipboard"));
     } catch {
-      toast.error("复制失败");
+      toast.error(t("user.dialog.resetPassword.copyFailed"));
     }
   };
 
@@ -152,7 +157,7 @@ export const ResetPasswordDialog = ({
       <DialogContent className="sm:max-w-md" showCloseButton={false}>
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
-            <span>重置密码</span>
+            <span>{t("user.dialog.resetPassword.title")}</span>
             <Button
               type="button"
               variant="ghost"
@@ -166,7 +171,9 @@ export const ResetPasswordDialog = ({
               ) : (
                 <Sparkles className="mr-1 size-3.5" />
               )}
-              {isGenerating ? "生成中..." : "随机生成"}
+              {isGenerating
+                ? t("user.dialog.resetPassword.generating")
+                : t("user.dialog.resetPassword.generateRandom")}
             </Button>
           </DialogTitle>
         </DialogHeader>
@@ -174,15 +181,14 @@ export const ResetPasswordDialog = ({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             {generatedPassword ? (
-              // 显示生成的密码
               <div className="space-y-4">
                 <FormItem>
-                  <FormLabel>生成的密码</FormLabel>
+                  <FormLabel>{t("user.dialog.resetPassword.generatedPassword")}</FormLabel>
                   <InputGroup>
                     <InputGroupInput
                       id="new-password-input"
                       type="text"
-                      placeholder="请输入新密码"
+                      placeholder={t("user.dialog.resetPassword.newPassword.placeholder")}
                       disabled
                       value={generatedPassword}
                     />
@@ -206,14 +212,14 @@ export const ResetPasswordDialog = ({
                     <FormItem>
                       <FormLabel>
                         <span className="text-destructive">*</span>
-                        新密码
+                        {t("user.dialog.resetPassword.newPassword.label")}
                       </FormLabel>
                       <FormControl>
                         <InputGroup>
                           <InputGroupInput
                             id="new-password-input"
                             type={showPassword ? "text" : "password"}
-                            placeholder="请输入新密码"
+                            placeholder={t("user.dialog.resetPassword.newPassword.placeholder")}
                             {...field}
                           />
                           <InputGroupAddon
@@ -241,14 +247,14 @@ export const ResetPasswordDialog = ({
                     <FormItem>
                       <FormLabel>
                         <span className="text-destructive">*</span>
-                        确认密码
+                        {t("user.dialog.resetPassword.confirmPassword.label")}
                       </FormLabel>
                       <FormControl>
                         <InputGroup>
                           <InputGroupInput
                             id="confirm-password-input"
                             type={showConfirmPassword ? "text" : "password"}
-                            placeholder="请输入新密码"
+                            placeholder={t("user.dialog.resetPassword.confirmPassword.placeholder")}
                             {...field}
                           />
                           <InputGroupAddon
@@ -270,7 +276,7 @@ export const ResetPasswordDialog = ({
                 />
 
                 <FormDescription className="text-muted-foreground text-xs">
-                  建议6位以上的密码
+                  {t("user.dialog.resetPassword.passwordHint")}
                 </FormDescription>
               </>
             )}
@@ -279,11 +285,11 @@ export const ResetPasswordDialog = ({
               {!generatedPassword && (
                 <>
                   <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
-                    取消
+                    {t("user.dialog.resetPassword.cancel")}
                   </Button>
                   <Button type="submit" disabled={resetPasswordMutation.isPending}>
                     {resetPasswordMutation.isPending && <Loader2 className="animate-spin" />}
-                    确认重置密码
+                    {t("user.dialog.resetPassword.confirmReset")}
                   </Button>
                 </>
               )}

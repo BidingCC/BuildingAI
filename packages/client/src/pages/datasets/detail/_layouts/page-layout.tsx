@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   type ImperativePanelHandle,
   ResizableHandle,
@@ -55,6 +56,7 @@ export interface PageLayoutProps {
 type MobileView = "chat" | "documents";
 
 export function PageLayout({ panel, children }: PageLayoutProps) {
+  const { t } = useI18n();
   const isSmallScreen = useSmallScreen();
   const [chatOpen, setChatOpen] = useState(false);
   const [mobileView, setMobileView] = useState<MobileView>("chat");
@@ -84,8 +86,8 @@ export function PageLayout({ panel, children }: PageLayoutProps) {
           <div className="shrink-0 border-b px-4">
             <Tabs value={mobileView} onValueChange={(v) => setMobileView(v as MobileView)}>
               <TabsList variant="line">
-                <TabsTrigger value="chat">AI 对话</TabsTrigger>
-                <TabsTrigger value="documents">文档</TabsTrigger>
+                <TabsTrigger value="chat">{t("dataset.detail.chatTab")}</TabsTrigger>
+                <TabsTrigger value="documents">{t("dataset.detail.documentsTab")}</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>

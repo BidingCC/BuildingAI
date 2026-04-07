@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { McpCommunicationType, McpServerType } from "@buildingai/constants/shared/mcp.constant";
 import {
   type CreateAiMcpServerDto,
@@ -48,24 +49,27 @@ const COMMUNICATION_TYPES: { value: McpCommunicationType; label: string }[] = [
   { value: McpCommunicationType.STREAMABLEHTTP, label: "Streamable HTTP" },
 ];
 
-const SERVER_TYPES: { value: McpServerType; label: string }[] = [
-  { value: McpServerType.SYSTEM, label: "系统服务" },
-  { value: McpServerType.USER, label: "用户服务" },
+const SERVER_TYPES: { value: McpServerType; labelKey: string }[] = [
+  { value: McpServerType.SYSTEM, labelKey: "mcp.form.serverType.system" },
+  { value: McpServerType.USER, labelKey: "mcp.form.serverType.user" },
 ];
 
 const formSchema = z.object({
   name: z
-    .string({ message: "服务名称必须填写" })
-    .min(1, "服务名称不能为空")
-    .max(100, "服务名称不能超过100个字符"),
-  alias: z.string().max(100, "别名不能超过100个字符").optional(),
-  description: z.string().max(1000, "描述不能超过1000个字符").optional(),
-  url: z.string({ message: "服务地址必须填写" }).min(1, "服务地址不能为空").url("请输入有效的URL"),
+    .string({ message: "Service name is required" })
+    .min(1, "Service name is required")
+    .max(100, "Service name cannot exceed 100 characters"),
+  alias: z.string().max(100, "Alias cannot exceed 100 characters").optional(),
+  description: z.string().max(1000, "Description cannot exceed 1000 characters").optional(),
+  url: z
+    .string({ message: "Service URL is required" })
+    .min(1, "Service URL is required")
+    .url("Please enter a valid URL"),
   icon: z.string().optional(),
   type: z.enum(McpServerType).optional(),
   communicationType: z.enum(McpCommunicationType).optional(),
   isDisabled: z.boolean().optional(),
-  sortOrder: z.number().min(0, "排序权重不能小于0").optional(),
+  sortOrder: z.number().min(0, "Sort weight cannot be less than 0").optional(),
   headers: z.string().optional(),
 });
 
@@ -82,6 +86,7 @@ type McpFormDialogProps = {
  * MCP Server form dialog component for creating and updating MCP servers
  */
 export const McpFormDialog = ({ open, onOpenChange, server, onSuccess }: McpFormDialogProps) => {
+  const { t } = useI18n();
   const isEditMode = !!server;
 
   const form = useForm<FormValues>({
@@ -136,24 +141,24 @@ export const McpFormDialog = ({ open, onOpenChange, server, onSuccess }: McpForm
 
   const createMutation = useCreateMcpServerMutation({
     onSuccess: (data) => {
-      toast.success("MCP服务创建成功，正在检测连接...");
+      toast.success(t("mcp.form.toast.createSuccess"));
       onOpenChange(false);
       onSuccess?.();
       checkConnectionMutation.mutate(data.id);
     },
     onError: (error) => {
-      toast.error(`创建失败: ${error.message}`);
+      toast.error(t("mcp.form.toast.createFailed", { message: error.message }));
     },
   });
 
   const updateMutation = useUpdateMcpServerMutation({
     onSuccess: () => {
-      toast.success("MCP服务更新成功");
+      toast.success(t("mcp.form.toast.updateSuccess"));
       onOpenChange(false);
       onSuccess?.();
     },
     onError: (error) => {
-      toast.error(`更新失败: ${error.message}`);
+      toast.error(t("mcp.form.toast.updateFailed", { message: error.message }));
     },
   });
 
@@ -165,7 +170,7 @@ export const McpFormDialog = ({ open, onOpenChange, server, onSuccess }: McpForm
       try {
         headers = JSON.parse(values.headers);
       } catch {
-        toast.error("请求头格式错误，请输入有效的JSON");
+        toast.error(t("mcp.form.toast.headersError"));
         return;
       }
     }
@@ -194,9 +199,9 @@ export const McpFormDialog = ({ open, onOpenChange, server, onSuccess }: McpForm
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="gap-0 p-0 sm:max-w-lg">
         <DialogHeader className="p-4">
-          <DialogTitle>{isEditMode ? "编辑MCP服务" : "新增MCP服务"}</DialogTitle>
+          <DialogTitle>{isEditMode ? t("mcp.form.title.edit") : t("mcp.form.title.create")}</DialogTitle>
           <DialogDescription>
-            {isEditMode ? "修改MCP服务的配置信息" : "添加一个新的MCP服务"}
+            {isEditMode ? t("mcp.form.description.edit") : t("mcp.form.description.create")}
           </DialogDescription>
         </DialogHeader>
 
@@ -209,7 +214,7 @@ export const McpFormDialog = ({ open, onOpenChange, server, onSuccess }: McpForm
                   name="icon"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>图标</FormLabel>
+                      <FormLabel>{t("mcp.form.label.icon")}</FormLabel>
                       <FormControl>
                         <ImageUpload
                           size="sm"
@@ -227,7 +232,7 @@ export const McpFormDialog = ({ open, onOpenChange, server, onSuccess }: McpForm
                   name="sortOrder"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>排序权重</FormLabel>
+                      <FormLabel>{t("mcp.form.label.sortOrder")}</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -248,9 +253,9 @@ export const McpFormDialog = ({ open, onOpenChange, server, onSuccess }: McpForm
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>服务名称</FormLabel>
+                    <FormLabel required>{t("mcp.form.label.name")}</FormLabel>
                     <FormControl>
-                      <Input placeholder="例如: GitHub MCP, Slack MCP" {...field} />
+                      <Input placeholder={t("mcp.form.placeholder.name")} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -262,11 +267,11 @@ export const McpFormDialog = ({ open, onOpenChange, server, onSuccess }: McpForm
                 name="url"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>服务地址</FormLabel>
+                    <FormLabel required>{t("mcp.form.label.url")}</FormLabel>
                     <FormControl>
-                      <Input placeholder="例如: https://mcp.example.com/sse" {...field} />
+                      <Input placeholder={t("mcp.form.placeholder.url")} {...field} />
                     </FormControl>
-                    <FormDescription>MCP服务的SSE或HTTP端点地址</FormDescription>
+                    <FormDescription>{t("mcp.form.description.url")}</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -278,17 +283,17 @@ export const McpFormDialog = ({ open, onOpenChange, server, onSuccess }: McpForm
                   name="type"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel required>服务类型</FormLabel>
+                      <FormLabel required>{t("mcp.form.label.type")}</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className="w-full">
-                            <SelectValue placeholder="选择服务类型" />
+                            <SelectValue placeholder={t("mcp.form.placeholder.selectType")} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           {SERVER_TYPES.map((type) => (
                             <SelectItem key={type.value} value={type.value}>
-                              {type.label}
+                              {t(type.labelKey)}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -303,11 +308,11 @@ export const McpFormDialog = ({ open, onOpenChange, server, onSuccess }: McpForm
                   name="communicationType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel required>通信类型</FormLabel>
+                      <FormLabel required>{t("mcp.form.label.communicationType")}</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className="w-full">
-                            <SelectValue placeholder="选择通信类型" />
+                            <SelectValue placeholder={t("mcp.form.placeholder.selectCommunicationType")} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -329,9 +334,9 @@ export const McpFormDialog = ({ open, onOpenChange, server, onSuccess }: McpForm
                 name="alias"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>别名</FormLabel>
+                    <FormLabel>{t("mcp.form.label.alias")}</FormLabel>
                     <FormControl>
-                      <Input placeholder="服务别名（可选）" {...field} />
+                      <Input placeholder={t("mcp.form.placeholder.alias")} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -343,10 +348,10 @@ export const McpFormDialog = ({ open, onOpenChange, server, onSuccess }: McpForm
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>描述</FormLabel>
+                    <FormLabel>{t("mcp.form.label.description")}</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="服务描述信息（可选）"
+                        placeholder={t("mcp.form.placeholder.description")}
                         className="resize-none"
                         rows={2}
                         {...field}
@@ -362,7 +367,7 @@ export const McpFormDialog = ({ open, onOpenChange, server, onSuccess }: McpForm
                 name="headers"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>请求头</FormLabel>
+                    <FormLabel>{t("mcp.form.label.headers")}</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder='{"Authorization": "Bearer xxx"}'
@@ -371,7 +376,7 @@ export const McpFormDialog = ({ open, onOpenChange, server, onSuccess }: McpForm
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription>JSON格式的HTTP请求头</FormDescription>
+                    <FormDescription>{t("mcp.form.description.headers")}</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -383,8 +388,8 @@ export const McpFormDialog = ({ open, onOpenChange, server, onSuccess }: McpForm
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
                     <div className="space-y-0.5">
-                      <FormLabel>禁用状态</FormLabel>
-                      <FormDescription>禁用后该服务将不可用</FormDescription>
+                      <FormLabel>{t("mcp.form.label.isDisabled")}</FormLabel>
+                      <FormDescription>{t("mcp.form.description.isDisabled")}</FormDescription>
                     </div>
                     <FormControl>
                       <Switch checked={field.value} onCheckedChange={field.onChange} />
@@ -395,11 +400,11 @@ export const McpFormDialog = ({ open, onOpenChange, server, onSuccess }: McpForm
 
               <DialogFooter className="bg-background absolute bottom-0 left-0 w-full flex-row justify-end rounded-lg p-4">
                 <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                  取消
+                  {t("action.cancel")}
                 </Button>
                 <Button type="submit" disabled={isPending}>
                   {isPending && <Loader2 className="animate-spin" />}
-                  {isEditMode ? "保存" : "创建"}
+                  {isEditMode ? t("action.save") : t("action.create")}
                 </Button>
               </DialogFooter>
             </form>

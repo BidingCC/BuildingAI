@@ -34,6 +34,7 @@ import {
   XIcon,
 } from "lucide-react";
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { useI18n } from "@buildingai/i18n";
 
 import { ProviderIcon } from "../../provider-icons";
 import { convertProvidersToModels } from "../libs/provider-converter";
@@ -94,8 +95,9 @@ const ModelRowItem = ({
   onSelect,
   membershipLevels,
 }: ModelRowItemProps) => {
+  const { t } = useI18n();
   const features = model.features ?? [];
-  const powerText = model.billingRule?.power ? `${model.billingRule.power} 积分` : "免费";
+  const powerText = model.billingRule?.power ? t("common.askAssistant.credits", { power: model.billingRule.power }) : t("common.askAssistant.free");
 
   // 获取需要的会员等级名称
   const requiredMembershipNames = model.membershipLevel
@@ -138,7 +140,7 @@ const ModelRowItem = ({
           ) : null,
         )}
         {isDisabled ? (
-          <LockIcon aria-label="会员专属" className="text-muted-foreground size-3.5" />
+          <LockIcon aria-label={t("common.askAssistant.membersOnly")} className="text-muted-foreground size-3.5" />
         ) : (
           <CommandShortcut>
             {isSelected ? <CheckIcon className="size-4" /> : <div className="size-4" />}
@@ -155,7 +157,7 @@ const ModelRowItem = ({
           <div className="w-full">{content}</div>
         </TooltipTrigger>
         <TooltipContent side="left">
-          <p>该模型仅限 {requiredMembershipNames} 使用</p>
+          <p>{t("common.askAssistant.modelOnlyForMembers", { members: requiredMembershipNames! })}</p>
         </TooltipContent>
       </Tooltip>
     );
@@ -174,10 +176,11 @@ export const ModelSelector = ({
   onOpenChange,
   modelType,
   triggerVariant = "prompt",
-  placeholder = "请选择模型",
+  placeholder = "Models",
   disabled = false,
   className,
 }: ModelSelectorProps) => {
+  const { t } = useI18n();
   const [innerOpen, setInnerOpen] = useState(false);
   const [query, setQuery] = useState("");
   const parentRef = useRef<HTMLDivElement | null>(null);
@@ -312,7 +315,7 @@ export const ModelSelector = ({
             className={cn("group flex justify-start gap-1 text-left", className)}
           >
             <span className="min-w-0 flex-1 truncate">
-              {isLoading ? "加载中..." : (selectedModel?.name ?? placeholder)}
+              {isLoading ? t("common.askAssistant.loading") : (selectedModel?.name ?? placeholder)}
             </span>
             <span className="relative ml-auto flex size-6 shrink-0 items-center justify-center">
               <ChevronDownIcon
@@ -338,7 +341,7 @@ export const ModelSelector = ({
                       onSelect?.("");
                     }
                   }}
-                  aria-label="清除选择"
+                  aria-label={t("common.askAssistant.clearSelection")}
                 >
                   <XIcon className="size-4" />
                 </span>
@@ -355,8 +358,8 @@ export const ModelSelector = ({
                 {selectedModel.name}
                 <Badge variant="secondary" className="text-muted-foreground ml-1.5 text-xs">
                   {selectedModel.billingRule?.power
-                    ? `${selectedModel.billingRule.power} 积分`
-                    : "免费"}
+                    ? t("common.askAssistant.credits", { power: selectedModel.billingRule.power })
+                    : t("common.askAssistant.free")}
                 </Badge>
               </AIModelSelectorName>
             )}
@@ -378,7 +381,7 @@ export const ModelSelector = ({
           style={{ height: `${CONTAINER_HEIGHT}px` }}
         >
           {rows.length === 0 ? (
-            <AIModelSelectorEmpty>暂无可用的模型</AIModelSelectorEmpty>
+            <AIModelSelectorEmpty>{t("common.askAssistant.noModelsAvailable")}</AIModelSelectorEmpty>
           ) : (
             <div
               style={{

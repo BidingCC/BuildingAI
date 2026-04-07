@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { Badge } from "@buildingai/ui/components/ui/badge";
 import { Button } from "@buildingai/ui/components/ui/button";
 import { Checkbox } from "@buildingai/ui/components/ui/checkbox";
@@ -167,7 +168,7 @@ const SelectOptionItem = memo(
         </Button>
         <Input
           value={item.label}
-          placeholder="选项标签"
+          placeholder={t("agent.detail.function.placeholderLabel")}
           className={cn("border-0 pr-9 pl-0 shadow-none focus-visible:ring-0")}
           onChange={(e) => onChange(item.id, e.target.value)}
         />
@@ -189,6 +190,7 @@ SelectOptionItem.displayName = "SelectOptionItem";
 
 export const FormVariables = memo(
   ({ value, onChange }: { value: any[]; onChange: (value: any[]) => void }) => {
+    const { t } = useI18n();
     const { confirm } = useAlertDialog();
     const sensors = useSensors(useSensor(PointerSensor));
 
@@ -337,9 +339,9 @@ export const FormVariables = memo(
       async (item: FormVariable) => {
         try {
           await confirm({
-            title: "删除表单变量",
-            description: "确定要删除该表单变量吗？",
-            confirmText: "删除",
+            title: t("agent.detail.function.deleteVariable"),
+            description: t("agent.detail.function.confirmDeleteVariable"),
+            confirmText: t("common.delete"),
             confirmVariant: "destructive",
           });
         } catch {
@@ -354,12 +356,15 @@ export const FormVariables = memo(
       [confirm, onChange],
     );
 
-    const typeLabel = useCallback((type: FormVariableType) => {
-      if (type === "text") return "文本输入";
-      if (type === "paragraph") return "段落";
-      if (type === "select") return "下拉选项";
-      return "数字";
-    }, []);
+    const typeLabel = useCallback(
+      (type: FormVariableType) => {
+        if (type === "text") return t("agent.detail.function.text");
+        if (type === "paragraph") return t("agent.detail.function.paragraph");
+        if (type === "select") return t("agent.detail.function.selectOption");
+        return t("agent.detail.function.number");
+      },
+      [t],
+    );
 
     const valueTypeLabel = useCallback(
       (type: FormVariableType) => (type === "number" ? "number" : "string"),
@@ -371,21 +376,20 @@ export const FormVariables = memo(
         <div className="flex items-center justify-between">
           <div className="flex flex-col">
             <div className="flex items-center gap-1">
-              <h3 className="text-sm font-medium">表单变量</h3>
+              <h3 className="text-sm font-medium">{t("agent.detail.function.formVariables")}</h3>
               <Tooltip>
                 <TooltipTrigger>
                   <HelpCircle className="text-muted-foreground h-4 w-4" />
                 </TooltipTrigger>
                 <TooltipContent>
                   <div className="text-background text-xs">
-                    变量将以表单形式让用户在对话前填写 <br />
-                    用户填写的表单内容将自动替换角色设定中的变量。
+                    {t("agent.detail.function.formVariablesDesc")}
                   </div>
                 </TooltipContent>
               </Tooltip>
             </div>
             <p className="text-muted-foreground mt-0.5 text-xs">
-              变量是智能体的临时记忆，让对话有上下文。
+              {t("agent.detail.function.variablesNote")}
             </p>
           </div>
           <Button
@@ -395,7 +399,7 @@ export const FormVariables = memo(
             onClick={openCreateFormVariable}
           >
             <Plus className="h-4 w-4" />
-            <span>添加</span>
+            <span>{t("agent.detail.function.addVariable")}</span>
           </Button>
         </div>
 
@@ -454,9 +458,13 @@ export const FormVariables = memo(
         >
           <DialogContent className="flex max-h-[70vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-md">
             <DialogHeader className="shrink-0 px-4 pt-4">
-              <DialogTitle>{editingFormVariableId ? "编辑表单变量" : "添加表单变量"}</DialogTitle>
+              <DialogTitle>
+                {editingFormVariableId
+                  ? t("agent.detail.function.editVariable")
+                  : t("agent.detail.function.addFormVariable")}
+              </DialogTitle>
               <div className="text-muted-foreground mt-1 text-sm">
-                配置表单字段，用户填写后将自动替换角色设定中的变量{"{{变量名}}"}
+                {t("agent.detail.function.formVariablesDesc")}
               </div>
             </DialogHeader>
 
@@ -464,21 +472,22 @@ export const FormVariables = memo(
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label className="text-sm">
-                    字段类型<span className="text-destructive">*</span>
+                    {t("agent.detail.function.fieldType")}
+                    <span className="text-destructive">*</span>
                   </Label>
                   <Select
                     value={formVariableDraft?.type ?? "text"}
                     onValueChange={(v) => changeDraftType(v as FormVariableType)}
                   >
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="选择字段类型" />
+                      <SelectValue placeholder={t("agent.detail.function.selectOption")} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="text">
                         <span className="flex w-full items-center justify-between">
                           <span className="flex items-center gap-2">
                             <Type className="h-4 w-4" />
-                            <span>文本</span>
+                            <span>{t("agent.detail.function.text")}</span>
                           </span>
                           <Badge variant="outline">string</Badge>
                         </span>
@@ -487,7 +496,7 @@ export const FormVariables = memo(
                         <span className="flex w-full items-center justify-between">
                           <span className="flex items-center gap-2">
                             <AlignLeft className="h-4 w-4" />
-                            <span>段落</span>
+                            <span>{t("agent.detail.function.paragraph")}</span>
                           </span>
                           <Badge variant="outline">string</Badge>
                         </span>
@@ -496,7 +505,7 @@ export const FormVariables = memo(
                         <span className="flex w-full items-center justify-between">
                           <span className="flex items-center gap-2">
                             <List className="h-4 w-4" />
-                            <span>下拉选项</span>
+                            <span>{t("agent.detail.function.selectOption")}</span>
                           </span>
                           <Badge variant="outline">string</Badge>
                         </span>
@@ -505,7 +514,7 @@ export const FormVariables = memo(
                         <span className="flex w-full items-center justify-between">
                           <span className="flex items-center gap-2">
                             <Hash className="h-4 w-4" />
-                            <span>数字</span>
+                            <span>{t("agent.detail.function.number")}</span>
                           </span>
                           <Badge variant="outline">number</Badge>
                         </span>
@@ -516,11 +525,12 @@ export const FormVariables = memo(
 
                 <div className="space-y-2">
                   <Label className="text-sm">
-                    变量名<span className="text-destructive">*</span>
+                    {t("agent.detail.function.variableName")}
+                    <span className="text-destructive">*</span>
                   </Label>
                   <Input
                     value={formVariableDraft?.name ?? ""}
-                    placeholder="请输入变量名，只可以设置为英文、数字下划线等"
+                    placeholder={t("agent.detail.function.inputVariableName")}
                     onChange={(e) =>
                       setFormVariableDraft((prev) =>
                         prev ? { ...prev, name: e.target.value } : prev,
@@ -531,11 +541,12 @@ export const FormVariables = memo(
 
                 <div className="space-y-2">
                   <Label className="text-sm">
-                    显示名称<span className="text-destructive">*</span>
+                    {t("agent.detail.function.displayName")}
+                    <span className="text-destructive">*</span>
                   </Label>
                   <Input
                     value={formVariableDraft?.label ?? ""}
-                    placeholder="请输入显示名称"
+                    placeholder={t("agent.detail.function.inputDisplayName")}
                     onChange={(e) =>
                       setFormVariableDraft((prev) =>
                         prev ? { ...prev, label: e.target.value } : prev,
@@ -547,7 +558,7 @@ export const FormVariables = memo(
                 {(formVariableDraft?.type === "text" ||
                   formVariableDraft?.type === "paragraph") && (
                   <div className="space-y-2">
-                    <Label className="text-sm">最大长度</Label>
+                    <Label className="text-sm">{t("agent.detail.function.maxLength")}</Label>
                     <Input
                       inputMode="numeric"
                       value={
@@ -555,7 +566,7 @@ export const FormVariables = memo(
                           ? ""
                           : String(formVariableDraft.maxLength)
                       }
-                      placeholder="请输入最大长度限制"
+                      placeholder={t("agent.detail.function.inputMaxLength")}
                       onChange={(e) => {
                         const raw = e.target.value;
                         if (raw === "") {
@@ -581,7 +592,7 @@ export const FormVariables = memo(
                 {formVariableDraft?.type === "select" && (
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <Label className="text-sm">选项列表</Label>
+                      <Label className="text-sm">{t("agent.detail.function.optionsList")}</Label>
                       <Button
                         type="button"
                         variant="ghost"
@@ -590,7 +601,7 @@ export const FormVariables = memo(
                         onClick={addSelectOption}
                       >
                         <Plus className="h-4 w-4" />
-                        <span>添加选项</span>
+                        <span>{t("agent.detail.function.addOption")}</span>
                       </Button>
                     </div>
                     <DndContext
@@ -627,7 +638,9 @@ export const FormVariables = memo(
                           setFormVariableDraft((prev) => (prev ? { ...prev, required: !!v } : prev))
                         }
                       />
-                      <Label htmlFor="required-checkbox">必填</Label>
+                      <Label htmlFor="required-checkbox">
+                        {t("agent.detail.function.required")}
+                      </Label>
                     </Field>
                   </FieldGroup>
                 </div>
@@ -635,7 +648,7 @@ export const FormVariables = memo(
                 {formVariableDraft?.name.trim() &&
                   !isValidVarName(formVariableDraft.name.trim()) && (
                     <div className="text-destructive text-sm">
-                      变量名仅支持英文、数字、下划线，且不能以数字开头
+                      {t("agent.detail.function.variableNameInvalid")}
                     </div>
                   )}
               </div>
@@ -643,10 +656,10 @@ export const FormVariables = memo(
 
             <DialogFooter className="shrink-0 px-4 py-4">
               <DialogClose asChild>
-                <Button variant="outline">取消</Button>
+                <Button variant="outline">{t("common.cancel")}</Button>
               </DialogClose>
               <Button onClick={submitFormVariable} disabled={!canSubmitFormVariable}>
-                保存
+                {t("common.save")}
               </Button>
             </DialogFooter>
           </DialogContent>

@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   type DailyFeedbackItem,
   type DashboardChartItem,
@@ -188,21 +189,31 @@ function DailyChart({
 const FEEDBACK_LIKE_COLOR = "hsl(142 71% 42%)";
 const FEEDBACK_DISLIKE_COLOR = "hsl(0 72% 51%)";
 
-function FeedbackChart({ data, loading }: { data: DailyFeedbackItem[]; loading?: boolean }) {
+function FeedbackChart({
+  data,
+  loading,
+  t,
+}: {
+  data: DailyFeedbackItem[];
+  loading?: boolean;
+  t: ReturnType<typeof useI18n>["t"];
+}) {
   const chartId = useId();
   const chartData = useMemo(
     () => data.map((d) => ({ date: d.date, like: d.like, dislike: d.dislike })),
     [data],
   );
   const config: ChartConfig = {
-    like: { label: "点赞", color: FEEDBACK_LIKE_COLOR },
-    dislike: { label: "踩", color: FEEDBACK_DISLIKE_COLOR },
+    like: { label: t("agent.detail.monitoring.like"), color: FEEDBACK_LIKE_COLOR },
+    dislike: { label: t("agent.detail.monitoring.dislike"), color: FEEDBACK_DISLIKE_COLOR },
   };
   const gradientIds = ["like", "dislike"].map((k) => `fill-fb-${k}-${chartId}`);
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium">用户反馈趋势</CardTitle>
+        <CardTitle className="text-sm font-medium">
+          {t("agent.detail.monitoring.userFeedbackTrend")}
+        </CardTitle>
       </CardHeader>
       <CardContent className="px-2 pb-4">
         {loading ? (
@@ -288,6 +299,7 @@ function buildQueryParams(range: DateRange | undefined) {
 }
 
 export default function Monitoring({ agentId }: MonitoringProps) {
+  const { t } = useI18n();
   const [dateRange, setDateRange] = useState<DateRange | undefined>(getDefaultDateRange);
   const [cardMode, setCardMode] = useState<CardStatMode>("total");
 
@@ -307,41 +319,59 @@ export default function Monitoring({ agentId }: MonitoringProps) {
     if (!cards) return null;
     if (cardMode === "total") {
       return {
-        records: { value: cards.totalRecords.toLocaleString(), label: "总对话数" },
-        messages: { value: cards.totalMessages.toLocaleString(), label: "总消息数" },
-        power: { value: cards.totalPower.toLocaleString(), label: "总积分消耗" },
-        tokens: { value: cards.totalTokens.toLocaleString(), label: "总 Token 消耗" },
-        annotations: { value: cards.totalAnnotations.toLocaleString(), label: "总标注数" },
-        hitAnnotations: { value: cards.hitAnnotations.toLocaleString(), label: "命中标注数" },
+        records: {
+          value: cards.totalRecords.toLocaleString(),
+          label: t("agent.detail.monitoring.totalConversations"),
+        },
+        messages: {
+          value: cards.totalMessages.toLocaleString(),
+          label: t("agent.detail.monitoring.totalMessages"),
+        },
+        power: {
+          value: cards.totalPower.toLocaleString(),
+          label: t("agent.detail.monitoring.powerConsumption"),
+        },
+        tokens: {
+          value: cards.totalTokens.toLocaleString(),
+          label: t("agent.detail.monitoring.totalTokenConsumption"),
+        },
+        annotations: {
+          value: cards.totalAnnotations.toLocaleString(),
+          label: t("agent.detail.monitoring.totalAnnotation"),
+        },
+        hitAnnotations: {
+          value: cards.hitAnnotations.toLocaleString(),
+          label: t("agent.detail.monitoring.hitAnnotation"),
+        },
       };
     }
     return {
       records: {
         value: Math.round(cards.totalRecords / daysInRange).toLocaleString(),
-        label: "日均对话数",
+        label: t("agent.detail.monitoring.avgDailyConversations"),
       },
       messages: {
         value: Math.round(cards.totalMessages / daysInRange).toLocaleString(),
-        label: "日均消息数",
+        label: t("agent.detail.monitoring.avgDailyMessages"),
       },
       power: {
         value: Math.round(cards.totalPower / daysInRange).toLocaleString(),
-        label: "日均积分消耗",
+        label: t("agent.detail.monitoring.avgDailyTokenConsumption"),
       },
       tokens: {
         value: Math.round(cards.totalTokens / daysInRange).toLocaleString(),
-        label: "日均 Token 消耗",
+        label: t("agent.detail.monitoring.avgDailyTokenConsumption"),
       },
       annotations: {
         value: cards.totalAnnotations.toLocaleString(),
-        label: "总标注数",
+        label: t("agent.detail.monitoring.totalAnnotation"),
       },
       hitAnnotations: {
         value: cards.hitAnnotations.toLocaleString(),
-        label: "命中标注数",
+        label: t("agent.detail.monitoring.hitAnnotation"),
       },
     };
-  }, [cards, cardMode, daysInRange]);
+  }, [cards, cardMode, daysInRange, t]);
 
   const isDefaultRange = useMemo(() => {
     if (!dateRange?.from || !dateRange?.to) return false;
@@ -356,7 +386,7 @@ export default function Monitoring({ agentId }: MonitoringProps) {
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex shrink-0 items-center justify-between px-6 py-4">
         <div className="flex items-center gap-4">
-          <h1 className="text-lg font-semibold">监测</h1>
+          <h1 className="text-lg font-semibold">{t("agent.detail.monitoring.title")}</h1>
           <Tabs
             value={cardMode}
             onValueChange={(v) => setCardMode(v as CardStatMode)}
@@ -364,10 +394,10 @@ export default function Monitoring({ agentId }: MonitoringProps) {
           >
             <TabsList className="h-8">
               <TabsTrigger value="total" className="text-xs">
-                累计
+                {t("agent.detail.monitoring.cumulative")}
               </TabsTrigger>
               <TabsTrigger value="daily" className="text-xs">
-                按日
+                {t("agent.detail.monitoring.daily")}
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -386,7 +416,7 @@ export default function Monitoring({ agentId }: MonitoringProps) {
                     format(dateRange.from, "yyyy/MM/dd")
                   )
                 ) : (
-                  <span>选择时间范围</span>
+                  <span>{t("agent.detail.monitoring.selectDateRange")}</span>
                 )}
               </Button>
             </PopoverTrigger>
@@ -418,46 +448,50 @@ export default function Monitoring({ agentId }: MonitoringProps) {
           <div className="flex flex-col gap-3">
             <div className="flex gap-4">
               <StatCard
-                title="对话统计"
+                title={t("agent.detail.monitoring.conversationStats")}
                 icon={<MessageSquare className="size-4" />}
                 loading={isLoading}
                 stats={[
                   {
-                    label: cardStats?.records.label ?? "总对话数",
+                    label:
+                      cardStats?.records.label ?? t("agent.detail.monitoring.totalConversations"),
                     value: cardStats?.records.value ?? 0,
                   },
                   {
-                    label: cardStats?.messages.label ?? "总消息数",
+                    label: cardStats?.messages.label ?? t("agent.detail.monitoring.totalMessages"),
                     value: cardStats?.messages.value ?? 0,
                   },
                 ]}
               />
               <StatCard
-                title="Token 消耗"
+                title={t("agent.detail.monitoring.tokenConsumption")}
                 icon={<Zap className="size-4" />}
                 loading={isLoading}
                 stats={[
                   {
-                    label: cardStats?.power.label ?? "总积分消耗",
+                    label: cardStats?.power.label ?? t("agent.detail.monitoring.powerConsumption"),
                     value: cardStats?.power.value ?? 0,
                   },
                   {
-                    label: cardStats?.tokens.label ?? "总 Token 消耗",
+                    label:
+                      cardStats?.tokens.label ?? t("agent.detail.monitoring.totalTokenConsumption"),
                     value: cardStats?.tokens.value ?? 0,
                   },
                 ]}
               />
               <StatCard
-                title="标注管理"
+                title={t("agent.detail.monitoring.annotationManagement")}
                 icon={<BookMarked className="size-4" />}
                 loading={isLoading}
                 stats={[
                   {
-                    label: cardStats?.annotations.label ?? "总标注数",
+                    label:
+                      cardStats?.annotations.label ?? t("agent.detail.monitoring.totalAnnotation"),
                     value: cardStats?.annotations.value ?? 0,
                   },
                   {
-                    label: cardStats?.hitAnnotations.label ?? "命中标注数",
+                    label:
+                      cardStats?.hitAnnotations.label ?? t("agent.detail.monitoring.hitAnnotation"),
                     value: cardStats?.hitAnnotations.value ?? 0,
                   },
                 ]}
@@ -467,14 +501,14 @@ export default function Monitoring({ agentId }: MonitoringProps) {
 
           <div className="grid grid-cols-2 gap-4">
             <DailyChart
-              title="每日对话数"
+              title={t("agent.detail.monitoring.dailyConversations")}
               data={charts?.dailyRecords ?? []}
               dataKey="records"
               color={CHART_COLORS[0]}
               loading={isLoading}
             />
             <DailyChart
-              title="Token 消耗"
+              title={t("agent.detail.monitoring.tokenConsumption")}
               data={charts?.dailyTokens ?? []}
               dataKey="tokens"
               color={CHART_COLORS[0]}
@@ -482,30 +516,30 @@ export default function Monitoring({ agentId }: MonitoringProps) {
               valueFormatter={(v) => v.toLocaleString()}
             />
             <DailyChart
-              title="每日消息数"
+              title={t("agent.detail.monitoring.dailyMessages")}
               data={charts?.dailyMessages ?? []}
               dataKey="messages"
               color={CHART_COLORS[1]}
               loading={isLoading}
             />
             <DailyChart
-              title="每日活跃用户数"
+              title={t("agent.detail.monitoring.dailyActiveUsers")}
               data={charts?.dailyUsers ?? []}
               dataKey="users"
               color={CHART_COLORS[2]}
               loading={isLoading}
             />
             <DailyChart
-              title="积分消耗"
+              title={t("agent.detail.monitoring.powerConsumption")}
               data={charts?.dailyPower ?? []}
               dataKey="power"
               color={CHART_COLORS[3]}
               loading={isLoading}
               valueFormatter={(v) => v.toLocaleString()}
             />
-            <FeedbackChart data={charts?.dailyFeedback ?? []} loading={isLoading} />
+            <FeedbackChart t={t} data={charts?.dailyFeedback ?? []} loading={isLoading} />
             <DailyChart
-              title="标注趋势"
+              title={t("agent.detail.monitoring.annotationTrend")}
               data={charts?.dailyAnnotations ?? []}
               dataKey="annotations"
               color={CHART_COLORS[2]}

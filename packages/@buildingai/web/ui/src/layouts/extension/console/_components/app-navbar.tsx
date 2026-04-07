@@ -1,4 +1,5 @@
 import { ReloadWindow } from "@buildingai/ui/components/reload-windows";
+import { useI18n } from "@buildingai/i18n";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -61,6 +62,7 @@ function findBreadcrumbTrail(
 }
 
 const AppNavbar = ({ menus }: { menus: ExtensionMenuItem[] }) => {
+  const { t } = useI18n();
   const { state } = useSidebar();
   const location = useLocation();
   const navigate = useNavigate();
@@ -78,7 +80,7 @@ const AppNavbar = ({ menus }: { menus: ExtensionMenuItem[] }) => {
             <SidebarTrigger className="size-fit bg-transparent p-0 hover:bg-transparent" />
           </TooltipTrigger>
           <TooltipContent>
-            <p>{state === "expanded" ? "收起侧边栏" : "展开侧边栏"}</p>
+            <p>{state === "expanded" ? t("common.collapseSidebar") : t("common.expandSidebar")}</p>
           </TooltipContent>
         </Tooltip>
 

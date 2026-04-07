@@ -1,4 +1,5 @@
 import { useAgreementConfigQuery } from "@buildingai/services/web";
+import { useI18n } from "@buildingai/i18n";
 import { EditorContentRenderer } from "@buildingai/ui/components/editor";
 import {
   Dialog,
@@ -17,6 +18,7 @@ type AgreementDialogProps = {
 };
 
 const AgreementDialog = ({ open, onOpenChange, type }: AgreementDialogProps) => {
+  const { t } = useI18n();
   const { data, isLoading } = useAgreementConfigQuery();
 
   const agreement = data?.agreement;
@@ -38,7 +40,7 @@ const AgreementDialog = ({ open, onOpenChange, type }: AgreementDialogProps) => 
         <ScrollArea className="h-full px-4 py-4 sm:px-6 sm:py-5">
           <div className="prose dark:prose-invert mx-auto max-w-prose">
             {isLoading && (
-              <p className="text-muted-foreground text-xs sm:text-sm">正在加载协议内容…</p>
+              <p className="text-muted-foreground text-xs sm:text-sm">{t("agreement.loadingContent")}</p>
             )}
             <div className="flex items-center justify-center pt-12 pb-6 text-lg font-medium">
               <h2 className="text-3xl font-normal">{currentTitle}</h2>
@@ -48,7 +50,7 @@ const AgreementDialog = ({ open, onOpenChange, type }: AgreementDialogProps) => 
 
             {!isLoading && !currentContent && (
               <p className="text-muted-foreground text-xs sm:text-sm">
-                暂未配置{isService ? "用户协议" : "隐私政策"}内容，请联系管理员在网站配置中补充。
+                {isService ? t("agreement.notConfiguredService") : t("agreement.notConfiguredPrivacy")}
               </p>
             )}
           </div>

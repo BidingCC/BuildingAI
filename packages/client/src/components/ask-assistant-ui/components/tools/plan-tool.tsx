@@ -8,6 +8,7 @@ import {
   PlanTitle,
   PlanTrigger,
 } from "@buildingai/ui/components/ai-elements/plan";
+import { useI18n } from "@buildingai/i18n";
 import { Button } from "@buildingai/ui/components/ui/button";
 import { FileText } from "lucide-react";
 import { memo } from "react";
@@ -83,6 +84,7 @@ export interface PlanToolProps {
 }
 
 export const PlanTool = memo(function PlanTool({ toolPart, planningStatus }: PlanToolProps) {
+  const { t } = useI18n();
   const { state, output } = toolPart;
   const structured = isStructuredPlan(output) ? output : null;
   const planText = typeof output === "string" ? output : "";
@@ -90,7 +92,7 @@ export const PlanTool = memo(function PlanTool({ toolPart, planningStatus }: Pla
   const hasContent = structured || planText;
 
   if (state === "output-available" && hasContent) {
-    const title = structured?.title ?? "执行计划";
+    const title = structured?.title ?? t("common.askAssistant.executionPlan");
     const description =
       structured?.description ??
       planningStatus?.planPreview ??
@@ -122,14 +124,14 @@ export const PlanTool = memo(function PlanTool({ toolPart, planningStatus }: Pla
           <div>
             <div className="mb-4 flex items-center gap-2">
               <FileText className="size-4" />
-              <PlanTitle>执行计划</PlanTitle>
+              <PlanTitle>{t("common.askAssistant.executionPlan")}</PlanTitle>
             </div>
-            <PlanDescription>正在生成计划…</PlanDescription>
+            <PlanDescription>{t("common.askAssistant.generatingPlan")}</PlanDescription>
           </div>
           <PlanTrigger />
         </PlanHeader>
         <PlanContent>
-          <div className="text-muted-foreground text-sm">请稍候</div>
+          <div className="text-muted-foreground text-sm">{t("common.askAssistant.pleaseWait")}</div>
         </PlanContent>
       </Plan>
     );

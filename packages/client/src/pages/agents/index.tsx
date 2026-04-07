@@ -1,4 +1,5 @@
 import { definePageMeta, useDocumentHead } from "@buildingai/hooks";
+import { useI18n } from "@buildingai/i18n";
 import {
   type AgentDecorateBannerItem,
   useAgentTags,
@@ -48,12 +49,13 @@ import { useDebounceValue } from "usehooks-ts";
 const PAGE_SIZE = 20;
 
 export const meta = definePageMeta({
-  title: "智能体广场",
-  description: "选择你想要的智能体",
+  title: "agent.square.title",
+  description: "agent.square.description",
   icon: "bot",
 });
 
 const AgentsIndexPage = () => {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const [keyword, setKeyword] = useState("");
   const [debouncedKeyword] = useDebounceValue(keyword.trim(), 300);
@@ -63,7 +65,7 @@ const AgentsIndexPage = () => {
   const [canScrollTagsRight, setCanScrollTagsRight] = useState(false);
 
   useDocumentHead({
-    title: "智能体广场",
+    title: t("agent.square.title"),
   });
 
   const { data: decorateConfig } = useWebAgentDecorateQuery();
@@ -194,7 +196,7 @@ const AgentsIndexPage = () => {
             <Button variant="ghost" size="sm" className="ml-auto" asChild>
               <Link to="/agents/workspace">
                 <User />
-                我的智能体
+                {t("agent.workspace.title")}
               </Link>
             </Button>
           </div>
@@ -204,15 +206,15 @@ const AgentsIndexPage = () => {
           <div className="bg-background sticky top-12 z-20 pb-4">
             <div className="flex flex-col items-center justify-between gap-4 max-sm:items-start sm:flex-row sm:px-3">
               <div className="flex flex-col gap-2">
-                <h1 className="text-2xl">{decorateConfig?.title || "智能体广场"}</h1>
+                <h1 className="text-2xl">{decorateConfig?.title || t("agent.square.title")}</h1>
                 <p className="text-muted-foreground text-sm">
-                  {decorateConfig?.description || "选择你想要的智能体"}
+                  {decorateConfig?.description || t("agent.square.description")}
                 </p>
               </div>
               <div className="max-sm:w-full">
                 <InputGroup className="rounded-full">
                   <InputGroupInput
-                    placeholder="搜索智能体"
+                    placeholder={t("agent.square.searchPlaceholder")}
                     value={keyword}
                     onChange={(e) => setKeyword(e.target.value)}
                   />
@@ -262,7 +264,7 @@ const AgentsIndexPage = () => {
                     className={badgeClass(selectedTagId === null)}
                     onClick={() => setSelectedTagId(null)}
                   >
-                    全部
+                    {t("agent.square.all")}
                   </Badge>
                   {tags.map((tag) => (
                     <Badge
@@ -317,7 +319,9 @@ const AgentsIndexPage = () => {
                 <Loader2 className="text-muted-foreground size-8 animate-spin" />
               </div>
             ) : items.length === 0 ? (
-              <p className="text-muted-foreground py-12 text-center text-sm">暂无智能体</p>
+              <p className="text-muted-foreground py-12 text-center text-sm">
+                {t("agent.square.noAgents")}
+              </p>
             ) : (
               <InfiniteScroll
                 loading={isFetchingNextPage}
@@ -329,9 +333,9 @@ const AgentsIndexPage = () => {
                 <div className="grid gap-x-4 sm:grid-cols-2">
                   {items.map((agent) => {
                     const creator = agent.creator;
-                    const displayName = creator?.nickname ?? "智能体";
+                    const displayName = creator?.nickname ?? t("agent.type.unknown");
                     const initial = displayName.slice(0, 1).toUpperCase();
-                    const creatorLabel = creator?.nickname ?? "匿名";
+                    const creatorLabel = creator?.nickname ?? t("agent.square.anonymous");
                     const creatorInitial = creatorLabel.slice(0, 1).toUpperCase();
                     return (
                       <Item
@@ -357,7 +361,8 @@ const AgentsIndexPage = () => {
                             <span className="truncate">{creatorLabel}</span>
                           </div> */}
                           <ItemDescription className="line-clamp-1">
-                            {agent.description?.toString().trim() || "暂无描述"}
+                            {agent.description?.toString().trim() ||
+                              t("agent.square.noDescription")}
                           </ItemDescription>
                           <div className="text-muted-foreground mt-2 flex flex-wrap items-center justify-between gap-2 text-xs">
                             <div className="flex flex-wrap items-center gap-3">
@@ -411,7 +416,7 @@ const AgentsIndexPage = () => {
                             size="icon-sm"
                             variant="outline"
                             className="rounded-full"
-                            aria-label="进入"
+                            aria-label={t("agent.square.enter")}
                             onClick={(e) => {
                               e.stopPropagation();
                               openAgentChat(agent);

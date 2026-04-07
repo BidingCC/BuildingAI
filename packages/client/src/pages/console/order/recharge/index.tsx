@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   type QueryRechargeOrderDto,
   type Statistics,
@@ -54,49 +55,49 @@ import { OrderDetailDialog } from "./_components/order-detail-dialog";
 const statisticsItems = [
   {
     key: "totalOrder",
-    label: "充值订单数",
-    unit: "单",
+    label: "financial.order.rechargeOrderCount",
+    unit: "financial.order.rechargeOrderUnit",
   },
   {
     key: "totalAmount",
-    label: "累计充值金额",
-    unit: "元",
+    label: "financial.order.totalRechargeAmount",
+    unit: "financial.order.totalRechargeCurrency",
   },
   {
     key: "totalRefundOrder",
-    label: "退款订单数",
-    unit: "单",
+    label: "financial.order.refundOrderCount",
+    unit: "financial.order.refundOrderUnit",
   },
   {
     key: "totalRefundAmount",
-    label: "累计退款金额",
-    unit: "元",
+    label: "financial.order.totalRefundAmount",
+    unit: "financial.order.totalRefundCurrency",
   },
   {
     key: "totalIncome",
-    label: "净收入",
-    unit: "元",
+    label: "financial.order.netIncome",
+    unit: "financial.order.totalRechargeCurrency",
   },
 ];
 
 const paymentStatusOptions = [
   {
-    label: "已支付",
+    label: "financial.order.paidLabel",
     value: "1",
   },
   {
-    label: "未支付",
+    label: "financial.order.unpaidLabel",
     value: "0",
   },
 ];
 
 const refundStatusOptions = [
   {
-    label: "已退款",
+    label: "financial.order.refundedLabel",
     value: "1",
   },
   {
-    label: "未退款",
+    label: "financial.order.notRefundedLabel",
     value: "0",
   },
 ];
@@ -109,6 +110,7 @@ function formatCurrency(val: number) {
 }
 
 const OrderRechargeIndexPage = () => {
+  const { t } = useI18n();
   const { confirm } = useAlertDialog();
   const [paymentStatusFilter, setPaymentStatusFilter] = useState<string | undefined>(undefined);
   const [paymentMethodFilter, setPaymentMethodFilter] = useState<string | undefined>(undefined);
@@ -121,6 +123,29 @@ const OrderRechargeIndexPage = () => {
   const [detailOrderId, setDetailOrderId] = useState<string | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [statistics, setStatistics] = useState<Statistics>({
+    totalAmount: 0,
+    totalIncome: 0,
+    totalOrder: 0,
+    totalRefundAmount: 0,
+    totalRefundOrder: 0,
+  });
+
+  const translatedPaymentStatusOptions = useMemo(
+    () => [
+      { label: t("financial.order.paidLabel"), value: "1" },
+      { label: t("financial.order.unpaidLabel"), value: "0" },
+    ],
+    [t],
+  );
+
+  const translatedRefundStatusOptions = useMemo(
+    () => [
+      { label: t("financial.order.refundedLabel"), value: "1" },
+      { label: t("financial.order.notRefundedLabel"), value: "0" },
+    ],
+    [t],
+  );
+  const [stats, setStats] = useState({
     totalAmount: 0,
     totalIncome: 0,
     totalOrder: 0,
@@ -214,18 +239,18 @@ const OrderRechargeIndexPage = () => {
 
   const refundMutation = useRefundRechargeOrderMutation({
     onSuccess: () => {
-      toast.success("退款成功");
+      toast.success(t("financial.order.refundSuccess"));
       refetch();
     },
     onError: (error) => {
-      toast.error(`退款失败: ${error.message}`);
+      toast.error(t("financial.order.refundFailed", { message: error.message }));
     },
   });
 
   const handleRefund = async (id: string) => {
     await confirm({
-      title: "退款确认",
-      description: "确定要退款吗？",
+      title: t("financial.order.refundConfirmTitle"),
+      description: t("financial.order.refundConfirmDescription"),
       confirmVariant: "destructive",
     });
     await refundMutation.mutateAsync(id);
@@ -242,9 +267,9 @@ const OrderRechargeIndexPage = () => {
                   <span className="text-2xl font-bold">
                     {statistics[item.key as keyof Statistics]}
                   </span>
-                  <span className="text-muted-foreground ml-1 text-xs">{item.unit}</span>
+                  <span className="text-muted-foreground ml-1 text-xs">{t(item.unit)}</span>
                 </CardTitle>
-                <CardDescription className="text-center">{item.label}</CardDescription>
+                <CardDescription className="text-center">{t(item.label)}</CardDescription>
               </CardContent>
             </Card>
           ))}
@@ -252,32 +277,32 @@ const OrderRechargeIndexPage = () => {
         <div className="flex h-full flex-1 flex-col gap-2 overflow-hidden px-4 pt-6">
           <div className="flex flex-wrap items-center gap-2">
             <Input
-              placeholder="搜索订单号"
+              placeholder={t("financial.order.searchOrderNo")}
               value={orderNoSearch}
               onChange={(e) => setOrderNoSearch(e.target.value)}
               className="h-8 w-[200px]"
             />
             <Input
-              placeholder="搜索用户ID/昵称/手机号"
+              placeholder={t("financial.order.searchUserIdNicknamePhone")}
               value={userSearch}
               onChange={(e) => setUserSearch(e.target.value)}
               className="h-8 w-[200px]"
             />
             <DataTableFacetedFilter
-              title="支付状态"
-              options={paymentStatusOptions}
+              title={t("financial.order.paymentStatus")}
+              options={translatedPaymentStatusOptions}
               selectedValue={paymentStatusFilter}
               onSelectionChange={setPaymentStatusFilter}
             />
             <DataTableFacetedFilter
-              title="支付方式"
+              title={t("financial.order.paymentMethod")}
               options={paymentMethodOptions}
               selectedValue={paymentMethodFilter}
               onSelectionChange={setPaymentMethodFilter}
             />
             <DataTableFacetedFilter
-              title="退款状态"
-              options={refundStatusOptions}
+              title={t("financial.order.refundStatus")}
+              options={translatedRefundStatusOptions}
               selectedValue={refundStatusFilter}
               onSelectionChange={setRefundStatusFilter}
             />
@@ -286,19 +311,21 @@ const OrderRechargeIndexPage = () => {
                 <AlertDialogTrigger asChild>
                   <Button variant="outline" size="sm" className="h-8 border-dashed">
                     <RotateCcwIcon className="mr-2 size-4" />
-                    清除筛选
+                    {t("financial.order.clearFilters")}
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent className="sm:max-w-sm">
                   <AlertDialogHeader>
-                    <AlertDialogTitle>清除所有筛选？</AlertDialogTitle>
+                    <AlertDialogTitle>{t("financial.order.clearFiltersTitle")}</AlertDialogTitle>
                     <AlertDialogDescription>
-                      这将清除所有已设置的筛选条件，包括搜索输入和筛选选项。此操作无法撤销。
+                      {t("financial.order.clearFiltersDescription")}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>取消</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleResetFilters}>清除</AlertDialogAction>
+                    <AlertDialogCancel>{t("financial.order.cancel")}</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleResetFilters}>
+                      {t("financial.order.clear")}
+                    </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
@@ -311,20 +338,20 @@ const OrderRechargeIndexPage = () => {
             <Table className="h-full">
               <TableHeader className="bg-muted sticky top-0 z-10">
                 <TableRow>
-                  <TableHead>订单号</TableHead>
-                  <TableHead>用户</TableHead>
-                  <TableHead>充值数量</TableHead>
-                  <TableHead>赠送数量</TableHead>
-                  <TableHead>到账数量</TableHead>
-                  <TableHead>实付金额</TableHead>
-                  <TableHead>支付方式</TableHead>
-                  <TableHead>支付状态</TableHead>
-                  <TableHead>下单时间</TableHead>
+                  <TableHead>{t("financial.order.table.orderNo")}</TableHead>
+                  <TableHead>{t("financial.order.table.user")}</TableHead>
+                  <TableHead>{t("financial.order.table.rechargeAmount")}</TableHead>
+                  <TableHead>{t("financial.order.table.giveAmount")}</TableHead>
+                  <TableHead>{t("financial.order.arrivedAmount")}</TableHead>
+                  <TableHead>{t("financial.order.table.paidAmount")}</TableHead>
+                  <TableHead>{t("financial.order.table.paymentMethod")}</TableHead>
+                  <TableHead>{t("financial.order.table.paymentStatus")}</TableHead>
+                  <TableHead>{t("financial.order.table.orderTime")}</TableHead>
                   <PermissionGuard
                     permissions={["recharge-order:detail", "recharge-order:refund"]}
                     any
                   >
-                    <TableHead>操作</TableHead>
+                    <TableHead>{t("financial.order.table.operation")}</TableHead>
                   </PermissionGuard>
                 </TableRow>
               </TableHeader>
@@ -332,15 +359,15 @@ const OrderRechargeIndexPage = () => {
                 {isLoading ? (
                   <TableRow>
                     <TableCell colSpan={10} className="text-muted-foreground h-32 text-center">
-                      加载中...
+                      {t("financial.order.loadingTable")}
                     </TableCell>
                   </TableRow>
                 ) : !data?.items || data.items.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={10} className="text-muted-foreground h-32 text-center">
                       {hasActiveFilters
-                        ? "没有找到符合条件的订单，请尝试调整筛选条件"
-                        : "暂无充值订单数据"}
+                        ? t("financial.order.noResultsTable")
+                        : t("financial.order.noDataTable")}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -379,9 +406,9 @@ const OrderRechargeIndexPage = () => {
                         >
                           {item.payStatus === 1
                             ? item.refundStatus === 0
-                              ? "已支付"
-                              : "已退款"
-                            : "未支付"}
+                              ? t("financial.order.status.paid")
+                              : t("financial.order.status.refunded")
+                            : t("financial.order.status.unpaid")}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -407,7 +434,7 @@ const OrderRechargeIndexPage = () => {
                                   }}
                                 >
                                   <EyeIcon className="mr-2 size-4" />
-                                  查看详情
+                                  {t("financial.order.viewDetails")}
                                 </DropdownMenuItem>
                               </PermissionGuard>
                               {item.payStatus === 1 && item.refundStatus === 0 && (
@@ -419,7 +446,7 @@ const OrderRechargeIndexPage = () => {
                                     }}
                                   >
                                     <Undo2Icon className="mr-2 size-4" />
-                                    退款
+                                    {t("financial.order.applyRefund")}
                                   </DropdownMenuItem>
                                 </PermissionGuard>
                               )}

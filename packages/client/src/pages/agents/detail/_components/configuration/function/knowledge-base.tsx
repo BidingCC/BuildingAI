@@ -1,4 +1,5 @@
 import { RETRIEVAL_MODE } from "@buildingai/constants/shared/datasets.constants";
+import { useI18n } from "@buildingai/i18n";
 import {
   getDatasetDetail,
   useMyCreatedDatasetsInfiniteQuery,
@@ -33,12 +34,13 @@ type KnowledgeBaseProps = {
 type KnowledgeBaseTab = "my" | "team";
 
 const RETRIEVAL_MODE_LABEL: Record<string, string> = {
-  [RETRIEVAL_MODE.VECTOR]: "向量检索",
-  [RETRIEVAL_MODE.FULL_TEXT]: "全文检索",
-  [RETRIEVAL_MODE.HYBRID]: "混合检索",
+  [RETRIEVAL_MODE.VECTOR]: "agent.detail.model.vectorRetrieval",
+  [RETRIEVAL_MODE.FULL_TEXT]: "agent.detail.model.fullTextRetrieval",
+  [RETRIEVAL_MODE.HYBRID]: "agent.detail.model.hybridRetrieval",
 };
 
 export const KnowledgeBase = memo(({ value, onChange }: KnowledgeBaseProps) => {
+  const { t } = useI18n();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<KnowledgeBaseTab>("my");
   const [searchKeyword, setSearchKeyword] = useState("");
@@ -116,7 +118,9 @@ export const KnowledgeBase = memo(({ value, onChange }: KnowledgeBaseProps) => {
       const isLoading = selectedDetailsQueries[queryIndex]?.isLoading;
       return {
         id,
-        name: res?.name ?? (isLoading ? "加载中..." : `ID: ${id}`),
+        name:
+          res?.name ??
+          (isLoading ? t("common.loading") : t("agent.detail.model.knowledgeBaseId", { id })),
         retrievalMode: res?.retrievalMode,
       };
     });
@@ -208,7 +212,7 @@ export const KnowledgeBase = memo(({ value, onChange }: KnowledgeBaseProps) => {
         const meta = allDatasetsMap.get(id);
         return {
           id,
-          name: meta?.name ?? `未加载的知识库（ID: ${id}）`,
+          name: meta?.name ?? t("agent.detail.model.notLoaded"),
           retrievalMode: meta?.retrievalMode,
         };
       }),
@@ -220,21 +224,21 @@ export const KnowledgeBase = memo(({ value, onChange }: KnowledgeBaseProps) => {
       <div className="flex items-center justify-between">
         <div className="flex flex-col">
           <div className="flex items-center gap-1">
-            <h3 className="text-sm font-medium">关联知识库</h3>
+            <h3 className="text-sm font-medium">{t("agent.detail.model.knowledgeBase")}</h3>
             <Tooltip>
               <TooltipTrigger>
                 <HelpCircle className="text-muted-foreground h-4 w-4" />
               </TooltipTrigger>
               <TooltipContent>
                 <div className="text-background text-xs">
-                  选择智能体可以访问的知识库 <br />
-                  智能体将根据这些知识库的内容回答用户问题。
+                  {t("agent.detail.model.selectKnowledgeBase")} <br />
+                  {t("agent.detail.model.knowledgeBaseDesc")}
                 </div>
               </TooltipContent>
             </Tooltip>
           </div>
           <p className="text-muted-foreground mt-0.5 text-xs">
-            您可以选择一个或多个知识库作为上下文来源
+            {t("agent.detail.model.knowledgeBaseDesc")}
           </p>
         </div>
         <Button
@@ -244,7 +248,11 @@ export const KnowledgeBase = memo(({ value, onChange }: KnowledgeBaseProps) => {
           onClick={handleOpenDialog}
         >
           <Plus className="h-4 w-4" />
-          <span>{value.length ? `已选 ${value.length} 个` : "添加"}</span>
+          <span>
+            {value.length
+              ? t("agent.detail.model.selectedCount", { count: value.length })
+              : t("agent.detail.model.addKnowledgeBase")}
+          </span>
         </Button>
       </div>
 
@@ -286,7 +294,7 @@ export const KnowledgeBase = memo(({ value, onChange }: KnowledgeBaseProps) => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="gap-0 p-0 sm:max-w-3xl">
           <DialogHeader className="px-4 pt-4">
-            <DialogTitle>选择关联知识库</DialogTitle>
+            <DialogTitle>{t("agent.detail.model.selectKnowledgeBase")}</DialogTitle>
           </DialogHeader>
           <div className="mt-3 px-4 pb-4">
             <div className="grid gap-4 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
@@ -298,10 +306,10 @@ export const KnowledgeBase = memo(({ value, onChange }: KnowledgeBaseProps) => {
                 >
                   <TabsList className="bg-muted/60 w-full rounded-lg p-[3px]">
                     <TabsTrigger value="my" className="flex-1 rounded-md text-xs sm:text-sm">
-                      我的知识库
+                      {t("agent.detail.model.myKnowledgeBase")}
                     </TabsTrigger>
                     <TabsTrigger value="team" className="flex-1 rounded-md text-xs sm:text-sm">
-                      团队知识库
+                      {t("agent.detail.model.teamKnowledgeBase")}
                     </TabsTrigger>
                   </TabsList>
                   <TabsContent value="my" className="outline-none">
@@ -311,7 +319,7 @@ export const KnowledgeBase = memo(({ value, onChange }: KnowledgeBaseProps) => {
                     >
                       <div className="px-2 pb-1.5">
                         <Input
-                          placeholder="搜索我的知识库..."
+                          placeholder={t("agent.detail.model.searchMyKnowledgeBase")}
                           value={searchKeyword}
                           onChange={(e) => setSearchKeyword(e.target.value)}
                           className="bg-muted! supports-backdrop-filter:bg-background/80 sticky top-2 z-10 my-2 h-9 border-0 text-xs shadow-none backdrop-blur sm:text-sm"
@@ -320,7 +328,7 @@ export const KnowledgeBase = memo(({ value, onChange }: KnowledgeBaseProps) => {
                           <>
                             {availableDatasets.length === 0 ? (
                               <div className="text-muted-foreground py-6 text-center text-xs sm:text-sm">
-                                暂无知识库
+                                {t("agent.detail.model.noKnowledgeBase")}
                               </div>
                             ) : (
                               <>
@@ -372,7 +380,7 @@ export const KnowledgeBase = memo(({ value, onChange }: KnowledgeBaseProps) => {
                                 )}
                                 {!hasMore && availableDatasets.length > 0 && (
                                   <div className="text-muted-foreground py-2 text-center text-xs">
-                                    没有更多了
+                                    {t("agent.detail.model.noMore")}
                                   </div>
                                 )}
                               </>
@@ -389,7 +397,7 @@ export const KnowledgeBase = memo(({ value, onChange }: KnowledgeBaseProps) => {
                     >
                       <div className="px-2 pb-1.5">
                         <Input
-                          placeholder="搜索团队知识库..."
+                          placeholder={t("agent.detail.model.searchTeamKnowledgeBase")}
                           value={searchKeyword}
                           onChange={(e) => setSearchKeyword(e.target.value)}
                           className="bg-muted! supports-backdrop-filter:bg-background/80 sticky top-2 z-10 my-2 h-9 border-0 text-xs shadow-none backdrop-blur sm:text-sm"
@@ -398,7 +406,7 @@ export const KnowledgeBase = memo(({ value, onChange }: KnowledgeBaseProps) => {
                           <>
                             {availableDatasets.length === 0 ? (
                               <div className="text-muted-foreground py-6 text-center text-xs sm:text-sm">
-                                暂无知识库
+                                {t("agent.detail.model.noKnowledgeBase")}
                               </div>
                             ) : (
                               <>
@@ -450,7 +458,7 @@ export const KnowledgeBase = memo(({ value, onChange }: KnowledgeBaseProps) => {
                                 )}
                                 {!hasMore && availableDatasets.length > 0 && (
                                   <div className="text-muted-foreground py-2 text-center text-xs">
-                                    没有更多了
+                                    {t("agent.detail.model.noMore")}
                                   </div>
                                 )}
                               </>
@@ -466,19 +474,19 @@ export const KnowledgeBase = memo(({ value, onChange }: KnowledgeBaseProps) => {
               <div className="bg-background flex min-h-0 flex-col rounded-md border px-3 py-2">
                 <div className="flex items-center justify-between gap-2">
                   <div className="text-xs font-medium sm:text-sm">
-                    已选择的知识库（{selectedIds.length}）
+                    {t("agent.detail.model.selectedKnowledgeBases")}
                   </div>
                   {selectedIds.length > 0 && (
                     <Button variant="ghost" size="xs" type="button" onClick={handleClearSelected}>
                       <X className="h-3 w-3" />
-                      清空
+                      {t("agent.detail.model.clear")}
                     </Button>
                   )}
                 </div>
                 <ScrollArea className="mt-2 max-h-88 pr-1">
                   {selectedDatasets.length === 0 ? (
                     <div className="text-muted-foreground py-6 text-center text-xs sm:text-sm">
-                      暂未选择知识库
+                      {t("agent.detail.model.noKnowledgeBaseSelected")}
                     </div>
                   ) : (
                     selectedDatasets.map((dataset) => (
@@ -513,11 +521,11 @@ export const KnowledgeBase = memo(({ value, onChange }: KnowledgeBaseProps) => {
           <DialogFooter className="px-4 pb-3">
             <DialogClose asChild>
               <Button variant="outline" size="sm">
-                取消
+                {t("common.cancel")}
               </Button>
             </DialogClose>
             <Button size="sm" onClick={handleConfirm}>
-              确定
+              {t("common.confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>

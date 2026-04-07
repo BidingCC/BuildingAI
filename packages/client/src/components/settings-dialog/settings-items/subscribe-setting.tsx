@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from "@buildingai/i18n";
 import {
   useMembershipOrderListsInfiniteQuery,
   type UserMembershipOrderItem,
@@ -35,6 +36,7 @@ function formatDate(dateString: string): string {
 }
 
 const SubscribeSetting = () => {
+  const { t } = useI18n();
   const [selectedSubscription, setSelectedSubscription] = useState<UserSubscriptionItem | null>(
     null,
   );
@@ -96,13 +98,13 @@ const SubscribeSetting = () => {
             title={
               <div className="flex items-center gap-1">
                 <Crown className="size-4" />
-                暂无会员
+                {t("settings.noMembership")}
               </div>
             }
-            description="您当前没有有效的会员订阅"
+            description={t("settings.noActiveSubscription")}
           >
             <Button variant="ghost" onClick={() => setUpgradeDialogOpen(true)}>
-              去订阅
+              {t("settings.goToSubscribe")}
               <ChevronRight />
             </Button>
           </SettingItem>
@@ -116,7 +118,7 @@ const SubscribeSetting = () => {
     <div>
       <SettingItemGroup>
         {data.items.map((subscription) => {
-          const levelName = subscription.level?.name ?? "未知等级";
+          const levelName = subscription.level?.name ?? t("settings.unknownLevel");
           const levelIcon = subscription.level?.icon;
           const endTime = subscription.endTime ? formatDate(subscription.endTime) : null;
           const isExpired = subscription.isExpired;
@@ -140,13 +142,15 @@ const SubscribeSetting = () => {
                   {levelName}
                   {isActive && (
                     <Badge className="bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">
-                      激活中
+                      {t("settings.active")}
                     </Badge>
                   )}
                 </div>
               }
               description={
-                endTime ? `到期时间至 ${endTime}${isExpired ? " (已过期)" : ""}` : "永久有效"
+                endTime
+                  ? `${t("settings.expiresAt")} ${endTime}${isExpired ? ` (${t("settings.expired")})` : ""}`
+                  : t("settings.permanent")
               }
             >
               <Button
@@ -165,7 +169,7 @@ const SubscribeSetting = () => {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="flex flex-col p-0">
           <DialogHeader className="shrink-0 px-6 pt-6">
-            <DialogTitle>订阅详情</DialogTitle>
+            <DialogTitle>{t("settings.subscriptionDetails")}</DialogTitle>
           </DialogHeader>
           {selectedSubscription && (
             <div className="min-h-0 flex-1 px-5 pb-6">
@@ -174,14 +178,14 @@ const SubscribeSetting = () => {
                 <div className="flex flex-col gap-3 px-1">
                   <div className="flex flex-col gap-2">
                     <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                      <span className="text-muted-foreground text-xs">等级名称</span>
+                      <span className="text-muted-foreground text-xs">{t("settings.levelName")}</span>
                       <span className="text-sm">
-                        {selectedSubscription.level?.name ?? "未知等级"}
+                        {selectedSubscription.level?.name ?? t("settings.unknownLevel")}
                       </span>
                     </div>
                     {selectedSubscription.startTime && (
                       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                        <span className="text-muted-foreground text-xs">开通时间</span>
+                        <span className="text-muted-foreground text-xs">{t("settings.startTime")}</span>
                         <span className="text-sm">
                           <TimeText format="YYYY/MM/DD" value={selectedSubscription.startTime} />
                         </span>
@@ -189,7 +193,7 @@ const SubscribeSetting = () => {
                     )}
                     {selectedSubscription.endTime && (
                       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                        <span className="text-muted-foreground text-xs">到期时间</span>
+                        <span className="text-muted-foreground text-xs">{t("settings.expiryTime")}</span>
                         <span className="text-sm">
                           <TimeText format="YYYY/MM/DD" value={selectedSubscription.endTime} />
                         </span>
@@ -200,7 +204,7 @@ const SubscribeSetting = () => {
 
                 {/* 订单记录 */}
                 <div className="flex flex-col gap-3">
-                  <h3 className="px-1 text-sm font-medium">订单记录</h3>
+                  <h3 className="px-1 text-sm font-medium">{t("settings.orderHistory")}</h3>
                   {isOrderLoading ? (
                     <div className="flex flex-col gap-2">
                       {Array.from({ length: 3 }).map((_, index) => (
@@ -213,7 +217,7 @@ const SubscribeSetting = () => {
                         loading={isFetchingNextPage}
                         hasMore={!!hasNextPage}
                         onLoadMore={() => fetchNextPage()}
-                        emptyText="没有更多订单了"
+                        emptyText={t("settings.noMoreOrders")}
                       >
                         <div className="flex flex-col gap-3 p-1">
                           {orderItems.map((order: UserMembershipOrderItem) => {
@@ -233,9 +237,9 @@ const SubscribeSetting = () => {
                                           <div className="flex items-center gap-2">
                                             <span className="text-sm font-medium">
                                               {isGift
-                                                ? "系统赠送"
+                                                ? t("settings.systemGift")
                                                 : isCdk
-                                                  ? "卡密兑换"
+                                                  ? t("settings.cdkRedemption")
                                                   : order.planName}
                                             </span>
                                             <Badge
@@ -246,12 +250,12 @@ const SubscribeSetting = () => {
                                             </Badge>
                                             {isRefunded && (
                                               <Badge variant="destructive" className="text-xs">
-                                                已退款
+                                                {t("settings.refunded")}
                                               </Badge>
                                             )}
                                           </div>
                                           <span className="text-muted-foreground text-xs">
-                                            订单号：{order.orderNo}
+                                            {t("settings.orderNo")}：{order.orderNo}
                                           </span>
                                         </div>
                                       </div>
@@ -265,23 +269,23 @@ const SubscribeSetting = () => {
                                     {/* 订单详情 */}
                                     <div className="flex flex-col gap-1.5 border-t pt-2">
                                       <div className="flex items-center justify-between text-xs">
-                                        <span className="text-muted-foreground">等级</span>
+                                        <span className="text-muted-foreground">{t("settings.level")}</span>
                                         <span>{order.levelName}</span>
                                       </div>
                                       {order.duration && (
                                         <div className="flex items-center justify-between text-xs">
-                                          <span className="text-muted-foreground">订阅时长</span>
+                                          <span className="text-muted-foreground">{t("settings.subscriptionDuration")}</span>
                                           <span>{order.duration}</span>
                                         </div>
                                       )}
                                       {isOrderPurchase && (
                                         <div className="flex items-center justify-between text-xs">
-                                          <span className="text-muted-foreground">支付方式</span>
+                                          <span className="text-muted-foreground">{t("settings.paymentMethod")}</span>
                                           <span>{order.payTypeDesc}</span>
                                         </div>
                                       )}
                                       <div className="flex items-center justify-between text-xs">
-                                        <span className="text-muted-foreground">开通时间</span>
+                                        <span className="text-muted-foreground">{t("settings.startTime")}</span>
                                         <span>
                                           <TimeText
                                             format="YYYY/MM/DD HH:mm"

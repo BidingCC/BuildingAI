@@ -1,0 +1,58 @@
+export default {
+  pageTitle: "Model Provider Management",
+  searchPlaceholder: "Search provider name or identifier",
+  allStatus: "All Status",
+  enabled: "Enabled",
+  disabled: "Disabled",
+  addProvider: {
+    title: "Add Provider",
+    description: "Add new custom model provider",
+    importFromConfig: "Import from Config File",
+    createManually: "Create Manually",
+  },
+  modelDialog: {
+    searchPlaceholder: "Search model name...",
+    modelStatus: "Model Status",
+    allStatus: "All Status",
+    enabled: "Enabled",
+    disabled: "Disabled",
+    addModel: "Add Model",
+    modelList: "Model List ({count})",
+    noModelsFound: "No models found",
+    config: "Config",
+    points: "{power} points",
+    free: "Free",
+  },
+  dropdown: {
+    edit: "Edit",
+    delete: "Delete",
+  },
+  alert: {
+    deleteModelTitle: "Delete Model",
+    deleteModelDesc:
+      'Are you sure you want to delete model "{model}"? This action cannot be undone.',
+    deleteProviderTitle: "Delete Provider",
+    deleteProviderDesc:
+      "Are you sure you want to delete this provider? This action cannot be undone.",
+    providerStatusTitle: "Provider Status",
+    providerStatusDesc: "Are you sure you want to {action} this provider?",
+    enable: "enable",
+    disable: "disable",
+    confirm: "Confirm",
+    builtInProvider: "System built-in providers cannot be deleted",
+  },
+  toast: {
+    modelDeleted: "Model deleted",
+    modelDeleteFailed: "Delete failed: {message}",
+    modelEnabled: "Model enabled",
+    modelDisabled: "Model disabled",
+    providerDeleted: "Provider deleted",
+    providerDeleteFailed: "Delete failed: {message}",
+    providerEnabled: "Provider enabled",
+    providerDisabled: "Provider disabled",
+  },
+  noData: {
+    noResults: 'No providers found matching "{keyword}"',
+    noProviders: "No provider data",
+  },
+};

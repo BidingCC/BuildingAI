@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   type RoleEntity,
   useBatchDeleteRolesMutation,
@@ -36,6 +37,7 @@ import { AssignPermissionsDialog } from "./_components/assign-permissions-dialog
 import { EditRoleDialog } from "./_components/edit-role-dialog";
 
 const AccessRoleIndexPage = () => {
+  const { t } = useI18n();
   const [searchName, setSearchName] = useState("");
   const [searchDescription, setSearchDescription] = useState("");
   const [page, setPage] = useState(1);
@@ -65,7 +67,7 @@ const AccessRoleIndexPage = () => {
 
   const deleteMutation = useDeleteRoleMutation({
     onSuccess: () => {
-      toast.success("删除成功");
+      toast.success(t("access.role.toast.deleteSuccess"));
       refetch();
       setSelectedIds([]);
     },
@@ -73,7 +75,7 @@ const AccessRoleIndexPage = () => {
 
   const batchDeleteMutation = useBatchDeleteRolesMutation({
     onSuccess: () => {
-      toast.success("批量删除成功");
+      toast.success(t("access.role.toast.batchDeleteSuccess"));
       refetch();
       setSelectedIds([]);
     },
@@ -97,20 +99,20 @@ const AccessRoleIndexPage = () => {
 
   const handleBatchDelete = async () => {
     if (selectedIds.length === 0) {
-      toast.warning("请选择要删除的角色");
+      toast.warning(t("access.role.alert.selectDelete"));
       return;
     }
     await confirm({
-      title: "删除角色",
-      description: `确定要删除选中的 ${selectedIds.length} 个角色吗？此操作不可恢复。`,
+      title: t("access.role.alert.deleteTitle"),
+      description: t("access.role.alert.batchDeleteDesc", { count: selectedIds.length }),
     });
     batchDeleteMutation.mutate(selectedIds);
   };
 
   const handleDelete = async (id: string) => {
     await confirm({
-      title: "删除角色",
-      description: "确定要删除该角色吗？此操作不可恢复。",
+      title: t("access.role.alert.deleteTitle"),
+      description: t("access.role.alert.deleteDesc"),
     });
     deleteMutation.mutate(id);
   };
@@ -139,13 +141,13 @@ const AccessRoleIndexPage = () => {
       <div className="flex flex-col gap-2">
         <div className="bg-background sticky top-0 z-2 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
           <Input
-            placeholder="搜索角色名称..."
+            placeholder={t("access.role.searchNamePlaceholder")}
             value={searchName}
             onChange={(e) => setSearchName(e.target.value)}
             className="text-sm"
           />
           <Input
-            placeholder="搜索角色描述..."
+            placeholder={t("access.role.searchDescPlaceholder")}
             value={searchDescription}
             onChange={(e) => setSearchDescription(e.target.value)}
             className="text-sm"
@@ -160,14 +162,14 @@ const AccessRoleIndexPage = () => {
                   disabled={batchDeleteMutation.isPending}
                 >
                   <Trash2 className="mr-2 size-4" />
-                  批量删除 ({selectedIds.length})
+                  {t("access.role.batchDelete", { count: selectedIds.length })}
                 </Button>
               )}
             </PermissionGuard>
             <PermissionGuard permissions="role:create">
               <Button size="sm" onClick={handleOpenCreate}>
                 <UserPlus className="mr-2 size-4" />
-                新增角色
+                {t("access.role.createRole")}
               </Button>
             </PermissionGuard>
           </div>
@@ -181,7 +183,7 @@ const AccessRoleIndexPage = () => {
                   <Checkbox
                     checked={allSelected}
                     onCheckedChange={handleSelectAll}
-                    aria-label="全选"
+                    aria-label={t("access.role.table.selectAll")}
                     ref={(el) => {
                       if (el) {
                         (el as any).indeterminate = someSelected;
@@ -189,24 +191,24 @@ const AccessRoleIndexPage = () => {
                     }}
                   />
                 </TableHead>
-                <TableHead>角色名称</TableHead>
-                <TableHead>描述</TableHead>
-                <TableHead>角色人数</TableHead>
-                <TableHead>创建时间</TableHead>
-                <TableHead className="w-24">操作</TableHead>
+                <TableHead>{t("access.role.table.roleName")}</TableHead>
+                <TableHead>{t("access.role.table.description")}</TableHead>
+                <TableHead>{t("access.role.table.userCount")}</TableHead>
+                <TableHead>{t("access.role.table.createTime")}</TableHead>
+                <TableHead className="w-24">{t("access.role.table.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
                   <TableCell colSpan={6} className="h-32 text-center">
-                    加载中...
+                    {t("access.role.table.loading")}
                   </TableCell>
                 </TableRow>
               ) : roles.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-muted-foreground h-32 text-center">
-                    暂无数据
+                    {t("access.role.table.noData")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -216,7 +218,7 @@ const AccessRoleIndexPage = () => {
                       <Checkbox
                         checked={selectedIds.includes(role.id)}
                         onCheckedChange={(checked) => handleSelectOne(role.id, checked as boolean)}
-                        aria-label={`选择 ${role.name}`}
+                        aria-label={t("access.role.table.selectRole", { name: role.name })}
                       />
                     </TableCell>
                     <TableCell className="font-medium">{role.name}</TableCell>
@@ -238,13 +240,13 @@ const AccessRoleIndexPage = () => {
                           <PermissionGuard permissions="role:update">
                             <DropdownMenuItem onClick={() => handleOpenEdit(role)}>
                               <Edit className="mr-2 size-4" />
-                              编辑
+                              {t("access.role.dropdown.edit")}
                             </DropdownMenuItem>
                           </PermissionGuard>
                           <PermissionGuard permissions="role:assign-permissions">
                             <DropdownMenuItem onClick={() => handleOpenAssign(role)}>
                               <ShieldCheck className="mr-2 size-4" />
-                              分配权限
+                              {t("access.role.dropdown.assignPermissions")}
                             </DropdownMenuItem>
                           </PermissionGuard>
                           <DropdownMenuSeparator />
@@ -254,7 +256,7 @@ const AccessRoleIndexPage = () => {
                               className="text-destructive"
                             >
                               <Trash2 className="mr-2 size-4" />
-                              删除
+                              {t("access.role.dropdown.delete")}
                             </DropdownMenuItem>
                           </PermissionGuard>
                         </DropdownMenuContent>

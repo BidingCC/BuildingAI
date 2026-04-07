@@ -1,4 +1,5 @@
 import { useSettingsDialog } from "@buildingai/hooks";
+import { useI18n } from "@buildingai/i18n";
 import type { McpServer, McpServerType } from "@buildingai/services/web";
 import { PromptInputButton as AIPromptInputButton } from "@buildingai/ui/components/ai-elements/prompt-input";
 import SvgIcons from "@buildingai/ui/components/svg-icons";
@@ -33,6 +34,7 @@ export interface McpSelectorProps {
 
 export const McpSelector = memo(
   ({ mcpServers, selectedMcpServerIds, onSelectionChange }: McpSelectorProps) => {
+    const { t } = useI18n();
     const [open, setOpen] = useState(false);
     const [filterType, setFilterType] = useState<McpServerType | "all">("all");
 
@@ -88,7 +90,7 @@ export const McpSelector = memo(
                 )}
               </AvatarGroup>
             ) : (
-              <span>工具</span>
+              <span>{t("common.askAssistant.tools")}</span>
             )}
             <ChevronDownIcon className="text-muted-foreground size-4" />
           </AIPromptInputButton>
@@ -97,7 +99,7 @@ export const McpSelector = memo(
           <Command>
             <div className="flex items-center gap-1 p-1 pb-0">
               <div className="flex-1">
-                <CommandInput placeholder="搜索 MCP 服务器..." className="h-7" />
+                <CommandInput placeholder={t("common.askAssistant.searchMcpServer")} className="h-7" />
               </div>
               <InputGroupButton
                 size="icon-sm"
@@ -117,23 +119,23 @@ export const McpSelector = memo(
               >
                 <TabsList variant="line" className="w-full border-b">
                   <TabsTrigger value="all" className="flex-1">
-                    全部({mcpServers.length})
+                    {t("common.askAssistant.all")}({mcpServers.length})
                   </TabsTrigger>
                   <TabsTrigger value="system" className="flex-1">
-                    系统({systemServers.length})
+                    {t("common.askAssistant.system")}({systemServers.length})
                   </TabsTrigger>
                   <TabsTrigger value="user" className="flex-1">
-                    我的({userServers.length})
+                    {t("common.askAssistant.mine")}({userServers.length})
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
             </div>
             <CommandList>
-              <CommandEmpty className="text-muted-foreground text-xs">未找到 MCP 服务</CommandEmpty>
+              <CommandEmpty className="text-muted-foreground text-xs">{t("common.askAssistant.noMcpServicesFound")}</CommandEmpty>
               {(filterType === "all" || filterType === "system") && systemServers.length > 0 && (
                 <>
                   <CommandGroup
-                    heading={filterType === "all" ? `系统服务(${systemServers.length})` : undefined}
+                    heading={filterType === "all" ? t("common.askAssistant.systemServices") : undefined}
                   >
                     {systemServers.map((server) => {
                       const isSelected = selectedMcpServerIds.includes(server.id);
@@ -167,7 +169,7 @@ export const McpSelector = memo(
                           {server.tools && server.tools.length > 0 && (
                             <CommandShortcut>
                               <Badge variant="outline" className="text-xs">
-                                {server.tools.length} 工具
+                                {t("common.askAssistant.toolsCount", { count: server.tools.length })}
                               </Badge>
                             </CommandShortcut>
                           )}
@@ -179,7 +181,7 @@ export const McpSelector = memo(
               )}
               {(filterType === "all" || filterType === "user") && userServers.length > 0 && (
                 <CommandGroup
-                  heading={filterType === "all" ? `我的服务(${userServers.length})` : undefined}
+                  heading={filterType === "all" ? t("common.askAssistant.myServices") : undefined}
                 >
                   {userServers.map((server) => {
                     const isSelected = selectedMcpServerIds.includes(server.id);

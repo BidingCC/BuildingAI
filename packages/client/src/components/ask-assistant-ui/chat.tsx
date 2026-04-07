@@ -5,6 +5,7 @@ import {
   InfiniteScrollTopScrollButton,
   useInfiniteScrollTopContext,
 } from "@buildingai/ui/components/infinite-scroll-top";
+import { useI18n } from "@buildingai/i18n";
 import { Button } from "@buildingai/ui/components/ui/button";
 import { SidebarTrigger } from "@buildingai/ui/components/ui/sidebar";
 import { cn } from "@buildingai/ui/lib/utils";
@@ -44,6 +45,7 @@ const ChatHeader = memo(function ChatHeader({
   onSelectModel: (id: string) => void;
   onShare?: () => void;
 }) {
+  const { t } = useI18n();
   const [modelSelectorOpen, setModelSelectorOpen] = useState(false);
 
   return (
@@ -70,7 +72,7 @@ const ChatHeader = memo(function ChatHeader({
       {onShare && (
         <Button onClick={onShare} size="icon-sm" variant="ghost">
           <ShareIcon className="size-4" />
-          <span className="sr-only">分享</span>
+          <span className="sr-only">{t("common.askAssistant.share")}</span>
         </Button>
       )}
     </header>
@@ -101,6 +103,7 @@ const WelcomeMessage = memo(function WelcomeMessage({
   welcomeTitle?: string;
   welcomeDescription?: string;
 }) {
+  const { t } = useI18n();
   const descContent = useMemo(
     () => parseWelcomeDescription(welcomeDescription),
     [welcomeDescription],
@@ -109,7 +112,7 @@ const WelcomeMessage = memo(function WelcomeMessage({
   return (
     <div className="flex flex-1 items-center justify-center py-4">
       <div className="text-center">
-        <h2 className="text-2xl font-semibold">{welcomeTitle || "欢迎使用 AI 助手"}</h2>
+        <h2 className="text-2xl font-semibold">{welcomeTitle || t("common.askAssistant.welcomeToAIAssistant")}</h2>
         {descContent?.type === "rich" ? (
           <div className="mt-2">
             <EditorContentRenderer
@@ -119,7 +122,7 @@ const WelcomeMessage = memo(function WelcomeMessage({
         ) : descContent?.type === "text" ? (
           <p className="text-muted-foreground mt-2">{descContent.value}</p>
         ) : (
-          <p className="text-muted-foreground mt-2">开始对话，或者选择一个推荐问题</p>
+          <p className="text-muted-foreground mt-2">{t("common.askAssistant.startConversationOrChoose")}</p>
         )}
       </div>
     </div>
@@ -127,10 +130,11 @@ const WelcomeMessage = memo(function WelcomeMessage({
 });
 
 const LoadingIndicator = memo(function LoadingIndicator() {
+  const { t } = useI18n();
   return (
     <div className="flex flex-1 items-center justify-center py-4">
       <div className="text-center">
-        <p className="text-muted-foreground">加载中...</p>
+        <p className="text-muted-foreground">{t("common.askAssistant.loading")}</p>
       </div>
     </div>
   );
@@ -178,6 +182,7 @@ const InputArea = memo(function InputArea({
   hasMessages: boolean;
   footerText?: string;
 }) {
+  const { t } = useI18n();
   const { suggestions, status, textareaRef, isLoading, onSend, onStop, selectedModelId } =
     useAssistantContext();
   const { id } = useParams<{ id: string }>();
@@ -186,7 +191,7 @@ const InputArea = memo(function InputArea({
   const handleSubmit = useCallback(
     async (message: PromptInputMessage, _event: FormEvent<HTMLFormElement>) => {
       if (!selectedModelId) {
-        toast.warning("请先选择模型");
+        toast.warning(t("common.askAssistant.pleaseSelectModelFirst"));
         throw new Error("No model selected");
       }
       const text = message.text?.trim();
@@ -227,7 +232,7 @@ const InputArea = memo(function InputArea({
         />
       </div>
       <div className="text-muted-foreground bg-background py-1.5 text-center text-xs">
-        {footerText || "内容由 AI 生成，请仔细甄别"}
+        {footerText || t("common.askAssistant.contentGeneratedByAI")}
       </div>
     </div>
   );

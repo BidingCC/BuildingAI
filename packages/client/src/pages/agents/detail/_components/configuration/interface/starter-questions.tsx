@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { Button } from "@buildingai/ui/components/ui/button";
 import { Input } from "@buildingai/ui/components/ui/input";
 import { cn } from "@buildingai/ui/lib/utils";
@@ -64,7 +65,7 @@ const SortableStarterQuestionItem = memo(
             </span>
             <Input
               value={item.text}
-              placeholder="请输入开场问题"
+              placeholder={t("agent.detail.interface.inputPlaceholder")}
               className={cn(
                 "border-0 pr-9 pl-8 shadow-none focus-visible:ring-0",
                 !canDelete && "pr-3",
@@ -91,6 +92,7 @@ SortableStarterQuestionItem.displayName = "SortableStarterQuestionItem";
 
 export const StarterQuestions = memo(
   ({ value, onChange }: { value: string[]; onChange: (value: string[]) => void }) => {
+    const { t } = useI18n();
     const sensors = useSensors(useSensor(PointerSensor));
 
     const [starterQuestions, setStarterQuestions] = useState<StarterQuestion[]>(() => {
@@ -154,7 +156,7 @@ export const StarterQuestions = memo(
             starterQuestions.length !== 0 && "mb-2",
           )}
         >
-          <h3 className="text-sm font-medium">开场问题</h3>
+          <h3 className="text-sm font-medium">{t("agent.detail.interface.starterQuestions")}</h3>
 
           <Button
             variant="ghost"
@@ -163,7 +165,7 @@ export const StarterQuestions = memo(
             onClick={handleAdd}
           >
             <Plus className="h-4 w-4" />
-            <span>添加</span>
+            <span>{t("common.add")}</span>
           </Button>
         </div>
 

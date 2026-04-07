@@ -4,6 +4,7 @@ import {
   type SpeechTtsModelConfig,
   type SpeechVoiceOption,
 } from "@buildingai/ai-sdk/config/audio";
+import { useI18n } from "@buildingai/i18n";
 import { useAiProvidersQuery } from "@buildingai/services/web";
 import type { VoiceConfig } from "@buildingai/types";
 import { Label } from "@buildingai/ui/components/ui/label";
@@ -30,6 +31,7 @@ export const VoiceConfigSelector = memo(function VoiceConfigSelector({
   value,
   onChange,
 }: VoiceConfigSelectorProps) {
+  const { t } = useI18n();
   const stt = value?.stt;
   const tts = value?.tts;
 
@@ -75,7 +77,7 @@ export const VoiceConfigSelector = memo(function VoiceConfigSelector({
   );
 
   const sttLanguageOptions = useMemo(() => {
-    const auto = { value: "auto", label: "自动" };
+    const auto = { value: "auto", label: t("agent.detail.model.auto") };
     const list = sttSpeechConfig?.transcription.models.find(
       (m: SpeechTranscriptionModelConfig) => m.modelId === sttModelKey,
     )?.supportedLanguages;
@@ -149,16 +151,18 @@ export const VoiceConfigSelector = memo(function VoiceConfigSelector({
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <h3 className="text-sm font-medium">语音能力（可选）</h3>
+        <h3 className="text-sm font-medium">{t("agent.detail.model.voiceCapability")}</h3>
         <p className="text-muted-foreground text-xs">
-          配置后，对话中可启用语音输入（麦克风）与朗读回复（播放）。
+          {t("agent.detail.model.voiceCapabilityDesc")}
         </p>
       </div>
 
       <div className="bg-secondary flex flex-col gap-3 rounded-lg px-3 py-2.5">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5">
-            <Label className="text-sm font-medium">语音识别 (STT)</Label>
+            <Label className="text-sm font-medium">
+              {t("agent.detail.model.voiceRecognition")}
+            </Label>
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
@@ -170,7 +174,7 @@ export const VoiceConfigSelector = memo(function VoiceConfigSelector({
                 </button>
               </TooltipTrigger>
               <TooltipContent side="top" className="max-w-xs text-xs">
-                将用户语音转成文字填入输入框，不配置则不显示麦克风按钮。
+                {t("agent.detail.model.voiceInputDesc")}
               </TooltipContent>
             </Tooltip>
           </div>
@@ -180,20 +184,22 @@ export const VoiceConfigSelector = memo(function VoiceConfigSelector({
               value={stt?.modelId ?? ""}
               onSelect={(id) => updateStt({ modelId: id })}
               triggerVariant="button"
-              placeholder="不启用"
+              placeholder={t("agent.detail.model.notEnabled")}
               className="w-full min-w-0"
             />
           </div>
         </div>
         {stt?.modelId && sttLanguageOptions.length > 1 && (
           <div className="w-32">
-            <Label className="text-muted-foreground mb-1.5 block text-xs">语言</Label>
+            <Label className="text-muted-foreground mb-1.5 block text-xs">
+              {t("agent.detail.model.language")}
+            </Label>
             <Select
               value={stt.language || "auto"}
               onValueChange={(v) => updateStt({ language: v === "auto" ? undefined : v })}
             >
               <SelectTrigger className="bg-background h-9 w-full">
-                <SelectValue placeholder="自动" />
+                <SelectValue placeholder={t("agent.detail.model.auto")} />
               </SelectTrigger>
               <SelectContent>
                 {sttLanguageOptions.map((opt) => (
@@ -210,7 +216,7 @@ export const VoiceConfigSelector = memo(function VoiceConfigSelector({
       <div className="bg-secondary flex flex-col gap-3 rounded-lg px-3 py-2.5">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5">
-            <Label className="text-sm font-medium">语音合成 (TTS)</Label>
+            <Label className="text-sm font-medium">{t("agent.detail.model.voiceSynthesis")}</Label>
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
@@ -222,7 +228,7 @@ export const VoiceConfigSelector = memo(function VoiceConfigSelector({
                 </button>
               </TooltipTrigger>
               <TooltipContent side="top" className="max-w-xs text-xs">
-                将助手回复朗读播放，不配置则不显示朗读按钮。
+                {t("agent.detail.model.voiceOutputDesc")}
               </TooltipContent>
             </Tooltip>
           </div>
@@ -232,7 +238,7 @@ export const VoiceConfigSelector = memo(function VoiceConfigSelector({
               value={tts?.modelId ?? ""}
               onSelect={handleTtsModelSelect}
               triggerVariant="button"
-              placeholder="不启用"
+              placeholder={t("agent.detail.model.notEnabled")}
               className="w-full min-w-0"
             />
           </div>
@@ -241,7 +247,9 @@ export const VoiceConfigSelector = memo(function VoiceConfigSelector({
           <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end">
             {ttsVoiceOptions.length > 0 && (
               <div className="min-w-0 sm:w-48">
-                <Label className="text-muted-foreground mb-1.5 block text-xs">音色</Label>
+                <Label className="text-muted-foreground mb-1.5 block text-xs">
+                  {t("agent.detail.model.timbre")}
+                </Label>
                 <Select
                   value={tts.voiceId ?? ttsDefaultVoiceId ?? ttsVoiceOptions[0]?.value ?? ""}
                   onValueChange={(v) => updateTts({ voiceId: v || undefined })}
@@ -261,7 +269,7 @@ export const VoiceConfigSelector = memo(function VoiceConfigSelector({
             )}
             <div className="min-w-0 flex-1 sm:max-w-48">
               <Label className="text-muted-foreground mb-1.5 block text-xs">
-                语速 {ttsSpeedValue.toFixed(1)}x
+                {t("agent.detail.model.speed")} {ttsSpeedValue.toFixed(1)}x
               </Label>
               <div className="flex h-8 w-full items-center">
                 <Slider

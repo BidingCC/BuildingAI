@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { type McpServer, useMcpServerQuery } from "@buildingai/services/console";
 import { Badge } from "@buildingai/ui/components/ui/badge";
 import {
@@ -19,6 +20,7 @@ type McpToolsDialogProps = {
 };
 
 export const McpToolsDialog = ({ open, onOpenChange, server }: McpToolsDialogProps) => {
+  const { t } = useI18n();
   const [localServer, setLocalServer] = useState<McpServer | null>(server);
 
   useEffect(() => {
@@ -44,9 +46,9 @@ export const McpToolsDialog = ({ open, onOpenChange, server }: McpToolsDialogPro
         <DialogHeader className="p-4 pb-2">
           <DialogTitle className="flex items-center gap-2">
             <Hammer className="size-4" />
-            {localServer?.name} - 工具列表
+            {localServer?.name} - {t("mcp.tools.title")}
           </DialogTitle>
-          <DialogDescription>共 {isLoading ? "..." : tools.length} 个工具</DialogDescription>
+          <DialogDescription>{t("mcp.tools.count", { count: isLoading ? "..." : tools.length })}</DialogDescription>
         </DialogHeader>
 
         <ScrollArea className="max-h-[60vh]">
@@ -75,7 +77,7 @@ export const McpToolsDialog = ({ open, onOpenChange, server }: McpToolsDialogPro
               ))
             ) : (
               <div className="text-muted-foreground flex h-24 items-center justify-center text-sm">
-                暂无工具数据，请先检测连接以同步工具
+                {t("mcp.tools.noData")}
               </div>
             )}
           </div>

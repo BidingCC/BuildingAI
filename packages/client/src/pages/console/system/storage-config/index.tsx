@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { useStorageConfigListQuery } from "@buildingai/services/console";
 import { PermissionGuard } from "@buildingai/ui/components/auth/permission-guard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@buildingai/ui/components/ui/tabs";
@@ -9,6 +10,7 @@ const Local = lazy(async () => import("./_components/local"));
 const Oss = lazy(async () => import("./_components/oss"));
 
 const SystemStorageConfigIndexPage = () => {
+  const { t } = useI18n();
   const [activeTab, setActiveTab] = useState("");
   const { data: configList } = useStorageConfigListQuery();
 
@@ -18,10 +20,10 @@ const SystemStorageConfigIndexPage = () => {
 
   const tabs = useMemo(() => {
     const labelMap: Record<string, string> = {
-      local: "本地存储",
-      oss: "阿里云OSS",
-      cos: "腾讯云COS",
-      kodo: "七牛云KODO",
+      local: t("system.storageConfig.tabs.local"),
+      oss: t("system.storageConfig.tabs.oss"),
+      cos: t("system.storageConfig.tabs.cos"),
+      kodo: t("system.storageConfig.tabs.kodo"),
     };
     return (
       configList?.map((item) => ({
@@ -29,7 +31,7 @@ const SystemStorageConfigIndexPage = () => {
         label: labelMap[item.storageType] ?? item.storageType,
       })) ?? []
     );
-  }, [configList]);
+  }, [configList, t]);
 
   useEffect(() => {
     if (!configList || configList.length === 0) return;

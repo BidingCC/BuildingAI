@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { useAgentDetailQuery, useUpdatePublishConfigMutation } from "@buildingai/services/web";
 import { Badge } from "@buildingai/ui/components/ui/badge";
 import { Card, CardContent } from "@buildingai/ui/components/ui/card";
@@ -171,7 +172,7 @@ function ChannelCard({
               onClick={onRegenerate}
             >
               <RefreshCw className="mr-1.5 size-3.5" />
-              重新生成
+              {t("agent.detail.publish.regenerate")}
             </button>
           )}
 
@@ -195,6 +196,7 @@ function ChannelCard({
 }
 
 export default function Publish() {
+  const { t } = useI18n();
   const { id } = useParams();
   const agentId = id ?? "";
   const [activeTab, setActiveTab] = useState<PublishTab>("all");
@@ -228,7 +230,7 @@ export default function Publish() {
 
   const handleCopy = useCallback(async (value: string, successMessage: string) => {
     if (!value) {
-      toast.error("暂无可复制内容");
+      toast.error(t("agent.detail.publish.noContentToCopy"));
       return;
     }
 
@@ -236,13 +238,13 @@ export default function Publish() {
       await navigator.clipboard.writeText(value);
       toast.success(successMessage);
     } catch {
-      toast.error("复制失败");
+      toast.error(t("agent.detail.publish.copyFailed"));
     }
   }, []);
 
   const handleOpenPublicLink = useCallback(() => {
     if (!publicLink) {
-      toast.error("请先发布智能体");
+      toast.error(t("agent.detail.publish.pleasePublishFirst"));
       return;
     }
     window.open(publicLink, "_blank", "noopener,noreferrer");
@@ -264,11 +266,11 @@ export default function Publish() {
       <div className="flex h-full flex-col overflow-y-auto px-6 py-4">
         <div className="space-y-6">
           <div className="flex items-center gap-4">
-            <h1 className="text-lg font-semibold">发布渠道</h1>
+            <h1 className="text-lg font-semibold">{t("agent.detail.publish.title")}</h1>
             <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-5">
               <TabsList className="w-fit rounded-xl">
-                <TabsTrigger value="all">全部</TabsTrigger>
-                <TabsTrigger value="webapp">WebAPP</TabsTrigger>
+                <TabsTrigger value="all">{t("agent.detail.publish.all")}</TabsTrigger>
+                <TabsTrigger value="webapp">{t("agent.detail.publish.webappTab")}</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
@@ -293,17 +295,19 @@ export default function Publish() {
               {(activeTab === "all" || activeTab === "webapp") && (
                 <section className="space-y-4">
                   <div className="flex items-center gap-2">
-                    <h2 className="text-lg font-semibold">WebAPP</h2>
+                    <h2 className="text-lg font-semibold">{t("agent.detail.publish.webapp")}</h2>
                     <Badge variant="secondary">2</Badge>
                   </div>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-3">
                     <ChannelCard
                       icon={Earth}
-                      title="网页"
-                      description="用户在此链接可以直接和您的智能体对话，适合快速分发与预览体验。"
-                      primaryActionLabel="复制链接"
-                      onPrimaryAction={() => handleCopyPublishedValue(publicLink, "公开链接已复制")}
-                      secondaryActionLabel="预览体验"
+                      title={t("agent.detail.publish.webPage")}
+                      description={t("agent.detail.publish.webPageDesc")}
+                      primaryActionLabel={t("agent.detail.publish.copyLink")}
+                      onPrimaryAction={() =>
+                        handleCopyPublishedValue(publicLink, t("agent.detail.publish.linkCopied"))
+                      }
+                      secondaryActionLabel={t("agent.detail.publish.previewExperience")}
                       onSecondaryAction={handleOpenPublicLink}
                       switchChecked={agent?.publishConfig?.enableSite ?? false}
                       onSwitchChange={(checked) =>
@@ -317,12 +321,17 @@ export default function Publish() {
                     />
                     <ChannelCard
                       icon={SquareCode}
-                      title="JS 嵌入"
-                      description="可将智能体页面嵌入到任意站点，适用于官网、帮助中心和营销落地页。"
+                      title={t("agent.detail.publish.jsEmbed")}
+                      description={t("agent.detail.publish.jsEmbedDesc")}
                       onOpen={() => setDialogType("embed")}
-                      primaryActionLabel="复制 iframe"
-                      onPrimaryAction={() => handleCopyPublishedValue(embedCode, "嵌入代码已复制")}
-                      secondaryActionLabel="查看代码"
+                      primaryActionLabel={t("agent.detail.publish.copyIframe")}
+                      onPrimaryAction={() =>
+                        handleCopyPublishedValue(
+                          embedCode,
+                          t("agent.detail.publish.embedCodeCopied"),
+                        )
+                      }
+                      secondaryActionLabel={t("agent.detail.publish.viewCode")}
                       onSecondaryAction={() => setDialogType("embed")}
                       secondaryActionIcon={FileCodeCorner}
                     />

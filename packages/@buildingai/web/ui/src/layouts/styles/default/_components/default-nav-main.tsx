@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from "@buildingai/i18n";
 import {
   type ConversationRecord,
   useConversationsQuery,
@@ -444,6 +445,7 @@ function ChatHistoryMenuItem({
   isActive: boolean;
   onOpenDialog: () => void;
 }) {
+  const { t } = useI18n();
   const { pathname } = useLocation();
   const { state } = useSidebar();
   const { isLogin } = useAuthStore((state) => state.authActions);
@@ -452,7 +454,7 @@ function ChatHistoryMenuItem({
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
-        tooltip={item.title}
+        tooltip={t(`sidebar.${item.id}`)}
         className="group/history-chat-icon h-9"
         onClick={onOpenDialog}
         asChild
@@ -492,7 +494,7 @@ function ChatHistoryMenuItem({
               "ml-6": state === "expanded",
             })}
           >
-            {item.title}
+            {t(`sidebar.${item.id}`) || item.title}
           </span>
         </div>
       </SidebarMenuButton>
@@ -509,9 +511,9 @@ function ChatHistoryMenuItem({
             <SidebarMenuSubItem>
               <SidebarMenuSubButton onClick={onOpenDialog} className="h-9 cursor-pointer">
                 <span className="text-muted-foreground line-clamp-1 text-xs font-medium">
-                  查看全部
+                  {t("chat.viewAll")}
                 </span>
-                <span className="sr-only">查看全部</span>
+                <span className="sr-only">{t("chat.viewAll")}</span>
               </SidebarMenuSubButton>
               <SidebarMenuAction
                 showOnHover
@@ -533,13 +535,14 @@ function ChatHistoryMenuItem({
 function CollapsibleMenuItem({ item, isActive }: { item: NavItem; isActive: boolean }) {
   const { pathname } = useLocation();
   const isItemActive = (path?: string) => path === pathname;
+  const { t } = useI18n();
 
   return (
     <SidebarMenuItem>
       <CollapsibleTrigger asChild className="group/collapsible">
-        <SidebarMenuButton isActive={isActive} tooltip={item.title} className="h-9">
+        <SidebarMenuButton isActive={isActive} tooltip={t(`sidebar.${item.id}`)} className="h-9">
           {item.icon && <NavIcon icon={item.icon} isActive={isActive} />}
-          <span>{item.title}</span>
+          <span>{t(`sidebar.${item.id}`)}</span>
           <SidebarMenuAction>
             <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
           </SidebarMenuAction>
@@ -570,11 +573,12 @@ function CollapsibleMenuItem({ item, isActive }: { item: NavItem; isActive: bool
  */
 function LinkMenuItem({ item, isActive }: { item: NavItem; isActive: boolean }) {
   const isExternal = item.target === "_blank";
+  const { t } = useI18n();
 
   const content = (
     <>
       {item.icon && <NavIcon icon={item.icon} isActive={isActive} />}
-      <span className="mr-auto line-clamp-1 flex-1 whitespace-nowrap">{item.title}</span>
+      <span className="mr-auto line-clamp-1 flex-1 whitespace-nowrap">{t(`sidebar.${item.id}`) || item.title}</span>
       {item.action}
       {isExternal && (
         <ExternalLink className="text-muted-foreground size-3.5 shrink-0 opacity-0 transition-opacity group-hover/link-menu-item:opacity-100" />
@@ -585,7 +589,7 @@ function LinkMenuItem({ item, isActive }: { item: NavItem; isActive: boolean }) 
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
-        tooltip={item.title}
+        tooltip={t(`sidebar.${item.id}`)}
         className="group/link-menu-item h-9"
         isActive={isActive}
         asChild
@@ -609,6 +613,7 @@ export function DefaultNavMain({
   items: NavItem[];
   isLoading?: boolean;
 }) {
+  const { t } = useI18n();
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { isLogin } = useAuthStore((state) => state.authActions);
@@ -712,7 +717,6 @@ export function DefaultNavMain({
   const renderMenuItem = (item: NavItem) => {
     const hasItems = item.items && item.items.length > 0;
     const isChatHistory = item.id === "menu_history_fixed";
-
     if (isChatHistory) {
       return (
         <ChatHistoryMenuItem
@@ -745,7 +749,7 @@ export function DefaultNavMain({
       isFirst = false;
 
       groups.push(
-        <CommandGroup key={group} heading={TIME_GROUP_LABELS[group]}>
+        <CommandGroup key={group} heading={t(`sidebar.${TIME_GROUP_LABELS[group]}`)}>
           {conversations.map((conversation) => (
             <HistoryCommandItem
               key={conversation.id}

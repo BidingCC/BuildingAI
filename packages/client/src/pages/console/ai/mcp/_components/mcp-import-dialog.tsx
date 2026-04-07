@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   useBatchCheckMcpConnectionMutation,
   useImportMcpServersFromJsonMutation,
@@ -29,7 +30,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 const formSchema = z.object({
-  jsonString: z.string({ message: "JSON配置必须填写" }).min(1, "JSON配置不能为空"),
+  jsonString: z.string().min(1, "JSON configuration is required"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -53,6 +54,7 @@ const JSON_EXAMPLE = `{
  * MCP Server import dialog component for importing from JSON
  */
 export const McpImportDialog = ({ open, onOpenChange, onSuccess }: McpImportDialogProps) => {
+  const { t } = useI18n();
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema as any),
     defaultValues: {
@@ -78,16 +80,16 @@ export const McpImportDialog = ({ open, onOpenChange, onSuccess }: McpImportDial
         .join("\n");
 
       if (success) {
-        toast.success(`导入成功，共导入 ${created} 个MCP服务`);
+        toast.success(t("mcp.import.toast.success", { count: created }));
       } else if (created > 0) {
         toast.warning(
-          `部分导入成功：共 ${total} 个，成功 ${created} 个，失败 ${total - created} 个`,
+          t("mcp.import.toast.partialSuccess", { total, created, failed: total - created }),
           {
             description: errorMessages,
           },
         );
       } else {
-        toast.error(`导入失败：共 ${total} 个，全部失败`, {
+        toast.error(t("mcp.import.toast.allFailed", { total }), {
           description: errorMessages,
         });
         return;
@@ -107,7 +109,7 @@ export const McpImportDialog = ({ open, onOpenChange, onSuccess }: McpImportDial
     try {
       JSON.parse(values.jsonString);
     } catch {
-      toast.error("JSON格式错误，请检查输入");
+      toast.error(t("mcp.import.form.errors.jsonFormat"));
       return;
     }
 
@@ -122,8 +124,8 @@ export const McpImportDialog = ({ open, onOpenChange, onSuccess }: McpImportDial
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="gap-0 p-0 sm:max-w-lg">
         <DialogHeader className="p-4">
-          <DialogTitle>从JSON导入MCP服务</DialogTitle>
-          <DialogDescription>粘贴MCP服务配置的JSON字符串进行批量导入</DialogDescription>
+          <DialogTitle>{t("mcp.import.title")}</DialogTitle>
+          <DialogDescription>{t("mcp.import.description")}</DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
@@ -134,7 +136,7 @@ export const McpImportDialog = ({ open, onOpenChange, onSuccess }: McpImportDial
               render={({ field }) => (
                 <FormItem>
                   <div className="flex items-center justify-between">
-                    <FormLabel>JSON配置</FormLabel>
+                    <FormLabel>{t("mcp.import.form.jsonConfig")}</FormLabel>
                     <Button
                       type="button"
                       variant="link"
@@ -142,7 +144,7 @@ export const McpImportDialog = ({ open, onOpenChange, onSuccess }: McpImportDial
                       className="h-auto p-0"
                       onClick={handlePasteExample}
                     >
-                      填入示例
+                      {t("mcp.import.form.fillExample")}
                     </Button>
                   </div>
                   <FormControl>
@@ -153,7 +155,7 @@ export const McpImportDialog = ({ open, onOpenChange, onSuccess }: McpImportDial
                       {...field}
                     />
                   </FormControl>
-                  <FormDescription>支持标准的MCP服务配置格式，包含mcpServers对象</FormDescription>
+                  <FormDescription>{t("mcp.import.form.configFormat")}</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -161,11 +163,11 @@ export const McpImportDialog = ({ open, onOpenChange, onSuccess }: McpImportDial
 
             <DialogFooter className="flex-row justify-end">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                取消
+                {t("action.cancel")}
               </Button>
               <Button type="submit" disabled={importMutation.isPending}>
                 {importMutation.isPending && <Loader2 className="animate-spin" />}
-                导入
+                {t("mcp.import.form.submit")}
               </Button>
             </DialogFooter>
           </form>

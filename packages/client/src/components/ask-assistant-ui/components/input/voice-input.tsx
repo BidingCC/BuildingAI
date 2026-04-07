@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from "@buildingai/i18n";
 import { Button } from "@buildingai/ui/components/ui/button";
 import { Spinner } from "@buildingai/ui/components/ui/spinner";
 import { cn } from "@buildingai/ui/lib/utils";
@@ -212,6 +213,7 @@ const VoiceInputInner = memo(function VoiceInputInner({
   onTranscriptReceived,
   className,
 }: VoiceInputProps) {
+  const { t } = useI18n();
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -352,7 +354,7 @@ const VoiceInputInner = memo(function VoiceInputInner({
               style={{ width: "100%", height: "100%", imageRendering: "crisp-edges" }}
             />
           ) : (
-            <span className="text-muted-foreground text-xs">连接中…</span>
+            <span className="text-muted-foreground text-xs">{t("ai:askAssistant.voiceInput.connecting")}</span>
           )}
         </div>
         <Button
@@ -361,7 +363,7 @@ const VoiceInputInner = memo(function VoiceInputInner({
           size="icon-sm"
           className="size-7 rounded-full"
           onClick={handleCancel}
-          aria-label="取消"
+          aria-label={t("ai:askAssistant.voiceInput.cancel")}
         >
           <X className="size-3.5" strokeWidth={2.25} />
         </Button>
@@ -371,7 +373,7 @@ const VoiceInputInner = memo(function VoiceInputInner({
           className="size-7 rounded-full"
           onClick={handleConfirm}
           disabled={isProcessing}
-          aria-label="确认"
+          aria-label={t("ai:askAssistant.voiceInput.confirm")}
           loading={isProcessing}
         >
           <Check className="size-3.5" strokeWidth={2.5} />
@@ -389,7 +391,7 @@ const VoiceInputInner = memo(function VoiceInputInner({
       disabled={disabled}
       onClick={startRecording}
       loading={isProcessing}
-      aria-label="语音输入"
+      aria-label={t("ai:askAssistant.voiceInput.voiceInput")}
     >
       <Mic className="size-4" strokeWidth={2} />
     </Button>

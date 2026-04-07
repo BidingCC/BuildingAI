@@ -1,4 +1,5 @@
 import { useDocumentHead } from "@buildingai/hooks";
+import { useI18n } from "@buildingai/i18n";
 import {
   type AiProvider,
   useAiProvidersQuery,
@@ -14,7 +15,7 @@ import { toast } from "sonner";
 
 import { AssistantProvider } from "@/components/ask-assistant-ui";
 
-import { ChatContainer, DEFAULT_SUGGESTIONS } from "./_components/chat";
+import { ChatContainer, getDefaultSuggestions } from "./_components/chat";
 import { DatasetActions } from "./_components/dataset-actions";
 import { DatasetInfo } from "./_components/dataset-info";
 import {
@@ -43,10 +44,11 @@ const ChatPanel = memo(function ChatPanel({
   datasetName: string;
   creatorNickname: string;
 }) {
+  const { t } = useI18n();
   const { providerValue, setConversationId } = useDatasetsAssistant({
     datasetId,
     providers,
-    suggestions: DEFAULT_SUGGESTIONS,
+    suggestions: getDefaultSuggestions(t),
   });
 
   return (
@@ -58,7 +60,7 @@ const ChatPanel = memo(function ChatPanel({
         welcomeConfig={{
           title: datasetName,
           creator: creatorNickname,
-          instruction: "你可以通过提问了解知识库中的相关内容",
+          instruction: t("chat.askAssistantTip"),
         }}
       />
     </AssistantProvider>
@@ -66,6 +68,7 @@ const ChatPanel = memo(function ChatPanel({
 });
 
 export default function DatasetDetailPage() {
+  const { t } = useI18n();
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<DocumentTab>("all");
@@ -81,7 +84,7 @@ export default function DatasetDetailPage() {
   });
 
   useDocumentHead({
-    title: dataset?.name || "知识库详情",
+    title: dataset?.name || t("dataset.detail.title"),
   });
 
   const { uploadDocuments, uploadDocumentFromUrl } = useDatasetDocumentUpload(id);
@@ -129,11 +132,19 @@ export default function DatasetDetailPage() {
               const published = Boolean(
                 data?.publishedToSquare || data?.squarePublishStatus === "approved",
               );
-              toast.success(published ? "已发布到知识广场" : "已提交审核，请等待审核结果");
+              toast.success(
+                published
+                  ? t("dataset.detail.publishSuccess")
+                  : t("dataset.detail.submittedForReview"),
+              );
               queryClient.refetchQueries({ queryKey: ["datasets", dataset.id] });
             },
             onError: (error) => {
-              toast.error(error instanceof Error ? error.message : "发布失败");
+              toast.error(
+                error instanceof Error
+                  ? error.message
+                  : t("dataset.detail.publishFailed", { message: "" }),
+              );
             },
           },
         );
@@ -141,11 +152,15 @@ export default function DatasetDetailPage() {
         unpublishMutation.mutate(undefined, {
           onSuccess: () => {
             dialog.close();
-            toast.success("已从知识广场取消发布");
+            toast.success(t("dataset.detail.unpublishSuccess"));
             queryClient.refetchQueries({ queryKey: ["datasets", dataset.id] });
           },
           onError: (error) => {
-            toast.error(error instanceof Error ? error.message : "取消发布失败");
+            toast.error(
+              error instanceof Error
+                ? error.message
+                : t("dataset.detail.unpublishFailed", { message: "" }),
+            );
           },
         });
       }
@@ -217,7 +232,7 @@ export default function DatasetDetailPage() {
               <DatasetActions />
             </div>
             <p className="text-muted-foreground mt-2 text-sm">
-              {dataset?.description ?? "快来填写简介吧～"}
+              {dataset?.description ?? t("dataset.detail.emptyDescription")}
             </p>
           </div>
           <DocumentTabs />

@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   useSetWebsiteConfigMutation,
   useWebsiteConfigQuery,
@@ -27,12 +28,13 @@ export type StatisticsFormValues = {
 const defaultValues: StatisticsFormValues = { appid: "" };
 
 export default function Statistics() {
+  const { t } = useI18n();
   const { data: rawData, isLoading } = useWebsiteConfigQuery();
   const data = rawData as WebsiteConfigResponse | undefined;
   const setMutation = useSetWebsiteConfigMutation({
-    onSuccess: () => toast.success("保存成功"),
+    onSuccess: () => toast.success(t("system.websiteConfig.statistics.saveSuccess")),
     onError: (e) => {
-      console.log(`保存失败: ${e.message}`);
+      console.log(`${t("system.websiteConfig.statistics.saveFailed", { message: e.message })}`);
     },
   });
 
@@ -62,12 +64,15 @@ export default function Statistics() {
           name="appid"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>AppID</FormLabel>
+              <FormLabel>{t("system.websiteConfig.statistics.appid.label")}</FormLabel>
               <FormControl>
-                <Input placeholder="请输入统计应用ID" {...field} />
+                <Input
+                  placeholder={t("system.websiteConfig.statistics.appid.placeholder")}
+                  {...field}
+                />
               </FormControl>
               <FormDescription>
-                开通地址:{" "}
+                {t("system.websiteConfig.statistics.appid.description")}:{" "}
                 <Button variant="link" asChild className="h-fit p-0">
                   <Link
                     to="https://clarity.microsoft.com/"
@@ -86,7 +91,7 @@ export default function Statistics() {
           <PermissionGuard permissions="system-website:setConfig">
             <Button type="submit" disabled={setMutation.isPending}>
               {setMutation.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
-              保存设置
+              {t("system.websiteConfig.statistics.save")}
             </Button>
             <Button
               type="button"
@@ -95,7 +100,7 @@ export default function Statistics() {
                 data?.statistics != null && form.reset({ appid: data.statistics.appid ?? "" })
               }
             >
-              重置设置
+              {t("system.websiteConfig.statistics.reset")}
             </Button>
           </PermissionGuard>
         </div>

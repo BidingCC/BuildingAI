@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from "@buildingai/i18n";
 import { useAuthStore } from "@buildingai/stores";
 import { LucideIcon } from "@buildingai/ui/components/lucide-icon";
 import {
@@ -53,9 +54,11 @@ function getVisibleChildren(menu: MenuItem): MenuItem[] {
 }
 
 function NavMenuItem({ menu, basePath = "" }: { menu: MenuItem; basePath?: string }) {
+  const { t } = useI18n();
   const location = useLocation();
   const { state, setOpenMobile, isMobile } = useSidebar();
   const isCollapsed = state === "collapsed";
+  const label = menu.code ? (t(`sidebar.${menu.code}`) || menu.name) : menu.name;
 
   const handleLinkClick = () => {
     if (isMobile) {
@@ -80,7 +83,7 @@ function NavMenuItem({ menu, basePath = "" }: { menu: MenuItem; basePath?: strin
                       "menu") as keyof typeof dynamicIconImports
                   }
                 />
-                <span>{menu.name}</span>
+                <span>{label}</span>
               </SidebarMenuButton>
             </HoverCardTrigger>
             <HoverCardContent side="right" align="start" className="w-48 p-1">
@@ -88,6 +91,7 @@ function NavMenuItem({ menu, basePath = "" }: { menu: MenuItem; basePath?: strin
                 {visibleChildren.map((child) => {
                   const childPath = `/console/${menuPath}/${child.path}`.replace(/\/+/g, "/");
                   const isChildActive = location.pathname === childPath;
+                  const childLabel = child.code ? (t(`sidebar.${child.code}`) || child.name) : child.name;
                   return (
                     <Link
                       key={child.id}
@@ -97,7 +101,7 @@ function NavMenuItem({ menu, basePath = "" }: { menu: MenuItem; basePath?: strin
                         isChildActive ? "bg-accent text-accent-foreground" : ""
                       }`}
                     >
-                      {child.name}
+                      {childLabel}
                     </Link>
                   );
                 })}
@@ -112,13 +116,13 @@ function NavMenuItem({ menu, basePath = "" }: { menu: MenuItem; basePath?: strin
       <Collapsible asChild defaultOpen={isActive}>
         <SidebarMenuItem>
           <CollapsibleTrigger asChild>
-            <SidebarMenuButton tooltip={menu.name}>
+            <SidebarMenuButton tooltip={label}>
               <LucideIcon
                 name={
                   (menu.icon?.replace("i-lucide-", "") || "menu") as keyof typeof dynamicIconImports
                 }
               />
-              <span>{menu.name}</span>
+              <span>{label}</span>
               <SidebarMenuAction asChild className="[[data-state=open]_>_&]:rotate-90">
                 <div>
                   <ChevronRight />
@@ -131,11 +135,12 @@ function NavMenuItem({ menu, basePath = "" }: { menu: MenuItem; basePath?: strin
             <SidebarMenuSub>
               {visibleChildren.map((child) => {
                 const childPath = `/console/${menuPath}/${child.path}`.replace(/\/+/g, "/");
+                const childLabel = child.code ? (t(`sidebar.${child.code}`) || child.name) : child.name;
                 return (
                   <SidebarMenuSubItem key={child.id}>
                     <SidebarMenuSubButton asChild isActive={location.pathname === childPath}>
                       <Link to={childPath} onClick={handleLinkClick}>
-                        <span>{child.name}</span>
+                        <span>{childLabel}</span>
                       </Link>
                     </SidebarMenuSubButton>
                   </SidebarMenuSubItem>
@@ -150,14 +155,14 @@ function NavMenuItem({ menu, basePath = "" }: { menu: MenuItem; basePath?: strin
 
   return (
     <SidebarMenuItem>
-      <SidebarMenuButton asChild tooltip={menu.name} isActive={location.pathname === fullPath}>
+      <SidebarMenuButton asChild tooltip={label} isActive={location.pathname === fullPath}>
         <Link to={fullPath} onClick={handleLinkClick}>
           <LucideIcon
             name={
               (menu.icon?.replace("i-lucide-", "") || "menu") as keyof typeof dynamicIconImports
             }
           />
-          <span>{menu.name}</span>
+          <span>{label}</span>
         </Link>
       </SidebarMenuButton>
     </SidebarMenuItem>
@@ -165,15 +170,17 @@ function NavMenuItem({ menu, basePath = "" }: { menu: MenuItem; basePath?: strin
 }
 
 function NavMenuGroup({ group }: { group: MenuItem }) {
+  const { t } = useI18n();
   const visibleChildren = getVisibleChildren(group);
   const { state } = useSidebar();
   const isExpanded = state === "expanded";
+  const groupLabel = group.code ? (t(`sidebar.${group.code}`) || group.name) : group.name;
 
   if (visibleChildren.length === 0) return null;
 
   return (
     <SidebarGroup>
-      {isExpanded && <SidebarGroupLabel>{group.name}</SidebarGroupLabel>}
+      {isExpanded && <SidebarGroupLabel>{groupLabel}</SidebarGroupLabel>}
 
       <SidebarMenu>
         {visibleChildren.map((menu) => (

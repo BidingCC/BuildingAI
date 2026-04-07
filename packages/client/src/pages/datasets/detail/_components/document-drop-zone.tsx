@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { cn } from "@buildingai/ui/lib/utils";
 import { FileUp } from "lucide-react";
 
@@ -7,6 +8,7 @@ export interface DocumentDropZoneProps {
 }
 
 export function DocumentDropZone({ isOver, visible }: DocumentDropZoneProps) {
+  const { t } = useI18n();
   if (visible) {
     return (
       <div
@@ -38,7 +40,7 @@ export function DocumentDropZone({ isOver, visible }: DocumentDropZoneProps) {
                 isOver ? "text-primary" : "text-muted-foreground",
               )}
             >
-              {isOver ? "释放文件以上传" : "拖放文件到此处创建文档"}
+              {isOver ? t("dataset.document.dropToUpload") : t("dataset.document.dragDropHint")}
             </p>
           </div>
         </div>
@@ -46,7 +48,9 @@ export function DocumentDropZone({ isOver, visible }: DocumentDropZoneProps) {
         {!isOver && (
           <div className="border-muted-foreground/20 bg-background/80 flex shrink-0 items-center justify-center gap-2 border-t py-2.5">
             <FileUp className="text-muted-foreground size-3.5" />
-            <p className="text-muted-foreground text-xs">拖放文件到此处创建文档</p>
+            <p className="text-muted-foreground text-xs">
+              {t("dataset.document.dragDropHintSmall")}
+            </p>
           </div>
         )}
       </div>
@@ -56,7 +60,7 @@ export function DocumentDropZone({ isOver, visible }: DocumentDropZoneProps) {
   return (
     <div className="flex shrink-0 items-center justify-center gap-2 py-2.5">
       <FileUp className="text-muted-foreground/40 size-3.5" />
-      <p className="text-muted-foreground/40 text-xs">拖放文件到此处创建文档</p>
+      <p className="text-muted-foreground/40 text-xs">{t("dataset.document.dragDropHintSmall")}</p>
     </div>
   );
 }

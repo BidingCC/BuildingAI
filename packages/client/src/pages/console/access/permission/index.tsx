@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   type GroupedPermissions,
   type Permission,
@@ -64,7 +65,7 @@ const PermissionItem = ({ permission }: PermissionItemProps) => {
       <code className="text-muted-foreground text-xs">{permission.code}</code>
       {permission.isDeprecated && (
         <Badge variant="destructive" className="text-xs">
-          已废弃
+          {t("access.permission.table.deprecated")}
         </Badge>
       )}
     </div>
@@ -72,6 +73,7 @@ const PermissionItem = ({ permission }: PermissionItemProps) => {
 };
 
 const AccessPermissionIndexPage = () => {
+  const { t } = useI18n();
   const [params, setParams] = useState<QueryPermissionListParams>({
     isGrouped: true,
   });
@@ -92,12 +94,12 @@ const AccessPermissionIndexPage = () => {
       <div className="flex flex-1 flex-col gap-4">
         <div className="bg-background sticky top-0 z-2 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
           <Input
-            placeholder="搜索权限名称"
+            placeholder={t("access.permission.searchNamePlaceholder")}
             className="text-sm"
             onChange={(e) => handleKeywordChange(e.target.value)}
           />
           <Input
-            placeholder="搜索权限分组"
+            placeholder={t("access.permission.searchGroupPlaceholder")}
             className="text-sm"
             onChange={(e) => handleGroupChange(e.target.value)}
           />
@@ -106,14 +108,14 @@ const AccessPermissionIndexPage = () => {
               <Button
                 onClick={async () => {
                   const result = await syncPermissions();
-                  toast.success("权限同步成功", {
-                    description: `新增: ${result.added}, 更新: ${result.updated}, 废弃: ${result.deprecated}, 总计: ${result.total}`,
+                  toast.success(t("access.permission.toast.syncSuccess"), {
+                    description: `${t("access.permission.syncResult.added")}: ${result.added}, ${t("access.permission.syncResult.updated")}: ${result.updated}, ${t("access.permission.syncResult.deprecated")}: ${result.deprecated}, ${t("access.permission.syncResult.total")}: ${result.total}`,
                   });
                 }}
                 loading={isSyncing}
               >
                 {!isSyncing && <RefreshCcw />}
-                更新权限
+                {t("access.permission.updatePermissions")}
               </Button>
             </PermissionGuard>
           </div>

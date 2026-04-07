@@ -1,7 +1,8 @@
+import { useI18n } from "@buildingai/i18n";
 import {
-  useUpdateGoogleConfigMutation,
-  useGoogleConfigQuery,
   type GoogleConfigResponse,
+  useGoogleConfigQuery,
+  useUpdateGoogleConfigMutation,
 } from "@buildingai/services/console";
 import { PermissionGuard } from "@buildingai/ui/components/auth/permission-guard";
 import { Alert, AlertTitle } from "@buildingai/ui/components/ui/alert";
@@ -36,11 +37,12 @@ import { PageContainer } from "@/layouts/console/_components/page-container";
 const GOOGLE_CALLBACK_URL = `${window.location.origin}/api/auth/google-callback`;
 
 const GoogleIndexPage = () => {
+  const { t } = useI18n();
   const { data, isLoading } = useGoogleConfigQuery();
   const config = data as GoogleConfigResponse | undefined;
   const updateMutation = useUpdateGoogleConfigMutation({
-    onSuccess: () => toast.success("保存成功"),
-    onError: (e) => toast.error(`保存失败: ${e.message}`),
+    onSuccess: () => toast.success(t("channel.google.saveSuccess")),
+    onError: (e) => toast.error(t("channel.google.saveFailed", { message: e.message })),
   });
 
   const [clientId, setClientId] = useState("");
@@ -48,7 +50,7 @@ const GoogleIndexPage = () => {
   const [enabled, setEnabled] = useState(false);
 
   const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text).then(() => toast.success("已复制"));
+    navigator.clipboard.writeText(text).then(() => toast.success(t("channel.google.copied")));
   };
 
   useEffect(() => {
@@ -60,11 +62,11 @@ const GoogleIndexPage = () => {
 
   const handleSave = () => {
     if (!clientId.trim()) {
-      toast.error("请填写 Client ID");
+      toast.error(t("channel.google.clientId.required"));
       return;
     }
     if (!clientSecret.trim()) {
-      toast.error("请填写 Client Secret");
+      toast.error(t("channel.google.clientSecret.required"));
       return;
     }
     updateMutation.mutate({
@@ -78,10 +80,10 @@ const GoogleIndexPage = () => {
     <PageContainer>
       <div className="space-y-6 px-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-2xl font-semibold">Google登录配置</h1>
+          <h1 className="text-2xl font-semibold">{t("channel.google.title")}</h1>
           <PermissionGuard permissions="google-config:update-config">
             <Button onClick={handleSave} loading={updateMutation.isPending} disabled={isLoading}>
-              保存配置
+              {t("channel.google.saveConfig")}
             </Button>
           </PermissionGuard>
         </div>
@@ -89,14 +91,14 @@ const GoogleIndexPage = () => {
         <Alert>
           <ShieldCheck className="size-4" />
           <AlertTitle className="gap-2 sm:flex sm:items-center">
-            <div>请先前往 Google Cloud Console 申请 OAuth 2.0 客户端ID</div>
+            <div>{t("channel.google.alert.title")}</div>
             <div>
               <Link
                 to="https://console.cloud.google.com/"
                 target="_blank"
                 className="text-primary inline-flex items-center gap-1"
               >
-                前往 Google Cloud Console
+                {t("channel.google.alert.linkText")}
                 <ShieldCheck className="size-3" />
               </Link>
             </div>
@@ -107,28 +109,19 @@ const GoogleIndexPage = () => {
           <div className="flex flex-col gap-4 lg:grid lg:grid-cols-5">
             <Card className="lg:col-span-5">
               <CardHeader>
-                <CardTitle>Google OAuth 配置</CardTitle>
-                <CardDescription>
-                  登录 Google Cloud Console，点击 APIs &amp; Services &gt; Credentials，创建 OAuth 2.0 Client ID
-                </CardDescription>
+                <CardTitle>{t("channel.google.oauthConfig.title")}</CardTitle>
+                <CardDescription>{t("channel.google.oauthConfig.description")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <Field>
-                  <FieldLabel>回调地址</FieldLabel>
-                  <FieldDescription>
-                    登录 Google Cloud Console，在 OAuth 2.0 Client ID 的已授权重定向 URI 中添加以下地址
-                  </FieldDescription>
+                  <FieldLabel>{t("channel.google.callbackUrl.label")}</FieldLabel>
+                  <FieldDescription>{t("channel.google.callbackUrl.description")}</FieldDescription>
                   <InputGroup data-disabled="true" className="max-w-md">
-                    <InputGroupInput
-                      value={GOOGLE_CALLBACK_URL}
-                      readOnly
-                      disabled
-                      placeholder=""
-                    />
+                    <InputGroupInput value={GOOGLE_CALLBACK_URL} readOnly disabled placeholder="" />
                     <InputGroupAddon align="inline-end">
                       <InputGroupButton
                         size="icon-sm"
-                        aria-label="复制回调地址"
+                        aria-label={t("channel.google.callbackUrl.copyButton")}
                         onClick={() => copyToClipboard(GOOGLE_CALLBACK_URL)}
                       >
                         <Copy className="size-4" />
@@ -138,26 +131,27 @@ const GoogleIndexPage = () => {
                 </Field>
                 <Field>
                   <FieldLabel>
-                    <span className="text-destructive">*</span> Client ID
+                    <span className="text-destructive">*</span> {t("channel.google.clientId.label")}
                   </FieldLabel>
                   <Input
                     value={clientId}
                     className="max-w-xs"
                     onChange={(e) => setClientId(e.target.value)}
-                    placeholder="粘贴 Google Client ID"
+                    placeholder={t("channel.google.clientId.placeholder")}
                     disabled={isLoading}
                   />
                 </Field>
                 <Field>
                   <FieldLabel>
-                    <span className="text-destructive">*</span> Client Secret
+                    <span className="text-destructive">*</span>{" "}
+                    {t("channel.google.clientSecret.label")}
                   </FieldLabel>
                   <Input
                     value={clientSecret}
                     type="password"
                     className="max-w-xs"
                     onChange={(e) => setClientSecret(e.target.value)}
-                    placeholder="粘贴 Google Client Secret"
+                    placeholder={t("channel.google.clientSecret.placeholder")}
                     disabled={isLoading}
                   />
                 </Field>

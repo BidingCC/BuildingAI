@@ -4,6 +4,7 @@ import {
   ToolHeader,
   ToolInput,
 } from "@buildingai/ui/components/ai-elements/tool";
+import { useI18n } from "@buildingai/i18n";
 import { Skeleton } from "@buildingai/ui/components/ui/skeleton";
 import { memo } from "react";
 
@@ -32,6 +33,7 @@ export const ImageGenerationTool = memo(function ImageGenerationTool({
   toolPart,
   addToolApprovalResponse,
 }: ImageGenerationToolProps) {
+  const { t } = useI18n();
   const { state, approval, input, output, errorText } = toolPart;
   const approvalId = approval?.id;
   const isDenied =
@@ -50,7 +52,7 @@ export const ImageGenerationTool = memo(function ImageGenerationTool({
     return (
       <div className={widthClass}>
         <div className="space-y-4">
-          <p className="text-muted-foreground text-sm">图片创建中</p>
+          <p className="text-muted-foreground text-sm">{t("common.askAssistant.creatingImage")}</p>
           <div className="relative aspect-square w-full overflow-hidden rounded-lg">
             <Skeleton className="h-full w-full" />
           </div>
@@ -75,7 +77,7 @@ export const ImageGenerationTool = memo(function ImageGenerationTool({
               {image.revisedPrompt && (
                 <div className="pt-4">
                   {outputData.model && (
-                    <p className="text-foreground mb-2 text-sm">生成成功: {outputData.model}</p>
+                    <p className="text-foreground mb-2 text-sm">{t("common.askAssistant.generatedSuccessfully", { model: outputData.model })}</p>
                   )}
                   <p className="text-muted-foreground text-sm">
                     Revised prompt: {image.revisedPrompt}
@@ -96,7 +98,7 @@ export const ImageGenerationTool = memo(function ImageGenerationTool({
           <ToolHeader state="output-denied" type="tool-imageGeneration" />
           <ToolContent>
             <div className="text-muted-foreground px-4 py-3 text-sm">
-              Image generation was denied.
+              {t("common.askAssistant.imageGenerationDenied")}
             </div>
           </ToolContent>
         </Tool>
@@ -108,7 +110,7 @@ export const ImageGenerationTool = memo(function ImageGenerationTool({
     const errorMessage = errorText || outputData?.error || "Image generation failed";
     return (
       <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-500 dark:bg-red-950/50">
-        错误: {String(errorMessage)}
+        {t("common.askAssistant.error", { message: String(errorMessage) })}
       </div>
     );
   }
@@ -123,7 +125,7 @@ export const ImageGenerationTool = memo(function ImageGenerationTool({
           )}
           {state === "input-streaming" && (
             <div className="text-muted-foreground px-4 py-3 text-sm">
-              Receiving image generation request...
+              {t("common.askAssistant.receivingImageRequest")}
             </div>
           )}
           {state === "approval-requested" && approvalId && addToolApprovalResponse && (
@@ -139,14 +141,14 @@ export const ImageGenerationTool = memo(function ImageGenerationTool({
                 }
                 type="button"
               >
-                Deny
+                {t("common.askAssistant.deny")}
               </button>
               <button
                 className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-3 py-1.5 text-sm transition-colors"
                 onClick={() => addToolApprovalResponse({ id: approvalId, approved: true })}
                 type="button"
               >
-                Allow
+                {t("common.askAssistant.allow")}
               </button>
             </div>
           )}

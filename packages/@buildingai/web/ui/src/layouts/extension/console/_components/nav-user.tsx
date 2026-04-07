@@ -1,4 +1,5 @@
 import { useAuthStore } from "@buildingai/stores";
+import { useI18n } from "@buildingai/i18n";
 import { Avatar, AvatarFallback, AvatarImage } from "@buildingai/ui/components/ui/avatar";
 import {
   DropdownMenu,
@@ -18,6 +19,7 @@ import { ChevronsUpDown, LogOut, User } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 export function NavUser() {
+  const { t } = useI18n();
   const { isMobile } = useSidebar();
   const { userInfo } = useAuthStore((state) => state.auth);
   const { logout, isLogin } = useAuthStore((state) => state.authActions);
@@ -48,13 +50,13 @@ export function NavUser() {
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{userInfo?.nickname || "未登录"}</span>
+                <span className="truncate font-medium">{userInfo?.nickname || t("common.notLoggedIn")}</span>
                 <span className="text-muted-foreground truncate text-xs">
                   {isLogin()
                     ? isEnabled(userInfo?.isRoot)
-                      ? "超级管理员"
-                      : userInfo?.role?.name || "未设置角色"
-                    : "请先登录后使用"}
+                      ? t("common.superAdmin")
+                      : userInfo?.role?.name || t("common.noRole")
+                    : t("common.pleaseLoginFirst")}
                 </span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
@@ -69,8 +71,8 @@ export function NavUser() {
             <DropdownMenuItem
               onClick={async () => {
                 await confirm({
-                  title: "退出确认",
-                  description: "确定要退出登录吗？",
+                  title: t("common.logoutConfirm"),
+                  description: t("common.logoutConfirmDesc"),
                 });
                 await logout();
                 const redirect = encodeURIComponent(location.pathname + location.search);
@@ -81,7 +83,7 @@ export function NavUser() {
               }}
             >
               <LogOut />
-              退出登录
+              {t("common.logout")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

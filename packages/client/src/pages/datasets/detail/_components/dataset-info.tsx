@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { Avatar, AvatarFallback, AvatarImage } from "@buildingai/ui/components/ui/avatar";
 import { Separator } from "@buildingai/ui/components/ui/separator";
 import { Skeleton } from "@buildingai/ui/components/ui/skeleton";
@@ -22,6 +23,7 @@ function DatasetInfoSkeleton() {
 }
 
 export function DatasetInfo() {
+  const { t } = useI18n();
   const { dataset } = useDatasetDetailContext();
 
   if (!dataset) {
@@ -36,7 +38,7 @@ export function DatasetInfo() {
       <Avatar className="size-16 rounded-xl after:rounded-xl">
         <AvatarImage src={avatar} className="rounded-xl" />
         <AvatarFallback className="rounded-xl text-lg">
-          {(title || "库").slice(0, 2).toUpperCase()}
+          {(title || t("dataset.detail.title")).slice(0, 2).toUpperCase()}
         </AvatarFallback>
       </Avatar>
       <div className="flex flex-col gap-2">
@@ -50,12 +52,16 @@ export function DatasetInfo() {
                   {dataset.creator.nickname?.slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <p className="text-muted-foreground text-sm">{dataset.creator.nickname} 创建</p>
+              <p className="text-muted-foreground text-sm">
+                {t("dataset.detail.creator")}: {dataset.creator.nickname}
+              </p>
             </div>
           )}
           <Separator orientation="vertical" className="h-3" />
           {dataset.memberCount != null && (
-            <p className="text-muted-foreground text-sm">{dataset.memberCount} 人加入</p>
+            <p className="text-muted-foreground text-sm">
+              {t("dataset.detail.membersJoined", { count: dataset.memberCount })}
+            </p>
           )}
         </div>
       </div>

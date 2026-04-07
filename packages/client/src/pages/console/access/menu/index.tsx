@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   type CreateMenuParams,
   type Menu,
@@ -77,10 +78,10 @@ import { z } from "zod";
 import { PageContainer } from "@/layouts/console/_components/page-container";
 
 const MenuTypeLabels: Record<MenuType, string> = {
-  [MenuType.GROUP]: "分组",
-  [MenuType.DIRECTORY]: "目录",
-  [MenuType.MENU]: "菜单",
-  [MenuType.BUTTON]: "按钮",
+  [MenuType.GROUP]: "Group",
+  [MenuType.DIRECTORY]: "Directory",
+  [MenuType.MENU]: "Menu",
+  [MenuType.BUTTON]: "Button",
 };
 
 const MenuTypeIcons: Record<MenuType, React.ElementType> = {
@@ -92,13 +93,30 @@ const MenuTypeIcons: Record<MenuType, React.ElementType> = {
 
 const menuFormSchema = z
   .object({
-    name: z.string().min(1, "菜单名称不能为空").max(50, "菜单名称不能超过50个字符"),
-    code: z.string().min(1, "唯一标识不能为空").max(50, "唯一标识不能超过50个字符"),
-    path: z.string().min(1, "路径不能为空").max(100, "路径不能超过100个字符"),
-    icon: z.string().max(50, "图标不能超过50个字符").optional().or(z.literal("")),
-    component: z.string().max(100, "组件路径不能超过100个字符").optional().or(z.literal("")),
-    permissionCode: z.string().max(100, "权限编码不能超过100个字符").optional().or(z.literal("")),
-    sort: z.coerce.number().min(0, "排序值不能小于0").max(9999, "排序值不能大于9999"),
+    name: z
+      .string()
+      .min(1, "Menu name is required")
+      .max(50, "Menu name cannot exceed 50 characters"),
+    code: z
+      .string()
+      .min(1, "Unique identifier is required")
+      .max(50, "Unique identifier cannot exceed 50 characters"),
+    path: z.string().min(1, "Path is required").max(100, "Path cannot exceed 100 characters"),
+    icon: z.string().max(50, "Icon cannot exceed 50 characters").optional().or(z.literal("")),
+    component: z
+      .string()
+      .max(100, "Component path cannot exceed 100 characters")
+      .optional()
+      .or(z.literal("")),
+    permissionCode: z
+      .string()
+      .max(100, "Permission code cannot exceed 100 characters")
+      .optional()
+      .or(z.literal("")),
+    sort: z.coerce
+      .number()
+      .min(0, "Sort value must be 0 or greater")
+      .max(9999, "Sort value cannot exceed 9999"),
     isHidden: z.boolean(),
     type: z.enum(MenuType),
     parentId: z.string().optional().nullable(),
@@ -108,7 +126,7 @@ const menuFormSchema = z
     if (!isGroupOrDir && data.type !== MenuType.BUTTON && !data.component) {
       ctx.addIssue({
         code: "custom",
-        message: "组件路径不能为空",
+        message: "Component path is required",
         path: ["component"],
       });
     }
@@ -116,7 +134,7 @@ const menuFormSchema = z
     if (data.type === MenuType.DIRECTORY && !data.icon) {
       ctx.addIssue({
         code: "custom",
-        message: "图标不能为空",
+        message: "Icon is required",
         path: ["icon"],
       });
     }
@@ -155,7 +173,7 @@ const MenuFormDialog = ({
   onSuccess,
 }: MenuFormDialogProps) => {
   const isEdit = !!menu;
-
+  const { t } = useI18n();
   const form = useForm<MenuFormData>({
     resolver: zodResolver(menuFormSchema as any),
     defaultValues: defaultFormValues,
@@ -317,15 +335,17 @@ const MenuFormDialog = ({
           id: menu.id,
           data: payload as UpdateMenuParams,
         });
-        toast.success("菜单更新成功");
+        toast.success(t("access.menu.toast.updateSuccess"));
       } else {
         await createMutation.mutateAsync(payload as CreateMenuParams);
-        toast.success("菜单创建成功");
+        toast.success(t("access.menu.toast.createSuccess"));
       }
       onOpenChange(false);
       onSuccess?.();
     } catch {
-      toast.error(isEdit ? "更新失败" : "创建失败");
+      toast.error(
+        isEdit ? t("access.menu.toast.updateFailed") : t("access.menu.toast.createFailed"),
+      );
     }
   };
 
@@ -335,7 +355,9 @@ const MenuFormDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent ref={setContainer} className="gap-0 p-0 sm:max-w-lg">
         <DialogHeader className="p-4">
-          <DialogTitle>{isEdit ? "编辑菜单" : "新建菜单"}</DialogTitle>
+          <DialogTitle>
+            {isEdit ? t("access.menu.form.editTitle") : t("access.menu.form.createTitle")}
+          </DialogTitle>
         </DialogHeader>
         <ScrollArea className="max-h-[70vh]">
           <Form {...form}>
@@ -351,9 +373,9 @@ const MenuFormDialog = ({
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>菜单名称</FormLabel>
+                    <FormLabel required>{t("access.menu.form.name")}</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="请输入菜单名称" />
+                      <Input {...field} placeholder={t("access.menu.form.namePlaceholder")} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -364,9 +386,9 @@ const MenuFormDialog = ({
                 name="code"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>唯一标识</FormLabel>
+                    <FormLabel required>{t("access.menu.form.code")}</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="唯一标识，如 system-menu-list" />
+                      <Input {...field} placeholder={t("access.menu.form.codePlaceholder")} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -377,9 +399,9 @@ const MenuFormDialog = ({
                 name="path"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>路径</FormLabel>
+                    <FormLabel required>{t("access.menu.form.path")}</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="/example/path" />
+                      <Input {...field} placeholder={t("access.menu.form.pathPlaceholder")} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -390,12 +412,14 @@ const MenuFormDialog = ({
                 name="icon"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required={menuType === MenuType.DIRECTORY}>图标</FormLabel>
+                    <FormLabel required={menuType === MenuType.DIRECTORY}>
+                      {t("access.menu.form.icon")}
+                    </FormLabel>
                     <FormControl>
                       <IconPicker
                         value={field.value}
                         onChange={field.onChange}
-                        placeholder="选择图标"
+                        placeholder={t("access.menu.form.iconPlaceholder")}
                         container={container}
                       />
                     </FormControl>
@@ -409,9 +433,12 @@ const MenuFormDialog = ({
                   name="component"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel required>组件路径</FormLabel>
+                      <FormLabel required>{t("access.menu.form.component")}</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="组件路径" />
+                        <Input
+                          {...field}
+                          placeholder={t("access.menu.form.componentPlaceholder")}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -423,7 +450,7 @@ const MenuFormDialog = ({
                 name="permissionCode"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>权限编码</FormLabel>
+                    <FormLabel>{t("access.menu.form.permissionCode")}</FormLabel>
                     <FormControl>
                       <Combobox<Permission>
                         value={permissionList.find((p) => p.code === field.value) ?? null}
@@ -434,12 +461,12 @@ const MenuFormDialog = ({
                         itemToStringValue={(item) => `${item.code} ${item.name}`}
                       >
                         <ComboboxInput
-                          placeholder="搜索或选择权限编码..."
+                          placeholder={t("access.menu.form.permissionCodePlaceholder")}
                           className="w-full"
                           showClear
                         />
                         <ComboboxContent container={container}>
-                          <ComboboxEmpty>未找到匹配的权限</ComboboxEmpty>
+                          <ComboboxEmpty>{t("access.menu.form.noPermissionMatch")}</ComboboxEmpty>
                           <ComboboxList>
                             {(item) => (
                               <ComboboxItem key={item.code} value={item}>
@@ -462,7 +489,7 @@ const MenuFormDialog = ({
                 name="parentId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>父级菜单</FormLabel>
+                    <FormLabel>{t("access.menu.form.parentMenu")}</FormLabel>
                     <Select
                       value={field.value || "root"}
                       onValueChange={(value) =>
@@ -471,11 +498,11 @@ const MenuFormDialog = ({
                     >
                       <FormControl>
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder="选择父级菜单" />
+                          <SelectValue placeholder={t("access.menu.form.parentMenuPlaceholder")} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="root">无（顶级菜单）</SelectItem>
+                        <SelectItem value="root">{t("access.menu.form.noParent")}</SelectItem>
                         {allowedParentMenus.map((m) => (
                           <SelectItem key={m.id} value={m.id}>
                             {m.name}
@@ -492,7 +519,7 @@ const MenuFormDialog = ({
                 name="type"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>菜单类型</FormLabel>
+                    <FormLabel>{t("access.menu.form.menuType")}</FormLabel>
                     <Select
                       value={field.value.toString()}
                       onValueChange={(value) => field.onChange(Number(value) as MenuType)}
@@ -520,7 +547,7 @@ const MenuFormDialog = ({
                   name="isHidden"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>隐藏菜单</FormLabel>
+                      <FormLabel>{t("access.menu.form.hidden")}</FormLabel>
                       <FormControl>
                         <div className="flex h-9 items-center">
                           <Switch checked={field.value} onCheckedChange={field.onChange} />
@@ -535,7 +562,7 @@ const MenuFormDialog = ({
                   name="sort"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>排序</FormLabel>
+                      <FormLabel>{t("access.menu.form.sort")}</FormLabel>
                       <FormControl>
                         <Input type="number" {...field} min={0} max={9999} />
                       </FormControl>
@@ -551,11 +578,11 @@ const MenuFormDialog = ({
                   onClick={() => onOpenChange(false)}
                   disabled={isLoading}
                 >
-                  取消
+                  {t("access.menu.form.cancel")}
                 </Button>
                 <Button type="submit" disabled={isLoading}>
                   {isLoading && <Loader2Icon className="animate-spin" />}
-                  {isEdit ? "保存" : "创建"}
+                  {isEdit ? t("access.menu.form.save") : t("access.menu.form.create")}
                 </Button>
               </DialogFooter>
             </form>
@@ -735,6 +762,7 @@ const MenuTreeItem = ({ menu, level = 0, onEdit, onDelete, onCreateChild }: Menu
 };
 
 const AccessMenuIndexPage = () => {
+  const { t } = useI18n();
   const [keyword, setKeyword] = useState<string>("");
 
   const [formDialogOpen, setFormDialogOpen] = useState(false);
@@ -792,24 +820,24 @@ const AccessMenuIndexPage = () => {
     async (menu: Menu) => {
       try {
         await confirm({
-          title: "确认删除",
-          description: `确定要删除菜单「${menu.name}」吗？此操作不可撤销。`,
-          confirmText: "删除",
+          title: t("access.menu.alert.deleteTitle"),
+          description: t("access.menu.alert.deleteDesc", { name: menu.name }),
+          confirmText: t("access.menu.alert.deleteConfirm"),
           confirmVariant: "destructive",
         });
 
         const result = await deleteMutation.mutateAsync(menu.id);
         if (result.success) {
-          toast.success("删除成功");
+          toast.success(t("access.menu.toast.deleteSuccess"));
           refetch();
         } else {
-          toast.error(result.message || "删除失败");
+          toast.error(result.message || t("access.menu.toast.deleteFailed"));
         }
       } catch {
         // User cancelled or error occurred
       }
     },
-    [confirm, deleteMutation, refetch],
+    [confirm, deleteMutation, refetch, t],
   );
 
   return (
@@ -817,7 +845,7 @@ const AccessMenuIndexPage = () => {
       <div className="flex flex-1 flex-col gap-4">
         <div className="bg-background sticky top-0 z-2 flex items-center gap-4 pt-1 pb-2">
           <Input
-            placeholder="搜索菜单名称或编码"
+            placeholder={t("access.menu.searchPlaceholder")}
             className="max-w-xs text-sm"
             onChange={(e) => handleKeywordChange(e.target.value)}
           />
@@ -825,14 +853,16 @@ const AccessMenuIndexPage = () => {
           <PermissionGuard permissions="menu:create">
             <Button size="sm" onClick={handleCreate}>
               <PlusIcon />
-              新建菜单
+              {t("access.menu.createMenu")}
             </Button>
           </PermissionGuard>
         </div>
 
         <div className="flex flex-col gap-0.5">
           {isLoading ? (
-            <div className="text-muted-foreground py-8 text-center text-sm">加载中...</div>
+            <div className="text-muted-foreground py-8 text-center text-sm">
+              {t("access.menu.table.loading")}
+            </div>
           ) : filteredMenuTree && filteredMenuTree.length > 0 ? (
             filteredMenuTree.map((menu) => (
               <MenuTreeItem
@@ -844,7 +874,9 @@ const AccessMenuIndexPage = () => {
               />
             ))
           ) : (
-            <div className="text-muted-foreground py-8 text-center text-sm">暂无菜单数据</div>
+            <div className="text-muted-foreground py-8 text-center text-sm">
+              {t("access.menu.table.noData")}
+            </div>
           )}
         </div>
       </div>

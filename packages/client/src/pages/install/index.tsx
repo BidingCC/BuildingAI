@@ -40,7 +40,7 @@ const InstallPage = () => {
   const { setToken } = useAuthStore((state) => state.authActions);
   const { websiteConfig } = useConfigStore((state) => state.config);
   const { setIsInitialized } = useConfigStore((state) => state.configActions);
-  const { locale, setLocale, availableLocales } = useI18n();
+  const { locale, setLocale, availableLocales, t } = useI18n();
 
   const currentLocaleLabel = LOCALE_LABELS[locale] ?? locale;
 
@@ -157,18 +157,20 @@ const InstallPage = () => {
 
         {step !== 0 && step !== 3 && (
           <div className="flex w-full items-center justify-between p-4 md:p-6">
-            <div>{step}/2</div>
+            <div>{t("install.navigation.stepProgress", { current: step, total: 2 })}</div>
             <div className="flex items-center gap-4">
               <Button variant="outline" onClick={() => setStep(step - 1)} disabled={isPending}>
                 <ArrowLeft />
-                上一步
+                {t("install.navigation.previousStep")}
               </Button>
               <Button
                 loading={isPending}
                 onClick={handleNextStep}
                 disabled={!canProceed() || isPending}
               >
-                {step === 2 ? "完成配置" : "下一步"}
+                {step === 2
+                  ? t("install.navigation.completeSetup")
+                  : t("install.navigation.nextStep")}
                 {!isPending && <ArrowRight />}
               </Button>
             </div>

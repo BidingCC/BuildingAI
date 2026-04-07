@@ -1,3 +1,6 @@
+"use client";
+
+import { useI18n } from "@buildingai/i18n";
 import type { ConsoleTag } from "@buildingai/services/console";
 import { Avatar, AvatarFallback, AvatarImage } from "@buildingai/ui/components/ui/avatar";
 import { Button } from "@buildingai/ui/components/ui/button";
@@ -55,7 +58,7 @@ export type AppItemEditDialogProps = {
 
 const formSchema = z.object({
   appName: z.string(),
-  displayName: z.string().min(1, "显示名称不能为空"),
+  displayName: z.string().min(1, "Display name is required"),
   description: z.string(),
   icon: z.string(),
   visible: z.boolean(),
@@ -72,6 +75,7 @@ export function AppItemEditDialog({
   onSave,
   isPending,
 }: AppItemEditDialogProps) {
+  const { t } = useI18n();
   const anchor = useComboboxAnchor();
   const [container, setContainer] = useState<HTMLElement | null>(null);
   const form = useForm<FormValues>({
@@ -112,7 +116,7 @@ export function AppItemEditDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex max-w-md flex-col">
         <DialogHeader>
-          <DialogTitle>编辑应用</DialogTitle>
+          <DialogTitle>{t("decorate.apps.item.editApp")}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form ref={setContainer} className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
@@ -121,7 +125,7 @@ export function AppItemEditDialog({
               name="appName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>应用名称</FormLabel>
+                  <FormLabel>{t("decorate.apps.item.appName")}</FormLabel>
                   <FormControl>
                     <Input id="app-name" className="bg-muted" disabled {...field} />
                   </FormControl>
@@ -134,11 +138,13 @@ export function AppItemEditDialog({
               name="displayName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel htmlFor="display-name">显示名称</FormLabel>
+                  <FormLabel htmlFor="display-name">
+                    {t("decorate.apps.item.displayName")}
+                  </FormLabel>
                   <FormControl>
                     <Input
                       id="display-name"
-                      placeholder="请输入显示名称"
+                      placeholder={t("decorate.apps.item.displayNamePlaceholder")}
                       disabled={isPending}
                       {...field}
                     />
@@ -152,11 +158,11 @@ export function AppItemEditDialog({
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel htmlFor="description">应用描述</FormLabel>
+                  <FormLabel htmlFor="description">{t("decorate.apps.item.description")}</FormLabel>
                   <FormControl>
                     <Input
                       id="description"
-                      placeholder="请输入应用描述"
+                      placeholder={t("decorate.apps.item.descriptionPlaceholder")}
                       disabled={isPending}
                       {...field}
                     />
@@ -170,7 +176,7 @@ export function AppItemEditDialog({
               name="icon"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>应用图标</FormLabel>
+                  <FormLabel>{t("decorate.apps.item.icon")}</FormLabel>
                   <FormControl>
                     <div className="flex items-center gap-3">
                       <Avatar className="size-12">
@@ -180,7 +186,7 @@ export function AppItemEditDialog({
                         </AvatarFallback>
                       </Avatar>
                       <Input
-                        placeholder="图标 URL"
+                        placeholder={t("decorate.apps.item.iconPlaceholder")}
                         className="flex-1"
                         disabled={isPending}
                         {...field}
@@ -198,7 +204,7 @@ export function AppItemEditDialog({
                 const selectedTags = tags.filter((t) => field.value.includes(t.id));
                 return (
                   <FormItem>
-                    <FormLabel>标签分类</FormLabel>
+                    <FormLabel>{t("decorate.apps.item.tagCategory")}</FormLabel>
                     <FormControl>
                       <Combobox<ConsoleTag, true>
                         multiple
@@ -223,12 +229,12 @@ export function AppItemEditDialog({
                             </ComboboxChip>
                           ))}
                           <ComboboxChipsInput
-                            placeholder="请选择标签..."
+                            placeholder={t("decorate.apps.item.selectTags")}
                             className="placeholder:text-muted-foreground text-base md:text-sm"
                           />
                         </ComboboxChips>
                         <ComboboxContent anchor={anchor} container={container}>
-                          <ComboboxEmpty>未找到匹配的标签</ComboboxEmpty>
+                          <ComboboxEmpty>{t("decorate.apps.item.noMatchTag")}</ComboboxEmpty>
                           <ComboboxList>
                             {(item: ConsoleTag) => (
                               <ComboboxItem key={item.id} value={item}>
@@ -250,7 +256,7 @@ export function AppItemEditDialog({
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between gap-4">
                   <FormLabel htmlFor="visible" className="flex-1">
-                    是否显示
+                    {t("decorate.apps.item.isVisible")}
                   </FormLabel>
                   <FormControl>
                     <Switch
@@ -271,10 +277,10 @@ export function AppItemEditDialog({
                 onClick={() => onOpenChange(false)}
                 disabled={isPending}
               >
-                取消
+                {t("decorate.apps.cancel")}
               </Button>
               <Button type="submit" disabled={isPending}>
-                {isPending ? "保存中…" : "保存"}
+                {isPending ? t("decorate.apps.saving") : t("decorate.apps.save")}
               </Button>
             </DialogFooter>
           </form>

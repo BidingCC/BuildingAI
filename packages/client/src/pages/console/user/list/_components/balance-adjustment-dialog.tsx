@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   type UpdateUserBalanceDto,
   useChangeUserBalanceMutation,
@@ -38,8 +39,11 @@ const formSchema = z.object({
   amount: z
     .number()
     .optional()
-    .refine((value) => value !== undefined, "请输入调整额度")
-    .refine((value) => value === undefined || value >= 1, "增加数量必须大于0"),
+    .refine((value) => value !== undefined, "user.dialog.balanceAdjustment.amount.required")
+    .refine(
+      (value) => value === undefined || value >= 1,
+      "user.dialog.balanceAdjustment.amount.mustBePositive",
+    ),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -51,15 +55,13 @@ type BalanceAdjustmentDialogProps = {
   onSuccess?: () => void;
 };
 
-/**
- * 积分调整弹框组件
- */
 export const BalanceAdjustmentDialog = ({
   open,
   onOpenChange,
   user,
   onSuccess,
 }: BalanceAdjustmentDialogProps) => {
+  const { t } = useI18n();
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -91,12 +93,12 @@ export const BalanceAdjustmentDialog = ({
 
   const adjustmentMutation = useChangeUserBalanceMutation({
     onSuccess: () => {
-      toast.success("积分调整成功");
+      toast.success(t("user.dialog.balanceAdjustment.success"));
       onOpenChange(false);
       onSuccess?.();
     },
     onError: (error) => {
-      toast.error(`调整失败: ${error.message}`);
+      toast.error(t("user.dialog.balanceAdjustment.failed", { message: error.message }));
     },
   });
 
@@ -117,14 +119,15 @@ export const BalanceAdjustmentDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-full md:max-w-md">
         <DialogHeader className="px-1">
-          <DialogTitle className="text-lg">调整积分余额</DialogTitle>
+          <DialogTitle className="text-lg">{t("user.dialog.balanceAdjustment.title")}</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-5 px-1">
-            {/* 当前账户余额 */}
             <div className="bg-muted/50 flex items-center justify-between rounded-lg border px-4 py-3">
-              <span className="text-muted-foreground text-sm">当前账户余额</span>
+              <span className="text-muted-foreground text-sm">
+                {t("user.dialog.balanceAdjustment.currentBalance")}
+              </span>
               <div className="flex items-center gap-1.5">
                 <Zap className="text-primary size-5" />
                 <span className="text-foreground text-xl font-bold tabular-nums">
@@ -133,13 +136,14 @@ export const BalanceAdjustmentDialog = ({
               </div>
             </div>
 
-            {/* 调整方式 */}
             <FormField
               control={form.control}
               name="action"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm">调整方式</FormLabel>
+                  <FormLabel className="text-sm">
+                    {t("user.dialog.balanceAdjustment.action.label")}
+                  </FormLabel>
                   <FormControl>
                     <Tabs
                       value={field.value ?? "1"}
@@ -147,8 +151,12 @@ export const BalanceAdjustmentDialog = ({
                       className="w-full"
                     >
                       <TabsList className="w-full">
-                        <TabsTrigger value="1">增加积分</TabsTrigger>
-                        <TabsTrigger value="0">扣减积分</TabsTrigger>
+                        <TabsTrigger value="1">
+                          {t("user.dialog.balanceAdjustment.action.add")}
+                        </TabsTrigger>
+                        <TabsTrigger value="0">
+                          {t("user.dialog.balanceAdjustment.action.subtract")}
+                        </TabsTrigger>
                       </TabsList>
                     </Tabs>
                   </FormControl>
@@ -157,21 +165,22 @@ export const BalanceAdjustmentDialog = ({
               )}
             />
 
-            {/* 增加数量 */}
             <FormField
               control={form.control}
               name="amount"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-sm">
-                    {watchAction === "1" ? "增加数量" : "扣减数量"}
+                    {watchAction === "1"
+                      ? t("user.dialog.balanceAdjustment.amount.addLabel")
+                      : t("user.dialog.balanceAdjustment.amount.subtractLabel")}
                   </FormLabel>
                   <FormControl>
                     <InputGroup className="w-full">
                       <InputGroupInput
                         type="number"
                         min={1}
-                        placeholder="请输入调整额度"
+                        placeholder={t("user.dialog.balanceAdjustment.amount.placeholder")}
                         value={field.value ?? ""}
                         onBlur={field.onBlur}
                         ref={field.ref}
@@ -179,7 +188,9 @@ export const BalanceAdjustmentDialog = ({
                           field.onChange(e.target.value === "" ? undefined : Number(e.target.value))
                         }
                       />
-                      <InputGroupAddon align="inline-end">积分</InputGroupAddon>
+                      <InputGroupAddon align="inline-end">
+                        {t("user.listPage.credits")}
+                      </InputGroupAddon>
                     </InputGroup>
                   </FormControl>
                   <FormMessage />
@@ -189,9 +200,10 @@ export const BalanceAdjustmentDialog = ({
 
             <Separator className="border-border border-t border-dashed bg-transparent data-[orientation=horizontal]:h-0" />
 
-            {/* 预估变更后 */}
             <div className="flex items-center justify-between">
-              <div className="text-muted-foreground text-xs">预估变更后</div>
+              <div className="text-muted-foreground text-xs">
+                {t("user.dialog.balanceAdjustment.estimatedResult")}
+              </div>
               <div className="flex items-center gap-2">
                 <span className="text-muted-foreground text-sm tabular-nums line-through">
                   {user?.power?.toLocaleString() ?? 0}
@@ -214,11 +226,11 @@ export const BalanceAdjustmentDialog = ({
                 onClick={() => onOpenChange(false)}
                 disabled={isPending}
               >
-                取消操作
+                {t("user.dialog.balanceAdjustment.cancelOperation")}
               </Button>
               <Button type="submit" disabled={isPending || !watchAmount}>
                 {isPending && <Loader2 className="animate-spin" />}
-                确认调整并提交
+                {t("user.dialog.balanceAdjustment.confirmAndSubmit")}
               </Button>
             </DialogFooter>
           </form>

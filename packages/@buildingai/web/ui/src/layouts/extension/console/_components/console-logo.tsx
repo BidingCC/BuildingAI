@@ -1,4 +1,5 @@
 import { useExtensionDetailQuery } from "@buildingai/services/console";
+import { useI18n } from "@buildingai/i18n";
 import { useConfigStore } from "@buildingai/stores";
 import { Avatar, AvatarFallback, AvatarImage } from "@buildingai/ui/components/ui/avatar";
 import {
@@ -15,6 +16,7 @@ export interface ConsoleLogoProps {
 }
 
 export function ConsoleLogo({ identifier }: ConsoleLogoProps) {
+  const { t } = useI18n();
   const { websiteConfig } = useConfigStore((state) => state.config);
   const { data: extension, isLoading } = useExtensionDetailQuery(identifier || "", {
     enabled: !!identifier,
@@ -54,7 +56,7 @@ export function ConsoleLogo({ identifier }: ConsoleLogoProps) {
                   {extension?.name || websiteConfig?.webinfo.name}
                 </span>
                 <span className="text-muted-foreground line-clamp-1 text-xs">
-                  {extension?.description || "插件管理 · 工作台"}
+                  {extension?.description || t("extension.pluginManagementWorkspace")}
                 </span>
               </div>
             </>

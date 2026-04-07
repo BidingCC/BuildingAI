@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   useSetWebsiteConfigMutation,
   useWebsiteConfigQuery,
@@ -36,19 +37,19 @@ import { PageContainer } from "@/layouts/console/_components/page-container";
 const AGREEMENT_TABS = [
   {
     value: "privacy",
-    label: "隐私政策",
+    label: "privacy",
     titleField: "privacyTitle",
     contentField: "privacyContent",
   },
   {
     value: "service",
-    label: "服务条款",
+    label: "service",
     titleField: "serviceTitle",
     contentField: "serviceContent",
   },
   {
     value: "payment",
-    label: "支付协议",
+    label: "payment",
     titleField: "paymentTitle",
     contentField: "paymentContent",
   },
@@ -101,15 +102,16 @@ interface AgreementFormProps {
 }
 
 const AgreementForm = ({ agreement }: AgreementFormProps) => {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
 
   const setMutation = useSetWebsiteConfigMutation({
     onSuccess: () => {
-      toast.success("保存成功");
+      toast.success(t("system.agreement.saveSuccess"));
       void queryClient.invalidateQueries({ queryKey: ["system-website", "config"] });
     },
     onError: (e) => {
-      toast.error(`保存失败: ${e.message}`);
+      toast.error(t("system.agreement.saveFailed", { message: e.message }));
     },
   });
 
@@ -181,7 +183,7 @@ const AgreementForm = ({ agreement }: AgreementFormProps) => {
       <TabsList className="mx-4">
         {AGREEMENT_TABS.map((tab) => (
           <TabsTrigger key={tab.value} value={tab.value}>
-            {tab.label}
+            {t(`system.agreement.tabs.${tab.label}`)}
           </TabsTrigger>
         ))}
       </TabsList>
@@ -201,9 +203,13 @@ const AgreementForm = ({ agreement }: AgreementFormProps) => {
                 name={tab.titleField}
                 render={({ field }) => (
                   <FormItem className="mx-4">
-                    <FormLabel>标题</FormLabel>
+                    <FormLabel>{t("system.agreement.title")}</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="请输入标题" className="w-full md:w-sm" />
+                      <Input
+                        {...field}
+                        placeholder={t("system.agreement.titlePlaceholder")}
+                        className="w-full md:w-sm"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -214,7 +220,7 @@ const AgreementForm = ({ agreement }: AgreementFormProps) => {
                 name={tab.contentField}
                 render={({ field }) => (
                   <FormItem className="mx-4 flex h-full flex-1 flex-col overflow-hidden">
-                    <FormLabel>内容</FormLabel>
+                    <FormLabel>{t("system.agreement.content")}</FormLabel>
                     <FormControl>
                       <Plate
                         editor={editors[tab.value]!}
@@ -236,7 +242,7 @@ const AgreementForm = ({ agreement }: AgreementFormProps) => {
           <div className="flex gap-2 px-4">
             <PermissionGuard permissions="system-website:setConfig">
               <Button type="submit" loading={setMutation.isPending}>
-                保存
+                {t("system.agreement.save")}
               </Button>
 
               <Button
@@ -253,7 +259,7 @@ const AgreementForm = ({ agreement }: AgreementFormProps) => {
                   })
                 }
               >
-                重置
+                {t("system.agreement.reset")}
               </Button>
             </PermissionGuard>
           </div>

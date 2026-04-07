@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { Button } from "@buildingai/ui/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@buildingai/ui/components/ui/tooltip";
 import { cn } from "@buildingai/ui/lib/utils";
@@ -22,27 +23,28 @@ export function DocumentBatchActions({
   onClose,
   className,
 }: DocumentBatchActionsProps) {
+  const { t } = useI18n();
   if (selectedCount <= 0) return null;
 
   return (
     <div className={cn("flex shrink-0 items-center", className)}>
-      <ActionButton tooltip="编辑标签" onClick={onEditTags}>
+      <ActionButton tooltip={t("dataset.document.editTags")} onClick={onEditTags}>
         <Tag className="size-4" />
       </ActionButton>
 
-      <ActionButton tooltip="移动" onClick={onMove}>
+      <ActionButton tooltip={t("dataset.document.move")} onClick={onMove}>
         <ArrowLeftRightIcon className="size-4" />
       </ActionButton>
 
-      <ActionButton tooltip="复制" onClick={onCopy}>
+      <ActionButton tooltip={t("dataset.document.copy")} onClick={onCopy}>
         <FilesIcon className="size-4" />
       </ActionButton>
 
-      <ActionButton tooltip="删除" onClick={onDelete}>
+      <ActionButton tooltip={t("dataset.document.delete")} onClick={onDelete}>
         <TrashIcon className="size-4" />
       </ActionButton>
 
-      <ActionButton tooltip="退出" onClick={onClose}>
+      <ActionButton tooltip={t("common.action.cancel")} onClick={onClose}>
         <X className="size-4" />
       </ActionButton>
     </div>
@@ -58,6 +60,7 @@ function ActionButton({
   onClick?: () => void;
   children: React.ReactNode;
 }) {
+  const { t } = useI18n();
   return (
     <Tooltip>
       <TooltipTrigger asChild>

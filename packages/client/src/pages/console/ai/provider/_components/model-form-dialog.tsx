@@ -97,21 +97,21 @@ const FEATURE_ICON_MAP: Record<string, React.ElementType> = {
 };
 
 const billingRuleSchema = z.object({
-  power: z.number().int().min(0, "power 不能小于 0").default(0),
+  power: z.number().int().min(0, "Power cannot be less than 0").default(0),
   tokens: z.number().int().default(1000),
 });
 
 const formSchema = z.object({
   name: z
-    .string({ message: "模型名称必须传递" })
-    .min(1, "模型名称不能为空")
-    .max(100, "模型名称长度不能超过100个字符"),
+    .string({ message: "Model name is required" })
+    .min(1, "Model name is required")
+    .max(100, "Model name cannot exceed 100 characters"),
   model: z
-    .string({ message: "模型标识符必须传递" })
-    .min(1, "模型标识符不能为空")
-    .max(100, "模型标识符长度不能超过100个字符"),
-  modelType: z.string({ message: "模型类型必须选择" }),
-  maxContext: z.number().int().min(1, "最大上下文条数不能小于 1").optional(),
+    .string({ message: "Model identifier is required" })
+    .min(1, "Model identifier is required")
+    .max(100, "Model identifier cannot exceed 100 characters"),
+  modelType: z.string({ message: "Please select model type" }),
+  maxContext: z.number().int().min(1, "Maximum context count cannot be less than 1").optional(),
   features: z.array(z.string()).optional().default([]),
   billingRule: billingRuleSchema,
   membershipLevel: z.array(z.string()).optional(),
@@ -119,8 +119,8 @@ const formSchema = z.object({
   thinking: z.boolean().optional(),
   enableThinkingParam: z.boolean().optional(),
   isDefault: z.boolean().optional(),
-  description: z.string().max(500, "模型描述长度不能超过500个字符").optional(),
-  sortOrder: z.number().int().min(0, "排序权重不能小于0").optional(),
+  description: z.string().max(500, "Description cannot exceed 500 characters").optional(),
+  sortOrder: z.number().int().min(0, "Sort weight cannot be less than 0").optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;

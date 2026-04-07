@@ -50,12 +50,15 @@ const COMMUNICATION_TYPES: { value: McpCommunicationType; label: string }[] = [
 
 const formSchema = z.object({
   name: z
-    .string({ message: "服务名称必须填写" })
-    .min(1, "服务名称不能为空")
-    .max(100, "服务名称不能超过100个字符"),
-  alias: z.string().max(100, "别名不能超过100个字符").optional(),
-  description: z.string().max(1000, "描述不能超过1000个字符").optional(),
-  url: z.string({ message: "服务地址必须填写" }).min(1, "服务地址不能为空").url("请输入有效的URL"),
+    .string({ message: "Service name is required" })
+    .min(1, "Service name is required")
+    .max(100, "Service name cannot exceed 100 characters"),
+  alias: z.string().max(100, "Alias cannot exceed 100 characters").optional(),
+  description: z.string().max(1000, "Description cannot exceed 1000 characters").optional(),
+  url: z
+    .string({ message: "Service URL is required" })
+    .min(1, "Service URL is required")
+    .url("Please enter a valid URL"),
   icon: z.string().optional(),
   communicationType: z.enum(["sse", "streamable-http"]).optional(),
   isDisabled: z.boolean().optional(),

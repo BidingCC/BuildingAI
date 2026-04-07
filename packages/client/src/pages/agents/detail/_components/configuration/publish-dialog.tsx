@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { type SquarePublishStatus, useWebAgentConfigQuery } from "@buildingai/services/web";
 import { Button } from "@buildingai/ui/components/ui/button";
 import {
@@ -25,10 +26,10 @@ interface PublishDialogProps {
 }
 
 const statusLabelMap: Record<string, string> = {
-  none: "未提交",
-  pending: "待审核",
-  approved: "已通过",
-  rejected: "已拒绝",
+  none: "notSubmitted",
+  pending: "pending",
+  approved: "approved",
+  rejected: "rejected",
 };
 
 export function PublishDialog({
@@ -41,6 +42,7 @@ export function PublishDialog({
   loading = false,
   onConfirm,
 }: PublishDialogProps) {
+  const { t } = useI18n();
   const configQuery = useWebAgentConfigQuery({ enabled: open } as any);
   const skipReview = configQuery.data?.publishWithoutReview === true;
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
@@ -86,22 +88,25 @@ export function PublishDialog({
           onInteractOutside={(e) => e.preventDefault()}
         >
           <DialogHeader className="px-4 pt-4">
-            <DialogTitle>智能体广场发布设置</DialogTitle>
+            <DialogTitle>{t("agent.detail.publishDialog.title")}</DialogTitle>
           </DialogHeader>
 
           <div className="bg-muted/50 mx-4 mt-8 space-y-3 rounded-lg p-4">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0 flex-1 space-y-1">
                 <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium">是否发布到智能体广场</p>
+                  <p className="text-sm font-medium">
+                    {t("agent.detail.publishDialog.publishToSquare")}
+                  </p>
                   <span className="text-muted-foreground text-xs">
-                    {statusLabelMap[squareStatus] ?? squareStatus}
+                    {t(`agent.detail.publishDialog.${statusLabelMap[squareStatus]}`) ??
+                      squareStatus}
                   </span>
                 </div>
                 <p className="text-muted-foreground text-xs leading-relaxed">
                   {skipReview
-                    ? "确认发布后将直接上架，智能体广场将展示此智能体"
-                    : "确认发布后需管理员审核，审核通过后智能体广场将展示此智能体"}
+                    ? t("agent.detail.publishDialog.skipReviewNote")
+                    : t("agent.detail.publishDialog.needReviewNote")}
                 </p>
               </div>
               <Switch
@@ -115,7 +120,10 @@ export function PublishDialog({
             {publishToSquare && !isPending && (
               <div className="flex justify-between space-y-2 pt-2">
                 <Label className="text-sm font-medium">
-                  分类 <span className="text-muted-foreground text-xs">(可选)</span>
+                  {t("agent.detail.publishDialog.category")}{" "}
+                  <span className="text-muted-foreground text-xs">
+                    {t("agent.detail.publishDialog.categoryOptional")}
+                  </span>
                 </Label>
                 <TagSelect
                   tagsSource="web"
@@ -123,25 +131,29 @@ export function PublishDialog({
                   showManage={false}
                   value={selectedTagIds}
                   onChange={setSelectedTagIds}
-                  placeholder="搜索分类"
+                  placeholder={t("agent.detail.publishDialog.searchCategory")}
                 />
               </div>
             )}
 
             {isPending && (
-              <p className="text-muted-foreground text-xs">当前状态：待审核，请等待管理员审核。</p>
+              <p className="text-muted-foreground text-xs">
+                {t("agent.detail.publishDialog.pendingNote")}
+              </p>
             )}
 
             {isRejected && (
               <div className="space-y-1">
-                <p className="text-destructive text-xs">当前状态：审核未通过</p>
+                <p className="text-destructive text-xs">
+                  {t("agent.detail.publishDialog.rejectedNote")}
+                </p>
                 <Button
                   variant="link"
                   size="sm"
                   className="text-destructive h-auto p-0 text-xs"
                   onClick={() => setReasonDialogOpen(true)}
                 >
-                  查看拒绝原因
+                  {t("agent.detail.publishDialog.viewRejectionReason")}
                 </Button>
               </div>
             )}
@@ -149,15 +161,17 @@ export function PublishDialog({
 
           <div className="flex justify-end gap-2 px-4 pt-6 pb-4">
             <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
-              {isPending ? "关闭" : "取消"}
+              {isPending ? t("common.close") : t("common.cancel")}
             </Button>
             {isRejected ? (
               <Button onClick={handleResubmit} disabled={loading || !canResubmit}>
-                {loading ? "提交中…" : "重新提交"}
+                {loading
+                  ? t("agent.detail.publishDialog.submitting")
+                  : t("agent.detail.publishDialog.resubmit")}
               </Button>
             ) : !isPending ? (
               <Button onClick={handleConfirm} disabled={loading || !canSubmit}>
-                {loading ? "提交中…" : "确定"}
+                {loading ? t("agent.detail.publishDialog.submitting") : t("common.confirm")}
               </Button>
             ) : null}
           </div>
@@ -167,18 +181,18 @@ export function PublishDialog({
       <Dialog open={reasonDialogOpen} onOpenChange={setReasonDialogOpen}>
         <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
-            <DialogTitle>拒绝原因</DialogTitle>
+            <DialogTitle>{t("agent.detail.publishDialog.rejectionReason")}</DialogTitle>
           </DialogHeader>
           <div className="min-h-[60px] py-2">
             <p className="text-muted-foreground text-sm">
               {squareRejectReason?.trim()
                 ? squareRejectReason
-                : "暂无具体原因，如有疑问请联系管理员。"}
+                : t("agent.detail.publishDialog.noRejectionReason")}
             </p>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setReasonDialogOpen(false)}>
-              知道了
+              {t("agent.detail.publishDialog.gotIt")}
             </Button>
           </DialogFooter>
         </DialogContent>

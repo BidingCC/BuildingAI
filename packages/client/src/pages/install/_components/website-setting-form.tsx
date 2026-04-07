@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { THEME_COLORS, useTheme } from "@buildingai/ui/components/theme-provider";
 import { ScrollThemeItems } from "@buildingai/ui/components/theme-toggle";
 import {
@@ -34,7 +35,7 @@ import { z } from "zod";
 
 const formSchema = z.object({
   websiteName: z.string().min(1, {
-    message: "请输入网站名称",
+    message: "install.website.form.websiteNameRequired",
   }),
   websiteDescription: z.string().optional(),
   websiteLogo: z.string().optional(),
@@ -51,6 +52,7 @@ interface WebsiteSettingFormProps {
 }
 
 const WebsiteSettingForm = ({ step, defaultValues, onChange }: WebsiteSettingFormProps) => {
+  const { t } = useI18n();
   const { themeColor, setThemeColor } = useTheme();
 
   const form = useForm<WebsiteSettingFormValues>({
@@ -79,15 +81,18 @@ const WebsiteSettingForm = ({ step, defaultValues, onChange }: WebsiteSettingFor
     <div className={cn("flex justify-center", { hidden: step !== 2 })}>
       <Form {...form}>
         <form className="w-xs space-y-6">
-          <h1 className="text-xl font-bold">网站基本信息</h1>
+          <h1 className="text-xl font-bold">{t("install.websiteSettings.basicInfo")}</h1>
           <FormField
             control={form.control}
             name="websiteName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel required>网站名称</FormLabel>
+                <FormLabel required>{t("install.websiteSettings.websiteName")}</FormLabel>
                 <FormControl>
-                  <Input placeholder="请输入网站名称" {...field} />
+                  <Input
+                    placeholder={t("install.websiteSettings.websiteNamePlaceholder")}
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -98,9 +103,12 @@ const WebsiteSettingForm = ({ step, defaultValues, onChange }: WebsiteSettingFor
             name="websiteDescription"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>网站描述</FormLabel>
+                <FormLabel>{t("install.websiteSettings.websiteDescription")}</FormLabel>
                 <FormControl>
-                  <Textarea placeholder="请输入网站描述" {...field} />
+                  <Textarea
+                    placeholder={t("install.websiteSettings.websiteDescriptionPlaceholder")}
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -111,7 +119,7 @@ const WebsiteSettingForm = ({ step, defaultValues, onChange }: WebsiteSettingFor
             name="websiteLogo"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>网站 Logo</FormLabel>
+                <FormLabel>{t("install.websiteSettings.websiteLogo")}</FormLabel>
                 <FormControl>
                   <ImageUpload value={field.value} onChange={field.onChange} />
                 </FormControl>
@@ -124,7 +132,7 @@ const WebsiteSettingForm = ({ step, defaultValues, onChange }: WebsiteSettingFor
             name="websiteIcon"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>网站图标</FormLabel>
+                <FormLabel>{t("install.websiteSettings.websiteIcon")}</FormLabel>
                 <FormControl>
                   <ImageUpload value={field.value} onChange={field.onChange} />
                 </FormControl>
@@ -137,7 +145,7 @@ const WebsiteSettingForm = ({ step, defaultValues, onChange }: WebsiteSettingFor
               <AccordionItem value="item-1">
                 <AccordionTrigger className="items-center hover:no-underline">
                   <Settings2 className="mr-1 size-4" />
-                  更多配置
+                  {t("install.websiteSettings.moreSettings")}
                 </AccordionTrigger>
                 <AccordionContent className="h-fit space-y-6">
                   <FormField
@@ -149,7 +157,7 @@ const WebsiteSettingForm = ({ step, defaultValues, onChange }: WebsiteSettingFor
 
                       return (
                         <FormItem>
-                          <FormLabel>主题颜色</FormLabel>
+                          <FormLabel>{t("install.websiteSettings.themeColor")}</FormLabel>
                           <FormControl>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
@@ -164,7 +172,9 @@ const WebsiteSettingForm = ({ step, defaultValues, onChange }: WebsiteSettingFor
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="flex w-fit flex-col">
-                                <DropdownMenuLabel>当前主题</DropdownMenuLabel>
+                                <DropdownMenuLabel>
+                                  {t("install.websiteSettings.currentTheme")}
+                                </DropdownMenuLabel>
                                 <ScrollThemeItems
                                   themeColor={themeColor}
                                   onSelect={(t) => {

@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import type { GroupedPermissions, Permission, RoleEntity } from "@buildingai/services/console";
 import {
   useAssignPermissionsMutation,
@@ -34,6 +35,7 @@ export const AssignPermissionsDialog = ({
   role,
   onSuccess,
 }: AssignPermissionsDialogProps) => {
+  const { t } = useI18n();
   const [selectedPermissionIds, setSelectedPermissionIds] = useState<string[]>([]);
 
   const { data: permissionGroups, isLoading: isLoadingPermissions } = usePermissionListQuery(
@@ -47,7 +49,7 @@ export const AssignPermissionsDialog = ({
 
   const assignMutation = useAssignPermissionsMutation({
     onSuccess: () => {
-      toast.success("权限分配成功");
+      toast.success(t("access.menu.toast.updateSuccess"));
       onOpenChange(false);
       onSuccess?.();
     },
@@ -119,9 +121,9 @@ export const AssignPermissionsDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>分配权限</DialogTitle>
+          <DialogTitle>{t("access.menu.assignPermissions.title")}</DialogTitle>
           <DialogDescription>
-            为角色 <span className="font-semibold">{role?.name}</span> 分配系统权限
+            {t("access.menu.assignPermissions.description", { name: role?.name ?? "" })}
           </DialogDescription>
         </DialogHeader>
 
@@ -133,7 +135,7 @@ export const AssignPermissionsDialog = ({
             onClick={handleSelectAll}
             disabled={isLoadingPermissions}
           >
-            全选
+            {t("access.menu.assignPermissions.selectAll")}
           </Button>
           <Button
             type="button"
@@ -142,7 +144,7 @@ export const AssignPermissionsDialog = ({
             onClick={handleClearAll}
             disabled={isLoadingPermissions}
           >
-            取消全部
+            {t("access.menu.assignPermissions.deselectAll")}
           </Button>
           <Button
             type="button"
@@ -151,21 +153,27 @@ export const AssignPermissionsDialog = ({
             onClick={handleInvertSelection}
             disabled={isLoadingPermissions}
           >
-            反选
+            {t("access.menu.assignPermissions.invertSelection")}
           </Button>
           <div className="text-muted-foreground ml-auto text-sm">
-            已选择 {selectedPermissionIds.length} 项
+            {t("access.menu.assignPermissions.selectedCount", {
+              count: selectedPermissionIds.length,
+            })}
           </div>
         </div>
 
         <ScrollArea className="max-h-[60vh] pr-4">
           {isLoadingPermissions ? (
             <div className="flex h-32 items-center justify-center">
-              <p className="text-muted-foreground text-sm">加载中...</p>
+              <p className="text-muted-foreground text-sm">
+                {t("access.menu.assignPermissions.loading")}
+              </p>
             </div>
           ) : groups.length === 0 ? (
             <div className="flex h-32 items-center justify-center">
-              <p className="text-muted-foreground text-sm">暂无权限数据</p>
+              <p className="text-muted-foreground text-sm">
+                {t("access.menu.assignPermissions.noData")}
+              </p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -192,7 +200,11 @@ export const AssignPermissionsDialog = ({
                       />
                       <span className="font-semibold">{group.name}</span>
                       <span className="text-muted-foreground text-xs">
-                        ({groupPermissions.length} 项)
+                        (
+                        {t("access.menu.assignPermissions.itemCount", {
+                          count: groupPermissions.length,
+                        })}
+                        )
                       </span>
                     </div>
 
@@ -223,10 +235,12 @@ export const AssignPermissionsDialog = ({
 
         <DialogFooter>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-            取消
+            {t("access.menu.assignPermissions.cancel")}
           </Button>
           <Button onClick={handleSubmit} disabled={assignMutation.isPending || !role?.id}>
-            {assignMutation.isPending ? "保存中..." : "确定"}
+            {assignMutation.isPending
+              ? t("access.menu.assignPermissions.saving")
+              : t("access.menu.assignPermissions.confirm")}
           </Button>
         </DialogFooter>
       </DialogContent>

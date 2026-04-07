@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   useStorageConfigDetailQuery,
   useUpdateStorageConfigMutation,
@@ -30,6 +31,7 @@ interface LocalProps {
 }
 
 const Local = ({ configId }: LocalProps) => {
+  const { t } = useI18n();
   const {
     data,
     isLoading: isDetailLoading,
@@ -56,11 +58,11 @@ const Local = ({ configId }: LocalProps) => {
   const updateMutation = useUpdateStorageConfigMutation({
     onSuccess: () => {
       invalidateStorageConfigCache();
-      toast.success("已切换为本地存储");
+      toast.success(t("system.storageConfig.local.switchToLocal"));
       refetch();
     },
     onError: (e) => {
-      console.log(`切换失败: ${e.message}`);
+      console.log(`${t("system.storageConfig.local.switchFailed", { message: e.message })}`);
     },
   });
 
@@ -70,7 +72,7 @@ const Local = ({ configId }: LocalProps) => {
 
   const handleEnable = () => {
     if (!configId) {
-      toast.error("未找到本地存储配置记录");
+      toast.error(t("system.storageConfig.local.notFound"));
       return;
     }
     updateMutation.mutate({
@@ -101,7 +103,7 @@ const Local = ({ configId }: LocalProps) => {
                 <HardDrive className="text-primary size-5" />
               </div>
               <div className="flex flex-col gap-1">
-                <span className="text-sm font-medium">本地存储</span>
+                <span className="text-sm font-medium">{t("system.storageConfig.local.title")}</span>
               </div>
             </div>
             <PermissionGuard permissions="system-storage-config:set">
@@ -113,7 +115,9 @@ const Local = ({ configId }: LocalProps) => {
                 onClick={handleEnable}
               >
                 {updateMutation.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
-                {data?.isActive ? "已启用" : "启用"}
+                {data?.isActive
+                  ? t("system.storageConfig.local.enabled")
+                  : t("system.storageConfig.local.disabled")}
               </Button>
             </PermissionGuard>
           </CardContent>
@@ -123,11 +127,13 @@ const Local = ({ configId }: LocalProps) => {
           name="localStorage"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>本地存储路径</FormLabel>
+              <FormLabel>{t("system.storageConfig.local.storagePath")}</FormLabel>
               <FormControl>
                 <Input {...field} disabled />
               </FormControl>
-              <FormDescription>系统文件存放的绝对路径或相对路径</FormDescription>
+              <FormDescription>
+                {t("system.storageConfig.local.storagePathDescription")}
+              </FormDescription>
             </FormItem>
           )}
         />
@@ -136,11 +142,13 @@ const Local = ({ configId }: LocalProps) => {
           name="domain"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>访问域名（URL）</FormLabel>
+              <FormLabel>{t("system.storageConfig.local.accessDomain")}</FormLabel>
               <FormControl>
                 <Input {...field} disabled />
               </FormControl>
-              <FormDescription>外部访问附件时使用的基础 URL</FormDescription>
+              <FormDescription>
+                {t("system.storageConfig.local.accessDomainDescription")}
+              </FormDescription>
             </FormItem>
           )}
         />

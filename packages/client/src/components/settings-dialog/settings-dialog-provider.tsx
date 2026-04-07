@@ -176,7 +176,7 @@ export function SettingsDialogProvider({ children }: { children: React.ReactNode
         void queryClient.invalidateQueries({ queryKey: ["recharge", "center"] });
         void queryClient.invalidateQueries({ queryKey: ["user", "info"] });
         void queryClient.invalidateQueries({ queryKey: ["user", "account-log"] });
-        toast.success("充值成功");
+        toast.success(t("payment.rechargeSuccess"));
         window.dispatchEvent(new CustomEvent(PAYMENT_SUCCESS_MESSAGE_TYPE, { detail: payload }));
         if (availablePageIds.includes("wallet")) {
           setState((prev) => ({
@@ -194,7 +194,7 @@ export function SettingsDialogProvider({ children }: { children: React.ReactNode
         void queryClient.invalidateQueries({ queryKey: ["membership", "order"] });
         void queryClient.invalidateQueries({ queryKey: ["user", "info"] });
         void queryClient.invalidateQueries({ queryKey: ["user", "account-log"] });
-        toast.success("会员支付成功");
+        toast.success(t("payment.membershipPaymentSuccess"));
         window.dispatchEvent(new CustomEvent(PAYMENT_SUCCESS_MESSAGE_TYPE, { detail: payload }));
         if (availablePageIds.includes("subscribe")) {
           setState((prev) => ({
@@ -295,7 +295,7 @@ export function SettingsDialogProvider({ children }: { children: React.ReactNode
                           </Avatar>
                           <div className="grid flex-1 text-left text-sm leading-tight">
                             <span className="truncate font-medium">
-                              {userInfo?.nickname || "未登录"}
+                              {userInfo?.nickname || t("common.notLoggedIn")}
                             </span>
                             <span className="text-muted-foreground truncate text-xs">
                               {isLogin() ? (
@@ -303,7 +303,7 @@ export function SettingsDialogProvider({ children }: { children: React.ReactNode
                                   <span className="">{userInfo?.username || "0"}</span>
                                 </div>
                               ) : (
-                                "请先登录后使用"
+                                t("common.pleaseLoginFirst")
                               )}
                             </span>
                           </div>

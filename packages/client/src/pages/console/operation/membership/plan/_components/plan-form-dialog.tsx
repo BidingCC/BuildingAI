@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   type CreatePlansDto,
   useCreateMembershipPlanMutation,
@@ -55,51 +56,72 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-// 订阅时长: 1-月 2-季 4-年 5-终身 6-自定义
-const DURATION_OPTIONS = [
-  { value: 1, label: "一个月" },
-  { value: 2, label: "三个月" },
-  { value: 4, label: "一年" },
-  { value: 5, label: "永久" },
-  { value: 6, label: "自定义时长" },
-] as const;
+// Subscription duration: 1=Monthly, 2=Quarterly, 4=Yearly, 5=Lifetime, 6=Custom
+const getDurationOptions = (t: (key: string) => string) =>
+  [
+    { value: 1, label: t("operation.membership.plan.durationLabels.1") },
+    { value: 2, label: t("operation.membership.plan.durationLabels.2") },
+    { value: 4, label: t("operation.membership.plan.durationLabels.4") },
+    { value: 5, label: t("operation.membership.plan.durationLabels.5") },
+    { value: 6, label: t("operation.membership.plan.durationLabels.6") },
+  ] as const;
 
-const CUSTOM_DURATION_UNITS = [
-  { value: "day", label: "天" },
-  { value: "month", label: "月" },
-  { value: "year", label: "年" },
-] as const;
+const getCustomDurationUnits = (t: (key: string) => string) =>
+  [
+    { value: "day", label: t("operation.membership.plan.unitDay") },
+    { value: "month", label: t("operation.membership.plan.unitMonth") },
+    { value: "year", label: t("operation.membership.plan.unitYear") },
+  ] as const;
 
-const billingRowSchema = z.object({
-  levelId: z.string().min(1, "请选择等级"),
-  salesPrice: z
-    .union([z.number(), z.string()])
-    .transform((v) => (typeof v === "string" ? Number(v) : v))
-    .pipe(z.number().min(0, "销售价格不能为负")),
-  originalPrice: z
-    .union([z.number(), z.string(), z.undefined(), z.literal("")])
-    .optional()
-    .transform((v) =>
-      v === "" || v === undefined ? undefined : typeof v === "string" ? Number(v) : v,
-    ),
-  label: z.string().optional(),
-  status: z.boolean(),
-});
+const getBillingRowSchema = (t: (key: string) => string) =>
+  z.object({
+    levelId: z
+      .string()
+      .min(1, t("operation.membership.plan.form.levelRequired") || "Please select a level"),
+    salesPrice: z
+      .union([z.number(), z.string()])
+      .transform((v) => (typeof v === "string" ? Number(v) : v))
+      .pipe(
+        z
+          .number()
+          .min(
+            0,
+            t("operation.membership.plan.form.salesPriceNonNegative") ||
+              "Sales price cannot be negative",
+          ),
+      ),
+    originalPrice: z
+      .union([z.number(), z.string(), z.undefined(), z.literal("")])
+      .optional()
+      .transform((v) =>
+        v === "" || v === undefined ? undefined : typeof v === "string" ? Number(v) : v,
+      ),
+    label: z.string().optional(),
+    status: z.boolean(),
+  });
 
-const formSchema = z.object({
-  name: z.string().min(1, "计划名称必须填写").max(64, "计划名称不能超过64个字符"),
-  label: z.string().max(64).optional(),
-  durationConfig: z.number().int().min(1).max(6),
-  durationValue: z
-    .union([z.number(), z.string()])
-    .transform((v) => (typeof v === "string" ? Number(v) : v))
-    .pipe(z.number().int().min(1))
-    .optional(),
-  durationUnit: z.enum(["day", "month", "year"]).optional(),
-  billing: z.array(billingRowSchema).optional(),
-});
+const getFormSchema = (t: (key: string) => string) =>
+  z.object({
+    name: z
+      .string()
+      .min(1, t("operation.membership.plan.form.nameRequired") || "Plan name is required")
+      .max(
+        64,
+        t("operation.membership.plan.form.nameMaxLength") ||
+          "Plan name cannot exceed 64 characters",
+      ),
+    label: z.string().max(64).optional(),
+    durationConfig: z.number().int().min(1).max(6),
+    durationValue: z
+      .union([z.number(), z.string()])
+      .transform((v) => (typeof v === "string" ? Number(v) : v))
+      .pipe(z.number().int().min(1))
+      .optional(),
+    durationUnit: z.enum(["day", "month", "year"]).optional(),
+    billing: z.array(getBillingRowSchema(t)).optional(),
+  });
 
-type FormValues = z.infer<typeof formSchema>;
+type FormValues = z.infer<ReturnType<typeof getFormSchema>>;
 
 type PlanFormDialogProps = {
   open: boolean;
@@ -117,6 +139,7 @@ const defaultBillingRow = {
 };
 
 export const PlanFormDialog = ({ open, onOpenChange, planId, onSuccess }: PlanFormDialogProps) => {
+  const { t } = useI18n();
   const isEditMode = !!planId;
   const { data: planDetail } = useMembershipPlanDetailQuery(planId, { enabled: open && !!planId });
   const { data: levelsData } = useMembershipLevelListQuery(
@@ -124,6 +147,8 @@ export const PlanFormDialog = ({ open, onOpenChange, planId, onSuccess }: PlanFo
     { enabled: open },
   );
   const levels = levelsData?.items ?? [];
+
+  const formSchema = useMemo(() => getFormSchema(t), [t]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema) as Resolver<FormValues>,
@@ -156,7 +181,7 @@ export const PlanFormDialog = ({ open, onOpenChange, planId, onSuccess }: PlanFo
 
   useEffect(() => {
     if (!open) return;
-    if (planId && !planDetail) return; // 编辑模式下等待详情加载
+    if (planId && !planDetail) return; // Wait for detail to load in edit mode
     if (planDetail) {
       form.reset({
         name: planDetail.name,
@@ -189,23 +214,23 @@ export const PlanFormDialog = ({ open, onOpenChange, planId, onSuccess }: PlanFo
 
   const createMutation = useCreateMembershipPlanMutation({
     onSuccess: () => {
-      toast.success("计划创建成功");
+      toast.success(t("operation.membership.plan.planCreated"));
       onOpenChange(false);
       onSuccess?.();
     },
     onError: (error) => {
-      toast.error(`创建失败: ${error.message}`);
+      toast.error(t("operation.membership.plan.createFailed", { error: error.message }));
     },
   });
 
   const updateMutation = useUpdateMembershipPlanMutation({
     onSuccess: () => {
-      toast.success("计划更新成功");
+      toast.success(t("operation.membership.plan.planUpdated"));
       onOpenChange(false);
       onSuccess?.();
     },
     onError: (error) => {
-      toast.error(`更新失败: ${error.message}`);
+      toast.error(t("operation.membership.plan.updateFailed", { error: error.message }));
     },
   });
 
@@ -245,14 +270,22 @@ export const PlanFormDialog = ({ open, onOpenChange, planId, onSuccess }: PlanFo
 
   const durationConfig = form.watch("durationConfig");
   const isCustomDuration = durationConfig === 6;
+  const durationOptions = getDurationOptions(t);
+  const customDurationUnits = getCustomDurationUnits(t);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-full gap-0 p-0 md:max-w-2xl">
         <DialogHeader className="p-4">
-          <DialogTitle>{isEditMode ? "编辑计划" : "新增计划"}</DialogTitle>
+          <DialogTitle>
+            {isEditMode
+              ? t("operation.membership.plan.edit")
+              : t("operation.membership.plan.form.addPlan")}
+          </DialogTitle>
           <DialogDescription>
-            {isEditMode ? "修改订阅计划信息" : "添加一个新的订阅计划"}
+            {isEditMode
+              ? t("operation.membership.plan.form.editPlanDesc")
+              : t("operation.membership.plan.form.addPlanDesc")}
           </DialogDescription>
         </DialogHeader>
 
@@ -270,9 +303,12 @@ export const PlanFormDialog = ({ open, onOpenChange, planId, onSuccess }: PlanFo
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>计划名称</FormLabel>
+                    <FormLabel>{t("operation.membership.plan.form.name")}</FormLabel>
                     <FormControl>
-                      <Input placeholder="请输入计划名称" {...field} />
+                      <Input
+                        placeholder={t("operation.membership.plan.form.namePlaceholder")}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -284,9 +320,12 @@ export const PlanFormDialog = ({ open, onOpenChange, planId, onSuccess }: PlanFo
                 name="label"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>标签名称</FormLabel>
+                    <FormLabel>{t("operation.membership.plan.form.label")}</FormLabel>
                     <FormControl>
-                      <Input placeholder="如：限时优惠、推荐" {...field} />
+                      <Input
+                        placeholder={t("operation.membership.plan.form.labelPlaceholder")}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -298,14 +337,16 @@ export const PlanFormDialog = ({ open, onOpenChange, planId, onSuccess }: PlanFo
                 name="durationConfig"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>订阅时长</FormLabel>
+                    <FormLabel>
+                      {t("operation.membership.plan.form.subscriptionDuration")}
+                    </FormLabel>
                     <FormControl>
                       <RadioGroup
                         value={String(field.value)}
                         onValueChange={(v) => field.onChange(Number(v))}
                         className="flex flex-wrap gap-4"
                       >
-                        {DURATION_OPTIONS.map((opt) => (
+                        {durationOptions.map((opt) => (
                           <div key={opt.value} className="flex items-center gap-2">
                             <RadioGroupItem
                               value={String(opt.value)}
@@ -332,13 +373,12 @@ export const PlanFormDialog = ({ open, onOpenChange, planId, onSuccess }: PlanFo
                   name="durationValue"
                   render={({ field: valueField }) => (
                     <FormItem>
-                      {/* <FormLabel>自定义时长</FormLabel> */}
                       <FormControl>
                         <InputGroup className="w-full max-w-[200px]">
                           <InputGroupInput
                             type="number"
                             min={1}
-                            placeholder="如 7"
+                            placeholder={t("operation.membership.plan.durationLabels.6")}
                             value={valueField.value ?? ""}
                             onBlur={valueField.onBlur}
                             ref={valueField.ref}
@@ -359,10 +399,12 @@ export const PlanFormDialog = ({ open, onOpenChange, planId, onSuccess }: PlanFo
                                     onValueChange={unitField.onChange}
                                   >
                                     <SelectTrigger className="text-muted-foreground h-8 min-w-[72px] border-0 bg-transparent shadow-none focus-visible:ring-0">
-                                      <SelectValue placeholder="单位" />
+                                      <SelectValue
+                                        placeholder={t("operation.membership.plan.form.unit")}
+                                      />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      {CUSTOM_DURATION_UNITS.map((u) => (
+                                      {customDurationUnits.map((u) => (
                                         <SelectItem key={u.value} value={u.value}>
                                           {u.label}
                                         </SelectItem>
@@ -383,7 +425,7 @@ export const PlanFormDialog = ({ open, onOpenChange, planId, onSuccess }: PlanFo
 
               <div className="w-full space-y-3">
                 <div className="flex items-center justify-between">
-                  <FormLabel>会员计费</FormLabel>
+                  <FormLabel>{t("operation.membership.plan.form.billing")}</FormLabel>
                   <Button
                     type="button"
                     variant="outline"
@@ -392,25 +434,36 @@ export const PlanFormDialog = ({ open, onOpenChange, planId, onSuccess }: PlanFo
                     onClick={() => append(defaultBillingRow)}
                   >
                     <Plus className="mr-1 size-4" />
-                    添加等级
+                    {t("operation.membership.plan.form.addLevel")}
                   </Button>
                 </div>
-                <p className="text-muted-foreground text-sm">等级不可重复选择</p>
+                <p className="text-muted-foreground text-sm">
+                  {t("operation.membership.plan.form.levelCannotRepeat")}
+                </p>
                 {fields.length === 0 ? (
                   <p className="text-muted-foreground rounded-lg border border-dashed p-4 text-center text-sm">
-                    暂无计费等级，点击「添加等级」添加
+                    {t("operation.membership.plan.form.noBillingLevels")}
                   </p>
                 ) : (
                   <div className="w-full rounded-lg border">
                     <Table className="w-full">
                       <TableHeader>
                         <TableRow className="hover:bg-transparent">
-                          <TableHead className="min-w-48">等级名称</TableHead>
-                          <TableHead className="min-w-24">销售价格</TableHead>
-                          {/* <TableHead className="min-w-24">原价</TableHead> */}
-                          <TableHead className="min-w-24">标签</TableHead>
-                          <TableHead className="min-w-24">启用状态</TableHead>
-                          <TableHead className="w-14">操作</TableHead>
+                          <TableHead className="min-w-48">
+                            {t("operation.membership.plan.form.levelName")}
+                          </TableHead>
+                          <TableHead className="min-w-24">
+                            {t("operation.membership.plan.form.salesPrice")}
+                          </TableHead>
+                          <TableHead className="min-w-24">
+                            {t("operation.membership.plan.form.tag")}
+                          </TableHead>
+                          <TableHead className="min-w-24">
+                            {t("operation.membership.plan.form.enabledStatus")}
+                          </TableHead>
+                          <TableHead className="w-14">
+                            {t("operation.membership.plan.table.actions")}
+                          </TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -428,7 +481,11 @@ export const PlanFormDialog = ({ open, onOpenChange, planId, onSuccess }: PlanFo
                                     >
                                       <FormControl>
                                         <SelectTrigger className="h-8">
-                                          <SelectValue placeholder="选择等级" />
+                                          <SelectValue
+                                            placeholder={t(
+                                              "operation.membership.plan.form.levelPlaceholder",
+                                            )}
+                                          />
                                         </SelectTrigger>
                                       </FormControl>
                                       <SelectContent>
@@ -464,25 +521,6 @@ export const PlanFormDialog = ({ open, onOpenChange, planId, onSuccess }: PlanFo
                                 )}
                               />
                             </TableCell>
-                            {/* <TableCell>
-                              <FormField
-                                control={form.control}
-                                name={`billing.${index}.originalPrice`}
-                                render={({ field: f }) => (
-                                  <FormItem>
-                                    <FormControl>
-                                      <Input
-                                        type="number"
-                                        min={0}
-                                        step={0.01}
-                                        className="h-8"
-                                        {...f}
-                                      />
-                                    </FormControl>
-                                  </FormItem>
-                                )}
-                              />
-                            </TableCell> */}
                             <TableCell>
                               <FormField
                                 control={form.control}
@@ -490,7 +528,11 @@ export const PlanFormDialog = ({ open, onOpenChange, planId, onSuccess }: PlanFo
                                 render={({ field: f }) => (
                                   <FormItem>
                                     <FormControl>
-                                      <Input placeholder="标签" className="h-8" {...f} />
+                                      <Input
+                                        placeholder={t("operation.membership.plan.form.tag")}
+                                        className="h-8"
+                                        {...f}
+                                      />
                                     </FormControl>
                                   </FormItem>
                                 )}
@@ -530,11 +572,13 @@ export const PlanFormDialog = ({ open, onOpenChange, planId, onSuccess }: PlanFo
 
               <DialogFooter className="bg-background absolute bottom-0 left-0 w-full flex-row justify-end rounded-lg p-4">
                 <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                  取消
+                  {t("operation.membership.plan.form.cancel")}
                 </Button>
                 <Button type="submit" disabled={isPending}>
                   {isPending && <Loader2 className="animate-spin" />}
-                  {isEditMode ? "保存" : "新增"}
+                  {isEditMode
+                    ? t("operation.membership.plan.form.save")
+                    : t("operation.membership.plan.form.create")}
                 </Button>
               </DialogFooter>
             </form>

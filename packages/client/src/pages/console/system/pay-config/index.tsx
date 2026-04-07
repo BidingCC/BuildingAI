@@ -1,5 +1,6 @@
 import { PayConfigPayType } from "@buildingai/constants/shared/payconfig.constant";
 import { BooleanNumber } from "@buildingai/constants/shared/status-codes.constant";
+import { useI18n } from "@buildingai/i18n";
 import {
   type SystemPayConfigItem,
   useSetDefaultSystemPayconfigMutation,
@@ -37,12 +38,13 @@ import { PageContainer } from "@/layouts/console/_components/page-container";
 
 import { PayConfigFormDialog } from "./_components/pay-config-form-dialog";
 
-const PAY_TYPE_LABEL: Record<number, string> = {
-  [PayConfigPayType.WECHAT]: "微信支付",
-  [PayConfigPayType.ALIPAY]: "支付宝支付",
-};
+const getPayTypeLabel = (t: (key: string) => string): Record<number, string> => ({
+  [PayConfigPayType.WECHAT]: t("system.payConfig.wechat"),
+  [PayConfigPayType.ALIPAY]: t("system.payConfig.alipay"),
+});
 
 const SystemPayConfigIndexPage = () => {
+  const { t } = useI18n();
   const { confirm } = useAlertDialog();
   const [searchKeyword, setSearchKeyword] = useState("");
   const [debouncedSearchKeyword] = useDebounceValue(searchKeyword.trim(), 300);
@@ -54,16 +56,17 @@ const SystemPayConfigIndexPage = () => {
 
   const updateStatusMutation = useUpdateSystemPayconfigStatusMutation({
     onSuccess: () => {
-      toast.success("支付配置状态已更新");
+      toast.success(t("system.payConfig.paymentUpdated"));
       refetch();
     },
     onError: (error) => {
-      toast.error(`更新失败: ${error.message}`);
+      toast.error(t("system.payConfig.updateFailed", { message: error.message }));
     },
   });
 
   const filteredConfigs = useMemo(() => {
     if (!payConfigs) return [];
+    const PAY_TYPE_LABEL = getPayTypeLabel(t);
     return (payConfigs as SystemPayConfigItem[]).filter((item) => {
       const matchKeyword =
         !debouncedSearchKeyword ||
@@ -77,7 +80,7 @@ const SystemPayConfigIndexPage = () => {
 
       return matchKeyword && matchStatus;
     });
-  }, [payConfigs, debouncedSearchKeyword, statusFilter]);
+  }, [payConfigs, debouncedSearchKeyword, statusFilter, t]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchKeyword(e.target.value);
@@ -85,19 +88,19 @@ const SystemPayConfigIndexPage = () => {
 
   const handleSetDefaultPayconfig = async (item: SystemPayConfigItem) => {
     await confirm({
-      title: "设置默认支付方式",
-      description: `确定要设置「${item.name}」为默认支付方式吗？`,
+      title: t("system.payConfig.setDefaultTitle"),
+      description: t("system.payConfig.setDefaultConfirm", { name: item.name }),
     });
     setDefaultSystemPayconfigMutation.mutate({ id: item.id });
   };
 
   const setDefaultSystemPayconfigMutation = useSetDefaultSystemPayconfigMutation({
     onSuccess: () => {
-      toast.success("默认支付方式已设置");
+      toast.success(t("system.payConfig.defaultSetSuccess"));
       refetch();
     },
     onError: (error) => {
-      console.log(`更新失败: ${error.message}`);
+      console.log(t("system.payConfig.defaultSetFailed", { message: error.message }));
     },
   });
 
@@ -109,8 +112,11 @@ const SystemPayConfigIndexPage = () => {
     const nextEnable = item.isEnable === BooleanNumber.YES ? BooleanNumber.NO : BooleanNumber.YES;
 
     await confirm({
-      title: "支付方式状态",
-      description: `确定要${nextEnable === BooleanNumber.YES ? "启用" : "禁用"}该支付方式吗？`,
+      title: t("system.payConfig.statusChanged"),
+      description:
+        nextEnable === BooleanNumber.YES
+          ? t("system.payConfig.paymentEnabled")
+          : t("system.payConfig.paymentDisabled"),
     });
 
     updateStatusMutation.mutate({
@@ -125,19 +131,19 @@ const SystemPayConfigIndexPage = () => {
         <div className="flex flex-col gap-4">
           <div className="bg-background sticky top-0 z-2 grid grid-cols-1 gap-4 pt-1 pb-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
             <Input
-              placeholder="搜索支付方式名称"
+              placeholder={t("system.payConfig.searchPlaceholder")}
               className="text-sm"
               value={searchKeyword}
               onChange={handleSearchChange}
             />
             <Select value={statusFilter} onValueChange={handleStatusChange}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="启用状态" />
+                <SelectValue placeholder={t("system.payConfig.statusAll")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">全部状态</SelectItem>
-                <SelectItem value="enabled">已启用</SelectItem>
-                <SelectItem value="disabled">已禁用</SelectItem>
+                <SelectItem value="all">{t("system.payConfig.statusAll")}</SelectItem>
+                <SelectItem value="enabled">{t("system.payConfig.statusEnabled")}</SelectItem>
+                <SelectItem value="disabled">{t("system.payConfig.statusDisabled")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -185,7 +191,7 @@ const SystemPayConfigIndexPage = () => {
                     <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
                       <span className="line-clamp-1 font-medium">{item.name}</span>
                       <span className="text-muted-foreground line-clamp-1 text-xs">
-                        {PAY_TYPE_LABEL[item.payType] ?? "未知支付方式"}
+                        {getPayTypeLabel(t)[item.payType] ?? t("system.payConfig.unknownPayment")}
                       </span>
                     </div>
 
@@ -208,7 +214,7 @@ const SystemPayConfigIndexPage = () => {
                               }}
                             >
                               <Edit />
-                              编辑
+                              {t("system.payConfig.edit")}
                             </DropdownMenuItem>
                           </PermissionGuard>
                           <PermissionGuard permissions="system-payconfig:setDefault">
@@ -217,7 +223,7 @@ const SystemPayConfigIndexPage = () => {
                               onClick={() => handleSetDefaultPayconfig(item)}
                             >
                               <Star />
-                              设置默认
+                              {t("system.payConfig.setDefault")}
                             </DropdownMenuItem>
                           </PermissionGuard>
                         </DropdownMenuContent>
@@ -228,11 +234,11 @@ const SystemPayConfigIndexPage = () => {
                   <div className="mt-2 flex flex-wrap items-center gap-2">
                     <StatusBadge
                       active={item.isEnable === BooleanNumber.YES}
-                      activeText="启用"
-                      inactiveText="禁用"
+                      activeText={t("system.payConfig.enabled")}
+                      inactiveText={t("system.payConfig.disabled")}
                     />
                     {item.isDefault === BooleanNumber.YES && (
-                      <Badge variant="secondary">默认支付方式</Badge>
+                      <Badge variant="secondary">{t("system.payConfig.defaultPayment")}</Badge>
                     )}
                   </div>
                 </div>
@@ -241,8 +247,8 @@ const SystemPayConfigIndexPage = () => {
               <div className="col-span-1 flex h-28 items-center justify-center gap-4 sm:col-span-2 lg:col-span-3 xl:col-span-4 2xl:col-span-5">
                 <span className="text-muted-foreground text-sm">
                   {searchKeyword
-                    ? `没有找到与"${searchKeyword}"相关的支付方式`
-                    : "暂无支付配置数据"}
+                    ? t("system.payConfig.noResults", { keyword: searchKeyword })
+                    : t("system.payConfig.noData")}
                 </span>
               </div>
             )}

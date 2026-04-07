@@ -10,6 +10,7 @@ import {
   useRechargePayResultQuery,
   useSubmitRechargeMutation,
 } from "@buildingai/services/web";
+import { useI18n } from "@buildingai/i18n";
 import { Avatar, AvatarFallback, AvatarImage } from "@buildingai/ui/components/ui/avatar";
 import { Badge } from "@buildingai/ui/components/ui/badge";
 import { Button } from "@buildingai/ui/components/ui/button";
@@ -46,7 +47,7 @@ function buildAlipayReturnUrl(orderId: string, orderNo: string) {
 function openAlipayPopup() {
   const popupWindow = window.open("", "_blank", "width=620,height=720");
   if (!popupWindow) {
-    throw new Error("无法打开支付宝支付窗口，请检查浏览器是否拦截了弹窗");
+    throw new Error(t("settings.recharge.unableToOpenAlipayWindow"));
   }
   popupWindow.document.write(
     `<!doctype html><html><head><meta charset="utf-8" /><title>支付宝支付</title></head><body><div style="display:flex;min-height:100vh;align-items:center;justify-content:center;font-family:sans-serif;color:#666;font-size:14px;">正在打开支付宝支付窗口…</div></body></html>`,
@@ -76,6 +77,7 @@ export function RechargeDetailDialog({
   payWayList?: PayWayItem[];
   rechargeExplain?: string;
 }) {
+  const { t } = useI18n();
   /** 从已开启的支付方式中取默认值：有默认则用默认，否则用第一个 */
   const getDefaultPaymentMethod = (): PayConfigType => {
     if (payWayList.length === 0) return 1 as PayConfigType;
@@ -161,7 +163,7 @@ export function RechargeDetailDialog({
     }
     setQrCode(null);
     setQrLoading(false);
-    setQrError("暂未获取到支付二维码，请稍后重试或更换支付方式");
+    setQrError(t("settings.recharge.failedToGetQrCode"));
   };
 
   const handleConfirmPay = async () => {
@@ -192,7 +194,7 @@ export function RechargeDetailDialog({
         const payForm = prepay.payForm;
         if (typeof payForm === "string" && payForm.length > 0) {
           if (!paymentWindow) {
-            throw new Error("无法打开支付宝支付窗口，请检查浏览器是否拦截了弹窗");
+            throw new Error(t("settings.recharge.unableToOpenAlipayWindow"));
           }
           submitAlipayForm(payForm, paymentWindow);
           setQrLoading(false);
@@ -201,7 +203,7 @@ export function RechargeDetailDialog({
         paymentWindow?.close();
         setQrCode(null);
         setQrLoading(false);
-        setQrError("暂未获取到支付宝支付链接，请稍后重试或更换支付方式");
+        setQrError(t("settings.recharge.failedToGetAlipayLink"));
         return;
       }
       const rawQrCode = prepay.qrCode?.code_url;
@@ -211,7 +213,7 @@ export function RechargeDetailDialog({
       } else {
         setQrCode(null);
         setQrLoading(false);
-        setQrError("暂未获取到支付二维码，请稍后重试或更换支付方式");
+        setQrError(t("settings.recharge.failedToGetQrCode"));
       }
     } catch (e) {
       console.error(e);
@@ -223,7 +225,7 @@ export function RechargeDetailDialog({
         // noop
       }
       setQrLoading(false);
-      setQrError("创建订单或拉起支付失败，请稍后重试");
+      setQrError(t("settings.recharge.orderOrPaymentFailed"));
     }
   };
 
@@ -234,7 +236,7 @@ export function RechargeDetailDialog({
     } catch (error) {
       console.error(error);
       setQrLoading(false);
-      setQrError("刷新支付二维码失败，请稍后重试");
+      setQrError(t("settings.recharge.failedToRefreshQrCode"));
     }
   };
 
@@ -244,7 +246,7 @@ export function RechargeDetailDialog({
     hasHandledPaidRef.current = true;
     void queryClient.invalidateQueries({ queryKey: ["user", "info"] });
     void queryClient.invalidateQueries({ queryKey: ["user", "account-log"] });
-    toast.success("支付成功");
+    toast.success(t("settings.recharge.paymentSuccess"));
     handleOpenChange(false);
   }, [payResult, queryClient]);
 
@@ -291,39 +293,39 @@ export function RechargeDetailDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>{showQr ? "请完成支付" : "积分套餐详情"}</DialogTitle>
+          <DialogTitle>{showQr ? t("settings.recharge.completePayment") : t("settings.recharge.packageDetails")}</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-6 py-4">
           {!rule ? (
-            <p className="text-muted-foreground text-sm">请选择套餐</p>
+            <p className="text-muted-foreground text-sm">{t("settings.recharge.selectPackage")}</p>
           ) : !showQr ? (
             <>
               <Card className="border-border">
                 <CardContent className="px-4">
                   <div className="space-y-3 text-sm">
                     <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">充值数量</span>
+                      <span className="text-muted-foreground">{t("settings.recharge.rechargeAmount")}</span>
                       <span className="font-medium tabular-nums">{rule.power}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">赠送数量</span>
+                      <span className="text-muted-foreground">{t("settings.recharge.bonusAmount")}</span>
                       <span className="font-medium text-green-600 tabular-nums dark:text-green-400">
                         + {rule.givePower}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">到账数量</span>
+                      <span className="text-muted-foreground">{t("settings.recharge.creditedAmount")}</span>
                       <span className="font-medium tabular-nums">{totalPower}</span>
                     </div>
                     {rule.label && (
                       <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">标签</span>
+                        <span className="text-muted-foreground">{t("settings.recharge.label")}</span>
                         <Badge className="bg-primary/10 text-primary text-xs">{rule.label}</Badge>
                       </div>
                     )}
                     <Separator className="border-border border-t border-dashed bg-transparent data-[orientation=horizontal]:h-0" />
                     <div className="flex items-center justify-between pt-1">
-                      <span className="text-muted-foreground">实付金额</span>
+                      <span className="text-muted-foreground">{t("settings.recharge.actualPayment")}</span>
                       <span className="text-lg font-semibold tabular-nums">
                         {formatPrice(rule.sellPrice)}
                       </span>
@@ -332,7 +334,7 @@ export function RechargeDetailDialog({
                 </CardContent>
               </Card>
               <div className="flex flex-col gap-3">
-                <h4 className="text-sm font-medium">选择支付方式</h4>
+                <h4 className="text-sm font-medium">{t("settings.recharge.selectPaymentMethod")}</h4>
                 <RadioGroup
                   orientation="horizontal"
                   value={String(paymentMethod)}
@@ -378,22 +380,22 @@ export function RechargeDetailDialog({
                 <span className="text-xl font-semibold">{formatPrice(rule.sellPrice)}</span>
               </div> */}
               <Button className="w-full" size="lg" disabled={isLoading} onClick={handleConfirmPay}>
-                {isLoading ? "提交中…" : "确认支付"}
+                {isLoading ? t("settings.recharge.submitOrder") : t("settings.recharge.confirmPayment")}
               </Button>
             </>
           ) : (
             <div className="flex flex-col items-center gap-4 py-4">
               {orderNo && (
                 <p className="text-muted-foreground text-sm">
-                  订单号：<span className="text-foreground font-medium">{orderNo}</span>
+                  {t("settings.recharge.orderNo")}：<span className="text-foreground font-medium">{orderNo}</span>
                 </p>
               )}
               {qrLoading && (
                 <div className="flex flex-col items-center gap-2 py-4">
                   <div className="bg-muted text-muted-foreground flex size-48 items-center justify-center rounded-lg border border-dashed text-sm">
                     {paymentMethod === PayConfigPayType.ALIPAY
-                      ? "正在跳转支付宝…"
-                      : "正在生成支付二维码…"}
+                      ? t("settings.recharge.redirectingToAlipay")
+                      : t("settings.recharge.generatingQrCode")}
                   </div>
                 </div>
               )}
@@ -410,18 +412,18 @@ export function RechargeDetailDialog({
                     <div className="relative flex size-48 items-center justify-center overflow-hidden rounded-lg border p-1">
                       <img
                         src={qrCode}
-                        alt="支付二维码"
+                        alt={t("settings.recharge.generatingQrCode")}
                         className="pointer-events-none size-full object-contain select-none"
-                        onError={() => setQrError("二维码加载失败，请刷新页面或稍后重试")}
+                        onError={() => setQrError(t("settings.recharge.qrCodeLoadFailed"))}
                       />
                       {wechatQrExpired && paymentMethod === PayConfigPayType.WECHAT && (
                         <div className="bg-background/80 absolute inset-0 z-10 flex flex-col items-center justify-center backdrop-blur-sm">
                           <AlertCircle className="text-destructive mb-2 size-12" />
                           <p className="text-muted-foreground mb-3 text-center text-sm">
-                            二维码已过期，请刷新
+                            t("settings.recharge.qrCodeExpired")
                           </p>
                           <Button size="sm" variant="secondary" onClick={handleRefreshWechatQrCode}>
-                            刷新二维码
+                            {t("settings.recharge.refreshQrCode")}
                           </Button>
                         </div>
                       )}
@@ -431,13 +433,13 @@ export function RechargeDetailDialog({
                       {qrCode}
                     </div>
                   )}
-                  <p className="text-muted-foreground text-sm">请使用微信扫码完成支付</p>
+                  <p className="text-muted-foreground text-sm">{t("settings.recharge.pleaseUseWechatScan")}</p>
                 </div>
               )}
               {!qrLoading && !qrError && !qrCode && paymentMethod === PayConfigPayType.ALIPAY && (
                 <div className="bg-muted text-muted-foreground flex min-h-48 w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed px-4 py-6 text-center text-sm">
-                  <span>支付宝支付窗口已打开</span>
-                  <span>请在新窗口完成支付，支付成功后系统会自动刷新并提示你</span>
+                  <span>{t("settings.recharge.alipayWindowOpened")}</span>
+                  <span>{t("settings.recharge.alipayPaymentSuccess")}</span>
                 </div>
               )}
             </div>

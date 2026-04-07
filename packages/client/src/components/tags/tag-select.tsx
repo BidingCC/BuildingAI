@@ -1,6 +1,7 @@
 import type { TagTypeType } from "@buildingai/constants";
 import { useConsoleTagsQuery } from "@buildingai/services/console";
 import { useTagsQuery } from "@buildingai/services/web";
+import { useI18n } from "@buildingai/i18n";
 import { Button } from "@buildingai/ui/components/ui/button";
 import { Input } from "@buildingai/ui/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@buildingai/ui/components/ui/popover";
@@ -27,11 +28,11 @@ export function TagSelect({
   onChange,
   type = "app",
   onClose,
-  placeholder = "搜索",
   showManage: showManageProp,
   tagsSource = "console",
   "data-testid": dataTestId,
 }: TagSelectProps) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
@@ -93,16 +94,16 @@ export function TagSelect({
               <span className="flex min-w-0 flex-1 items-center gap-2">
                 <Tag className="size-4 shrink-0" />
                 {value.length > 0 ? (
-                  <span className="truncate text-sm">{value.length} 个标签</span>
+                  <span className="truncate text-sm">{t("common.tags.selectedCount", { count: value.length })}</span>
                 ) : (
-                  <span className="text-muted-foreground truncate text-sm">全部标签</span>
+                  <span className="text-muted-foreground truncate text-sm">{t("common.tags.noTags")}</span>
                 )}
                 {value.length > 0 && (
                   <Button asChild variant="ghost" size="xs" className="size-5 shrink-0 p-0">
                     <span
                       role="button"
                       tabIndex={0}
-                      aria-label="清除已选标签"
+                      aria-label={t("common.tags.clearSelected")}
                       onClick={handleClear}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" || e.key === " ") {
@@ -129,7 +130,7 @@ export function TagSelect({
           >
             <div className="flex flex-col gap-2">
               <Input
-                placeholder={placeholder}
+                placeholder={t("common.tags.searchPlaceholder")}
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 className="h-8 shadow-none focus-visible:ring-0"
@@ -137,7 +138,7 @@ export function TagSelect({
               <ScrollArea className="max-h-72" viewportClassName="max-h-72">
                 <div className="flex flex-col gap-0.5">
                   {tagsLoading ? (
-                    <p className="text-muted-foreground py-4 text-center text-sm">加载中…</p>
+                    <p className="text-muted-foreground py-4 text-center text-sm">{t("loading")}</p>
                   ) : filteredTags.length > 0 ? (
                     filteredTags.map((tag) => (
                       <Button
@@ -154,7 +155,7 @@ export function TagSelect({
                   ) : (
                     <div className="text-muted-foreground flex h-20 flex-col items-center justify-center gap-2 text-sm">
                       <Tags className="size-5" />
-                      <span>暂无标签</span>
+                      <span>{t("common.tags.noTags")}</span>
                     </div>
                   )}
                 </div>
@@ -173,7 +174,7 @@ export function TagSelect({
                     }}
                   >
                     <Tags className="size-4" />
-                    管理标签
+                    {t("common.tags.manageTags")}
                   </Button>
                 </>
               )}

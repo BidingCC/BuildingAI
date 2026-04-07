@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import type { PromptInputMessage } from "@buildingai/ui/components/ai-elements/prompt-input";
 import { InfiniteScrollTopScrollButton } from "@buildingai/ui/components/infinite-scroll-top";
 import { cn } from "@buildingai/ui/lib/utils";
@@ -33,6 +34,7 @@ export const ChatInput = memo(function ChatInput({
   textareaRef: textareaRefProp,
   onStop,
 }: ChatInputProps) {
+  const { t } = useI18n();
   const { id } = useParams<{ id: string }>();
   const ownRef = useRef<HTMLTextAreaElement>(null);
   const textareaRef = textareaRefProp ?? ownRef;
@@ -88,7 +90,7 @@ export const ChatInput = memo(function ChatInput({
       </div>
 
       <div className="text-muted-foreground bg-background py-1.5 text-center text-xs">
-        内容由 AI 生成，请仔细甄别
+        {t("chat.aiGeneratedDisclaimer")}
       </div>
     </div>
   );

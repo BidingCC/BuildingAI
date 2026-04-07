@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import type { SquarePublishStatus } from "@buildingai/services/web";
 import { useApplyToDataset, useDeleteDataset, useLeaveDatasets } from "@buildingai/services/web";
 import { Button } from "@buildingai/ui/components/ui/button";
@@ -18,16 +19,19 @@ import { useChatPanel } from "../_layouts";
 import { useDatasetDetailContext } from "../context";
 
 function getPublishButtonLabel(
+  t: (key: string) => string,
   squarePublishStatus: SquarePublishStatus | undefined,
   publishedToSquare: boolean | undefined,
 ): string {
-  if (publishedToSquare || squarePublishStatus === "approved") return "取消发布";
-  if (squarePublishStatus === "pending") return "审核中";
-  if (squarePublishStatus === "rejected") return "审核未通过";
-  return "发布";
+  if (publishedToSquare || squarePublishStatus === "approved")
+    return t("dataset.detail.cancelPublish");
+  if (squarePublishStatus === "pending") return t("dataset.detail.underReview");
+  if (squarePublishStatus === "rejected") return t("dataset.detail.reviewRejected");
+  return t("dataset.detail.publish");
 }
 
 export function DatasetActions() {
+  const { t } = useI18n();
   const { dataset, isOwner, dialog } = useDatasetDetailContext();
   const navigate = useNavigate();
   const { chatOpen, toggleChatPanel } = useChatPanel();
@@ -41,7 +45,7 @@ export function DatasetActions() {
   const title = dataset?.name ?? "";
   const squarePublishStatus = dataset?.squarePublishStatus ?? "none";
   const publishedToSquare = dataset?.publishedToSquare;
-  const publishLabel = getPublishButtonLabel(squarePublishStatus, publishedToSquare);
+  const publishLabel = getPublishButtonLabel(t, squarePublishStatus, publishedToSquare);
   const isPending = squarePublishStatus === "pending";
 
   const isMember = dataset?.isOwner || dataset?.isMember;
@@ -51,9 +55,9 @@ export function DatasetActions() {
     if (!dataset?.id || !isOwner) return;
     try {
       await confirm({
-        title: "确认删除",
-        description: `确定要删除知识库「${title}」吗？此操作不可撤销，将同时删除其中的所有文档与对话记录。`,
-        confirmText: "删除",
+        title: t("dataset.detail.confirmDeleteTitle"),
+        description: t("dataset.detail.confirmDeleteDesc", { title }),
+        confirmText: t("dataset.detail.delete"),
         confirmVariant: "destructive",
       });
     } catch {
@@ -79,14 +83,17 @@ export function DatasetActions() {
       {
         onSuccess: () => {
           if (needApproval) {
-            toast.success("已提交加入申请，等待创建者审核");
+            toast.success(t("dataset.detail.joinRequestSubmitted"));
           } else {
-            toast.success("已加入知识库");
+            toast.success(t("dataset.detail.joinedDataset"));
           }
           queryClient.invalidateQueries({ queryKey: ["datasets", dataset.id] });
         },
         onError: (error) => {
-          const message = error instanceof Error ? error.message : "加入知识库失败";
+          const message =
+            error instanceof Error
+              ? error.message
+              : t("dataset.detail.joinFailed", { message: "" });
           toast.error(message);
         },
       },
@@ -102,7 +109,7 @@ export function DatasetActions() {
         className="hidden md:inline-flex"
       >
         <MessageCircle className="size-4" />
-        聊一聊
+        {t("dataset.detail.chatWithIt")}
       </Button>
       {dataset && !isMember && (
         <Button
@@ -111,7 +118,7 @@ export function DatasetActions() {
           onClick={handleApply}
           disabled={applyMutation.isPending}
         >
-          加入知识库
+          {t("dataset.detail.joinDataset")}
         </Button>
       )}
       {dataset && isMember && (
@@ -122,7 +129,7 @@ export function DatasetActions() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {(publishLabel !== "取消发布" || isOwner) && (
+            {(publishLabel !== t("dataset.detail.cancelPublish") || isOwner) && (
               <DropdownMenuItem
                 onClick={() => dialog.open({ type: "publish" })}
                 disabled={isPending}
@@ -144,7 +151,7 @@ export function DatasetActions() {
                 }}
               >
                 <Pencil className="size-4" />
-                编辑
+                {t("dataset.detail.edit")}
               </DropdownMenuItem>
             )}
             <DropdownMenuItem
@@ -154,12 +161,12 @@ export function DatasetActions() {
               {isOwner ? (
                 <>
                   <Trash2 className="size-4" />
-                  删除
+                  {t("dataset.detail.delete")}
                 </>
               ) : (
                 <>
                   <LogOut className="size-4" />
-                  退出知识库
+                  {t("dataset.detail.leaveDataset")}
                 </>
               )}
             </DropdownMenuItem>

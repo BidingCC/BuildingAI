@@ -1,4 +1,5 @@
 import { useAuthStore } from "@buildingai/stores";
+import { useI18n } from "@buildingai/i18n";
 import { Button } from "@buildingai/ui/components/ui/button";
 import { Separator } from "@buildingai/ui/components/ui/separator";
 import {
@@ -33,6 +34,7 @@ interface DynamicSidebarProps extends React.ComponentProps<typeof Sidebar> {
  * 支持通过配置动态渲染侧边栏内容
  */
 export function OperationSidebar({ config, basePath, ...props }: DynamicSidebarProps) {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const location = useLocation();
   const { userInfo } = useAuthStore((state) => state.auth);
@@ -67,8 +69,8 @@ export function OperationSidebar({ config, basePath, ...props }: DynamicSidebarP
 
         <div className="mt-2 flex flex-col items-start gap-2">
           <div className="flex min-w-0 flex-col">
-            <span className="truncate text-sm font-medium">{config.title}</span>
-            <span className="text-muted-foreground line-clamp-2 text-xs">{config.description}</span>
+            <span className="truncate text-sm font-medium">{t(config.title)}</span>
+            <span className="text-muted-foreground line-clamp-2 text-xs">{t(config.description)}</span>
           </div>
         </div>
       </SidebarHeader>
@@ -90,7 +92,7 @@ export function OperationSidebar({ config, basePath, ...props }: DynamicSidebarP
                     onClick={() => navigate(fullPath)}
                   >
                     <item.icon />
-                    <span className="whitespace-nowrap">{item.label}</span>
+                    <span className="whitespace-nowrap">{t(item.label)}</span>
                   </Button>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -104,7 +106,7 @@ export function OperationSidebar({ config, basePath, ...props }: DynamicSidebarP
             <SidebarMenuButton className="h-9" asChild>
               <Link to="/console/dashboard">
                 <FileText />
-                <span className="whitespace-nowrap">说明文档</span>
+                <span className="whitespace-nowrap">{t("common.documentation")}</span>
                 <SidebarMenuAction asChild>
                   <div>
                     <ExternalLink />

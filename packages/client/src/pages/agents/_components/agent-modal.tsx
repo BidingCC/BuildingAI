@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { createAgent, updateAgentConfig, useWebAgentConfigQuery } from "@buildingai/services/web";
 import SvgIcons from "@buildingai/ui/components/svg-icons";
 import { Button } from "@buildingai/ui/components/ui/button";
@@ -48,26 +49,26 @@ const defaultForm: AgentEditFormValues = {
 
 const creationMethods: {
   value: CreationMethod;
-  label: string;
-  description: string;
+  labelKey: string;
+  descriptionKey: string;
   icon: ReactNode;
 }[] = [
   {
     value: "direct",
-    label: "直接创建",
-    description: "手动配置您的智能体",
+    labelKey: "agent.modal.directCreate",
+    descriptionKey: "agent.modal.directCreateDesc",
     icon: <ChevronsLeftRight className="size-4" />,
   },
   {
     value: "coze",
-    label: "Coze智能体",
-    description: "从第三方平台导入智能体",
+    labelKey: "agent.modal.cozeAgent",
+    descriptionKey: "agent.modal.importFromThirdParty",
     icon: <SvgIcons.coze className="size-3" />,
   },
   {
     value: "dify",
-    label: "Dify智能体",
-    description: "从第三方平台导入智能体",
+    labelKey: "agent.modal.difyAgent",
+    descriptionKey: "agent.modal.importFromThirdParty",
     icon: <SvgIcons.dify className="size-4" />,
   },
 ];
@@ -86,6 +87,7 @@ export function AgentModal({
   initialValues,
   onSuccess,
 }: AgentModalProps) {
+  const { t } = useI18n();
   const [form, setForm] = useState<AgentEditFormValues>(defaultForm);
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>();
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
@@ -174,7 +176,7 @@ export function AgentModal({
     }
   };
 
-  const submitLabel = mode === "create" ? "创建中..." : "保存中...";
+  const submitLabel = mode === "create" ? t("agent.modal.creating") : t("agent.modal.saving");
   const isFormValid =
     form.name.trim().length > 0 && (mode === "edit" || hasAvailableCreationMethods);
 
@@ -182,14 +184,16 @@ export function AgentModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="gap-0 p-0 sm:max-w-lg">
         <DialogHeader className="px-4 pt-4">
-          <DialogTitle>{mode === "create" ? "创建智能体" : "编辑智能体"}</DialogTitle>
+          <DialogTitle>
+            {mode === "create" ? t("agent.modal.createAgent") : t("agent.modal.editAgent")}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 px-4 pt-6 pb-4">
-          <FormField label="创建方式" required>
+          <FormField label={t("agent.modal.creationMethod")} required>
             {!hasAvailableCreationMethods ? (
               <div className="text-muted-foreground rounded-lg border border-dashed px-3 py-4 text-sm">
-                暂无可创建的智能体类型
+                {t("agent.modal.noAvailableTypes")}
               </div>
             ) : (
               <div className="grid grid-cols-3 gap-3">
@@ -216,16 +220,18 @@ export function AgentModal({
                       >
                         {method.icon}
                       </span>
-                      <span className="text-sm font-medium">{method.label}</span>
+                      <span className="text-sm font-medium">{t(method.labelKey)}</span>
                     </div>
-                    <span className="text-muted-foreground text-xs">{method.description}</span>
+                    <span className="text-muted-foreground text-xs">
+                      {t(method.descriptionKey)}
+                    </span>
                   </button>
                 ))}
               </div>
             )}
           </FormField>
 
-          <FormField label="头像 & 名称" required>
+          <FormField label={t("agent.modal.avatarAndName")} required>
             <div className="flex items-center gap-3">
               <AvatarUpload
                 avatarUrl={avatarUrl}
@@ -242,7 +248,7 @@ export function AgentModal({
                 <InputGroupInput
                   value={form.name}
                   onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-                  placeholder="给智能体起个好听的名字吧"
+                  placeholder={t("agent.modal.namePlaceholder")}
                 />
                 {form.name.length > 0 && (
                   <InputGroupAddon align="inline-end">
@@ -261,11 +267,11 @@ export function AgentModal({
             </div>
           </FormField>
 
-          <FormField label="智能体简介">
+          <FormField label={t("agent.modal.agentDescription")}>
             <Textarea
               value={form.description}
               onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
-              placeholder="请简单描述下你的智能体"
+              placeholder={t("agent.modal.descriptionPlaceholder")}
               className="min-h-34 resize-none"
             />
           </FormField>
@@ -274,7 +280,7 @@ export function AgentModal({
         <DialogFooter className="px-4 py-4">
           <DialogClose asChild>
             <Button variant="outline" disabled={isSubmitting}>
-              取消
+              {t("common.cancel")}
             </Button>
           </DialogClose>
           <Button onClick={handleSubmit} disabled={isSubmitting || !isFormValid}>
@@ -284,7 +290,7 @@ export function AgentModal({
                 {submitLabel}
               </>
             ) : (
-              "确认创建"
+              t("agent.modal.confirmCreate")
             )}
           </Button>
         </DialogFooter>

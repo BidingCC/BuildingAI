@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   type AliyunOssConfig,
   useStorageConfigDetailQuery,
@@ -25,16 +26,16 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 const ossSchema = z.object({
-  bucket: z.string().min(1, "请输入存储空间名称"),
-  accessKey: z.string().min(1, "请输入 ACCESS_KEY"),
-  secretKey: z.string().min(1, "请输入 SECRET_KEY"),
+  bucket: z.string().min(1, "Please enter bucket name"),
+  accessKey: z.string().min(1, "Please enter ACCESS_KEY"),
+  secretKey: z.string().min(1, "Please enter SECRET_KEY"),
   domain: z
     .string()
-    .min(1, "请输入空间域名")
-    .url("请输入合法的 URL")
-    .refine((value) => value.startsWith("https://"), "域名必须以 https:// 开头"),
-  region: z.string().min(1, "请输入 region"),
-  arn: z.string().min(1, "请输入 ARN"),
+    .min(1, "Please enter domain")
+    .url("Please enter a valid URL")
+    .refine((value) => value.startsWith("https://"), "Domain must start with https://"),
+  region: z.string().min(1, "Please enter region"),
+  arn: z.string().min(1, "Please enter ARN"),
 });
 
 type OssStorageFormValues = z.infer<typeof ossSchema>;
@@ -44,6 +45,7 @@ interface OssProps {
 }
 
 const Oss = ({ configId }: OssProps) => {
+  const { t } = useI18n();
   const {
     data,
     isLoading: isDetailLoading,
@@ -80,17 +82,17 @@ const Oss = ({ configId }: OssProps) => {
   const updateMutation = useUpdateStorageConfigMutation({
     onSuccess: () => {
       invalidateStorageConfigCache();
-      toast.success("保存成功");
+      toast.success(t("system.storageConfig.oss.saveSuccess"));
       refetch();
     },
     onError: (e) => {
-      console.log(`保存失败: ${e.message}`);
+      console.log(`${t("system.storageConfig.oss.saveFailed", { message: e.message })}`);
     },
   });
 
   const onSubmit = (values: OssStorageFormValues) => {
     if (!configId) {
-      toast.error("未找到 OSS 存储配置记录");
+      toast.error(t("system.storageConfig.oss.notFound"));
       return;
     }
     updateMutation.mutate({
@@ -105,7 +107,7 @@ const Oss = ({ configId }: OssProps) => {
 
   const handleEnable = () => {
     if (!configId) {
-      toast.error("未找到 OSS 存储配置记录");
+      toast.error(t("system.storageConfig.oss.notFound"));
       return;
     }
     const values = form.getValues();
@@ -136,7 +138,7 @@ const Oss = ({ configId }: OssProps) => {
                 <Cloud className="text-primary size-5" />
               </div>
               <div className="flex flex-col gap-1">
-                <span className="text-sm font-medium">阿里云OSS</span>
+                <span className="text-sm font-medium">{t("system.storageConfig.oss.title")}</span>
               </div>
             </div>
             <PermissionGuard permissions="system-storage-config:set">
@@ -148,7 +150,9 @@ const Oss = ({ configId }: OssProps) => {
                 onClick={handleEnable}
               >
                 {updateMutation.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
-                {data?.isActive ? "已启用" : "启用"}
+                {data?.isActive
+                  ? t("system.storageConfig.oss.enabled")
+                  : t("system.storageConfig.oss.disabled")}
               </Button>
             </PermissionGuard>
           </CardContent>
@@ -158,9 +162,9 @@ const Oss = ({ configId }: OssProps) => {
           name="bucket"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>储存空间名称</FormLabel>
+              <FormLabel>{t("system.storageConfig.oss.bucket")}</FormLabel>
               <FormControl>
-                <Input placeholder="请输入存储空间名称 (Bucket)" {...field} />
+                <Input placeholder={t("system.storageConfig.oss.bucketPlaceholder")} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -171,9 +175,12 @@ const Oss = ({ configId }: OssProps) => {
           name="accessKey"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>ACCESS_KEY</FormLabel>
+              <FormLabel>{t("system.storageConfig.oss.accessKey")}</FormLabel>
               <FormControl>
-                <Input placeholder="请输入 ACCESS_KEY(AK)" {...field} />
+                <Input
+                  placeholder={t("system.storageConfig.oss.accessKeyPlaceholder")}
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -184,9 +191,12 @@ const Oss = ({ configId }: OssProps) => {
           name="secretKey"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>SECRET_KEY</FormLabel>
+              <FormLabel>{t("system.storageConfig.oss.secretKey")}</FormLabel>
               <FormControl>
-                <Input placeholder="请输入 SECRET_KEY(SK)" {...field} />
+                <Input
+                  placeholder={t("system.storageConfig.oss.secretKeyPlaceholder")}
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -197,13 +207,11 @@ const Oss = ({ configId }: OssProps) => {
           name="domain"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>空间域名</FormLabel>
+              <FormLabel>{t("system.storageConfig.oss.domain")}</FormLabel>
               <FormControl>
-                <Input placeholder="请输入空间域名 (Domain)" {...field} />
+                <Input placeholder={t("system.storageConfig.oss.domainPlaceholder")} {...field} />
               </FormControl>
-              <FormDescription>
-                请补全 http:// 或 https://，例如https://static.cloud.com
-              </FormDescription>
+              <FormDescription>{t("system.storageConfig.oss.domainDescription")}</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -213,9 +221,9 @@ const Oss = ({ configId }: OssProps) => {
           name="region"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>REGION</FormLabel>
+              <FormLabel>{t("system.storageConfig.oss.region")}</FormLabel>
               <FormControl>
-                <Input placeholder="请输入 region" {...field} />
+                <Input placeholder={t("system.storageConfig.oss.regionPlaceholder")} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -226,11 +234,11 @@ const Oss = ({ configId }: OssProps) => {
           name="arn"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>ARN</FormLabel>
+              <FormLabel>{t("system.storageConfig.oss.arn")}</FormLabel>
               <FormControl>
-                <Input placeholder="请输入 role_arn" {...field} />
+                <Input placeholder={t("system.storageConfig.oss.arnPlaceholder")} {...field} />
               </FormControl>
-              <FormDescription>阿里云文件直传参数</FormDescription>
+              <FormDescription>{t("system.storageConfig.oss.arnDescription")}</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -239,7 +247,7 @@ const Oss = ({ configId }: OssProps) => {
           <PermissionGuard permissions="system-storage-config:set">
             <Button type="submit" disabled={updateMutation.isPending}>
               {updateMutation.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
-              保存设置
+              {t("system.storageConfig.oss.save")}
             </Button>
           </PermissionGuard>
           <Button
@@ -257,7 +265,7 @@ const Oss = ({ configId }: OssProps) => {
               })
             }
           >
-            重置设置
+            {t("system.storageConfig.oss.reset")}
           </Button>
         </div>
       </form>

@@ -27,6 +27,7 @@ import { Loader2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
+import { useI18n } from "@buildingai/i18n";
 import { PageContainer } from "@/layouts/console/_components/page-container";
 
 type AgentTypeOption = {
@@ -35,9 +36,9 @@ type AgentTypeOption = {
 };
 
 const AGENT_TYPE_OPTIONS: AgentTypeOption[] = [
-  { key: "direct", label: "系统智能体" },
-  { key: "coze", label: "Coze智能体" },
-  { key: "dify", label: "Dify智能体" },
+  { key: "direct", label: "" },
+  { key: "coze", label: "" },
+  { key: "dify", label: "" },
 ];
 
 /** 创建默认的智能体类型配置 */
@@ -88,6 +89,7 @@ function normalizeTypeConfig(items?: AgentTypeConfigItem[]): AgentTypeConfigItem
 
 /** 智能体设置页面 */
 const AgentConfigIndexPage = () => {
+  const { t } = useI18n();
   const [typeConfig, setTypeConfig] = useState<AgentTypeConfigItem[]>(buildDefaultTypeConfig);
   const [publishWithoutReview, setPublishWithoutReview] = useState(false);
   const { data, isLoading } = useAgentConfigQuery();
@@ -96,7 +98,7 @@ const AgentConfigIndexPage = () => {
     onSuccess: (response) => {
       setTypeConfig(normalizeTypeConfig(response.createTypes));
       setPublishWithoutReview(response.publishWithoutReview);
-      toast.success("保存成功");
+      toast.success(t("ai.agent.config.saveSuccess"));
     },
   });
 
@@ -140,7 +142,7 @@ const AgentConfigIndexPage = () => {
     if (!checked) {
       const enabledCount = typeConfig.filter((item) => item.enabled).length;
       if (enabledCount <= 1) {
-        toast.error("至少需要保留一个智能体类型");
+        toast.error(t("ai.agent.config.minOneTypeError"));
         return;
       }
     }
@@ -196,20 +198,22 @@ const AgentConfigIndexPage = () => {
   return (
     <PageContainer>
       <div className="w-full min-w-0 space-y-6 pb-6 md:w-md">
-        <h1 className="text-xl font-semibold">智能体设置</h1>
+        <h1 className="text-xl font-semibold">{t("ai.agent.config.meta.title")}</h1>
 
         <div className="space-y-3">
-          <Label>发布到广场免审核</Label>
+          <Label>{t("ai.agent.config.publishWithoutReview.label")}</Label>
           <div className="flex items-center gap-2">
             <Switch checked={publishWithoutReview} onCheckedChange={setPublishWithoutReview} />
             <span className="text-muted-foreground text-sm">
-              {publishWithoutReview ? "已开启，发布直接上架" : "已关闭，发布需管理员审核"}
+              {publishWithoutReview
+                ? t("ai.agent.config.publishWithoutReview.enabled")
+                : t("ai.agent.config.publishWithoutReview.disabled")}
             </span>
           </div>
         </div>
 
         <div className="space-y-3">
-          <Label>可创建智能体类型</Label>
+          <Label>{t("ai.agent.config.createTypes.label")}</Label>
           <div className="w-full rounded-lg border">
             <Table className="w-full">
               <TableHeader>
@@ -219,12 +223,14 @@ const AgentConfigIndexPage = () => {
                       <Checkbox
                         checked={isAllSelected}
                         onCheckedChange={(checked) => handleSelectAll(checked === true)}
-                        aria-label="全选智能体类型"
+                        aria-label={t("ai.agent.config.createTypes.selectAll")}
                       />
                     </div>
                   </TableHead>
-                  <TableHead className="min-w-48">类型</TableHead>
-                  <TableHead className="min-w-56">计费 / 1千token</TableHead>
+                  <TableHead className="min-w-48">{t("ai.agent.list.table.type")}</TableHead>
+                  <TableHead className="min-w-56">
+                    {t("ai.agent.config.createTypes.billingPer1kToken")}
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -241,25 +247,27 @@ const AgentConfigIndexPage = () => {
                             onCheckedChange={(checked) =>
                               handleTypeEnabledChange(option.key, checked === true)
                             }
-                            aria-label={`启用${option.label}`}
+                            aria-label={`${t("ai.agent.config.enable")}${t(`ai.agent.createMode.${option.key}`)}`}
                           />
                         </div>
                       </TableCell>
-                      <TableCell>{option.label}</TableCell>
+                      <TableCell>{t(`ai.agent.createMode.${option.key}`)}</TableCell>
                       <TableCell>
                         {option.key === "direct" ? (
-                          <span>动态计费</span>
+                          <span>{t("ai.agent.config.billing.dynamic")}</span>
                         ) : (
                           <InputGroup className="max-w-52">
                             <InputGroupInput
                               type="number"
                               min={0}
-                              placeholder="请输入"
+                              placeholder={t("ai.agent.config.placeholder")}
                               value={current.points ?? 0}
                               onChange={(e) => handlePointsChange(option.key, e.target.value)}
                               disabled={!current.enabled}
                             />
-                            <InputGroupAddon align="inline-end">积分</InputGroupAddon>
+                            <InputGroupAddon align="inline-end">
+                              {t("ai.agent.config.billing.points")}
+                            </InputGroupAddon>
                           </InputGroup>
                         )}
                       </TableCell>
@@ -270,7 +278,7 @@ const AgentConfigIndexPage = () => {
             </Table>
           </div>
           <p className="text-muted-foreground text-sm">
-            系统智能体按模型实际消耗动态计费，Coze 与 Dify 智能体可设置固定积分消耗。
+            {t("ai.agent.config.description.billing")}
           </p>
         </div>
 
@@ -278,7 +286,7 @@ const AgentConfigIndexPage = () => {
           <PermissionGuard permissions="agent-config:set">
             <Button onClick={handleSave} disabled={saveMutation.isPending}>
               {saveMutation.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
-              保存
+              {t("ai.agent.config.save")}
             </Button>
           </PermissionGuard>
         </div>

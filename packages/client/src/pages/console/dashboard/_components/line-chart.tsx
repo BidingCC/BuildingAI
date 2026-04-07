@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from "@buildingai/i18n";
 import {
   Card,
   CardContent,
@@ -50,10 +51,10 @@ export interface AreaChartCardProps {
   loading?: boolean;
 }
 
-const TIME_RANGE_OPTIONS: { value: TimeRange; label: string }[] = [
-  { value: "7d", label: "最近 7 天" },
-  { value: "15d", label: "最近 15 天" },
-  { value: "30d", label: "最近 30 天" },
+const TIME_RANGE_OPTIONS: { value: TimeRange; labelKey: string }[] = [
+  { value: "7d", labelKey: "dashboard.timeRange.last7Days" },
+  { value: "15d", labelKey: "dashboard.timeRange.last15Days" },
+  { value: "30d", labelKey: "dashboard.timeRange.last30Days" },
 ];
 
 export function AreaChartCard({
@@ -67,6 +68,7 @@ export function AreaChartCard({
   className,
   loading = false,
 }: AreaChartCardProps) {
+  const { t } = useI18n();
   const [timeRange, setTimeRange] = React.useState<TimeRange>(defaultTimeRange);
   const chartId = React.useId();
 
@@ -104,13 +106,16 @@ export function AreaChartCard({
           )}
         </div>
         <Select value={timeRange} onValueChange={handleTimeRangeChange}>
-          <SelectTrigger className="flex sm:ml-auto" aria-label="选择时间范围">
-            <SelectValue placeholder="选择时间范围" />
+          <SelectTrigger
+            className="flex sm:ml-auto"
+            aria-label={t("dashboard.timeRange.ariaLabel")}
+          >
+            <SelectValue placeholder={t("dashboard.timeRange.selectPlaceholder")} />
           </SelectTrigger>
           <SelectContent>
             {TIME_RANGE_OPTIONS.map((option) => (
               <SelectItem key={option.value} value={option.value}>
-                {option.label}
+                {t(option.labelKey)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -119,7 +124,9 @@ export function AreaChartCard({
       <CardContent className="px-2 pt-4 sm:px-4">
         {loading ? (
           <div className="flex h-[300px] items-center justify-center">
-            <span className="text-muted-foreground text-sm">加载中...</span>
+            <span className="text-muted-foreground text-sm">
+              {t("dashboard.timeRange.loading")}
+            </span>
           </div>
         ) : (
           <ChartContainer config={chartConfig} className="aspect-auto h-[300px] w-full">

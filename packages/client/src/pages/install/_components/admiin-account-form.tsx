@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import {
   Form,
   FormControl,
@@ -13,25 +14,29 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-const formSchema = z
-  .object({
-    username: z.string().min(2, {
-      message: "用户名至少需要2个字符",
-    }),
-    password: z.string().min(6, {
-      message: "密码至少需要6个字符",
-    }),
-    confirmPassword: z.string().min(6, {
-      message: "确认密码至少需要6个字符",
-    }),
-    email: z.email({ message: "请输入有效的邮箱地址" }).optional().or(z.literal("")),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "两次输入的密码不一致",
-    path: ["confirmPassword"],
-  });
+const createFormSchema = (t: (key: string) => string) =>
+  z
+    .object({
+      username: z.string().min(2, {
+        message: t("install.adminAccount.usernameMinLength"),
+      }),
+      password: z.string().min(6, {
+        message: t("install.adminAccount.passwordMinLength"),
+      }),
+      confirmPassword: z.string().min(6, {
+        message: t("install.adminAccount.confirmPasswordMinLength"),
+      }),
+      email: z
+        .email({ message: t("install.adminAccount.emailInvalid") })
+        .optional()
+        .or(z.literal("")),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: t("install.adminAccount.passwordMismatch"),
+      path: ["confirmPassword"],
+    });
 
-export type AdminAccountFormValues = z.infer<typeof formSchema>;
+export type AdminAccountFormValues = z.infer<ReturnType<typeof createFormSchema>>;
 
 interface AdminAccountFormProps {
   step: number;
@@ -40,10 +45,11 @@ interface AdminAccountFormProps {
 }
 
 const AdminAccountForm = ({ step, defaultValues, onChange }: AdminAccountFormProps) => {
+  const { t } = useI18n();
   const [isVisible, setIsVisible] = useState(false);
 
   const form = useForm<AdminAccountFormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(createFormSchema(t)),
     defaultValues: {
       username: "",
       password: "",
@@ -87,15 +93,20 @@ const AdminAccountForm = ({ step, defaultValues, onChange }: AdminAccountFormPro
     >
       <Form {...form}>
         <form className="h-fit w-xs space-y-6">
-          <h1 className="text-xl font-bold">创建管理员账号</h1>
+          <h1 className="text-xl font-bold">{t("install.adminAccount.createAdmin")}</h1>
           <FormField
             control={form.control}
             name="username"
             render={({ field }) => (
               <FormItem>
-                <FormLabel required>用户名</FormLabel>
+                <FormLabel required>{t("install.adminAccount.username")}</FormLabel>
                 <FormControl>
-                  <Input placeholder="请填写用户名" required {...field} autoComplete="off" />
+                  <Input
+                    placeholder={t("install.adminAccount.usernamePlaceholder")}
+                    required
+                    {...field}
+                    autoComplete="off"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -107,11 +118,11 @@ const AdminAccountForm = ({ step, defaultValues, onChange }: AdminAccountFormPro
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel required>密码</FormLabel>
+                <FormLabel required>{t("install.adminAccount.password")}</FormLabel>
                 <FormControl>
                   <PasswordInput
                     required
-                    placeholder="请填写密码"
+                    placeholder={t("install.adminAccount.passwordPlaceholder")}
                     type="password"
                     autoComplete="off"
                     {...field}
@@ -127,11 +138,11 @@ const AdminAccountForm = ({ step, defaultValues, onChange }: AdminAccountFormPro
             name="confirmPassword"
             render={({ field }) => (
               <FormItem>
-                <FormLabel required>确认密码</FormLabel>
+                <FormLabel required>{t("install.adminAccount.confirmPassword")}</FormLabel>
                 <FormControl>
                   <PasswordInput
                     required
-                    placeholder="请再次填写密码"
+                    placeholder={t("install.adminAccount.confirmPasswordPlaceholder")}
                     autoComplete="off"
                     {...field}
                   />
@@ -146,9 +157,13 @@ const AdminAccountForm = ({ step, defaultValues, onChange }: AdminAccountFormPro
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>邮箱</FormLabel>
+                <FormLabel>{t("install.adminAccount.email")}</FormLabel>
                 <FormControl>
-                  <Input placeholder="请填写邮箱" {...field} autoComplete="off" />
+                  <Input
+                    placeholder={t("install.adminAccount.emailPlaceholder")}
+                    {...field}
+                    autoComplete="off"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

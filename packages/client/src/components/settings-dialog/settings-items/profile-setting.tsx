@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { uploadFileAuto, useUserInfoQuery } from "@buildingai/services/shared";
 import {
   type AllowedUserField,
@@ -40,6 +41,7 @@ type PhoneBindingInfo = {
 };
 
 const ProfileSetting = () => {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const { isLogin, logout } = useAuthStore((state) => state.authActions);
   const { data } = useUserInfoQuery();
@@ -75,7 +77,7 @@ const ProfileSetting = () => {
 
   const { mutate: changePassword, isPending: isChangePasswordPending } = useChangePasswordMutation({
     onSuccess: async () => {
-      toast.success("密码已修改，请重新登录");
+      toast.success(t("profile.passwordChanged"));
       setPasswordDialogOpen(false);
       setOldPassword("");
       setNewPassword("");
@@ -84,29 +86,29 @@ const ProfileSetting = () => {
       window.location.replace("/login");
     },
     onError: (e) => {
-      toast.error(e.message || "修改密码失败");
+      toast.error(e.message || t("profile.changePasswordFailed"));
     },
   });
 
   const handleChangePasswordSubmit = useCallback(() => {
     if (!oldPassword.trim()) {
-      toast.error("请输入当前密码");
+      toast.error(t("profile.enterCurrentPassword"));
       return;
     }
     if (!newPassword.trim()) {
-      toast.error("请输入新密码");
+      toast.error(t("profile.enterNewPassword"));
       return;
     }
     if (newPassword.length < 6) {
-      toast.error("新密码至少 6 位");
+      toast.error(t("profile.passwordMinLength"));
       return;
     }
     if (newPassword !== confirmPassword) {
-      toast.error("两次输入的新密码不一致");
+      toast.error(t("profile.passwordMismatch"));
       return;
     }
     if (!/^(?=.*[A-Za-z])(?=.*\d).+$/.test(newPassword)) {
-      toast.error("新密码须同时包含字母和数字");
+      toast.error(t("profile.passwordRequirements"));
       return;
     }
     changePassword({
@@ -156,7 +158,7 @@ const ProfileSetting = () => {
           wechatPollRef.current = null;
           setWechatStatus("success");
           void queryClient.invalidateQueries({ queryKey: ["user", "info"] });
-          toast.success("微信绑定成功");
+          toast.success(t("profile.wechatBindSuccess"));
           setWechatBindOpen(false);
         } else if (res.error) {
           if (wechatPollRef.current) clearInterval(wechatPollRef.current);
@@ -205,7 +207,7 @@ const ProfileSetting = () => {
           { field: "avatar", value: result.url },
           {
             onSuccess: () => {
-              toast.success("头像已更新");
+              toast.success(t("profile.avatarUpdated"));
             },
             onSettled: () => {
               setIsUploadingAvatar(false);
@@ -216,7 +218,7 @@ const ProfileSetting = () => {
           },
         );
       } catch {
-        toast.error("头像上传失败");
+        toast.error(t("profile.avatarUploadFailed"));
         setIsUploadingAvatar(false);
         if (avatarInputRef.current) {
           avatarInputRef.current.value = "";
@@ -285,7 +287,7 @@ const ProfileSetting = () => {
   const handleSendBindCode = useCallback(async () => {
     const mobile = bindMobile.trim();
     if (!MOBILE_REGEX.test(mobile)) {
-      toast.error("请输入有效手机号");
+      toast.error(t("profile.enterValidPhone"));
       return;
     }
 
@@ -294,7 +296,7 @@ const ProfileSetting = () => {
     }
 
     await sendBindCode({ mobile, areaCode: "86" });
-    toast.success("验证码已发送");
+    toast.success(t("profile.verificationCodeSent"));
     setSmsCountdown(60);
   }, [bindMobile, sendBindCode, smsCountdown]);
 
@@ -306,12 +308,12 @@ const ProfileSetting = () => {
     const code = bindCode.trim();
 
     if (!MOBILE_REGEX.test(mobile)) {
-      toast.error("请输入有效手机号");
+      toast.error(t("profile.enterValidPhone"));
       return;
     }
 
     if (code.length !== 6) {
-      toast.error("请输入6位验证码");
+      toast.error(t("profile.enter6DigitCode"));
       return;
     }
 
@@ -320,14 +322,14 @@ const ProfileSetting = () => {
       code,
       areaCode: "86",
     });
-    toast.success("手机号绑定成功");
+    toast.success(t("profile.phoneBindSuccess"));
     setPhoneDialogOpen(false);
     setBindCode("");
   }, [bindCode, bindMobile, bindPhone]);
 
   return (
     <div className="flex flex-col gap-4">
-      <SettingItemGroup label="基本信息">
+      <SettingItemGroup label={t("profile.basicInfo")}>
         <SettingItem
           title={
             <Avatar className="size-10 rounded-lg after:rounded-lg">
@@ -369,7 +371,7 @@ const ProfileSetting = () => {
               data?.nickname
             )
           }
-          description="昵称"
+          description={t("profile.nickname")}
         >
           {editingField === "nickname" ? (
             <div className="flex items-center gap-1">
@@ -386,12 +388,12 @@ const ProfileSetting = () => {
             </SettingItemAction>
           )}
         </SettingItem>
-        <SettingItem title={data?.username} description="用户名">
+        <SettingItem title={data?.username} description={t("profile.username")}>
           <SettingItemAction asChild>
             <CopyButton value={data?.username ?? ""} />
           </SettingItemAction>
         </SettingItem>
-        <SettingItem title={data?.userNo} description="用户编号">
+        <SettingItem title={data?.userNo} description={t("profile.userId")}>
           <SettingItemAction asChild>
             <CopyButton value={data?.userNo ?? ""} />
           </SettingItemAction>
@@ -414,7 +416,7 @@ const ProfileSetting = () => {
               data?.email || "--"
             )
           }
-          description="邮箱"
+          description={t("profile.email")}
         >
           {editingField === "email" ? (
             <div className="flex items-center gap-1">
@@ -433,8 +435,8 @@ const ProfileSetting = () => {
         </SettingItem>
       </SettingItemGroup>
 
-      <SettingItemGroup label="安全设置">
-        <SettingItem title={data?.hasPassword ? "已设置" : "未设置"} description="密码">
+      <SettingItemGroup label={t("profile.securitySettings")}>
+        <SettingItem title={data?.hasPassword ? t("profile.passwordSet") : t("profile.passwordNotSet")} description={t("profile.password")}>
           {data?.hasPassword && (
             <SettingItemAction onClick={() => setPasswordDialogOpen(true)}>
               <PenLine />
@@ -444,36 +446,36 @@ const ProfileSetting = () => {
         <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
           <DialogContent className="sm:max-w-sm">
             <DialogHeader>
-              <DialogTitle>修改密码</DialogTitle>
+              <DialogTitle>{t("profile.changePassword")}</DialogTitle>
               <DialogDescription>
-                修改成功后将退出登录，请使用新密码重新登录。新密码须至少 6 位且包含字母和数字。
+                {t("profile.passwordChangeDescription")}
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <label className="text-muted-foreground text-sm font-medium">当前密码</label>
+                <label className="text-muted-foreground text-sm font-medium">{t("profile.currentPassword")}</label>
                 <PasswordInput
                   value={oldPassword}
                   onChange={(e) => setOldPassword(e.target.value)}
-                  placeholder="请输入当前密码"
+                  placeholder={t("profile.enterCurrentPassword")}
                   autoComplete="current-password"
                 />
               </div>
               <div className="grid gap-2">
-                <label className="text-muted-foreground text-sm font-medium">新密码</label>
+                <label className="text-muted-foreground text-sm font-medium">{t("profile.newPassword")}</label>
                 <PasswordInput
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="至少 6 位，含字母和数字"
+                  placeholder={t("profile.passwordRequirementsPlaceholder")}
                   autoComplete="new-password"
                 />
               </div>
               <div className="grid gap-2">
-                <label className="text-muted-foreground text-sm font-medium">确认新密码</label>
+                <label className="text-muted-foreground text-sm font-medium">{t("profile.confirmNewPassword")}</label>
                 <PasswordInput
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="请再次输入新密码"
+                  placeholder={t("profile.confirmNewPasswordPlaceholder")}
                   autoComplete="new-password"
                 />
               </div>
@@ -483,10 +485,10 @@ const ProfileSetting = () => {
                   onClick={() => setPasswordDialogOpen(false)}
                   disabled={isChangePasswordPending}
                 >
-                  取消
+                  {t("profile.cancel")}
                 </Button>
                 <Button onClick={handleChangePasswordSubmit} loading={isChangePasswordPending}>
-                  确认修改
+                  {t("profile.confirmChange")}
                 </Button>
               </div>
             </div>
@@ -496,20 +498,20 @@ const ProfileSetting = () => {
           title={
             phoneBindingInfo.phone
               ? `${phoneBindingInfo.phoneAreaCode ? `+${phoneBindingInfo.phoneAreaCode} ` : ""}${phoneBindingInfo.phone}`
-              : "未绑定"
+              : t("profile.notBound")
           }
-          description="手机号"
+          description={t("profile.phone")}
         >
           <SettingItemAction onClick={handleOpenPhoneDialog}>
             <PenLine />
           </SettingItemAction>
         </SettingItem>
         <SettingItem
-          title={data?.bindWechatOa ? "已绑定" : "未绑定"}
+          title={data?.bindWechatOa ? t("profile.bound") : t("profile.notBound")}
           description={
             <div className="flex items-center gap-0.5">
               <SvgIcons.wechat className="size-3" />
-              关联微信
+              {t("profile.linkedWechat")}
             </div>
           }
         >
@@ -517,7 +519,7 @@ const ProfileSetting = () => {
             <SettingItemAction variant="ghost" size="sm" onClick={() => setWechatBindOpen(true)}>
               <span className="flex items-center gap-0.5">
                 <Link />
-                去绑定
+                {t("profile.goToBind")}
               </span>
             </SettingItemAction>
           )}
@@ -525,8 +527,8 @@ const ProfileSetting = () => {
         <Dialog open={wechatBindOpen} onOpenChange={setWechatBindOpen}>
           <DialogContent className="sm:max-w-xs">
             <DialogHeader>
-              <DialogTitle>关联微信</DialogTitle>
-              <DialogDescription>请使用微信扫描二维码完成绑定</DialogDescription>
+              <DialogTitle>{t("profile.linkWechat")}</DialogTitle>
+              <DialogDescription>{t("profile.scanQrCode")}</DialogDescription>
             </DialogHeader>
             <div className="flex w-full flex-col items-center justify-center gap-4 py-2">
               <div className="relative flex size-52 items-center justify-center overflow-hidden rounded-lg border p-1">
@@ -535,7 +537,7 @@ const ProfileSetting = () => {
                   <>
                     <img
                       src={wechatQrUrl}
-                      alt="微信绑定二维码"
+                      alt={t("profile.wechatBindQrCode")}
                       className="pointer-events-none size-full object-contain select-none"
                     />
                     {(wechatStatus === "success" ||
@@ -546,7 +548,7 @@ const ProfileSetting = () => {
                         {wechatStatus === "success" && (
                           <>
                             <CheckCircle2 className="text-primary mb-2 size-12" />
-                            <p className="text-muted-foreground text-sm">绑定成功</p>
+                            <p className="text-muted-foreground text-sm">{t("profile.bindSuccess")}</p>
                           </>
                         )}
                         {(wechatStatus === "invalid" || wechatStatus === "error") && (
@@ -554,11 +556,11 @@ const ProfileSetting = () => {
                             <AlertCircle className="text-destructive mb-2 size-12" />
                             <p className="text-muted-foreground mb-3 text-center text-sm">
                               {wechatStatus === "invalid"
-                                ? "二维码已过期，请刷新"
-                                : "绑定失败，请重试"}
+                                ? t("profile.qrCodeExpired")
+                                : t("profile.bindFailed")}
                             </p>
                             <Button size="sm" variant="secondary" onClick={fetchWechatQrCode}>
-                              刷新二维码
+                              {t("profile.refreshQrCode")}
                             </Button>
                           </>
                         )}
@@ -566,10 +568,10 @@ const ProfileSetting = () => {
                           <>
                             <AlertCircle className="text-destructive mb-2 size-12" />
                             <p className="text-muted-foreground mb-3 text-center text-sm">
-                              获取二维码失败，请重试
+                              {t("profile.getQrCodeFailed")}
                             </p>
                             <Button size="sm" variant="secondary" onClick={fetchWechatQrCode}>
-                              刷新二维码
+                              {t("profile.refreshQrCode")}
                             </Button>
                           </>
                         )}
@@ -582,50 +584,50 @@ const ProfileSetting = () => {
           </DialogContent>
         </Dialog>
         <RootOnly reverse>
-          <SettingItem title="注销账号" description="您的账号数据将会被永久删除，此操作不可逆">
+          <SettingItem title={t("profile.deleteAccount")} description={t("profile.deleteAccountDescription")}>
             <SettingItemAction variant="destructive" size="sm">
-              注销
+              {t("profile.delete")}
             </SettingItemAction>
           </SettingItem>
         </RootOnly>
       </SettingItemGroup>
 
-      <SettingItemGroup label="注册信息">
+      <SettingItemGroup label={t("profile.registrationInfo")}>
         <SettingItem
           title={<TimeText value={data?.lastLoginAt} format="YYYY/MM/DD HH:mm" />}
-          description="最后登录时间"
+          description={t("profile.lastLoginTime")}
         />
         <SettingItem
           title={<TimeText value={data?.createdAt} format="YYYY/MM/DD HH:mm" />}
-          description="注册时间"
+          description={t("profile.registrationTime")}
         />
       </SettingItemGroup>
 
       <Dialog open={phoneDialogOpen} onOpenChange={setPhoneDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>绑定手机号</DialogTitle>
-            <DialogDescription>请输入手机号并完成短信验证码验证</DialogDescription>
+            <DialogTitle>{t("profile.bindPhone")}</DialogTitle>
+            <DialogDescription>{t("profile.bindPhoneDescription")}</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">手机号</label>
+              <label className="text-sm font-medium">{t("profile.phoneNumber")}</label>
               <Input
                 value={bindMobile}
                 onChange={(e) => setBindMobile(e.target.value.replace(/\D/g, "").slice(0, 11))}
-                placeholder="请输入手机号"
+                placeholder={t("profile.enterPhoneNumber")}
                 disabled={isSendBindCodePending || isBindPhonePending}
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">验证码</label>
+              <label className="text-sm font-medium">{t("profile.verificationCode")}</label>
               <div className="flex items-center gap-2">
                 <Input
                   value={bindCode}
                   onChange={(e) => setBindCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                  placeholder="请输入验证码"
+                  placeholder={t("profile.enterVerificationCode")}
                   disabled={isBindPhonePending}
                 />
                 <Button
@@ -639,7 +641,7 @@ const ProfileSetting = () => {
                   ) : smsCountdown > 0 ? (
                     `${smsCountdown}s`
                   ) : (
-                    "发送验证码"
+                    t("profile.sendVerificationCode")
                   )}
                 </Button>
               </div>
@@ -653,11 +655,11 @@ const ProfileSetting = () => {
               onClick={() => setPhoneDialogOpen(false)}
               disabled={isBindPhonePending}
             >
-              取消
+              {t("profile.cancel")}
             </Button>
             <Button type="button" onClick={handleSubmitBindPhone} disabled={isBindPhonePending}>
               {isBindPhonePending && <Loader2 className="mr-2 size-4 animate-spin" />}
-              确认绑定
+              {t("profile.confirmBind")}
             </Button>
           </DialogFooter>
         </DialogContent>

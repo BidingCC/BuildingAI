@@ -48,49 +48,34 @@ import semver from "semver";
 import { toast } from "sonner";
 import { z } from "zod";
 
-const EXTENSION_TYPE_OPTIONS: { label: string; value: ExtensionTypeType }[] = [
-  { label: "应用插件", value: ExtensionType.APPLICATION },
-  { label: "功能插件", value: ExtensionType.FUNCTIONAL },
-];
-
-const TERMINAL_OPTIONS: {
-  label: string;
-  value: ExtensionSupportTerminalType;
-  disabled?: boolean;
-}[] = [
-  { label: "Web端", value: ExtensionSupportTerminal.WEB },
-  { label: "公众号", value: ExtensionSupportTerminal.WEIXIN, disabled: true },
-  { label: "H5", value: ExtensionSupportTerminal.H5, disabled: true },
-  { label: "小程序", value: ExtensionSupportTerminal.MP, disabled: true },
-  { label: "API端", value: ExtensionSupportTerminal.API, disabled: true },
-];
+import { useI18n } from "@buildingai/i18n";
 
 const formSchema = z.object({
   name: z
-    .string({ message: "应用名称必须填写" })
-    .min(1, "应用名称不能为空")
-    .max(100, "应用名称不能超过100个字符"),
+    .string({ message: "App name is required" })
+    .min(1, "App name is required")
+    .max(100, "App name cannot exceed 100 characters"),
   identifier: z
-    .string({ message: "标识符必须填写" })
-    .min(1, "标识符不能为空")
-    .max(100, "标识符不能超过100个字符"),
-  description: z.string().max(1000, "描述不能超过1000个字符").optional(),
-  type: z.number({ message: "应用类型必须选择" }),
-  supportTerminal: z.array(z.number()).min(1, "至少选择一个").optional(),
+    .string({ message: "Identifier is required" })
+    .min(1, "Identifier is required")
+    .max(100, "Identifier cannot exceed 100 characters"),
+  description: z.string().max(1000, "Description cannot exceed 1000 characters").optional(),
+  type: z.number({ message: "Please select app type" }),
+  supportTerminal: z.array(z.number()).min(1, "Please select at least one").optional(),
   version: z
     .string()
-    .min(1, "版本号不能为空")
-    .max(50, "版本号不能超过50个字符")
+    .min(1, "Version is required")
+    .max(50, "Version cannot exceed 50 characters")
     .refine(
       (val) => {
         if (!val) return true;
         return semver.valid(val) !== null;
       },
-      { message: "版本号格式不正确" },
+      { message: "Version format is incorrect" },
     )
     .optional(),
-  authorName: z.string().max(100, "作者名称不能超过100个字符").optional(),
-  icon: z.string().max(500, "图标地址不能超过500个字符").optional(),
+  authorName: z.string().max(100, "Author name cannot exceed 100 characters").optional(),
+  icon: z.string().max(500, "Icon URL cannot exceed 500 characters").optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -108,6 +93,7 @@ export const ExtensionFormDialog = ({
   extension,
   onSuccess,
 }: ExtensionFormDialogProps) => {
+  const { t } = useI18n();
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema as any),
     defaultValues: {
@@ -154,23 +140,23 @@ export const ExtensionFormDialog = ({
 
   const createMutation = useCreateExtensionMutation({
     onSuccess: () => {
-      toast.success("应用创建成功");
+      toast.success(t("extension.form.createSuccess"));
       onOpenChange(false);
       onSuccess?.();
     },
     onError: (error) => {
-      toast.error(`创建失败: ${error.message}`);
+      toast.error(t("extension.form.createFailed", { error: error.message }));
     },
   });
 
   const updateMutation = useUpdateExtensionMutation({
     onSuccess: () => {
-      toast.success("应用更新成功");
+      toast.success(t("extension.form.updateSuccess"));
       onOpenChange(false);
       onSuccess?.();
     },
     onError: (error) => {
-      toast.error(`更新失败: ${error.message}`);
+      toast.error(t("extension.form.updateFailed", { error: error.message }));
     },
   });
 
@@ -207,9 +193,13 @@ export const ExtensionFormDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="gap-0 p-0 sm:max-w-lg">
         <DialogHeader className="p-4">
-          <DialogTitle>{isEditMode ? "编辑应用" : "创建应用"}</DialogTitle>
+          <DialogTitle>
+            {isEditMode ? t("extension.form.editTitle") : t("extension.form.createTitle")}
+          </DialogTitle>
           <DialogDescription>
-            {isEditMode ? "修改本地应用的基本信息" : "创建一个新的本地应用"}
+            {isEditMode
+              ? t("extension.form.editDescription")
+              : t("extension.form.createDescription")}
           </DialogDescription>
         </DialogHeader>
 
@@ -221,7 +211,7 @@ export const ExtensionFormDialog = ({
                 name="icon"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>应用图标</FormLabel>
+                    <FormLabel>{t("extension.form.appIcon")}</FormLabel>
                     <FormControl>
                       <ImageUpload
                         size="lg"
@@ -240,9 +230,9 @@ export const ExtensionFormDialog = ({
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>应用名称</FormLabel>
+                    <FormLabel required>{t("extension.form.appName")}</FormLabel>
                     <FormControl>
-                      <Input placeholder="请输入应用名称" {...field} />
+                      <Input placeholder={t("extension.form.appNamePlaceholder")} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -254,9 +244,13 @@ export const ExtensionFormDialog = ({
                 name="identifier"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>标识符</FormLabel>
+                    <FormLabel required>{t("extension.form.identifier")}</FormLabel>
                     <FormControl>
-                      <Input placeholder="例如: example-app" disabled={!!extension} {...field} />
+                      <Input
+                        placeholder={t("extension.form.identifierPlaceholder")}
+                        disabled={!!extension}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -268,10 +262,10 @@ export const ExtensionFormDialog = ({
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>应用描述</FormLabel>
+                    <FormLabel>{t("extension.form.description")}</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="请输入应用描述"
+                        placeholder={t("extension.form.descriptionPlaceholder")}
                         className="resize-none"
                         rows={3}
                         {...field}
@@ -287,22 +281,23 @@ export const ExtensionFormDialog = ({
                 name="type"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>应用类型</FormLabel>
+                    <FormLabel required>{t("extension.form.appType")}</FormLabel>
                     <Select
                       onValueChange={(v) => field.onChange(Number(v))}
                       value={String(field.value)}
                     >
                       <FormControl>
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder="选择应用类型" />
+                          <SelectValue placeholder={t("extension.form.selectAppType")} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {EXTENSION_TYPE_OPTIONS.map((opt) => (
-                          <SelectItem key={opt.value} value={String(opt.value)}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
+                        <SelectItem value={String(ExtensionType.APPLICATION)}>
+                          {t("extension.type.application")}
+                        </SelectItem>
+                        <SelectItem value={String(ExtensionType.FUNCTIONAL)}>
+                          {t("extension.type.functional")}
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -315,26 +310,55 @@ export const ExtensionFormDialog = ({
                 name="supportTerminal"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>支持终端</FormLabel>
+                    <FormLabel required>{t("extension.form.supportedTerminals")}</FormLabel>
                     <div className="flex flex-wrap gap-4">
-                      {TERMINAL_OPTIONS.map((opt) => {
-                        const checked = field.value?.includes(opt.value) ?? false;
-                        return (
-                          <label key={opt.value} className="flex items-center gap-1.5 text-sm">
-                            <Checkbox
-                              checked={checked}
-                              disabled={opt.disabled === true}
-                              onCheckedChange={(v) => {
-                                const next = v
-                                  ? [...(field.value ?? []), opt.value]
-                                  : (field.value ?? []).filter((t) => t !== opt.value);
-                                field.onChange(next);
-                              }}
-                            />
-                            {opt.label}
-                          </label>
-                        );
-                      })}
+                      <label className="flex items-center gap-1.5 text-sm">
+                        <Checkbox
+                          checked={field.value?.includes(ExtensionSupportTerminal.WEB) ?? false}
+                          disabled={false}
+                          onCheckedChange={(v) => {
+                            const next = v
+                              ? [...(field.value ?? []), ExtensionSupportTerminal.WEB]
+                              : (field.value ?? []).filter(
+                                  (t) => t !== ExtensionSupportTerminal.WEB,
+                                );
+                            field.onChange(next);
+                          }}
+                        />
+                        {t("extension.terminalLabels.web")}
+                      </label>
+                      <label className="flex items-center gap-1.5 text-sm">
+                        <Checkbox
+                          checked={field.value?.includes(ExtensionSupportTerminal.WEIXIN) ?? false}
+                          disabled={true}
+                          onCheckedChange={() => {}}
+                        />
+                        {t("extension.terminalLabels.weixin")}
+                      </label>
+                      <label className="flex items-center gap-1.5 text-sm">
+                        <Checkbox
+                          checked={field.value?.includes(ExtensionSupportTerminal.H5) ?? false}
+                          disabled={true}
+                          onCheckedChange={() => {}}
+                        />
+                        {t("extension.terminalLabels.h5")}
+                      </label>
+                      <label className="flex items-center gap-1.5 text-sm">
+                        <Checkbox
+                          checked={field.value?.includes(ExtensionSupportTerminal.MP) ?? false}
+                          disabled={true}
+                          onCheckedChange={() => {}}
+                        />
+                        {t("extension.terminalLabels.mp")}
+                      </label>
+                      <label className="flex items-center gap-1.5 text-sm">
+                        <Checkbox
+                          checked={field.value?.includes(ExtensionSupportTerminal.API) ?? false}
+                          disabled={true}
+                          onCheckedChange={() => {}}
+                        />
+                        {t("extension.terminalLabels.api")}
+                      </label>
                     </div>
                     <FormMessage />
                   </FormItem>
@@ -347,9 +371,9 @@ export const ExtensionFormDialog = ({
                   name="version"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel required>应用版本</FormLabel>
+                      <FormLabel required>{t("extension.form.appVersion")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="例如: 1.0.0" {...field} />
+                        <Input placeholder={t("extension.form.versionPlaceholder")} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -361,9 +385,9 @@ export const ExtensionFormDialog = ({
                   name="authorName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>作者名称</FormLabel>
+                      <FormLabel>{t("extension.form.authorName")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="请输入作者名称" {...field} />
+                        <Input placeholder={t("extension.form.authorNamePlaceholder")} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -373,11 +397,11 @@ export const ExtensionFormDialog = ({
 
               <DialogFooter className="bg-background absolute bottom-0 left-0 w-full flex-row justify-end rounded-lg p-4">
                 <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                  取消
+                  {t("extension.form.cancel")}
                 </Button>
                 <Button type="submit" disabled={isPending}>
                   {isPending && <Loader2 className="animate-spin" />}
-                  {isEditMode ? "保存" : "创建"}
+                  {isEditMode ? t("extension.form.save") : t("extension.form.create")}
                 </Button>
               </DialogFooter>
             </form>
