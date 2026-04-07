@@ -50,6 +50,17 @@ export default {
       tools: "Tools",
     },
   },
+  about: {
+    systemInfo: "System Information",
+    systemVersion: "System Version",
+    policyAgreement: "Policy Agreement",
+    userAgreement: "User Agreement",
+    privacyPolicy: "Privacy Policy",
+    contactUs: "Contact Us",
+    contactCustomerService: "Contact Customer Service",
+    customerServiceQrcode: "Customer Service QR Code",
+    qrcodeNotConfigured: "QR code not configured yet",
+  },
   personalized: {
     label: "Chat Style",
     chatStyle: {

@@ -1,3 +1,4 @@
+import { useI18n } from "@buildingai/i18n";
 import { useConfigStore } from "@buildingai/stores";
 import SvgIcons from "@buildingai/ui/components/svg-icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@buildingai/ui/components/ui/avatar";
@@ -10,7 +11,7 @@ import { Link } from "react-router-dom";
 
 export function ConsoleLogo() {
   const { websiteConfig } = useConfigStore((state) => state.config);
-
+  const { t } = useI18n();
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -34,7 +35,7 @@ export function ConsoleLogo() {
               <div className="flex flex-1 flex-col justify-center text-left text-sm">
                 <span className="truncate font-medium">{websiteConfig?.webinfo.name}</span>
                 <span className="truncate text-xs">
-                  工作台 ·{" "}
+                  {t("common.workspace")} ·{" "}
                   <span className="text-muted-foreground">
                     v{websiteConfig?.webinfo.version || "26.0.0"}
                   </span>

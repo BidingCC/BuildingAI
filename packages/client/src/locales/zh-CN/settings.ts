@@ -50,6 +50,17 @@ export default {
       tools: "工具",
     },
   },
+  about: {
+    systemInfo: "系统信息",
+    systemVersion: "系统版本",
+    policyAgreement: "政策协议",
+    userAgreement: "用户协议",
+    privacyPolicy: "隐私政策",
+    contactUs: "联系我们",
+    contactCustomerService: "联系客服",
+    customerServiceQrcode: "客服二维码",
+    qrcodeNotConfigured: "暂未配置二维码",
+  },
   personalized: {
     label: "对话风格",
     chatStyle: {

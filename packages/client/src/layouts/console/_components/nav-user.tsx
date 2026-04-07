@@ -93,6 +93,8 @@ export function NavUser() {
                 await confirm({
                   title: t("common.logoutConfirm"),
                   description: t("common.logoutConfirmDesc"),
+                  confirmText: t("common.action.confirm"),
+                  cancelText: t("common.action.cancel"),
                 });
                 await logout();
                 const redirect = encodeURIComponent(location.pathname + location.search);
