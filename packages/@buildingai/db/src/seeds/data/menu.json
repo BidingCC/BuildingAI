@@ -386,6 +386,18 @@
                         "isHidden": 0,
                         "type": 2,
                         "sourceType": 1
+                    },
+                    {
+                        "name": "Google登录",
+                        "code": "channel-google",
+                        "path": "google",
+                        "icon": "google",
+                        "component": "/console/channel/google/index",
+                        "permissionCode": "google-config:get-config",
+                        "sort": 1,
+                        "isHidden": 0,
+                        "type": 2,
+                        "sourceType": 1
                     }
                 ]
             },
