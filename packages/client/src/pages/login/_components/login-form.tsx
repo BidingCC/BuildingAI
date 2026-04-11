@@ -171,6 +171,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
     loginSettings?.allowedLoginMethods?.includes(LOGIN_TYPE.ACCOUNT) ?? true;
   const allowPhoneLogin = loginSettings?.allowedLoginMethods?.includes(LOGIN_TYPE.PHONE) ?? false;
   const allowWechatLogin = loginSettings?.allowedLoginMethods?.includes(LOGIN_TYPE.WECHAT) ?? true;
+  const allowGoogleLogin = loginSettings?.allowedLoginMethods?.includes(LOGIN_TYPE.GOOGLE) ?? true;
   const allowAccountRegister =
     loginSettings?.allowedRegisterMethods?.includes(LOGIN_TYPE.ACCOUNT) ?? true;
   const allowPhoneRegister =
@@ -607,6 +608,18 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                   </DialogContent>
                 </Dialog>
               )}
+            </Field>
+          )}
+          {allowGoogleLogin && (
+            <Field className="flex flex-wrap gap-2">
+              <Button
+                variant="secondary"
+                type="button"
+                onClick={() => (window.location.href = "/api/auth/google")}
+              >
+                <SvgIcons.google />
+                Google 登录
+              </Button>
             </Field>
           )}
           {allowWechatLogin && canUseAccountInput && (

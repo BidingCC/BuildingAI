@@ -10,18 +10,20 @@ import { Playground } from "@buildingai/decorators/playground.decorator";
 import { Public } from "@buildingai/decorators/public.decorator";
 import { DictService } from "@buildingai/dict";
 import { HttpErrorFactory } from "@buildingai/errors";
-import { isDevelopment } from "@buildingai/utils";
+import { getFrontendBaseUrl } from "@buildingai/utils";
 import { WebController } from "@common/decorators";
 import { ChangePasswordDto } from "@common/modules/auth/dto/change-password.dto";
 import { LoginDto } from "@common/modules/auth/dto/login.dto";
 import { RegisterDto } from "@common/modules/auth/dto/register.dto";
 import { SendSmsCodeDto, SmsLoginDto } from "@common/modules/auth/dto/sms.dto";
 import { AuthService } from "@common/modules/auth/services/auth.service";
+import { GoogleOAuthService } from "@common/modules/auth/services/google-oauth.service";
 import { SmsService } from "@common/modules/sms/services/sms.service";
 import { WechatOaService } from "@common/modules/wechat/services/wechatoa.service";
 import { type LoginSettingsConfig } from "@modules/user/dto/login-settings.dto";
 import { Body, Get, Headers, Param, Post, Query, Req, Res } from "@nestjs/common";
 import type { Request, Response } from "express";
+import crypto from "node:crypto";
 
 const OAUTH_SESSION_PREFIX = "oauth:session:";
 
@@ -38,6 +40,7 @@ export class AuthWebController extends BaseController {
         private smsService: SmsService,
         private dictService: DictService,
         private cacheService: CacheService,
+        private googleOAuthService: GoogleOAuthService,
     ) {
         super();
     }
@@ -338,22 +341,6 @@ export class AuthWebController extends BaseController {
         return { token: data.token, user: data.user };
     }
 
-    private getFrontendBaseUrl() {
-        return isDevelopment()
-            ? "http://localhost:4091"
-            : (process.env.APP_DOMAIN || "http://localhost:4090").replace(/\/$/, "");
-    }
-
-    private redirectOAuthCallback(res: Response, error?: string, redirectState?: string) {
-        const baseUrl = this.getFrontendBaseUrl();
-        if (error) {
-            const params = new URLSearchParams({ error });
-            if (redirectState) params.set("redirect", redirectState);
-            return res.redirect(`${baseUrl}/login?${params.toString()}`);
-        }
-        return res.redirect(`${baseUrl}/login`);
-    }
-
     private async getLoginSettings() {
         return await this.dictService.get<LoginSettingsConfig>(
             "login_settings",
@@ -438,5 +425,47 @@ export class AuthWebController extends BaseController {
           </html>`;
         res.setHeader("Content-Type", "text/html; charset=utf-8");
         return res.send(html);
+    }
+
+    /**
+     * Redirect user to Google consent screen
+     *
+     * @param res Express response object
+     * @returns Redirects to Google OAuth authorization URL
+     */
+    @Public()
+    @Get("google")
+    async googleAuth(@Res() res: Response) {
+        const state = crypto.randomUUID();
+        const url = await this.googleOAuthService.getAuthorizationUrl(state);
+        return res.redirect(url);
+    }
+
+    /**
+     * Google OAuth callback - Google redirects here with code
+     *
+     * @param code Authorization code from Google
+     * @param state State parameter for CSRF validation
+     * @param error Error parameter if user denied consent
+     * @param res Express response object
+     * @returns Redirects to frontend with token
+     */
+    @Public()
+    @Get("google-callback")
+    async googleCallback(
+        @Query("code") code: string,
+        @Query("state") state: string,
+        @Query("error") error: string,
+        @Res() res: Response,
+    ) {
+        const redirectUri = `${getFrontendBaseUrl()}/api/auth/google-callback`;
+
+        if (error || !code) {
+            return res.redirect(`${getFrontendBaseUrl()}/login?error=${error || "missing_code"}`);
+        }
+
+        const { token } = await this.googleOAuthService.handleCallback(code, state, redirectUri);
+        console.log("Google OAuth callback - token:", token);
+        return res.redirect(`${getFrontendBaseUrl()}/login/oauth-callback?provider=google&token=${token}`);
     }
 }
