@@ -598,8 +598,13 @@ export class UserService extends BaseService<User> {
             }
         }
 
-        // 移除 roleId，因为我们要单独处理角色关联
-        const { roleId: _roleId, ...restUpdateData } = updateData as UpdateUserDto;
+        // 移除 roleId / level / levelEndTime，因为我们要单独处理角色关联和会员订阅
+        const {
+            roleId: _roleId,
+            level: _level,
+            levelEndTime: _levelEndTime,
+            ...restUpdateData
+        } = updateData as UpdateUserDto;
 
         // 更新用户基本数据（使用 save 方法触发生命周期钩子）
         Object.assign(user, restUpdateData);
@@ -613,10 +618,11 @@ export class UserService extends BaseService<User> {
             .set(role ? role.id : null);
 
         // 处理会员订阅信息
-        if ("level" in updateData || "levelEndTime" in updateData) {
-            const levelId = "level" in updateData ? updateData.level : undefined;
-            const levelEndTime = "levelEndTime" in updateData ? updateData.levelEndTime : undefined;
-
+        // 处理会员订阅信息（仅当调用方显式提供了 level 或 levelEndTime 值时才处理，
+        // class-transformer 会将未传的字段设为 undefined，因此用 !== undefined 判断）
+        const levelId = (updateData as UpdateUserDto).level;
+        const levelEndTime = (updateData as UpdateUserDto).levelEndTime;
+        if (levelId !== undefined || levelEndTime !== undefined) {
             // 如果提供了会员等级信息，则创建或更新订阅记录
             if (levelId && levelEndTime) {
                 const level = await this.membershipLevelsRepository.findOne({
@@ -654,7 +660,7 @@ export class UserService extends BaseService<User> {
                     });
                     await this.userSubscriptionRepository.save(subscription);
                 }
-            } else if (levelId === null || levelId === undefined) {
+            } else if (levelId === null) {
                 // 如果设置为普通用户，将所有有效订阅的 endTime 截断到当前时间（保留历史记录）
                 const now = new Date();
                 const activeSubscriptions = await this.userSubscriptionRepository.find({
