@@ -76,17 +76,6 @@ const DashboardIndexPage = () => {
             ) : (
               <>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">订单金额</span>
-                  <span className="text-primary text-xl font-bold">
-                    ¥
-                    <CountUp
-                      direction="up"
-                      duration={0.05}
-                      to={data?.order.todayOrderAmount ?? 0}
-                    />
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
                   <span className="text-sm">本月收入</span>
                   <span className="text-primary text-xl font-bold">
                     ¥
@@ -94,6 +83,17 @@ const DashboardIndexPage = () => {
                       direction="up"
                       duration={0.05}
                       to={data?.order.monthOrderAmount ?? 0}
+                    />
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">订单金额</span>
+                  <span className="text-primary text-xl font-bold">
+                    ¥
+                    <CountUp
+                      direction="up"
+                      duration={0.05}
+                      to={data?.order.todayOrderAmount ?? 0}
                     />
                   </span>
                 </div>
