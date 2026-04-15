@@ -59,11 +59,16 @@ export const ContextSettings = memo(
     }, [annotationConfig?.threshold, annotationConfig?.vectorModelId]);
 
     const saveAnnotationSettings = useCallback(() => {
+      const trimmedVectorModelId = vectorModelId?.trim() || undefined;
+      const hadVectorModel = Boolean(annotationConfig?.vectorModelId?.trim());
+      const hasVectorModel = Boolean(trimmedVectorModelId);
+      const currentEnabled = annotationConfig?.enabled ?? false;
+
       const next: AnnotationConfig = {
         ...annotationConfig,
-        enabled: annotationConfig?.enabled ?? false,
+        enabled: currentEnabled || (!hadVectorModel && hasVectorModel),
         threshold: clampThreshold(threshold),
-        vectorModelId: vectorModelId?.trim() || undefined,
+        vectorModelId: trimmedVectorModelId,
       };
       onChange({ annotationConfig: next });
       setDialogOpen(false);
