@@ -265,9 +265,9 @@ export class AgentsService extends BaseService<Agent> {
         if (status === SquarePublishStatus.PENDING) {
             throw HttpErrorFactory.badRequest("已提交审核，请等待审核结果");
         }
-        if (status === SquarePublishStatus.APPROVED) {
-            throw HttpErrorFactory.badRequest("该智能体已发布到广场");
-        }
+        // if (status === SquarePublishStatus.APPROVED) {
+        //     throw HttpErrorFactory.badRequest("该智能体已发布到广场");
+        // }
 
         const ids = Array.isArray(tagIds) ? tagIds.filter(Boolean) : [];
         const tags = await this.tagRepository.find({

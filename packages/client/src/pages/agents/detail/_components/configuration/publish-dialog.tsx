@@ -65,11 +65,11 @@ export function PublishDialog({
   const canResubmit = true;
 
   const handleConfirm = () => {
-    const initial = initialPublishedToSquareRef.current;
-    if (publishToSquare === initial) {
-      onOpenChange(false);
-      return;
-    }
+    // const initial = initialPublishedToSquareRef.current;
+    // if (publishToSquare === initial) {
+    //   onOpenChange(false);
+    //   return;
+    // }
     if (!canSubmit) return;
     onConfirm?.(publishToSquare, publishToSquare ? selectedTagIds : undefined);
   };
