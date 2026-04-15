@@ -1,4 +1,7 @@
 {
+    "extends": [
+        "@buildingai/typescript-config/react-library.json"
+    ],
     "compilerOptions": {
         "tsBuildInfoFile": "./.temp/tsconfig.web.tsbuildinfo",
         "target": "ES2022",
@@ -15,9 +18,9 @@
         "skipLibCheck": true,
         /* Bundler mode */
         "moduleResolution": "bundler",
-        "allowImportingTsExtensions": true,
         "verbatimModuleSyntax": true,
         "moduleDetection": "force",
+        "allowImportingTsExtensions": true,
         "noEmit": true,
         "jsx": "react-jsx",
         /* Linting */
@@ -27,14 +30,5 @@
         "erasableSyntaxOnly": true,
         "noFallthroughCasesInSwitch": true,
         "noUncheckedSideEffectImports": true,
-        "paths": {
-            "@/*": [
-                "./src/*"
-            ]
-        }
-    },
-    "include": [
-        "src",
-        "../vite.config.ts"
-    ]
+    }
 }
