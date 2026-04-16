@@ -44,7 +44,7 @@ const MODEL_ROW_HEIGHT = 44;
 const VIRTUAL_LIST_OVERSCAN = 5;
 const CONTAINER_HEIGHT = 288;
 
-const compareProviderGroups = (a: ModelData[], b: ModelData[]): number => {
+function compareProviderGroups(a: ModelData[], b: ModelData[]): number {
   const orderA = a[0]?.providerSortOrder;
   const orderB = b[0]?.providerSortOrder;
   if (orderA != null && orderB != null && orderA !== orderB) {
@@ -58,7 +58,7 @@ const compareProviderGroups = (a: ModelData[], b: ModelData[]): number => {
   const nameA = a[0]?.chef ?? "";
   const nameB = b[0]?.chef ?? "";
   return nameA.localeCompare(nameB, undefined, { sensitivity: "base" });
-};
+}
 
 const FEATURE_ICON_MAP: Record<string, React.ElementType> = {
   [MODEL_FEATURES.VISION]: ScanEye,
