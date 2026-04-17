@@ -1,5 +1,5 @@
 import { useDocumentHead, useHeadRenderer, useRefreshUser } from "@buildingai/hooks";
-import { useExtensionDetailQuery } from "@buildingai/services/console";
+import { useWebExtensionDetailQuery } from "@buildingai/services/web";
 import { useAuthStore } from "@buildingai/stores";
 import { ThemeProvider } from "@buildingai/ui/components/theme-provider";
 import { Toaster } from "@buildingai/ui/components/ui/sonner";
@@ -40,7 +40,7 @@ export const ExtensionMainLayout = ({ children }: { children: ReactNode }) => {
   useRefreshUser();
 
   const identifier = useMemo(() => parseExtensionIdentifierFromLocation(), []);
-  const { data: extension } = useExtensionDetailQuery(identifier || "", {
+  const { data: extension } = useWebExtensionDetailQuery(identifier || "", {
     enabled: !!identifier,
   });
 

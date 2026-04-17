@@ -1,4 +1,4 @@
-import { useExtensionDetailQuery } from "@buildingai/services/console";
+import { useWebExtensionDetailQuery } from "@buildingai/services/web";
 import { useConfigStore } from "@buildingai/stores";
 import { Avatar, AvatarFallback, AvatarImage } from "@buildingai/ui/components/ui/avatar";
 import {
@@ -16,7 +16,7 @@ export interface ConsoleLogoProps {
 
 export function ConsoleLogo({ identifier }: ConsoleLogoProps) {
   const { websiteConfig } = useConfigStore((state) => state.config);
-  const { data: extension, isLoading } = useExtensionDetailQuery(identifier || "", {
+  const { data: extension, isLoading } = useWebExtensionDetailQuery(identifier || "", {
     enabled: !!identifier,
   });
 

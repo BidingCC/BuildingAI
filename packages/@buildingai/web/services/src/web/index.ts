@@ -16,6 +16,7 @@ export * from "./datasets-chat";
 export * from "./datasets-document";
 export * from "./datasets-member";
 export * from "./decorate";
+export * from "./extension";
 export * from "./mcp";
 export * from "./membership";
 export * from "./recharge";
