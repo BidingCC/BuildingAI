@@ -400,6 +400,7 @@ export interface CreateAgentParams {
     description?: string;
     avatar?: string;
     createMode?: "direct" | "coze" | "dify";
+    modelConfig?: ModelConfig;
     thirdPartyIntegration?: ThirdPartyIntegrationConfig;
     tagIds?: string[];
 }

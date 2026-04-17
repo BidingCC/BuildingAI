@@ -759,6 +759,7 @@ export default function Messages({ agentId }: MessagesProps) {
                 <TableHead className="bg-muted w-[24%]">用户或账户</TableHead>
                 <TableHead className="bg-muted w-18">消息数</TableHead>
                 <TableHead className="bg-muted w-26">用户反馈</TableHead>
+                <TableHead className="bg-muted w-26">积分消耗</TableHead>
                 <TableHead className="bg-muted w-32">更新时间</TableHead>
                 <TableHead className="bg-muted w-32 rounded-r-lg">创建时间</TableHead>
               </TableRow>
@@ -804,6 +805,11 @@ export default function Messages({ agentId }: MessagesProps) {
                   <TableCell>{c.messageCount ?? 0}</TableCell>
                   <TableCell>
                     <FeedbackCell record={c} />
+                  </TableCell>
+                  <TableCell>
+                    {(c.consumedPower ?? 0) > 0
+                      ? "-" + (c.consumedPower ?? 0).toLocaleString()
+                      : "-"}
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm">
                     {formatDateTime(c.updatedAt)}

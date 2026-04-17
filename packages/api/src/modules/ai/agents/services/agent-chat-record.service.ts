@@ -371,6 +371,7 @@ export class AgentChatRecordService extends BaseService<AgentChatRecord> {
             });
         } else if (userId) {
             qb.andWhere("r.userId = :userId", { userId });
+            qb.andWhere("r.anonymousIdentifier IS NULL");
         } else {
             qb.andWhere("r.userId IS NULL");
         }

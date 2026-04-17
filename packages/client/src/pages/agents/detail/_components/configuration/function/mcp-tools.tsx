@@ -14,7 +14,7 @@ import {
 import { Input } from "@buildingai/ui/components/ui/input";
 import { ScrollArea } from "@buildingai/ui/components/ui/scroll-area";
 import { Skeleton } from "@buildingai/ui/components/ui/skeleton";
-import { Switch } from "@buildingai/ui/components/ui/switch";
+// import { Switch } from "@buildingai/ui/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@buildingai/ui/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@buildingai/ui/components/ui/tooltip";
 import { cn } from "@buildingai/ui/lib/utils";
@@ -461,7 +461,7 @@ export const McpTools = memo(
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
-              <div className="flex items-center justify-between gap-4">
+              {/* <div className="flex items-center justify-between gap-4">
                 <div className="space-y-0.5">
                   <label className="text-sm font-medium">工具执行需人工审批</label>
                   <p className="text-muted-foreground text-xs">
@@ -469,7 +469,7 @@ export const McpTools = memo(
                   </p>
                 </div>
                 <Switch checked={draftRequireApproval} onCheckedChange={setDraftRequireApproval} />
-              </div>
+              </div> */}
               <div className="grid gap-2">
                 <label className="text-sm font-medium">单个工具执行超时（毫秒）</label>
                 <Input

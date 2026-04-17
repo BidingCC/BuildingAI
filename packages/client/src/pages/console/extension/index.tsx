@@ -6,6 +6,9 @@ import {
 import {
   buildExtensionConsoleManageUrl,
   type Extension,
+  type ExtensionUpgradeContent,
+  type ExtensionUpgradeContentResponse,
+  fetchExtensionUpgradeContent,
   fetchPluginLayout,
   getPluginLayoutQueryKey,
   type QueryExtensionDto,
@@ -20,6 +23,14 @@ import SvgIcons from "@buildingai/ui/components/svg-icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@buildingai/ui/components/ui/avatar";
 import { Badge } from "@buildingai/ui/components/ui/badge";
 import { Button } from "@buildingai/ui/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@buildingai/ui/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,6 +52,7 @@ import { Switch } from "@buildingai/ui/components/ui/switch";
 import { useAlertDialog } from "@buildingai/ui/hooks/use-alert-dialog";
 import { useQueryClient } from "@tanstack/react-query";
 import {
+  CalendarClock,
   CircleFadingArrowUp,
   Edit,
   EllipsisVertical,
@@ -79,6 +91,187 @@ const TERMINAL_LABEL_MAP: Record<ExtensionSupportTerminalType, string> = {
  */
 function getWebAppBaseUrl(): string {
   return import.meta.env.VITE_DEVELOP_APP_BASE_URL || window.location.origin;
+}
+
+type UpgradeDialogState = {
+  extension: Extension;
+  content: ExtensionUpgradeContentResponse;
+};
+
+function getStringValue(value: unknown) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function getStringArrayValue(value: unknown) {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string").map((item) => item.trim())
+    : [];
+}
+
+function normalizeUpgradeContentEntry(content: unknown): ExtensionUpgradeContent | null {
+  if (!content) {
+    return null;
+  }
+
+  if (typeof content === "string") {
+    return {
+      explain: content,
+    };
+  }
+
+  if (typeof content !== "object" || Array.isArray(content)) {
+    return null;
+  }
+
+  const record = content as Record<string, unknown>;
+
+  return {
+    version: getStringValue(record.version),
+    explain: getStringValue(record.explain),
+    createdAt: getStringValue(record.createdAt || record.date),
+    features: getStringValue(record.features),
+    optimize: getStringValue(record.optimize),
+    fixs: getStringValue(record.fixs),
+    changes: getStringArrayValue(record.changes),
+  };
+}
+
+function normalizeUpgradeContent(content: ExtensionUpgradeContentResponse) {
+  const isUpgradeContent = (
+    item: ExtensionUpgradeContent | null,
+  ): item is ExtensionUpgradeContent => item !== null;
+
+  const normalized = Array.isArray(content)
+    ? content.map((item) => normalizeUpgradeContentEntry(item)).filter(isUpgradeContent)
+    : [normalizeUpgradeContentEntry(content)].filter(isUpgradeContent);
+
+  if (normalized.length > 0) {
+    return normalized;
+  }
+
+  if (content && typeof content === "object" && !Array.isArray(content)) {
+    const record = content as Record<string, unknown>;
+    if (record.data) {
+      return normalizeUpgradeContent(record.data as ExtensionUpgradeContentResponse);
+    }
+  }
+
+  return [];
+}
+
+function splitContentLines(value?: string) {
+  return (value || "")
+    .split(/\r?\n/u)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function UpgradeContentPreview({ content }: { content: ExtensionUpgradeContentResponse }) {
+  const versionItems = normalizeUpgradeContent(content);
+
+  if (!versionItems.length) {
+    return (
+      <div className="text-muted-foreground rounded-lg border border-dashed p-4 text-sm">
+        暂无可展示的更新内容
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {versionItems.map((item, index) => {
+        const explainLines = splitContentLines(item.explain);
+        const featureLines = splitContentLines(item.features);
+        const optimizeLines = splitContentLines(item.optimize);
+        const fixLines = splitContentLines(item.fixs);
+        const changeLines = item.changes?.filter(Boolean) || [];
+        const hasDetail =
+          explainLines.length ||
+          featureLines.length ||
+          optimizeLines.length ||
+          fixLines.length ||
+          changeLines.length;
+
+        return (
+          <div
+            key={`${item.version || "latest"}-${item.createdAt || index}`}
+            className="rounded-lg border p-4"
+          >
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="secondary">{item.version ? `v${item.version}` : "最新版本"}</Badge>
+              {item.createdAt && (
+                <span className="text-muted-foreground flex items-center gap-1 text-xs">
+                  <CalendarClock className="size-3.5" />
+                  {new Date(item.createdAt).toLocaleString()}
+                </span>
+              )}
+            </div>
+
+            {hasDetail ? (
+              <div className="mt-3 space-y-3 text-sm">
+                {explainLines.length > 0 && (
+                  <div className="space-y-1">
+                    <div className="font-medium">更新说明</div>
+                    <div className="text-muted-foreground space-y-1">
+                      {explainLines.map((line) => (
+                        <p key={line}>{line}</p>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {featureLines.length > 0 && (
+                  <div className="space-y-1">
+                    <div className="font-medium">新功能</div>
+                    <ul className="text-muted-foreground list-disc space-y-1 pl-5">
+                      {featureLines.map((line) => (
+                        <li key={line}>{line}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {optimizeLines.length > 0 && (
+                  <div className="space-y-1">
+                    <div className="font-medium">优化</div>
+                    <ul className="text-muted-foreground list-disc space-y-1 pl-5">
+                      {optimizeLines.map((line) => (
+                        <li key={line}>{line}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {fixLines.length > 0 && (
+                  <div className="space-y-1">
+                    <div className="font-medium">修复</div>
+                    <ul className="text-muted-foreground list-disc space-y-1 pl-5">
+                      {fixLines.map((line) => (
+                        <li key={line}>{line}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {changeLines.length > 0 && (
+                  <div className="space-y-1">
+                    <div className="font-medium">变更项</div>
+                    <ul className="text-muted-foreground list-disc space-y-1 pl-5">
+                      {changeLines.map((line) => (
+                        <li key={line}>{line}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p className="text-muted-foreground mt-3 text-sm">暂无详细更新说明</p>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 /**
@@ -138,6 +331,9 @@ const ExtensionIndexPage = () => {
   } | null>(null);
   const [detailDefaultTab, setDetailDefaultTab] = useState<"overview" | "changelog">("overview");
   const [activationDialogOpen, setActivationDialogOpen] = useState(false);
+  const [upgradeDialogState, setUpgradeDialogState] = useState<UpgradeDialogState | null>(null);
+  const [previewLoadingIdentifier, setPreviewLoadingIdentifier] = useState<string | null>(null);
+  const [upgradingIdentifier, setUpgradingIdentifier] = useState<string | null>(null);
   const { data, refetch, isLoading } = useExtensionsListQuery(queryParams);
   const { confirm } = useAlertDialog();
 
@@ -164,10 +360,14 @@ const ExtensionIndexPage = () => {
   const upgradeMutation = useUpgradeExtensionMutation({
     onSuccess: () => {
       toast.success("应用升级成功");
+      setUpgradeDialogState(null);
       refetch();
     },
     onError: (error) => {
       toast.error(`升级失败: ${error.message}`);
+    },
+    onSettled: () => {
+      setUpgradingIdentifier(null);
     },
   });
 
@@ -194,11 +394,20 @@ const ExtensionIndexPage = () => {
   };
 
   const handleUpgrade = async (extension: Extension) => {
-    await confirm({
-      title: "升级应用",
-      description: "确定要升级该应用吗？",
-    });
-    upgradeMutation.mutate(extension.identifier);
+    setPreviewLoadingIdentifier(extension.identifier);
+
+    try {
+      const content = await fetchExtensionUpgradeContent(extension.identifier);
+      setUpgradeDialogState({
+        extension,
+        content,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "无法获取更新内容";
+      toast.error(`获取更新内容失败: ${message}`);
+    } finally {
+      setPreviewLoadingIdentifier((current) => (current === extension.identifier ? null : current));
+    }
   };
 
   const handleUninstall = async (extension: Extension) => {
@@ -476,9 +685,15 @@ const ExtensionIndexPage = () => {
                           <Button
                             size="xs"
                             onClick={() => handleUpgrade(extension)}
-                            disabled={upgradeMutation.isPending}
+                            loading={
+                              previewLoadingIdentifier === extension.identifier ||
+                              upgradingIdentifier === extension.identifier
+                            }
                           >
-                            <CircleFadingArrowUp />
+                            {previewLoadingIdentifier !== extension.identifier &&
+                              upgradingIdentifier !== extension.identifier && (
+                                <CircleFadingArrowUp />
+                              )}
                             升级
                           </Button>
                         )}
@@ -530,6 +745,53 @@ const ExtensionIndexPage = () => {
         onOpenChange={setActivationDialogOpen}
         onSuccess={refetch}
       />
+      <Dialog
+        open={!!upgradeDialogState}
+        onOpenChange={(open) => {
+          if (!open && !upgradeMutation.isPending) {
+            setUpgradeDialogState(null);
+          }
+        }}
+      >
+        <DialogContent className="flex max-h-[80vh] flex-col gap-0 p-0 sm:max-w-xl">
+          <DialogHeader className="px-6 pt-6 pb-4">
+            <DialogTitle>升级应用</DialogTitle>
+            <DialogDescription>
+              {upgradeDialogState
+                ? `即将升级 ${upgradeDialogState.extension.name}，以下是本次更新内容。`
+                : "以下是本次更新内容。"}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="overflow-y-auto px-6 py-4">
+            {upgradeDialogState && <UpgradeContentPreview content={upgradeDialogState.content} />}
+          </div>
+
+          <DialogFooter className="px-6 py-4">
+            <Button
+              variant="outline"
+              onClick={() => setUpgradeDialogState(null)}
+              disabled={upgradeMutation.isPending}
+            >
+              取消
+            </Button>
+            <Button
+              onClick={() => {
+                if (!upgradeDialogState) {
+                  return;
+                }
+
+                setUpgradeDialogState(null);
+                setUpgradingIdentifier(upgradeDialogState.extension.identifier);
+                upgradeMutation.mutate(upgradeDialogState.extension.identifier);
+              }}
+              loading={upgradeMutation.isPending}
+            >
+              确认升级
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageContainer>
   );
 };

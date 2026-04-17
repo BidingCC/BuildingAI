@@ -1,4 +1,5 @@
 import { createAgent, updateAgentConfig, useWebAgentConfigQuery } from "@buildingai/services/web";
+import { useAssistantStore } from "@buildingai/stores";
 import SvgIcons from "@buildingai/ui/components/svg-icons";
 import { Button } from "@buildingai/ui/components/ui/button";
 import {
@@ -90,6 +91,7 @@ export function AgentModal({
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>();
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const selectedModelId = useAssistantStore((state) => state.selectedModelId);
   const { data: agentConfig } = useWebAgentConfigQuery({
     enabled: open && mode === "create",
   });
@@ -154,6 +156,10 @@ export function AgentModal({
           description: trimmedDescription || undefined,
           avatar: avatarUrl,
           createMode: form.creationMethod,
+          modelConfig:
+            form.creationMethod === "direct" && selectedModelId
+              ? { id: selectedModelId }
+              : undefined,
         });
         onOpenChange(false);
         onSuccess?.(agent);

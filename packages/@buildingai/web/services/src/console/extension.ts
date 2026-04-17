@@ -162,6 +162,22 @@ export type ExtensionVersion = {
     [key: string]: any;
 };
 
+export type ExtensionUpgradeContent = {
+    version?: string;
+    explain?: string;
+    createdAt?: string;
+    features?: string;
+    optimize?: string;
+    fixs?: string;
+    changes?: string[];
+    [key: string]: any;
+};
+
+export type ExtensionUpgradeContentResponse =
+    | ExtensionUpgradeContent
+    | ExtensionUpgradeContent[]
+    | string;
+
 export type ExtensionFeature = {
     id: string;
     name: string;
@@ -218,6 +234,15 @@ export function useUpgradeExtensionMutation(options?: MutationOptionsUtil<Extens
             consoleHttpClient.post<Extension>(`/extensions/upgrade/${identifier}`),
         ...options,
     });
+}
+
+/**
+ * Get extension upgrade content
+ */
+export function fetchExtensionUpgradeContent(identifier: string) {
+    return consoleHttpClient.get<ExtensionUpgradeContentResponse>(
+        `/extensions/upgrade-content/${identifier}`,
+    );
 }
 
 /**

@@ -33,7 +33,7 @@ export const MessageItem = memo(
     addToolApprovalResponse,
     extraActions,
   }: MessageItemProps) {
-    const { id, message, branchNumber, branchCount, branches } = displayMessage;
+    const { id, message, branchNumber, branchCount, branches, isLast } = displayMessage;
     const { onSpeak, showConversationContext, assistantAvatar } =
       useOptionalAssistantContext() ?? {};
 
@@ -46,6 +46,7 @@ export const MessageItem = memo(
         branchNumber={branchNumber}
         branchCount={branchCount}
         branches={branches}
+        isLast={isLast}
         onLikeChange={onLike ? (v) => onLike(id, v) : undefined}
         onDislikeChange={
           onDislike ? (v, reason, isUpdate) => onDislike(id, v, reason, isUpdate) : undefined
@@ -79,6 +80,7 @@ export const MessageItem = memo(
       prevDm.id !== nextDm.id ||
       prevDm.branchNumber !== nextDm.branchNumber ||
       prevDm.branchCount !== nextDm.branchCount ||
+      prevDm.isLast !== nextDm.isLast ||
       prevStreaming !== nextStreaming ||
       prevLiked !== nextLiked ||
       prevDisliked !== nextDisliked

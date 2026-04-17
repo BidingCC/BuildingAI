@@ -78,7 +78,7 @@ export function RechargeDetailDialog({
 }) {
   /** 从已开启的支付方式中取默认值：有默认则用默认，否则用第一个 */
   const getDefaultPaymentMethod = (): PayConfigType => {
-    if (payWayList.length === 0) return 1 as PayConfigType;
+    if (payWayList.length === 0) return undefined as unknown as PayConfigType;
     const defaultItem = payWayList.find((item) => item.isDefault === BooleanNumber.YES);
     return (defaultItem?.payType ?? payWayList[0]?.payType ?? 1) as PayConfigType;
   };
@@ -166,6 +166,10 @@ export function RechargeDetailDialog({
 
   const handleConfirmPay = async () => {
     if (!rule) return;
+    if (!paymentMethod) {
+      toast.error("支付功能未开启,请联系客服");
+      return;
+    }
     try {
       hasHandledPaidRef.current = false;
       const isAlipayPayment = paymentMethod === PayConfigPayType.ALIPAY;

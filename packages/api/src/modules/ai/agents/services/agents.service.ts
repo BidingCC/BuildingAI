@@ -84,6 +84,7 @@ export class AgentsService extends BaseService<Agent> {
             description: description || undefined,
             avatar: dto.avatar || this.defaultAvatar,
             createMode,
+            modelConfig: createMode === "direct" ? dto.modelConfig : undefined,
             thirdPartyIntegration: dto.thirdPartyIntegration || {},
             showContext: true,
             showReference: true,

@@ -1,3 +1,4 @@
+import type { ModelConfig } from "@buildingai/types/ai/agent-config.interface";
 import { IsArray, IsIn, IsObject, IsOptional, IsString, IsUUID } from "class-validator";
 
 export class CreateAgentDto {
@@ -15,6 +16,10 @@ export class CreateAgentDto {
     @IsOptional()
     @IsIn(["direct", "coze", "dify"])
     createMode?: "direct" | "coze" | "dify";
+
+    @IsOptional()
+    @IsObject()
+    modelConfig?: ModelConfig;
 
     @IsOptional()
     @IsObject()

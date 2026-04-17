@@ -24,7 +24,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@buildingai/ui/components/u
 import { Button } from "@buildingai/ui/components/ui/button";
 import type { ReasoningUIPart, UIMessage } from "ai";
 import { AlertCircleIcon, Bot } from "lucide-react";
-import { memo, type ReactNode, useMemo, useState } from "react";
+import { memo, type ReactNode, useEffect, useMemo, useState } from "react";
 
 import { useOptionalAssistantContext } from "../../context";
 import { useSmoothText } from "../../hooks/use-smooth-text";
@@ -44,6 +44,7 @@ export interface MessageProps {
   liked?: boolean;
   disliked?: boolean;
   isStreaming?: boolean;
+  isLast?: boolean;
   branchNumber?: number;
   branchCount?: number;
   branches?: string[];
@@ -75,6 +76,7 @@ export const Message = memo(function Message({
   liked = false,
   disliked = false,
   isStreaming = false,
+  isLast = false,
   branchNumber = 1,
   branchCount = 1,
   branches = [],
@@ -92,6 +94,7 @@ export const Message = memo(function Message({
   const [showFeedbackCard, setShowFeedbackCard] = useState(false);
   const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
   const [isEditingMessage, setIsEditingMessage] = useState(false);
+  const [hideFollowUpSuggestions, setHideFollowUpSuggestions] = useState(false);
   const messageData = convertUIMessageToMessage(message);
   const metadata = message.metadata && typeof message.metadata === "object" ? message.metadata : {};
   const usagePart = message.parts?.find((part) => part.type === "data-usage");
@@ -167,7 +170,16 @@ export const Message = memo(function Message({
     );
   }, [message.parts]);
 
-  const { onSend: contextOnSend } = useOptionalAssistantContext() ?? {};
+  const assistantContext = useOptionalAssistantContext();
+  const contextOnSend = assistantContext?.onSend;
+  const isCurrentTailMessage = assistantContext
+    ? assistantContext.displayMessages[assistantContext.displayMessages.length - 1]?.id ===
+      message.id
+    : isLast;
+
+  useEffect(() => {
+    setHideFollowUpSuggestions(false);
+  }, [message.id]);
 
   const knowledgeRefs = useMemo(() => {
     if (!message.parts) return [];
@@ -217,6 +229,12 @@ export const Message = memo(function Message({
     }));
     onEditMessage?.(message.id, newContent, files);
   };
+
+  const shouldShowFollowUpSuggestions =
+    isAssistant &&
+    isCurrentTailMessage &&
+    followUpSuggestions.length > 0 &&
+    !hideFollowUpSuggestions;
 
   const messageNode = (
     <AIMessage
@@ -304,7 +322,7 @@ export const Message = memo(function Message({
                 {citationContent}
               </AIMessageResponse>
             )}
-            {isAssistant && followUpSuggestions.length > 0 && (
+            {shouldShowFollowUpSuggestions && (
               <div className="mt-3 flex flex-wrap gap-2">
                 {followUpSuggestions.map((s, index) => (
                   <Button
@@ -313,7 +331,10 @@ export const Message = memo(function Message({
                     variant="outline"
                     size="sm"
                     className="rounded-full"
-                    onClick={() => contextOnSend?.(s)}
+                    onClick={() => {
+                      setHideFollowUpSuggestions(true);
+                      contextOnSend?.(s);
+                    }}
                   >
                     {s}
                   </Button>
