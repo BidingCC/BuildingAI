@@ -448,19 +448,28 @@ export class AgentChatCompletionService {
                                     }) as ChatMessageUsage;
 
                                     let userConsumedPower = 0;
+                                    const hasPendingApproval = this.hasPendingApproval(responseMsg);
+                                    const previousApprovalUsage =
+                                        params.isToolApprovalFlow && conversationId
+                                            ? await this.getPendingApprovalUsage(conversationId)
+                                            : undefined;
+                                    const billingUsage = params.isToolApprovalFlow
+                                        ? this.mergeUsage(previousApprovalUsage, baseUsage)
+                                        : baseUsage;
                                     if (
+                                        !hasPendingApproval &&
                                         saveConversation &&
                                         conversationId &&
                                         params.userId &&
                                         chatModel?.dbModel?.billingRule &&
-                                        baseUsage
+                                        billingUsage
                                     ) {
                                         try {
                                             userConsumedPower =
                                                 await this.agentBillingHandler.deduct({
                                                     userId: params.userId,
                                                     conversationId,
-                                                    usage: baseUsage,
+                                                    usage: billingUsage,
                                                     billingRule: chatModel.dbModel.billingRule,
                                                 });
                                         } catch (err) {
@@ -567,6 +576,8 @@ export class AgentChatCompletionService {
                                             await this.saveApprovalMessages(
                                                 finished,
                                                 conversationId,
+                                                totalUsage,
+                                                userConsumedPower,
                                             );
                                         } else {
                                             await this.saveMessages({
@@ -803,7 +814,11 @@ export class AgentChatCompletionService {
             );
         }
 
-        const skipApproval = new Set(["read_attached_file", "request_execution_plan"]);
+        const skipApproval = new Set([
+            "getWeather",
+            "read_attached_file",
+            "request_execution_plan",
+        ]);
 
         return Object.fromEntries(
             Object.entries(tools).map(([name, t]) => [
@@ -889,6 +904,21 @@ export class AgentChatCompletionService {
         );
     }
 
+    private hasPendingApproval(msg?: UIMessage): boolean {
+        return !!msg?.parts?.some((part) => (part as PartWithState).state === "approval-requested");
+    }
+
+    private async getPendingApprovalUsage(
+        conversationId: string,
+    ): Promise<ChatMessageUsage | undefined> {
+        const dbMsgs = await this.agentChatMessageService.findAll({
+            where: { conversationId },
+            order: { createdAt: "DESC" },
+        });
+        const approvalMsg = dbMsgs.find((m) => this.needsApproval(m.message as UIMessage));
+        return (approvalMsg?.message as ChatUIMessage | undefined)?.usage;
+    }
+
     private async buildApprovalMessages(
         conversationId: string,
         approvalMsg: UIMessage,
@@ -906,6 +936,8 @@ export class AgentChatCompletionService {
     private async saveApprovalMessages(
         finished: UIMessage[],
         conversationId: string,
+        usage?: ChatMessageUsage,
+        userConsumedPower?: number,
     ): Promise<void> {
         const dbMsgs = await this.agentChatMessageService.findAll({
             where: { conversationId },
@@ -918,10 +950,63 @@ export class AgentChatCompletionService {
         if (!approvalMsg || !lastAssistant) return;
 
         const cleanedParts = lastAssistant.parts?.filter((part) => !part.type?.startsWith("data-"));
+        const previousMessage = approvalMsg.message as ChatUIMessage;
+        const mergedUsage = this.mergeUsage(previousMessage.usage, usage);
+        const mergedUserConsumedPower =
+            previousMessage.userConsumedPower != null || userConsumedPower != null
+                ? (previousMessage.userConsumedPower ?? 0) + (userConsumedPower ?? 0)
+                : undefined;
+
+        const messageToSave: ChatUIMessage = {
+            ...lastAssistant,
+            parts: cleanedParts,
+            ...(mergedUsage && { usage: mergedUsage }),
+            ...(mergedUserConsumedPower != null && { userConsumedPower: mergedUserConsumedPower }),
+        } as ChatUIMessage;
 
         await this.agentChatMessageService.updateMessage(approvalMsg.id, {
-            message: { ...lastAssistant, parts: cleanedParts } as ChatUIMessage,
+            message: messageToSave,
         });
+        await this.agentChatRecordService.updateStats(conversationId);
+    }
+
+    private mergeUsage(
+        previous?: ChatMessageUsage,
+        current?: ChatMessageUsage,
+    ): ChatMessageUsage | undefined {
+        if (!previous) return current;
+        if (!current) return previous;
+
+        return {
+            ...previous,
+            ...current,
+            inputTokens: (previous.inputTokens ?? 0) + (current.inputTokens ?? 0),
+            outputTokens: (previous.outputTokens ?? 0) + (current.outputTokens ?? 0),
+            totalTokens: (previous.totalTokens ?? 0) + (current.totalTokens ?? 0),
+            extraTokens: (previous.extraTokens ?? 0) + (current.extraTokens ?? 0),
+            reasoningTokens: (previous.reasoningTokens ?? 0) + (current.reasoningTokens ?? 0),
+            cachedInputTokens: (previous.cachedInputTokens ?? 0) + (current.cachedInputTokens ?? 0),
+            inputTokenDetails: {
+                noCacheTokens:
+                    (previous.inputTokenDetails?.noCacheTokens ?? 0) +
+                    (current.inputTokenDetails?.noCacheTokens ?? 0),
+                cacheReadTokens:
+                    (previous.inputTokenDetails?.cacheReadTokens ?? 0) +
+                    (current.inputTokenDetails?.cacheReadTokens ?? 0),
+                cacheWriteTokens:
+                    (previous.inputTokenDetails?.cacheWriteTokens ?? 0) +
+                    (current.inputTokenDetails?.cacheWriteTokens ?? 0),
+            },
+            outputTokenDetails: {
+                textTokens:
+                    (previous.outputTokenDetails?.textTokens ?? 0) +
+                    (current.outputTokenDetails?.textTokens ?? 0),
+                reasoningTokens:
+                    (previous.outputTokenDetails?.reasoningTokens ?? 0) +
+                    (current.outputTokenDetails?.reasoningTokens ?? 0),
+            },
+            raw: current.raw ?? previous.raw,
+        };
     }
 
     private async saveMessages(ctx: {

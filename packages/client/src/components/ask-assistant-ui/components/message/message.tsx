@@ -39,6 +39,81 @@ import { MessageTools } from "./message-tools";
 import { StreamingIndicator } from "./streaming-indicator";
 import { UserMessageActions } from "./user-message-actions";
 
+type UsageData = Record<string, unknown> & {
+  inputTokens?: number;
+  outputTokens?: number;
+  totalTokens?: number;
+  extraTokens?: number;
+  reasoningTokens?: number;
+  cachedInputTokens?: number;
+  userConsumedPower?: number | null;
+  inputTokenDetails?: {
+    noCacheTokens?: number;
+    cacheReadTokens?: number;
+    cacheWriteTokens?: number;
+  };
+  outputTokenDetails?: {
+    textTokens?: number;
+    reasoningTokens?: number;
+  };
+  raw?: Record<string, unknown>;
+};
+
+const sum = (a?: number | null, b?: number | null) => (a ?? 0) + (b ?? 0);
+
+function mergeUsageData(previous: UsageData, current: UsageData): UsageData {
+  return {
+    ...previous,
+    ...current,
+    inputTokens: sum(previous.inputTokens, current.inputTokens),
+    outputTokens: sum(previous.outputTokens, current.outputTokens),
+    totalTokens: sum(previous.totalTokens, current.totalTokens),
+    extraTokens: sum(previous.extraTokens, current.extraTokens),
+    reasoningTokens: sum(previous.reasoningTokens, current.reasoningTokens),
+    cachedInputTokens: sum(previous.cachedInputTokens, current.cachedInputTokens),
+    userConsumedPower: sum(previous.userConsumedPower, current.userConsumedPower),
+    inputTokenDetails: {
+      noCacheTokens: sum(
+        previous.inputTokenDetails?.noCacheTokens,
+        current.inputTokenDetails?.noCacheTokens,
+      ),
+      cacheReadTokens: sum(
+        previous.inputTokenDetails?.cacheReadTokens,
+        current.inputTokenDetails?.cacheReadTokens,
+      ),
+      cacheWriteTokens: sum(
+        previous.inputTokenDetails?.cacheWriteTokens,
+        current.inputTokenDetails?.cacheWriteTokens,
+      ),
+    },
+    outputTokenDetails: {
+      textTokens: sum(
+        previous.outputTokenDetails?.textTokens,
+        current.outputTokenDetails?.textTokens,
+      ),
+      reasoningTokens: sum(
+        previous.outputTokenDetails?.reasoningTokens,
+        current.outputTokenDetails?.reasoningTokens,
+      ),
+    },
+    raw: current.raw ?? previous.raw,
+  };
+}
+
+function getUsageFromParts(parts: UIMessage["parts"]): UsageData | undefined {
+  const usageParts = (parts ?? [])
+    .filter((part) => part.type === "data-usage")
+    .map((part) =>
+      part && typeof part === "object" && "data" in part
+        ? ((part as { data?: UsageData }).data ?? undefined)
+        : undefined,
+    )
+    .filter((data): data is UsageData => Boolean(data));
+
+  if (usageParts.length === 0) return undefined;
+  return usageParts.reduce((acc, item) => mergeUsageData(acc, item));
+}
+
 export interface MessageProps {
   message: UIMessage;
   liked?: boolean;
@@ -97,19 +172,18 @@ export const Message = memo(function Message({
   const [hideFollowUpSuggestions, setHideFollowUpSuggestions] = useState(false);
   const messageData = convertUIMessageToMessage(message);
   const metadata = message.metadata && typeof message.metadata === "object" ? message.metadata : {};
-  const usagePart = message.parts?.find((part) => part.type === "data-usage");
+  const usageFromParts = getUsageFromParts(message.parts);
   const conversationContextPart = message.parts?.find(
     (part) => part.type === "data-conversation-context",
   );
   const msgWithUsage = message as { usage?: Record<string, unknown>; userConsumedPower?: number };
   const usageData =
-    msgWithUsage.usage != null
+    usageFromParts ??
+    (msgWithUsage.usage != null
       ? msgWithUsage.usage
-      : usagePart && typeof usagePart === "object" && "data" in usagePart
-        ? ((usagePart as { data?: Record<string, unknown> }).data ?? undefined)
-        : "usage" in metadata
-          ? (metadata.usage as Record<string, unknown>)
-          : undefined;
+      : "usage" in metadata
+        ? (metadata.usage as Record<string, unknown>)
+        : undefined);
   const usage = usageData;
   const conversationContext =
     conversationContextPart &&

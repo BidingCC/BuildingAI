@@ -22,12 +22,8 @@ export interface WeatherToolProps {
   addToolApprovalResponse?: (args: { id: string; approved: boolean; reason?: string }) => void;
 }
 
-export const WeatherTool = memo(function WeatherTool({
-  toolPart,
-  addToolApprovalResponse,
-}: WeatherToolProps) {
+export const WeatherTool = memo(function WeatherTool({ toolPart }: WeatherToolProps) {
   const { state, approval, input, output, errorText } = toolPart;
-  const approvalId = approval?.id;
   const isDenied =
     state === "output-denied" || (state === "approval-responded" && approval?.approved === false);
   const widthClass = "w-[min(100%,450px)]";
@@ -66,34 +62,13 @@ export const WeatherTool = memo(function WeatherTool({
   return (
     <div className={widthClass}>
       <Tool className="w-full" defaultOpen>
-        <ToolHeader state={state as "input-available"} type="tool-getWeather" />
+        <ToolHeader
+          state={(state === "approval-requested" ? "input-available" : state) as "input-available"}
+          type="tool-getWeather"
+        />
         <ToolContent>
           {(state === "input-available" || state === "approval-requested") && (
             <ToolInput input={input} />
-          )}
-          {state === "approval-requested" && approvalId && addToolApprovalResponse && (
-            <div className="flex items-center justify-end gap-2 border-t px-4 py-3">
-              <button
-                className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-md px-3 py-1.5 text-sm transition-colors"
-                onClick={() =>
-                  addToolApprovalResponse({
-                    id: approvalId,
-                    approved: false,
-                    reason: "User denied weather lookup",
-                  })
-                }
-                type="button"
-              >
-                Deny
-              </button>
-              <button
-                className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-3 py-1.5 text-sm transition-colors"
-                onClick={() => addToolApprovalResponse({ id: approvalId, approved: true })}
-                type="button"
-              >
-                Allow
-              </button>
-            </div>
           )}
         </ToolContent>
       </Tool>

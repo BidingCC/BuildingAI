@@ -15,6 +15,28 @@ const USAGE_HYDRATE_RETRY_INTERVAL_MS = 500;
 const USAGE_HYDRATE_MAX_ATTEMPTS = 5;
 const USAGE_HYDRATE_PAGE_SIZE = 2;
 
+function getPendingWeatherApprovalIds(messages: UIMessage[]): string[] {
+  return messages.flatMap((message) =>
+    (message.parts ?? []).flatMap((part) => {
+      const toolPart = part as {
+        type?: string;
+        state?: string;
+        approval?: { id?: string; approved?: boolean };
+      };
+      const approvalId = toolPart.approval?.id;
+      if (
+        toolPart.type !== "tool-getWeather" ||
+        toolPart.state !== "approval-requested" ||
+        !approvalId ||
+        toolPart.approval?.approved !== undefined
+      ) {
+        return [];
+      }
+      return [approvalId];
+    }),
+  );
+}
+
 export interface UsePublicAgentChatStreamOptions {
   agentId: string;
   accessToken: string;
@@ -64,6 +86,7 @@ export function usePublicAgentChatStream(
   const pendingTimeoutsRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
   const finalizedTokenRef = useRef<string | null>(null);
   const messagesRef = useRef<UIMessage[]>([]);
+  const autoApprovedWeatherApprovalIdsRef = useRef<Set<string>>(new Set());
 
   const conversationIdRef = useRef<string | undefined>(
     initialConversationId && isUUID(initialConversationId) ? initialConversationId : undefined,
@@ -288,6 +311,16 @@ export function usePublicAgentChatStream(
 
   messagesRef.current = messages;
 
+  useEffect(() => {
+    if (!addToolApprovalResponse) return;
+
+    for (const approvalId of getPendingWeatherApprovalIds(messages)) {
+      if (autoApprovedWeatherApprovalIdsRef.current.has(approvalId)) continue;
+      autoApprovedWeatherApprovalIdsRef.current.add(approvalId);
+      addToolApprovalResponse({ id: approvalId, approved: true });
+    }
+  }, [messages, addToolApprovalResponse]);
+
   const hydrateLastAssistantUsageFromServer = useCallback(async (): Promise<void> => {
     const conversationId = conversationIdRef.current;
     if (!conversationId) return;
@@ -350,16 +383,15 @@ export function usePublicAgentChatStream(
             ...(userConsumedPower != null ? { userConsumedPower } : {}),
           };
           const usagePart = { type: "data-usage" as const, data: usagePayload };
-          const nextParts = Array.isArray(m.parts) ? [...m.parts] : [];
-          const usageIndex = nextParts.findIndex(
+          const nextParts = (Array.isArray(m.parts) ? m.parts : []).filter(
             (part) =>
-              part && typeof part === "object" && (part as { type?: string }).type === "data-usage",
+              !(
+                part &&
+                typeof part === "object" &&
+                (part as { type?: string }).type === "data-usage"
+              ),
           );
-          if (usageIndex >= 0) {
-            nextParts[usageIndex] = usagePart as (typeof nextParts)[number];
-          } else {
-            nextParts.push(usagePart as (typeof nextParts)[number]);
-          }
+          nextParts.push(usagePart as (typeof nextParts)[number]);
 
           return {
             ...m,

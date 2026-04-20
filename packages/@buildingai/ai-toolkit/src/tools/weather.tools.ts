@@ -99,7 +99,7 @@ export const getWeather = tool({
             .describe("City name (e.g., 'San Francisco', 'New York', 'London')")
             .optional(),
     }),
-    needsApproval: true,
+    needsApproval: false,
     execute: async (input) => {
         let latitude: number;
         let longitude: number;

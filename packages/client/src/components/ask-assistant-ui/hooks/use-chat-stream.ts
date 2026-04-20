@@ -20,6 +20,28 @@ const USAGE_HYDRATE_MAX_ATTEMPTS = 5;
 /** Page size when re-fetching messages to recover usage. Only the latest record is needed. */
 const USAGE_HYDRATE_PAGE_SIZE = 2;
 
+function getPendingWeatherApprovalIds(messages: UIMessage[]): string[] {
+  return messages.flatMap((message) =>
+    (message.parts ?? []).flatMap((part) => {
+      const toolPart = part as {
+        type?: string;
+        state?: string;
+        approval?: { id?: string; approved?: boolean };
+      };
+      const approvalId = toolPart.approval?.id;
+      if (
+        toolPart.type !== "tool-getWeather" ||
+        toolPart.state !== "approval-requested" ||
+        !approvalId ||
+        toolPart.approval?.approved !== undefined
+      ) {
+        return [];
+      }
+      return [approvalId];
+    }),
+  );
+}
+
 export interface UseChatStreamOptions {
   modelId: string;
   mcpServerIds?: string[];
@@ -145,6 +167,7 @@ export function useChatStream(options: UseChatStreamOptions): UseChatStreamRetur
     featureRef.current = feature;
   }, [feature]);
   const messagesRef = useRef<UIMessage[]>([]);
+  const autoApprovedWeatherApprovalIdsRef = useRef<Set<string>>(new Set());
   const messageDbIdMapRef = useRef<Map<string, string>>(new Map());
   const pendingUserDbIdRef = useRef<string | null>(null);
   const pendingAssistantDbIdRef = useRef<string | null>(null);
@@ -288,6 +311,16 @@ export function useChatStream(options: UseChatStreamOptions): UseChatStreamRetur
 
   messagesRef.current = messages;
 
+  useEffect(() => {
+    if (!addToolApprovalResponse) return;
+
+    for (const approvalId of getPendingWeatherApprovalIds(messages)) {
+      if (autoApprovedWeatherApprovalIdsRef.current.has(approvalId)) continue;
+      autoApprovedWeatherApprovalIdsRef.current.add(approvalId);
+      addToolApprovalResponse({ id: approvalId, approved: true });
+    }
+  }, [messages, addToolApprovalResponse]);
+
   /**
    * Hydrates usage (tokens/power) for the last assistant message from the server.
    *
@@ -370,15 +403,10 @@ export function useChatStream(options: UseChatStreamOptions): UseChatStreamRetur
           };
           const usagePart = { type: "data-usage" as const, data: usagePayload };
 
-          const nextParts = Array.isArray(m.parts) ? [...m.parts] : [];
-          const usageIndex = nextParts.findIndex(
-            (p) => p && typeof p === "object" && (p as { type?: string }).type === "data-usage",
+          const nextParts = (Array.isArray(m.parts) ? m.parts : []).filter(
+            (p) => !(p && typeof p === "object" && (p as { type?: string }).type === "data-usage"),
           );
-          if (usageIndex >= 0) {
-            nextParts[usageIndex] = usagePart as (typeof nextParts)[number];
-          } else {
-            nextParts.push(usagePart as (typeof nextParts)[number]);
-          }
+          nextParts.push(usagePart as (typeof nextParts)[number]);
 
           return {
             ...m,
@@ -447,6 +475,7 @@ export function useChatStream(options: UseChatStreamOptions): UseChatStreamRetur
     if (messages.length === 0) {
       setStatusOverride(null);
       messageDbIdMapRef.current.clear();
+      autoApprovedWeatherApprovalIdsRef.current.clear();
       pendingUserDbIdRef.current = null;
       pendingAssistantDbIdRef.current = null;
     }
