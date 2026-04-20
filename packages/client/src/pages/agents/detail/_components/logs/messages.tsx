@@ -682,6 +682,7 @@ export default function Messages({ agentId }: MessagesProps) {
       keyword: keyword.trim() || undefined,
       sortBy: sortBy as "createdAt" | "updatedAt",
       includeDebug: true,
+      includeAnonymous: true,
     }),
     [page, keyword, sortBy],
   );

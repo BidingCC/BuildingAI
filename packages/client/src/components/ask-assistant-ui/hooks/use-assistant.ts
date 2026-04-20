@@ -156,6 +156,7 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
     stop,
     regenerate,
     addToolApprovalResponse,
+    getDbMessageId,
   } = useChatStream({
     modelId: selectedModelId,
     mcpServerIds: selectedMcpServerIds,
@@ -174,6 +175,7 @@ export function useAssistant(options: UseAssistantOptions): AssistantContextValu
     useMessagesPaging({
       setMessages,
       lastMessageDbIdRef,
+      getDbMessageId,
     });
 
   useEffect(() => {

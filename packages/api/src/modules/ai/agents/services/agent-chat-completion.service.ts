@@ -212,13 +212,6 @@ export class AgentChatCompletionService {
                             transient: true,
                         } as any);
                     }
-                    const assistantMessageId = generateId();
-                    writer.write({
-                        type: "start",
-                        messageId: assistantMessageId,
-                    });
-
-                    if (params.abortSignal?.aborted) return;
 
                     let messages = params.messages;
                     if (params.isToolApprovalFlow && saveConversation && conversationId) {
@@ -227,6 +220,17 @@ export class AgentChatCompletionService {
                             params.messages[0],
                         );
                     }
+
+                    const assistantMessageId = params.isToolApprovalFlow
+                        ? (messages.findLast((message) => message.role === "assistant")?.id ??
+                          generateId())
+                        : generateId();
+                    writer.write({
+                        type: "start",
+                        messageId: assistantMessageId,
+                    });
+
+                    if (params.abortSignal?.aborted) return;
 
                     const lastUserText = this.extractLastUserText(messages);
                     const customReply = this.quickCommandHandler.getCustomReply(

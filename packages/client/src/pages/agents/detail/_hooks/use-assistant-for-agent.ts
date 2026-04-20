@@ -133,8 +133,7 @@ export function useAssistantForAgent(
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const lastMessageDbIdRef = useRef<string | null>(null);
   const pendingParentIdRef = useRef<string | null>(null);
-  const conversationIdRef = useRef<string | undefined>(undefined);
-  conversationIdRef.current = normalizedConversationId;
+  const conversationIdRef = useRef<string | undefined>(normalizedConversationId);
   const prevNormalizedConversationIdRef = useRef<string | undefined>(normalizedConversationId);
   const pendingClearRef = useRef(false);
 

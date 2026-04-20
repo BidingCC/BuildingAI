@@ -1,13 +1,24 @@
 import { useChat } from "@ai-sdk/react";
-import { getConversationInfo } from "@buildingai/services/web";
+import type { MessageRecord } from "@buildingai/services/web";
+import { getConversationInfo, getConversationMessages } from "@buildingai/services/web";
 import { useAuthStore } from "@buildingai/stores";
 import { useQueryClient } from "@tanstack/react-query";
 import type { ChatStatus, FileUIPart, UIMessage } from "ai";
 import { DefaultChatTransport } from "ai";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { validate as isUUID } from "uuid";
 
 import { getApiBaseUrl } from "@/utils/api";
+
+/** Delay before running post-stop side effects, giving backend time to persist usage. */
+const STOP_FINALIZE_DELAY_MS = 350;
+/** Interval between usage-hydration retries when the server hasn't persisted usage yet. */
+const USAGE_HYDRATE_RETRY_INTERVAL_MS = 500;
+/** Max number of usage-hydration retries before giving up. */
+const USAGE_HYDRATE_MAX_ATTEMPTS = 5;
+/** Page size when re-fetching messages to recover usage. Only the latest record is needed. */
+const USAGE_HYDRATE_PAGE_SIZE = 2;
 
 export interface UseChatStreamOptions {
   modelId: string;
@@ -34,6 +45,7 @@ export interface UseChatStreamReturn {
   ) => void;
   stop: () => void;
   addToolApprovalResponse?: (args: { id: string; approved: boolean; reason?: string }) => void;
+  getDbMessageId: (clientMessageId: string) => string | undefined;
 }
 
 export function useChatStream(options: UseChatStreamOptions): UseChatStreamReturn {
@@ -54,6 +66,70 @@ export function useChatStream(options: UseChatStreamOptions): UseChatStreamRetur
   const token = useAuthStore((state) => state.auth.token);
   const queryClient = useQueryClient();
 
+  /**
+   * Tracks pending timeouts scheduled by stop/hydration logic so they can be
+   * cleared on unmount to avoid setState-after-unmount warnings and leaks.
+   */
+  const pendingTimeoutsRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
+
+  /**
+   * Guards against double-finalizing the same turn when both `onFinish` and
+   * manual `stop()` fire. Holds an opaque token identifying the finalized turn.
+   */
+  const finalizedTokenRef = useRef<string | null>(null);
+
+  /**
+   * Schedules a timeout whose handle is auto-cleaned after it fires or when
+   * the component unmounts via the effect below.
+   */
+  const scheduleTimeout = useCallback((fn: () => void, ms: number) => {
+    const id = setTimeout(() => {
+      pendingTimeoutsRef.current.delete(id);
+      fn();
+    }, ms);
+    pendingTimeoutsRef.current.add(id);
+    return id;
+  }, []);
+
+  useEffect(() => {
+    const timeouts = pendingTimeoutsRef.current;
+    return () => {
+      timeouts.forEach(clearTimeout);
+      timeouts.clear();
+    };
+  }, []);
+
+  /**
+   * Finalizes chat state after the stream ends (either normally or via manual stop).
+   * This ensures usage-related UI (tokens/credits) is refreshed even when `onFinish`
+   * is not called (e.g. aborted streaming request). The optional `token` is used to
+   * de-duplicate calls when both the normal and stop paths race to finalize.
+   */
+  const finalizeConversationSideEffects = useCallback(
+    (token?: string) => {
+      if (token) {
+        if (finalizedTokenRef.current === token) return;
+        finalizedTokenRef.current = token;
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+
+      const conversationId = conversationIdRef.current;
+      if (conversationId) {
+        void getConversationInfo(conversationId)
+          .then((info) => {
+            queryClient.setQueryData(["conversation", conversationId], info);
+          })
+          .catch((error) => {
+            console.warn("Failed to refresh conversation info after stream end", error);
+          });
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["user", "info"] });
+    },
+    [queryClient, conversationIdRef],
+  );
+
   const modelIdRef = useRef(modelId);
   useEffect(() => {
     modelIdRef.current = modelId;
@@ -68,7 +144,19 @@ export function useChatStream(options: UseChatStreamOptions): UseChatStreamRetur
   useEffect(() => {
     featureRef.current = feature;
   }, [feature]);
+  const messagesRef = useRef<UIMessage[]>([]);
+  const messageDbIdMapRef = useRef<Map<string, string>>(new Map());
+  const pendingUserDbIdRef = useRef<string | null>(null);
+  const pendingAssistantDbIdRef = useRef<string | null>(null);
   const [statusOverride, setStatusOverride] = useState<ChatStatus | null>(null);
+
+  const mapLatestMessageId = useCallback((role: UIMessage["role"], dbId: string): boolean => {
+    const latest = [...messagesRef.current].reverse().find((message) => message.role === role);
+    if (!latest) return false;
+
+    messageDbIdMapRef.current.set(latest.id, dbId);
+    return true;
+  }, []);
 
   const {
     messages,
@@ -151,21 +239,27 @@ export function useChatStream(options: UseChatStreamOptions): UseChatStreamRetur
         data.data
       ) {
         lastMessageDbIdRef.current = data.data as string;
+        if (data.type === "data-user-message-id") {
+          pendingUserDbIdRef.current = data.data as string;
+          if (mapLatestMessageId("user", data.data as string)) {
+            pendingUserDbIdRef.current = null;
+          }
+        } else {
+          pendingAssistantDbIdRef.current = data.data as string;
+          if (mapLatestMessageId("assistant", data.data as string)) {
+            pendingAssistantDbIdRef.current = null;
+          }
+        }
       }
     },
     onFinish: () => {
-      queryClient.invalidateQueries({ queryKey: ["conversations"] });
-
       const conversationId = conversationIdRef.current;
-      if (conversationId) {
-        void getConversationInfo(conversationId)
-          .then((info) => {
-            queryClient.setQueryData(["conversation", conversationId], info);
-          })
-          .catch(() => {});
-      }
-
-      queryClient.invalidateQueries({ queryKey: ["user", "info"] });
+      const lastAssistantId = [...messagesRef.current]
+        .reverse()
+        .find((m) => m.role === "assistant")?.id;
+      const token =
+        conversationId && lastAssistantId ? `${conversationId}:${lastAssistantId}` : undefined;
+      finalizeConversationSideEffects(token);
     },
     onError: (error) => {
       console.error("Error streaming chat", error);
@@ -192,6 +286,142 @@ export function useChatStream(options: UseChatStreamOptions): UseChatStreamRetur
     },
   });
 
+  messagesRef.current = messages;
+
+  /**
+   * Hydrates usage (tokens/power) for the last assistant message from the server.
+   *
+   * When the stream is manually stopped, the SSE `data-usage` (and often the
+   * `data-assistant-message-id`) frame never reaches the client because `fetch`
+   * is aborted. The backend, however, still persists usage/userConsumedPower
+   * in the `onFinish` callback of the UI message stream. We poll that record
+   * for a short window and patch it onto the corresponding assistant message
+   * so `MessageUsage` can display correct numbers.
+   *
+   * Correctness notes:
+   * - Target message identity (`conversationId` + assistant client id) is
+   *   captured on the first invocation and **frozen** across retries to avoid
+   *   applying usage to a newer message after the user sends something else.
+   * - Backend pagination is ordered by `sequence: DESC`, so the latest record
+   *   is always `items[0]`; we intentionally do NOT reverse the list.
+   */
+  const hydrateLastAssistantUsageFromServer = useCallback(async (): Promise<void> => {
+    const conversationId = conversationIdRef.current;
+    if (!conversationId) return;
+
+    const lastAssistant = [...messagesRef.current].reverse().find((m) => m.role === "assistant");
+    if (!lastAssistant) return;
+
+    const targetClientId = lastAssistant.id;
+    const targetDbId = messageDbIdMapRef.current.get(targetClientId);
+
+    /**
+     * Returns true if the captured target is still the last assistant message
+     * in the current (same) conversation. Guards against race conditions where
+     * the user switches conversation or sends a new message during retry.
+     */
+    const isStillTargetable = (): boolean => {
+      if (conversationIdRef.current !== conversationId) return false;
+      return messagesRef.current.some((m) => m.id === targetClientId && m.role === "assistant");
+    };
+
+    /**
+     * Finds the server record corresponding to the captured assistant message
+     * inside a page of messages. Since `items` is ordered by sequence DESC,
+     * the fallback (first assistant with usage) is the newest one.
+     */
+    const findRecord = (items: MessageRecord[]): MessageRecord | undefined => {
+      const matched = items.find(
+        (r) => (targetDbId != null && r.id === targetDbId) || r.frontendId === targetClientId,
+      );
+      if (matched) return matched;
+
+      // Fallback: assume the newest assistant (items are sorted by sequence DESC).
+      return items.find(
+        (r) =>
+          r.message?.role === "assistant" &&
+          (r.message?.usage != null || r.message?.userConsumedPower != null),
+      );
+    };
+
+    /**
+     * Applies the server-side usage/userConsumedPower to the captured message.
+     * Also injects a `data-usage` part so downstream consumers (which read from
+     * either `message.metadata.usage` or the part) stay in sync.
+     */
+    const applyUsage = (record: MessageRecord): void => {
+      const usage = record.message?.usage ?? undefined;
+      const userConsumedPower = record.message?.userConsumedPower ?? undefined;
+      if (!usage && userConsumedPower == null) return;
+
+      setChatMessages((prev) =>
+        prev.map((m) => {
+          if (m.id !== targetClientId) return m;
+          const nextMetadata: Record<string, unknown> =
+            m.metadata && typeof m.metadata === "object"
+              ? { ...(m.metadata as Record<string, unknown>) }
+              : {};
+          if (usage) nextMetadata.usage = usage;
+          if (userConsumedPower != null) nextMetadata.userConsumedPower = userConsumedPower;
+
+          const usagePayload = {
+            ...(usage ?? {}),
+            ...(userConsumedPower != null ? { userConsumedPower } : {}),
+          };
+          const usagePart = { type: "data-usage" as const, data: usagePayload };
+
+          const nextParts = Array.isArray(m.parts) ? [...m.parts] : [];
+          const usageIndex = nextParts.findIndex(
+            (p) => p && typeof p === "object" && (p as { type?: string }).type === "data-usage",
+          );
+          if (usageIndex >= 0) {
+            nextParts[usageIndex] = usagePart as (typeof nextParts)[number];
+          } else {
+            nextParts.push(usagePart as (typeof nextParts)[number]);
+          }
+
+          return {
+            ...m,
+            metadata: nextMetadata as UIMessage["metadata"],
+            parts: nextParts,
+          };
+        }),
+      );
+    };
+
+    const sleep = (ms: number): Promise<void> =>
+      new Promise((resolve) => {
+        scheduleTimeout(resolve, ms);
+      });
+
+    for (let attempt = 0; attempt < USAGE_HYDRATE_MAX_ATTEMPTS; attempt += 1) {
+      if (!isStillTargetable()) return;
+
+      let record: MessageRecord | undefined;
+      try {
+        const res = await getConversationMessages({
+          conversationId,
+          page: 1,
+          pageSize: USAGE_HYDRATE_PAGE_SIZE,
+        });
+        record = findRecord(res.items ?? []);
+      } catch (error) {
+        console.warn("Failed to fetch conversation messages for usage hydration", error);
+      }
+
+      if (!isStillTargetable()) return;
+
+      if (record && (record.message?.usage != null || record.message?.userConsumedPower != null)) {
+        applyUsage(record);
+        return;
+      }
+
+      if (attempt + 1 < USAGE_HYDRATE_MAX_ATTEMPTS) {
+        await sleep(USAGE_HYDRATE_RETRY_INTERVAL_MS);
+      }
+    }
+  }, [conversationIdRef, setChatMessages, scheduleTimeout]);
+
   useEffect(() => {
     const prevThreadId = prevThreadIdRef.current;
     const isSwitchingConversation =
@@ -216,8 +446,38 @@ export function useChatStream(options: UseChatStreamOptions): UseChatStreamRetur
   useEffect(() => {
     if (messages.length === 0) {
       setStatusOverride(null);
+      messageDbIdMapRef.current.clear();
+      pendingUserDbIdRef.current = null;
+      pendingAssistantDbIdRef.current = null;
     }
   }, [messages.length]);
+
+  useEffect(() => {
+    if (messages.length === 0) return;
+
+    const lastUserIndex = [...messages]
+      .map((message, index) => ({ message, index }))
+      .reverse()
+      .find(({ message }) => message.role === "user")?.index;
+
+    if (lastUserIndex !== undefined && pendingUserDbIdRef.current) {
+      messageDbIdMapRef.current.set(messages[lastUserIndex].id, pendingUserDbIdRef.current);
+      pendingUserDbIdRef.current = null;
+    }
+
+    const last = messages[messages.length - 1];
+    if (last?.role === "assistant" && pendingAssistantDbIdRef.current) {
+      messageDbIdMapRef.current.set(last.id, pendingAssistantDbIdRef.current);
+      pendingAssistantDbIdRef.current = null;
+    }
+  }, [messages]);
+
+  const getDbMessageId = useCallback((clientMessageId: string): string | undefined => {
+    return (
+      messageDbIdMapRef.current.get(clientMessageId) ??
+      (isUUID(clientMessageId) ? clientMessageId : undefined)
+    );
+  }, []);
 
   const handleRegenerate = useCallback(
     (messageId: string) => {
@@ -275,6 +535,40 @@ export function useChatStream(options: UseChatStreamOptions): UseChatStreamRetur
 
   const effectiveStatus = statusOverride ?? status;
 
+  /**
+   * Manually stops streaming and still refreshes usage-related data.
+   *
+   * `stop()` aborts the underlying fetch, which means the AI SDK neither fires
+   * `onFinish` nor `onError`. We therefore schedule a short delay (to let the
+   * backend finish persisting usage inside its own `onFinish` callback), then
+   * refresh side-effects and hydrate the last assistant usage from the API.
+   *
+   * A `finalize` token derived from the target conversation/message id ensures
+   * that if the normal `onFinish` path already ran for this turn, we don't
+   * double-invalidate queries.
+   */
+  const stopWithFinalize = useCallback(() => {
+    const conversationId = conversationIdRef.current;
+    const targetAssistantId = [...messagesRef.current]
+      .reverse()
+      .find((m) => m.role === "assistant")?.id;
+    const token =
+      conversationId && targetAssistantId ? `${conversationId}:${targetAssistantId}` : undefined;
+
+    stop();
+
+    scheduleTimeout(() => {
+      finalizeConversationSideEffects(token);
+      void hydrateLastAssistantUsageFromServer();
+    }, STOP_FINALIZE_DELAY_MS);
+  }, [
+    stop,
+    scheduleTimeout,
+    finalizeConversationSideEffects,
+    hydrateLastAssistantUsageFromServer,
+    conversationIdRef,
+  ]);
+
   return {
     currentThreadId,
     messages,
@@ -282,8 +576,9 @@ export function useChatStream(options: UseChatStreamOptions): UseChatStreamRetur
     streamingMessageId,
     setMessages: setChatMessages,
     send,
-    stop,
+    stop: stopWithFinalize,
     regenerate: handleRegenerate,
     addToolApprovalResponse,
+    getDbMessageId,
   };
 }

@@ -15,11 +15,13 @@ export interface UseMessagesPagingReturn {
 export interface UseMessagesPagingOptions {
   setMessages: (messages: UIMessage[] | ((prev: UIMessage[]) => UIMessage[])) => void;
   lastMessageDbIdRef: React.RefObject<string | null>;
+  getDbMessageId: (clientMessageId: string) => string | undefined;
 }
 
 export function useMessagesPaging({
   setMessages,
   lastMessageDbIdRef,
+  getDbMessageId,
 }: UseMessagesPagingOptions): UseMessagesPagingReturn {
   const { id: currentThreadId } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -45,22 +47,73 @@ export function useMessagesPaging({
   const nextPageRef = useRef(2);
   const loadMoreLockRef = useRef(false);
 
-  const mergeAndSortMessages = useCallback((base: UIMessage[], incoming: UIMessage[]) => {
-    const map = new Map<string, UIMessage>();
-    for (const m of base) map.set(m.id, m);
-    for (const m of incoming) {
-      if (!map.has(m.id)) map.set(m.id, m);
-    }
-    const arr = Array.from(map.values());
-    arr.sort((a, b) => {
-      const sa = (a.metadata as { sequence?: number } | undefined)?.sequence;
-      const sb = (b.metadata as { sequence?: number } | undefined)?.sequence;
-      const na = typeof sa === "number" ? sa : Number.POSITIVE_INFINITY;
-      const nb = typeof sb === "number" ? sb : Number.POSITIVE_INFINITY;
-      return na - nb;
-    });
-    return arr;
-  }, []);
+  const mergeAndSortMessages = useCallback(
+    (base: UIMessage[], incoming: UIMessage[]) => {
+      const map = new Map<string, UIMessage>();
+      const dbIdToLocalId = new Map<string, string>();
+
+      const remapMessageParentId = (message: UIMessage): UIMessage => {
+        const metadata = (message.metadata as Record<string, unknown> | undefined) ?? undefined;
+        const parentId =
+          typeof metadata?.parentId === "string" ? (metadata.parentId as string) : undefined;
+
+        if (!parentId) return message;
+
+        const localParentId = dbIdToLocalId.get(parentId);
+        if (!localParentId || localParentId === parentId) return message;
+
+        return {
+          ...message,
+          metadata: {
+            ...metadata,
+            parentId: localParentId,
+          },
+        } as UIMessage;
+      };
+
+      for (const m of base) {
+        map.set(m.id, m);
+        const dbId = getDbMessageId(m.id);
+        if (dbId) {
+          dbIdToLocalId.set(dbId, m.id);
+        }
+      }
+
+      for (const m of incoming) {
+        const normalizedIncoming = remapMessageParentId(m);
+        const localId = dbIdToLocalId.get(m.id);
+        if (localId && localId !== m.id) {
+          const localMessage = map.get(localId);
+          if (localMessage) {
+            map.set(localId, {
+              ...normalizedIncoming,
+              ...localMessage,
+              id: localId,
+              metadata: {
+                ...((localMessage.metadata as Record<string, unknown> | undefined) ?? {}),
+                ...((normalizedIncoming.metadata as Record<string, unknown> | undefined) ?? {}),
+              },
+            } as UIMessage);
+          }
+          continue;
+        }
+
+        if (!map.has(m.id)) {
+          map.set(normalizedIncoming.id, normalizedIncoming);
+        }
+      }
+      const arr = Array.from(map.values());
+      arr.sort((a, b) => {
+        const sa = (a.metadata as { sequence?: number } | undefined)?.sequence;
+        const sb = (b.metadata as { sequence?: number } | undefined)?.sequence;
+        const na = typeof sa === "number" ? sa : Number.POSITIVE_INFINITY;
+        const nb = typeof sb === "number" ? sb : Number.POSITIVE_INFINITY;
+        return na - nb;
+      });
+      return arr;
+    },
+    [getDbMessageId],
+  );
 
   useEffect(() => {
     if (!currentThreadId) {

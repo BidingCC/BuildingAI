@@ -80,6 +80,7 @@ export type MessageToolCall = {
 
 export type MessageRecord = {
     id: string;
+    frontendId?: string | null;
     conversationId: string;
     modelId: string;
     sequence: number;

@@ -8,6 +8,13 @@ import { validate as isUUID } from "uuid";
 
 import { getApiBaseUrl } from "@/utils/api";
 
+import { getPublicConversationMessages } from "../services/public-conversation-messages";
+
+const STOP_FINALIZE_DELAY_MS = 350;
+const USAGE_HYDRATE_RETRY_INTERVAL_MS = 500;
+const USAGE_HYDRATE_MAX_ATTEMPTS = 5;
+const USAGE_HYDRATE_PAGE_SIZE = 2;
+
 export interface UsePublicAgentChatStreamOptions {
   agentId: string;
   accessToken: string;
@@ -54,6 +61,9 @@ export function usePublicAgentChatStream(
 
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const pendingTimeoutsRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
+  const finalizedTokenRef = useRef<string | null>(null);
+  const messagesRef = useRef<UIMessage[]>([]);
 
   const conversationIdRef = useRef<string | undefined>(
     initialConversationId && isUUID(initialConversationId) ? initialConversationId : undefined,
@@ -86,6 +96,48 @@ export function usePublicAgentChatStream(
   const lastAssistantDbIdRef = useRef<string | null>(null);
   const pendingAssistantDbIdRef = useRef<string | null>(null);
   const [statusOverride, setStatusOverride] = useState<ChatStatus | null>(null);
+
+  const scheduleTimeout = useCallback((fn: () => void, ms: number) => {
+    const id = setTimeout(() => {
+      pendingTimeoutsRef.current.delete(id);
+      fn();
+    }, ms);
+    pendingTimeoutsRef.current.add(id);
+    return id;
+  }, []);
+
+  useEffect(() => {
+    const timeouts = pendingTimeoutsRef.current;
+    return () => {
+      timeouts.forEach(clearTimeout);
+      timeouts.clear();
+    };
+  }, []);
+
+  const conversationsQueryKey = useMemo(
+    () => ["public-agent-conversations", agentId, accessToken, anonymousIdentifier ?? ""],
+    [agentId, accessToken, anonymousIdentifier],
+  );
+
+  const finalizeConversationSideEffects = useCallback(
+    (token?: string) => {
+      if (token) {
+        if (finalizedTokenRef.current === token) return;
+        finalizedTokenRef.current = token;
+      }
+
+      queryClient.invalidateQueries({ queryKey: conversationsQueryKey });
+    },
+    [queryClient, conversationsQueryKey],
+  );
+
+  const mapLatestMessageId = useCallback((role: UIMessage["role"], dbId: string): boolean => {
+    const latest = [...messagesRef.current].reverse().find((message) => message.role === role);
+    if (!latest) return false;
+
+    messageDbIdMapRef.current.set(latest.id, dbId);
+    return true;
+  }, []);
 
   useEffect(() => {
     if (conversationIdState && isUUID(conversationIdState)) return;
@@ -165,14 +217,7 @@ export function usePublicAgentChatStream(
             setConversationIdState(id);
             if (shouldNavigateRef.current && wasEmpty) {
               navigate(`/agents/${agentId}/${accessToken}/c/${id}`, { replace: true });
-              queryClient.invalidateQueries({
-                queryKey: [
-                  "public-agent-conversations",
-                  agentId,
-                  accessToken,
-                  anonymousIdentifier ?? "",
-                ],
-              });
+              queryClient.invalidateQueries({ queryKey: conversationsQueryKey });
             }
           }
         }
@@ -182,13 +227,30 @@ export function usePublicAgentChatStream(
           if (isUUID(id)) {
             lastAssistantDbIdRef.current = id;
             pendingAssistantDbIdRef.current = id;
+            if (mapLatestMessageId("assistant", id)) {
+              pendingAssistantDbIdRef.current = null;
+            }
           }
         }
 
         if (data.type === "data-user-message-id" && data.data) {
           const id = data.data as string;
-          if (isUUID(id)) pendingUserDbIdRef.current = id;
+          if (isUUID(id)) {
+            pendingUserDbIdRef.current = id;
+            if (mapLatestMessageId("user", id)) {
+              pendingUserDbIdRef.current = null;
+            }
+          }
         }
+      },
+      onFinish: () => {
+        const conversationId = conversationIdRef.current;
+        const lastAssistantId = [...messagesRef.current]
+          .reverse()
+          .find((m) => m.role === "assistant")?.id;
+        const token =
+          conversationId && lastAssistantId ? `${conversationId}:${lastAssistantId}` : undefined;
+        finalizeConversationSideEffects(token);
       },
       onError: (error) => {
         console.error("Public agent chat stream error:", error);
@@ -223,6 +285,129 @@ export function usePublicAgentChatStream(
         });
       },
     });
+
+  messagesRef.current = messages;
+
+  const hydrateLastAssistantUsageFromServer = useCallback(async (): Promise<void> => {
+    const conversationId = conversationIdRef.current;
+    if (!conversationId) return;
+
+    const lastAssistant = [...messagesRef.current].reverse().find((m) => m.role === "assistant");
+    if (!lastAssistant) return;
+
+    const targetClientId = lastAssistant.id;
+    const targetDbId = messageDbIdMapRef.current.get(targetClientId);
+
+    const isStillTargetable = (): boolean => {
+      if (conversationIdRef.current !== conversationId) return false;
+      return messagesRef.current.some((m) => m.id === targetClientId && m.role === "assistant");
+    };
+
+    const getUsage = (message: UIMessage) => {
+      const msgWithUsage = message as {
+        usage?: Record<string, unknown> | null;
+        userConsumedPower?: number | null;
+      };
+      const metadata = message.metadata as
+        | { usage?: Record<string, unknown> | null; userConsumedPower?: number | null }
+        | undefined;
+      return {
+        usage: msgWithUsage.usage ?? metadata?.usage ?? undefined,
+        userConsumedPower:
+          msgWithUsage.userConsumedPower ?? metadata?.userConsumedPower ?? undefined,
+      };
+    };
+
+    const findMessage = (items: UIMessage[]): UIMessage | undefined => {
+      const matched = items.find(
+        (message) =>
+          (targetDbId != null && message.id === targetDbId) || message.id === targetClientId,
+      );
+      if (matched) return matched;
+
+      return [...items].reverse().find((message) => {
+        const { usage, userConsumedPower } = getUsage(message);
+        return message.role === "assistant" && (usage != null || userConsumedPower != null);
+      });
+    };
+
+    const applyUsage = (source: UIMessage): void => {
+      const { usage, userConsumedPower } = getUsage(source);
+      if (!usage && userConsumedPower == null) return;
+
+      setMessages((prev) =>
+        prev.map((m) => {
+          if (m.id !== targetClientId) return m;
+          const nextMetadata: Record<string, unknown> =
+            m.metadata && typeof m.metadata === "object"
+              ? { ...(m.metadata as Record<string, unknown>) }
+              : {};
+          if (usage) nextMetadata.usage = usage;
+          if (userConsumedPower != null) nextMetadata.userConsumedPower = userConsumedPower;
+
+          const usagePayload = {
+            ...(usage ?? {}),
+            ...(userConsumedPower != null ? { userConsumedPower } : {}),
+          };
+          const usagePart = { type: "data-usage" as const, data: usagePayload };
+          const nextParts = Array.isArray(m.parts) ? [...m.parts] : [];
+          const usageIndex = nextParts.findIndex(
+            (part) =>
+              part && typeof part === "object" && (part as { type?: string }).type === "data-usage",
+          );
+          if (usageIndex >= 0) {
+            nextParts[usageIndex] = usagePart as (typeof nextParts)[number];
+          } else {
+            nextParts.push(usagePart as (typeof nextParts)[number]);
+          }
+
+          return {
+            ...m,
+            metadata: nextMetadata as UIMessage["metadata"],
+            parts: nextParts,
+          };
+        }),
+      );
+    };
+
+    const sleep = (ms: number): Promise<void> =>
+      new Promise((resolve) => {
+        scheduleTimeout(resolve, ms);
+      });
+
+    for (let attempt = 0; attempt < USAGE_HYDRATE_MAX_ATTEMPTS; attempt += 1) {
+      if (!isStillTargetable()) return;
+
+      let message: UIMessage | undefined;
+      try {
+        const res = await getPublicConversationMessages({
+          agentId,
+          accessToken,
+          anonymousIdentifier,
+          conversationId,
+          page: 1,
+          pageSize: USAGE_HYDRATE_PAGE_SIZE,
+        });
+        message = findMessage(res.items ?? []);
+      } catch (error) {
+        console.warn("Failed to fetch public agent messages for usage hydration", error);
+      }
+
+      if (!isStillTargetable()) return;
+
+      if (message) {
+        const { usage, userConsumedPower } = getUsage(message);
+        if (usage != null || userConsumedPower != null) {
+          applyUsage(message);
+          return;
+        }
+      }
+
+      if (attempt + 1 < USAGE_HYDRATE_MAX_ATTEMPTS) {
+        await sleep(USAGE_HYDRATE_RETRY_INTERVAL_MS);
+      }
+    }
+  }, [accessToken, agentId, anonymousIdentifier, scheduleTimeout, setMessages]);
 
   useEffect(() => {
     const nextConversationId =
@@ -377,6 +562,22 @@ export function usePublicAgentChatStream(
     [messages, regenerate, resolveMessageDbId],
   );
 
+  const stopWithFinalize = useCallback(() => {
+    const conversationId = conversationIdRef.current;
+    const targetAssistantId = [...messagesRef.current]
+      .reverse()
+      .find((m) => m.role === "assistant")?.id;
+    const token =
+      conversationId && targetAssistantId ? `${conversationId}:${targetAssistantId}` : undefined;
+
+    stop();
+
+    scheduleTimeout(() => {
+      finalizeConversationSideEffects(token);
+      void hydrateLastAssistantUsageFromServer();
+    }, STOP_FINALIZE_DELAY_MS);
+  }, [stop, scheduleTimeout, finalizeConversationSideEffects, hydrateLastAssistantUsageFromServer]);
+
   return {
     conversationId: conversationIdState ?? conversationIdRef.current,
     messages,
@@ -385,7 +586,7 @@ export function usePublicAgentChatStream(
     setMessages,
     send,
     sendWithParent,
-    stop,
+    stop: stopWithFinalize,
     addToolApprovalResponse,
     regenerate: handleRegenerate,
     getDbMessageId,

@@ -37,6 +37,7 @@ export type ListAgentConversationsParams = {
     keyword?: string;
     sortBy?: "createdAt" | "updatedAt";
     includeDebug?: boolean;
+    includeAnonymous?: boolean;
 };
 
 export type ListAgentConversationsResult = {
@@ -58,6 +59,8 @@ export async function listAgentConversations(
         search.set("keyword", params.keyword.trim());
     if (params?.sortBy != null) search.set("sortBy", params.sortBy);
     if (params?.includeDebug != null) search.set("includeDebug", String(params.includeDebug));
+    if (params?.includeAnonymous != null)
+        search.set("includeAnonymous", String(params.includeAnonymous));
     const qs = search.toString();
     const path = qs
         ? `/ai-agents/${agentId}/chat/conversations?${qs}`

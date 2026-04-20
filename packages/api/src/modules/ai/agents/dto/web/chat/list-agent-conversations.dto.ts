@@ -20,4 +20,9 @@ export class ListAgentConversationsDto extends PaginationDto {
     @Transform(({ value }) => value === "true" || value === true)
     @IsBoolean()
     includeDebug?: boolean;
+
+    @IsOptional()
+    @Transform(({ value }) => value === "true" || value === true)
+    @IsBoolean()
+    includeAnonymous?: boolean;
 }

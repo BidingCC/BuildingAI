@@ -181,7 +181,11 @@ export class ChatCompletionService {
                             transient: true,
                         } as any);
                     }
-                    const assistantMessageId = generateId();
+                    const assistantMessageId = isToolApprovalFlow
+                        ? (messages.findLast((message) => message.role === "assistant")?.id ??
+                          generateId())
+                        : generateId();
+
                     writer.write({
                         type: "start",
                         messageId: assistantMessageId,

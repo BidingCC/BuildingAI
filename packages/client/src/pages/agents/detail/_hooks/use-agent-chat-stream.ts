@@ -1,4 +1,5 @@
 import { useChat } from "@ai-sdk/react";
+import { type AgentChatMessageItem, listAgentConversationMessages } from "@buildingai/services/web";
 import { useAuthStore } from "@buildingai/stores";
 import { useQueryClient } from "@tanstack/react-query";
 import type { ChatStatus, FileUIPart, UIMessage } from "ai";
@@ -8,6 +9,11 @@ import { useNavigate } from "react-router-dom";
 import { validate as isUUID } from "uuid";
 
 import { getApiBaseUrl } from "@/utils/api";
+
+const STOP_FINALIZE_DELAY_MS = 350;
+const USAGE_HYDRATE_RETRY_INTERVAL_MS = 500;
+const USAGE_HYDRATE_MAX_ATTEMPTS = 5;
+const USAGE_HYDRATE_PAGE_SIZE = 2;
 
 export interface UseAgentChatStreamOptions {
   agentId: string;
@@ -59,13 +65,47 @@ export function useAgentChatStream(options: UseAgentChatStreamOptions): UseAgent
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [conversationIdState, setConversationIdState] = useState<string | undefined>(undefined);
+  const pendingTimeoutsRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
+  const finalizedTokenRef = useRef<string | null>(null);
   const formVariablesRef = useRef(formVariables);
   const formFieldsInputsRef = useRef(formFieldsInputs);
   const featureRef = useRef<Record<string, boolean> | undefined>(feature);
+  const messagesRef = useRef<UIMessage[]>([]);
   const messageDbIdMapRef = useRef<Map<string, string>>(new Map());
   const pendingUserDbIdRef = useRef<string | null>(null);
   const pendingAssistantDbIdRef = useRef<string | null>(null);
   const [statusOverride, setStatusOverride] = useState<ChatStatus | null>(null);
+
+  const scheduleTimeout = useCallback((fn: () => void, ms: number) => {
+    const id = setTimeout(() => {
+      pendingTimeoutsRef.current.delete(id);
+      fn();
+    }, ms);
+    pendingTimeoutsRef.current.add(id);
+    return id;
+  }, []);
+
+  useEffect(() => {
+    const timeouts = pendingTimeoutsRef.current;
+    return () => {
+      timeouts.forEach(clearTimeout);
+      timeouts.clear();
+    };
+  }, []);
+
+  const finalizeConversationSideEffects = useCallback(
+    (token?: string) => {
+      if (token) {
+        if (finalizedTokenRef.current === token) return;
+        finalizedTokenRef.current = token;
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["agents", "chat", "conversations"] });
+      queryClient.invalidateQueries({ queryKey: ["user", "info"] });
+    },
+    [queryClient],
+  );
+
   useEffect(() => {
     formVariablesRef.current = formVariables;
     formFieldsInputsRef.current = formFieldsInputs;
@@ -83,6 +123,14 @@ export function useAgentChatStream(options: UseAgentChatStreamOptions): UseAgent
     },
     [],
   );
+
+  const mapLatestMessageId = useCallback((role: UIMessage["role"], dbId: string): boolean => {
+    const latest = [...messagesRef.current].reverse().find((message) => message.role === role);
+    if (!latest) return false;
+
+    messageDbIdMapRef.current.set(latest.id, dbId);
+    return true;
+  }, []);
 
   const transport = useMemo(
     () =>
@@ -170,11 +218,26 @@ export function useAgentChatStream(options: UseAgentChatStreamOptions): UseAgent
       if (data.type === "data-user-message-id" && data.data) {
         lastMessageDbIdRef.current = data.data as string;
         pendingUserDbIdRef.current = data.data as string;
+        if (mapLatestMessageId("user", data.data as string)) {
+          pendingUserDbIdRef.current = null;
+        }
       }
       if (data.type === "data-assistant-message-id" && data.data) {
         lastMessageDbIdRef.current = data.data as string;
         pendingAssistantDbIdRef.current = data.data as string;
+        if (mapLatestMessageId("assistant", data.data as string)) {
+          pendingAssistantDbIdRef.current = null;
+        }
       }
+    },
+    onFinish: () => {
+      const conversationId = conversationIdRef.current;
+      const lastAssistantId = [...messagesRef.current]
+        .reverse()
+        .find((m) => m.role === "assistant")?.id;
+      const token =
+        conversationId && lastAssistantId ? `${conversationId}:${lastAssistantId}` : undefined;
+      finalizeConversationSideEffects(token);
     },
     onError: (error) => {
       console.error("Agent chat stream error:", error);
@@ -209,6 +272,124 @@ export function useAgentChatStream(options: UseAgentChatStreamOptions): UseAgent
       });
     },
   });
+
+  messagesRef.current = messages;
+
+  const hydrateLastAssistantUsageFromServer = useCallback(async (): Promise<void> => {
+    const conversationId = conversationIdRef.current;
+    if (!conversationId) return;
+
+    const lastAssistant = [...messagesRef.current].reverse().find((m) => m.role === "assistant");
+    if (!lastAssistant) return;
+
+    const targetClientId = lastAssistant.id;
+    const targetDbId = messageDbIdMapRef.current.get(targetClientId);
+
+    const isStillTargetable = (): boolean => {
+      if (conversationIdRef.current !== conversationId) return false;
+      return messagesRef.current.some((m) => m.id === targetClientId && m.role === "assistant");
+    };
+
+    const getUsage = (record: AgentChatMessageItem) => {
+      const message = record.message as {
+        id?: string;
+        role?: string;
+        usage?: Record<string, unknown> | null;
+        userConsumedPower?: number | null;
+      };
+      return {
+        message,
+        usage: message.usage ?? undefined,
+        userConsumedPower: message.userConsumedPower ?? undefined,
+      };
+    };
+
+    const findRecord = (items: AgentChatMessageItem[]): AgentChatMessageItem | undefined => {
+      const matched = items.find((record) => {
+        const message = record.message as { id?: string };
+        return (targetDbId != null && record.id === targetDbId) || message.id === targetClientId;
+      });
+      if (matched) return matched;
+
+      return items.find((record) => {
+        const { message, usage, userConsumedPower } = getUsage(record);
+        return message.role === "assistant" && (usage != null || userConsumedPower != null);
+      });
+    };
+
+    const applyUsage = (record: AgentChatMessageItem): void => {
+      const { usage, userConsumedPower } = getUsage(record);
+      if (!usage && userConsumedPower == null) return;
+
+      setChatMessages((prev) =>
+        prev.map((m) => {
+          if (m.id !== targetClientId) return m;
+          const nextMetadata: Record<string, unknown> =
+            m.metadata && typeof m.metadata === "object"
+              ? { ...(m.metadata as Record<string, unknown>) }
+              : {};
+          if (usage) nextMetadata.usage = usage;
+          if (userConsumedPower != null) nextMetadata.userConsumedPower = userConsumedPower;
+
+          const usagePayload = {
+            ...(usage ?? {}),
+            ...(userConsumedPower != null ? { userConsumedPower } : {}),
+          };
+          const usagePart = { type: "data-usage" as const, data: usagePayload };
+          const nextParts = Array.isArray(m.parts) ? [...m.parts] : [];
+          const usageIndex = nextParts.findIndex(
+            (part) =>
+              part && typeof part === "object" && (part as { type?: string }).type === "data-usage",
+          );
+          if (usageIndex >= 0) {
+            nextParts[usageIndex] = usagePart as (typeof nextParts)[number];
+          } else {
+            nextParts.push(usagePart as (typeof nextParts)[number]);
+          }
+
+          return {
+            ...m,
+            metadata: nextMetadata as UIMessage["metadata"],
+            parts: nextParts,
+          };
+        }),
+      );
+    };
+
+    const sleep = (ms: number): Promise<void> =>
+      new Promise((resolve) => {
+        scheduleTimeout(resolve, ms);
+      });
+
+    for (let attempt = 0; attempt < USAGE_HYDRATE_MAX_ATTEMPTS; attempt += 1) {
+      if (!isStillTargetable()) return;
+
+      let record: AgentChatMessageItem | undefined;
+      try {
+        const res = await listAgentConversationMessages(agentId, conversationId, {
+          page: 1,
+          pageSize: USAGE_HYDRATE_PAGE_SIZE,
+        });
+        record = findRecord(res.items ?? []);
+      } catch (error) {
+        console.warn("Failed to fetch agent conversation messages for usage hydration", error);
+      }
+
+      if (!isStillTargetable()) return;
+
+      if (record) {
+        const { usage, userConsumedPower } = getUsage(record);
+        if (usage != null || userConsumedPower != null) {
+          applyUsage(record);
+          return;
+        }
+      }
+
+      if (attempt + 1 < USAGE_HYDRATE_MAX_ATTEMPTS) {
+        await sleep(USAGE_HYDRATE_RETRY_INTERVAL_MS);
+      }
+    }
+  }, [agentId, conversationIdRef, scheduleTimeout, setChatMessages]);
 
   const handleRegenerate = useCallback(
     (messageId: string) => {
@@ -313,6 +494,28 @@ export function useAgentChatStream(options: UseAgentChatStreamOptions): UseAgent
 
   const effectiveStatus = statusOverride ?? status;
 
+  const stopWithFinalize = useCallback(() => {
+    const conversationId = conversationIdRef.current;
+    const targetAssistantId = [...messagesRef.current]
+      .reverse()
+      .find((m) => m.role === "assistant")?.id;
+    const token =
+      conversationId && targetAssistantId ? `${conversationId}:${targetAssistantId}` : undefined;
+
+    stop();
+
+    scheduleTimeout(() => {
+      finalizeConversationSideEffects(token);
+      void hydrateLastAssistantUsageFromServer();
+    }, STOP_FINALIZE_DELAY_MS);
+  }, [
+    stop,
+    scheduleTimeout,
+    finalizeConversationSideEffects,
+    hydrateLastAssistantUsageFromServer,
+    conversationIdRef,
+  ]);
+
   return {
     conversationId: resolvedConversationId,
     messages,
@@ -320,7 +523,7 @@ export function useAgentChatStream(options: UseAgentChatStreamOptions): UseAgent
     streamingMessageId,
     setMessages: setChatMessages,
     send,
-    stop,
+    stop: stopWithFinalize,
     regenerate: handleRegenerate,
     addToolApprovalResponse,
     getDbMessageId,
