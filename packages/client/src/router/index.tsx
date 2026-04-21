@@ -115,7 +115,11 @@ export const router = createBrowserRouter([
           },
           {
             path: "/apps/:identifier/*",
-            element: <AppIframePage />,
+            element: (
+              <AuthGuard>
+                <AppIframePage />
+              </AuthGuard>
+            ),
           },
           {
             path: "/agents",

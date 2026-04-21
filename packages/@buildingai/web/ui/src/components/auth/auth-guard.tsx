@@ -9,6 +9,8 @@ const isPluginPath = window.location.pathname.includes("/extension/");
 const AuthGuard = ({ children }: { children?: React.ReactNode }) => {
   const location = useLocation();
   const { isLogin } = useAuthStore((state) => state.authActions);
+  const redirect = `${location.pathname}${location.search}${location.hash}`;
+
   if (isLogin()) {
     return children || <Outlet />;
   }
@@ -22,9 +24,9 @@ const AuthGuard = ({ children }: { children?: React.ReactNode }) => {
 
   return (
     <Navigate
-      to={{ pathname: "/login", search: `?redirect=${encodeURIComponent(location.pathname)}` }}
+      to={{ pathname: "/login", search: `?redirect=${encodeURIComponent(redirect)}` }}
       replace
-      state={{ redirect: location.pathname }}
+      state={{ redirect }}
     />
   );
 };

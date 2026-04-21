@@ -78,6 +78,26 @@ function ParentFrameSync() {
     return <Outlet />;
 }
 
+function ExtensionNotFoundPage() {
+    const location = useLocation();
+
+    useEffect(() => {
+        if (window.parent === window) return;
+
+        window.parent.postMessage(
+            {
+                type: "extension-not-found",
+                path: location.pathname,
+                search: location.search,
+                hash: location.hash,
+            },
+            "*",
+        );
+    }, [location.pathname, location.search, location.hash]);
+
+    return <NotFoundPage />;
+}
+
 /**
  * Build a standard application router from a simplified route option.
  * Encapsulates the common route skeleton so each project only needs
@@ -118,7 +138,7 @@ export function defineRouteOption(option: RouteOption) {
                     },
                     {
                         path: "*",
-                        element: <NotFoundPage />,
+                        element: <ExtensionNotFoundPage />,
                     },
                 ],
             },

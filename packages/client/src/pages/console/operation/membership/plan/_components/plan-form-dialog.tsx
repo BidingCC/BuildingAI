@@ -4,6 +4,7 @@ import {
   useMembershipLevelListQuery,
   useMembershipPlanDetailQuery,
   useUpdateMembershipPlanMutation,
+  useUpdateMembershipPlanSortMutation,
 } from "@buildingai/services/console";
 import { Button } from "@buildingai/ui/components/ui/button";
 import {
@@ -89,6 +90,10 @@ const billingRowSchema = z.object({
 const formSchema = z.object({
   name: z.string().min(1, "计划名称必须填写").max(64, "计划名称不能超过64个字符"),
   label: z.string().max(64).optional(),
+  sort: z
+    .union([z.number(), z.string()])
+    .transform((v) => (typeof v === "string" ? Number(v) : v))
+    .pipe(z.number().int().min(0, "排序不能为负数")),
   durationConfig: z.number().int().min(1).max(6),
   durationValue: z
     .union([z.number(), z.string()])
@@ -130,6 +135,7 @@ export const PlanFormDialog = ({ open, onOpenChange, planId, onSuccess }: PlanFo
     defaultValues: {
       name: "",
       label: "",
+      sort: 0,
       durationConfig: 1,
       durationValue: undefined,
       durationUnit: "month",
@@ -161,6 +167,7 @@ export const PlanFormDialog = ({ open, onOpenChange, planId, onSuccess }: PlanFo
       form.reset({
         name: planDetail.name,
         label: planDetail.label ?? "",
+        sort: planDetail.sort ?? 0,
         durationConfig: planDetail.durationConfig,
         durationValue: planDetail.duration?.value,
         durationUnit: (planDetail.duration?.unit as "day" | "month" | "year") ?? "month",
@@ -179,6 +186,7 @@ export const PlanFormDialog = ({ open, onOpenChange, planId, onSuccess }: PlanFo
       form.reset({
         name: "",
         label: "",
+        sort: 0,
         durationConfig: 1,
         durationValue: undefined,
         durationUnit: "month",
@@ -188,30 +196,27 @@ export const PlanFormDialog = ({ open, onOpenChange, planId, onSuccess }: PlanFo
   }, [open, planId, planDetail, form]);
 
   const createMutation = useCreateMembershipPlanMutation({
-    onSuccess: () => {
-      toast.success("计划创建成功");
-      onOpenChange(false);
-      onSuccess?.();
-    },
     onError: (error) => {
-      toast.error(`创建失败: ${error.message}`);
+      console.log(`创建失败: ${error.message}`);
     },
   });
 
   const updateMutation = useUpdateMembershipPlanMutation({
-    onSuccess: () => {
-      toast.success("计划更新成功");
-      onOpenChange(false);
-      onSuccess?.();
-    },
     onError: (error) => {
-      toast.error(`更新失败: ${error.message}`);
+      console.log(`更新失败: ${error.message}`);
     },
   });
 
-  const isPending = createMutation.isPending || updateMutation.isPending;
+  const updateSortMutation = useUpdateMembershipPlanSortMutation({
+    onError: (error) => {
+      console.log(`更新排序失败: ${error.message}`);
+    },
+  });
 
-  const handleSubmit = (values: FormValues) => {
+  const isPending =
+    createMutation.isPending || updateMutation.isPending || updateSortMutation.isPending;
+
+  const handleSubmit = async (values: FormValues) => {
     const durationConfig = values.durationConfig;
     const duration =
       durationConfig === 6 && values.durationValue != null && values.durationUnit
@@ -236,10 +241,21 @@ export const PlanFormDialog = ({ open, onOpenChange, planId, onSuccess }: PlanFo
       billing,
     };
 
-    if (isEditMode && planId) {
-      updateMutation.mutate({ id: planId, body });
-    } else {
-      createMutation.mutate(body);
+    try {
+      const detail =
+        isEditMode && planId
+          ? await updateMutation.mutateAsync({ id: planId, body })
+          : await createMutation.mutateAsync(body);
+
+      if (values.sort !== detail.sort) {
+        await updateSortMutation.mutateAsync({ id: detail.id, sort: values.sort });
+      }
+
+      toast.success(isEditMode ? "计划更新成功" : "计划创建成功");
+      onOpenChange(false);
+      onSuccess?.();
+    } catch {
+      // Errors are handled by each mutation's onError.
     }
   };
 
@@ -287,6 +303,26 @@ export const PlanFormDialog = ({ open, onOpenChange, planId, onSuccess }: PlanFo
                     <FormLabel>标签名称</FormLabel>
                     <FormControl>
                       <Input placeholder="如：限时优惠、推荐" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="sort"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>计划排序</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min={0}
+                        step={1}
+                        placeholder="数字越小越靠前"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -465,24 +501,24 @@ export const PlanFormDialog = ({ open, onOpenChange, planId, onSuccess }: PlanFo
                               />
                             </TableCell>
                             {/* <TableCell>
-                              <FormField
-                                control={form.control}
-                                name={`billing.${index}.originalPrice`}
-                                render={({ field: f }) => (
-                                  <FormItem>
-                                    <FormControl>
-                                      <Input
-                                        type="number"
-                                        min={0}
-                                        step={0.01}
-                                        className="h-8"
-                                        {...f}
-                                      />
-                                    </FormControl>
-                                  </FormItem>
-                                )}
-                              />
-                            </TableCell> */}
+                                <FormField
+                                  control={form.control}
+                                  name={`billing.${index}.originalPrice`}
+                                  render={({ field: f }) => (
+                                    <FormItem>
+                                      <FormControl>
+                                        <Input
+                                          type="number"
+                                          min={0}
+                                          step={0.01}
+                                          className="h-8"
+                                          {...f}
+                                        />
+                                      </FormControl>
+                                    </FormItem>
+                                  )}
+                                />
+                              </TableCell> */}
                             <TableCell>
                               <FormField
                                 control={form.control}
