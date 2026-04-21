@@ -20,6 +20,7 @@ export * from "./menu";
 export * from "./notice";
 export * from "./payconfig";
 export * from "./permission";
+export * from "./pm2";
 export * from "./provider";
 export * from "./recharge";
 export * from "./role";

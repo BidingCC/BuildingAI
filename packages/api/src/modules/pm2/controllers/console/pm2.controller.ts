@@ -7,6 +7,7 @@ import { Body, Delete, Get, Post, Query } from "@nestjs/common";
 
 import {
     Pm2DeleteDto,
+    Pm2LogRotateConfigDto,
     Pm2LogsQueryDto,
     Pm2ProcessInfoQueryDto,
     Pm2ReloadDto,
@@ -194,6 +195,86 @@ export class Pm2Controller extends BaseController {
         }
 
         return true;
+    }
+
+    /**
+     * 获取 PM2 日志切割配置
+     */
+    @Get("log-rotate/config")
+    @Permissions({
+        code: "get-log-rotate-config",
+        name: "获取 PM2 日志切割配置",
+    })
+    async getLogRotateConfig() {
+        const result = await this.pm2Service.getLogRotateConfig();
+
+        if (!result.success) {
+            throw HttpErrorFactory.internal(
+                result.message || "Failed to get PM2 log rotate config",
+            );
+        }
+
+        return result.data;
+    }
+
+    /**
+     * 保存并应用 PM2 日志切割配置
+     */
+    @Post("log-rotate/config")
+    @Permissions({
+        code: "set-log-rotate-config",
+        name: "设置 PM2 日志切割配置",
+    })
+    async setLogRotateConfig(@Body() dto: Pm2LogRotateConfigDto) {
+        const result = await this.pm2Service.setLogRotateConfig(dto);
+
+        if (!result.success) {
+            throw HttpErrorFactory.internal(
+                result.message || "Failed to set PM2 log rotate config",
+            );
+        }
+
+        return result.data;
+    }
+
+    /**
+     * 重新应用当前 PM2 日志切割配置
+     */
+    @Post("log-rotate/apply")
+    @Permissions({
+        code: "apply-log-rotate-config",
+        name: "应用 PM2 日志切割配置",
+    })
+    async applyLogRotateConfig() {
+        const result = await this.pm2Service.applyStoredLogRotateConfig();
+
+        if (!result.success) {
+            throw HttpErrorFactory.internal(
+                result.message || "Failed to apply PM2 log rotate config",
+            );
+        }
+
+        return result.data;
+    }
+
+    /**
+     * 获取 PM2 日志切割模块状态
+     */
+    @Get("log-rotate/status")
+    @Permissions({
+        code: "log-rotate-status",
+        name: "查看 PM2 日志切割状态",
+    })
+    async getLogRotateStatus() {
+        const result = await this.pm2Service.getLogRotateStatus();
+
+        if (!result.success) {
+            throw HttpErrorFactory.internal(
+                result.message || "Failed to get PM2 log rotate status",
+            );
+        }
+
+        return result.data;
     }
 
     /**

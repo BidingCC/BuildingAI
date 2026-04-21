@@ -548,6 +548,18 @@
                         "isHidden": 0,
                         "type": 2,
                         "sourceType": 1
+                    },
+                    {
+                        "name": "日志切割",
+                        "code": "system-pm2-log-rotate",
+                        "path": "pm2-log-rotate",
+                        "icon": "",
+                        "component": "/console/system/pm2-log-rotate/index",
+                        "permissionCode": "pm2:get-log-rotate-config",
+                        "sort": 110,
+                        "isHidden": 0,
+                        "type": 2,
+                        "sourceType": 1
                     }
                 ]
             }
