@@ -12,6 +12,7 @@ import { AccountLog } from "@buildingai/db/entities";
 import { Analyse, AnalyseActionType } from "@buildingai/db/entities";
 import { Extension } from "@buildingai/db/entities";
 import { RechargeOrder } from "@buildingai/db/entities";
+import { MembershipOrder } from "@buildingai/db/entities";
 import { MoreThanOrEqual, Repository } from "@buildingai/db/typeorm";
 import {
     ChatStats,
@@ -47,6 +48,7 @@ export class DashboardService extends BaseService<any> {
      * @param aiModelRepository AI模型仓储
      * @param aiProviderRepository AI供应商仓储
      * @param analyseRepository 行为分析仓储
+     * @param membershipOrderRepository 会员订单仓储
      */
     constructor(
         @InjectRepository(User)
@@ -73,6 +75,8 @@ export class DashboardService extends BaseService<any> {
         private readonly aiProviderRepository: Repository<AiProvider>,
         @InjectRepository(Analyse)
         private readonly analyseRepository: Repository<Analyse>,
+        @InjectRepository(MembershipOrder)
+        private readonly membershipOrderRepository: Repository<MembershipOrder>,
     ) {
         super(userRepository);
     }
@@ -278,63 +282,135 @@ export class DashboardService extends BaseService<any> {
      * @returns 订单统计信息
      */
     private async getOrderStats(): Promise<OrderStats> {
-        // 总订单数
-        const totalOrders = await this.rechargeOrderRepository.count();
+        // 订单统计口径：仅统计已支付订单
+        // - 充值订单：payStatus=1
+        // - 会员订单：payState=1
 
-        // 总订单金额
-        const totalAmountQuery = await this.rechargeOrderRepository
-            .createQueryBuilder("order")
-            .select("COALESCE(SUM(order.orderAmount), 0)", "total")
-            .getRawOne();
-        const totalAmount = Number(totalAmountQuery?.total || 0);
-        //本月订单
+        // 总订单数（已支付）
+        const [paidRechargeOrders, paidMembershipOrders] = await Promise.all([
+            this.rechargeOrderRepository.count({ where: { payStatus: 1 } }),
+            this.membershipOrderRepository.count({ where: { payState: 1 } }),
+        ]);
+        const totalOrders = paidRechargeOrders + paidMembershipOrders;
+
+        // 总订单金额（已支付）
+        const [rechargeTotalAmountRaw, membershipTotalAmountRaw] = await Promise.all([
+            this.rechargeOrderRepository
+                .createQueryBuilder("order")
+                .where("order.payStatus = :payStatus", { payStatus: 1 })
+                .select("COALESCE(SUM(order.orderAmount), 0)", "total")
+                .getRawOne(),
+            this.membershipOrderRepository
+                .createQueryBuilder("order")
+                .where("order.payState = :payState", { payState: 1 })
+                .select("COALESCE(SUM(order.orderAmount), 0)", "total")
+                .getRawOne(),
+        ]);
+        const totalAmount =
+            Number(rechargeTotalAmountRaw?.total || 0) +
+            Number(membershipTotalAmountRaw?.total || 0);
+
+        // 本月订单金额（已支付）
         const monthStart = new Date();
         monthStart.setDate(1);
         monthStart.setHours(0, 0, 0, 0);
         const nextMonthStart = new Date(monthStart);
         nextMonthStart.setMonth(nextMonthStart.getMonth() + 1);
-        const monthOrderAmountQuery = await this.rechargeOrderRepository
-            .createQueryBuilder("order")
-            .where("order.createdAt >= :start AND order.createdAt < :end", {
-                start: monthStart,
-                end: nextMonthStart,
-            })
-            .select("COALESCE(SUM(order.orderAmount), 0)", "total")
-            .getRawOne();
-        const monthOrderAmount = Number(monthOrderAmountQuery?.total || 0);
-        // 今日订单数
+
+        const [rechargeMonthAmountRaw, membershipMonthAmountRaw] = await Promise.all([
+            this.rechargeOrderRepository
+                .createQueryBuilder("order")
+                .where("order.createdAt >= :start AND order.createdAt < :end", {
+                    start: monthStart,
+                    end: nextMonthStart,
+                })
+                .andWhere("order.payStatus = :payStatus", { payStatus: 1 })
+                .select("COALESCE(SUM(order.orderAmount), 0)", "total")
+                .getRawOne(),
+            this.membershipOrderRepository
+                .createQueryBuilder("order")
+                .where("order.createdAt >= :start AND order.createdAt < :end", {
+                    start: monthStart,
+                    end: nextMonthStart,
+                })
+                .andWhere("order.payState = :payState", { payState: 1 })
+                .select("COALESCE(SUM(order.orderAmount), 0)", "total")
+                .getRawOne(),
+        ]);
+        const monthOrderAmount =
+            Number(rechargeMonthAmountRaw?.total || 0) +
+            Number(membershipMonthAmountRaw?.total || 0);
+
+        // 今日订单数/金额（已支付）
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        const ordersToday = await this.rechargeOrderRepository.count({
-            where: {
-                createdAt: MoreThanOrEqual(today),
-            },
-        });
-        //今日订单金额
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
-        const todayOrderAmountQuery = await this.rechargeOrderRepository
-            .createQueryBuilder("order")
-            .where("order.createdAt >= :start AND order.createdAt < :end", {
-                start: today,
-                end: tomorrow,
-            })
-            .select("COALESCE(SUM(order.orderAmount), 0)", "total")
-            .getRawOne();
-        const todayOrderAmount = Number(todayOrderAmountQuery?.total || 0);
 
-        // 昨天订单数（用于计算同比变化）
+        const [rechargeOrdersToday, membershipOrdersToday] = await Promise.all([
+            this.rechargeOrderRepository.count({
+                where: {
+                    payStatus: 1,
+                    createdAt: MoreThanOrEqual(today),
+                },
+            }),
+            this.membershipOrderRepository.count({
+                where: {
+                    payState: 1,
+                    createdAt: MoreThanOrEqual(today),
+                },
+            }),
+        ]);
+        const ordersToday = rechargeOrdersToday + membershipOrdersToday;
+
+        const [rechargeTodayAmountRaw, membershipTodayAmountRaw] = await Promise.all([
+            this.rechargeOrderRepository
+                .createQueryBuilder("order")
+                .where("order.createdAt >= :start AND order.createdAt < :end", {
+                    start: today,
+                    end: tomorrow,
+                })
+                .andWhere("order.payStatus = :payStatus", { payStatus: 1 })
+                .select("COALESCE(SUM(order.orderAmount), 0)", "total")
+                .getRawOne(),
+            this.membershipOrderRepository
+                .createQueryBuilder("order")
+                .where("order.createdAt >= :start AND order.createdAt < :end", {
+                    start: today,
+                    end: tomorrow,
+                })
+                .andWhere("order.payState = :payState", { payState: 1 })
+                .select("COALESCE(SUM(order.orderAmount), 0)", "total")
+                .getRawOne(),
+        ]);
+        const todayOrderAmount =
+            Number(rechargeTodayAmountRaw?.total || 0) +
+            Number(membershipTodayAmountRaw?.total || 0);
+
+        // 昨天订单数（用于计算同比变化，已支付）
         const yesterday = new Date(today);
         yesterday.setDate(yesterday.getDate() - 1);
         const yesterdayEnd = new Date(today);
 
-        const ordersYesterday = await this.rechargeOrderRepository
-            .createQueryBuilder("order")
-            .where("order.createdAt >= :start AND order.createdAt < :end", {
-                start: yesterday,
-                end: yesterdayEnd,
-            })
-            .getCount();
+        const [rechargeOrdersYesterday, membershipOrdersYesterday] = await Promise.all([
+            this.rechargeOrderRepository
+                .createQueryBuilder("order")
+                .where("order.createdAt >= :start AND order.createdAt < :end", {
+                    start: yesterday,
+                    end: yesterdayEnd,
+                })
+                .andWhere("order.payStatus = :payStatus", { payStatus: 1 })
+                .getCount(),
+            this.membershipOrderRepository
+                .createQueryBuilder("order")
+                .where("order.createdAt >= :start AND order.createdAt < :end", {
+                    start: yesterday,
+                    end: yesterdayEnd,
+                })
+                .andWhere("order.payState = :payState", { payState: 1 })
+                .getCount(),
+        ]);
+        const ordersYesterday = rechargeOrdersYesterday + membershipOrdersYesterday;
 
         // 计算同比变化（百分比）
         const orderChange =
@@ -347,8 +423,8 @@ export class DashboardService extends BaseService<any> {
         return {
             totalOrders,
             totalAmount,
-            todayOrderAmount,
             monthOrderAmount,
+            todayOrderAmount,
             ordersToday,
             orderChange: Math.round(orderChange * 100) / 100,
         };

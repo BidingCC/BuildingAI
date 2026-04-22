@@ -10,6 +10,7 @@ import {
     AiProvider,
     Analyse,
     Extension,
+    MembershipOrder,
     RechargeOrder,
     User,
 } from "@buildingai/db/entities";
@@ -34,6 +35,7 @@ import { DashboardService } from "./services/dashboard.service";
             AgentChatMessage,
             AiChatRecord,
             AiChatMessage,
+            MembershipOrder,
             RechargeOrder,
             AccountLog,
             Extension,
