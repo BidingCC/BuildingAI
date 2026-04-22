@@ -9,10 +9,10 @@ import { generateNo } from "@buildingai/utils";
 import { SYSTEM_CONFIG } from "@common/constants";
 import { AuthService } from "@common/modules/auth/services/auth.service";
 import { RolePermissionService } from "@common/modules/auth/services/role-permission.service";
+import { getOrCreateSystemId } from "@common/utils/system-id";
 import { UserService } from "@modules/user/services/user.service";
 import { Injectable, Logger } from "@nestjs/common";
 import { exec } from "child_process";
-import { machineIdSync } from "node-machine-id";
 import { promisify } from "util";
 
 import { initializeDto } from "../dto/system.dto";
@@ -52,7 +52,7 @@ export class SystemService {
      * 获取运行时系统信息（用于控制台展示）
      */
     async getRuntimeInfo(): Promise<{ version: string; systemId: string }> {
-        const systemId = await machineIdSync(true);
+        const systemId = await getOrCreateSystemId(this.dictService);
         return {
             version: AppConfig.version,
             systemId,

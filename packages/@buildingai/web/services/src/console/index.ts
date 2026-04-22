@@ -26,6 +26,7 @@ export * from "./recharge";
 export * from "./role";
 export * from "./secret";
 export * from "./storage-config";
+export * from "./system";
 export * from "./tag";
 export * from "./user";
 export * from "./website";

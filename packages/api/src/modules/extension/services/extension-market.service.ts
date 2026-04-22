@@ -10,8 +10,8 @@ import { ExtensionDetailType, ExtensionsService, PlatformInfo } from "@buildinga
 import { DictService } from "@buildingai/dict";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { createHttpClient, HttpClientInstance } from "@buildingai/utils";
+import { getOrCreateSystemId } from "@common/utils/system-id";
 import { Injectable, Logger } from "@nestjs/common";
-import { machineIdSync } from "node-machine-id";
 import * as semver from "semver";
 
 /**
@@ -249,14 +249,7 @@ export class ExtensionMarketService {
      * @returns System key or null
      */
     private async getSystemKey(): Promise<string | null> {
-        const generatedMachineId = machineIdSync(true);
-        // const generatedMachineId = await machineId();
-
-        if (!generatedMachineId || generatedMachineId.trim() === "") {
-            throw HttpErrorFactory.badRequest("Generated machine ID is empty");
-        }
-
-        return generatedMachineId;
+        return getOrCreateSystemId(this.dictService);
     }
 
     /**

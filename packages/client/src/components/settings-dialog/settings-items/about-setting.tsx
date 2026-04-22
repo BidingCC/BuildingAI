@@ -1,12 +1,15 @@
+import { useSystemRuntimeInfoQuery } from "@buildingai/services/console";
 import { useConfigStore } from "@buildingai/stores";
+import { RootOnly } from "@buildingai/ui/components/auth/root-only";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@buildingai/ui/components/ui/dialog";
-import { ChevronRight } from "lucide-react";
+import { Check, ChevronRight, Copy } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { AgreementDialog, type AgreementType } from "@/components/agreement-dialog";
 
@@ -16,17 +19,52 @@ const AboutSetting = () => {
   const [agreementOpen, setAgreementOpen] = useState(false);
   const [customerServiceOpen, setCustomerServiceOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<AgreementType>("service");
+  const [copiedSystemId, setCopiedSystemId] = useState(false);
   const { websiteConfig } = useConfigStore((state) => state.config);
+  const { data: runtimeInfo, isLoading: runtimeInfoLoading } = useSystemRuntimeInfoQuery();
   const customerServiceQrcode = websiteConfig?.webinfo?.customerServiceQrcode;
+  const systemId = runtimeInfo?.systemId?.trim();
+  const version = runtimeInfo?.version || websiteConfig?.webinfo.version || "26.0.0";
+
+  const handleCopySystemId = async () => {
+    if (!systemId) return;
+
+    try {
+      await navigator.clipboard.writeText(systemId);
+      setCopiedSystemId(true);
+      toast.success("系统 ID 已复制");
+      window.setTimeout(() => setCopiedSystemId(false), 1500);
+    } catch {
+      toast.error("系统 ID 复制失败");
+    }
+  };
 
   return (
     <>
       <div className="flex flex-col gap-4">
         <SettingItemGroup label="系统信息">
-          <SettingItem
-            title="系统版本"
-            description={`v${websiteConfig?.webinfo.version || "26.0.0"}`}
-          />
+          <SettingItem title="系统版本" description={`v${version}`} />
+          <RootOnly>
+            <SettingItem
+              title="系统 ID"
+              description={
+                <span className="font-mono break-all">
+                  {systemId || (runtimeInfoLoading ? "加载中..." : "暂无")}
+                </span>
+              }
+              contentClassName="min-w-0 flex-1 pr-3"
+            >
+              <SettingItemAction
+                type="button"
+                title="复制系统 ID"
+                aria-label="复制系统 ID"
+                disabled={!systemId}
+                onClick={handleCopySystemId}
+              >
+                {copiedSystemId ? <Check /> : <Copy />}
+              </SettingItemAction>
+            </SettingItem>
+          </RootOnly>
         </SettingItemGroup>
 
         <SettingItemGroup label="政策协议">
