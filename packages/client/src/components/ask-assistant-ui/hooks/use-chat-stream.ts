@@ -14,9 +14,9 @@ import { getApiBaseUrl } from "@/utils/api";
 /** Delay before running post-stop side effects, giving backend time to persist usage. */
 const STOP_FINALIZE_DELAY_MS = 350;
 /** Interval between usage-hydration retries when the server hasn't persisted usage yet. */
-const USAGE_HYDRATE_RETRY_INTERVAL_MS = 500;
+const USAGE_HYDRATE_RETRY_INTERVAL_MS = 1000;
 /** Max number of usage-hydration retries before giving up. */
-const USAGE_HYDRATE_MAX_ATTEMPTS = 5;
+const USAGE_HYDRATE_MAX_ATTEMPTS = 10;
 /** Page size when re-fetching messages to recover usage. Only the latest record is needed. */
 const USAGE_HYDRATE_PAGE_SIZE = 2;
 

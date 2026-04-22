@@ -13,8 +13,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { getApiBaseUrl } from "@/utils/api";
 
 const STOP_FINALIZE_DELAY_MS = 350;
-const USAGE_HYDRATE_RETRY_INTERVAL_MS = 500;
-const USAGE_HYDRATE_MAX_ATTEMPTS = 5;
+const USAGE_HYDRATE_RETRY_INTERVAL_MS = 1000;
+const USAGE_HYDRATE_MAX_ATTEMPTS = 10;
 const USAGE_HYDRATE_PAGE_SIZE = 2;
 
 export interface UseDatasetsChatStreamOptions {
