@@ -12,7 +12,7 @@ import * as React from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
 import { ToolbarButton } from "./toolbar";
 
-const DEFAULT_FONT_SIZE = "16";
+const DEFAULT_FONT_SIZE = "14";
 
 const FONT_SIZE_MAP = {
   h1: "36",
