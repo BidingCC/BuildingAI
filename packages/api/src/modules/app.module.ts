@@ -17,6 +17,7 @@ import { AuthGuard } from "@common/guards/auth.guard";
 import { DemoGuard } from "@common/guards/demo.guard";
 import { ExtensionGuard } from "@common/guards/extension.guard";
 import { GuardsModule } from "@common/guards/guards.module";
+import { LoginAwardGuard } from "@common/guards/login-award.guard";
 import { MemberOnlyGuard } from "@common/guards/member-only.guard";
 import { PermissionsGuard } from "@common/guards/permissions.guard";
 import { SuperAdminGuard } from "@common/guards/super-admin.guard";
@@ -157,6 +158,10 @@ export class AppModule {
                 {
                     provide: APP_GUARD,
                     useClass: MemberOnlyGuard,
+                },
+                {
+                    provide: APP_GUARD,
+                    useClass: LoginAwardGuard,
                 },
             ],
         };

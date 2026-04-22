@@ -21,6 +21,7 @@ export * from "./mcp";
 export * from "./membership";
 export * from "./recharge";
 export * from "./tag";
+export * from "./task-award";
 export * from "./user";
 export * from "./user-memory";
 export * from "./workflow";

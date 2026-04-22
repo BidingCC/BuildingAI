@@ -76,8 +76,8 @@ export class UserAwardService extends BaseService<User> {
      * @returns
      */
     public async loginAward(userId: string) {
-        const { status, registerAward } = await this.getLoginAward();
-        if (!status || !registerAward) {
+        const { status, loginAward } = await this.getLoginAward();
+        if (!status || !loginAward) {
             return false;
         }
         if (1 !== status) {
@@ -96,8 +96,8 @@ export class UserAwardService extends BaseService<User> {
         if (hasTodayLoginAward) {
             return false;
         }
-        const loginAward = await this.resolveLoginAward(userId, registerAward);
-        if (loginAward <= 0) {
+        const loginAwardValue = await this.resolveLoginAward(userId, loginAward);
+        if (loginAwardValue <= 0) {
             await this.cacheService.del(cacheKey);
             return false;
         }
@@ -117,13 +117,13 @@ export class UserAwardService extends BaseService<User> {
                 await this.appBillingService.addUserPower(
                     {
                         userId: user.id,
-                        amount: loginAward,
+                        amount: loginAwardValue,
                         accountType: ACCOUNT_LOG_TYPE.LOGIN_AWARD_INC,
                         source: {
                             type: ACCOUNT_LOG_SOURCE.LOGIN_AWARD,
                             source: "登录奖励",
                         },
-                        remark: `登录奖励：${loginAward}`,
+                        remark: `登录奖励：${loginAwardValue}`,
                         expireAt: tomorrow,
                     },
                     entityManager,
@@ -161,7 +161,7 @@ export class UserAwardService extends BaseService<User> {
     /**
      * 获取登录奖励配置
      */
-    public async getLoginAward(): Promise<{ status: number; registerAward: unknown }> {
+    public async getLoginAward(): Promise<{ status: number; loginAward: unknown }> {
         const cachedConfig = await this.cacheService.get<string>(LOGIN_CONFIG_CACHE_PREFIX);
         if (cachedConfig) {
             const parsedConfig = this.parseLoginAwardCache(cachedConfig);
@@ -174,7 +174,7 @@ export class UserAwardService extends BaseService<User> {
         const loginAwardConfig = await this.dictService.get("loginAward", 0, "award");
         const normalizedConfig = {
             status: Number(status ?? 0),
-            registerAward: loginAwardConfig,
+            loginAward: loginAwardConfig,
         };
         await this.cacheService.set(LOGIN_CONFIG_CACHE_PREFIX, JSON.stringify(normalizedConfig));
         return normalizedConfig;
@@ -256,15 +256,15 @@ export class UserAwardService extends BaseService<User> {
      */
     private parseLoginAwardCache(
         cacheValue: string,
-    ): { status: number; registerAward: unknown } | null {
+    ): { status: number; loginAward: unknown } | null {
         try {
             const parsed = JSON.parse(cacheValue) as {
                 status?: unknown;
-                registerAward?: unknown;
+                loginAward?: unknown;
             };
             return {
                 status: Number(parsed.status ?? 0),
-                registerAward: parsed.registerAward ?? 0,
+                loginAward: parsed.loginAward ?? 0,
             };
         } catch {
             return null;
