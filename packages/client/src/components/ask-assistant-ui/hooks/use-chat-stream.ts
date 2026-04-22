@@ -526,7 +526,7 @@ export function useChatStream(options: UseChatStreamOptions): UseChatStreamRetur
       parentId?: string | null,
       files?: Array<{ type: "file"; url: string; mediaType?: string; filename?: string }>,
     ) => {
-      if (status === "streaming") return;
+      if (status === "submitted" || status === "streaming") return;
       if (!content.trim() && (!files || files.length === 0)) return;
       if (!token) {
         const redirect = `${location.pathname}${location.search}`;

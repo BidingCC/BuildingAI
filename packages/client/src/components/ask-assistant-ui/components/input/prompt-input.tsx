@@ -34,7 +34,7 @@ import {
   Square,
   X,
 } from "lucide-react";
-import type { ClipboardEvent, FormEvent, ReactNode, RefObject } from "react";
+import type { ClipboardEvent, FormEvent, KeyboardEvent, ReactNode, RefObject } from "react";
 import { memo, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -163,6 +163,7 @@ const PromptInputInner = memo(
       () => models.find((m) => m.id === selectedModelId),
       [models, selectedModelId],
     );
+    const isConversationInProgress = status === "submitted" || status === "streaming";
 
     const hiddenSet = useMemo(() => new Set<PromptInputHiddenTool>(hiddenTools), [hiddenTools]);
     const shouldLoadMcpServers = !hiddenSet.has("mcp");
@@ -334,19 +335,41 @@ const PromptInputInner = memo(
 
     const handleSubmit = useCallback(
       async (message: PromptInputMessage, event: FormEvent<HTMLFormElement>) => {
+        if (isConversationInProgress) {
+          event.preventDefault();
+          throw new Error("MESSAGE_IN_PROGRESS");
+        }
         if (message.files?.length) {
           message.files = await uploadFilesIfNeeded(message.files);
         }
         onSubmit?.(message, event);
       },
-      [onSubmit, uploadFilesIfNeeded],
+      [isConversationInProgress, onSubmit, uploadFilesIfNeeded],
+    );
+
+    const handleTextareaKeyDown = useCallback(
+      (event: KeyboardEvent<HTMLTextAreaElement>) => {
+        if (
+          isConversationInProgress &&
+          event.key === "Enter" &&
+          !event.shiftKey &&
+          !event.nativeEvent.isComposing
+        ) {
+          event.preventDefault();
+        }
+      },
+      [isConversationInProgress],
     );
 
     return (
       <AIPromptInput globalDrop={globalDrop} multiple={multiple} onSubmit={handleSubmit}>
         <PromptInputAttachmentsList />
         <AIPromptInputBody>
-          <AIPromptInputTextarea ref={textareaRef} onPaste={handlePaste} />
+          <AIPromptInputTextarea
+            ref={textareaRef}
+            onKeyDown={handleTextareaKeyDown}
+            onPaste={handlePaste}
+          />
         </AIPromptInputBody>
         <AIPromptInputFooter className="h-13 py-0">
           <AIPromptInputTools>
