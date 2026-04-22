@@ -33,3 +33,9 @@ export const UserTerminal = {
 } as const;
 export type UserTerminalType = (typeof UserTerminal)[keyof typeof UserTerminal];
 export type UserTerminalKey = keyof typeof UserTerminal;
+export const USER_TERMINAL_TYPE_DESCRIPTION = {
+    [UserTerminal.PC]: "PC网页",
+    [UserTerminal.H5]: "手机H5",
+    [UserTerminal.MP]: "微信小程序",
+    [UserTerminal.APP]: "APP",
+} as const;

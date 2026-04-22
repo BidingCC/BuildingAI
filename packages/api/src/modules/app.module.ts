@@ -38,6 +38,7 @@ import { existsSync } from "fs";
 import { join } from "path";
 
 import { AiModule } from "./ai/ai.module";
+import { AwardModule } from "./award/award.module";
 import { ConfigModule as AppConfigModule } from "./config/config.module";
 import { DecorateModule } from "./decorate/decorate.module";
 import { FinanceModule } from "./finance/finance.module";
@@ -123,6 +124,7 @@ export class AppModule {
                 ScheduleModule,
                 SmsModule,
                 NoticeModule,
+                AwardModule,
                 NotificationModule,
                 await ExtensionCoreModule.register(),
             ],
