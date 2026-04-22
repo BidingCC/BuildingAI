@@ -59,7 +59,147 @@ type UsageData = Record<string, unknown> & {
   raw?: Record<string, unknown>;
 };
 
+const FOLLOW_UP_STORAGE_KEY = "__buildingai_last_follow_up_suggestions__";
+const FOLLOW_UP_DISMISSED_STORAGE_KEY = "__buildingai_dismissed_follow_up_suggestions__";
+const MAX_DISMISSED_FOLLOW_UP_KEYS = 100;
+
+type PersistedFollowUpSuggestions = {
+  scope: string;
+  messageId: string;
+  clientMessageId: string;
+  suggestions: string[];
+  signature: string;
+  createdAt: number;
+};
+
 const sum = (a?: number | null, b?: number | null) => (a ?? 0) + (b ?? 0);
+
+function getStorage(): Storage | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.localStorage;
+  } catch {
+    return null;
+  }
+}
+
+function normalizeFollowUpSuggestions(suggestions: string[]): string[] {
+  return suggestions.map((item) => item.trim()).filter(Boolean);
+}
+
+function getFollowUpSignature(suggestions: string[]): string {
+  return normalizeFollowUpSuggestions(suggestions).join("\n");
+}
+
+function getDismissKeys(
+  scope: string,
+  messageId: string,
+  clientMessageId: string,
+  signature: string,
+) {
+  return [
+    `${scope}:message:${messageId}`,
+    `${scope}:message:${clientMessageId}`,
+    `${scope}:signature:${signature}`,
+  ];
+}
+
+function readDismissedFollowUpKeys(): string[] {
+  const storage = getStorage();
+  if (!storage) return [];
+  try {
+    const parsed = JSON.parse(storage.getItem(FOLLOW_UP_DISMISSED_STORAGE_KEY) || "[]");
+    return Array.isArray(parsed)
+      ? parsed.filter((item): item is string => typeof item === "string")
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+function isFollowUpDismissed(
+  scope: string,
+  messageId: string,
+  clientMessageId: string,
+  signature: string,
+): boolean {
+  if (!signature) return false;
+  const dismissed = new Set(readDismissedFollowUpKeys());
+  return getDismissKeys(scope, messageId, clientMessageId, signature).some((key) =>
+    dismissed.has(key),
+  );
+}
+
+function markFollowUpDismissed(
+  scope: string,
+  messageId: string,
+  clientMessageId: string,
+  signature: string,
+) {
+  const storage = getStorage();
+  if (!storage || !signature) return;
+  const next = [
+    ...readDismissedFollowUpKeys(),
+    ...getDismissKeys(scope, messageId, clientMessageId, signature),
+  ];
+  const deduped = Array.from(new Set(next)).slice(-MAX_DISMISSED_FOLLOW_UP_KEYS);
+  storage.setItem(FOLLOW_UP_DISMISSED_STORAGE_KEY, JSON.stringify(deduped));
+}
+
+function readPersistedFollowUpSuggestions(): PersistedFollowUpSuggestions | null {
+  const storage = getStorage();
+  if (!storage) return null;
+  try {
+    const parsed = JSON.parse(storage.getItem(FOLLOW_UP_STORAGE_KEY) || "null");
+    if (!parsed || typeof parsed !== "object") return null;
+    const data = parsed as Partial<PersistedFollowUpSuggestions>;
+    if (
+      typeof data.scope !== "string" ||
+      typeof data.messageId !== "string" ||
+      typeof data.clientMessageId !== "string" ||
+      typeof data.signature !== "string" ||
+      !Array.isArray(data.suggestions)
+    ) {
+      return null;
+    }
+    const suggestions = normalizeFollowUpSuggestions(
+      data.suggestions.filter((item): item is string => typeof item === "string"),
+    );
+    if (suggestions.length === 0) return null;
+    return {
+      scope: data.scope,
+      messageId: data.messageId,
+      clientMessageId: data.clientMessageId,
+      suggestions,
+      signature: data.signature,
+      createdAt: typeof data.createdAt === "number" ? data.createdAt : Date.now(),
+    };
+  } catch {
+    return null;
+  }
+}
+
+function writePersistedFollowUpSuggestions(data: PersistedFollowUpSuggestions) {
+  const storage = getStorage();
+  if (!storage) return;
+  storage.setItem(FOLLOW_UP_STORAGE_KEY, JSON.stringify(data));
+}
+
+function clearPersistedFollowUpSuggestions(
+  scope: string,
+  messageId: string,
+  clientMessageId: string,
+) {
+  const storage = getStorage();
+  if (!storage) return;
+  const persisted = readPersistedFollowUpSuggestions();
+  if (
+    persisted?.scope === scope &&
+    (persisted.messageId === messageId || persisted.clientMessageId === clientMessageId)
+  ) {
+    storage.removeItem(FOLLOW_UP_STORAGE_KEY);
+  }
+}
 
 function mergeUsageData(previous: UsageData, current: UsageData): UsageData {
   return {
@@ -246,14 +386,91 @@ export const Message = memo(function Message({
 
   const assistantContext = useOptionalAssistantContext();
   const contextOnSend = assistantContext?.onSend;
+  const followUpScope = assistantContext?.currentThreadId ?? assistantContext?.agentId ?? "default";
+  const followUpMessageId = resolvedMessageId || message.id;
+  const followUpClientMessageId = message.id;
   const isCurrentTailMessage = assistantContext
     ? assistantContext.displayMessages[assistantContext.displayMessages.length - 1]?.id ===
       message.id
     : isLast;
+  const followUpSignature = useMemo(
+    () => getFollowUpSignature(followUpSuggestions),
+    [followUpSuggestions],
+  );
+  const [persistedFollowUpSuggestions, setPersistedFollowUpSuggestions] = useState<string[]>([]);
 
   useEffect(() => {
     setHideFollowUpSuggestions(false);
   }, [message.id]);
+
+  useEffect(() => {
+    if (!isAssistant || !isCurrentTailMessage) {
+      setPersistedFollowUpSuggestions([]);
+      return;
+    }
+
+    const persisted = readPersistedFollowUpSuggestions();
+    if (
+      persisted?.scope === followUpScope &&
+      (persisted.messageId === followUpMessageId ||
+        persisted.clientMessageId === followUpClientMessageId) &&
+      !isFollowUpDismissed(
+        followUpScope,
+        followUpMessageId,
+        followUpClientMessageId,
+        persisted.signature,
+      )
+    ) {
+      setPersistedFollowUpSuggestions(persisted.suggestions);
+      return;
+    }
+
+    setPersistedFollowUpSuggestions([]);
+  }, [
+    followUpClientMessageId,
+    followUpMessageId,
+    followUpScope,
+    isAssistant,
+    isCurrentTailMessage,
+  ]);
+
+  useEffect(() => {
+    if (
+      !isAssistant ||
+      !isCurrentTailMessage ||
+      hideFollowUpSuggestions ||
+      followUpSuggestions.length === 0 ||
+      !followUpSignature ||
+      isFollowUpDismissed(
+        followUpScope,
+        followUpMessageId,
+        followUpClientMessageId,
+        followUpSignature,
+      )
+    ) {
+      return;
+    }
+
+    const suggestions = normalizeFollowUpSuggestions(followUpSuggestions);
+    writePersistedFollowUpSuggestions({
+      scope: followUpScope,
+      messageId: followUpMessageId,
+      clientMessageId: followUpClientMessageId,
+      suggestions,
+      signature: followUpSignature,
+      createdAt: Date.now(),
+    });
+    setPersistedFollowUpSuggestions(suggestions);
+  }, [
+    followUpClientMessageId,
+    followUpMessageId,
+    followUpScope,
+    followUpSignature,
+    followUpSuggestions,
+    hideFollowUpSuggestions,
+    isAssistant,
+    isCurrentTailMessage,
+  ]);
 
   const knowledgeRefs = useMemo(() => {
     if (!message.parts) return [];
@@ -307,8 +524,10 @@ export const Message = memo(function Message({
   const shouldShowFollowUpSuggestions =
     isAssistant &&
     isCurrentTailMessage &&
-    followUpSuggestions.length > 0 &&
+    (followUpSuggestions.length > 0 || persistedFollowUpSuggestions.length > 0) &&
     !hideFollowUpSuggestions;
+  const visibleFollowUpSuggestions =
+    followUpSuggestions.length > 0 ? followUpSuggestions : persistedFollowUpSuggestions;
 
   const messageNode = (
     <AIMessage
@@ -398,7 +617,7 @@ export const Message = memo(function Message({
             )}
             {shouldShowFollowUpSuggestions && (
               <div className="mt-3 flex flex-wrap gap-2">
-                {followUpSuggestions.map((s, index) => (
+                {visibleFollowUpSuggestions.map((s, index) => (
                   <Button
                     key={`${message.id}-followup-${index}`}
                     type="button"
@@ -406,7 +625,20 @@ export const Message = memo(function Message({
                     size="sm"
                     className="rounded-full"
                     onClick={() => {
+                      const signature = getFollowUpSignature(visibleFollowUpSuggestions);
                       setHideFollowUpSuggestions(true);
+                      markFollowUpDismissed(
+                        followUpScope,
+                        followUpMessageId,
+                        followUpClientMessageId,
+                        signature,
+                      );
+                      clearPersistedFollowUpSuggestions(
+                        followUpScope,
+                        followUpMessageId,
+                        followUpClientMessageId,
+                      );
+                      setPersistedFollowUpSuggestions([]);
                       contextOnSend?.(s);
                     }}
                   >

@@ -110,6 +110,10 @@ export const MessageItem = memo(
             const tp = p as { toolCallId?: string; state?: string; toolName?: string };
             return `dynamic-tool:${tp.toolName || ""}:${tp.toolCallId || ""}:${tp.state || ""}`;
           }
+          if (type === "data-follow-up-suggestions") {
+            const data = (p as { data?: unknown }).data;
+            return `${type}:${Array.isArray(data) ? data.join("\n") : ""}`;
+          }
           return String(type);
         })
         .join("|") || "";
