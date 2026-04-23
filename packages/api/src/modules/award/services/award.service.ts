@@ -4,6 +4,7 @@ import { Dict } from "@buildingai/db/entities";
 import { MembershipLevels } from "@buildingai/db/entities";
 import { DictService } from "@buildingai/dict";
 import { HttpErrorFactory } from "@buildingai/errors";
+import { UserAwardService } from "@common/modules/auth/services/user-award.service";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
@@ -16,6 +17,7 @@ export class AwardService extends BaseService<Dict> {
     constructor(
         private readonly dictService: DictService,
         private readonly cacheService: RedisService,
+        private readonly userAwardService: UserAwardService,
         @InjectRepository(Dict) repository: Repository<Dict>,
         @InjectRepository(MembershipLevels)
         private readonly membershipLevelsRepository: Repository<MembershipLevels>,
@@ -29,8 +31,8 @@ export class AwardService extends BaseService<Dict> {
      */
     async getRegisterAward() {
         return {
-            status: await this.dictService.get("registerAwardStatus", 0, "award"),
-            registerAward: await this.dictService.get("registerAward", 0, "award"),
+            status: await this.dictService.get("registerAwardStatus", 1, "award"),
+            registerAward: await this.dictService.get("registerAward", 20, "award"),
         };
     }
 
@@ -54,36 +56,10 @@ export class AwardService extends BaseService<Dict> {
      * @returns 登录奖励配置信息
      */
     async getLoginAward() {
-        const status = await this.dictService.get("loginAwardStatus", 0, "award");
-        const loginAward = await this.dictService.get("loginAward", [], "award");
-        const loginAwardMap = Array.isArray(loginAward)
-            ? Object.fromEntries(loginAward.map((item) => [String(item.id), item]))
-            : loginAward;
-        //等级列表
-        const lists = await this.membershipLevelsRepository.find({
-            select: ["id", "name", "level"],
-            order: {
-                level: "ASC",
-            },
-        });
-        const normalUserConfig = {
-            id: "0",
-            name: "普通用户",
-            level: 0,
-            award: Number(loginAwardMap[""]?.award ?? loginAwardMap["0"]?.award ?? 0),
-        };
-        const loginAwardConfig = lists.map((item) => ({
-            ...item,
-            award: Number(
-                loginAwardMap[String(item.id)]?.award ??
-                    loginAwardMap[String(item.level)]?.award ??
-                    0,
-            ),
-        }));
-
+        const config = await this.userAwardService.getLoginAwardDefaultConfig();
         return {
-            status,
-            loginAward: [normalUserConfig, ...loginAwardConfig],
+            status: config.status,
+            loginAward: config.loginAward,
         };
     }
 
@@ -122,8 +98,8 @@ export class AwardService extends BaseService<Dict> {
      */
     async getSignAward() {
         return {
-            status: await this.dictService.get("signAwardStatus", 0, "award"),
-            signAward: await this.dictService.get("signAward", 0, "award"),
+            status: await this.dictService.get("signAwardStatus", 1, "award"),
+            signAward: await this.dictService.get("signAward", 10, "award"),
         };
     }
 

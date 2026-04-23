@@ -25,6 +25,7 @@ import { JwtModule } from "@nestjs/jwt";
 import type { StringValue } from "ms";
 
 import { AuthWebController } from "./controller/web/auth.controller";
+import { UserAwardService } from "@common/modules/auth/services/user-award.service";
 
 /**
  * 认证模块
@@ -66,6 +67,7 @@ import { AuthWebController } from "./controller/web/auth.controller";
         RolePermissionService,
         UserTokenService,
         WechatOaService,
+        UserAwardService,
     ],
     exports: [
         AuthService,
@@ -74,6 +76,7 @@ import { AuthWebController } from "./controller/web/auth.controller";
         JwtModule,
         RolePermissionService,
         UserTokenService,
+        UserAwardService,
     ],
 })
 export class AuthModule {}

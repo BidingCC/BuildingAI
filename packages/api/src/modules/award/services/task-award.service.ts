@@ -39,14 +39,15 @@ export class TaskAwardService {
      */
     async center(user: UserPlayground) {
         //签到奖励
-        const signStatus = await this.dictService.get("signAwardStatus", 0, "award");
-        const signAward = await this.dictService.get("signAward", 0, "award");
+        const signStatus = await this.dictService.get("signAwardStatus", 1, "award");
+        const signAward = await this.dictService.get("signAward", 10, "award");
         //登录奖励
-        const loginStatus = await this.dictService.get("loginAwardStatus", 0, "award");
-        const loginAward = await this.dictService.get("loginAward", 0, "award");
+        const loginAwardConfig = await this.userAwardService.getLoginAward();
+        const loginStatus = loginAwardConfig.status;
+        const loginAward = loginAwardConfig.loginAward;
         //注册奖励
-        const registerStatus = await this.dictService.get("registerAwardStatus", 0, "award");
-        const registerAward = await this.dictService.get("registerAward", 0, "award");
+        const registerStatus = await this.dictService.get("registerAwardStatus", 1, "award");
+        const registerAward = await this.dictService.get("registerAward", 20, "award");
         //是否签到、是否登录。
         let isSign = false;
         let isLogin = false;
@@ -71,7 +72,7 @@ export class TaskAwardService {
             awardLists.push({
                 type: "sign",
                 name: "签到奖励",
-                desc: "签到奖励成功，可得" + signAward + "积分",
+                desc: "每天签到成功，可得" + signAward + "积分",
                 award: signAward,
                 isGet: isSign, //是否已经签到
             });
@@ -96,7 +97,7 @@ export class TaskAwardService {
                 awardLists.push({
                     type: "login",
                     name: "登录奖励",
-                    desc: "登录奖励成功，可得" + loginAwardByLevel + "积分",
+                    desc: "每天登录，可得" + loginAwardByLevel + "积分",
                     award: loginAwardByLevel,
                     isGet: isLogin, //是否已经登录
                 });
@@ -115,8 +116,8 @@ export class TaskAwardService {
             }
             awardLists.push({
                 type: "register",
-                name: "注册奖励",
-                desc: "注册奖励成功，可得" + registerAward + "积分",
+                name: "新用户注册",
+                desc: "完成注册，可得" + registerAward + "积分",
                 award: registerAward,
                 isGet: isRegister, //是否已经注册
             });
@@ -129,8 +130,8 @@ export class TaskAwardService {
      * @param user
      */
     async sign(user: UserPlayground) {
-        const status = await this.dictService.get("signAwardStatus", 0, "award");
-        const signAward = await this.dictService.get("signAward", 0, "award");
+        const status = await this.dictService.get("signAwardStatus", 1, "award");
+        const signAward = await this.dictService.get("signAward", 10, "award");
         if (1 !== status || signAward <= 0) {
             throw HttpErrorFactory.notFound("每天签到活动未开启");
         }

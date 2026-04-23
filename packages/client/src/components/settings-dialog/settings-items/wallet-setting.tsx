@@ -23,6 +23,7 @@ import { RechargeDetailDialog } from "./recharge-detail-dialog";
 function formatPrice(amount: number) {
   return `¥${Number(amount).toFixed(2)}`;
 }
+
 const WalletSetting = () => {
   const queryClient = useQueryClient();
   const { userInfo } = useAuthStore((state) => state.auth);
@@ -73,12 +74,6 @@ const WalletSetting = () => {
   };
 
   const getTaskDesc = (item: TaskAwardItem) => {
-    if (item.type === "sign") {
-      return `每日签到成功，可得${item.award}积分`;
-    }
-    if (item.type === "login") {
-      return `每日登录可得 ${item.award} 积分`;
-    }
     return item.desc;
   };
 

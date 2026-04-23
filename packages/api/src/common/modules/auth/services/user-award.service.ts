@@ -170,8 +170,9 @@ export class UserAwardService extends BaseService<User> {
             }
         }
         //查询数据库，设置缓存
-        const status = await this.dictService.get("loginAwardStatus", 0, "award");
-        const loginAwardConfig = await this.dictService.get("loginAward", 0, "award");
+        const defaultConfig = await this.getLoginAwardDefaultConfig();
+        const status = defaultConfig.status;
+        const loginAwardConfig = defaultConfig.loginAward;
         const normalizedConfig = {
             status: Number(status ?? 0),
             loginAward: loginAwardConfig,
@@ -181,7 +182,52 @@ export class UserAwardService extends BaseService<User> {
     }
 
     /**
+     *
+     * 获取登录奖励默认配置
+     */
+    public async getLoginAwardDefaultConfig() {
+        const loginStatus = await this.dictService.get("loginAwardStatus", 0, "award");
+        const loginAward = await this.dictService.get("loginAward", [], "award");
+        const loginAwardMap = Array.isArray(loginAward)
+            ? Object.fromEntries(loginAward.map((item) => [String(item.id), item]))
+            : loginAward;
+        let defaultValue = 0;
+        if (0 === loginAward.length) {
+            defaultValue = 10;
+        }
+        //等级列表
+        const lists = await this.membershipLevelsRepository.find({
+            select: ["id", "name", "level"],
+            order: {
+                level: "ASC",
+            },
+        });
+        const normalUserConfig = {
+            id: "0",
+            name: "普通用户",
+            level: 0,
+            award: Number(loginAwardMap[""]?.award ?? loginAwardMap["0"]?.award ?? defaultValue),
+        };
+        defaultValue = Number(normalUserConfig.award) || defaultValue;
+        const loginAwardConfig = lists.map((item) => {
+            const award = Number(
+                loginAwardMap[String(item.id)]?.award ??
+                    loginAwardMap[String(item.level)]?.award ??
+                    (defaultValue += 20),
+            );
+            return {
+                ...item,
+                award,
+            };
+        });
+        return {
+            status: loginStatus,
+            loginAward: [normalUserConfig, ...loginAwardConfig],
+        };
+    }
+    /**
      * 解析登录奖励配置
+     *
      * @param userId
      * @param loginAwardConfig
      * @returns

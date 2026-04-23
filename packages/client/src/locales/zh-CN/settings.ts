@@ -34,7 +34,7 @@ export default {
     account: {
       label: "账户",
       profile: "账户",
-      wallet: "钱包",
+      wallet: "我的积分",
       subscribe: "订阅管理",
       redeemCardKey: "卡密兑换",
     },
