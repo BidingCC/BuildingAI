@@ -6,6 +6,7 @@ import { Module } from "@nestjs/common";
 
 import { ScheduleController } from "./controllers/schedule.controller";
 import { MembershipGiftService } from "./services/membership-gift.service";
+import { AwardOverdueClearService } from "./services/award-overdue-clear.service";
 
 /**
  * 定时任务模块
@@ -18,7 +19,7 @@ import { MembershipGiftService } from "./services/membership-gift.service";
         TypeOrmModule.forFeature([User, UserSubscription, AccountLog]),
     ],
     controllers: [ScheduleController],
-    providers: [ScheduleService, MembershipGiftService],
+    providers: [ScheduleService, MembershipGiftService,AwardOverdueClearService],
     exports: [ScheduleService],
 })
 export class ScheduleModule {}
