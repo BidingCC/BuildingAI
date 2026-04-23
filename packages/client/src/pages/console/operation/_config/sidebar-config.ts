@@ -95,6 +95,39 @@ export const sidebarConfigMap: Record<string, SidebarConfig> = {
       },
     ],
   },
+  "login-reward": {
+    title: "登录奖励",
+    description: "每日登录赠送积分",
+    backPath: "/console/operation",
+    icon: Wallet,
+    menuItems: [
+      { path: "config", label: "登录奖励", icon: Bolt, permissions: "award:get-login-award" },
+    ],
+  },
+  "register-reward": {
+    title: "注册奖励",
+    description: "新用户注册赠送积分",
+    backPath: "/console/operation",
+    icon: Wallet,
+    menuItems: [
+      { path: "config", label: "注册奖励", icon: Bolt, permissions: "award:get-register-award" },
+    ],
+  },
+  "sign-reward": {
+    title: "签到奖励",
+    description: "用户每日签到领取积分",
+    backPath: "/console/operation",
+    icon: Wallet,
+    menuItems: [
+      { path: "config", label: "签到设置", icon: Bolt, permissions: "award:get-sign-award" },
+      {
+        path: "records",
+        label: "签到记录",
+        icon: History,
+        permissions: "award-record:sign-record-list",
+      },
+    ],
+  },
   //   "points-task": {
   //     title: "积分任务",
   //     description: "积分任务管理",

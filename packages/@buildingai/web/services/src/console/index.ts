@@ -3,6 +3,7 @@ export * from "./agent-decorate";
 export * from "./agents";
 export * from "./analyse";
 export * from "./apps-decorate";
+export * from "./award";
 export * from "./cdk";
 export * from "./chat";
 export * from "./datasets";
