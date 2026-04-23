@@ -37,7 +37,7 @@ export function PowerDetailDialog({
     const power = extend?.power ?? 0;
     const membershipGiftPower = extend?.membershipGiftPower ?? 0;
     const rechargePower = extend?.rechargePower ?? Math.max(0, power - membershipGiftPower);
-    const dailyGift = 0; // 假数据：每日赠送（待实现）
+    const dailyGift = extend?.dailyGift ?? 0; // 假数据：每日赠送（待实现）
     return { power, membershipGiftPower, rechargePower, dailyGift };
   }, [extend]);
 
@@ -82,7 +82,7 @@ export function PowerDetailDialog({
                   <Separator className="flex-1" />
                 </div>
                 <div className="flex items-center justify-between py-1 text-sm">
-                  <span className="text-muted-foreground">每日赠送</span>
+                  <span className="text-muted-foreground">赠送积分</span>
                   <span className="font-semibold tabular-nums">{summary.dailyGift}</span>
                 </div>
               </div>
@@ -100,7 +100,7 @@ export function PowerDetailDialog({
                 </div>
                 <span className="text-muted-foreground px-2 text-lg">+</span>
                 <div className="flex flex-col items-center gap-1">
-                  <span className="text-muted-foreground text-xs">每日赠送</span>
+                  <span className="text-muted-foreground text-xs">赠送积分</span>
                   <span className="font-semibold tabular-nums">{summary.dailyGift}</span>
                 </div>
               </div>

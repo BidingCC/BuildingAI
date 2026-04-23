@@ -346,6 +346,7 @@ export class UserWebController extends BaseController {
                 availableAmount: MoreThan(0),
             } as any,
         });
+
         const membershipGiftPower = membershipGiftLogs.reduce(
             (sum, log) => sum + ((log as any).availableAmount || 0),
             0,
@@ -418,12 +419,48 @@ export class UserWebController extends BaseController {
             return { ...accountLog, accountTypeDesc, consumeSourceDesc };
         });
 
+        //充值积分
+        const rechargeGiftLogs = await this.accountLogService.findAll({
+            where: {
+                userId: user.id,
+                accountType: In([
+                    ACCOUNT_LOG_TYPE.RECHARGE_GIVE_INC,
+                    ACCOUNT_LOG_TYPE.CARD_KEY_REDEEM_INC,
+                ]),
+                availableAmount: MoreThan(0),
+            } as any,
+        });
+
+        const rechargeGiftPower = rechargeGiftLogs.reduce(
+            (sum, log) => sum + ((log as any).availableAmount || 0),
+            0,
+        );
+        const dailyGiftLogs = await this.accountLogService.findAll({
+            where: {
+                userId: user.id,
+                accountType: In([
+                    ACCOUNT_LOG_TYPE.RECHARGE_GIVE_INC,
+                    ACCOUNT_LOG_TYPE.REGISTER_AWARD_INC,
+                    ACCOUNT_LOG_TYPE.LOGIN_AWARD_INC,
+                    ACCOUNT_LOG_TYPE.SIGN_AWARD_INC,
+                ]),
+            } as any,
+        });
+
+        const dailyGiftPower = dailyGiftLogs.reduce(
+            (sum, log) => sum + ((log as any).availableAmount || 0),
+            0,
+        );
         return {
             ...lists,
             extend: {
                 ...userInfo,
+                //订阅积分
                 membershipGiftPower,
-                rechargePower: userInfo.power - membershipGiftPower,
+                //充值积分
+                rechargePower: rechargeGiftPower,
+                //奖励积分
+                dailyGift: dailyGiftPower,
             },
         };
     }

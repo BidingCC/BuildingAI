@@ -5,8 +5,8 @@ import { AccountLog, User, UserSubscription } from "@buildingai/db/entities";
 import { Module } from "@nestjs/common";
 
 import { ScheduleController } from "./controllers/schedule.controller";
-import { MembershipGiftService } from "./services/membership-gift.service";
 import { AwardOverdueClearService } from "./services/award-overdue-clear.service";
+import { MembershipGiftService } from "./services/membership-gift.service";
 
 /**
  * 定时任务模块
@@ -19,7 +19,7 @@ import { AwardOverdueClearService } from "./services/award-overdue-clear.service
         TypeOrmModule.forFeature([User, UserSubscription, AccountLog]),
     ],
     controllers: [ScheduleController],
-    providers: [ScheduleService, MembershipGiftService,AwardOverdueClearService],
+    providers: [ScheduleService, MembershipGiftService, AwardOverdueClearService],
     exports: [ScheduleService],
 })
 export class ScheduleModule {}

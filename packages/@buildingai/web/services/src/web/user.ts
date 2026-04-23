@@ -72,6 +72,7 @@ export type UserAccountLogExtend = {
     power: number;
     membershipGiftPower: number;
     rechargePower: number;
+    dailyGift: number;
 };
 
 export type UserAccountLogResponse = {
