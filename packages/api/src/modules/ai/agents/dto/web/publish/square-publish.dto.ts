@@ -1,4 +1,4 @@
-import { IsArray, IsOptional, IsString, IsUUID } from "class-validator";
+import { IsArray, IsBoolean, IsOptional, IsString, IsUUID } from "class-validator";
 
 export class RejectSquarePublishDto {
     @IsOptional()
@@ -11,4 +11,8 @@ export class PublishToSquareDto {
     @IsArray()
     @IsUUID("4", { each: true })
     tagIds?: string[];
+
+    @IsOptional()
+    @IsBoolean()
+    allowCopy?: boolean;
 }

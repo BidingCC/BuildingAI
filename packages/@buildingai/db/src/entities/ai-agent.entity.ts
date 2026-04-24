@@ -323,6 +323,7 @@ export class Agent extends BaseEntity {
         accessToken?: string | null;
         enableApiKey?: boolean;
         apiKey?: string | null;
+        allowCopy?: boolean;
         wxcomConfig?: AgentWxcomConfig;
     };
 

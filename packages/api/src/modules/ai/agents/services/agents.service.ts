@@ -27,6 +27,10 @@ import type { UpdatePublishConfigDto } from "../dto/web/publish/update-publish-c
 import { CozeAgentSyncService } from "../integrations/coze-agent-sync.service";
 import { DifyAgentSyncService } from "../integrations/dify-agent-sync.service";
 
+type AgentPublishConfigWithCopy = NonNullable<Agent["publishConfig"]> & {
+    allowCopy?: boolean;
+};
+
 @Injectable()
 export class AgentsService extends BaseService<Agent> {
     protected readonly logger = new Logger(AgentsService.name);
@@ -236,13 +240,17 @@ export class AgentsService extends BaseService<Agent> {
         if (!agent) throw HttpErrorFactory.notFound("智能体不存在");
         if (agent.createBy !== user.id) throw HttpErrorFactory.forbidden("无权限操作该智能体");
 
-        const config = agent.publishConfig ?? {};
+        const config = (agent.publishConfig ?? {}) as AgentPublishConfigWithCopy;
 
         if (dto.enableSite !== undefined) {
             config.enableSite = dto.enableSite;
             if (dto.enableSite && !config.accessToken) {
                 config.accessToken = randomBytes(32).toString("hex");
             }
+        }
+
+        if (dto.allowCopy !== undefined) {
+            config.allowCopy = dto.allowCopy;
         }
 
         if (dto.regenerateAccessToken === true) {
@@ -254,7 +262,12 @@ export class AgentsService extends BaseService<Agent> {
         return this.agentRepository.save(agent);
     }
 
-    async publishToSquare(agentId: string, userId: string, tagIds?: string[]): Promise<Agent> {
+    async publishToSquare(
+        agentId: string,
+        userId: string,
+        tagIds?: string[],
+        options?: { allowCopy?: boolean },
+    ): Promise<Agent> {
         const agent = await this.agentRepository.findOne({
             where: { id: agentId },
             relations: ["tags"],
@@ -283,6 +296,10 @@ export class AgentsService extends BaseService<Agent> {
         const publishWithoutReview = config.publishWithoutReview ?? false;
 
         agent.tags = tags;
+        agent.publishConfig = {
+            ...(agent.publishConfig ?? {}),
+            allowCopy: options?.allowCopy ?? false,
+        } as AgentPublishConfigWithCopy;
         agent.squareReviewedBy = null;
         agent.squareReviewedAt = null;
         agent.squareRejectReason = null;
@@ -511,6 +528,7 @@ export class AgentsService extends BaseService<Agent> {
             .createQueryBuilder("a")
             .leftJoinAndSelect("a.tags", "tags")
             .where("a.squarePublishStatus = :status", { status: SquarePublishStatus.APPROVED })
+            .andWhere("a.publishedToSquare = :published", { published: true })
             .orderBy("a.updatedAt", "DESC");
 
         if (keyword?.trim()) {
@@ -584,8 +602,12 @@ export class AgentsService extends BaseService<Agent> {
         if (!source) throw HttpErrorFactory.notFound("智能体不存在");
 
         const status = source.squarePublishStatus ?? SquarePublishStatus.NONE;
-        if (status !== SquarePublishStatus.APPROVED) {
+        if (status !== SquarePublishStatus.APPROVED || !source.publishedToSquare) {
             throw HttpErrorFactory.badRequest("仅支持复制已发布到广场的智能体");
+        }
+        const sourcePublishConfig = source.publishConfig as AgentPublishConfigWithCopy | undefined;
+        if (sourcePublishConfig?.allowCopy !== true) {
+            throw HttpErrorFactory.badRequest("该智能体未开放复制");
         }
 
         const name = await this.generateUniqueName(source.name);

@@ -5,6 +5,7 @@ import {
   useAiProvidersQuery,
   usePublishAgentToSquareMutation,
   useUnpublishAgentFromSquareMutation,
+  useUpdatePublishConfigMutation,
 } from "@buildingai/services/web";
 import type {
   AnnotationConfig,
@@ -431,13 +432,23 @@ export default function Configuration() {
     return () => window.clearTimeout(t);
   }, [agentId, autoSave, config]);
 
-  const publishLoading = publishSquareMutation.isPending || unpublishSquareMutation.isPending;
+  const updatePublishConfigMutation = useUpdatePublishConfigMutation(agentId);
+  const publishLoading =
+    publishSquareMutation.isPending ||
+    unpublishSquareMutation.isPending ||
+    updatePublishConfigMutation.isPending;
 
   const handleConfirmSquarePublish = useCallback(
-    async (publishToSquare: boolean, tagIds?: string[]) => {
+    async (publishToSquare: boolean, tagIds?: string[], allowCopy?: boolean) => {
       try {
         if (publishToSquare) {
-          await publishSquareMutation.mutateAsync({ tagIds: tagIds ?? [] });
+          await updatePublishConfigMutation.mutateAsync({ allowCopy: allowCopy ?? false });
+          if (agent?.publishedToSquare && agent?.squarePublishStatus === "approved") {
+            toast.success("发布设置已更新");
+            setPublishDialogOpen(false);
+            return;
+          }
+          await publishSquareMutation.mutateAsync({ tagIds: tagIds ?? [], allowCopy });
           toast.success("已提交广场审核");
         } else {
           await unpublishSquareMutation.mutateAsync();
@@ -448,7 +459,13 @@ export default function Configuration() {
         console.log(`操作失败: ${(error as Error).message}`);
       }
     },
-    [publishSquareMutation, unpublishSquareMutation],
+    [
+      agent?.publishedToSquare,
+      agent?.squarePublishStatus,
+      publishSquareMutation,
+      unpublishSquareMutation,
+      updatePublishConfigMutation,
+    ],
   );
 
   return (
@@ -652,6 +669,7 @@ export default function Configuration() {
         onOpenChange={setPublishDialogOpen}
         defaultPublishedToSquare={agent?.publishedToSquare ?? false}
         defaultTagIds={(agent?.tags ?? []).map((t) => t.id)}
+        defaultAllowCopy={agent?.publishConfig?.allowCopy === true}
         squarePublishStatus={(agent?.squarePublishStatus as any) ?? "none"}
         squareRejectReason={agent?.squareRejectReason ?? null}
         loading={publishLoading}

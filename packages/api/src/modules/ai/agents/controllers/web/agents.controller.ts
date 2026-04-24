@@ -121,7 +121,9 @@ export class AgentsWebController {
         @Param("id") id: string,
         @Body() dto: PublishToSquareDto,
     ): Promise<Agent> {
-        return this.agentsService.publishToSquare(id, user.id, dto.tagIds);
+        return this.agentsService.publishToSquare(id, user.id, dto.tagIds, {
+            allowCopy: dto.allowCopy,
+        });
     }
 
     @Post(":id/unpublish-from-square")

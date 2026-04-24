@@ -18,10 +18,11 @@ interface PublishDialogProps {
   onOpenChange: (open: boolean) => void;
   defaultPublishedToSquare?: boolean;
   defaultTagIds?: string[];
+  defaultAllowCopy?: boolean;
   squarePublishStatus?: SquarePublishStatus;
   squareRejectReason?: string | null;
   loading?: boolean;
-  onConfirm?: (publishToSquare: boolean, tagIds?: string[]) => void;
+  onConfirm?: (publishToSquare: boolean, tagIds?: string[], allowCopy?: boolean) => void;
 }
 
 const statusLabelMap: Record<string, string> = {
@@ -36,6 +37,7 @@ export function PublishDialog({
   onOpenChange,
   defaultPublishedToSquare = false,
   defaultTagIds,
+  defaultAllowCopy = false,
   squarePublishStatus = "none",
   squareRejectReason,
   loading = false,
@@ -45,6 +47,7 @@ export function PublishDialog({
   const skipReview = configQuery.data?.publishWithoutReview === true;
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [publishToSquare, setPublishToSquare] = useState(defaultPublishedToSquare);
+  const [allowCopy, setAllowCopy] = useState(defaultAllowCopy);
   const [reasonDialogOpen, setReasonDialogOpen] = useState(false);
   const initialPublishedToSquareRef = useRef(defaultPublishedToSquare);
 
@@ -53,9 +56,10 @@ export function PublishDialog({
       const initial = defaultPublishedToSquare;
       initialPublishedToSquareRef.current = initial;
       setPublishToSquare(initial);
+      setAllowCopy(defaultAllowCopy);
       setSelectedTagIds(defaultTagIds ?? []);
     }
-  }, [open, defaultPublishedToSquare, defaultTagIds]);
+  }, [open, defaultPublishedToSquare, defaultAllowCopy, defaultTagIds]);
 
   const squareStatus = squarePublishStatus ?? "none";
   const isPending = squareStatus === "pending";
@@ -71,12 +75,12 @@ export function PublishDialog({
     //   return;
     // }
     if (!canSubmit) return;
-    onConfirm?.(publishToSquare, publishToSquare ? selectedTagIds : undefined);
+    onConfirm?.(publishToSquare, publishToSquare ? selectedTagIds : undefined, allowCopy);
   };
 
   const handleResubmit = () => {
     if (!canResubmit) return;
-    onConfirm?.(true, selectedTagIds);
+    onConfirm?.(true, selectedTagIds, allowCopy);
   };
 
   return (
@@ -114,19 +118,36 @@ export function PublishDialog({
             </div>
 
             {publishToSquare && !isPending && (
-              <div className="flex justify-between space-y-2 pt-2">
-                <Label className="text-sm font-medium">
-                  分类 <span className="text-muted-foreground text-xs">(可选)</span>
-                </Label>
-                <TagSelect
-                  tagsSource="web"
-                  type="app"
-                  showManage={false}
-                  value={selectedTagIds}
-                  onChange={setSelectedTagIds}
-                  placeholder="搜索分类"
-                />
-              </div>
+              <>
+                <div className="flex justify-between space-y-2 pt-2">
+                  <Label className="text-sm font-medium">
+                    分类 <span className="text-muted-foreground text-xs">(可选)</span>
+                  </Label>
+                  <TagSelect
+                    tagsSource="web"
+                    type="app"
+                    showManage={false}
+                    value={selectedTagIds}
+                    onChange={setSelectedTagIds}
+                    placeholder="搜索分类"
+                  />
+                </div>
+
+                <div className="flex items-start justify-between gap-4 pt-3">
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <p className="text-sm font-medium">公开配置</p>
+                    <p className="text-muted-foreground text-xs leading-relaxed">
+                      配置公开后，所有人都可以复制您的智能体
+                    </p>
+                  </div>
+                  <Switch
+                    checked={allowCopy}
+                    onCheckedChange={setAllowCopy}
+                    className="shrink-0"
+                    disabled={loading}
+                  />
+                </div>
+              </>
             )}
 
             {isPending && (
