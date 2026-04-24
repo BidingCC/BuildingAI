@@ -287,6 +287,7 @@ export interface AgentPublishConfig {
     accessToken?: string | null;
     enableApiKey?: boolean;
     apiKey?: string | null;
+    allowCopy?: boolean;
     wxcomConfig?: AgentWxcomConfig;
 }
 

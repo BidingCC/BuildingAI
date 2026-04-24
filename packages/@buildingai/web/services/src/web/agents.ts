@@ -109,6 +109,7 @@ export function usePublishedAgentDetailQuery(
 
 export type PublishAgentToSquareParams = {
     tagIds: string[];
+    allowCopy?: boolean;
 };
 
 export async function publishAgentToSquare(
@@ -125,6 +126,7 @@ export async function unpublishAgentFromSquare(agentId: string): Promise<Agent> 
 export type UpdatePublishConfigParams = {
     enableSite?: boolean;
     enableApiKey?: boolean;
+    allowCopy?: boolean;
     regenerateAccessToken?: boolean;
     regenerateApiKey?: boolean;
 };

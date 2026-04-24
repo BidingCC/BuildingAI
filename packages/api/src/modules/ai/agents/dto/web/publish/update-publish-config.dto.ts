@@ -7,5 +7,9 @@ export class UpdatePublishConfigDto {
 
     @IsOptional()
     @IsBoolean()
+    allowCopy?: boolean;
+
+    @IsOptional()
+    @IsBoolean()
     regenerateAccessToken?: boolean;
 }

@@ -33,15 +33,31 @@ async function bootstrap() {
     const appLogger = LoggerModule.createLogger(AppConfig.name);
     const app = await NestFactory.create<NestExpressApplication>(dynamicAppModule, {
         logger: appLogger,
+        bodyParser: false,
     });
 
     NestContainer.set(app);
 
     bodyParserXml(bodyParser);
 
+    const bodyLimit = "5mb";
+
+    app.use(
+        bodyParser.json({
+            limit: bodyLimit,
+        }),
+    );
+
+    app.use(
+        bodyParser.urlencoded({
+            extended: true,
+            limit: bodyLimit,
+        }),
+    );
+
     app.use(
         bodyParser.xml({
-            limit: "1mb",
+            limit: bodyLimit,
             xmlParseOptions: {
                 explicitArray: false,
             },

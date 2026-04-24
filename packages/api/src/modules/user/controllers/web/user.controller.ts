@@ -1,11 +1,12 @@
 import { BaseService } from "@buildingai/base";
 import { BaseController } from "@buildingai/base";
-import { ACCOUNT_LOG_TYPE } from "@buildingai/constants";
 import {
     ACCOUNT_LOG_SOURCE,
+    ACCOUNT_LOG_TYPE,
     ACCOUNT_LOG_TYPE_DESCRIPTION,
 } from "@buildingai/constants/shared/account-log.constants";
 import { SmsScene } from "@buildingai/constants/shared/sms.constant";
+import { AppBillingService } from "@buildingai/core/modules";
 import { type UserPlayground } from "@buildingai/db";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
 import { Agent, MembershipLevels, UserSubscription } from "@buildingai/db/entities";
@@ -72,6 +73,7 @@ export class UserWebController extends BaseController {
         @InjectRepository(MembershipLevels)
         private readonly membershipLevelsRepository: Repository<MembershipLevels>,
         private readonly userCapacityService: UserCapacityService,
+        private readonly appBillingService: AppBillingService,
     ) {
         super();
         this.accountLogService = new BaseService(accountLogRepository);
@@ -107,6 +109,7 @@ export class UserWebController extends BaseController {
 
         // 获取用户当前最高会员等级ID
         const membershipLevel = await this.userService.getUserHighestMembershipLevel(user.id);
+        const spendablePower = await this.appBillingService.getSpendablePower(user.id);
 
         const {
             mpOpenid,
@@ -118,6 +121,7 @@ export class UserWebController extends BaseController {
 
         return {
             ...userInfoResult,
+            power: spendablePower,
             permissions: hasPermissions,
             bindWechat: !!mpOpenid,
             bindWechatOa: !!openid,
@@ -331,10 +335,7 @@ export class UserWebController extends BaseController {
         }
 
         // 获取用户信息
-        const userInfo = await this.userService.findOne({
-            where: { id: user.id },
-            select: ["power"],
-        });
+        const spendablePower = await this.appBillingService.getSpendablePower(user.id);
 
         // 获取订阅积分（所有未过期记录的 availableAmount 总和）
         const now = new Date();
@@ -421,9 +422,10 @@ export class UserWebController extends BaseController {
         return {
             ...lists,
             extend: {
-                ...userInfo,
+                power: spendablePower,
+                //订阅积分
                 membershipGiftPower,
-                rechargePower: userInfo.power - membershipGiftPower,
+                rechargePower: spendablePower - membershipGiftPower,
             },
         };
     }

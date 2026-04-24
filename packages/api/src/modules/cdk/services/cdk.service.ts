@@ -16,6 +16,7 @@ import {
 import { DataSource } from "@buildingai/db/typeorm";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { generateNo } from "@buildingai/utils";
+import { calculateMembershipGiftExpireAt } from "@modules/membership/utils/membership-gift-cycle";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Between, EntityManager, Like, Repository } from "typeorm";
@@ -412,7 +413,7 @@ export class CDKService extends BaseService<CDK> {
         const givePower = shouldGiftPoints ? batch.level?.givePower || 0 : 0;
 
         if (givePower > 0) {
-            const expireAt = this.calculateMembershipGiftExpireAt(now, subscription.endTime);
+            const expireAt = calculateMembershipGiftExpireAt(startBase, subscription.endTime);
 
             await this.appBillingService.addUserPower(
                 {
@@ -486,21 +487,6 @@ export class CDKService extends BaseService<CDK> {
         }
 
         return end;
-    }
-
-    private calculateMembershipGiftExpireAt(grantDate: Date, subscriptionEndTime: Date): Date {
-        const standardExpireAt = this.getNext30Days(grantDate);
-
-        return standardExpireAt > subscriptionEndTime
-            ? new Date(subscriptionEndTime)
-            : standardExpireAt;
-    }
-
-    private getNext30Days(date: Date): Date {
-        const nextDate = new Date(date);
-        nextDate.setDate(nextDate.getDate() + 30);
-        nextDate.setHours(0, 0, 0, 0);
-        return nextDate;
     }
 
     private generateMembershipGiftAssociationNo(baseNo: string, cycle: number): string {
