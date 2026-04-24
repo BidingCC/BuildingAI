@@ -6,8 +6,8 @@ import {
 } from "@buildingai/ui/components/ai-elements/message";
 import { Button } from "@buildingai/ui/components/ui/button";
 import { Textarea } from "@buildingai/ui/components/ui/textarea";
-import { CopyIcon, PencilIcon } from "lucide-react";
-import { memo, useEffect, useState } from "react";
+import { CopyCheck, CopyIcon, PencilIcon } from "lucide-react";
+import { memo, useEffect, useRef, useState } from "react";
 
 import { MessageBranch } from "./message-branch";
 
@@ -40,12 +40,22 @@ export const UserMessageActions = memo(function UserMessageActions({
 }: UserMessageActionsProps) {
   const [internalIsEditing, setInternalIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(content);
+  const [isCopied, setIsCopied] = useState(false);
+  const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isEditing = externalIsEditing ?? internalIsEditing;
 
   useEffect(() => {
     setEditContent(content);
   }, [content]);
+
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleEdit = () => {
     setEditContent(content);
@@ -71,6 +81,11 @@ export const UserMessageActions = memo(function UserMessageActions({
 
   const handleCopy = () => {
     navigator.clipboard.writeText(content);
+    setIsCopied(true);
+    if (copyTimeoutRef.current) {
+      clearTimeout(copyTimeoutRef.current);
+    }
+    copyTimeoutRef.current = setTimeout(() => setIsCopied(false), 2000);
   };
 
   if (isEditing) {
@@ -106,8 +121,8 @@ export const UserMessageActions = memo(function UserMessageActions({
               <PencilIcon className="size-4" />
             </AIMessageAction>
           )}
-          <AIMessageAction label="Copy" onClick={handleCopy} tooltip="复制">
-            <CopyIcon className="size-4" />
+          <AIMessageAction label="Copy" onClick={handleCopy} tooltip={isCopied ? "已复制" : "复制"}>
+            {isCopied ? <CopyCheck className="size-4" /> : <CopyIcon className="size-4" />}
           </AIMessageAction>
           {onSwitchBranch && (
             <MessageBranch
