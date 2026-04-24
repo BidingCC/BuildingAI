@@ -266,9 +266,15 @@ export class DatasetsService extends BaseService<Datasets> {
 
         let qb = this.datasetsRepository
             .createQueryBuilder("d")
+            .addSelect(
+                "CASE WHEN d.square_publish_status = :pendingStatus THEN 0 ELSE 1 END",
+                "pending_review_sort",
+            )
             .leftJoinAndSelect("d.tags", "tags")
             .leftJoin(User, "u", "u.id = d.createdBy")
-            .orderBy("d.updatedAt", "DESC");
+            .orderBy("pending_review_sort", "ASC")
+            .addOrderBy("d.updatedAt", "DESC")
+            .setParameter("pendingStatus", SquarePublishStatus.PENDING);
 
         if (tagId) {
             qb = qb.innerJoin(

@@ -414,9 +414,15 @@ export class AgentsService extends BaseService<Agent> {
 
         const qb = this.agentRepository
             .createQueryBuilder("a")
+            .addSelect(
+                "CASE WHEN a.square_publish_status = :pendingStatus THEN 0 ELSE 1 END",
+                "pending_review_sort",
+            )
             .leftJoinAndSelect("a.tags", "tags")
             .leftJoin(User, "u", "u.id::text = a.createBy")
-            .orderBy("a.createdAt", "DESC");
+            .orderBy("pending_review_sort", "ASC")
+            .addOrderBy("a.createdAt", "DESC")
+            .setParameter("pendingStatus", SquarePublishStatus.PENDING);
 
         if (tagId) {
             qb.innerJoin("ai_agent_tags", "at", "at.agent_id = a.id AND at.tag_id = :tagId", {

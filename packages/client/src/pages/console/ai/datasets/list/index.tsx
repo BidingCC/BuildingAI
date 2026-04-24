@@ -342,7 +342,7 @@ const DatasetsIndexPage = () => {
                 <TableHead className="text-center">文档数量</TableHead>
                 <TableHead>存储空间</TableHead>
                 <TableHead>状态</TableHead>
-                <TableHead className="text-center">排序</TableHead>
+                {/* <TableHead className="text-center">排序</TableHead> */}
                 <TableHead>最近编辑</TableHead>
                 <PermissionGuard
                   permissions={[
@@ -419,7 +419,7 @@ const DatasetsIndexPage = () => {
                         }
                       />
                     </TableCell>
-                    <TableCell className="text-center">{row.sort}</TableCell>
+                    {/* <TableCell className="text-center">{row.sort}</TableCell> */}
                     <TableCell>
                       <TimeText value={row.updatedAt} variant="datetime" />
                     </TableCell>
