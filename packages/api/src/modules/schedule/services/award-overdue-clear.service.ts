@@ -144,29 +144,12 @@ export class AwardOverdueClearService {
 
             if (!lockedLog) return;
             if (!lockedLog.expireAt || lockedLog.expireAt > now) return;
+            if (((lockedLog as any).availableAmount ?? 0) <= 0) return;
 
-            const expiredAmount = (lockedLog as any).availableAmount;
-            if (expiredAmount <= 0) return;
-
-            // 1. 将过期积分记录的可用数量清零
-            await entityManager.update(AccountLog, { id: lockedLog.id }, {
-                availableAmount: 0,
-            } as any);
-
-            // 2. 从用户总积分中扣除过期的积分，并记录账户变动日志
-            await this.appBillingService.deductUserPower(
-                {
-                    userId: lockedLog.userId,
-                    amount: expiredAmount,
-                    accountType: ACCOUNT_LOG_TYPE.LOGIN_AWARD_EXPIRED,
-                    source: {
-                        type: ACCOUNT_LOG_SOURCE.LOGIN_AWARD,
-                        source: "登录奖励积分到期",
-                    },
-                    remark: `登录奖励积分到期清零：${expiredAmount}`,
-                    associationNo: lockedLog.accountNo || "",
-                },
+            await this.appBillingService.reconcileExpiredTemporaryPower(
+                lockedLog.userId,
                 entityManager,
+                [lockedLog.id],
             );
         });
     }

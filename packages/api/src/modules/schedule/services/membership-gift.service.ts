@@ -7,6 +7,10 @@ import { AppBillingService } from "@buildingai/core/modules";
 import { InjectDataSource, InjectRepository } from "@buildingai/db/@nestjs/typeorm";
 import { AccountLog, User, UserSubscription } from "@buildingai/db/entities";
 import { DataSource } from "@buildingai/db/typeorm";
+import {
+    calculateDueMembershipGiftCycle,
+    calculateMembershipGiftExpireAt,
+} from "@modules/membership/utils/membership-gift-cycle";
 import { Injectable, Logger } from "@nestjs/common";
 import type { EntityManager } from "typeorm";
 import { Repository } from "typeorm";
@@ -17,9 +21,9 @@ const EXPIRED_GIFT_BATCH_SIZE = 1000;
  * 会员积分赠送定时任务服务
  *
  * 积分发放和清零逻辑:
- * - 用户购买会员后立即赠送积分,过期时间为 30 天后
+ * - 用户购买会员后立即赠送积分,过期时间为下一个自然月会员周期或订阅结束时间
  * - 每天检查当天需要清零的过期积分
- * - 每天检查当天需要发放新积分的订阅(距离订阅开始日期是 30 的倍数天)
+ * - 每天检查当天需要发放新积分的订阅(到达订阅开始日期的自然月周年日)
  */
 @Injectable()
 export class MembershipGiftService {
@@ -97,6 +101,9 @@ export class MembershipGiftService {
                         .select(["log.id"])
                         .where("log.expireAt <= :now", { now })
                         .andWhere("log.availableAmount > 0")
+                        .andWhere("log.accountType = :accountType", {
+                            accountType: ACCOUNT_LOG_TYPE.MEMBERSHIP_GIFT_INC,
+                        })
                         .orderBy("log.expireAt", "ASC")
                         .addOrderBy("log.createdAt", "ASC")
                         .take(EXPIRED_GIFT_BATCH_SIZE);
@@ -149,36 +156,19 @@ export class MembershipGiftService {
 
             if (!lockedLog) return;
             if (!lockedLog.expireAt || lockedLog.expireAt > now) return;
+            if (((lockedLog as any).availableAmount ?? 0) <= 0) return;
 
-            const expiredAmount = (lockedLog as any).availableAmount;
-            if (expiredAmount <= 0) return;
-
-            // 1. 将过期积分记录的可用数量清零
-            await entityManager.update(AccountLog, { id: lockedLog.id }, {
-                availableAmount: 0,
-            } as any);
-
-            // 2. 从用户总积分中扣除过期的积分，并记录账户变动日志
-            await this.appBillingService.deductUserPower(
-                {
-                    userId: lockedLog.userId,
-                    amount: expiredAmount,
-                    accountType: ACCOUNT_LOG_TYPE.MEMBERSHIP_GIFT_EXPIRED,
-                    source: {
-                        type: ACCOUNT_LOG_SOURCE.MEMBERSHIP_GIFT,
-                        source: "订阅积分到期",
-                    },
-                    remark: `会员赠送积分到期清零：${expiredAmount}`,
-                    associationNo: lockedLog.accountNo || "",
-                },
+            await this.appBillingService.reconcileExpiredTemporaryPower(
+                lockedLog.userId,
                 entityManager,
+                [lockedLog.id],
             );
         });
     }
 
     /**
      * 每天凌晨0点5分执行:为当天需要发放积分的会员发放新积分
-     * 发放条件:距离订阅开始日期是 30 的倍数天,且订阅仍在有效期内
+     * 发放条件:到达订阅开始日期的自然月周年日,且订阅仍覆盖下一个周期
      */
     @Cron("5 0 * * *", {
         name: "daily-gift-power-grant",
@@ -191,16 +181,14 @@ export class MembershipGiftService {
             try {
                 const grantDate = new Date();
                 grantDate.setHours(0, 0, 0, 0); // 归一化到当天 0 点
+                const grantDayEnd = new Date(grantDate);
+                grantDayEnd.setDate(grantDayEnd.getDate() + 1);
 
                 const activeSubscriptions = await this.userSubscriptionRepository
                     .createQueryBuilder("subscription")
                     .leftJoinAndSelect("subscription.level", "level")
-                    .where("subscription.startTime <= :grantDate", { grantDate })
-                    .andWhere("subscription.endTime >= :grantDate", { grantDate })
-                    .andWhere(
-                        `FLOOR(EXTRACT(EPOCH FROM (:grantDate::timestamptz - DATE_TRUNC('day', subscription.startTime))) / 86400) >= 30`,
-                        { grantDate },
-                    )
+                    .where("subscription.startTime < :grantDayEnd", { grantDayEnd })
+                    .andWhere("subscription.endTime > :grantDate", { grantDate })
                     .getMany();
 
                 const subscriptionsToGrant: Array<{ subscriptionId: string; cycle: number }> = [];
@@ -288,7 +276,11 @@ export class MembershipGiftService {
                 return;
             }
 
-            const expireAt = this.calculateMembershipGiftExpireAt(dayStart, subscription.endTime);
+            const expireAt = calculateMembershipGiftExpireAt(
+                subscription.startTime,
+                subscription.endTime,
+                cycle,
+            );
 
             await this.appBillingService.addUserPower(
                 {
@@ -314,28 +306,14 @@ export class MembershipGiftService {
     }
 
     private async calculateCurrentGrantCycle(subscription: UserSubscription, currentDate: Date) {
-        const startTime = new Date(subscription.startTime);
-        startTime.setHours(0, 0, 0, 0);
-
-        const current = new Date(currentDate);
-        current.setHours(0, 0, 0, 0);
-
-        if (current > subscription.endTime) {
-            return null;
-        }
-
-        const diffDays = Math.floor(
-            (current.getTime() - startTime.getTime()) / (1000 * 60 * 60 * 24),
-        );
-
-        if (diffDays < 30) {
-            return null;
-        }
-
-        const currentCycle = Math.floor(diffDays / 30);
         const lastGrantedCycle = await this.getLastGrantedCycle(subscription.id);
 
-        return currentCycle > lastGrantedCycle ? currentCycle : null;
+        return calculateDueMembershipGiftCycle({
+            subscriptionStartTime: subscription.startTime,
+            subscriptionEndTime: subscription.endTime,
+            grantDate: currentDate,
+            lastGrantedCycle,
+        });
     }
 
     private async getLastGrantedCycle(subscriptionId: string) {
@@ -394,25 +372,5 @@ export class MembershipGiftService {
 
     private generateMembershipGiftAssociationNo(baseNo: string, cycle: number) {
         return `${baseNo}_${cycle}`;
-    }
-
-    private calculateMembershipGiftExpireAt(grantDate: Date, subscriptionEndTime: Date) {
-        const standardExpireAt = this.getNext30Days(grantDate);
-
-        return standardExpireAt > subscriptionEndTime
-            ? new Date(subscriptionEndTime)
-            : standardExpireAt;
-    }
-
-    /**
-     * 获取 30 天后的时间
-     * @param date 日期
-     * @returns 30 天后的 0 点时间
-     */
-    private getNext30Days(date: Date): Date {
-        const nextDate = new Date(date);
-        nextDate.setDate(nextDate.getDate() + 30);
-        nextDate.setHours(0, 0, 0, 0);
-        return nextDate;
     }
 }

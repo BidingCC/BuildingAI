@@ -31,7 +31,7 @@ export class ChatBillingHandler {
     ): Promise<void> {
         if (!userId || !billingRule?.tokens || billingRule.power <= 0) return;
 
-        const currentPower = await this.appBillingService.getUserPower(userId);
+        const currentPower = await this.appBillingService.getSpendablePower(userId);
         const minRequired = this.calculateConsumedPower(ESTIMATED_TOKENS_PER_ROUND, billingRule);
         if (currentPower < minRequired) {
             throw HttpErrorFactory.badRequest("积分不足，请充值后重试");

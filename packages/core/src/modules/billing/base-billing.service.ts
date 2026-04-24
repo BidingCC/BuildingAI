@@ -1,4 +1,8 @@
-import { ACTION } from "@buildingai/constants/shared/account-log.constants";
+import {
+    ACCOUNT_LOG_SOURCE,
+    ACCOUNT_LOG_TYPE,
+    ACTION,
+} from "@buildingai/constants/shared/account-log.constants";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
 import { User } from "@buildingai/db/entities";
 import { AccountLog } from "@buildingai/db/entities";
@@ -24,6 +28,10 @@ import type { PowerAdditionOptions, PowerDeductionOptions } from "./types";
 @Injectable()
 export class BaseBillingService {
     protected readonly logger = new Logger(BaseBillingService.name);
+    private readonly expirableTemporaryAccountTypes = [
+        ACCOUNT_LOG_TYPE.MEMBERSHIP_GIFT_INC,
+        ACCOUNT_LOG_TYPE.LOGIN_AWARD_INC,
+    ] as const;
 
     constructor(
         @InjectRepository(User)
@@ -31,6 +39,131 @@ export class BaseBillingService {
         @InjectRepository(AccountLog)
         protected readonly accountLogRepository: Repository<AccountLog>,
     ) {}
+
+    private getExpiredCleanupMetadata(accountType: number) {
+        switch (accountType) {
+            case ACCOUNT_LOG_TYPE.MEMBERSHIP_GIFT_INC:
+                return {
+                    expiredAccountType: ACCOUNT_LOG_TYPE.MEMBERSHIP_GIFT_EXPIRED,
+                    source: {
+                        type: ACCOUNT_LOG_SOURCE.MEMBERSHIP_GIFT,
+                        source: "订阅积分到期",
+                    },
+                    remarkPrefix: "会员赠送积分到期清零",
+                };
+            case ACCOUNT_LOG_TYPE.LOGIN_AWARD_INC:
+                return {
+                    expiredAccountType: ACCOUNT_LOG_TYPE.LOGIN_AWARD_EXPIRED,
+                    source: {
+                        type: ACCOUNT_LOG_SOURCE.LOGIN_AWARD,
+                        source: "登录奖励积分到期",
+                    },
+                    remarkPrefix: "登录奖励积分到期清零",
+                };
+            default:
+                return null;
+        }
+    }
+
+    async reconcileExpiredTemporaryPower(
+        userId: string,
+        entityManager?: EntityManager,
+        logIds?: string[],
+    ): Promise<{ processedLogs: number; deductedAmount: number; shortfallAmount: number }> {
+        const executeReconcile = async (manager: EntityManager) => {
+            const user = await manager.findOne(User, {
+                where: { id: userId },
+                lock: { mode: "pessimistic_write" },
+            });
+
+            if (!user) {
+                throw new NotFoundException("用户不存在");
+            }
+
+            const now = new Date();
+            const queryBuilder = manager
+                .createQueryBuilder(AccountLog, "log")
+                .where("log.userId = :userId", { userId })
+                .andWhere("log.availableAmount > 0")
+                .andWhere("log.expireAt IS NOT NULL")
+                .andWhere("log.expireAt <= :now", { now })
+                .andWhere("log.accountType IN (:...accountTypes)", {
+                    accountTypes: this.expirableTemporaryAccountTypes,
+                })
+                .orderBy("log.expireAt", "ASC")
+                .addOrderBy("log.createdAt", "ASC")
+                .setLock("pessimistic_write");
+
+            if (logIds?.length) {
+                queryBuilder.andWhere("log.id IN (:...logIds)", { logIds });
+            }
+
+            const expiredLogs = await queryBuilder.getMany();
+            let deductedAmount = 0;
+            let shortfallAmount = 0;
+
+            for (const log of expiredLogs) {
+                const availableAmount = Number(log.availableAmount ?? 0);
+
+                if (availableAmount <= 0) {
+                    continue;
+                }
+
+                await manager.update(AccountLog, { id: log.id }, {
+                    availableAmount: 0,
+                } as any);
+
+                const actualDeductAmount = Math.min(user.power, availableAmount);
+                const shortfall = availableAmount - actualDeductAmount;
+
+                if (actualDeductAmount > 0) {
+                    user.power -= actualDeductAmount;
+                    deductedAmount += actualDeductAmount;
+
+                    await manager.decrement(User, { id: userId }, "power", actualDeductAmount);
+
+                    const metadata = this.getExpiredCleanupMetadata(log.accountType);
+                    if (metadata) {
+                        await manager.insert(AccountLog, {
+                            userId,
+                            accountNo: await generateNo(
+                                manager.getRepository(AccountLog),
+                                "accountNo",
+                            ),
+                            accountType: metadata.expiredAccountType,
+                            action: ACTION.DEC,
+                            changeAmount: actualDeductAmount,
+                            leftAmount: user.power,
+                            associationNo: log.accountNo || "",
+                            remark: `${metadata.remarkPrefix}：${actualDeductAmount}`,
+                            sourceInfo: metadata.source,
+                        } as any);
+                    }
+                }
+
+                if (shortfall > 0) {
+                    shortfallAmount += shortfall;
+                    this.logger.warn(
+                        `用户 ${userId} 存在 ${shortfall} 积分的过期临时余额短差，记录 ${log.id} 已清空可用额但用户余额不足以完全回收`,
+                    );
+                }
+            }
+
+            return {
+                processedLogs: expiredLogs.length,
+                deductedAmount,
+                shortfallAmount,
+            };
+        };
+
+        if (entityManager) {
+            return executeReconcile(entityManager);
+        }
+
+        return this.userRepository.manager.transaction(async (manager) =>
+            executeReconcile(manager),
+        );
+    }
 
     /**
      * Deduct user power with automatic balance query
@@ -84,11 +217,15 @@ export class BaseBillingService {
                 // Query user's current power balance
                 const user = await manager.findOne(User, {
                     where: { id: userId },
+                    lock: { mode: "pessimistic_write" },
                 });
 
                 if (!user) {
                     throw new NotFoundException("用户不存在");
                 }
+
+                const reconcileResult = await this.reconcileExpiredTemporaryPower(userId, manager);
+                user.power -= reconcileResult.deductedAmount;
 
                 // Validate sufficient balance
                 if (user.power < amount) {
@@ -110,6 +247,7 @@ export class BaseBillingService {
                     .andWhere("log.expireAt IS NOT NULL")
                     .andWhere("log.expireAt > :now", { now })
                     .orderBy("log.expireAt", "ASC")
+                    .setLock("pessimistic_write")
                     .getMany();
 
                 // 依次扣除会员赠送积分
@@ -271,20 +409,59 @@ export class BaseBillingService {
     /**
      * Get user's current power balance
      *
+     * This method reconciles expired temporary power in a transaction and locks
+     * the user row. Use getSpendablePower for read-only display or pre-checks.
+     *
      * @param userId - User ID
      * @returns Current power balance
      * @throws HttpErrorFactory.badRequest if user not found
      */
     async getUserPower(userId: string): Promise<number> {
+        return this.userRepository.manager.transaction(async (manager) => {
+            const user = await manager.findOne(User, {
+                where: { id: userId },
+                lock: { mode: "pessimistic_write" },
+            });
+
+            if (!user) {
+                throw new NotFoundException("用户不存在");
+            }
+
+            const reconcileResult = await this.reconcileExpiredTemporaryPower(userId, manager);
+
+            return Math.max(0, user.power - reconcileResult.deductedAmount);
+        });
+    }
+
+    /**
+     * Get user's spendable power without locking or reconciling expired logs.
+     *
+     * This is intended for high-frequency read paths and non-authoritative
+     * pre-checks. Actual deductions must still use deductUserPower, which
+     * performs locked reconciliation before changing balance.
+     */
+    async getSpendablePower(userId: string): Promise<number> {
         const user = await this.userRepository.findOne({
             where: { id: userId },
+            select: ["id", "power"],
         });
 
         if (!user) {
             throw new NotFoundException("用户不存在");
         }
 
-        return user.power;
+        const now = new Date();
+        const result = await this.accountLogRepository
+            .createQueryBuilder("log")
+            .select("COALESCE(SUM(log.availableAmount), 0)", "expiredAmount")
+            .where("log.userId = :userId", { userId })
+            .andWhere("log.availableAmount > 0")
+            .andWhere("log.expireAt <= :now", { now })
+            .getRawOne<{ expiredAmount: string | number | null }>();
+
+        const expiredAmount = Number(result?.expiredAmount ?? 0);
+
+        return Math.max(0, Number(user.power ?? 0) - expiredAmount);
     }
 
     /**
@@ -295,7 +472,7 @@ export class BaseBillingService {
      * @returns true if user has sufficient power
      */
     async hasSufficientPower(userId: string, requiredAmount: number): Promise<boolean> {
-        const currentPower = await this.getUserPower(userId);
+        const currentPower = await this.getSpendablePower(userId);
         return currentPower >= requiredAmount;
     }
 }
