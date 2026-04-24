@@ -41,13 +41,9 @@ import OperationLayout from "@/pages/console/operation/_layouts";
 import CDKManagementPage from "@/pages/console/operation/cdk/management";
 import CDKRecordsPage from "@/pages/console/operation/cdk/records";
 import CDKSettingsPage from "@/pages/console/operation/cdk/settings";
-import LoginRewardConfigPage from "@/pages/console/operation/login-reward/config";
 import MembershipLevelIndexPage from "@/pages/console/operation/membership/level";
 import MembershipPlanIndexPage from "@/pages/console/operation/membership/plan";
 import UserRechargeIndexPage from "@/pages/console/operation/recharge";
-import RegisterRewardConfigPage from "@/pages/console/operation/register-reward/config";
-import SignRewardConfigPage from "@/pages/console/operation/sign-reward/config";
-import SignRewardRecordsPage from "@/pages/console/operation/sign-reward/records";
 import OrderMembershipIndexPage from "@/pages/console/order/membership";
 import OrderRechargeIndexPage from "@/pages/console/order/recharge";
 import SystemAgreementIndexPage from "@/pages/console/system/agreement";
@@ -137,34 +133,6 @@ function ConsoleRoutes() {
           {
             path: "membership/plan",
             element: <MembershipPlanIndexPage />,
-          },
-          {
-            path: "login-reward/config",
-            element: <LoginRewardConfigPage />,
-          },
-          {
-            path: "login-reward",
-            element: <Navigate replace to="/console/operation/login-reward/config" />,
-          },
-          {
-            path: "register-reward/config",
-            element: <RegisterRewardConfigPage />,
-          },
-          {
-            path: "register-reward",
-            element: <Navigate replace to="/console/operation/register-reward/config" />,
-          },
-          {
-            path: "sign-reward/config",
-            element: <SignRewardConfigPage />,
-          },
-          {
-            path: "sign-reward/records",
-            element: <SignRewardRecordsPage />,
-          },
-          {
-            path: "sign-reward",
-            element: <Navigate replace to="/console/operation/sign-reward/config" />,
           },
         ],
       },

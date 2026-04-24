@@ -21,7 +21,6 @@ import { isEmail, isMobilePhone } from "class-validator";
 
 import { RegisterDto } from "../dto/register.dto";
 import { RolePermissionService } from "./role-permission.service";
-import { UserAwardService } from "./user-award.service";
 import { UserTokenService } from "./user-token.service";
 
 /**
@@ -40,7 +39,6 @@ export class AuthService extends BaseService<User> {
         private readonly departmentUserIndexRepository: Repository<DepartmentUserIndex>,
         @InjectRepository(Department)
         private readonly departmentRepository: Repository<Department>,
-        private readonly userAwardService: UserAwardService,
     ) {
         super(userRepository);
     }
@@ -227,8 +225,6 @@ export class AuthService extends BaseService<User> {
             ipAddress,
             userAgent,
         );
-        //注册奖励
-        await this.userAwardService.registerAward(savedUser.id);
         // 返回登录结果
         return {
             token: tokenResult.token,
@@ -387,10 +383,6 @@ export class AuthService extends BaseService<User> {
             },
             { excludeFields: ["password", "openid"] },
         );
-
-        //注册奖励
-        await this.userAwardService.registerAward(savedUser.id);
-
         // 重新获取完整的用户信息以确保类型正确
         const fullUser = await this.findOne({
             where: { id: savedUser.id },
@@ -712,8 +704,6 @@ export class AuthService extends BaseService<User> {
             },
             { excludeFields: ["password", "openid"] },
         );
-        //注册奖励
-        await this.userAwardService.registerAward(savedUser.id);
         // 重新获取完整的用户信息以确保类型正确
         const fullUser = await this.findOne({
             where: { id: savedUser.id },

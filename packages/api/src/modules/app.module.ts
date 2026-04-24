@@ -17,7 +17,6 @@ import { AuthGuard } from "@common/guards/auth.guard";
 import { DemoGuard } from "@common/guards/demo.guard";
 import { ExtensionGuard } from "@common/guards/extension.guard";
 import { GuardsModule } from "@common/guards/guards.module";
-import { LoginAwardGuard } from "@common/guards/login-award.guard";
 import { MemberOnlyGuard } from "@common/guards/member-only.guard";
 import { PermissionsGuard } from "@common/guards/permissions.guard";
 import { SuperAdminGuard } from "@common/guards/super-admin.guard";
@@ -39,7 +38,6 @@ import { existsSync } from "fs";
 import { join } from "path";
 
 import { AiModule } from "./ai/ai.module";
-import { AwardModule } from "./award/award.module";
 import { ConfigModule as AppConfigModule } from "./config/config.module";
 import { DecorateModule } from "./decorate/decorate.module";
 import { FinanceModule } from "./finance/finance.module";
@@ -125,7 +123,6 @@ export class AppModule {
                 ScheduleModule,
                 SmsModule,
                 NoticeModule,
-                AwardModule,
                 NotificationModule,
                 await ExtensionCoreModule.register(),
             ],
@@ -158,10 +155,6 @@ export class AppModule {
                 {
                     provide: APP_GUARD,
                     useClass: MemberOnlyGuard,
-                },
-                {
-                    provide: APP_GUARD,
-                    useClass: LoginAwardGuard,
                 },
             ],
         };
