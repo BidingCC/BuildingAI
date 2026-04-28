@@ -1,6 +1,8 @@
 import { QueueModule, SecretService } from "@buildingai/core/modules";
 import { TypeOrmModule } from "@buildingai/db/@nestjs/typeorm";
 import {
+    AiModel,
+    AiProvider,
     DatasetMember,
     DatasetMemberApplication,
     Datasets,
@@ -60,6 +62,8 @@ import { VectorizationTriggerService } from "./services/vectorization-trigger.se
             DatasetsChatMessage,
             Tag,
             User,
+            AiModel,
+            AiProvider,
         ]),
         ConfigModule,
         QueueModule,

@@ -204,9 +204,12 @@ export class FinanceService extends BaseService<AccountLog> {
 
         // 添加关键词搜索条件
         if (keyword) {
-            queryBuilder.andWhere("(user.username ILIKE :keyword OR user.phone ILIKE :keyword)", {
-                keyword: `%${keyword}%`,
-            });
+            queryBuilder.andWhere(
+                "(user.username ILIKE :keyword OR user.phone ILIKE :keyword OR user.userNo ILIKE :keyword)",
+                {
+                    keyword: `%${keyword}%`,
+                },
+            );
         }
 
         // 添加账户类型筛选条件

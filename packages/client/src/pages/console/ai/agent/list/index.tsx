@@ -336,7 +336,7 @@ const AgentIndexPage = () => {
               <TableRow>
                 <TableHead>智能体</TableHead>
                 <TableHead>创建人</TableHead>
-                <TableHead>模型</TableHead>
+                <TableHead>对话模型</TableHead>
                 <TableHead>标签</TableHead>
                 <TableHead className="text-center">智能体类型</TableHead>
                 <TableHead>状态</TableHead>
@@ -390,22 +390,14 @@ const AgentIndexPage = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex max-w-52 items-center gap-2">
-                        <Avatar className="bg-muted size-5 rounded-sm after:rounded-sm">
-                          {row.iconUrl?.trim() ? (
-                            <AvatarImage src={row.iconUrl} className="rounded-sm" />
-                          ) : null}
-                          <AvatarFallback className="rounded-sm">
-                            {row.modelProvider ? (
-                              <ProviderIcon
-                                provider={row.modelProvider}
-                                className="text-primary size-3"
-                                fallback={<Bot className="text-primary size-3" />}
-                              />
-                            ) : (
-                              <Bot className="text-primary size-3" />
-                            )}
-                          </AvatarFallback>
-                        </Avatar>
+                        <span className="flex size-5 items-center justify-center">
+                          <ProviderIcon
+                            provider={row.modelProvider ?? undefined}
+                            iconUrl={row.iconUrl?.trim() || undefined}
+                            className="text-primary size-4 rounded-sm"
+                            fallback={<Bot className="text-primary size-4" />}
+                          />
+                        </span>
                         <span className="truncate">{row.modelName || "-"}</span>
                       </div>
                     </TableCell>
