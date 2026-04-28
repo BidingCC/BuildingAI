@@ -1,6 +1,8 @@
 import { type UserPlayground } from "@buildingai/db";
-import { Datasets, SquarePublishStatus } from "@buildingai/db/entities";
+import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
+import { AiModel, AiProvider, Datasets, SquarePublishStatus } from "@buildingai/db/entities";
 import { In } from "@buildingai/db/typeorm";
+import { Repository } from "@buildingai/db/typeorm";
 import { Playground } from "@buildingai/decorators/playground.decorator";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { bytesToReadable } from "@buildingai/utils";
@@ -19,6 +21,10 @@ export class DatasetsConsoleController {
     constructor(
         private readonly datasetsService: DatasetsService,
         private readonly userService: UserService,
+        @InjectRepository(AiModel)
+        private readonly aiModelRepository: Repository<AiModel>,
+        @InjectRepository(AiProvider)
+        private readonly aiProviderRepository: Repository<AiProvider>,
     ) {}
 
     @Get()

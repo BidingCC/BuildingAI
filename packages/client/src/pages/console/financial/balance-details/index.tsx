@@ -81,7 +81,7 @@ const BalanceDetailsIndexPage = () => {
         <div className="flex h-full flex-1 flex-col gap-2 overflow-hidden px-4 pt-6">
           <div className="flex flex-wrap items-center gap-2">
             <Input
-              placeholder="搜索用户名/手机号"
+              placeholder="搜索用户名/手机号/用户编号"
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
               className="h-8 w-full md:w-50"
@@ -112,7 +112,7 @@ const BalanceDetailsIndexPage = () => {
             <Table className="h-full">
               <TableHeader className="bg-muted sticky top-0 z-10">
                 <TableRow>
-                  <TableHead>流水号</TableHead>
+                  <TableHead>用户编号</TableHead>
                   <TableHead>用户</TableHead>
                   <TableHead>变动数量</TableHead>
                   <TableHead>剩余数量</TableHead>
@@ -141,7 +141,7 @@ const BalanceDetailsIndexPage = () => {
                   items.map((item: AccountLogListItem) => (
                     <TableRow key={item.id}>
                       <TableCell className="w-[120px] font-mono text-xs">
-                        {item.accountNo}
+                        {item.user.userNo ?? undefined}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">

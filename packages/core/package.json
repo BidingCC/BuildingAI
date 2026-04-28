@@ -59,7 +59,9 @@
         "@nestjs/common": "catalog:api",
         "@types/ali-oss": "catalog:",
         "ali-oss": "catalog:",
-        "cli-table3": "catalog:"
+        "cli-table3": "catalog:",
+        "cos-nodejs-sdk-v5": "catalog:",
+        "tencentcloud-sdk-nodejs-sts": "catalog:"
     },
     "devDependencies": {
         "@buildingai/eslint-config": "workspace:*",

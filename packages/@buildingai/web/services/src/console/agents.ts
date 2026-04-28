@@ -30,6 +30,9 @@ export type ConsoleAgentQuickCommand = {
 export type ConsoleAgentItem = {
     id: string;
     name: string;
+    modelName?: string | null;
+    modelProvider?: string | null;
+    iconUrl?: string | null;
     description?: string | null;
     avatar?: string | null;
     rolePrompt?: string | null;

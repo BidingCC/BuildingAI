@@ -40,6 +40,7 @@ import {
   ArrowDownToLine,
   ArrowUpToLine,
   BookOpen,
+  Bot,
   EllipsisVertical,
   FileCheck,
   FileText,
@@ -48,11 +49,12 @@ import {
   Trash2,
   Users,
 } from "lucide-react";
-import { useState } from "react";
 import { useEffect } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { useDebounceValue } from "usehooks-ts";
 
+import { ProviderIcon } from "@/components/provider-icons";
 import { TagSelect } from "@/components/tags";
 import { PageContainer } from "@/layouts/console/_components/page-container";
 
@@ -338,6 +340,7 @@ const DatasetsIndexPage = () => {
               <TableRow>
                 <TableHead>知识库</TableHead>
                 <TableHead>创建人</TableHead>
+                <TableHead>向量模型</TableHead>
                 <TableHead>标签</TableHead>
                 <TableHead className="text-center">文档数量</TableHead>
                 <TableHead>存储空间</TableHead>
@@ -363,13 +366,13 @@ const DatasetsIndexPage = () => {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={10} className="text-muted-foreground h-32 text-center">
+                  <TableCell colSpan={9} className="text-muted-foreground h-32 text-center">
                     加载中...
                   </TableCell>
                 </TableRow>
               ) : !data?.items?.length ? (
                 <TableRow>
-                  <TableCell colSpan={10} className="text-muted-foreground h-32 text-center">
+                  <TableCell colSpan={9} className="text-muted-foreground h-32 text-center">
                     暂无知识库数据
                   </TableCell>
                 </TableRow>
@@ -377,7 +380,7 @@ const DatasetsIndexPage = () => {
                 data.items.map((row) => (
                   <TableRow key={row.id}>
                     <TableCell>
-                      <div className="flex items-center gap-2">
+                      <div className="flex max-w-60 items-center gap-2">
                         <Avatar className="size-8 rounded-md after:rounded-md">
                           <AvatarImage src={row.coverUrl} className="rounded-md" />
                           <AvatarFallback className="rounded-md">
@@ -389,6 +392,18 @@ const DatasetsIndexPage = () => {
                     </TableCell>
                     <TableCell className="text-muted-foreground truncate">
                       {row.creatorName}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex max-w-52 items-center gap-2">
+                        <span className="flex size-5 items-center justify-center">
+                          <ProviderIcon
+                            provider={row.modelProvider ?? undefined}
+                            className="text-primary size-4 rounded-sm"
+                            fallback={<Bot className="text-primary size-4" />}
+                          />
+                        </span>
+                        <span className="truncate">{row.modelName || "-"}</span>
+                      </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex max-w-[120px] flex-wrap gap-1">

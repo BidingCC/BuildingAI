@@ -64,6 +64,17 @@ type OSSSignature = {
     securityToken: string;
 };
 
+type COSSignature = {
+    authorization: string;
+    host: string;
+    bucket: string;
+    region: string;
+    securityToken: string;
+    tmpSecretId: string;
+    startTime: number;
+    expiredTime: number;
+};
+
 type OSSFileMetadata = {
     type: string;
     mimeType: string;
@@ -80,15 +91,25 @@ export type OSSSignatureResult = {
     fileUrl: string;
 };
 
-export type LocalSignatureResult = {
-    signature: null;
-    storageType: Exclude<string, "oss">;
+export type COSSignatureResult = {
+    signature: COSSignature;
+    metadata: OSSFileMetadata;
+    storageType: "cos";
+    fullPath: string;
+    fileUrl: string;
 };
 
-export type SignatureResult = OSSSignatureResult | LocalSignatureResult;
+export type LocalSignatureResult = {
+    signature: null;
+    storageType: Exclude<string, "oss" | "cos">;
+};
 
-export function isOSSSignatureResult(result: SignatureResult): result is OSSSignatureResult {
-    return result.storageType === "oss" && result.signature !== null;
+export type SignatureResult = OSSSignatureResult | COSSignatureResult | LocalSignatureResult;
+
+export function isCloudSignatureResult(
+    result: SignatureResult,
+): result is OSSSignatureResult | COSSignatureResult {
+    return result.signature !== null;
 }
 
 export async function getUploadSignature(
@@ -119,6 +140,25 @@ export async function uploadToOSS(
 
     await axios.post(signature.host, formData, { onUploadProgress });
 }
+export async function uploadToCOS(
+    file: File,
+    result: COSSignatureResult,
+    onUploadProgress?: (event: AxiosProgressEvent) => void,
+): Promise<void> {
+    const { signature, fullPath } = result;
+    const normalizedHost = signature.host.endsWith("/")
+        ? signature.host.slice(0, -1)
+        : signature.host;
+    const uploadUrl = `${normalizedHost}/${fullPath}`;
+    await axios.put(uploadUrl, file, {
+        onUploadProgress,
+        headers: {
+            Authorization: signature.authorization,
+            "x-cos-security-token": signature.securityToken,
+            "Content-Type": file.type || "application/octet-stream",
+        },
+    });
+}
 
 export async function saveOSSFileRecord(params: {
     url: string;
@@ -140,17 +180,31 @@ export async function uploadFileAuto(
 ): Promise<UploadFileResult> {
     const storageConfig = await getActiveStorageConfig();
 
-    if (storageConfig.storageType !== "oss") {
+    if (storageConfig.storageType === "local") {
         return uploadFile(file, params, options);
     }
 
     const signatureResult = await getUploadSignature(file.name, file.size, params?.extensionId);
 
-    if (!isOSSSignatureResult(signatureResult)) {
+    if (!isCloudSignatureResult(signatureResult)) {
         throw new Error("No signature");
     }
-
-    await uploadToOSS(file, signatureResult, options?.onUploadProgress);
+    switch (storageConfig.storageType) {
+        case "oss":
+            if (signatureResult.storageType !== "oss") {
+                throw new Error("Invalid OSS signature");
+            }
+            await uploadToOSS(file, signatureResult, options?.onUploadProgress);
+            break;
+        case "cos":
+            if (signatureResult.storageType !== "cos") {
+                throw new Error("Invalid COS signature");
+            }
+            await uploadToCOS(file, signatureResult, options?.onUploadProgress);
+            break;
+        default:
+            throw new Error(`Unsupported storage type: ${storageConfig.storageType}`);
+    }
 
     return saveOSSFileRecord({
         url: signatureResult.fileUrl,

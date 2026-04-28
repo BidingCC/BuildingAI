@@ -1,19 +1,31 @@
-import { AliyunOssConfig, BusinessCode, StorageType, StorageTypeType } from "@buildingai/constants";
+import {
+    AliyunOssConfig,
+    BusinessCode,
+    StorageType,
+    StorageTypeType,
+    TencentCosConfig,
+} from "@buildingai/constants";
 import { StorageConfig } from "@buildingai/db/entities";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { Injectable } from "@nestjs/common";
 
 import type { CloudStorageParams } from "../interfaces/cloud-storage.interface";
+import { CosStorageService } from "./cos-storage.service";
 import { OssStorageService } from "./oss-storage.service";
 
 @Injectable()
 export class CloudStorageService {
-    constructor(private readonly ossStorageService: OssStorageService) {}
+    constructor(
+        private readonly ossStorageService: OssStorageService,
+        private readonly cosStorageService: CosStorageService,
+    ) {}
 
     async upload(params: CloudStorageParams) {
         switch (params.storageConfig.storageType) {
             case StorageType.OSS:
                 return await this.ossStorageService.upload(params);
+            case StorageType.COS:
+                return await this.cosStorageService.upload(params);
             default: {
                 throw HttpErrorFactory.internal(
                     `Unavailable storage type: ${params.storageConfig.storageType}`,
@@ -23,11 +35,15 @@ export class CloudStorageService {
         }
     }
 
-    async signature(storageConfig: StorageConfig) {
+    async signature(storageConfig: StorageConfig, key?: string) {
         switch (storageConfig.storageType) {
             case StorageType.OSS: {
                 const config = storageConfig.config as AliyunOssConfig;
                 return await this.ossStorageService.generateOssUploadSignature(config);
+            }
+            case StorageType.COS: {
+                const config = storageConfig.config as TencentCosConfig;
+                return await this.cosStorageService.generateCosUploadSignature(config, key);
             }
             default: {
                 throw HttpErrorFactory.internal(
@@ -42,6 +58,10 @@ export class CloudStorageService {
         switch (type) {
             case StorageType.OSS:
                 await this.ossStorageService.clearOssStsCredentials();
+                break;
+            case StorageType.COS:
+                await this.cosStorageService.clearCosStsCredentials();
+                break;
         }
     }
 }

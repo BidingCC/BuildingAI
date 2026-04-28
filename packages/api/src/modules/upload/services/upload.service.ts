@@ -72,14 +72,34 @@ export class UploadService extends BaseService<File> {
         if (!storageConfig) {
             throw HttpErrorFactory.notFound("Config not found");
         }
-
         switch (storageConfig.storageType) {
             case StorageType.OSS: {
                 const cloudConf = await this.fileUploadService.createCloudStoragePath(
                     { name: dto.name, size: dto.size },
                     dto.extensionId ? { extensionId: dto.extensionId } : undefined,
                 );
-                const signature = await this.cloudStorageService.signature(storageConfig);
+                const signature = await this.cloudStorageService.signature(
+                    storageConfig,
+                    cloudConf.storage.fullPath,
+                );
+
+                return {
+                    signature,
+                    metadata: cloudConf.metadata,
+                    storageType: storageConfig.storageType,
+                    fullPath: cloudConf.storage.fullPath,
+                    fileUrl: cloudConf.storage.fileUrl,
+                };
+            }
+            case StorageType.COS: {
+                const cloudConf = await this.fileUploadService.createCloudStoragePath(
+                    { name: dto.name, size: dto.size },
+                    dto.extensionId ? { extensionId: dto.extensionId } : undefined,
+                );
+                const signature = await this.cloudStorageService.signature(
+                    storageConfig,
+                    cloudConf.storage.fullPath,
+                );
 
                 return {
                     signature,

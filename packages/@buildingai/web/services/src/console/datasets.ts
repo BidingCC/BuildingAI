@@ -36,6 +36,8 @@ export type ConsoleDatasetItemTag = { id: string; name: string };
 export type ConsoleDatasetItem = {
     id: string;
     name: string;
+    modelName?: string | null;
+    modelProvider?: string | null;
     creatorName: string;
     documentCount: number;
     storageSize: number;

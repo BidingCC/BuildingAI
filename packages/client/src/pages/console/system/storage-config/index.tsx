@@ -7,6 +7,7 @@ import { PageContainer } from "@/layouts/console/_components/page-container";
 
 const Local = lazy(async () => import("./_components/local"));
 const Oss = lazy(async () => import("./_components/oss"));
+const Cos = lazy(async () => import("./_components/cos"));
 
 const SystemStorageConfigIndexPage = () => {
   const [activeTab, setActiveTab] = useState("");
@@ -51,6 +52,8 @@ const SystemStorageConfigIndexPage = () => {
     switch (activeTab) {
       case "oss":
         return Oss;
+      case "cos":
+        return Cos;
       default:
         return Local;
     }
