@@ -208,6 +208,7 @@ const MembershipLevelIndexPage = () => {
                   <TableHead>等级名称</TableHead>
                   <TableHead>等级描述</TableHead>
                   <TableHead>每月赠送积分</TableHead>
+                  <TableHead>知识库空间</TableHead>
                   <TableHead>用户数量</TableHead>
                   <TableHead>状态</TableHead>
                   <TableHead>操作</TableHead>
@@ -249,6 +250,7 @@ const MembershipLevelIndexPage = () => {
                         {item.description ?? "-"}
                       </TableCell>
                       <TableCell>{item.givePower}</TableCell>
+                      <TableCell>{item.storageCapacity}</TableCell>
                       <TableCell>{item.accountCount ?? 0}</TableCell>
                       <TableCell>
                         <Switch

@@ -508,7 +508,7 @@ export default function Configuration() {
                 onClick={() => setPublishDialogOpen(true)}
                 disabled={!agentId}
               >
-                <span>{agent?.squarePublishStatus === "rejected" ? "审核失败" : "发布"}</span>
+                <span>{agent?.squarePublishStatus === "rejected" ? "审核失败" : "发布到广场"}</span>
                 {agent?.squarePublishStatus === "rejected" ? <RefreshCcw /> : <ArrowBigUp />}
               </Button>
             </div>
