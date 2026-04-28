@@ -217,8 +217,10 @@ export function usePublishAgentToSquareMutation(
     return useMutation({
         mutationFn: (payload) => publishAgentToSquare(agentId, payload),
         onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [...PUBLISH_DETAIL_KEY, agentId] });
             queryClient.invalidateQueries({ queryKey: [...AGENT_DETAIL_KEY, agentId] });
             queryClient.invalidateQueries({ queryKey: ["agents"] });
+            queryClient.invalidateQueries({ queryKey: SQUARE_LIST_KEY });
         },
     });
 }

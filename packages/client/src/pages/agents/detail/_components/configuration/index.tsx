@@ -5,7 +5,6 @@ import {
   useAiProvidersQuery,
   usePublishAgentToSquareMutation,
   useUnpublishAgentFromSquareMutation,
-  useUpdatePublishConfigMutation,
 } from "@buildingai/services/web";
 import type {
   AnnotationConfig,
@@ -432,24 +431,25 @@ export default function Configuration() {
     return () => window.clearTimeout(t);
   }, [agentId, autoSave, config]);
 
-  const updatePublishConfigMutation = useUpdatePublishConfigMutation(agentId);
-  const publishLoading =
-    publishSquareMutation.isPending ||
-    unpublishSquareMutation.isPending ||
-    updatePublishConfigMutation.isPending;
+  const publishLoading = publishSquareMutation.isPending || unpublishSquareMutation.isPending;
 
   const handleConfirmSquarePublish = useCallback(
     async (publishToSquare: boolean, tagIds?: string[], allowCopy?: boolean) => {
       try {
         if (publishToSquare) {
-          await updatePublishConfigMutation.mutateAsync({ allowCopy: allowCopy ?? false });
+          const updatedAgent = await publishSquareMutation.mutateAsync({
+            tagIds: tagIds ?? [],
+            allowCopy,
+          });
+
           if (agent?.publishedToSquare && agent?.squarePublishStatus === "approved") {
             toast.success("发布设置已更新");
             setPublishDialogOpen(false);
             return;
           }
-          await publishSquareMutation.mutateAsync({ tagIds: tagIds ?? [], allowCopy });
-          toast.success("已提交广场审核");
+          toast.success(
+            updatedAgent.squarePublishStatus === "approved" ? "已发布到广场" : "已提交广场审核",
+          );
         } else {
           await unpublishSquareMutation.mutateAsync();
           toast.success("已撤回广场发布");
@@ -464,7 +464,6 @@ export default function Configuration() {
       agent?.squarePublishStatus,
       publishSquareMutation,
       unpublishSquareMutation,
-      updatePublishConfigMutation,
     ],
   );
 
