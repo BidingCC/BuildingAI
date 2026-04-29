@@ -602,7 +602,7 @@ function PlanCard({
           {givePower > 0 && (
             <div className="flex items-center gap-2">
               <Zap className="size-4" />
-              <span>获得{givePower}积分</span>
+              <span>每月获得{givePower}积分</span>
             </div>
           )}
           {description && <p className="text-muted-foreground text-xs">{description}</p>}

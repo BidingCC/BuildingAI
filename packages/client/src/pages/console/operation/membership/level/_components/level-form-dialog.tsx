@@ -31,10 +31,26 @@ import {
 } from "@buildingai/ui/components/ui/input-group";
 import { ScrollArea } from "@buildingai/ui/components/ui/scroll-area";
 import { Textarea } from "@buildingai/ui/components/ui/textarea";
+import {
+  closestCenter,
+  DndContext,
+  type DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Plus, Trash2 } from "lucide-react";
+import { GripVertical, Loader2, Plus, Trash2 } from "lucide-react";
 import { useEffect } from "react";
-import type { Resolver } from "react-hook-form";
+import type { Control, Resolver } from "react-hook-form";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -76,6 +92,90 @@ type LevelFormDialogProps = {
 
 const defaultBenefit = { icon: "", content: "" };
 
+type SortableBenefitItemProps = {
+  id: string;
+  index: number;
+  control: Control<FormValues>;
+  canRemove: boolean;
+  onRemove: (index: number) => void;
+};
+
+function SortableBenefitItem({
+  id,
+  index,
+  control,
+  canRemove,
+  onRemove,
+}: SortableBenefitItemProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+      }}
+      className={`flex flex-wrap items-center gap-2 rounded-lg border p-3 ${
+        isDragging ? "bg-background relative z-20 shadow-md" : ""
+      }`}
+    >
+      <button
+        type="button"
+        className="text-muted-foreground hover:text-foreground flex size-8 shrink-0 cursor-grab items-center justify-center rounded-md active:cursor-grabbing"
+        aria-label="拖拽排序"
+        {...attributes}
+        {...listeners}
+      >
+        <GripVertical className="size-4" />
+      </button>
+      <FormField
+        control={control}
+        name={`benefits.${index}.icon`}
+        render={({ field: iconField }) => (
+          <FormItem>
+            <FormLabel className="text-xs">图标</FormLabel>
+            <FormControl>
+              <ImageUpload
+                className="h-10 w-10"
+                size="sm"
+                value={iconField.value || undefined}
+                onChange={(url) => iconField.onChange(url ?? "")}
+                forceMobile
+              />
+            </FormControl>
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={control}
+        name={`benefits.${index}.content`}
+        render={({ field: contentField }) => (
+          <FormItem className="flex-1">
+            <FormLabel className="text-xs">权益内容</FormLabel>
+            <FormControl>
+              <Input placeholder="权益描述" className="h-10" {...contentField} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="text-muted-foreground hover:text-destructive mt-6 size-8 shrink-0"
+        onClick={() => onRemove(index)}
+        disabled={!canRemove}
+      >
+        <Trash2 className="size-4" />
+      </Button>
+    </div>
+  );
+}
+
 export const LevelFormDialog = ({ open, onOpenChange, level, onSuccess }: LevelFormDialogProps) => {
   const isEditMode = !!level;
 
@@ -92,10 +192,16 @@ export const LevelFormDialog = ({ open, onOpenChange, level, onSuccess }: LevelF
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, move } = useFieldArray({
     control: form.control,
     name: "benefits",
   });
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
 
   useEffect(() => {
     if (open) {
@@ -142,6 +248,17 @@ export const LevelFormDialog = ({ open, onOpenChange, level, onSuccess }: LevelF
   });
 
   const isPending = createMutation.isPending || updateMutation.isPending;
+
+  const handleBenefitDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = fields.findIndex((field) => field.id === active.id);
+    const newIndex = fields.findIndex((field) => field.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    move(oldIndex, newIndex);
+  };
 
   const handleSubmit = (values: FormValues) => {
     const body: CreateLevelsDto = {
@@ -295,58 +412,31 @@ export const LevelFormDialog = ({ open, onOpenChange, level, onSuccess }: LevelF
                   </Button>
                 </div>
                 <p className="text-muted-foreground text-sm">
-                  每条权益由图标与文本组成，可添加多条
+                  每条权益由图标与文本组成，可添加多条，拖动左侧手柄调整展示顺序
                 </p>
-                <div className="space-y-3">
-                  {fields.map((field, index) => (
-                    <div
-                      key={field.id}
-                      className="flex flex-wrap items-center gap-2 rounded-lg border p-3"
-                    >
-                      <FormField
-                        control={form.control}
-                        name={`benefits.${index}.icon`}
-                        render={({ field: iconField }) => (
-                          <FormItem>
-                            <FormLabel className="text-xs">图标</FormLabel>
-                            <FormControl>
-                              <ImageUpload
-                                className="h-10 w-10"
-                                size="sm"
-                                value={iconField.value || undefined}
-                                onChange={(url) => iconField.onChange(url ?? "")}
-                                forceMobile
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name={`benefits.${index}.content`}
-                        render={({ field: contentField }) => (
-                          <FormItem className="flex-1">
-                            <FormLabel className="text-xs">权益内容</FormLabel>
-                            <FormControl>
-                              <Input placeholder="权益描述" className="h-10" {...contentField} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="text-muted-foreground hover:text-destructive mt-6 size-8 shrink-0"
-                        onClick={() => remove(index)}
-                        disabled={fields.length <= 1}
-                      >
-                        <Trash2 className="size-4" />
-                      </Button>
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleBenefitDragEnd}
+                >
+                  <SortableContext
+                    items={fields.map((field) => field.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    <div className="space-y-3">
+                      {fields.map((field, index) => (
+                        <SortableBenefitItem
+                          key={field.id}
+                          id={field.id}
+                          index={index}
+                          control={form.control}
+                          canRemove={fields.length > 1}
+                          onRemove={remove}
+                        />
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </SortableContext>
+                </DndContext>
               </div>
 
               <DialogFooter className="bg-background absolute bottom-0 left-0 w-full flex-row justify-end rounded-lg p-4">

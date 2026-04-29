@@ -44,7 +44,10 @@ export function PublishDialog({
   onConfirm,
 }: PublishDialogProps) {
   const configQuery = useWebAgentConfigQuery({ enabled: open } as any);
-  const skipReview = configQuery.data?.publishWithoutReview === true;
+  const skipReview =
+    configQuery.data?.publishWithoutReview !== false ||
+    squarePublishStatus === "approved" ||
+    defaultPublishedToSquare;
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [publishToSquare, setPublishToSquare] = useState(defaultPublishedToSquare);
   const [allowCopy, setAllowCopy] = useState(defaultAllowCopy);

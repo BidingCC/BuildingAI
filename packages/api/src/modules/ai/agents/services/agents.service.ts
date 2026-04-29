@@ -276,12 +276,8 @@ export class AgentsService extends BaseService<Agent> {
         if (agent.createBy !== userId) throw HttpErrorFactory.forbidden("无权限操作该智能体");
 
         const status = agent.squarePublishStatus ?? SquarePublishStatus.NONE;
-        if (status === SquarePublishStatus.PENDING) {
-            throw HttpErrorFactory.badRequest("已提交审核，请等待审核结果");
-        }
-        // if (status === SquarePublishStatus.APPROVED) {
-        //     throw HttpErrorFactory.badRequest("该智能体已发布到广场");
-        // }
+        const isAlreadyApproved =
+            status === SquarePublishStatus.APPROVED || agent.publishedToSquare;
 
         const ids = Array.isArray(tagIds) ? tagIds.filter(Boolean) : [];
         const tags = await this.tagRepository.find({
@@ -293,18 +289,21 @@ export class AgentsService extends BaseService<Agent> {
 
         // Get agent config to check if publish without review is enabled
         const config = await this.agentConfigService.getConfig();
-        const publishWithoutReview = config.publishWithoutReview ?? false;
+        const publishWithoutReview = config.publishWithoutReview ?? true;
+        const shouldPublishImmediately = publishWithoutReview || isAlreadyApproved;
 
         agent.tags = tags;
         agent.publishConfig = {
             ...(agent.publishConfig ?? {}),
             allowCopy: options?.allowCopy ?? false,
         } as AgentPublishConfigWithCopy;
-        agent.squareReviewedBy = null;
-        agent.squareReviewedAt = null;
+        if (!isAlreadyApproved) {
+            agent.squareReviewedBy = null;
+            agent.squareReviewedAt = null;
+        }
         agent.squareRejectReason = null;
 
-        if (publishWithoutReview) {
+        if (shouldPublishImmediately) {
             agent.squarePublishStatus = SquarePublishStatus.APPROVED;
             agent.publishedToSquare = true;
             agent.publishedAt = agent.publishedAt ?? new Date();

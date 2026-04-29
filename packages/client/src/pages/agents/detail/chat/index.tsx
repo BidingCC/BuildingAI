@@ -723,7 +723,7 @@ const AgentChatPage = () => {
           <ChatContent
             agentAvatar={agentAvatar}
             agentName={agent?.name}
-            agentDescription={agent?.description}
+            // agentDescription={agent?.description}
             formFields={formFields}
             formValues={formValues}
             onOpenForm={() => setFormPopoverOpen(true)}
