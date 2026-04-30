@@ -54,7 +54,6 @@ export {
     SecretTemplateType,
     type TemplateField,
 } from "./secret-template.entity";
-export { SignRecord } from "./sign-record.entity";
 export { StorageConfig } from "./storage-config.entity";
 export { Tag } from "./tag.entity";
 export { User } from "./user.entity";
