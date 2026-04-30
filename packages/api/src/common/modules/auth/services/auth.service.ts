@@ -193,7 +193,10 @@ export class AuthService extends BaseService<User> {
         const salt = await bcrypt.genSalt();
         const hashedPassword = await bcrypt.hash(registerDto.password, salt);
 
-        const { nickname, avatar } = this.generateRandomName();
+        const { nickname: generatedNickname, avatar } = this.generateRandomName();
+        const nickname = registerDto.nickname?.trim() || generatedNickname;
+        const email = registerDto.email?.trim();
+        const phone = registerDto.phone?.trim();
         const userNo = await generateNo(this.userRepository, "userNo");
         // 创建用户
         const savedUser = await this.create(
@@ -201,6 +204,8 @@ export class AuthService extends BaseService<User> {
                 username: registerDto.username,
                 password: hashedPassword,
                 nickname,
+                email: email || undefined,
+                phone: phone || undefined,
                 status: BooleanNumber.YES, // 默认启用
                 source: UserCreateSource.USERNAME,
                 avatar,
