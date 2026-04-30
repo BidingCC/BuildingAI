@@ -24,6 +24,7 @@ import DatasetsIndexPage from "@/pages/console/ai/datasets/list";
 import AiMcpIndexPage from "@/pages/console/ai/mcp";
 import AiProviderIndexPage from "@/pages/console/ai/provider";
 import AiSecretIndexPage from "@/pages/console/ai/secret";
+import ChannelGoogleIndexPage from "@/pages/console/channel/google";
 import ChannelWechatOaIndexPage from "@/pages/console/channel/wechat-oa";
 import ChatConfigIndexPage from "@/pages/console/chat/config";
 import ChatRecordIndexPage from "@/pages/console/chat/record";
@@ -207,6 +208,10 @@ function ConsoleRoutes() {
           {
             path: "wechat-oa",
             element: <ChannelWechatOaIndexPage />,
+          },
+          {
+            path: "google",
+            element: <ChannelGoogleIndexPage />,
           },
         ],
       },

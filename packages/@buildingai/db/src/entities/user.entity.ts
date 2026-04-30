@@ -37,6 +37,12 @@ export class User extends SoftDeleteBaseEntity {
     @Column({ nullable: true, unique: true, comment: "用户unionid" })
     unionid: string;
 
+    /**
+     * Google OAuth openid
+     */
+    @Column({ nullable: true, comment: "Google OAuth openid" })
+    googleOpenid: string;
+
     @Column({ nullable: true })
     userNo: string;
     /**
