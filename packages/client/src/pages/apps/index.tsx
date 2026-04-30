@@ -55,7 +55,12 @@ type DisplayAppItem = ReturnType<typeof extToDisplayItem>;
 
 const AppItem = ({ item }: { item: DisplayAppItem }) => {
   return (
-    <Item className="group/apps-item hover:bg-accent cursor-pointer px-0 transition-[padding] hover:px-4">
+    <Item
+      className="group/apps-item hover:bg-accent cursor-pointer px-0 transition-[padding] hover:px-4"
+      onClick={() => {
+        window.location.href = `/apps/${item.identifier}`;
+      }}
+    >
       <ItemMedia>
         <Avatar className="size-10 rounded-lg after:rounded-lg">
           <AvatarImage src={item.avatar} className="rounded-lg" />

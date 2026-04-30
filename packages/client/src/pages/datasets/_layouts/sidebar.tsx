@@ -4,6 +4,7 @@ import {
   useTeamDatasetsInfiniteQuery,
   useUserStorageQuery,
 } from "@buildingai/services/web";
+import { useConfigStore } from "@buildingai/stores";
 import { Button } from "@buildingai/ui/components/ui/button";
 import {
   Collapsible,
@@ -65,6 +66,13 @@ export function DatasetsSidebarMain({ className }: { className?: string }) {
   const { pathname } = useLocation();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
+
+  const { websiteConfig } = useConfigStore((state) => state.config);
+  /**
+   * Membership feature flag from website config.
+   * When disabled, any membership-related entry points should be hidden.
+   */
+  const membershipEnabled = websiteConfig?.features?.membership ?? false;
 
   const myQuery = useMyCreatedDatasetsInfiniteQuery(SIDEBAR_PAGE_SIZE);
   const teamQuery = useTeamDatasetsInfiniteQuery(SIDEBAR_PAGE_SIZE);
@@ -366,17 +374,19 @@ export function DatasetsSidebarMain({ className }: { className?: string }) {
                 已用 {storageInfo ? bytesToReadable(storageInfo.usedStorage) : "0 B"} /{" "}
                 {storageInfo ? bytesToReadable(storageInfo.totalStorage, 0) : "0 B"}
               </span>
-              <Button
-                variant="ghost"
-                size="xs"
-                className="text-primary px-1 text-[11px]"
-                onClick={() => {
-                  setUpgradeDialogOpen(true);
-                }}
-              >
-                扩容
-                <ChevronRight />
-              </Button>
+              {membershipEnabled && (
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  className="text-primary px-1 text-[11px]"
+                  onClick={() => {
+                    setUpgradeDialogOpen(true);
+                  }}
+                >
+                  扩容
+                  <ChevronRight />
+                </Button>
+              )}
             </div>
             <Progress
               value={
@@ -398,7 +408,9 @@ export function DatasetsSidebarMain({ className }: { className?: string }) {
       </SidebarFooter>
 
       {/* 升级弹框 */}
-      <UpgradeDialog open={upgradeDialogOpen} onOpenChange={setUpgradeDialogOpen} />
+      {membershipEnabled && (
+        <UpgradeDialog open={upgradeDialogOpen} onOpenChange={setUpgradeDialogOpen} />
+      )}
     </div>
   );
 }

@@ -20,6 +20,7 @@ import { ScrollArea } from "@buildingai/ui/components/ui/scroll-area";
 import { Separator } from "@buildingai/ui/components/ui/separator";
 import { Skeleton } from "@buildingai/ui/components/ui/skeleton";
 import { Textarea } from "@buildingai/ui/components/ui/textarea";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@buildingai/ui/components/ui/tooltip";
 import { cn } from "@buildingai/ui/lib/utils";
 import { Bot, ChevronDown, ChevronLeft, ListIndentDecrease, Settings2 } from "lucide-react";
 import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react";
@@ -143,6 +144,7 @@ function AgentInfoPanel({
   const conversationCount = agent?.conversationCount ?? 0;
   const messageCount = agent?.messageCount ?? 0;
   const creatorName = agent?.creator?.nickname ?? "未知用户";
+  const canCopyAgent = agent?.publishConfig?.allowCopy === true;
   const publishedAgent = agent as
     | (PublishedAgentDetail & {
         chatBillingRule?: AgentChatBillingRule;
@@ -197,7 +199,16 @@ function AgentInfoPanel({
             </div>
 
             {agent?.description ? (
-              <p className="text-muted-foreground text-sm leading-relaxed">{agent.description}</p>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <p className="text-muted-foreground line-clamp-6 text-sm leading-relaxed">
+                    {agent.description}
+                  </p>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{agent.description}</p>
+                </TooltipContent>
+              </Tooltip>
             ) : null}
 
             <div className="flex items-center gap-2">
@@ -237,21 +248,23 @@ function AgentInfoPanel({
                   消息
                 </span>
               </div>
-              <div className="text-muted-foreground text-sm">免费复制</div>
+              {canCopyAgent ? <div className="text-muted-foreground text-sm">免费复制</div> : null}
             </div>
 
             <div className="flex flex-col gap-2">
-              <div className="w-full">
-                <Button
-                  variant="default"
-                  className="w-full"
-                  type="button"
-                  onClick={handleCopyAgent}
-                  disabled={copyAgentMutation.isPending}
-                >
-                  {copyAgentMutation.isPending ? "复制中..." : "复制到我的智能体"}
-                </Button>
-              </div>
+              {canCopyAgent ? (
+                <div className="w-full">
+                  <Button
+                    variant="default"
+                    className="w-full"
+                    type="button"
+                    onClick={handleCopyAgent}
+                    disabled={copyAgentMutation.isPending}
+                  >
+                    {copyAgentMutation.isPending ? "复制中..." : "复制到我的智能体"}
+                  </Button>
+                </div>
+              ) : null}
               <div className="w-full">
                 <Button
                   variant="outline"
@@ -525,10 +538,10 @@ const AgentChatPage = () => {
 
   const [formValues, setFormValues] = useState<Record<string, string>>({});
 
-  const formFields = useMemo(
-    () => (Array.isArray(agent?.formFields) ? agent.formFields : []) as FormFieldConfig[],
-    [agent?.formFields],
-  );
+  const formFields = useMemo(() => {
+    const fields = agent?.formFields;
+    return (Array.isArray(fields) ? fields : []) as FormFieldConfig[];
+  }, [agent?.formFields]);
 
   const voiceConfig = useMemo(() => agent?.voiceConfig ?? null, [agent?.voiceConfig]);
 
