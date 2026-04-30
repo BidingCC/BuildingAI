@@ -44,23 +44,53 @@ export class DatasetsConsoleController {
                   })
                 : [];
         const creatorMap = new Map(users.map((u) => [u.id, u.nickname ?? "-"]));
+        //获取模型信息
+        const modelIds = [
+            ...new Set(result.items.map((item) => item.embeddingModelId).filter(Boolean)),
+        ] as string[];
+        const models =
+            modelIds.length > 0
+                ? await this.aiModelRepository.find({
+                      where: { id: In(modelIds) },
+                      select: ["id", "name", "providerId"],
+                  })
+                : [];
+        const providerIds = [...new Set(models.map((item) => item.providerId).filter(Boolean))];
+        const providers =
+            providerIds.length > 0
+                ? await this.aiProviderRepository.find({
+                      where: { id: In(providerIds) },
+                      select: ["id", "provider"],
+                  })
+                : [];
+        const modelMap = new Map(models.map((model) => [model.id, model]));
+        const providerMap = new Map(providers.map((provider) => [provider.id, provider]));
+
         const items = (
             result.items as (Datasets & { tags?: { id: string; name: string }[] })[]
-        ).map((d) => ({
-            id: d.id,
-            name: d.name,
-            coverUrl: d.coverUrl,
-            creatorName: creatorMap.get(d.createdBy) ?? "-",
-            documentCount: d.documentCount ?? 0,
-            storageSize: d.storageSize ?? 0,
-            storageSizeFormatted: bytesToReadable(Number(d.storageSize ?? 0)),
-            publishedToSquare: d.publishedToSquare ?? false,
-            squarePublishStatus: d.squarePublishStatus ?? SquarePublishStatus.NONE,
-            squareRejectReason: d.squareRejectReason ?? null,
-            sort: 0,
-            updatedAt: d.updatedAt,
-            tags: (d.tags ?? []).map((t) => ({ id: t.id, name: t.name })),
-        }));
+        ).map((d) => {
+            const modelId = d.embeddingModelId;
+            const model = modelId ? modelMap.get(modelId) : null;
+            return {
+                id: d.id,
+                name: d.name,
+                modelName: model?.name ?? null,
+                modelProvider: model?.providerId
+                    ? (providerMap.get(model.providerId)?.provider ?? null)
+                    : null,
+                coverUrl: d.coverUrl,
+                creatorName: creatorMap.get(d.createdBy) ?? "-",
+                documentCount: d.documentCount ?? 0,
+                storageSize: d.storageSize ?? 0,
+                storageSizeFormatted: bytesToReadable(Number(d.storageSize ?? 0)),
+                publishedToSquare: d.publishedToSquare ?? false,
+                squarePublishStatus: d.squarePublishStatus ?? SquarePublishStatus.NONE,
+                squareRejectReason: d.squareRejectReason ?? null,
+                sort: 0,
+                updatedAt: d.updatedAt,
+                tags: (d.tags ?? []).map((t) => ({ id: t.id, name: t.name })),
+            };
+        });
         return {
             items,
             total: result.total,
