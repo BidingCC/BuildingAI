@@ -1,11 +1,11 @@
 import { StorageType } from "@buildingai/constants/shared/storage-config.constant";
-import { Menu, MenuSourceType, MenuType, StorageConfig } from "@buildingai/db/entities";
+import { Menu, MenuSourceType, MenuType, Permission, StorageConfig } from "@buildingai/db/entities";
 import { In } from "@buildingai/db/typeorm";
 
 import { BaseUpgradeScript, type UpgradeContext } from "../../index";
 
 /**
- * Core upgrade script for version 26.2.0
+ * Core upgrade script for version 26.1.0
  *
  * - Ensures a Tencent COS storage option row exists in `storage_config`
  * - Normalizes console menu paths for agent and datasets list entries
@@ -89,13 +89,18 @@ export default class Upgrade extends BaseUpgradeScript {
             return;
         }
 
+        const permissionCode = await this.getExistingPermissionCodeOrUndefined(
+            context,
+            "pm2:get-log-rotate-config",
+        );
+
         await repo.insert({
             name: "日志切割",
             code: "system-pm2-log-rotate",
             path: "pm2-log-rotate",
             icon: "",
             component: "/console/system/pm2-log-rotate/index",
-            permissionCode: "pm2:get-log-rotate-config",
+            ...(permissionCode ? { permissionCode } : {}),
             sort: 110,
             isHidden: 0,
             type: MenuType.MENU,
@@ -104,5 +109,23 @@ export default class Upgrade extends BaseUpgradeScript {
         });
 
         this.log("Inserted menus system-pm2-log-rotate under system-settings");
+    }
+
+    /**
+     * Ensures the permission exists to avoid FK violations on `menus.permissionCode -> permissions.code`.
+     *
+     * @param context - Upgrade context
+     * @param code - Permission code to verify
+     * @returns The code if it exists, otherwise undefined
+     */
+    private async getExistingPermissionCodeOrUndefined(
+        context: UpgradeContext,
+        code: string,
+    ): Promise<string | undefined> {
+        const permissionRepo = context.dataSource.getRepository(Permission);
+        const permission = await permissionRepo.findOne({ where: { code } });
+        if (permission) return code;
+        this.log(`permissions missing ${code}, omit menus.permissionCode to avoid FK error`);
+        return undefined;
     }
 }
