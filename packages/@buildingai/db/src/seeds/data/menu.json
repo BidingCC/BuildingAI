@@ -38,7 +38,7 @@
                     {
                         "name": "智能体列表",
                         "code": "ai-agent-list",
-                        "path": "",
+                        "path": "/",
                         "icon": "",
                         "component": "/console/ai/agent/list",
                         "permissionCode": "agents:list",
@@ -76,7 +76,7 @@
                     {
                         "name": "知识库列表",
                         "code": "ai-datasets-list",
-                        "path": "",
+                        "path": "/",
                         "icon": "",
                         "component": "/console/ai/datasets/list",
                         "permissionCode": "datasets:list",

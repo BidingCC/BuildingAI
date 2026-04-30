@@ -1,0 +1,1 @@
+var e={YES:1,NO:0},t={PC:1,H5:2,MP:3,APP:4};t.PC,t.H5,t.MP,t.APP;export{e as t};

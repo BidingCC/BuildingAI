@@ -1,1 +1,0 @@
-var e={YES:1,NO:0};export{e as t};
