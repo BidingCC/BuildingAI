@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/bidingcc-buildingai-badge.png)](https://mseep.ai/app/bidingcc-buildingai)
+
 <p align="center">
   <a href="https://www.buildingai.cc/" target="_blank"><img src="./assets/banner.png" width="100%" alt="BuildingAI Banner" /></a>
 </p>
