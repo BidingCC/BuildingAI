@@ -4,6 +4,7 @@ import {
     cohere,
     custom,
     deepseek,
+    edenai,
     giteeAi,
     google,
     hunyuan,
@@ -53,6 +54,7 @@ class ProviderRegistry {
         this.register("gitee_ai", giteeAi, "Gitee AI 魔力方舟");
         this.register("x", x, "xAI Grok 系列模型");
         this.register("openrouter", openrouter, "OpenRouter 统一接入 300+ 模型");
+        this.register("edenai", edenai, "Eden AI 欧洲 OpenAI 兼容网关");
         this.register("azure", azure, "Azure AI 服务");
         this.register("custom", custom, "自定义 OpenAI 兼容 API");
     }
