@@ -43,7 +43,7 @@ import { UserCapacityService } from "./services/user-capacity.service";
             Department,
             DepartmentUserIndex,
         ]),
-        AuthModule,
+        forwardRef(() => AuthModule),
         SmsModule,
         MenuModule,
         RoleModule,

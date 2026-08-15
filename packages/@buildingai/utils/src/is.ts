@@ -110,3 +110,9 @@ export function isAsyncGenerator<T, TReturn, TNext>(
 ): value is AsyncGenerator<T, TReturn, TNext> {
     return value != null && typeof value === "object" && Symbol.asyncIterator in value;
 }
+
+export function getFrontendBaseUrl() {
+    return isDevelopment()
+        ? (process.env.CLIENT_URL || "http://localhost:4091").replace(/\/$/, "")
+        : (process.env.APP_DOMAIN || "http://localhost:4090").replace(/\/$/, "");
+}

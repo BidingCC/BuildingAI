@@ -30,7 +30,7 @@ import { WebsiteService } from "./services/website.service";
  */
 @Module({
     imports: [
-        AuthModule,
+        forwardRef(() => AuthModule),
         CloudStorageModule,
         TypeOrmModule.forFeature([
             Dict,

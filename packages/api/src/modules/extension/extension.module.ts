@@ -10,7 +10,7 @@ import { Extension } from "@buildingai/db/entities";
 import { DataSource } from "@buildingai/db/typeorm";
 import { TerminalLogger } from "@buildingai/logger";
 import { ExtensionFeatureScanService } from "@common/modules/auth/services/extension-feature-scan.service";
-import { DynamicModule, Logger, Module, OnModuleInit } from "@nestjs/common";
+import { DynamicModule, forwardRef, Logger, Module, OnModuleInit } from "@nestjs/common";
 import { ModuleRef } from "@nestjs/core";
 
 import { AuthModule } from "../auth/auth.module";
@@ -51,7 +51,7 @@ export class ExtensionCoreModule implements OnModuleInit {
         return {
             module: ExtensionCoreModule,
             imports: [
-                AuthModule,
+                forwardRef(() => AuthModule),
                 Pm2Module,
                 UploadModule,
                 TypeOrmModule.forFeature([Extension]),

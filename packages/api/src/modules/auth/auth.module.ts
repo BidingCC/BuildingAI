@@ -14,14 +14,17 @@ import {
 import { AuthService } from "@common/modules/auth/services/auth.service";
 import { ExtensionFeatureService } from "@common/modules/auth/services/extension-feature.service";
 import { ExtensionFeatureScanService } from "@common/modules/auth/services/extension-feature-scan.service";
+import { GoogleOAuthService } from "@common/modules/auth/services/google-oauth.service";
 import { RolePermissionService } from "@common/modules/auth/services/role-permission.service";
 import { UserTokenService } from "@common/modules/auth/services/user-token.service";
 import { SmsModule } from "@common/modules/sms/sms.module";
 import { WechatOaService } from "@common/modules/wechat/services/wechatoa.service";
 import { ChannelModule } from "@modules/channel/channel.module";
+import { UserModule } from "@modules/user/user.module";
 import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
+import { forwardRef } from "@nestjs/common";
 import type { StringValue } from "ms";
 
 import { AuthWebController } from "./controller/web/auth.controller";
@@ -47,6 +50,7 @@ import { AuthWebController } from "./controller/web/auth.controller";
             DepartmentUserIndex,
         ]),
         ChannelModule,
+        forwardRef(() => UserModule),
         JwtModule.registerAsync({
             imports: [ConfigModule],
             inject: [ConfigService],
@@ -63,6 +67,7 @@ import { AuthWebController } from "./controller/web/auth.controller";
         AuthService,
         ExtensionFeatureScanService,
         ExtensionFeatureService,
+        GoogleOAuthService,
         RolePermissionService,
         UserTokenService,
         WechatOaService,
@@ -71,6 +76,7 @@ import { AuthWebController } from "./controller/web/auth.controller";
         AuthService,
         ExtensionFeatureScanService,
         ExtensionFeatureService,
+        GoogleOAuthService,
         JwtModule,
         RolePermissionService,
         UserTokenService,

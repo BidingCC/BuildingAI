@@ -30,7 +30,7 @@ import { ExtensionCoreModule } from "@modules/extension/extension.module";
 import { HealthModule } from "@modules/health/health.module";
 import { MembershipModule } from "@modules/membership/membership.module";
 import { NotificationModule } from "@modules/notification/notification.module";
-import { DynamicModule, Module } from "@nestjs/common";
+import { DynamicModule, forwardRef, Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { APP_GUARD } from "@nestjs/core";
 import { ServeStaticModule } from "@nestjs/serve-static";
@@ -97,7 +97,7 @@ export class AppModule {
                 DatabaseModule,
                 GuardsModule,
                 BillingModule,
-                AuthModule,
+                forwardRef(() => AuthModule),
                 CDKModule, //
                 ChannelModule,
                 AiModule,
@@ -118,7 +118,7 @@ export class AppModule {
                 UploadModule,
                 AnalyseModule,
                 SecretModule,
-                UserModule,
+                forwardRef(() => UserModule),
                 CloudStorageModule,
                 ScheduleModule,
                 SmsModule,

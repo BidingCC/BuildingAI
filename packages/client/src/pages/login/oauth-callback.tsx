@@ -11,9 +11,18 @@ const OAuthCallbackPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   const code = useMemo(() => searchParams.get("code"), [searchParams]);
+  const provider = useMemo(() => searchParams.get("provider"), [searchParams]);
+  const token = useMemo(() => searchParams.get("token"), [searchParams]);
   const redirect = useMemo(() => searchParams.get("redirect") || "/", [searchParams]);
 
   useEffect(() => {
+    if (provider === "google" && token) {
+      setToken(token);
+      window.history.replaceState(null, "", window.location.pathname);
+      navigate(redirect, { replace: true });
+      return;
+    }
+
     if (!code) {
       setError("missing_code");
       return;
@@ -35,7 +44,7 @@ const OAuthCallbackPage = () => {
     return () => {
       cancelled = true;
     };
-  }, [code, redirect, setToken, navigate]);
+  }, [code, provider, token, redirect, setToken, navigate]);
 
   if (error) {
     return (

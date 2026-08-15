@@ -78,7 +78,7 @@ import { AgentsService } from "./services/agents.service";
         forwardRef(() => AiDatasetsModule),
         AiMemoryModule,
         ConfigModule,
-        UserModule,
+        forwardRef(() => UserModule),
     ],
     controllers: [
         AgentsConsoleController,
