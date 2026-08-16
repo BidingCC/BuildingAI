@@ -15,7 +15,6 @@ import { WebController } from "@common/decorators";
 import { ChangePasswordDto } from "@common/modules/auth/dto/change-password.dto";
 import { LoginDto } from "@common/modules/auth/dto/login.dto";
 import { RegisterDto } from "@common/modules/auth/dto/register.dto";
-import { SetPasswordDto } from "@common/modules/auth/dto/set-password.dto";
 import { SendSmsCodeDto, SmsLoginDto } from "@common/modules/auth/dto/sms.dto";
 import { AuthService } from "@common/modules/auth/services/auth.service";
 import { SmsService } from "@common/modules/sms/services/sms.service";
@@ -125,28 +124,6 @@ export class AuthWebController extends BaseController {
             changePasswordDto.oldPassword,
             changePasswordDto.newPassword,
             changePasswordDto.confirmPassword,
-        );
-    }
-
-    /**
-     * 设置用户密码
-     *
-     * 适用于第三方登录（手机/微信/谷歌）后首次设置登录密码，不需要旧密码。
-     *
-     * @param setPasswordDto 设置密码信息
-     * @param user 当前用户
-     * @returns 设置结果
-     */
-    @Post("set-password")
-    async setPassword(@Body() setPasswordDto: SetPasswordDto, @Playground() user: UserPlayground) {
-        // 获取当前用户ID
-        const userId = user.id;
-
-        // 调用服务中的方法设置密码
-        return this.authService.setPassword(
-            userId,
-            setPasswordDto.newPassword,
-            setPasswordDto.confirmPassword,
         );
     }
 

@@ -71,3 +71,13 @@ extensions/*
 !extensions/simple-blog/.output
 extensions/simple-blog/dist
 releases
+
+# ===== local scratch & build artifacts (lifeos local dev) =====
+JourneyMap_*.md
+_tmp_*
+annual-tab*.png
+basic-tab*.png
+bazi-*.png
+luck-tab*.png
+public/web/assets/
+public/web/extensions/

@@ -290,14 +290,11 @@ export class ExtensionConsoleController extends BaseController {
             extensionsList = extensionsList.filter((ext) => ext.isInstalled === query.isInstalled);
         }
 
-        extensionsList = extensionsList.sort((a, b) => {
-            if (a.hasUpdate && !b.hasUpdate) return -1;
-            if (!a.hasUpdate && b.hasUpdate) return 1;
-            return (
+        extensionsList = extensionsList.sort(
+            (a, b) =>
                 new Date(b.createdAt || b.updatedAt || 0).getTime() -
-                new Date(a.createdAt || a.updatedAt || 0).getTime()
-            );
-        });
+                new Date(a.createdAt || a.updatedAt || 0).getTime(),
+        );
 
         const result = this.paginationResult(extensionsList, extensionsList.length, query);
         return { ...result, extend: { statistics } };

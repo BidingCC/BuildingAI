@@ -34,7 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@buildingai/ui/components/ui/select";
-import { Copy, ExternalLink, Eye, EyeOff, ShieldCheck } from "lucide-react";
+import { Copy, ExternalLink, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
@@ -60,7 +60,6 @@ const WechatOAIndexPage = () => {
 
   const [appId, setAppId] = useState("");
   const [appSecret, setAppSecret] = useState("");
-  const [showAppSecret, setShowAppSecret] = useState(false);
   const [token, setToken] = useState("");
   const [encodingAESKey, setEncodingAESKey] = useState("");
   const [messageEncryptType, setMessageEncryptType] =
@@ -161,25 +160,14 @@ const WechatOAIndexPage = () => {
                   <FieldLabel>
                     <span className="text-destructive">*</span> AppSecret
                   </FieldLabel>
-                  <InputGroup className="max-w-xs">
-                    <InputGroupInput
-                      value={appSecret}
-                      type={showAppSecret ? "text" : "password"}
-                      onChange={(e) => setAppSecret(e.target.value)}
-                      placeholder="粘贴微信公众号 AppSecret"
-                      disabled={isLoading}
-                    />
-                    <InputGroupAddon align="inline-end">
-                      <InputGroupButton
-                        size="icon-sm"
-                        type="button"
-                        aria-label={showAppSecret ? "隐藏密码" : "显示密码"}
-                        onClick={() => setShowAppSecret((prev) => !prev)}
-                      >
-                        {showAppSecret ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                      </InputGroupButton>
-                    </InputGroupAddon>
-                  </InputGroup>
+                  <Input
+                    value={appSecret}
+                    type="password"
+                    className="max-w-xs"
+                    onChange={(e) => setAppSecret(e.target.value)}
+                    placeholder="粘贴微信公众号 AppSecret"
+                    disabled={isLoading}
+                  />
                 </Field>
               </CardContent>
             </Card>

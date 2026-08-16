@@ -54,22 +54,8 @@ const defaultValues: InformationFormValues = {
   theme: "indigo",
 };
 
-/** Console website config query key (must match @buildingai/services/console useWebsiteConfigQuery). */
-const WEBSITE_CONFIG_QUERY_KEY = ["system-website", "config"] as const;
-
-/**
- * Normalize image field from API (string URL or legacy upload object with `url`).
- */
-function normalizeImageUrl(value: unknown): string {
-  if (typeof value === "string") {
-    return value;
-  }
-  if (value && typeof value === "object" && "url" in value) {
-    const url = (value as { url?: unknown }).url;
-    return typeof url === "string" ? url : "";
-  }
-  return "";
-}
+/** 前台展示用的网站配置 queryKey，与 shared/config 的 useWebsiteConfigQuery 一致，失效后侧栏/标题等会重新拉取并更新 */
+const WEBSITE_CONFIG_QUERY_KEY = ["config", "website"] as const;
 
 export default function Information() {
   const queryClient = useQueryClient();
@@ -93,17 +79,14 @@ export default function Information() {
   useEffect(() => {
     if (!data?.webinfo) return;
     const w = data.webinfo;
-    form.reset(
-      {
-        websiteName: w.name ?? "",
-        websiteDescription: w.description ?? "",
-        websiteLogo: normalizeImageUrl(w.logo),
-        websiteIcon: normalizeImageUrl(w.icon),
-        customerServiceQrcode: normalizeImageUrl(w.customerServiceQrcode),
-        theme: w.theme ?? "indigo",
-      },
-      { keepDirtyValues: true },
-    );
+    form.reset({
+      websiteName: w.name ?? "",
+      websiteDescription: w.description ?? "",
+      websiteLogo: w.logo ?? "",
+      websiteIcon: w.icon ?? "",
+      customerServiceQrcode: w.customerServiceQrcode ?? "",
+      theme: w.theme ?? "indigo",
+    });
   }, [data?.webinfo, form]);
 
   const onSubmit = (values: InformationFormValues) => {
@@ -274,9 +257,9 @@ export default function Information() {
                 form.reset({
                   websiteName: data.webinfo.name ?? "",
                   websiteDescription: data.webinfo.description ?? "",
-                  websiteLogo: normalizeImageUrl(data.webinfo.logo),
-                  websiteIcon: normalizeImageUrl(data.webinfo.icon),
-                  customerServiceQrcode: normalizeImageUrl(data.webinfo.customerServiceQrcode),
+                  websiteLogo: data.webinfo.logo ?? "",
+                  websiteIcon: data.webinfo.icon ?? "",
+                  customerServiceQrcode: data.webinfo.customerServiceQrcode ?? "",
                   theme: data.webinfo.theme ?? "indigo",
                 })
               }

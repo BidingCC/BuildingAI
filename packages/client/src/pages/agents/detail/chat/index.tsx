@@ -27,6 +27,8 @@ import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 
+import { useHomeAgentId } from "@/contexts/home-agent-context";
+
 import {
   AssistantProvider,
   MessageItem,
@@ -529,8 +531,10 @@ function ChatContent({
 
 const AgentChatPage = () => {
   const { id, uuid } = useParams<{ id?: string; uuid?: string }>();
+  const homeAgentId = useHomeAgentId();
   const navigate = useNavigate();
-  const agentId = id ?? "";
+  // Support agentId from URL param, or from home page context (decoration config)
+  const agentId = id ?? homeAgentId ?? "";
 
   const { data: agent, isLoading: isAgentLoading } = usePublishedAgentDetailQuery(agentId, {
     refetchOnWindowFocus: false,

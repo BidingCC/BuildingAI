@@ -16,8 +16,6 @@ import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 
-import { useImagePreview } from "@/components/image-preview";
-
 import { PromptInput } from "./components/input/prompt-input";
 import { Suggestions } from "./components/input/suggestions";
 import { MessageItem } from "./components/message/message-item";
@@ -141,8 +139,6 @@ const LoadingIndicator = memo(function LoadingIndicator() {
 });
 
 const MessageList = memo(function MessageList() {
-  useImagePreview();
-
   const {
     displayMessages,
     streamingMessageId,

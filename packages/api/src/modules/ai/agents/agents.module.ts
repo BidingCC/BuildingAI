@@ -6,6 +6,7 @@ import {
     AgentChatMessage,
     AgentChatMessageFeedback,
     AgentChatRecord,
+    AiAgentSkill,
     AiMcpServer,
     AiMcpTool,
     AiModel,
@@ -20,10 +21,13 @@ import {
 import { agentPublicAccessRegistry } from "@common/decorators/agent-public-access.registry";
 import { AiDatasetsModule } from "@modules/ai/datasets/datasets.module";
 import { AiMcpServerService } from "@modules/ai/mcp/services/ai-mcp-server.service";
+import { AiAgentSkillService } from "./services/ai-agent-skill.service";
+import { SkillParserService } from "./services/skill-parser.service";
 import { AiMcpToolService } from "@modules/ai/mcp/services/ai-mcp-tool.service";
 import { AiModelService } from "@modules/ai/model/services/ai-model.service";
 import { AiProviderService } from "@modules/ai/provider/services/ai-provider.service";
 import { ConfigModule } from "@modules/config/config.module";
+import { UploadModule } from "@modules/upload/upload.module";
 import { UserModule } from "@modules/user/user.module";
 import { forwardRef, MiddlewareConsumer, Module, NestModule, RequestMethod } from "@nestjs/common";
 
@@ -34,6 +38,7 @@ import { AgentAnnotationWebController } from "./controllers/web/agent-annotation
 import { AgentChatWebController } from "./controllers/web/agent-chat.controller";
 import { AgentPublishWebController } from "./controllers/web/agent-publish.controller";
 import { AgentsWebController } from "./controllers/web/agents.controller";
+import { AiAgentSkillWebController } from "./controllers/web/ai-agent-skill.controller";
 import { AgentBillingHandler } from "./handlers/agent-billing";
 import { AnnotationReplyHandler } from "./handlers/annotation-reply";
 import { FollowUpSuggestionsHandler } from "./handlers/follow-up-suggestions";
@@ -72,6 +77,7 @@ import { AgentsService } from "./services/agents.service";
             AiMcpServer,
             AiMcpTool,
             AiUserMcpServer,
+            AiAgentSkill,
             Secret,
             SecretTemplate,
         ]),
@@ -79,6 +85,7 @@ import { AgentsService } from "./services/agents.service";
         AiMemoryModule,
         ConfigModule,
         UserModule,
+        UploadModule,
     ],
     controllers: [
         AgentsConsoleController,
@@ -86,6 +93,7 @@ import { AgentsService } from "./services/agents.service";
         AgentChatWebController,
         AgentPublishWebController,
         AgentAnnotationWebController,
+        AiAgentSkillWebController,
         // AgentOpenApiController,
     ],
     providers: [
@@ -114,6 +122,8 @@ import { AgentsService } from "./services/agents.service";
         DifyApiService,
         DifyAgentSyncService,
         DifyChatProvider,
+        AiAgentSkillService,
+        SkillParserService,
         // Shared services (same pattern as AiChatModule)
         AiModelService,
         AiProviderService,

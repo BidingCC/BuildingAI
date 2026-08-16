@@ -285,6 +285,20 @@ export class Agent extends BaseEntity {
     })
     mcpServerIds?: string[];
 
+    /**
+     * 关联 Skill ID 列表
+     * 智能体可使用的 Skill 列表，其指令会在对话时注入 system prompt
+     *
+     * 示例：
+     * ["skill-id-1", "skill-id-2"]
+     */
+    @Column({
+        type: "simple-array",
+        nullable: true,
+        comment: "关联 Skill ID 列表",
+    })
+    skillIds?: string[];
+
     @Column({ type: "boolean", default: false, comment: "是否已发布到广场" })
     publishedToSquare: boolean;
 

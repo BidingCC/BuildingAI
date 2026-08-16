@@ -28,7 +28,6 @@
         "@buildingai/ui": "workspace:*",
         "@buildingai/utils": "workspace:*",
         "@buildingai/web-types": "workspace:*",
-        "@fancyapps/ui": "6.1.7",
         "@dnd-kit/core": "^6.3.1",
         "@dnd-kit/sortable": "^10.0.0",
         "@dnd-kit/utilities": "^3.2.2",
@@ -36,7 +35,7 @@
         "@lexical/react": "^0.41.0",
         "@monaco-editor/react": "^4.7.0",
         "@tanstack/react-virtual": "catalog:web",
-        "@tauri-apps/api": "~2.11.0",
+        "@tauri-apps/api": "^2.10.1",
         "@tauri-apps/plugin-opener": "^2.5.3",
         "ai": "^6.0.138",
         "class-variance-authority": "^0.7.1",
@@ -56,23 +55,23 @@
         "zustand": "^5.0.10"
     },
     "devDependencies": {
-        "@babel/core": "^7.29.0",
         "@buildingai/eslint-config": "workspace:*",
         "@buildingai/types": "workspace:*",
         "@eslint/js": "^9.39.2",
-        "@rolldown/plugin-babel": "catalog:web",
-        "@tauri-apps/cli": "~2.11.2",
-        "@types/babel__core": "^7.20.5",
+        "@tauri-apps/cli": "^2.10.0",
         "@types/node": "^24.10.13",
         "@types/react": "catalog:web",
         "@types/react-dom": "catalog:web",
-        "babel-plugin-react-compiler": "^1.0.0",
         "eslint": "^9.39.2",
         "eslint-plugin-react-hooks": "^7.0.1",
         "eslint-plugin-react-refresh": "^0.4.26",
         "tailwindcss": "catalog:web",
         "typescript": "~5.9.3",
         "typescript-eslint": "^8.55.0",
-        "vite-tsconfig-paths": "catalog:web"
+        "vite-tsconfig-paths": "catalog:web",
+        "@babel/core": "^7.29.0",
+        "@rolldown/plugin-babel": "catalog:web",
+        "@types/babel__core": "^7.20.5",
+        "babel-plugin-react-compiler": "^1.0.0"
     }
 }

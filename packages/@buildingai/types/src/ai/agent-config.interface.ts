@@ -251,11 +251,11 @@ export interface AnnotationConfig {
 export interface ThirdPartyIntegrationConfig {
     /** 第三方平台标识 */
     provider?: "coze" | "dify";
-    /** 应用/机器人ID */
+    /** 应用/机器人ID（旧版：bot_id；新版：project_id） */
     appId?: string;
-    /** API 密钥 */
+    /** API 密钥（旧版：API Key；新版：API Token/个人访问令牌） */
     apiKey?: string;
-    /** API 端点地址 */
+    /** API 端点地址（旧版：https://api.coze.cn；新版：部署域名） */
     baseURL?: string;
     /** 扩展配置，支持各平台特有配置 */
     extendedConfig?: Record<string, any>;
@@ -263,6 +263,15 @@ export interface ThirdPartyIntegrationConfig {
     variableMapping?: Record<string, string>;
     /** 是否使用平台的对话历史管理 */
     useExternalConversation?: boolean;
+    /**
+     * API 版本
+     * - "v1": 旧版 API（/v3/chat、/v1/chat），使用 bot_id + API Key
+     * - "v2": 新版 API（/stream_run），使用 project_id + API Token + 部署域名
+     * @default "v1"
+     */
+    apiVersion?: "v1" | "v2";
+    /** 新版 API 专用：Coze 项目 ID（新版 API 的 project_id，与 appId 二选一） */
+    projectId?: string;
 }
 
 export interface AgentWxcomConfig {

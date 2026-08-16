@@ -7,7 +7,11 @@ import {
     WEB_SEARCH_LAST_INSTRUCTIONS,
 } from "@buildingai/ai-toolkit/prompts";
 import type { Agent, AgentMemory, UserMemory } from "@buildingai/db/entities";
+import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
+import { AiAgentSkill } from "@buildingai/db/entities";
+import { Repository } from "@buildingai/db/typeorm";
 import { Injectable } from "@nestjs/common";
+import { In } from "@buildingai/db/typeorm";
 
 export interface PromptBuildOptions {
     formVariables?: Record<string, string>;
@@ -22,12 +26,17 @@ export interface PromptBuildOptions {
 
 @Injectable()
 export class PromptBuilder {
-    buildSystemPrompt(
+    constructor(
+        @InjectRepository(AiAgentSkill)
+        private readonly skillRepository: Repository<AiAgentSkill>,
+    ) {}
+
+    async buildSystemPrompt(
         agent: Agent,
         userMemories: UserMemory[],
         agentMemories: AgentMemory[],
         options?: PromptBuildOptions,
-    ): string {
+    ): Promise<string> {
         const sections: string[] = [];
 
         sections.push(TOOL_USE_POLICY);
@@ -84,6 +93,26 @@ export class PromptBuilder {
         if (agent.datasetIds?.length) {
             sections.push(KNOWLEDGE_BASE_TOOL_PRIORITY_INSTRUCTIONS);
             sections.push(KNOWLEDGE_BASE_CITATION_INSTRUCTIONS);
+        }
+
+        // 注入智能体绑定的 Skill 指令（指令+知识型）
+        if (agent.skillIds?.length) {
+            const skills = await this.skillRepository.find({
+                where: { id: In(agent.skillIds) },
+            });
+            if (skills.length > 0) {
+                const skillSections = skills
+                    .map((s) => {
+                        const header = s.description
+                            ? `### ${s.name}\n${s.description}`
+                            : `### ${s.name}`;
+                        return `${header}\n\n${s.instructions}`;
+                    })
+                    .join("\n\n---\n\n");
+                sections.push(
+                    `<skills>\nYou have access to the following skills. Follow their instructions when relevant:\n\n${skillSections}\n</skills>`,
+                );
+            }
         }
 
         return sections.join("\n\n");

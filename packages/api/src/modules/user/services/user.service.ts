@@ -1,5 +1,5 @@
 import nicknameData from "@assets/nickname.json";
-import { BaseService, type FieldFilterOptions } from "@buildingai/base";
+import { BaseService } from "@buildingai/base";
 import { type BooleanNumberType, UserCreateSource } from "@buildingai/constants";
 import { BusinessCode } from "@buildingai/constants";
 import {
@@ -918,71 +918,5 @@ export class UserService extends BaseService<User> {
             name: highestLevel?.name ?? null,
             icon: highestLevel?.icon ?? null,
         };
-    }
-
-    /**
-     * 删除用户（重写父类方法，在软删除前释放用户名和微信唯一标识）
-     *
-     * @param id 用户ID
-     * @returns 是否成功
-     */
-    async delete(id: string, options?: FieldFilterOptions<User>): Promise<void> {
-        // 先获取用户信息
-        const user = await this.findOneById(id, options);
-        if (!user) {
-            throw HttpErrorFactory.notFound("用户不存在");
-        }
-
-        // 修改用户名以释放唯一约束
-        user.username = `${user.username}__deleted_${user.id}`;
-        // 释放微信相关唯一标识
-        user.openid = null;
-        user.mpOpenid = null;
-        user.unionid = null;
-        await this.userRepository.save(user);
-
-        // 执行软删除
-        await super.delete(id, options);
-    }
-
-    /**
-     * 批量删除用户（重写父类方法，在软删除前释放用户名和微信唯一标识）
-     *
-     * @param ids 用户ID数组
-     * @param options 选项配置
-     * @returns 删除的记录数量
-     */
-    async deleteMany(
-        ids: string[],
-        options?: FieldFilterOptions<User> & { strict?: boolean },
-    ): Promise<number> {
-        if (!Array.isArray(ids) || ids.length === 0) {
-            return 0;
-        }
-
-        // 查询所有待删除的用户
-        const users = await this.userRepository.findBy({
-            id: In(ids) as any,
-        });
-
-        if (users.length === 0) {
-            if (options?.strict) {
-                throw HttpErrorFactory.badRequest("未找到任何用户");
-            }
-            return 0;
-        }
-
-        // 修改用户名和微信唯一标识以释放唯一约束
-        for (const user of users) {
-            user.username = `${user.username}__deleted_${user.id}`;
-            user.openid = null;
-            user.mpOpenid = null;
-            user.unionid = null;
-        }
-        await this.userRepository.save(users);
-
-        // 执行批量软删除
-        const result = await this.userRepository.softRemove(users);
-        return result.length;
     }
 }

@@ -311,6 +311,15 @@ export async function deleteAgent(agentId: string): Promise<void> {
     await apiHttpClient.delete<void>(`/ai-agents/${agentId}`);
 }
 
+export async function testCozeConnection(
+    config: ThirdPartyIntegrationConfig,
+): Promise<{ success: boolean; message: string }> {
+    return apiHttpClient.post<{ success: boolean; message: string }>(
+        "/ai-agents/test-coze-connection",
+        { config },
+    );
+}
+
 export function useDeleteAgentMutation(): UseMutationResult<void, unknown, string, unknown> {
     const queryClient = useQueryClient();
     return useMutation({

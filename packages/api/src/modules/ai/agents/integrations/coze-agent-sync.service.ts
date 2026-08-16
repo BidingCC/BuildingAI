@@ -68,6 +68,32 @@ export class CozeAgentSyncService {
             };
         }
 
+        const apiVersion = agent.thirdPartyIntegration?.apiVersion || "v1";
+
+        // 新版 API (stream_run) 暂不支持自动同步智能体信息
+        if (apiVersion === "v2") {
+            const normalized = this.cozeApiService.normalizeConfig(agent.thirdPartyIntegration);
+            const nextIntegration = {
+                ...normalized,
+                extendedConfig: {
+                    ...(normalized.extendedConfig ?? {}),
+                    cozeSyncStatus: "skipped_v2",
+                    cozeSyncError: "新版 API (stream_run) 暂不支持自动同步智能体信息，请手动配置",
+                    cozeSyncedAt: new Date().toISOString(),
+                },
+            };
+            await this.agentRepository.save({
+                ...agent,
+                thirdPartyIntegration: nextIntegration,
+            });
+            const latest = await this.agentRepository.findOne({ where: { id: agentId } });
+            return {
+                agent: latest as Agent,
+                status: "skipped",
+                errorMessage: "新版 API (stream_run) 暂不支持自动同步智能体信息，请手动配置",
+            };
+        }
+
         const normalized = this.cozeApiService.normalizeConfig(agent.thirdPartyIntegration);
         if (!this.cozeApiService.hasValidConfig(normalized)) {
             const nextIntegration = {

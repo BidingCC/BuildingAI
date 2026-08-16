@@ -184,19 +184,6 @@ export function useChangePasswordMutation(
     });
 }
 
-/** 设置密码请求参数 */
-export type SetPasswordRequest = {
-    newPassword: string;
-    confirmPassword: string;
-};
-
-export function useSetPasswordMutation(options?: MutationOptionsUtil<null, SetPasswordRequest>) {
-    return useMutation<null, Error, SetPasswordRequest>({
-        mutationFn: (body) => apiHttpClient.post<null>("/auth/set-password", body),
-        ...options,
-    });
-}
-
 export type LogoutResponse = {
     success: boolean;
     message: string;

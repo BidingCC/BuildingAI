@@ -133,6 +133,11 @@ export class UpdateAgentDto {
     mcpServerIds?: string[];
 
     @IsOptional()
+    @IsArray()
+    @IsString({ each: true })
+    skillIds?: string[];
+
+    @IsOptional()
     @ValidateNested()
     @Type(() => MemoryConfigDto)
     memoryConfig?: MemoryConfigDto;

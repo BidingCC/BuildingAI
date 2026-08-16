@@ -6,7 +6,7 @@ import { consoleHttpClient } from "../base";
 export type DecorateMenuLink = {
     label: string;
     path: string;
-    type: "system" | "extension" | "custom" | "button";
+    type: "system" | "extension" | "custom" | "button" | "agent";
     query: Record<string, string>;
     component: string | null;
     target: "_self" | "_blank";

@@ -1,4 +1,4 @@
-import { Tabs, TabsList, TabsTrigger } from "@buildingai/ui/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@buildingai/ui/components/ui/tabs";
 import { useMemo, useState } from "react";
 
 import { PageContainer } from "@/layouts/console/_components/page-container";
@@ -16,10 +16,13 @@ const NoticeSmsPage = () => {
   );
 
   const [activeTab, setActiveTab] = useState("aliyun");
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+  };
 
   return (
     <PageContainer>
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
         <TabsList>
           {tabs.map((tab) => (
             <TabsTrigger key={tab.name} value={tab.name}>
@@ -27,9 +30,12 @@ const NoticeSmsPage = () => {
             </TabsTrigger>
           ))}
         </TabsList>
-        <div className="max-w-full md:max-w-md">
-          {activeTab === "aliyun" ? <AliyunSms key="aliyun" /> : <TencentSms key="tencent" />}
-        </div>
+        <TabsContent value="aliyun" className="max-w-full md:max-w-md">
+          <AliyunSms />
+        </TabsContent>
+        <TabsContent value="tencent" className="md:max-w-full lg:max-w-md">
+          <TencentSms />
+        </TabsContent>
       </Tabs>
     </PageContainer>
   );

@@ -1,6 +1,7 @@
 export { AccountLog } from "./account-log.entity";
 export { Agent } from "./ai-agent.entity";
 export { AgentAnnotation } from "./ai-agent-annotation.entity";
+export { AiAgentSkill } from "./ai-agent-skill.entity";
 export { AgentChatMessage } from "./ai-agent-chat-message.entity";
 export { AgentChatMessageFeedback } from "./ai-agent-chat-message-feedback.entity";
 export { AgentChatRecord } from "./ai-agent-chat-record.entity";

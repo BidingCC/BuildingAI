@@ -8,17 +8,13 @@ import type {
     ProviderModelInfo,
 } from "../../types";
 import { fetchProviderModels } from "../../utils/fetch-models";
-import { type OpenAIApiMode, resolveOpenAIApiMode } from "./api-mode";
 import { createOpenAIModerationModel } from "./moderation-model";
 import { createOpenAIRerankModel } from "./rerank-model";
-
-export type { OpenAIApiMode } from "./api-mode";
 
 export interface OpenAIProviderSettings extends BaseProviderSettings {
     organization?: string;
     project?: string;
     compatibility?: "strict" | "compatible";
-    apiMode?: OpenAIApiMode;
 }
 
 class OpenAIProviderImpl implements AIProvider {
@@ -44,10 +40,7 @@ class OpenAIProviderImpl implements AIProvider {
     }
 
     languageModel(modelId: string): LanguageModelV3 {
-        const mode = resolveOpenAIApiMode(modelId, this.settings.baseURL, this.settings.apiMode);
-        return mode === "responses"
-            ? this.baseProvider.responses(modelId)
-            : this.baseProvider.chat(modelId);
+        return this.baseProvider.languageModel(modelId);
     }
 
     embeddingModel(modelId: string): EmbeddingModelV3 {

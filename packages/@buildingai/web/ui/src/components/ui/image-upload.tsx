@@ -79,33 +79,7 @@ function ImageUpload({
   const initInputRef = React.useRef<HTMLInputElement>(null);
   const isInitialized = useConfigStore((s) => s.config.isInitialized);
 
-  const isControlled = value !== undefined;
-
-  /**
-   * When controlled with an empty string (e.g. react-hook-form default), `value ?? internalValue`
-   * keeps showing empty after upload because "" is not nullish. Prefer internal preview until
-   * the parent updates `value`.
-   */
-  const currentValue = isControlled
-    ? typeof value === "string" && value.length > 0
-      ? value
-      : internalValue
-    : internalValue;
-
-  /** Sync internal preview when the parent value changes; avoid clearing during upload ("" -> "" + internal). */
-  const prevValueRef = React.useRef(value);
-  React.useEffect(() => {
-    if (!isControlled) return;
-    const prev = prevValueRef.current;
-    prevValueRef.current = value;
-    if (typeof value === "string" && value.length > 0) {
-      setInternalValue(value);
-      return;
-    }
-    if (value === "" && typeof prev === "string" && prev.length > 0) {
-      setInternalValue(undefined);
-    }
-  }, [isControlled, value]);
+  const currentValue = value ?? internalValue;
 
   const {
     isUploading: isNormalUploading,

@@ -26,8 +26,6 @@ import type { ReasoningUIPart, UIMessage } from "ai";
 import { AlertCircleIcon, Bot } from "lucide-react";
 import { memo, type ReactNode, useEffect, useMemo, useState } from "react";
 
-import { ImagePreview } from "@/components/image-preview";
-
 import { useOptionalAssistantContext } from "../../context";
 import { useSmoothText } from "../../hooks/use-smooth-text";
 import { convertUIMessageToMessage } from "../../libs/message-converter";
@@ -585,22 +583,12 @@ export const Message = memo(function Message({
 
         {attachments && attachments.length > 0 && (
           <AIMessageAttachments className="mb-2">
-            {attachments.map((attachment) =>
-              attachment.mediaType?.startsWith("image/") && attachment.url ? (
-                <ImagePreview
-                  key={attachment.url}
-                  src={attachment.url}
-                  alt={attachment.filename ?? "图片"}
-                  className="w-fit rounded-lg"
-                  imageClassName="h-24 w-24 object-cover rounded-lg"
-                />
-              ) : (
-                <AIMessageAttachment
-                  key={attachment.url}
-                  data={{ ...attachment, mediaType: attachment.mediaType ?? "" }}
-                />
-              ),
-            )}
+            {attachments.map((attachment) => (
+              <AIMessageAttachment
+                key={attachment.url}
+                data={{ ...attachment, mediaType: attachment.mediaType ?? "" }}
+              />
+            ))}
           </AIMessageAttachments>
         )}
 

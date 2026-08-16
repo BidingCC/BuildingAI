@@ -108,11 +108,11 @@ const UserListIndexPage = () => {
 
   const deleteMutation = useDeleteUserMutation({
     onSuccess: () => {
-      toast.success("用户已注销");
+      toast.success("用户已删除");
       refetch();
     },
     onError: (error) => {
-      toast.error(`注销失败: ${error.message}`);
+      toast.error(`删除失败: ${error.message}`);
     },
   });
 
@@ -127,13 +127,12 @@ const UserListIndexPage = () => {
 
   const handleDelete = async (user: User) => {
     if (user.isRoot === BooleanNumber.YES) {
-      toast.error("超级管理员不允许注销");
+      toast.error("超级管理员不允许删除");
       return;
     }
     await confirm({
-      title: "注销用户",
-      description: "确定要注销该用户吗？此操作不可恢复。",
-      confirmVariant: "destructive",
+      title: "删除用户",
+      description: "确定要删除该用户吗？此操作不可恢复。",
     });
     deleteMutation.mutate(user.id);
   };
@@ -346,7 +345,7 @@ const UserListIndexPage = () => {
                               }
                             >
                               <Trash2 />
-                              注销
+                              删除
                             </DropdownMenuItem>
                           </PermissionGuard>
                         </DropdownMenuContent>

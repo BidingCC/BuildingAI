@@ -7,7 +7,6 @@ import type { ChatStatus, FileUIPart, UIMessage } from "ai";
 import { DefaultChatTransport } from "ai";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { toast } from "sonner";
 import { validate as isUUID } from "uuid";
 
 import { getApiBaseUrl } from "@/utils/api";
@@ -290,10 +289,6 @@ export function useChatStream(options: UseChatStreamOptions): UseChatStreamRetur
     onError: (error) => {
       console.error("Error streaming chat", error);
       setStatusOverride("error");
-
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      toast.error(errorMessage || "对话出现错误，请稍后再试");
-
       setChatMessages((prev) => {
         if (prev.length === 0) return prev;
         const updated = [...prev];

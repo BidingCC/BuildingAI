@@ -25,13 +25,14 @@ import { toast } from "sonner";
 import OrchestrationLayout from "../../_layouts";
 import DebuggingPreview from "./debugging";
 import {
-  AgentFeatures,
-  ContextSettings,
-  FormVariables,
-  KnowledgeBase,
-  McpTools,
-  RolePrompt,
-  ThirdPartyIntegration,
+    AgentFeatures,
+    ContextSettings,
+    FormVariables,
+    KnowledgeBase,
+    McpTools,
+    RolePrompt,
+    Skills,
+    ThirdPartyIntegration,
 } from "./function";
 import {
   AutoFollowUp,
@@ -82,6 +83,7 @@ type ConfigState = {
   chatAvatarEnabled: boolean;
   datasetIds: string[];
   mcpServerIds: string[];
+  skillIds: string[];
   toolConfig: ToolConfigState;
   showContext: boolean;
   showReference: boolean;
@@ -111,6 +113,7 @@ const getDefaultConfig = (): ConfigState => ({
   chatAvatarEnabled: false,
   datasetIds: [],
   mcpServerIds: [],
+  skillIds: [],
   toolConfig: null,
   showContext: true,
   showReference: true,
@@ -264,6 +267,7 @@ export default function Configuration() {
       chatAvatarEnabled: currentAgent.chatAvatarEnabled ?? false,
       datasetIds: currentAgent.datasetIds ?? [],
       mcpServerIds: currentAgent.mcpServerIds ?? [],
+      skillIds: (currentAgent.skillIds as string[] | undefined | null) ?? [],
       toolConfig: currentAgent.toolConfig ?? null,
       showContext: currentAgent.showContext ?? true,
       showReference: currentAgent.showReference ?? true,
@@ -318,6 +322,7 @@ export default function Configuration() {
           chatAvatar: next.chatAvatar,
           datasetIds: next.datasetIds,
           mcpServerIds: next.mcpServerIds,
+          skillIds: next.skillIds,
           toolConfig: next.toolConfig ?? undefined,
           showContext: next.showContext,
           showReference: next.showReference,
@@ -554,6 +559,11 @@ export default function Configuration() {
                           onChange={(v) => updateConfig("mcpServerIds", v)}
                           toolConfig={config.toolConfig}
                           onToolConfigChange={(v) => updateConfig("toolConfig", v)}
+                        />
+                        <Skills
+                          agentId={agentId}
+                          value={config.skillIds}
+                          onChange={(v) => updateConfig("skillIds", v)}
                         />
                         <AgentFeatures maxSteps={config.maxSteps} onChange={updateMultiple} />
                       </>

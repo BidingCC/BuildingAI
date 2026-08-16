@@ -171,8 +171,9 @@ export class AiProviderConsoleController extends BaseController {
     @Get("active/all")
     @BuildFileUrl(["**.iconUrl"])
     @Permissions({
-        code: "list",
+        code: "active-all",
         name: "查看AI供应商",
+        hidden: true,
     })
     async getActiveProviders() {
         return await this.aiProviderService.getActiveProviders(["apiKey"]);

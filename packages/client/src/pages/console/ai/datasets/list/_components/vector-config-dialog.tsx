@@ -16,7 +16,6 @@ import {
   DialogTitle,
 } from "@buildingai/ui/components/ui/dialog";
 import { Label } from "@buildingai/ui/components/ui/label";
-import { ScrollArea } from "@buildingai/ui/components/ui/scroll-area";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -105,8 +104,8 @@ export function VectorConfigDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="gap-0 p-0 sm:max-w-[min(32rem,90vw)]">
-        <DialogHeader className="p-4">
+      <DialogContent className="max-h-[90vh] w-full overflow-y-auto sm:max-w-[min(32rem,90vw)]">
+        <DialogHeader>
           <DialogTitle>向量配置 · {datasetName}</DialogTitle>
         </DialogHeader>
         {isLoading ? (
@@ -114,30 +113,24 @@ export function VectorConfigDialog({
             <Loader2 className="size-6 animate-spin" />
           </div>
         ) : (
-          <ScrollArea className="max-h-[80vh]">
-            <div className="space-y-4 p-4 pt-0">
-              <div className="space-y-2">
-                <Label>
-                  Embedding 模型 <span className="text-destructive">*</span>
-                </Label>
-                <ModelSelector
-                  modelType="text-embedding"
-                  value={embeddingModelId || undefined}
-                  onSelect={setEmbeddingModelId}
-                  placeholder="请选择模型"
-                  triggerVariant="button"
-                  className="w-full text-left"
-                />
-              </div>
-              <RetrievalConfigSection
-                value={retrieval}
-                onChange={setRetrieval}
-                className="w-full"
+          <div className="min-w-0 space-y-4 py-2">
+            <div className="space-y-2">
+              <Label>
+                Embedding 模型 <span className="text-destructive">*</span>
+              </Label>
+              <ModelSelector
+                modelType="text-embedding"
+                value={embeddingModelId || undefined}
+                onSelect={setEmbeddingModelId}
+                placeholder="请选择模型"
+                triggerVariant="button"
+                className="w-full text-left"
               />
             </div>
-          </ScrollArea>
+            <RetrievalConfigSection value={retrieval} onChange={setRetrieval} className="w-full" />
+          </div>
         )}
-        <DialogFooter className="p-4">
+        <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             取消
           </Button>

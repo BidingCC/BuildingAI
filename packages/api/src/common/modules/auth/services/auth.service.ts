@@ -374,7 +374,6 @@ export class AuthService extends BaseService<User> {
         userAgent?: string,
     ) {
         const { nickname, username, avatar } = this.generateRandomName();
-        const userNo = await generateNo(this.userRepository, "userNo");
 
         // 创建用户
         const savedUser = await this.create(
@@ -386,7 +385,6 @@ export class AuthService extends BaseService<User> {
                 status: BooleanNumber.YES, // 默认启用
                 source: UserCreateSource.WECHAT, // 标记为微信注册
                 avatar,
-                userNo,
             },
             { excludeFields: ["password", "openid"] },
         );
@@ -524,7 +522,7 @@ export class AuthService extends BaseService<User> {
         // 验证旧密码
         const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password);
         if (!isOldPasswordValid) {
-            throw HttpErrorFactory.badRequest("旧密码不正确", BusinessCode.PASSWORD_INCORRECT);
+            throw HttpErrorFactory.unauthorized("旧密码不正确", BusinessCode.PASSWORD_INCORRECT);
         }
 
         // 生成新密码的哈希
@@ -538,52 +536,6 @@ export class AuthService extends BaseService<User> {
 
         // 清除用户所有 token，强制重新登录
         await this.userTokenService.revokeAllTokens(userId);
-
-        return null;
-    }
-
-    /**
-     * 设置用户密码
-     *
-     * 适用于通过手机号/微信/谷歌等第三方方式登录后，首次设置登录密码。
-     * 该场景不需要验证旧密码。
-     *
-     * @param userId 用户ID
-     * @param newPassword 新密码
-     * @param confirmPassword 确认密码
-     * @returns 设置结果
-     */
-    async setPassword(userId: string, newPassword: string, confirmPassword: string) {
-        // 验证新密码与确认密码是否一致
-        if (newPassword !== confirmPassword) {
-            throw HttpErrorFactory.badRequest(
-                "新密码与确认密码不一致",
-                BusinessCode.VALIDATION_FAILED,
-            );
-        }
-
-        // 查找用户
-        const user = await this.findOne({
-            where: { id: userId },
-        });
-
-        if (!user) {
-            throw HttpErrorFactory.notFound(`ID为 ${userId} 的用户不存在`);
-        }
-
-        // 已设置过密码的用户不允许通过 set-password 覆盖，应使用 change-password
-        if (user.password) {
-            throw HttpErrorFactory.badRequest("用户已设置密码，请使用修改密码功能");
-        }
-
-        // 生成新密码的哈希
-        const salt = await bcrypt.genSalt();
-        const hashedPassword = await bcrypt.hash(newPassword, salt);
-
-        // 更新密码
-        await this.updateById(userId, {
-            password: hashedPassword,
-        });
 
         return null;
     }
@@ -743,7 +695,6 @@ export class AuthService extends BaseService<User> {
         const randomIndex = Math.floor(Math.random() * nicknameData.length);
         const randomAvatarIndex = Math.floor(Math.random() * 36) + 1;
         const randomNickname = nicknameData[randomIndex];
-        const userNo = await generateNo(this.userRepository, "userNo");
 
         // 创建用户
         const savedUser = await this.create(
@@ -755,7 +706,6 @@ export class AuthService extends BaseService<User> {
                 status: BooleanNumber.YES, // 默认启用
                 source: UserCreateSource.WECHAT, // 标记为微信注册
                 avatar: `/static/avatars/${randomAvatarIndex}.png`,
-                userNo,
             },
             { excludeFields: ["password", "openid"] },
         );

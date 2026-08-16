@@ -4,6 +4,7 @@ export * from "./agent-config";
 export * from "./agent-decorate";
 export * from "./agent-message";
 export * from "./agents";
+export * from "./agent-skill";
 export * from "./ai-provider";
 export * from "./apps-decorate";
 export * from "./auth";

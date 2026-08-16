@@ -341,7 +341,7 @@ export class AgentChatCompletionService {
                         );
                         const useToolForDocuments = hasToolSupport && documentContents.length > 0;
 
-                        const systemPrompt = this.promptBuilder.buildSystemPrompt(
+                        const systemPrompt = await this.promptBuilder.buildSystemPrompt(
                             agent,
                             userMemories,
                             agentMemories,

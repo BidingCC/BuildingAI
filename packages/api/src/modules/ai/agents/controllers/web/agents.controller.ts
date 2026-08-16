@@ -21,12 +21,15 @@ import {
     AgentDashboardService,
 } from "../../services/agent-dashboard.service";
 import { AgentsService } from "../../services/agents.service";
+import { CozeApiService } from "../../integrations/coze-api.service";
+import type { ThirdPartyIntegrationConfig } from "@buildingai/types";
 
 @WebController("ai-agents")
 export class AgentsWebController {
     constructor(
         private readonly agentsService: AgentsService,
         private readonly agentDashboardService: AgentDashboardService,
+        private readonly cozeApiService: CozeApiService,
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
     ) {}
@@ -137,5 +140,20 @@ export class AgentsWebController {
     @Delete(":id")
     async deleteAgent(@Playground() user: UserPlayground, @Param("id") id: string): Promise<void> {
         await this.agentsService.deleteAgent(id, user.id);
+    }
+
+    /**
+     * 测试 Coze 第三方连接。
+     * 根据 apiVersion 自动选择旧版（v1）或新版（v2）测试方式。
+     */
+    @Post("test-coze-connection")
+    async testCozeConnection(
+        @Body() body: { config: ThirdPartyIntegrationConfig },
+    ): Promise<{ success: boolean; message: string }> {
+        const apiVersion = body.config?.apiVersion || "v1";
+        if (apiVersion === "v2") {
+            return this.cozeApiService.testConnectionV2(body.config);
+        }
+        return this.cozeApiService.testConnectionV1(body.config);
     }
 }

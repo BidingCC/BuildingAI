@@ -113,7 +113,7 @@ export const UserMessageActions = memo(function UserMessageActions({
 
   return (
     <>
-      <AIMessageContent className="break-words whitespace-pre-wrap">{content}</AIMessageContent>
+      <AIMessageContent>{content}</AIMessageContent>
       <AIMessageToolbar className="mt-2 flex min-w-0 justify-end">
         <AIMessageActions className="opacity-0 transition-opacity group-hover:opacity-100">
           {onSend && (

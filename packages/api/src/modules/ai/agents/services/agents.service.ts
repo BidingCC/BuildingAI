@@ -199,6 +199,7 @@ export class AgentsService extends BaseService<Agent> {
             formFieldsInputs: dto.formFieldsInputs,
             datasetIds: dto.datasetIds,
             mcpServerIds: dto.mcpServerIds,
+            skillIds: dto.skillIds,
             toolConfig: dto.toolConfig,
             maxSteps: dto.maxSteps,
             modelRouting: dto.modelRouting,

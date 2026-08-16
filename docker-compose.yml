@@ -1,4 +1,4 @@
-name: buildingai
+name: lifeos
 
 x-resource-config: &resource-config
     deploy:
@@ -12,7 +12,7 @@ x-resource-config: &resource-config
 services:
     redis:
         image: ccr.ccs.tencentyun.com/buildingai/redis:8.2.2
-        container_name: buildingai-redis${DOCKER_CONTAINER_SUFFIX:-}
+        container_name: lifeos-redis${DOCKER_CONTAINER_SUFFIX:-}
         restart: always
         environment:
             TZ: Asia/Shanghai
@@ -23,7 +23,7 @@ services:
         volumes:
             - ./docker/data/redis:/data
         networks:
-            - buildingai-network
+            - lifeos-network
         <<: *resource-config
         healthcheck:
             test: ["CMD-SHELL", "redis-cli -a $$REDIS_PASSWORD ping"]
@@ -33,19 +33,19 @@ services:
 
     postgres:
         image: ccr.ccs.tencentyun.com/buildingai/postgres:17.6
-        container_name: buildingai-postgres${DOCKER_CONTAINER_SUFFIX:-}
+        container_name: lifeos-postgres${DOCKER_CONTAINER_SUFFIX:-}
         restart: always
         environment:
             TZ: Asia/Shanghai
             POSTGRES_USER: ${DB_USERNAME:-postgres}
             POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
-            POSTGRES_DB: ${DB_DATABASE:-buildingai}
+            POSTGRES_DB: ${DB_DATABASE:-lifeos}
         ports:
             - "${POSTGRES_EXTERNAL_PORT:-}${POSTGRES_EXTERNAL_PORT:+:}5432"
         volumes:
             - ./docker/data/postgres/postgres_data:/var/lib/postgresql/data
         networks:
-            - buildingai-network
+            - lifeos-network
         <<: *resource-config
         healthcheck:
             test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres}"]
@@ -55,70 +55,65 @@ services:
 
     nodejs:
         image: ccr.ccs.tencentyun.com/buildingai/node:22.20.0
-        container_name: buildingai-nodejs${DOCKER_CONTAINER_SUFFIX:-}
+        container_name: lifeos-nodejs${DOCKER_CONTAINER_SUFFIX:-}
         restart: on-failure:3
-        working_dir: /buildingai
+        working_dir: /lifeos
         volumes:
-            - ./:/buildingai
-            - /buildingai/node_modules
-            - /buildingai/packages/api/node_modules
-            - /buildingai/packages/cli/node_modules
-            - /buildingai/packages/core/node_modules
-            - /buildingai/packages/client/node_modules
-            - /buildingai/packages/web/@buildingai/designer/node_modules
-            - /buildingai/packages/web/@buildingai/hooks/node_modules
-            - /buildingai/packages/web/@buildingai/http/node_modules
-            - /buildingai/packages/web/@buildingai/i18n-config/node_modules
-            - /buildingai/packages/web/@buildingai/layouts/node_modules
-            - /buildingai/packages/web/@buildingai/nuxt/node_modules
-            - /buildingai/packages/web/@buildingai/service/node_modules
-            - /buildingai/packages/web/@buildingai/stores/node_modules
-            - /buildingai/packages/web/@buildingai/ui/node_modules
-            - /buildingai/packages/web/@buildingai/web-config/node_modules
-            - /buildingai/packages/@buildingai/ai-sdk/node_modules
-            - /buildingai/packages/@buildingai/base/node_modules
-            - /buildingai/packages/@buildingai/cache/node_modules
-            - /buildingai/packages/@buildingai/config/node_modules
-            - /buildingai/packages/@buildingai/constants/node_modules
-            - /buildingai/packages/@buildingai/db/node_modules
-            - /buildingai/packages/@buildingai/decorators/node_modules
-            - /buildingai/packages/@buildingai/dict/node_modules
-            - /buildingai/packages/@buildingai/di/node_modules
-            - /buildingai/packages/@buildingai/dto/node_modules
-            - /buildingai/packages/@buildingai/errors/node_modules
-            - /buildingai/packages/@buildingai/eslint-config/node_modules
-            - /buildingai/packages/@buildingai/extension-sdk/node_modules
-            - /buildingai/packages/@buildingai/logger/node_modules
-            - /buildingai/packages/@buildingai/pipe/node_modules
-            - /buildingai/packages/@buildingai/types/node_modules
-            - /buildingai/packages/@buildingai/typescript-config/node_modules
-            - /buildingai/packages/@buildingai/upgrade/node_modules
-            - /buildingai/packages/@buildingai/utils/node_modules
-            - /buildingai/packages/@buildingai/wechat-sdk/node_modules
+            - ./:/lifeos
+            - /lifeos/node_modules
+            - /lifeos/packages/api/node_modules
+            - /lifeos/packages/cli/node_modules
+            - /lifeos/packages/core/node_modules
+            - /lifeos/packages/client/node_modules
+            - /lifeos/packages/web/@buildingai/designer/node_modules
+            - /lifeos/packages/web/@buildingai/hooks/node_modules
+            - /lifeos/packages/web/@buildingai/http/node_modules
+            - /lifeos/packages/web/@buildingai/i18n-config/node_modules
+            - /lifeos/packages/web/@buildingai/layouts/node_modules
+            - /lifeos/packages/web/@buildingai/nuxt/node_modules
+            - /lifeos/packages/web/@buildingai/service/node_modules
+            - /lifeos/packages/web/@buildingai/stores/node_modules
+            - /lifeos/packages/web/@buildingai/ui/node_modules
+            - /lifeos/packages/web/@buildingai/web-config/node_modules
+            - /lifeos/packages/@buildingai/ai-sdk/node_modules
+            - /lifeos/packages/@buildingai/base/node_modules
+            - /lifeos/packages/@buildingai/cache/node_modules
+            - /lifeos/packages/@buildingai/config/node_modules
+            - /lifeos/packages/@buildingai/constants/node_modules
+            - /lifeos/packages/@buildingai/db/node_modules
+            - /lifeos/packages/@buildingai/decorators/node_modules
+            - /lifeos/packages/@buildingai/dict/node_modules
+            - /lifeos/packages/@buildingai/di/node_modules
+            - /lifeos/packages/@buildingai/dto/node_modules
+            - /lifeos/packages/@buildingai/errors/node_modules
+            - /lifeos/packages/@buildingai/eslint-config/node_modules
+            - /lifeos/packages/@buildingai/extension-sdk/node_modules
+            - /lifeos/packages/@buildingai/logger/node_modules
+            - /lifeos/packages/@buildingai/pipe/node_modules
+            - /lifeos/packages/@buildingai/types/node_modules
+            - /lifeos/packages/@buildingai/typescript-config/node_modules
+            - /lifeos/packages/@buildingai/upgrade/node_modules
+            - /lifeos/packages/@buildingai/utils/node_modules
+            - /lifeos/packages/@buildingai/wechat-sdk/node_modules
         ports:
-            - "${SERVER_PORT:-4090}:${SERVER_PORT:-4090}"
+            - "${SERVER_PORT:-4091}:${SERVER_PORT:-4091}"
         environment:
             TZ: Asia/Shanghai
-            SERVER_PORT: ${SERVER_PORT:-4090}
+            SERVER_PORT: ${SERVER_PORT:-4091}
             QUICK_START_MODE: ${QUICK_START_MODE:-false}
             NPM_REGISTRY_URL: ${NPM_REGISTRY_URL:-}
-            DB_TYPE: ${DB_TYPE:-postgres}
             DB_USERNAME: ${DB_USERNAME:-postgres}
             DB_PASSWORD: ${DB_PASSWORD:-postgres}
-            DB_DATABASE: ${DB_DATABASE:-buildingai}
-            # Read from .env; loopback hosts are remapped to compose services in command below
-            DB_HOST: ${DB_HOST:-postgres}
-            DB_PORT: ${DB_PORT:-5432}
-            DB_SYNCHRONIZE: ${DB_SYNCHRONIZE:-false}
-            DB_DEV_SYNCHRONIZE: ${DB_DEV_SYNCHRONIZE:-true}
-            DB_LOGGING: ${DB_LOGGING:-true}
-            REDIS_HOST: ${REDIS_HOST:-redis}
-            REDIS_PORT: ${REDIS_PORT:-6379}
+            DB_DATABASE: ${DB_DATABASE:-lifeos}
+            DB_HOST: postgres
+            DB_PORT: 5432
+            REDIS_HOST: redis
+            REDIS_PORT: 6379
             REDIS_PASSWORD: ${REDIS_PASSWORD:-}
         command: |
             sh -c '
             set -e
-            echo "🚀 Starting BuildingAI container..."
+            echo "🚀 Starting LifeOS container..."
 
             if [ -n "$NPM_REGISTRY_URL" ]; then
             echo "🔧 Using custom registry: $NPM_REGISTRY_URL"
@@ -142,21 +137,11 @@ services:
             fi
             fi
 
-            # localhost inside a container is the container itself, not host Postgres/Redis
-            if [ "$DB_HOST" = "localhost" ] || [ "$DB_HOST" = "127.0.0.1" ]; then
-            export DB_HOST=postgres
-            echo "🔀 DB_HOST localhost -> postgres (Docker network)"
-            fi
-            if [ "$REDIS_HOST" = "localhost" ] || [ "$REDIS_HOST" = "127.0.0.1" ]; then
-            export REDIS_HOST=redis
-            echo "🔀 REDIS_HOST localhost -> redis (Docker network)"
-            fi
-
-            echo "🎯 Starting BuildingAI..."
+            echo "🎯 Starting LifeOS..."
             exec pnpm start --no-daemon
             '
         networks:
-            - buildingai-network
+            - lifeos-network
         <<: *resource-config
         depends_on:
             redis:
@@ -164,12 +149,12 @@ services:
             postgres:
                 condition: service_healthy
         healthcheck:
-            test: ["CMD-SHELL", "curl -f http://localhost:${SERVER_PORT:-4090}/consoleapi/health || pnpm pm2 describe ${PM2_APP_NAME:-buildingai-api} | grep -q 'online' || exit 1"]
+            test: ["CMD-SHELL", "curl -f http://localhost:${SERVER_PORT:-4091}/consoleapi/health || pnpm pm2 describe ${PM2_APP_NAME:-lifeos-api} | grep -q 'online' || exit 1"]
             interval: 30s
             timeout: 10s
             retries: 3
             start_period: 600s
 
 networks:
-    buildingai-network:
+    lifeos-network:
         driver: bridge

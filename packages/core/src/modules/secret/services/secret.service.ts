@@ -411,11 +411,6 @@ export class SecretService extends BaseService<Secret> {
             throw HttpErrorFactory.notFound("密钥配置不存在");
         }
 
-        // 检查密钥配置是否激活
-        if (!config.status) {
-            throw HttpErrorFactory.business("密钥配置未开启， 请联系管理员");
-        }
-
         // Create template field mapping for easy lookup of field's required property
         const templateFieldMap = new Map();
         if (config.template && config.template.fieldConfig) {

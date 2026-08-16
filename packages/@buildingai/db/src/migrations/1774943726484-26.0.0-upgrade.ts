@@ -788,6 +788,29 @@ export class Migration1774943726484 implements MigrationInterface {
         await queryRunner.query(
             `DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'FK_6036b74579c7c11571e7f8f06c2') THEN ALTER TABLE "datasets_tags" ADD CONSTRAINT "FK_6036b74579c7c11571e7f8f06c2" FOREIGN KEY ("tag_id") REFERENCES "tag"("id") ON DELETE NO ACTION ON UPDATE NO ACTION; END IF; END $$`,
         );
+
+        // ===== agent skill support =====
+        await queryRunner.query(
+            `CREATE TABLE IF NOT EXISTS "ai_agent_skill" (
+                "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
+                "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+                "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+                "agent_id" uuid NOT NULL,
+                "name" character varying(255) NOT NULL,
+                "description" text,
+                "instructions" text NOT NULL,
+                "source_type" character varying(20) NOT NULL,
+                "source_ref" text NOT NULL,
+                "file_meta" jsonb,
+                CONSTRAINT "PK_ai_agent_skill" PRIMARY KEY ("id")
+            )`,
+        );
+        await queryRunner.query(
+            `CREATE INDEX IF NOT EXISTS "IDX_ai_agent_skill_agent_id" ON "ai_agent_skill" ("agent_id")`,
+        );
+        await queryRunner.query(
+            `DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'ai_agent' AND column_name = 'skill_ids') THEN ALTER TABLE "ai_agent" ADD "skill_ids" text; END IF; END $$`,
+        );
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
@@ -1368,5 +1391,11 @@ export class Migration1774943726484 implements MigrationInterface {
         await queryRunner.query(
             `ALTER TABLE "ai_agent_annotation" ADD CONSTRAINT "FK_1b7295e37ffc1156e34f650949e" FOREIGN KEY ("reviewed_by") REFERENCES "user"("id") ON DELETE SET NULL ON UPDATE NO ACTION`,
         );
+
+        // ===== agent skill support (down) =====
+        await queryRunner.query(
+            `DO $$ BEGIN IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'ai_agent' AND column_name = 'skill_ids') THEN ALTER TABLE "ai_agent" DROP COLUMN "skill_ids"; END IF; END $$`,
+        );
+        await queryRunner.query(`DROP TABLE IF EXISTS "ai_agent_skill"`);
     }
 }

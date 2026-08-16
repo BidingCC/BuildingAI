@@ -1,8 +1,10 @@
 import { type PagePathInfo, parsePageModules } from "@buildingai/hooks";
 import {
+  type ConsoleAgentItem,
   type DecorateMenuConfig,
   type DecorateMenuGroup,
   type DecorateMenuItem,
+  useConsoleAgentsListQuery,
   useDecorateMenuConfigQuery,
   useExtensionMenusQuery,
   useSetDecorateMenuConfigMutation,
@@ -227,6 +229,7 @@ const MenuFormDialog = ({
   const skipLinkTypeSideEffectsRef = useRef(false);
   const isEditMode = !!editItem;
   const isEditingFixed = !!editItem && isFixedMenu(editItem.id);
+  const isEditingHome = editItem?.id === MENU_HOME_FIXED;
   const isEditingHistory = editItem?.id === MENU_HISTORY_FIXED;
   const form = useForm<MenuFormValues>({
     resolver: zodResolver(menuFormSchema as any),
@@ -237,6 +240,11 @@ const MenuFormDialog = ({
   const { data: extensionMenus = [] } = useExtensionMenusQuery({
     enabled: linkType === "extension",
   });
+  const { data: agentsData } = useConsoleAgentsListQuery(
+    { pageSize: 200 },
+    { enabled: linkType === "agent" },
+  );
+  const agents = agentsData?.items ?? [];
 
   useEffect(() => {
     if (open) {
@@ -323,7 +331,7 @@ const MenuFormDialog = ({
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
-                    disabled={isEditingFixed}
+                    disabled={isEditingFixed && !isEditingHome}
                   >
                     <FormControl>
                       <SelectTrigger className="w-full">
@@ -332,6 +340,7 @@ const MenuFormDialog = ({
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="system">系统页面</SelectItem>
+                      <SelectItem value="agent">智能体</SelectItem>
                       <SelectItem value="extension">扩展页面</SelectItem>
                       <SelectItem value="custom">自定义链接</SelectItem>
                       <SelectItem value="button">按钮</SelectItem>
@@ -341,7 +350,7 @@ const MenuFormDialog = ({
                 </FormItem>
               )}
             />
-            {linkType !== "button" && linkType !== "extension" && !isEditingHistory && (
+            {linkType !== "button" && linkType !== "extension" && linkType !== "agent" && !isEditingHistory && (
               <FormField
                 control={form.control}
                 name="link.path"
@@ -381,6 +390,60 @@ const MenuFormDialog = ({
                         ))}
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+            {linkType === "agent" && (
+              <FormField
+                control={form.control}
+                name="link.query"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel required>选择智能体</FormLabel>
+                    <FormControl>
+                      <Combobox<ConsoleAgentItem>
+                        value={agents.find((a) => a.id === field.value?.agentId) ?? null}
+                        onValueChange={(agent) => {
+                          if (!agent) return;
+                          const newQuery = { ...field.value, agentId: agent.id };
+                          field.onChange(newQuery);
+                          form.setValue("link.component", "/src/pages/agents/detail/chat/index.tsx");
+                          form.setValue("link.path", `/agents/${agent.id}/chat`);
+                          form.setValue("title", agent.name);
+                        }}
+                        items={agents}
+                        itemToStringValue={(item) => item.name}
+                      >
+                        <ComboboxInput placeholder="搜索或选择智能体..." className="w-full" />
+                        <ComboboxContent container={container}>
+                          <ComboboxEmpty>未找到匹配的智能体</ComboboxEmpty>
+                          <ComboboxList>
+                            {(item) => (
+                              <ComboboxItem key={item.id} value={item}>
+                                <div className="flex items-center gap-2">
+                                  <Avatar className="size-6 rounded-sm">
+                                    <AvatarImage src={item.avatar ?? undefined} alt={item.name} />
+                                    <AvatarFallback className="rounded-sm text-xs">
+                                      {item.name.slice(0, 1)}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div className="flex min-w-0 flex-col">
+                                    <span className="truncate text-sm font-medium">{item.name}</span>
+                                    {item.description && (
+                                      <span className="text-muted-foreground truncate text-xs">
+                                        {item.description}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </ComboboxItem>
+                            )}
+                          </ComboboxList>
+                        </ComboboxContent>
+                      </Combobox>
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -957,7 +1020,7 @@ export const DecorateLayoutSidebar = () => {
       path: values.link.path,
       type: values.link.type,
       query: values.link.query,
-      component: values.link.type === "system" ? values.link.component : null,
+      component: values.link.type === "system" || values.link.type === "agent" ? values.link.component : null,
       target: values.link.target,
     };
 
