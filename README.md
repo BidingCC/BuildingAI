@@ -89,7 +89,7 @@ the [Q&A forum](https://www.buildingai.cc/question).
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=BidingCC/BuildingAI&type=Date)](https://www.star-history.com/#BidingCC/BuildingAI&Date)
+[![Star History Chart](https://star-history.dera.page/svg?repos=BidingCC/BuildingAI&type=Date)](https://star-history.dera.page/#BidingCC/BuildingAI&Date)
 
 ## Privacy Policy
 
