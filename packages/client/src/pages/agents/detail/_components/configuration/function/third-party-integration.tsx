@@ -7,6 +7,10 @@ import { Textarea } from "@buildingai/ui/components/ui/textarea";
 import { testCozeConnection } from "@buildingai/services/web";
 import { CheckCircle2, Loader2, XCircle } from "lucide-react";
 import { memo, useCallback, useMemo, useState } from "react";
+import {
+    smartParseJson,
+    SYSTEM_MANAGED_KEYS,
+} from "./coze-config-parser";
 
 type ThirdPartyIntegrationValue = ThirdPartyIntegrationConfig & {
   provider?: "coze" | "dify";
@@ -19,85 +23,6 @@ type ThirdPartyIntegrationProps = {
 };
 
 type ApiVersion = "v1" | "v2";
-
-// 从 curl 命令中提取 domain 和 apiToken
-function extractCurlMeta(raw: string): { domain?: string; token?: string } {
-  const result: { domain?: string; token?: string } = {};
-
-  // 提取 URL 中的 domain
-  const urlMatch = raw.match(/https?:\/\/([^\/'"]+)/);
-  if (urlMatch) {
-    result.domain = urlMatch[1];
-  }
-
-  // 提取 Authorization Bearer token
-  const tokenMatch = raw.match(/Authorization:\s*Bearer\s+([^\s'"]+)/i);
-  if (tokenMatch) {
-    result.token = tokenMatch[1];
-  }
-
-  return result;
-}
-
-// 智能解析输入内容为 JSON 对象
-function smartParseJson(rawValue: string): {
-  parsed: Record<string, any>;
-  meta: { domain?: string; token?: string };
-} | null {
-  const trimmed = rawValue.trim();
-  if (!trimmed) return null;
-
-  const meta: { domain?: string; token?: string } = {};
-  let jsonToParse = trimmed;
-
-  // 从 curl 命令中提取元数据
-  if (trimmed.startsWith("curl ")) {
-    Object.assign(meta, extractCurlMeta(trimmed));
-
-    // 提取 --data 中的 JSON
-    const dataMatch = trimmed.match(
-      /(?:--data(?:-raw)?|-d)\s+(['"])([\s\S]*?)\1/,
-    );
-    if (dataMatch) {
-      jsonToParse = dataMatch[2];
-    } else {
-      const dataBraceMatch = trimmed.match(
-        /(?:--data(?:-raw)?|-d)\s+(\{[\s\S]*\})/,
-      );
-      if (dataBraceMatch) {
-        jsonToParse = dataBraceMatch[1];
-      }
-    }
-  }
-
-  // 如果不是 JSON 开头，尝试提取 body/data 中的 JSON
-  if (!jsonToParse.startsWith("{") && !jsonToParse.startsWith("[")) {
-    const bodyMatch = jsonToParse.match(
-      /(?:body|data):\s*(?:JSON\.stringify\()?\s*(\{[\s\S]*?\})\s*\)?/,
-    );
-    if (bodyMatch) {
-      jsonToParse = bodyMatch[1];
-    }
-  }
-
-  // 回退：提取第一个 {...} 块
-  if (!jsonToParse.startsWith("{") && !jsonToParse.startsWith("[")) {
-    const firstBrace = jsonToParse.match(/(\{[\s\S]*\})/);
-    if (firstBrace) {
-      jsonToParse = firstBrace[1];
-    }
-  }
-
-  try {
-    const parsed = JSON.parse(jsonToParse);
-    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
-      return null;
-    }
-    return { parsed, meta };
-  } catch {
-    return null;
-  }
-}
 
 export const ThirdPartyIntegration = memo(
   ({ mode, value, onChange }: ThirdPartyIntegrationProps) => {
@@ -130,12 +55,8 @@ export const ThirdPartyIntegration = memo(
     const [jsonInput, setJsonInput] = useState(() => {
       if (!value?.extendedConfig) return "";
       // 排除系统管理字段，只显示用户自定义字段
-      const systemKeys = [
-        "provider", "botId", "apiVersion", "projectId",
-        "cozeSyncStatus", "cozeSyncError",
-        "difySyncStatus", "difySyncError",
-      ];
-      const userFields: Record<string, any> = {};
+      const systemKeys = SYSTEM_MANAGED_KEYS;
+      const userFields: Record<string, unknown> = {};
       for (const [k, v] of Object.entries(value.extendedConfig)) {
         if (!systemKeys.includes(k)) {
           userFields[k] = v;
@@ -146,6 +67,8 @@ export const ThirdPartyIntegration = memo(
         : "";
     });
     const [jsonError, setJsonError] = useState<string | null>(null);
+    // F3：本地草稿，避免把已存明文 apiKey 回填到密码框
+    const [apiKeyDraft, setApiKeyDraft] = useState("");
 
     // 从 JSON 中提取到的 Domain 显示
     const [extractedDomain, setExtractedDomain] = useState<string | null>(() => {
@@ -203,17 +126,26 @@ export const ThirdPartyIntegration = memo(
 
     const handleApiVersionChange = useCallback(
       (version: ApiVersion) => {
+        // 切换版本时仅清空版本不兼容字段；保留共用凭证 apiKey，避免误清空（F3）
         const patch: Partial<ThirdPartyIntegrationValue> = {
           apiVersion: version,
           appId: "",
           baseURL: "",
-          apiKey: "",
           projectId: "",
         };
         update(patch, true);
         setJsonInput("");
         setJsonError(null);
         setExtractedDomain(null);
+      },
+      [update],
+    );
+
+    // F3：密码框不回显明文；仅当用户实际输入非空时才覆盖 apiKey，避免误清空与明文回填
+    const handleApiKeyChange = useCallback(
+      (raw: string) => {
+        setApiKeyDraft(raw);
+        if (raw) update({ apiKey: raw.trim() });
       },
       [update],
     );
@@ -243,13 +175,9 @@ export const ThirdPartyIntegration = memo(
         if (!rawValue.trim()) {
           setJsonError(null);
           setExtractedDomain(null);
-          const systemKeys = [
-            "provider", "botId", "apiVersion", "projectId",
-            "cozeSyncStatus", "cozeSyncError",
-            "difySyncStatus", "difySyncError",
-          ];
+          const systemKeys = SYSTEM_MANAGED_KEYS;
           const currentExt = config.extendedConfig ?? {};
-          const systemFields: Record<string, any> = {};
+          const systemFields: Record<string, unknown> = {};
           for (const [k, v] of Object.entries(currentExt)) {
             if (systemKeys.includes(k)) {
               systemFields[k] = v;
@@ -275,7 +203,7 @@ export const ThirdPartyIntegration = memo(
           "domain", // curl 中提取的域名，不保存
         ]);
         const currentExt = config.extendedConfig ?? {};
-        const extraConfig: Record<string, any> = { ...currentExt };
+        const extraConfig: Record<string, unknown> = { ...currentExt };
         // 只添加不在核心字段列表中的用户字段
         for (const [k, v] of Object.entries(result.parsed)) {
           if (!cozeBodyCoreKeys.has(k)) {
@@ -393,11 +321,11 @@ export const ThirdPartyIntegration = memo(
                 </Label>
                 <Input
                   type="password"
-                  placeholder="请输入平台 API Key"
-                  value={config.apiKey ?? ""}
+                  placeholder={config.apiKey ? "已配置，留空保持不变" : "请输入平台 API Key"}
+                  value={apiKeyDraft}
                   className="bg-background"
                   autoComplete="new-password"
-                  onChange={(e) => update({ apiKey: e.target.value.trim() })}
+                  onChange={(e) => handleApiKeyChange(e.target.value)}
                 />
               </div>
             </>
@@ -412,11 +340,11 @@ export const ThirdPartyIntegration = memo(
                 </Label>
                 <Input
                   type="password"
-                  placeholder="请输入个人访问令牌（pat_xxx）"
-                  value={config.apiKey ?? ""}
+                  placeholder={config.apiKey ? "已配置，留空保持不变" : "请输入个人访问令牌（pat_xxx）"}
+                  value={apiKeyDraft}
                   className="bg-background"
                   autoComplete="new-password"
-                  onChange={(e) => update({ apiKey: e.target.value.trim() })}
+                  onChange={(e) => handleApiKeyChange(e.target.value)}
                 />
               </div>
 

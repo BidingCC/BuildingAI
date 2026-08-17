@@ -14,6 +14,7 @@ import {
 import { IsString, IsUrl } from "class-validator";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { Playground } from "@buildingai/decorators/playground.decorator";
+import { HttpErrorFactory } from "@buildingai/errors";
 import type { Request } from "express";
 
 import { AiAgentSkillService } from "../../services/ai-agent-skill.service";
@@ -41,7 +42,7 @@ export class AiAgentSkillWebController {
         @Req() request: Request,
     ) {
         if (!file) {
-            throw new Error("缺少上传文件");
+            throw HttpErrorFactory.badRequest("缺少上传文件");
         }
         return this.skillService.addByUpload(agentId, file, user, request);
     }
@@ -67,7 +68,7 @@ export class AiAgentSkillWebController {
         @Playground() user: UserPlayground,
         @Param("agentId") agentId: string,
     ) {
-        return this.skillService.listByAgent(agentId, user.id);
+        return this.skillService.listByAgent(agentId, user);
     }
 
     /**
@@ -75,7 +76,7 @@ export class AiAgentSkillWebController {
      */
     @Delete(":id")
     async remove(@Playground() user: UserPlayground, @Param("id") id: string) {
-        await this.skillService.remove(id, user.id);
+        await this.skillService.remove(id, user);
         return { success: true };
     }
 }

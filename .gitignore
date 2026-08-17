@@ -81,3 +81,6 @@ bazi-*.png
 luck-tab*.png
 public/web/assets/
 public/web/extensions/
+
+# AI offline knowledge base (mirror of doc.buildingai.cc/llms.txt, not committed)
+.codebuddy/knowledge/

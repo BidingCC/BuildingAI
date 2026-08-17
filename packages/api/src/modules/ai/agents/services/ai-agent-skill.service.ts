@@ -1,7 +1,8 @@
 import { execFile } from "node:child_process";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readdir, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { isAbsolute, join, relative } from "node:path";
+import { URL } from "node:url";
 import { promisify } from "node:util";
 
 import { BaseService } from "@buildingai/base";
@@ -50,7 +51,7 @@ export class AiAgentSkillService extends BaseService<AiAgentSkill> {
         user: UserPlayground,
         request: Request,
     ): Promise<AiAgentSkill> {
-        const agent = await this.requireOwnedAgent(agentId, user.id);
+        const agent = await this.requireOwnedAgent(agentId, user);
         const tmpDir = await mkdtemp(join(tmpdir(), "skill-upload-"));
         try {
             // FileInterceptor 默认使用内存存储，file.path 为 undefined，只有 file.buffer。
@@ -67,6 +68,9 @@ export class AiAgentSkillService extends BaseService<AiAgentSkill> {
 
             // 2. 解压到临时目录（使用系统 unzip，避免引入 zip 依赖）
             await execFileAsync("unzip", ["-o", "-q", zipPath, "-d", tmpDir]);
+
+            // 2.1 zip-slip 防护：校验解压后所有条目真实路径均落在临时目录内（B7）
+            await this.assertNoZipSlip(tmpDir);
 
             // 3. 解析 skill 定义
             const parsed = this.skillParser.parseDirectory(
@@ -98,15 +102,13 @@ export class AiAgentSkillService extends BaseService<AiAgentSkill> {
         user: UserPlayground,
         request: Request,
     ): Promise<AiAgentSkill> {
-        const agent = await this.requireOwnedAgent(agentId, user.id);
-        if (!/^https?:\/\/.+/.test(gitUrl)) {
-            throw HttpErrorFactory.badRequest("请提供合法的 git 仓库 URL（http/https）");
-        }
+        const agent = await this.requireOwnedAgent(agentId, user);
+        this.validateGitUrl(gitUrl);
 
         const tmpDir = await mkdtemp(join(tmpdir(), "skill-git-"));
         try {
-            // 1. 浅克隆
-            await execFileAsync("git", ["clone", "--depth", "1", gitUrl, tmpDir], {
+            // 1. 浅克隆（-- 终止符防止 URL 被当作 git 选项解析，缓解选项注入）
+            await execFileAsync("git", ["clone", "--depth", "1", "--", gitUrl, tmpDir], {
                 timeout: 60_000,
             });
 
@@ -130,8 +132,8 @@ export class AiAgentSkillService extends BaseService<AiAgentSkill> {
     /**
      * 列出某智能体的全部 skill
      */
-    async listByAgent(agentId: string, userId: string): Promise<AiAgentSkill[]> {
-        await this.requireOwnedAgent(agentId, userId);
+    async listByAgent(agentId: string, user: UserPlayground): Promise<AiAgentSkill[]> {
+        await this.requireOwnedAgent(agentId, user);
         return this.skillRepository.find({
             where: { agentId },
             order: { createdAt: "DESC" },
@@ -141,20 +143,34 @@ export class AiAgentSkillService extends BaseService<AiAgentSkill> {
     /**
      * 删除 skill 并解绑
      */
-    async remove(skillId: string, userId: string): Promise<void> {
+    async remove(skillId: string, user: UserPlayground): Promise<void> {
         const skill = await this.skillRepository.findOne({ where: { id: skillId } });
         if (!skill) throw HttpErrorFactory.notFound("Skill 不存在");
-        await this.requireOwnedAgent(skill.agentId, userId);
+        await this.requireOwnedAgent(skill.agentId, user);
         await this.skillRepository.delete({ id: skillId });
+
+        // 同步清理 agent.skillIds，避免孤儿引用
+        const agent = await this.agentRepository.findOne({ where: { id: skill.agentId } });
+        if (agent?.skillIds?.includes(skillId)) {
+            agent.skillIds = agent.skillIds.filter((id) => id !== skillId);
+            await this.agentRepository.save(agent);
+        }
     }
 
     /**
      * 校验智能体存在且属于当前用户
      */
-    private async requireOwnedAgent(agentId: string, userId: string): Promise<Agent> {
+    private async requireOwnedAgent(agentId: string, user: UserPlayground): Promise<Agent> {
         const agent = await this.agentRepository.findOne({ where: { id: agentId } });
         if (!agent) throw HttpErrorFactory.notFound("智能体不存在");
-        if (agent.createBy && agent.createBy !== userId) {
+        // 系统/模板智能体（createBy 为空）仅 isRoot 用户可管理，普通用户一律禁止（B5）
+        if (!agent.createBy) {
+            if (user.isRoot !== 1) {
+                throw HttpErrorFactory.forbidden("无权限操作系统智能体");
+            }
+            return agent;
+        }
+        if (agent.createBy !== user.id) {
             throw HttpErrorFactory.forbidden("无权限操作该智能体");
         }
         return agent;
@@ -168,7 +184,7 @@ export class AiAgentSkillService extends BaseService<AiAgentSkill> {
         parsed: ParsedSkill,
         sourceType: "upload" | "git",
         sourceRef: string,
-        fileMeta: Record<string, any>,
+        fileMeta: Record<string, unknown>,
     ): Promise<AiAgentSkill> {
         const skill = await this.skillRepository.save(
             this.skillRepository.create({
@@ -191,8 +207,61 @@ export class AiAgentSkillService extends BaseService<AiAgentSkill> {
         return skill;
     }
 
+    private validateGitUrl(gitUrl: string): void {
+        let parsed: URL;
+        try {
+            parsed = new URL(gitUrl);
+        } catch {
+            throw HttpErrorFactory.badRequest("请提供合法的 git 仓库 URL");
+        }
+        if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+            throw HttpErrorFactory.badRequest("仅支持 http/https 协议的 git 仓库 URL");
+        }
+        if (parsed.username || parsed.password) {
+            throw HttpErrorFactory.badRequest("git 仓库 URL 不允许包含账号或密码");
+        }
+        const host = parsed.hostname.toLowerCase();
+        // SSRF 防护：阻止访问本地/内网地址
+        if (
+            host === "localhost" ||
+            host === "0.0.0.0" ||
+            host.endsWith(".local") ||
+            host.endsWith(".internal") ||
+            host.startsWith("127.") ||
+            host.startsWith("10.") ||
+            host.startsWith("192.168.") ||
+            host.startsWith("169.254.") ||
+            (host.startsWith("172.") && /^172\.(1[6-9]|2\d|3[01])\./.test(host)) ||
+            host === "[::1]" ||
+            host.startsWith("fe80")
+        ) {
+            throw HttpErrorFactory.badRequest("不支持的 git 仓库地址");
+        }
+    }
+
     private nameFromUrl(url: string): string {
         const last = url.replace(/\.git$/i, "").split(/[\\/]/).pop() || "git-skill";
         return last;
+    }
+
+    /**
+     * zip-slip 防护：递归校验解压目录内所有条目真实路径均落在 rootDir 内（B7）。
+     * 防御恶意 zip 通过 `../` 等路径将文件写到临时目录之外。
+     */
+    private async assertNoZipSlip(rootDir: string): Promise<void> {
+        const stack = [rootDir];
+        while (stack.length) {
+            const dir = stack.pop() as string;
+            const entries = await readdir(dir, { withFileTypes: true });
+            for (const entry of entries) {
+                const full = join(dir, entry.name);
+                const real = await realpath(full);
+                const rel = relative(rootDir, real);
+                if (rel === "" || isAbsolute(rel) || rel.startsWith("..")) {
+                    throw HttpErrorFactory.badRequest("压缩包包含非法路径，已拒绝");
+                }
+                if (entry.isDirectory()) stack.push(full);
+            }
+        }
     }
 }

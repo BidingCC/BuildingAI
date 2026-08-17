@@ -6,6 +6,7 @@ import { type UserPlayground } from "@buildingai/db";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
 import {
     Agent,
+    AiAgentSkill,
     AiMcpServer,
     Datasets,
     McpServerType,
@@ -45,6 +46,8 @@ export class AgentsService extends BaseService<Agent> {
         private readonly mcpServerRepository: Repository<AiMcpServer>,
         @InjectRepository(Datasets)
         private readonly datasetsRepository: Repository<Datasets>,
+        @InjectRepository(AiAgentSkill)
+        private readonly skillRepository: Repository<AiAgentSkill>,
         private readonly cozeAgentSyncService: CozeAgentSyncService,
         private readonly difyAgentSyncService: DifyAgentSyncService,
         private readonly agentConfigService: AgentConfigService,
@@ -73,6 +76,18 @@ export class AgentsService extends BaseService<Agent> {
             throw HttpErrorFactory.badRequest("标签不存在");
         }
         (agent as Agent & { tags?: Tag[] }).tags = tags;
+    }
+
+    private async requireOwnedSkills(skillIds: string[], agentId: string): Promise<void> {
+        if (skillIds.length === 0) return;
+        const count = await this.skillRepository.count({
+            where: { id: In(skillIds), agentId },
+        });
+        if (count !== skillIds.length) {
+            throw HttpErrorFactory.badRequest(
+                "skillIds 包含不存在或不属于该智能体的 skill",
+            );
+        }
     }
 
     async createAgent(user: UserPlayground, dto: CreateAgentDto): Promise<Agent> {
@@ -172,6 +187,11 @@ export class AgentsService extends BaseService<Agent> {
 
         if (dto.createMode !== undefined && dto.createMode !== agent.createMode) {
             throw HttpErrorFactory.badRequest("创建方式不可修改");
+        }
+
+        // skillIds 归属校验：仅允许绑定属于本智能体的 skill，防止越权绑定他人 skill
+        if (dto.skillIds) {
+            await this.requireOwnedSkills(dto.skillIds, agent.id);
         }
 
         const next = {
@@ -591,6 +611,8 @@ export class AgentsService extends BaseService<Agent> {
             throw HttpErrorFactory.badRequest("已发布到广场的智能体不能删除，请先撤回广场发布");
         }
 
+        // 删除智能体前先清理其关联的 skill 行，避免孤儿数据
+        await this.skillRepository.delete({ agentId });
         await this.agentRepository.delete(agentId);
     }
 

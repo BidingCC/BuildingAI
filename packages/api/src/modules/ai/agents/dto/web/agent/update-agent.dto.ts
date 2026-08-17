@@ -134,7 +134,7 @@ export class UpdateAgentDto {
 
     @IsOptional()
     @IsArray()
-    @IsString({ each: true })
+    @IsUUID("4", { each: true })
     skillIds?: string[];
 
     @IsOptional()

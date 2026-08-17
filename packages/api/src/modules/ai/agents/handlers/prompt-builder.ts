@@ -10,8 +10,12 @@ import type { Agent, AgentMemory, UserMemory } from "@buildingai/db/entities";
 import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
 import { AiAgentSkill } from "@buildingai/db/entities";
 import { Repository } from "@buildingai/db/typeorm";
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { In } from "@buildingai/db/typeorm";
+
+// B6：注入 Skill 指令时的上限保护，防止超长/过多 skill 撑爆上下文
+const MAX_SKILL_INJECT = 10;
+const MAX_SKILL_INSTRUCTION_CHARS = 8000;
 
 export interface PromptBuildOptions {
     formVariables?: Record<string, string>;
@@ -26,6 +30,8 @@ export interface PromptBuildOptions {
 
 @Injectable()
 export class PromptBuilder {
+    private readonly logger = new Logger(PromptBuilder.name);
+
     constructor(
         @InjectRepository(AiAgentSkill)
         private readonly skillRepository: Repository<AiAgentSkill>,
@@ -96,17 +102,28 @@ export class PromptBuilder {
         }
 
         // 注入智能体绑定的 Skill 指令（指令+知识型）
+        // B6：限制注入数量与单条指令长度，防止超长/过多 skill 撑爆上下文
         if (agent.skillIds?.length) {
+            const limitedIds = agent.skillIds.slice(0, MAX_SKILL_INJECT);
             const skills = await this.skillRepository.find({
-                where: { id: In(agent.skillIds) },
+                where: { id: In(limitedIds) },
             });
             if (skills.length > 0) {
+                if (agent.skillIds.length > MAX_SKILL_INJECT) {
+                    this.logger.warn(
+                        `智能体 ${agent.id} 绑定 ${agent.skillIds.length} 个 skill，仅注入前 ${MAX_SKILL_INJECT} 个`,
+                    );
+                }
                 const skillSections = skills
                     .map((s) => {
                         const header = s.description
                             ? `### ${s.name}\n${s.description}`
                             : `### ${s.name}`;
-                        return `${header}\n\n${s.instructions}`;
+                        const instructions =
+                            s.instructions && s.instructions.length > MAX_SKILL_INSTRUCTION_CHARS
+                                ? `${s.instructions.slice(0, MAX_SKILL_INSTRUCTION_CHARS)}\n…[指令过长已截断]`
+                                : s.instructions;
+                        return `${header}\n\n${instructions}`;
                     })
                     .join("\n\n---\n\n");
                 sections.push(

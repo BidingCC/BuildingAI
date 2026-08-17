@@ -1,0 +1,720 @@
+<!-- 本工作台通过本地单文件 HTML + localStorage 搭建（资料库 skill 未加载，启用本地兜底方案） -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>天赋教练工作台</title>
+<style>
+  :root{
+    --primary:#4F46E5;
+    --primary-soft:#EEF0FF;
+    --accent:#F59E0B;
+    --bg:#F5F7FB;
+    --card:#FFFFFF;
+    --text:#1E293B;
+    --muted:#64748B;
+    --line:#E7EAF3;
+    --red:#EF4444;
+    --green:#10B981;
+    --radius:16px;
+    --shadow:0 6px 20px rgba(30,41,59,0.06);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);font-size:15px;line-height:1.6;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  /* ===== Layout ===== */
+  .app{display:flex;min-height:100vh;}
+  .sidebar{
+    width:220px;flex:0 0 220px;background:#fff;border-right:1px solid var(--line);
+    padding:22px 14px;position:sticky;top:0;height:100vh;overflow-y:auto;
+  }
+  .brand{display:flex;align-items:center;gap:10px;padding:0 8px 18px;}
+  .brand .logo{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--primary),#7C6CF5);
+    display:flex;align-items:center;justify-content:center;color:#fff;flex:0 0 auto;}
+  .brand h1{font-size:16px;margin:0;line-height:1.2;}
+  .brand small{color:var(--muted);font-size:11px;}
+  .nav{display:flex;flex-direction:column;gap:6px;margin-top:8px;}
+  .nav button{
+    display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:0;background:transparent;
+    padding:11px 12px;border-radius:11px;color:var(--text);font-size:14px;cursor:pointer;font-weight:500;
+  }
+  .nav button svg{width:18px;height:18px;flex:0 0 auto;}
+  .nav button.active{background:var(--primary-soft);color:var(--primary);font-weight:600;}
+  .nav button:hover{background:#F1F3F9;}
+
+  .main{flex:1;min-width:0;padding:22px 26px 40px;max-width:920px;}
+  @media(max-width:768px){
+    .sidebar{display:none;}
+    .main{padding:14px 14px 96px;}
+  }
+
+  /* ===== Header ===== */
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px;}
+  .topbar h2{margin:0;font-size:20px;}
+  .topbar .sub{color:var(--muted);font-size:13px;margin-top:2px;}
+  .tools{display:flex;gap:8px;flex-wrap:wrap;}
+  .btn{
+    display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;color:var(--text);
+    padding:8px 12px;border-radius:10px;font-size:13px;cursor:pointer;font-weight:500;min-height:40px;
+  }
+  .btn svg{width:15px;height:15px;}
+  .btn:hover{background:#F7F8FC;}
+  .btn.primary{background:var(--primary);color:#fff;border-color:var(--primary);}
+  .btn.primary:hover{background:#4338CA;}
+  .btn.ghost{border-color:transparent;color:var(--muted);}
+  .sync{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);
+    background:#fff;border:1px solid var(--line);padding:6px 10px;border-radius:20px;}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);}
+  .dot.ok{background:var(--green);}
+
+  /* ===== Today card ===== */
+  .today{
+    background:linear-gradient(135deg,#FFF7ED,#FFFBEB);border:1px solid #FDE68A;border-radius:var(--radius);
+    padding:16px 18px;margin-bottom:20px;box-shadow:var(--shadow);
+  }
+  .today h3{margin:0 0 10px;font-size:15px;display:flex;align-items:center;gap:8px;}
+  .today h3 svg{width:18px;height:18px;color:var(--accent);}
+  .today .empty{color:var(--muted);font-size:13px;padding:4px 0;}
+  .todo{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:11px;background:#fff;margin-bottom:8px;border:1px solid #FDE68A;}
+  .todo.overdue .label{color:var(--red);font-weight:700;}
+  .todo .meta{font-size:12px;color:var(--muted);}
+  .todo .grow{flex:1;min-width:0;}
+  .todo .title{font-weight:600;font-size:14px;}
+  .todo .label{font-size:12px;margin-right:6px;}
+  .mini{flex:0 0 auto;border:0;background:var(--primary);color:#fff;border-radius:9px;padding:7px 11px;font-size:13px;cursor:pointer;min-height:36px;}
+  .mini:hover{background:#4338CA;}
+
+  /* ===== Cards / module ===== */
+  .panel{display:none;}
+  .panel.active{display:block;animation:fade .2s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+  .sec-head{display:flex;align-items:center;justify-content:space-between;margin:4px 0 14px;}
+  .sec-head h3{margin:0;font-size:16px;}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px;box-shadow:var(--shadow);}
+  .row{display:flex;align-items:flex-start;gap:12px;}
+  .item-title{font-weight:600;font-size:15px;}
+  .item-sub{font-size:12.5px;color:var(--muted);margin-top:3px;}
+  .pill{display:inline-block;font-size:11.5px;padding:3px 9px;border-radius:20px;background:var(--primary-soft);color:var(--primary);font-weight:600;margin-right:6px;margin-top:6px;}
+  .pill.warn{background:#FEF3C7;color:#B45309;}
+  .pill.green{background:#D1FAE5;color:#047857;}
+  .pill.gray{background:#F1F5F9;color:var(--muted);}
+  .grow{flex:1;min-width:0;}
+  .icon-btn{border:0;background:transparent;color:var(--muted);cursor:pointer;padding:6px;border-radius:8px;min-width:36px;min-height:36px;}
+  .icon-btn:hover{background:#F1F3F9;color:var(--red);}
+  .check-btn{width:24px;height:24px;border-radius:50%;border:2px solid var(--line);background:#fff;cursor:pointer;flex:0 0 auto;display:flex;align-items:center;justify-content:center;padding:0;}
+  .check-btn.done{background:var(--green);border-color:var(--green);}
+  .check-btn.done svg{color:#fff;}
+
+  /* ===== Forms ===== */
+  .form{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:16px;box-shadow:var(--shadow);}
+  .form.hidden{display:none;}
+  .field{margin-bottom:11px;}
+  .field label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:5px;font-weight:600;}
+  input[type=text],input[type=date],textarea,select{
+    width:100%;border:1px solid var(--line);border-radius:10px;padding:11px 12px;font-size:16px;
+    font-family:inherit;background:#fff;color:var(--text);
+  }
+  textarea{resize:vertical;min-height:64px;}
+  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft);}
+  .form-actions{display:flex;gap:8px;margin-top:4px;}
+
+  .client-pick{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+  .chip{border:1px solid var(--line);background:#fff;border-radius:20px;padding:7px 13px;font-size:13px;cursor:pointer;min-height:38px;}
+  .chip.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+  .chip.add{border-style:dashed;color:var(--muted);}
+
+  .stat{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+  .stat .box{flex:1;min-width:120px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow);}
+  .stat .num{font-size:24px;font-weight:700;color:var(--primary);}
+  .stat .lbl{font-size:12px;color:var(--muted);margin-top:2px;}
+
+  /* ===== Mobile bottom tabs ===== */
+  .bottomtabs{display:none;}
+  @media(max-width:768px){
+    .bottomtabs{display:flex;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);
+      padding:8px 4px calc(8px + env(safe-area-inset-bottom));z-index:50;justify-content:space-around;}
+    .bottomtabs button{flex:1;border:0;background:transparent;color:var(--muted);font-size:11px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 0;}
+    .bottomtabs button svg{width:20px;height:20px;}
+    .bottomtabs button.active{color:var(--primary);}
+  }
+  .hint{font-size:12px;color:var(--muted);margin-top:6px;}
+  /* agent toggle floating btn (mobile friendly) */
+  .agent-toggle{position:fixed;right:16px;bottom:20px;z-index:2147483001;background:var(--primary);color:#fff;border:0;border-radius:50px;
+    padding:12px 16px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 12px 30px rgba(79,70,229,.35);display:none;}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar (PC) -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.5 6.5L21 11l-6.5 2.5L12 20l-2.5-6.5L3 11l6.5-2.5z"/></svg>
+      </div>
+      <div>
+        <h1>天赋教练台</h1>
+        <small>基于人生教练技能</small>
+      </div>
+    </div>
+    <nav class="nav">
+      <button data-tab="clients" class="active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        客户档案
+      </button>
+      <button data-tab="insights">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/></svg>
+        洞见银行
+      </button>
+      <button data-tab="actions">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>
+        行动计划
+      </button>
+    </nav>
+    <div style="margin-top:18px;font-size:11px;color:var(--muted);line-height:1.5;">
+      右下角为 AI 教练对话窗，可随时收起/展开，与其对话并沉淀洞察到上方模块。
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h2>工作台</h2>
+        <div class="sub">天赋教练 · 个人数字工作台</div>
+      </div>
+      <div class="tools">
+        <span class="sync" id="syncTag"><span class="dot"></span>本地存储 · 离线可用</span>
+        <button class="btn" id="exportBtn" title="导出 JSON 备份">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+          备份
+        </button>
+        <button class="btn" id="importBtn" title="导入恢复">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
+          恢复
+        </button>
+        <input type="file" id="importFile" accept="application/json" style="display:none" />
+      </div>
+    </div>
+
+    <!-- 今天要处理 -->
+    <section class="today" id="todayCard">
+      <h3>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        今天要处理
+      </h3>
+      <div id="todayList"></div>
+    </section>
+
+    <!-- ===== Clients ===== -->
+    <section class="panel active" id="panel-clients">
+      <div class="stat">
+        <div class="box"><div class="num" id="statClients">0</div><div class="lbl">在陪来访者</div></div>
+        <div class="box"><div class="num" id="statInsights">0</div><div class="lbl">累计洞见</div></div>
+        <div class="box"><div class="num" id="statActions">0</div><div class="lbl">进行中行动</div></div>
+      </div>
+
+      <div class="sec-head">
+        <h3>客户档案</h3>
+        <button class="btn primary" id="addClientBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          新增来访者
+        </button>
+      </div>
+
+      <div class="form hidden" id="clientForm">
+        <div class="field">
+          <label>称呼 / 姓名</label>
+          <input type="text" id="cName" placeholder="如：李明" />
+        </div>
+        <div class="field">
+          <label>人生阶段</label>
+          <input type="text" id="cStage" placeholder="如：职业探索期 / 转型期 / 创业" />
+        </div>
+        <div class="field">
+          <label>用户类型（A–J）</label>
+          <select id="cType">
+            <option value="">未分类</option>
+            <option value="A 探索者">A 探索者</option>
+            <option value="B 困惑者">B 困惑者</option>
+            <option value="C 迷茫者">C 迷茫者</option>
+            <option value="D 防御者">D 防御者</option>
+            <option value="E 危机者">E 危机者</option>
+            <option value="F 决策者">F 决策者</option>
+            <option value="G 高认知防御者">G 高认知防御者</option>
+            <option value="H 创伤型">H 创伤型</option>
+            <option value="I 反复重启者">I 反复重启者</option>
+            <option value="J 过度共情者">J 过度共情者</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>关键备注</label>
+          <textarea id="cNote" placeholder="当前卡点、目标、已聊到的洞察…"></textarea>
+        </div>
+        <div class="form-actions">
+          <button class="btn primary" id="saveClientBtn">保存</button>
+          <button class="btn" id="cancelClientBtn">取消</button>
+        </div>
+      </div>
+
+      <div id="clientList"></div>
+    </section>
+
+    <!-- ===== Insights ===== -->
+    <section class="panel" id="panel-insights">
+      <div class="sec-head">
+        <h3>洞见银行</h3>
+        <button class="btn primary" id="addInsightBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          记录洞见
+        </button>
+      </div>
+
+      <div class="client-pick" id="insightClientPick"></div>
+
+      <div class="form hidden" id="insightForm">
+        <div class="field">
+          <label>关联来访者</label>
+          <select id="iClient"></select>
+        </div>
+        <div class="field">
+          <label>冰山层（L1–L8）</label>
+          <select id="iLayer">
+            <option value="L1 行为">L1 行为</option>
+            <option value="L2 应对方式">L2 应对方式</option>
+            <option value="L3 天赋">L3 天赋</option>
+            <option value="L4 价值观/信念">L4 价值观/信念</option>
+            <option value="L5 身份">L5 身份</option>
+            <option value="L6 渴望/恐惧">L6 渴望/恐惧</option>
+            <option value="L7 潜能/愿景">L7 潜能/愿景</option>
+            <option value="L8 盲区">L8 盲区</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>参考模型</label>
+          <select id="iModel">
+            <option value="">未指定</option>
+            <option>MBTI</option><option>VIA 品格优势</option><option>盖洛普优势</option>
+            <option>DISC</option><option>霍兰德</option><option>九型人格</option>
+            <option>螺旋动力学</option><option>Ikigai</option><option>叙事身份</option>
+            <option>可能自我</option><option>乔哈里窗</option><option>变革免疫</option>
+            <option>AQAL</option><option>理解六层次</option><option>心流</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>洞察内容</label>
+          <textarea id="iContent" placeholder="例如：能在混乱中快速看到系统结构（天赋信号，MBTI-Ti / 心流）"></textarea>
+        </div>
+        <div class="form-actions">
+          <button class="btn primary" id="saveInsightBtn">保存</button>
+          <button class="btn" id="cancelInsightBtn">取消</button>
+        </div>
+      </div>
+
+      <div id="insightList"></div>
+    </section>
+
+    <!-- ===== Actions ===== -->
+    <section class="panel" id="panel-actions">
+      <div class="sec-head">
+        <h3>行动计划</h3>
+        <button class="btn primary" id="addActionBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          新建行动
+        </button>
+      </div>
+
+      <div class="client-pick" id="actionClientPick"></div>
+
+      <div class="form hidden" id="actionForm">
+        <div class="field">
+          <label>关联来访者</label>
+          <select id="aClient"></select>
+        </div>
+        <div class="field">
+          <label>行动内容（1月 / 3月行动）</label>
+          <input type="text" id="aTitle" placeholder="如：约 3 位 B 端产品经理咖啡聊 1 小时" />
+        </div>
+        <div class="field">
+          <label>截止日期</label>
+          <input type="date" id="aDeadline" />
+        </div>
+        <div class="form-actions">
+          <button class="btn primary" id="saveActionBtn">保存</button>
+          <button class="btn" id="cancelActionBtn">取消</button>
+        </div>
+      </div>
+
+      <div id="actionList"></div>
+    </section>
+  </main>
+</div>
+
+<!-- Mobile bottom tabs -->
+<nav class="bottomtabs" id="bottomTabs">
+  <button data-tab="clients" class="active">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>
+    客户
+  </button>
+  <button data-tab="insights">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/></svg>
+    洞见
+  </button>
+  <button data-tab="actions">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>
+    行动
+  </button>
+</nav>
+
+<!-- 清空示例数据 -->
+<div style="text-align:center;margin-top:8px;">
+  <button class="btn ghost" id="clearSampleBtn" style="font-size:12px;">清空示例数据</button>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var PREFIX = "wb_giftcoach_";
+  var KEY_CLIENTS = PREFIX + "clients";
+  var KEY_INSIGHTS = PREFIX + "insights";
+  var KEY_ACTIONS = PREFIX + "actions";
+  var KEY_SEEDED = PREFIX + "seeded";
+
+  function load(key, def){
+    try{ var v = localStorage.getItem(key); return v ? JSON.parse(v) : def; }catch(e){ return def; }
+  }
+  function save(key, val){
+    try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){}
+  }
+  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  function todayStr(){
+    var d = new Date(); var m = ("0"+(d.getMonth()+1)).slice(-2); var day = ("0"+d.getDate()).slice(-2);
+    return d.getFullYear()+"-"+m+"-"+day;
+  }
+  function esc(s){ return (s||"").replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+
+  var clients = load(KEY_CLIENTS, []);
+  var insights = load(KEY_INSIGHTS, []);
+  var actions = load(KEY_ACTIONS, []);
+  var filterClient = "all"; // for insights & actions
+
+  // ----- Seed example data (first open) -----
+  function seed(){
+    if(localStorage.getItem(KEY_SEEDED)) return;
+    var c1 = uid(), c2 = uid(), c3 = uid();
+    clients = [
+      {id:c1, name:"李明", stage:"职业探索期（B端销售5年）", type:"I 反复重启者", note:"1年换3份工作，每次坚持不下去；能看到别人需求但常‘应该做却没做’。", createdAt:Date.now()},
+      {id:c2, name:"王芳", stage:"转型期（32岁·大厂）", type:"C 迷茫者", note:"不知道自己喜欢什么，低自我认知，从最小切口切入。", createdAt:Date.now()},
+      {id:c3, name:"张伟", stage:"创业中", type:"F 决策者", note:"有明确方向但纠结，需要场景模拟对比。", createdAt:Date.now()}
+    ];
+    insights = [
+      {id:uid(), clientId:c1, layer:"L3 天赋", model:"MBTI / 心流", content:"能在混乱中快速看到系统结构，并在‘看透别人需求’时进入心流。", createdAt:Date.now()-86400000*3},
+      {id:uid(), clientId:c2, layer:"L4 价值观/信念", model:"VIA", content:"极度重视真实与深度关系，排斥表面社交。", createdAt:Date.now()-86400000*2},
+      {id:uid(), clientId:c1, layer:"L4 价值观/信念", model:"叙事身份", content:"信念‘我应该做出成绩’来自父亲，每次启动都背负压力 → 情绪先崩后放弃。", createdAt:Date.now()-86400000}
+    ];
+    var t = todayStr();
+    function shift(d){ var x=new Date(); x.setDate(x.getDate()+d); var m=("0"+(x.getMonth()+1)).slice(-2), day=("0"+x.getDate()).slice(-2); return x.getFullYear()+"-"+m+"-"+day; }
+    actions = [
+      {id:uid(), clientId:c1, title:"约 3 位 B 端产品经理咖啡聊 1 小时", deadline:shift(-8), done:false, createdAt:Date.now()},
+      {id:uid(), clientId:c2, title:"连续 7 天记录‘忘了时间’的瞬间", deadline:t, done:false, createdAt:Date.now()},
+      {id:uid(), clientId:c3, title:"写‘防重启’触发清单（放弃瞬间应对）", deadline:shift(5), done:false, createdAt:Date.now()}
+    ];
+    save(KEY_CLIENTS, clients); save(KEY_INSIGHTS, insights); save(KEY_ACTIONS, actions);
+    localStorage.setItem(KEY_SEEDED, "1");
+  }
+  seed();
+
+  // ----- Helpers -----
+  function clientName(id){ var c = clients.filter(function(x){return x.id===id;})[0]; return c?c.name:"—"; }
+  function clientOf(id){ return clients.filter(function(x){return x.id===id;})[0]; }
+
+  // ----- Render: Today -----
+  function renderToday(){
+    var t = todayStr();
+    var list = actions.filter(function(a){ return !a.done; });
+    var overdue = list.filter(function(a){ return a.deadline < t; });
+    var today = list.filter(function(a){ return a.deadline === t; });
+    var html = "";
+    if(overdue.length===0 && today.length===0){
+      html = '<div class="empty">🎉 今天没有逾期或待办，享受当下吧。</div>';
+    }
+    overdue.forEach(function(a){
+      html += todoRow(a, "逾期", true);
+    });
+    today.forEach(function(a){
+      html += todoRow(a, "今天", false);
+    });
+    document.getElementById("todayList").innerHTML = html;
+  }
+  function todoRow(a, label, isOverdue){
+    return '<div class="todo'+(isOverdue?' overdue':'')+'">'+
+      '<div class="grow"><div><span class="label">'+(isOverdue?'⚠ 逾期':'📌 今天')+'</span>'+
+      '<span class="title">'+esc(a.title)+'</span></div>'+
+      '<div class="meta">'+esc(clientName(a.clientId))+' · 截止 '+esc(a.deadline)+'</div></div>'+
+      '<button class="mini" data-done="'+a.id+'">完成</button></div>';
+  }
+
+  // ----- Render: Clients -----
+  function renderClients(){
+    document.getElementById("statClients").textContent = clients.length;
+    document.getElementById("statInsights").textContent = insights.length;
+    document.getElementById("statActions").textContent = actions.filter(function(a){return !a.done;}).length;
+    var html = "";
+    if(clients.length===0){
+      html = '<div class="card"><div class="item-sub">还没有来访者。点击「新增来访者」开始建立你的教练档案。</div></div>';
+    }
+    clients.forEach(function(c){
+      var ci = insights.filter(function(x){return x.clientId===c.id;}).length;
+      var ca = actions.filter(function(x){return x.clientId===c.id && !x.done;}).length;
+      html += '<div class="card"><div class="row">'+
+        '<div class="grow"><div class="item-title">'+esc(c.name)+'</div>'+
+        '<div class="item-sub">'+esc(c.stage||"未填阶段")+'</div>'+
+        (c.type?'<span class="pill">'+esc(c.type)+'</span>':'')+
+        (ci?'<span class="pill gray">'+ci+' 条洞见</span>':'')+
+        (ca?'<span class="pill gray">'+ca+' 项行动</span>':'')+
+        (c.note?'<div class="item-sub" style="margin-top:8px;">'+esc(c.note)+'</div>':'')+
+        '</div>'+
+        '<button class="icon-btn" data-del-client="'+c.id+'" title="删除">'+
+        '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button>'+
+        '</div></div>';
+    });
+    document.getElementById("clientList").innerHTML = html;
+  }
+
+  // ----- Render: Insights -----
+  function renderInsightPicks(){
+    var wrap = document.getElementById("insightClientPick");
+    var html = '<button class="chip'+(filterClient==="all"?" active":"")+'" data-pick="all">全部</button>';
+    clients.forEach(function(c){
+      html += '<button class="chip'+(filterClient===c.id?" active":"")+'" data-pick="'+c.id+'">'+esc(c.name)+'</button>';
+    });
+    wrap.innerHTML = html;
+  }
+  function renderInsights(){
+    renderInsightPicks();
+    var list = insights.slice().sort(function(a,b){return b.createdAt-a.createdAt;});
+    if(filterClient!=="all") list = list.filter(function(x){return x.clientId===filterClient;});
+    var html = "";
+    if(list.length===0){
+      html = '<div class="card"><div class="item-sub">还没有洞见。与 AI 教练对话后，把关键发现沉淀到这里。</div></div>';
+    }
+    list.forEach(function(it){
+      html += '<div class="card"><div class="row"><div class="grow">'+
+        '<div class="item-sub">'+esc(clientName(it.clientId))+' · '+esc(it.layer)+
+        (it.model?' · '+esc(it.model):'')+'</div>'+
+        '<div style="margin-top:4px;">'+esc(it.content)+'</div></div>'+
+        '<button class="icon-btn" data-del-insight="'+it.id+'" title="删除">'+
+        '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button>'+
+        '</div></div>';
+    });
+    document.getElementById("insightList").innerHTML = html;
+  }
+
+  // ----- Render: Actions -----
+  function renderActionPicks(){
+    var wrap = document.getElementById("actionClientPick");
+    var html = '<button class="chip'+(filterClient==="all"?" active":"")+'" data-pick="all">全部</button>';
+    clients.forEach(function(c){
+      html += '<button class="chip'+(filterClient===c.id?" active":"")+'" data-pick="'+c.id+'">'+esc(c.name)+'</button>';
+    });
+    wrap.innerHTML = html;
+  }
+  function renderActions(){
+    renderActionPicks();
+    var t = todayStr();
+    var list = actions.slice().sort(function(a,b){
+      if(a.done!==b.done) return a.done?1:-1;
+      return (a.deadline< b.deadline)?-1:1;
+    });
+    if(filterClient!=="all") list = list.filter(function(x){return x.clientId===filterClient;});
+    var html = "";
+    if(list.length===0){
+      html = '<div class="card"><div class="item-sub">还没有行动项。为来访者设定 1月 / 3月 可执行行动。</div></div>';
+    }
+    list.forEach(function(a){
+      var overdue = (!a.done && a.deadline < t);
+      html += '<div class="card"><div class="row"><button class="check-btn'+(a.done?" done":"")+'" data-toggle="'+a.id+'" '+(a.done?"":"")+'>'+
+        (a.done?'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>':'')+
+        '</button><div class="grow"><div class="item-title" style="'+(a.done?"text-decoration:line-through;color:var(--muted);":"")+'">'+esc(a.title)+'</div>'+
+        '<div class="item-sub">'+esc(clientName(a.clientId))+' · 截止 <span style="'+(overdue?'color:var(--red);font-weight:600;':'')+'">'+esc(a.deadline)+'</span>'+(overdue?' · 已逾期':'')+'</div></div>'+
+        '<button class="icon-btn" data-del-action="'+a.id+'" title="删除">'+
+        '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button>'+
+        '</div></div>';
+    });
+    document.getElementById("actionList").innerHTML = html;
+  }
+
+  function renderAll(){ renderToday(); renderClients(); renderInsights(); renderActions(); }
+
+  // ----- Tabs -----
+  function switchTab(tab){
+    document.querySelectorAll(".nav button").forEach(function(b){ b.classList.toggle("active", b.dataset.tab===tab); });
+    document.querySelectorAll("#bottomTabs button").forEach(function(b){ b.classList.toggle("active", b.dataset.tab===tab); });
+    document.querySelectorAll(".panel").forEach(function(p){ p.classList.toggle("active", p.id==="panel-"+tab); });
+  }
+  document.querySelectorAll(".nav button, #bottomTabs button").forEach(function(b){
+    b.addEventListener("click", function(){ switchTab(b.dataset.tab); });
+  });
+
+  // ----- Client form -----
+  document.getElementById("addClientBtn").addEventListener("click", function(){
+    document.getElementById("clientForm").classList.toggle("hidden");
+  });
+  document.getElementById("cancelClientBtn").addEventListener("click", function(){
+    document.getElementById("clientForm").classList.add("hidden");
+  });
+  document.getElementById("saveClientBtn").addEventListener("click", function(){
+    var name = document.getElementById("cName").value.trim();
+    if(!name){ alert("请填写称呼 / 姓名"); return; }
+    clients.push({ id:uid(), name:name, stage:document.getElementById("cStage").value.trim(),
+      type:document.getElementById("cType").value, note:document.getElementById("cNote").value.trim(), createdAt:Date.now() });
+    save(KEY_CLIENTS, clients);
+    document.getElementById("cName").value=""; document.getElementById("cStage").value="";
+    document.getElementById("cType").value=""; document.getElementById("cNote").value="";
+    document.getElementById("clientForm").classList.add("hidden");
+    renderAll();
+  });
+
+  // ----- Insight form -----
+  function fillClientSelect(selId){
+    var sel = document.getElementById(selId);
+    sel.innerHTML = clients.map(function(c){ return '<option value="'+c.id+'">'+esc(c.name)+'</option>'; }).join("");
+  }
+  document.getElementById("addInsightBtn").addEventListener("click", function(){
+    if(clients.length===0){ alert("请先新增一位来访者"); return; }
+    fillClientSelect("iClient");
+    document.getElementById("insightForm").classList.toggle("hidden");
+  });
+  document.getElementById("cancelInsightBtn").addEventListener("click", function(){
+    document.getElementById("insightForm").classList.add("hidden");
+  });
+  document.getElementById("saveInsightBtn").addEventListener("click", function(){
+    var content = document.getElementById("iContent").value.trim();
+    if(!content){ alert("请填写洞察内容"); return; }
+    insights.push({ id:uid(), clientId:document.getElementById("iClient").value,
+      layer:document.getElementById("iLayer").value, model:document.getElementById("iModel").value,
+      content:content, createdAt:Date.now() });
+    save(KEY_INSIGHTS, insights);
+    document.getElementById("iContent").value="";
+    document.getElementById("insightForm").classList.add("hidden");
+    renderAll();
+  });
+
+  // ----- Action form -----
+  document.getElementById("addActionBtn").addEventListener("click", function(){
+    if(clients.length===0){ alert("请先新增一位来访者"); return; }
+    fillClientSelect("aClient");
+    document.getElementById("actionForm").classList.toggle("hidden");
+  });
+  document.getElementById("cancelActionBtn").addEventListener("click", function(){
+    document.getElementById("actionForm").classList.add("hidden");
+  });
+  document.getElementById("saveActionBtn").addEventListener("click", function(){
+    var title = document.getElementById("aTitle").value.trim();
+    if(!title){ alert("请填写行动内容"); return; }
+    actions.push({ id:uid(), clientId:document.getElementById("aClient").value, title:title,
+      deadline:document.getElementById("aDeadline").value || todayStr(), done:false, createdAt:Date.now() });
+    save(KEY_ACTIONS, actions);
+    document.getElementById("aTitle").value=""; document.getElementById("aDeadline").value="";
+    document.getElementById("actionForm").classList.add("hidden");
+    renderAll();
+  });
+
+  // ----- Delegated clicks -----
+  document.body.addEventListener("click", function(e){
+    var el;
+    if((el=e.target.closest("[data-done]"))){ var id=el.getAttribute("data-done");
+      var a=actions.filter(function(x){return x.id===id;})[0]; if(a){a.done=true; save(KEY_ACTIONS,actions); renderAll();} return; }
+    if((el=e.target.closest("[data-toggle]"))){ var id2=el.getAttribute("data-toggle");
+      var a2=actions.filter(function(x){return x.id===id2;})[0]; if(a2){a2.done=!a2.done; save(KEY_ACTIONS,actions); renderAll();} return; }
+    if((el=e.target.closest("[data-del-client]"))){ if(confirm("删除该来访者及其关联数据？")){
+      var cid=el.getAttribute("data-del-client"); clients=clients.filter(function(x){return x.id!==cid;});
+      insights=insights.filter(function(x){return x.clientId!==cid;}); actions=actions.filter(function(x){return x.clientId!==cid;});
+      save(KEY_CLIENTS,clients); save(KEY_INSIGHTS,insights); save(KEY_ACTIONS,actions); renderAll(); } return; }
+    if((el=e.target.closest("[data-del-insight]"))){ if(confirm("删除该洞见？")){
+      var iid=el.getAttribute("data-del-insight"); insights=insights.filter(function(x){return x.id!==iid;});
+      save(KEY_INSIGHTS,insights); renderAll(); } return; }
+    if((el=e.target.closest("[data-del-action]"))){ if(confirm("删除该行动？")){
+      var aid=el.getAttribute("data-del-action"); actions=actions.filter(function(x){return x.id!==aid;});
+      save(KEY_ACTIONS,actions); renderAll(); } return; }
+    if((el=e.target.closest("[data-pick]"))){ filterClient=el.getAttribute("data-pick"); renderInsights(); renderActions(); return; }
+  });
+
+  // ----- Backup / Restore -----
+  document.getElementById("exportBtn").addEventListener("click", function(){
+    var data = { clients:clients, insights:insights, actions:actions, exportedAt:new Date().toISOString() };
+    var blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
+    var url = URL.createObjectURL(blob); var a=document.createElement("a");
+    a.href=url; a.download="天赋教练工作台备份_"+todayStr()+".json"; a.click();
+    URL.revokeObjectURL(url);
+  });
+  document.getElementById("importBtn").addEventListener("click", function(){ document.getElementById("importFile").click(); });
+  document.getElementById("importFile").addEventListener("change", function(e){
+    var f=e.target.files[0]; if(!f) return; var r=new FileReader();
+    r.onload=function(){
+      try{
+        var d=JSON.parse(r.result);
+        if(Array.isArray(d.clients)) clients=d.clients;
+        if(Array.isArray(d.insights)) insights=d.insights;
+        if(Array.isArray(d.actions)) actions=d.actions;
+        save(KEY_CLIENTS,clients); save(KEY_INSIGHTS,insights); save(KEY_ACTIONS,actions);
+        renderAll(); alert("恢复成功，共导入 "+clients.length+" 位来访者 / "+insights.length+" 条洞见 / "+actions.length+" 项行动。");
+      }catch(err){ alert("文件格式有误，无法导入。"); }
+    };
+    r.readAsText(f); e.target.value="";
+  });
+
+  // ----- Clear sample -----
+  document.getElementById("clearSampleBtn").addEventListener("click", function(){
+    if(confirm("确定清空所有数据（含示例）？此操作不可撤销，建议先导出备份。")){
+      clients=[]; insights=[]; actions=[]; localStorage.removeItem(KEY_SEEDED);
+      save(KEY_CLIENTS,clients); save(KEY_INSIGHTS,insights); save(KEY_ACTIONS,actions);
+      filterClient="all"; renderAll();
+    }
+  });
+
+  renderAll();
+})();
+</script>
+
+<!-- ===== 内嵌 AI 教练对话（你提供的智能体 iframe） ===== -->
+<script>
+  (() => {
+    const iframe = document.createElement("iframe");
+    iframe.src = "http://localhost:4091/agents/293d45be-5673-4754-992f-c90094f948a6/67a69548b9f083db85aae9851d041d703de658b387abeb07fec8136644f54b01";
+    iframe.allow = "clipboard-write; microphone; camera";
+    iframe.style.position = "fixed";
+    iframe.style.right = "16px";
+    iframe.style.bottom = "20px";
+    iframe.style.width = "88vw";
+    iframe.style.maxWidth = "360px";
+    iframe.style.height = "72vh";
+    iframe.style.border = "0";
+    iframe.style.borderRadius = "20px";
+    iframe.style.background = "#fff";
+    iframe.style.boxShadow = "0 20px 50px rgba(15, 23, 42, 0.16)";
+    iframe.style.zIndex = "2147483000";
+    iframe.id = "agent-frame";
+
+    document.body.appendChild(iframe);
+
+    // 可收起的悬浮按钮（移动端/不想被遮挡时使用）
+    const toggle = document.createElement("button");
+    toggle.className = "agent-toggle";
+    toggle.textContent = "💬 教练对话";
+    toggle.style.display = "block";
+    toggle.addEventListener("click", () => {
+      const hidden = iframe.style.display === "none";
+      iframe.style.display = hidden ? "block" : "none";
+      toggle.textContent = hidden ? "💬 教练对话" : "✕ 收起";
+    });
+    document.body.appendChild(toggle);
+  })();
+</script>
+</body>
+</html>
