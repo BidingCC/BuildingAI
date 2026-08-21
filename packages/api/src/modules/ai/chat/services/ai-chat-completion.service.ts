@@ -76,6 +76,13 @@ const VALID_PART_TYPES = new Set([
     "step-start",
     "step-finish",
 ]);
+const DEFAULT_MATH_FORMATTING_INSTRUCTION = [
+    "涉及数学公式时，必须使用 LaTeX 格式：",
+    "行内公式使用 $...$；",
+    "独立公式使用 $$...$$；",
+    "不要使用反引号包裹数学公式；",
+    "不要使用 lim(x -> a)、x^2 这类普通文本代替 LaTeX。",
+].join("\n");
 
 @Injectable()
 export class ChatCompletionService {
@@ -863,7 +870,7 @@ export class ChatCompletionService {
         chatStyle?: string,
         customInstruction?: string,
     ): string {
-        const sections: string[] = [];
+        const sections: string[] = [DEFAULT_MATH_FORMATTING_INSTRUCTION];
         const prefsSection = buildUserPreferencesSection(chatStyle, customInstruction);
         if (prefsSection) sections.push(prefsSection);
         if (userMemories?.length) {

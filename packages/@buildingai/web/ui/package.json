@@ -106,6 +106,7 @@
         "gsap": "^3.14.2",
         "html2canvas-pro": "^1.6.6",
         "input-otp": "^1.4.2",
+        "katex": "0.16.47",
         "lodash": "^4.17.23",
         "lowlight": "^3.3.0",
         "lucide-react": "catalog:web",

@@ -1,5 +1,7 @@
 "use client";
 
+import "katex/dist/katex.min.css";
+
 import { Button } from "@buildingai/ui/components/ui/button";
 import { ButtonGroup, ButtonGroupText } from "@buildingai/ui/components/ui/button-group";
 import {
@@ -11,7 +13,7 @@ import {
 import { cn } from "@buildingai/ui/lib/utils";
 import { cjk } from "@streamdown/cjk";
 import { code } from "@streamdown/code";
-import { math } from "@streamdown/math";
+import { createMathPlugin } from "@streamdown/math";
 import { mermaid } from "@streamdown/mermaid";
 import type { UIMessage } from "ai";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
@@ -275,7 +277,11 @@ export const MessageBranchPage = ({ className, ...props }: MessageBranchPageProp
 
 export type MessageResponseProps = ComponentProps<typeof Streamdown>;
 
-const streamdownPlugins = { cjk, code, math, mermaid };
+const mathPlugin = createMathPlugin({
+  singleDollarTextMath: true,
+});
+
+const streamdownPlugins = { cjk, code, math: mathPlugin, mermaid };
 
 export const MessageResponse = memo(({ className, ...props }: MessageResponseProps) => (
   <Streamdown
