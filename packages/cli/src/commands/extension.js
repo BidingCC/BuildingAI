@@ -28,6 +28,7 @@ const RELEASE_COPY_ALLOWLIST = [
     "eslint.config.mjs",
     "LICENSE",
     "manifest.json",
+    "index.html",
     "nuxt.config.ts",
     "README.md",
     "SEEDS.md",
@@ -35,6 +36,7 @@ const RELEASE_COPY_ALLOWLIST = [
     "tsconfig.web.json",
     "tsconfig.api.json",
     "tsup.config.ts",
+    "vite.config.ts",
     "package.json",
 ];
 
