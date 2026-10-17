@@ -5,6 +5,7 @@ import {
 import { AppBillingService } from "@buildingai/core/modules";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { Injectable, Logger } from "@nestjs/common";
+import type { StopCondition, ToolSet } from "ai";
 
 const ESTIMATED_TOKENS_PER_ROUND = 500;
 const ESTIMATED_TOKENS_MEMORY = 300;
@@ -25,17 +26,62 @@ export class AgentBillingHandler {
 
     constructor(private readonly appBillingService: AppBillingService) {}
 
+    /**
+     * Admission check. Returns the spendable power the turn may consume (its budget), or
+     * undefined when the model is not billed.
+     */
     async validateUserPower(
         userId: string,
         billingRule: { power: number; tokens: number } | undefined,
-    ): Promise<void> {
-        if (!userId || !billingRule?.tokens || billingRule.power <= 0) return;
+    ): Promise<number | undefined> {
+        if (!userId || !billingRule?.tokens || billingRule.power <= 0) return undefined;
 
         const currentPower = await this.appBillingService.getSpendablePower(userId);
         const minRequired = this.calculateConsumedPower(ESTIMATED_TOKENS_PER_ROUND, billingRule);
         if (currentPower < minRequired) {
             throw HttpErrorFactory.badRequest("积分不足，请充值后重试");
         }
+        return currentPower;
+    }
+
+    /**
+     * Admission once the prompt is known: the first step alone sends the whole prompt, so the
+     * budget must cover the prompt plus one round of output, not a fixed 500-token estimate.
+     */
+    assertBudgetCoversPrompt(
+        budget: number | undefined,
+        promptTokens: number,
+        billingRule: { power: number; tokens: number } | undefined,
+    ): void {
+        if (budget === undefined) return;
+        const required = this.calculateConsumedPower(
+            promptTokens + ESTIMATED_TOKENS_PER_ROUND,
+            billingRule,
+        );
+        if (budget < required) {
+            throw HttpErrorFactory.badRequest("积分不足，请充值后重试");
+        }
+    }
+
+    /**
+     * Stop condition for the tool loop: every further step re-sends the whole conversation, so it
+     * costs at least as much as the last one. Stop before a step the admitted budget cannot pay.
+     */
+    stopWhenBudgetExhausted<TOOLS extends ToolSet = ToolSet>(
+        budget: number | undefined,
+        billingRule: { power: number; tokens: number } | undefined,
+    ): StopCondition<TOOLS> {
+        const stepTokens = (usage?: {
+            inputTokens?: number;
+            outputTokens?: number;
+            totalTokens?: number;
+        }) => usage?.totalTokens ?? (usage?.inputTokens ?? 0) + (usage?.outputTokens ?? 0);
+        return ({ steps }) => {
+            if (budget === undefined || steps.length === 0) return false;
+            const spent = steps.reduce((sum, step) => sum + stepTokens(step.usage), 0);
+            const next = stepTokens(steps[steps.length - 1].usage);
+            return this.calculateConsumedPower(spent + next, billingRule) > budget;
+        };
     }
 
     calculateConsumedPower(
@@ -58,9 +104,12 @@ export class AgentBillingHandler {
         if (amount <= 0) return 0;
 
         try {
-            await this.appBillingService.deductUserPower({
+            // The turn was already delivered: settle it even when the balance is short
+            // (deduct what is left) instead of refusing and charging nothing.
+            const deducted = await this.appBillingService.deductUserPower({
                 userId,
                 amount,
+                allowPartial: true,
                 accountType: isGuest
                     ? ACCOUNT_LOG_TYPE.AGENT_GUEST_CHAT_DEC
                     : ACCOUNT_LOG_TYPE.AGENT_CHAT_DEC,
@@ -71,7 +120,7 @@ export class AgentBillingHandler {
                 remark: "智能体对话消耗",
                 associationNo: conversationId,
             });
-            return amount;
+            return deducted;
         } catch (error) {
             this.logger.warn(
                 `Agent billing deduct failed: userId=${userId}, amount=${amount}, error=${error instanceof Error ? error.message : String(error)}`,
