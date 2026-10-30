@@ -1,8 +1,8 @@
 import { AppConfig } from "@buildingai/config/app.config";
-import { BooleanNumber, UserCreateSource, UserTerminal } from "@buildingai/constants";
-import { InjectRepository } from "@buildingai/db/@nestjs/typeorm";
+import { BooleanNumber, BusinessCode, UserCreateSource, UserTerminal } from "@buildingai/constants";
+import { InjectDataSource, InjectRepository } from "@buildingai/db/@nestjs/typeorm";
 import { User } from "@buildingai/db/entities";
-import { Repository } from "@buildingai/db/typeorm";
+import { DataSource, Repository } from "@buildingai/db/typeorm";
 import { DictService } from "@buildingai/dict";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { generateNo } from "@buildingai/utils";
@@ -26,8 +26,12 @@ import { initializeDto } from "../dto/system.dto";
 export class SystemService {
     private readonly logger = new Logger(SystemService.name);
     private static isRestarting = false;
+    // 系统初始化分布式锁 key
+    private static readonly INITIALIZE_LOCK_KEY = "system:initialize";
 
     constructor(
+        @InjectDataSource()
+        private readonly dataSource: DataSource,
         private readonly dictService: DictService,
         private readonly userService: UserService,
         private readonly authService: AuthService,
@@ -70,6 +74,71 @@ export class SystemService {
      * @returns 初始化结果(包含登录令牌)
      */
     async initialize(dto: initializeDto, ipAddress?: string, userAgent?: string) {
+        // 使用 PostgreSQL advisory lock 串行化初始化请求，防止并发请求同时通过"未初始化"校验
+        // advisory lock 是连接级别的，必须通过同一个 QueryRunner 获取/释放
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        try {
+            const result = await queryRunner.query(
+                "SELECT pg_try_advisory_lock(hashtext($1)) AS locked",
+                [SystemService.INITIALIZE_LOCK_KEY],
+            );
+            if (!result?.[0]?.locked) {
+                throw HttpErrorFactory.forbidden(
+                    "System initialization is in progress",
+                    BusinessCode.OPERATION_NOT_ALLOWED,
+                );
+            }
+
+            try {
+                await this.assertNotInitialized(ipAddress, userAgent);
+                const initResult = await this.createRootAndLogin(dto, ipAddress, userAgent);
+                this.logger.log(
+                    `系统初始化成功, username: ${dto.username}, ip: ${ipAddress ?? "unknown"}, userAgent: ${userAgent ?? "unknown"}`,
+                );
+                return initResult;
+            } finally {
+                await queryRunner.query("SELECT pg_advisory_unlock(hashtext($1))", [
+                    SystemService.INITIALIZE_LOCK_KEY,
+                ]);
+            }
+        } finally {
+            await queryRunner.release();
+        }
+    }
+
+    /**
+     * 校验系统尚未初始化，已初始化则拒绝
+     *
+     * 除字典标记外，额外校验库中是否已存在超级管理员（含软删除），
+     * 防止字典标记丢失或多实例缓存不一致时被绕过
+     */
+    private async assertNotInitialized(ipAddress?: string, userAgent?: string) {
+        const isInitialized =
+            (await this.dictService.get<boolean>("isInitialized", false, SYSTEM_CONFIG)) ||
+            !!(await this.userRepository.findOne({
+                where: { isRoot: BooleanNumber.YES },
+                select: ["id"],
+                withDeleted: true,
+            }));
+
+        if (isInitialized) {
+            this.logger.warn(
+                `已初始化的系统拒绝再次初始化请求, ip: ${ipAddress ?? "unknown"}, userAgent: ${userAgent ?? "unknown"}`,
+            );
+            throw HttpErrorFactory.forbidden(
+                "System already initialized",
+                BusinessCode.OPERATION_NOT_ALLOWED,
+            );
+        }
+    }
+
+    /**
+     * 创建超级管理员账户、设置网站基本信息并自动登录
+     *
+     * 仅允许在 initialize() 持锁且校验未初始化后调用
+     */
+    private async createRootAndLogin(dto: initializeDto, ipAddress?: string, userAgent?: string) {
         try {
             const existingUser = await this.userService.findOne({
                 where: {
