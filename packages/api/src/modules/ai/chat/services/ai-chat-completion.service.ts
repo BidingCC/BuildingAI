@@ -9,6 +9,7 @@ import {
 } from "@buildingai/ai-sdk";
 import { withEstimatedUsage } from "@buildingai/ai-sdk/utils/text-with-usage";
 import {
+    countTokens,
     extractTextFromParts,
     formatMessagesForTokenCount,
     normalizeChatUsage,
@@ -211,8 +212,9 @@ export class ChatCompletionService {
                             );
                         }
 
+                        let powerBudget: number | undefined;
                         if (params.userId && model.billingRule) {
-                            await this.chatBillingHandler.validateUserPower(
+                            powerBudget = await this.chatBillingHandler.validateUserPower(
                                 params.userId,
                                 model.billingRule,
                             );
@@ -260,6 +262,11 @@ export class ChatCompletionService {
                             ? [{ role: "system" as const, content: systemPrompt }, ...modelMsgs]
                             : modelMsgs;
                         const promptText = formatMessagesForTokenCount(finalMessages);
+                        this.chatBillingHandler.assertBudgetCoversPrompt(
+                            powerBudget,
+                            countTokens({ model: model.model, text: promptText }),
+                            model.billingRule,
+                        );
 
                         const tools = this.buildTools(
                             model.provider.provider,
@@ -278,7 +285,13 @@ export class ChatCompletionService {
                             model: provider(model.model).model,
                             ...(Object.keys(providerOptions).length > 0 && { providerOptions }),
                             ...(hasToolSupport && Object.keys(tools).length > 0 && { tools }),
-                            stopWhen: stepCountIs(10),
+                            stopWhen: [
+                                stepCountIs(10),
+                                this.chatBillingHandler.stopWhenBudgetExhausted(
+                                    powerBudget,
+                                    model.billingRule,
+                                ),
+                            ],
                         });
 
                         const result = await agent.stream({
@@ -308,11 +321,16 @@ export class ChatCompletionService {
                                             }>,
                                         );
 
-                                    const rawUsage = await withEstimatedUsage(result, {
-                                        model: model.model,
-                                        inputText: promptText,
-                                        outputTextPromise: Promise.resolve(fullText),
-                                    }).usage;
+                                    // Bill every step of the tool loop: result.usage is the final step only,
+                                    // result.totalUsage sums all steps.
+                                    const rawUsage = await withEstimatedUsage(
+                                        { usage: result.totalUsage },
+                                        {
+                                            model: model.model,
+                                            inputText: promptText,
+                                            outputTextPromise: Promise.resolve(fullText),
+                                        },
+                                    ).usage;
 
                                     const baseUsage = normalizeChatUsage({
                                         rawUsage,

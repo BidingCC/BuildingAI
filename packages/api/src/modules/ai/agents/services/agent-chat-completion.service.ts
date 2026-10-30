@@ -9,6 +9,7 @@ import {
 } from "@buildingai/ai-sdk";
 import { withEstimatedUsage } from "@buildingai/ai-sdk/utils/text-with-usage";
 import {
+    countTokens,
     extractTextFromParts,
     formatMessagesForTokenCount,
     normalizeChatUsage,
@@ -296,8 +297,9 @@ export class AgentChatCompletionService {
                         );
                     }
 
+                    let powerBudget: number | undefined;
                     if (params.userId && chatModel?.dbModel?.billingRule) {
-                        await this.agentBillingHandler.validateUserPower(
+                        powerBudget = await this.agentBillingHandler.validateUserPower(
                             params.userId,
                             chatModel.dbModel.billingRule,
                         );
@@ -368,6 +370,11 @@ export class AgentChatCompletionService {
                             ? [{ role: "system" as const, content: systemPrompt }, ...modelMsgs]
                             : modelMsgs;
                         const promptText = formatMessagesForTokenCount(finalMessages);
+                        this.agentBillingHandler.assertBudgetCoversPrompt(
+                            powerBudget,
+                            countTokens({ model: chatModel.dbModel.model, text: promptText }),
+                            chatModel.dbModel.billingRule,
+                        );
 
                         const mcpResult = await this.initMcpClients(agent.mcpServerIds);
                         mcpClients = mcpResult.clients;
@@ -406,7 +413,13 @@ export class AgentChatCompletionService {
                             model: chatModel.languageModel,
                             ...(Object.keys(providerOptions).length > 0 && { providerOptions }),
                             ...(hasToolSupport && Object.keys(tools).length > 0 && { tools }),
-                            stopWhen: stepCountIs(maxSteps),
+                            stopWhen: [
+                                stepCountIs(maxSteps),
+                                this.agentBillingHandler.stopWhenBudgetExhausted(
+                                    powerBudget,
+                                    chatModel.dbModel.billingRule,
+                                ),
+                            ],
                         });
 
                         const result = await agentInstance.stream({
@@ -434,11 +447,16 @@ export class AgentChatCompletionService {
                                             }>,
                                         );
 
-                                    const rawUsage = await withEstimatedUsage(result, {
-                                        model: chatModel.dbModel.model,
-                                        inputText: promptText,
-                                        outputTextPromise: Promise.resolve(fullText),
-                                    }).usage;
+                                    // Bill every step of the tool loop: result.usage is the final step only,
+                                    // result.totalUsage sums all steps.
+                                    const rawUsage = await withEstimatedUsage(
+                                        { usage: result.totalUsage },
+                                        {
+                                            model: chatModel.dbModel.model,
+                                            inputText: promptText,
+                                            outputTextPromise: Promise.resolve(fullText),
+                                        },
+                                    ).usage;
 
                                     const baseUsage = normalizeChatUsage({
                                         rawUsage,
@@ -456,10 +474,10 @@ export class AgentChatCompletionService {
                                     const billingUsage = params.isToolApprovalFlow
                                         ? this.mergeUsage(previousApprovalUsage, baseUsage)
                                         : baseUsage;
+                                    // Bill the delivered turn whether or not the client asked to
+                                    // save the conversation (saveConversation comes from the request).
                                     if (
                                         !hasPendingApproval &&
-                                        saveConversation &&
-                                        conversationId &&
                                         params.userId &&
                                         chatModel?.dbModel?.billingRule &&
                                         billingUsage
@@ -468,7 +486,7 @@ export class AgentChatCompletionService {
                                             userConsumedPower =
                                                 await this.agentBillingHandler.deduct({
                                                     userId: params.userId,
-                                                    conversationId,
+                                                    conversationId: conversationId ?? "",
                                                     usage: billingUsage,
                                                     billingRule: chatModel.dbModel.billingRule,
                                                 });
