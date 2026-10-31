@@ -3,6 +3,7 @@ export { azure, type AzureProviderSettings } from "./azure";
 export { cohere, type CohereProviderSettings } from "./cohere";
 export { custom, type CustomProviderSettings } from "./custom";
 export { deepseek, type DeepSeekProviderSettings } from "./deepseek";
+export { edenai, type EdenAIProviderSettings } from "./edenai";
 export { giteeAi, type GiteeAIProviderSettings } from "./gitee-ai";
 export { google, type GoogleProviderSettings } from "./google";
 export { hunyuan, type HunyuanProviderSettings } from "./hunyuan";

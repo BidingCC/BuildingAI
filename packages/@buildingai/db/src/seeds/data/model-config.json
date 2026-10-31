@@ -1,5 +1,5 @@
 {
-    "total": 19,
+    "total": 20,
     "updated_at": "2026-02-11T10:12:54.673Z",
     "configs": [
         {
@@ -19,6 +19,13 @@
         {
             "provider": "azure",
             "label": "Azure",
+            "icon_url": "",
+            "supported_model_types": ["llm"],
+            "models": []
+        },
+        {
+            "provider": "edenai",
+            "label": "Eden AI",
             "icon_url": "",
             "supported_model_types": ["llm"],
             "models": []
