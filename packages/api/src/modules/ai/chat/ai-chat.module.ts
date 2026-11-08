@@ -19,7 +19,7 @@ import {
     Secret,
     UserSubscription,
 } from "@buildingai/db/entities";
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 
 import { UserModule } from "../../user/user.module";
 import { FollowUpSuggestionsHandler } from "../agents/handlers/follow-up-suggestions";
@@ -52,7 +52,7 @@ import { ChatConfigService } from "./services/chat-config.service";
 @Module({
     imports: [
         AiMemoryModule,
-        UserModule,
+        forwardRef(() => UserModule),
         TypeOrmModule.forFeature([
             AiModel,
             AiProvider,

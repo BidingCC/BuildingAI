@@ -23,6 +23,7 @@ const LOGIN_TYPE_OPTIONS: { value: LoginType; label: string }[] = [
   { value: LOGIN_TYPE.ACCOUNT as LoginType, label: "账号" },
   { value: LOGIN_TYPE.WECHAT as LoginType, label: "微信" },
   { value: LOGIN_TYPE.PHONE as LoginType, label: "手机号" },
+  { value: LOGIN_TYPE.GOOGLE as LoginType, label: "Google" },
 ];
 
 const defaultConfig = {
@@ -189,6 +190,10 @@ const SystemLoginConfigIndexPage = () => {
               微信登录凭证请在{" "}
               <Link to="/console/channel/wechat-oa" className="text-primary">
                 渠道 - 微信公众号配置
+              </Link>{" "}
+              中设置，Google 登录凭证请在{" "}
+              <Link to="/console/channel/google" className="text-primary">
+                渠道 - Google登录配置
               </Link>{" "}
               中设置
             </FieldDescription>

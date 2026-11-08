@@ -369,6 +369,37 @@ export function useUpdateWxOaConfigMutation(
     });
 }
 
+/** Google登录配置（接口返回） */
+export type GoogleConfigResponse = {
+    clientId: string;
+    clientSecret: string;
+    enabled: boolean;
+};
+
+/** 更新Google登录配置 DTO */
+export type UpdateGoogleConfigDto = {
+    clientId?: string;
+    clientSecret?: string;
+    enabled?: boolean;
+};
+
+export function useGoogleConfigQuery(options?: QueryOptionsUtil<GoogleConfigResponse>) {
+    return useQuery<GoogleConfigResponse>({
+        queryKey: ["channel", "google-config"],
+        queryFn: () => consoleHttpClient.get<GoogleConfigResponse>("/google-config"),
+        ...options,
+    });
+}
+
+export function useUpdateGoogleConfigMutation(
+    options?: MutationOptionsUtil<{ success: boolean }, UpdateGoogleConfigDto>,
+) {
+    return useMutation<{ success: boolean }, Error, UpdateGoogleConfigDto>({
+        mutationFn: (dto) => consoleHttpClient.patch<{ success: boolean }>("/google-config", dto),
+        ...options,
+    });
+}
+
 // User subscription types
 export type UserSubscriptionLevel = {
     id: string;

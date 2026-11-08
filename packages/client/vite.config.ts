@@ -32,13 +32,19 @@ export default defineConfig({
     strictPort: true,
     hmr: host
       ? {
-          protocol: "ws",
-          host,
-          port: 1421,
-        }
+        protocol: "ws",
+        host,
+        port: 1421,
+      }
       : undefined,
     watch: {
       ignored: ["**/src-tauri/**"],
+    },
+    proxy: {
+      "/api": {
+        target: "http://localhost:4090",
+        changeOrigin: true,
+      },
     },
   },
   build: {

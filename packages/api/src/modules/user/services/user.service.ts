@@ -875,6 +875,41 @@ export class UserService extends BaseService<User> {
     }
 
     /**
+     * 根据 Google OpenID 查找用户
+     *
+     * @param googleOpenid Google OpenID
+     * @returns 用户或 null
+     */
+    async findByGoogleOpenid(googleOpenid: string): Promise<User | null> {
+        return this.userRepository.findOne({ where: { googleOpenid } });
+    }
+
+    /**
+     * 通过 Google 创建用户
+     *
+     * @param data 用户数据
+     * @returns 创建的用户
+     */
+    async createByGoogle(data: {
+        googleOpenid: string;
+        email?: string;
+        nickname?: string;
+        avatar?: string;
+    }): Promise<User> {
+        const user = this.userRepository.create({
+            googleOpenid: data.googleOpenid,
+            email: data.email,
+            nickname: data.nickname || data.email?.split("@")[0] || "Google User",
+            username: `google_${data.googleOpenid.slice(0, 8)}`,
+            avatar: data.avatar,
+            password: "GOOGLE_AUTH_CREDENTIALS",
+            source: UserCreateSource.GOOGLE,
+            status: 1,
+        });
+        return await this.userRepository.save(user);
+    }
+
+    /**
      * 获取用户当前最高会员等级ID
      *
      * @param userId 用户ID

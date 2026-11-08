@@ -13,5 +13,7 @@ export const LOGIN_TYPE = {
     PHONE: 2,
     /** 微信登录 */
     WECHAT: 3,
+    /** Google登录 */
+    GOOGLE: 5,
 } as const;
 export type LoginType = (typeof LOGIN_TYPE)[keyof typeof LOGIN_TYPE];
