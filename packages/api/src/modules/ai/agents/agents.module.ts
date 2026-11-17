@@ -18,6 +18,7 @@ import {
     User,
 } from "@buildingai/db/entities";
 import { agentPublicAccessRegistry } from "@common/decorators/agent-public-access.registry";
+import { ChatImageModule } from "@common/modules/chat-image/chat-image.module";
 import { AiDatasetsModule } from "@modules/ai/datasets/datasets.module";
 import { AiMcpServerService } from "@modules/ai/mcp/services/ai-mcp-server.service";
 import { AiMcpToolService } from "@modules/ai/mcp/services/ai-mcp-tool.service";
@@ -58,6 +59,7 @@ import { AgentVoiceService } from "./services/agent-voice.service";
 import { AgentsService } from "./services/agents.service";
 @Module({
     imports: [
+        ChatImageModule,
         TypeOrmModule.forFeature([
             Agent,
             AgentAnnotation,

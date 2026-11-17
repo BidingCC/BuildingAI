@@ -13,6 +13,7 @@ import {
     Tag,
     User,
 } from "@buildingai/db/entities";
+import { ChatImageModule } from "@common/modules/chat-image/chat-image.module";
 import { AiModelModule } from "@modules/ai/model/ai-model.module";
 import { ConfigModule } from "@modules/config/config.module";
 import { UploadModule } from "@modules/upload/upload.module";
@@ -52,6 +53,7 @@ import { VectorizationTriggerService } from "./services/vectorization-trigger.se
  */
 @Module({
     imports: [
+        ChatImageModule,
         TypeOrmModule.forFeature([
             Datasets,
             DatasetMember,

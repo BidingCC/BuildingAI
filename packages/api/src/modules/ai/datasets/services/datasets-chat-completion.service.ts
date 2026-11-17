@@ -10,12 +10,12 @@ import { createDatasetsSearchTool } from "@buildingai/ai-toolkit/tools";
 import { SecretService } from "@buildingai/core/modules";
 import { HttpErrorFactory } from "@buildingai/errors";
 import { getProviderSecret } from "@buildingai/utils";
+import { ChatImageService } from "@common/modules/chat-image/chat-image.service";
 import { AiModelService } from "@modules/ai/model/services/ai-model.service";
 import { Injectable, Logger } from "@nestjs/common";
 import type { LanguageModel } from "ai";
 import type { UIMessage } from "ai";
 import {
-    convertToModelMessages,
     createUIMessageStream,
     generateId,
     generateText,
@@ -56,6 +56,7 @@ export class DatasetsChatCompletionService {
         private readonly datasetsChatMessageService: DatasetsChatMessageService,
         private readonly datasetsRetrievalService: DatasetsRetrievalService,
         private readonly datasetMemberService: DatasetMemberService,
+        private readonly chatImageService: ChatImageService,
     ) {}
 
     private getErrorMsg(error: unknown): string {
@@ -100,7 +101,13 @@ export class DatasetsChatCompletionService {
             });
 
             const cleaned = this.clean(params.messages);
-            const modelMsgs = await convertToModelMessages(cleaned);
+            const modelInputMessages = await this.chatImageService.prepareMessages(
+                cleaned,
+                params.userId,
+                params.abortSignal,
+            );
+            const modelMsgs =
+                await this.chatImageService.convertToModelMessages(modelInputMessages);
             const finalMessages = [
                 { role: "system" as const, content: DATASETS_SYSTEM_PROMPT },
                 ...modelMsgs,

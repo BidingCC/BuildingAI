@@ -37,11 +37,11 @@ import { HttpErrorFactory } from "@buildingai/errors";
 import type { ChatMessageUsage } from "@buildingai/types";
 import type { ChatUIMessage } from "@buildingai/types";
 import { getProviderSecret } from "@buildingai/utils";
+import { ChatImageService } from "@common/modules/chat-image/chat-image.service";
 import { UserService } from "@modules/user/services/user.service";
 import { Injectable, Logger } from "@nestjs/common";
 import type { LanguageModel, Tool } from "ai";
 import {
-    convertToModelMessages,
     createUIMessageStream,
     generateId,
     pipeUIMessageStreamToResponse,
@@ -102,6 +102,7 @@ export class ChatCompletionService {
         private readonly chatConfigService: ChatConfigService,
         private readonly userService: UserService,
         private readonly followUpSuggestionsHandler: FollowUpSuggestionsHandler,
+        private readonly chatImageService: ChatImageService,
     ) {}
 
     private getErrorMsg(error: unknown): string {
@@ -247,8 +248,15 @@ export class ChatCompletionService {
                             (userPrefs.chatStyle as string) ?? undefined,
                             (userPrefs.customInstruction as string) ?? undefined,
                         );
+                        const modelInputMessages = await this.chatImageService.prepareMessages(
+                            processed,
+                            params.userId,
+                            params.abortSignal,
+                        );
                         const modelMsgs = (
-                            await convertToModelMessages(stripLocalhostFileParts(processed))
+                            await this.chatImageService.convertToModelMessages(
+                                stripLocalhostFileParts(modelInputMessages),
+                            )
                         ).filter(
                             // Drop ghost assistant messages produced when data-only
                             // parts appear before a step-start boundary

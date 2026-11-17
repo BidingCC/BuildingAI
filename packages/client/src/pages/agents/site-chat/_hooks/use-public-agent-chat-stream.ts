@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { validate as isUUID } from "uuid";
 
+import { getStreamingMessageId } from "@/components/ask-assistant-ui/libs/message-stream-state";
 import { getApiBaseUrl } from "@/utils/api";
 
 import { getPublicConversationMessages } from "../services/public-conversation-messages";
@@ -55,12 +56,12 @@ export interface UsePublicAgentChatStreamReturn {
   setMessages: (messages: UIMessage[] | ((prev: UIMessage[]) => UIMessage[])) => void;
   send: (
     content: string,
-    files?: Array<{ type: "file"; url: string; mediaType?: string; filename?: string }>,
+    files?: Array<Omit<FileUIPart, "mediaType"> & { mediaType?: string }>,
   ) => void;
   sendWithParent: (
     content: string,
     parentIdClientOrDb: string | null | undefined,
-    files?: Array<{ type: "file"; url: string; mediaType?: string; filename?: string }>,
+    files?: Array<Omit<FileUIPart, "mediaType"> & { mediaType?: string }>,
   ) => void;
   stop: () => void;
   addToolApprovalResponse?: (args: { id: string; approved: boolean; reason?: string }) => void;
@@ -505,14 +506,10 @@ export function usePublicAgentChatStream(
     }
   }, [messages]);
 
-  const streamingMessageId =
-    status === "streaming" && messages.length > 0 ? messages[messages.length - 1]?.id : null;
+  const streamingMessageId = getStreamingMessageId(messages, statusOverride ?? status);
 
   const send = useCallback(
-    (
-      content: string,
-      files?: Array<{ type: "file"; url: string; mediaType?: string; filename?: string }>,
-    ) => {
+    (content: string, files?: Array<Omit<FileUIPart, "mediaType"> & { mediaType?: string }>) => {
       const text = content.trim();
       if (status === "streaming") return;
       if (!text && (!files || files.length === 0)) return;
@@ -526,6 +523,7 @@ export function usePublicAgentChatStream(
               url: file.url,
               mediaType: file.mediaType || "application/octet-stream",
               ...(file.filename ? { filename: file.filename } : {}),
+              ...(file.providerMetadata && { providerMetadata: file.providerMetadata }),
             }))
           : undefined;
 
@@ -541,7 +539,7 @@ export function usePublicAgentChatStream(
     (
       content: string,
       parentIdClientOrDb: string | null | undefined,
-      files?: Array<{ type: "file"; url: string; mediaType?: string; filename?: string }>,
+      files?: Array<Omit<FileUIPart, "mediaType"> & { mediaType?: string }>,
     ) => {
       const text = content.trim();
       if (status === "streaming") return;
@@ -560,6 +558,7 @@ export function usePublicAgentChatStream(
               url: file.url,
               mediaType: file.mediaType || "application/octet-stream",
               ...(file.filename ? { filename: file.filename } : {}),
+              ...(file.providerMetadata && { providerMetadata: file.providerMetadata }),
             }))
           : undefined;
 

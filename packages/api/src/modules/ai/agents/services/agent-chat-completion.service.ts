@@ -32,11 +32,11 @@ import { HttpErrorFactory } from "@buildingai/errors";
 import type { ChatMessageUsage, ChatUIMessage } from "@buildingai/types";
 import type { ModelReference } from "@buildingai/types/ai/agent-config.interface";
 import { getProviderSecret } from "@buildingai/utils";
+import { ChatImageService } from "@common/modules/chat-image/chat-image.service";
 import { UserService } from "@modules/user/services/user.service";
 import { Injectable, Logger } from "@nestjs/common";
 import type { LanguageModel, Tool, UIMessage } from "ai";
 import {
-    convertToModelMessages,
     createUIMessageStream,
     generateId,
     pipeUIMessageStreamToResponse,
@@ -136,6 +136,7 @@ export class AgentChatCompletionService {
         private readonly cozeChatProvider: CozeChatProvider,
         private readonly difyChatProvider: DifyChatProvider,
         private readonly userService: UserService,
+        private readonly chatImageService: ChatImageService,
     ) {}
 
     async streamChat(params: AgentChatCompletionParams, response: ServerResponse): Promise<void> {
@@ -355,8 +356,15 @@ export class AgentChatCompletionService {
                         );
 
                         const truncated = this.truncateMessages(processed, agent);
+                        const modelInputMessages = await this.chatImageService.prepareMessages(
+                            truncated,
+                            params.userId,
+                            params.abortSignal,
+                        );
                         const modelMsgs = (
-                            await convertToModelMessages(stripLocalhostFileParts(truncated))
+                            await this.chatImageService.convertToModelMessages(
+                                stripLocalhostFileParts(modelInputMessages),
+                            )
                         ).filter(
                             // Drop ghost assistant messages produced when data-only
                             // parts appear before a step-start boundary

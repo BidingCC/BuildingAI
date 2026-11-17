@@ -205,6 +205,7 @@ export function useFileUpload(
         url: result.url,
         mediaType: result.mimeType,
         filename: result.originalName,
+        ...(result.id && { providerMetadata: { buildingai: { fileId: result.id } } }),
       }));
 
       const remoteFiles = files.filter(

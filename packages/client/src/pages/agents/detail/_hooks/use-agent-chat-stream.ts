@@ -8,6 +8,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { validate as isUUID } from "uuid";
 
+import { getStreamingMessageId } from "@/components/ask-assistant-ui/libs/message-stream-state";
 import { getApiBaseUrl } from "@/utils/api";
 
 const STOP_FINALIZE_DELAY_MS = 350;
@@ -61,7 +62,7 @@ export interface UseAgentChatStreamReturn {
   send: (
     content: string,
     parentId?: string | null,
-    files?: Array<{ type: "file"; url: string; mediaType?: string; filename?: string }>,
+    files?: Array<Omit<FileUIPart, "mediaType"> & { mediaType?: string }>,
   ) => void;
   stop: () => void;
   addToolApprovalResponse?: (args: { id: string; approved: boolean; reason?: string }) => void;
@@ -450,7 +451,7 @@ export function useAgentChatStream(options: UseAgentChatStreamOptions): UseAgent
     (
       content: string,
       parentId?: string | null,
-      files?: Array<{ type: "file"; url: string; mediaType?: string; filename?: string }>,
+      files?: Array<Omit<FileUIPart, "mediaType"> & { mediaType?: string }>,
     ) => {
       if (status === "streaming") return;
       if (!content.trim() && (!files || files.length === 0)) return;
@@ -467,6 +468,7 @@ export function useAgentChatStream(options: UseAgentChatStreamOptions): UseAgent
               url: file.url,
               mediaType: file.mediaType || "application/octet-stream",
               ...(file.filename && { filename: file.filename }),
+              ...(file.providerMetadata && { providerMetadata: file.providerMetadata }),
             }))
           : undefined;
 
@@ -478,10 +480,7 @@ export function useAgentChatStream(options: UseAgentChatStreamOptions): UseAgent
     [sendMessage, status, lastMessageDbIdRef, resolveMessageDbId],
   );
 
-  const streamingMessageId =
-    status === "streaming" && messages.length > 0
-      ? messages[messages.length - 1]?.id || null
-      : null;
+  const streamingMessageId = getStreamingMessageId(messages, statusOverride ?? status);
 
   useEffect(() => {
     if (messages.length === 0) {

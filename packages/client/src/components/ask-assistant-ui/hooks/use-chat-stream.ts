@@ -12,6 +12,8 @@ import { validate as isUUID } from "uuid";
 
 import { getApiBaseUrl } from "@/utils/api";
 
+import { getStreamingMessageId } from "../libs/message-stream-state";
+
 /** Delay before running post-stop side effects, giving backend time to persist usage. */
 const STOP_FINALIZE_DELAY_MS = 350;
 /** Interval between usage-hydration retries when the server hasn't persisted usage yet. */
@@ -64,7 +66,7 @@ export interface UseChatStreamReturn {
   send: (
     content: string,
     parentId?: string | null,
-    files?: Array<{ type: "file"; url: string; mediaType?: string; filename?: string }>,
+    files?: Array<Omit<FileUIPart, "mediaType"> & { mediaType?: string }>,
     options?: { baseMessages?: UIMessage[] },
   ) => void;
   stop: () => void;
@@ -532,7 +534,7 @@ export function useChatStream(options: UseChatStreamOptions): UseChatStreamRetur
     (
       content: string,
       parentId?: string | null,
-      files?: Array<{ type: "file"; url: string; mediaType?: string; filename?: string }>,
+      files?: Array<Omit<FileUIPart, "mediaType"> & { mediaType?: string }>,
       options?: { baseMessages?: UIMessage[] },
     ) => {
       const currentStatus = statusRef.current;
@@ -560,6 +562,7 @@ export function useChatStream(options: UseChatStreamOptions): UseChatStreamRetur
               url: file.url,
               mediaType: file.mediaType || "application/octet-stream",
               ...(file.filename && { filename: file.filename }),
+              ...(file.providerMetadata && { providerMetadata: file.providerMetadata }),
             }))
           : undefined;
 
@@ -579,12 +582,8 @@ export function useChatStream(options: UseChatStreamOptions): UseChatStreamRetur
     ],
   );
 
-  const streamingMessageId =
-    status === "streaming" && messages.length > 0
-      ? messages[messages.length - 1]?.id || null
-      : null;
-
   const effectiveStatus = statusOverride ?? status;
+  const streamingMessageId = getStreamingMessageId(messages, effectiveStatus);
 
   /**
    * Manually stops streaming and still refreshes usage-related data.

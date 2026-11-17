@@ -10,6 +10,7 @@ import type { ChatStatus, FileUIPart, UIMessage } from "ai";
 import { DefaultChatTransport } from "ai";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { getStreamingMessageId } from "@/components/ask-assistant-ui/libs/message-stream-state";
 import { getApiBaseUrl } from "@/utils/api";
 import { getErrorMessage } from "@/utils/error";
 
@@ -39,7 +40,7 @@ export interface UseDatasetsChatStreamReturn {
   send: (
     content: string,
     parentId?: string | null,
-    files?: Array<{ type: "file"; url: string; mediaType?: string; filename?: string }>,
+    files?: Array<Omit<FileUIPart, "mediaType"> & { mediaType?: string }>,
   ) => void;
   stop: () => void;
   addToolApprovalResponse?: (args: { id: string; approved: boolean; reason?: string }) => void;
@@ -396,7 +397,7 @@ export function useDatasetsChatStream(
     (
       content: string,
       parentId?: string | null,
-      files?: Array<{ type: "file"; url: string; mediaType?: string; filename?: string }>,
+      files?: Array<Omit<FileUIPart, "mediaType"> & { mediaType?: string }>,
     ) => {
       if (status === "submitted" || status === "streaming") return;
       if (!content.trim() && (!files || files.length === 0)) return;
@@ -410,6 +411,7 @@ export function useDatasetsChatStream(
               url: file.url,
               mediaType: file.mediaType || "application/octet-stream",
               ...(file.filename && { filename: file.filename }),
+              ...(file.providerMetadata && { providerMetadata: file.providerMetadata }),
             }))
           : undefined;
 
@@ -421,10 +423,7 @@ export function useDatasetsChatStream(
     [sendMessage, status, lastMessageDbIdRef, pendingParentIdRef],
   );
 
-  const streamingMessageId =
-    status === "streaming" && messages.length > 0
-      ? messages[messages.length - 1]?.id || null
-      : null;
+  const streamingMessageId = getStreamingMessageId(messages, statusOverride ?? status);
 
   useEffect(() => {
     if (messages.length === 0) {

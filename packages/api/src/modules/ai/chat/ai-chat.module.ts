@@ -19,6 +19,7 @@ import {
     Secret,
     UserSubscription,
 } from "@buildingai/db/entities";
+import { ChatImageModule } from "@common/modules/chat-image/chat-image.module";
 import { Module } from "@nestjs/common";
 
 import { UserModule } from "../../user/user.module";
@@ -51,6 +52,7 @@ import { ChatConfigService } from "./services/chat-config.service";
  */
 @Module({
     imports: [
+        ChatImageModule,
         AiMemoryModule,
         UserModule,
         TypeOrmModule.forFeature([
