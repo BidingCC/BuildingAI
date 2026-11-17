@@ -18,6 +18,7 @@ import {
     createReadAttachedFileTool,
     createRequestExecutionPlanTool,
     getWeather,
+    youcomSearch,
 } from "@buildingai/ai-toolkit/tools";
 import {
     parseFile,
@@ -734,6 +735,7 @@ export class AgentChatCompletionService {
         const tools: Record<string, Tool> = { ...mcpTools };
 
         tools.getWeather = getWeather;
+        tools.youcomSearch = youcomSearch;
 
         if (documentContents?.length) {
             tools.read_attached_file = createReadAttachedFileTool({ documents: documentContents });
@@ -826,6 +828,7 @@ export class AgentChatCompletionService {
             "getWeather",
             "read_attached_file",
             "request_execution_plan",
+            "youcomSearch",
         ]);
 
         return Object.fromEntries(
