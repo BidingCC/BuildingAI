@@ -176,8 +176,8 @@ export class BaseBillingService {
      *
      * @param options - Power deduction options
      * @param entityManager - Optional entity manager for external transaction
-     * @returns void
-     * @throws NotFoundException if user not found or insufficient power
+     * @returns The amount actually deducted (less than `amount` only with `allowPartial`)
+     * @throws NotFoundException if user not found or insufficient power (unless `allowPartial`)
      *
      * @example
      * ```ts
@@ -196,7 +196,7 @@ export class BaseBillingService {
     async deductUserPower(
         options: PowerDeductionOptions,
         entityManager?: EntityManager,
-    ): Promise<void> {
+    ): Promise<number> {
         const {
             userId,
             amount,
@@ -205,11 +205,12 @@ export class BaseBillingService {
             remark = "",
             associationNo = "",
             associationUserId,
+            allowPartial = false,
         } = options;
 
         if (amount <= 0) {
             this.logger.debug(`No power to deduct for user ${userId}`);
-            return;
+            return 0;
         }
 
         try {
@@ -228,14 +229,23 @@ export class BaseBillingService {
                 user.power -= reconcileResult.deductedAmount;
 
                 // Validate sufficient balance
+                let deductAmount = amount;
                 if (user.power < amount) {
-                    throw new BadRequestException(
-                        `余额不足。当前余额: ${user.power}, 需要: ${amount}`,
+                    if (!allowPartial) {
+                        throw new BadRequestException(
+                            `余额不足。当前余额: ${user.power}, 需要: ${amount}`,
+                        );
+                    }
+                    // Usage already delivered: take what is left instead of dropping the charge
+                    deductAmount = Math.max(0, user.power);
+                    this.logger.warn(
+                        `User ${userId} power short: due ${amount}, deducting available ${deductAmount}`,
                     );
+                    if (deductAmount <= 0) return 0;
                 }
 
                 // 优先扣除会员赠送的临时积分(未过期且有剩余的)
-                let remainingToDeduct = amount;
+                let remainingToDeduct = deductAmount;
                 const now = new Date();
 
                 // 查询用户所有未过期且有剩余可用数量的会员赠送积分记录
@@ -266,10 +276,10 @@ export class BaseBillingService {
                 }
 
                 // Calculate new power
-                const newPower = user.power - amount;
+                const newPower = user.power - deductAmount;
 
                 // Update user power
-                await manager.increment(User, { id: userId }, "power", -amount);
+                await manager.increment(User, { id: userId }, "power", -deductAmount);
 
                 // Record power change log
                 await manager.insert(AccountLog, {
@@ -277,27 +287,29 @@ export class BaseBillingService {
                     accountNo: await generateNo(this.accountLogRepository, "accountNo"),
                     accountType,
                     action: ACTION.DEC,
-                    changeAmount: amount,
+                    changeAmount: deductAmount,
                     leftAmount: newPower,
                     associationNo,
                     associationUserId,
-                    remark: remark || `扣费 ${amount} 积分`,
+                    remark:
+                        (remark || `扣费 ${deductAmount} 积分`) +
+                        (deductAmount < amount ? `（应扣 ${amount}，余额不足）` : ""),
                     sourceInfo: source,
                 });
 
                 this.logger.debug(
-                    `User ${userId} power deducted: ${amount}, remaining: ${newPower}`,
+                    `User ${userId} power deducted: ${deductAmount}, remaining: ${newPower}`,
                 );
+                return deductAmount;
             };
 
             // Use provided entity manager or create new transaction
             if (entityManager) {
-                await executeDeduction(entityManager);
-            } else {
-                await this.userRepository.manager.transaction(async (manager) => {
-                    await executeDeduction(manager);
-                });
+                return await executeDeduction(entityManager);
             }
+            return await this.userRepository.manager.transaction(async (manager) =>
+                executeDeduction(manager),
+            );
         } catch (error) {
             this.logger.error(`Failed to deduct user power: ${error.message}`, error.stack);
             throw error;

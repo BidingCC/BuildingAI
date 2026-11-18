@@ -26,6 +26,11 @@ export interface PowerDeductionOptions {
     associationNo?: string;
     /** Associated user ID */
     associationUserId?: string;
+    /**
+     * Settle usage that was already delivered: when the balance is short, deduct the whole
+     * available balance instead of refusing (the shortfall is recorded in the log remark).
+     */
+    allowPartial?: boolean;
 }
 
 /**
