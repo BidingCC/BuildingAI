@@ -79,7 +79,7 @@ docker compose up -d
 
 ## Star 历史
 
-[![Star History Chart](https://api.star-history.com/svg?repos=BidingCC/BuildingAI&type=Date)](https://www.star-history.com/#BidingCC/BuildingAI&Date)
+[![Star History Chart](https://star-history.dera.page/svg?repos=BidingCC/BuildingAI&type=Date)](https://star-history.dera.page/#BidingCC/BuildingAI&Date)
 
 ## 隐私政策
 
